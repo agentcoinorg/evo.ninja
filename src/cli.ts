@@ -1,5 +1,5 @@
 import readline from "readline";
-import { Agent } from "./evo/agent";
+import { Agent } from "./evo";
 import { FileSystemWorkspace } from "./workspaces";
 
 export async function cli(): Promise<void> {

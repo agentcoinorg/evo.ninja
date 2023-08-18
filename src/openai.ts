@@ -50,7 +50,7 @@ export class OpenAI implements LlmApi {
     return choice.message;
   }
 
-  private createChatCompletion(options: {
+  public createChatCompletion(options: {
     messages: ChatCompletionRequestMessage[];
     model?: string;
     functions?: any;

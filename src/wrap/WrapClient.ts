@@ -20,7 +20,7 @@ export class WrapClient extends PolywrapClient {
 
   public jsPromiseOutput: { result: any };
 
-  constructor(workspace: Workspace, ethereumPrivateKey: string | undefined) {
+  constructor(workspace: Workspace) {
     const jsPromiseOutput = { result: undefined };
 
     const builder = new PolywrapClientConfigBuilder()
