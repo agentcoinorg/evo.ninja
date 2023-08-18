@@ -1,9 +1,8 @@
 import { Chat } from "../chat";
 import { OpenAI } from "../openai";
 import { WrapClient } from "../wrap";
-import { RunResult, StepOutput, Workspace, env, executeFunc } from "..";
+import { RunResult, StepOutput, Workspace, env, executeFunc, functions } from "..";
 import { LlmApi } from "../llm";
-import { functions } from "./functions";
 import { loop } from "./loop";
 
 export class Agent {
