@@ -6,5 +6,6 @@ export * from './evo';
 export * from './functions';
 export * from './llm';
 export * from './openai';
+export * from './operations';
 export * from './workspaces';
 export * from './wrap';

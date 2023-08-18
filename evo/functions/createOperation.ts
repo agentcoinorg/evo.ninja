@@ -44,22 +44,8 @@ export const createOperation: AgentFunction = {
         }
       }
       
-      const workspace = new InMemoryWorkspace();
-      const writer = new CodeWriterAgent(workspace);
-  
-      let iterator = writer.run(options.namespace, options.description, options.arguments, options.developerNote);
-  
-      while(true) {
-        const response = await iterator.next();
-    
-        response.value.message && console.log(chalk.yellow(response.value.message));
-  
-        if (workspace.existsSync("index.ts")) {
-          break;
-        }
-      }
-  
-      const index = workspace.readFileSync("index.ts");
+      // Get generated code
+      const index = "";
   
       const op = {
         name: options.namespace,
