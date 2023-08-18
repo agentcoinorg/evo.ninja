@@ -4,7 +4,7 @@
   "license": "MIT",
   "main": "build/index.js",
   "scripts": {
-    "dev": "ts-node src/cli.ts",
+    "start": "ts-node src/cli.ts",
     "build": "rimraf build && tsc"
   },
   "dependencies": {
