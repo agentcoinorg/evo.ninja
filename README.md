@@ -15,8 +15,8 @@ Before you can run evo.ninja, ensure you have Node.js and yarn installed.
 ## Installation
 Clone the repository:
 ```bash
-git clone https://github.com/your-github-username/evo-ninja.git
-cd evo-ninja
+git clone https://github.com/polywrap/evo.ninja
+cd evo.ninja
 ```
 
 Install dependencies:
