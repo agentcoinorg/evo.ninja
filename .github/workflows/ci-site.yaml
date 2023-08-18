@@ -1,19 +1,18 @@
-name: cd-site
+name: ci-site
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+    paths:
+      - "site/**"
+  pull_request:
     paths:
       - "site/**"
 
-permissions:
-  contents: write
-
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -30,10 +29,3 @@ jobs:
     - name: Build
       working-directory: ./site
       run: yarn build && mv CNAME ./build
-
-    - name: Deploy
-      working-directory: ./site
-      uses: JamesIves/github-pages-deploy-action@v4
-      with:
-        branch: gh-pages
-        folder: build
