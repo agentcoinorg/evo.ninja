@@ -1,0 +1,6 @@
+{
+    "name":"agent.speak",
+    "description":"Informs the user by sending a message.",
+    "arguments":"{ message: string }",
+    "code":"return __wrap_subinvoke('plugin/agent', 'speak', { message: message }).value"
+}

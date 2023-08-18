@@ -92,8 +92,7 @@ export const executeOperation: AgentFunction = {
         });
 
         console.log("----------------");
-        console.log(result);
-        console.log(client.jsPromiseOutput);
+        console.log("Execute operation output", client.jsPromiseOutput);
         console.log("----------------");
 
         if (result.ok && client.jsPromiseOutput.result) {

@@ -1,6 +1,9 @@
 import { AgentFunction } from "../../functions";
 import { WrapClient } from "../../wrap";
 import { addOperation } from "../../operations";
+import { InMemoryWorkspace } from "../../workspaces";
+import { Agent as CodeWriterAgent } from "../../code-writer";
+import chalk from "chalk";
 
 export const createOperation: AgentFunction = {
   definition: {
@@ -42,8 +45,23 @@ export const createOperation: AgentFunction = {
         }
       }
       
-      // Get generated code
-      const index = "";
+      const workspace = new InMemoryWorkspace();
+      const writer = new CodeWriterAgent(workspace);
+      console.log(chalk.yellow(`Creating operation '${options.namespace}'...`));
+  
+      let iterator = writer.run(options.namespace, options.description, options.arguments, options.developerNote);
+  
+      while(true) {
+        const response = await iterator.next();
+    
+        response.value.message && console.log(chalk.yellow(response.value.message));
+  
+        if (workspace.existsSync("index.ts")) {
+          break;
+        }
+      }
+  
+      const index = workspace.readFileSync("index.ts");
   
       const op = {
         name: options.namespace,

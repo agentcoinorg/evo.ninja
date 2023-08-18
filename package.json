@@ -16,7 +16,7 @@
     "@polywrap/sys-config-bundle-js": "~0.11.0",
     "@polywrap/web3-config-bundle-js": "~0.11.0",
     "axios": "^1.4.0",
-    "chalk": "^5.3.0",
+    "chalk": "^4.1.2",
     "dotenv": "~16.3.1",
     "fuse.js": "^6.6.2",
     "openai": "~3.3.0",
