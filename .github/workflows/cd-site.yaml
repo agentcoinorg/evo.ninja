@@ -32,8 +32,7 @@ jobs:
       run: yarn build && mv CNAME ./build
 
     - name: Deploy
-      working-directory: ./site
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         branch: gh-pages
-        folder: build
+        folder: ./site/build
