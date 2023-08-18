@@ -87,7 +87,7 @@ export class WrapClient extends PolywrapClient {
           } catch (e) {
             console.error(e);
             res = {
-              error: e
+              error: JSON.stringify(e)
             };
           }
   

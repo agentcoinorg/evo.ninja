@@ -4,6 +4,7 @@ const console = {
     __wrap_subinvoke("plugin/console", "log", { message: JSON.stringify(message) });
   },
 };
+
 function require(lib) {
   function wrap(objName, obj) {
     const origin = {};
@@ -52,19 +53,31 @@ function require(lib) {
       case "axios":
         return wrap("axios", {
             get: (url, config) => {
-              return new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "get", { url, config }).value));
+              // This is hack because 'undefined' is not supported by JSON
+              return config
+                ? new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "get", { url, config }).value))
+                : new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "get", { url }).value));
             },
             post: (url, data, config) => {
-              return new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "post", { url, data, config }).value));
+              return config
+                ? new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "post", { url, data, config }).value))
+                : new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "post", { url, data }).value));
             },
             put: (url, data, config) => {
-              return new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "put", { url, data, config }).value));
+              return config
+                ? new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "put", { url, data, config }).value))
+                : new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "put", { url, data }).value));
             },
             delete: (url, config) => {
-              return new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "delete", { url, config }).value));
+              return config
+                ? new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "delete", { url, config }).value))
+                : new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "delete", { url}).value));
+              
             },
             head: (url, config) => {
-              return new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "head", { url, config }).value));
+              return config
+                ? new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "head", { url, config }).value))
+                : new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "head", { url }).value));
             },
         });
         break;
@@ -76,23 +89,6 @@ function require(lib) {
 const __temp = (async function () { 
   // OPERATION CODE HERE (do not forget to declare arguments of the operation function as local vars)
 
-  const currency = 'ethereum';
-  const axios = require('axios');
-
-  const url = 'https://api.coingecko.com/api/v3/simple/price';
-  
-  const params = {
-    ids: currency,
-    vs_currencies: 'usd'
-  };
-
-  try {
-    const response = await axios.get(url, { params });
-
-    return response.data[currency].usd;
-  } catch (error) {
-    throw new Error(`Could not fetch price for ${currency}: ${error.message}`);
-  }
   //END OPERATION CODE
  })().then(result => {
   __wrap_subinvoke("plugin/result", "post", { result: result != null ? result : "undefined" })
