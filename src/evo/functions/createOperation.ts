@@ -1,6 +1,4 @@
-import chalk from "chalk";
 import { AgentFunction } from "../../functions";
-import { InMemoryWorkspace } from "../../workspaces";
 import { WrapClient } from "../../wrap";
 import { addOperation } from "../../operations";
 
