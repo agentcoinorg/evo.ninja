@@ -28,8 +28,13 @@ export class WrapClient extends PolywrapClient {
       .addBundle("sys")
       .setPackage("plugin/result", PluginPackage.from(module => ({
         "post": async (args: any) => {
-          console.log("resssssult", args);
           jsPromiseOutput.result = args.result;
+        },
+      })))
+
+      .setPackage("plugin/console", PluginPackage.from(module => ({
+        "log": async (args: any) => {
+          console.log("CONSOLE.LOG", JSON.parse(args.message));
         },
       })))
       .setPackage("plugin/fs", PluginPackage.from(module => ({
@@ -69,14 +74,22 @@ export class WrapClient extends PolywrapClient {
       .setPackage("plugin/axios", PluginPackage.from(module => ({
         "get": async (args: any) => {
           console.log(chalk.yellow(`AXIOS.GET = ${args.url}`));
-          const result = await axios.get(args.url, args.config);
-          const res = {
-            status: result.status,
-            statusText: result.statusText,
-            headers: result.headers,
-            data: result.data
-          };
-          console.log(res);
+          let res;
+          try {
+            const result = await axios.get(args.url, args.config);
+            res = {
+              status: result.status,
+              statusText: result.statusText,
+              headers: result.headers,
+              data: result.data
+            };
+            console.log(res);
+          } catch (e) {
+            console.error(e);
+            res = {
+              error: e
+            };
+          }
   
           return res;
         },

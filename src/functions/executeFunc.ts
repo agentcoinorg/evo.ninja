@@ -48,7 +48,7 @@ export const executeFunc: ExecuteFunc = async (
 
   // If the function call was unsuccessful
   if (!response.ok) {
-    return ResultErr(`The function '${name}' failed, this is the error:\n----------\n${response.error ? response.error.slice(0, 300) + "...": "Unknown error."}\nJSON Arguments: ${args}\n----------\\n`);
+    return ResultErr(`The function '${name}' failed, this is the error:\n----------\n${response.error && response.error.slice ? response.error.slice(0, 300) + "...": "Unknown error."}\nJSON Arguments: ${args}\n----------\\n`);
   }
   // const resultStr = JSON.stringify(response.result, null, 2);
   if (name === "executeOperation" || name === "eval") {

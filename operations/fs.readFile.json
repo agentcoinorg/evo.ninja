@@ -1,0 +1,6 @@
+{
+  "name": "fs.readFile",
+  "description": "Reads the content of a file",
+  "arguments": "{ path: string, encoding: string }",
+  "code": "const fs = require('fs');\n\nreturn fs.readFileSync(path, encoding);"
+}

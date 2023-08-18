@@ -78,6 +78,8 @@ export const executeOperation: AgentFunction = {
         const invokeArgs = {
           src: nodeShims + `const __temp = (async function () { \n${operation.code}\n })().then(result => {
             __wrap_subinvoke("plugin/result", "post", { result: result != null ? result : "undefined" })
+          }, error => {
+            __wrap_subinvoke("plugin/result", "post", { result: error != null ? error : "undefined" })
           });\nconst result = __temp === undefined ? "undefined" : __temp;\nresult`,
           globals: Object.keys(args).map((key) => ({
             name: key,

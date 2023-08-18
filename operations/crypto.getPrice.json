@@ -1,0 +1,6 @@
+{
+  "name": "crypto.getPrice",
+  "description": "Get the current price of a specified cryptocurrency.",
+  "arguments": "{ currency: string }",
+  "code": "const axios = require('axios');\n\nconst url = 'https://api.coingecko.com/api/v3/simple/price';\n\nconst params = {\n  ids: currency,\n  vs_currencies: 'usd'\n};\n\ntry {\n  const response = await axios.get(url, { params });\n  return response.data[currency].usd;\n} catch (error) {\n  throw new Error(`Could not fetch price for ${currency}: ${error.message}`);\n}"
+}

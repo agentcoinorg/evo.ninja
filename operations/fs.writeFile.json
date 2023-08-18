@@ -1,0 +1,6 @@
+{
+  "name": "fs.writeFile",
+  "description": "Writes data to a file, replacing the file if it already exists",
+  "arguments": "{ path: string, data: string }",
+  "code": "const fs = require('fs');\n\nfs.writeFileSync(path, data);"
+}
