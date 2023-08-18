@@ -1,4 +1,6 @@
 import readline from "readline";
+import { Agent } from "./evo/agent";
+import { FileSystemWorkspace } from "./workspaces";
 
 export async function cli(): Promise<void> {
   let goal: string | undefined = process.argv[2];
@@ -7,7 +9,7 @@ export async function cli(): Promise<void> {
     goal = await prompt("Enter your goal: ");
   }
 
-  const agent = new Agent();
+  const agent = new Agent(new FileSystemWorkspace());
 
   let iterator = agent.run(goal);
 
