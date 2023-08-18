@@ -1,0 +1,31 @@
+name: ci-site
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "site/**"
+  pull_request:
+    paths:
+      - "site/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js 18.15
+      uses: actions/setup-node@v1
+      with:
+        node-version: 18.15
+
+    - name: Install dependencies
+      working-directory: ./site
+      run: yarn
+
+    - name: Build
+      working-directory: ./site
+      run: yarn build && mv CNAME ./build

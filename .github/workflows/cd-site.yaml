@@ -1,0 +1,39 @@
+name: cd-site
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "site/**"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js 18.15
+      uses: actions/setup-node@v1
+      with:
+        node-version: 18.15
+
+    - name: Install dependencies
+      working-directory: ./site
+      run: yarn
+
+    - name: Build
+      working-directory: ./site
+      run: yarn build && mv CNAME ./build
+
+    - name: Deploy
+      working-directory: ./site
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        branch: gh-pages
+        folder: build
