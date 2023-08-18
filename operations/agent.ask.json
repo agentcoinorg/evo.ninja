@@ -1,0 +1,6 @@
+{
+    "name":"agent.ask",
+    "description":"Sends a message to the user and waits for user response.",
+    "arguments":"{ message: string }",
+    "code":"return __wrap_subinvoke('plugin/agent', 'ask', { message: message }).value"
+}

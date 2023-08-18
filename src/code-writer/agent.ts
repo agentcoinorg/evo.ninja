@@ -1,9 +1,11 @@
 import { Chat } from "../chat";
 import { OpenAI } from "../openai";
 import { WrapClient } from "../wrap";
-import { RunResult, StepOutput, Workspace, env, executeFunc } from "..";
+import { RunResult, StepOutput, loop } from ".";
 import { LlmApi } from "../llm";
-import { loop } from "./loop";
+import { Workspace } from "../workspaces";
+import { env } from "../env";
+import { executeFunc } from "../functions";
 import { functions } from "./functions";
 
 export class Agent {
@@ -24,20 +26,37 @@ export class Agent {
       this.workspace,
       this.llm as OpenAI
     );
-  
+
     this.client = new WrapClient(
       this.workspace,
     );
-  
+    
     this.globals = {};
   }
 
-  public async* run(goal: string): AsyncGenerator<StepOutput, RunResult, string | undefined> {
+  public async* run(
+    namespace: string, 
+    description: string,
+    args: string,
+    developerNote?: string
+  ): AsyncGenerator<StepOutput, RunResult, string | undefined> {
     try {
-      return yield* loop(goal, this.llm, this.chat, this.client, this.globals, this.workspace, executeFunc, functions);
+      return yield* loop(
+        namespace, 
+        description, 
+        args, 
+        developerNote,
+        this.llm, 
+        this.chat, 
+        this.client, 
+        this.globals,
+        this.workspace,
+        executeFunc,
+        functions
+      );
     } catch (err) {
       console.error(err);
-      return RunResult.error("Unrecoverable error encountered.");
+      return RunResult.error( "Unrecoverable error encountered.");
     }
   }
 }
