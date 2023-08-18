@@ -5,6 +5,7 @@
   "main": "build/index.js",
   "scripts": {
     "start": "ts-node src/cli.ts",
+    "test": "ts-node src/shim-test.ts",
     "build": "rimraf build && tsc"
   },
   "dependencies": {

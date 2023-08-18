@@ -1,12 +1,9 @@
 
-export const nodeShims = 
-`
 const console = {
   log: (message) => {
     __wrap_subinvoke("plugin/console", "log", { message: JSON.stringify(message) });
   },
 };
-
 function require(lib) {
   function wrap(objName, obj) {
     const origin = {};
@@ -16,7 +13,7 @@ function require(lib) {
           if (obj[name]) {
             return obj[name](...arguments);
           } else {
-            throw new Error(\`No method \${name} in \${objName}\`);
+            throw new Error(`No method ${name} in ${objName}`);
           }
         };
       },
@@ -72,7 +69,35 @@ function require(lib) {
         });
         break;
     default:
-      throw new Error(\`Cannot do require('\${lib}'), '\${lib}' is an unknown import.\`);
+      throw new Error(`Cannot do require('${lib}'), '${lib}' is an unknown import.`);
   }
 }
-`;
+
+const __temp = (async function () { 
+  // OPERATION CODE HERE (do not forget to declare arguments of the operation function as local vars)
+
+  const currency = 'ethereum';
+  const axios = require('axios');
+
+  const url = 'https://api.coingecko.com/api/v3/simple/price';
+  
+  const params = {
+    ids: currency,
+    vs_currencies: 'usd'
+  };
+
+  try {
+    const response = await axios.get(url, { params });
+
+    return response.data[currency].usd;
+  } catch (error) {
+    throw new Error(`Could not fetch price for ${currency}: ${error.message}`);
+  }
+  //END OPERATION CODE
+ })().then(result => {
+  __wrap_subinvoke("plugin/result", "post", { result: result != null ? result : "undefined" })
+}, error => {
+  __wrap_subinvoke("plugin/result", "post", { result: error != null ? error : "undefined" })
+});
+const result = __temp === undefined ? "undefined" : __temp;
+result
