@@ -35,40 +35,35 @@ export class WrapClient extends PolywrapClient {
       .setPackage("plugin/fs", PluginPackage.from(module => ({
         "readFileSync": async (args: any) => {
           console.log(chalk.yellow("FS.READ = " + args.path));
-          return fs.readFileSync(args.path, "utf8");
+          return workspace.readFileSync(args.path);
         },
         "writeFileSync": async (args: any) => {
           console.log(chalk.yellow("FS.WRITE = " + args.path));
-          fs.writeFileSync(args.path, args.data.toString());
+          workspace.writeFileSync(args.path, args.data.toString());
           return true;
         },
         "appendFileSync": async (args: any) => {
           console.log(chalk.yellow("FS.APPEND = " + args.path));
           fs.appendFileSync(args.path, args.data.toString());
+          workspace.appendFileSync(args.path, args.data.toString());
           return true;
         },
         "existsSync": async (args: any) => {
           console.log(chalk.yellow("FS.EXISTS = " + args.path));
-          return fs.existsSync(args.path);
-        },
-        "unlinkSync": async (args: any) => {
-          console.log(chalk.yellow("FS.REMOVE = " + args.path));
-          fs.unlinkSync(args.path);
-          return true;
+          return workspace.existsSync(args.path);
         },
         "renameSync": async (args: any) => {
           console.log(chalk.yellow("FS.RENAME FROM = " + args.oldPath + " TO = " + args.newPath));
-          fs.renameSync(args.oldPath, args.newPath);
-          return true;
+          return workspace.renameSync(args.oldPath, args.newPath);
         },
         "mkdirSync": async (args: any) => {
           console.log(chalk.yellow("FS.MKDIR = " + args.path));
-          fs.mkdirSync(args.path, { recursive: true });
+          workspace.mkdirSync(args.path);
           return true;
         },
         "readdirSync": async (args: any) => {
           console.log(chalk.yellow("FS.READDIR = " + args.path));
-          return fs.readdirSync(args.path);
+          return workspace.readdirSync(args.path);
         }
       })))
       .setPackage("plugin/axios", PluginPackage.from(module => ({

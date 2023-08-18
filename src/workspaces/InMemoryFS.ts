@@ -148,4 +148,44 @@ export class InMemoryFS {
       }
       return result;
   }
+
+  renameSync(oldPath: string, newPath: string): void {
+    const oldPathSegments = oldPath.split("/");
+    const [oldParentDir, oldName] = this.navigateToPath(oldPathSegments);
+
+    const newPathSegments = newPath.split("/");
+    const [newParentDir, newName] = this.navigateToPath(newPathSegments);
+
+    const item = oldParentDir.getFile(oldName) || oldParentDir.getDirectory(oldName);
+    if (!item) {
+      throw new Error(`Path not found: ${oldPath}`);
+    }
+
+    // Ensure new path doesn't already exist
+    if (newParentDir.getFile(newName) || newParentDir.getDirectory(newName)) {
+      throw new Error(`Destination path already exists: ${newPath}`);
+    }
+
+    if (item instanceof InMemoryFile) {
+      newParentDir.setFile(newName, item);
+    } else {
+      newParentDir.setDirectory(newName, item as InMemoryDir);
+    }
+
+    oldParentDir.remove(oldName);
+  }
+
+  appendFileSync(subpath: string, data: string): void {
+    const pathSegments = subpath.split("/");
+    const [parentDir, fileName] = this.navigateToPath(pathSegments);
+    
+    let file = parentDir.getFile(fileName);
+    if (file) {
+      // If file exists, append data
+      file.write(file.read() + data);
+    } else {
+      // If file doesn't exist, create a new one with the data
+      parentDir.setFile(fileName, new InMemoryFile(data));
+    }
+  }
 }
