@@ -2,10 +2,10 @@
 Welcome to evo.ninja.
 
 Evo.ninja is an AI agent that builds itself!
-It executes operations to achieve a goal.
-It is capable of using fuzzy search to find and execute any operation in its library.
-Operations are namespaced JavaScript functions with typed arguments and a description. 
-If it can not find an operation, it will write one itself.
+It executes scripts to achieve a goal.
+It is capable of using fuzzy search to find and execute any script in its library.
+Scripts are namespaced JavaScript functions with typed arguments and a description. 
+If it can not find a script, it will write one itself.
 
 [Roadmap](./ROADMAP.md)
 

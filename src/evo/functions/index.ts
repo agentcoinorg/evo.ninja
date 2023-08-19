@@ -1,13 +1,12 @@
 import { AgentFunction } from "../../functions";
-import { createOperation } from "./createOperation";
-import { executeOperation } from "./executeOperation";
-import { findOperation } from "./findOperation";
+import { createScript } from "./createScript";
+import { executeScript } from "./executeScript";
+import { findScript } from "./findScript";
 import { readVar } from "./readVar";
 
 export const functions: AgentFunction[] = [
-  createOperation,
-  executeOperation,
-  findOperation,
+  createScript,
+  executeScript,
+  findScript,
   readVar,
 ];
-

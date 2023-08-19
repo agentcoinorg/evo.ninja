@@ -17,7 +17,7 @@ describe('AI Agent Test Suite', () => {
 
   // You can add more complex tests here...
   // For example:
-  test('Complex Operation: (590 * 204) + (1000 / 2) - 42', () => {
+  test('Complex script: (590 * 204) + (1000 / 2) - 42', () => {
     const goal = '(590 * 204) + (1000 / 2) - 42';
     const startTime = new Date().getTime();
     const result = execSync(`yarn start '${goal}'`, { timeout: oneMinute, encoding: 'utf-8' });

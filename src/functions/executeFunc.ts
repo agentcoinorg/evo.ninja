@@ -26,7 +26,7 @@ export const executeFunc: ExecuteFunc = async (
 
   const func = functions.find((f) => f.definition.name === name);
   if (!func) {
-    return ResultErr(`Function ${name} does not exist. Try calling executeOperation instead`);
+    return ResultErr(`Function ${name} does not exist. Try calling executeScript instead`);
   }
 
   const executor = func.buildExecutor(globals, client, workspace);
@@ -51,7 +51,7 @@ export const executeFunc: ExecuteFunc = async (
     return ResultErr(`The function '${name}' failed, this is the error:\n----------\n${response.error && response.error.slice ? response.error.slice(0, 300) + "...": "Unknown error."}\nJSON Arguments: ${args}\n----------\\n`);
   }
   // const resultStr = JSON.stringify(response.result, null, 2);
-  if (name === "executeOperation" || name === "eval") {
+  if (name === "executeScript" || name === "eval") {
     functionCallSummary += `Result stored into global var: \`{{${fnArgs.result}}}\`. Preview: \`${
       response.result 
         ? response.result.slice(0, 200) + "..."

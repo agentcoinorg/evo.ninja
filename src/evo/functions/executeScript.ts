@@ -1,25 +1,25 @@
 import { AgentFunction, WrapClient, functionCodeWrapper, nodeShims } from "../..";
 import { JS_ENGINE_URI } from "../../constants";
-import { getOperationByName } from "../../operations";
+import { getScriptByName } from "../../scripts";
 
-export const executeOperation: AgentFunction = {
+export const executeScript: AgentFunction = {
   definition: {
-    name: "executeOperation",
-    description: `Execute an operation.`,
+    name: "executeScript",
+    description: `Execute an script.`,
     parameters: {
       type: "object",
       properties: {
         namespace: {
           type: "string",
-          description: "Namespace of the operation to execute"
+          description: "Namespace of the script to execute"
         },
         arguments: {
           type: "string",
-          description: "The arguments to pass into the operation being executed.",
+          description: "The arguments to pass into the script being executed",
         },
         result: {
           type: "string",
-          description: "The name of the variable to store the result of the operation"
+          description: "The name of the variable to store the result of the script"
         }
       },
       required: ["name", "arguments", "result"],
@@ -35,16 +35,16 @@ export const executeOperation: AgentFunction = {
         // if (!options.arguments) {
         //   return {
         //     ok: false,
-        //     error: `No arguments provided for operation ${options.name}.`,
+        //     error: `No arguments provided for script ${options.name}.`,
         //   };
         // }
       
-        const operation = getOperationByName(options.namespace);
+        const script = getScriptByName(options.namespace);
   
-        if (!operation) {
+        if (!script) {
           return {
             ok: false,
-            error: `Operation ${options.namespace} not found.`,
+            error: `Script ${options.namespace} not found.`,
           };
         }
 
@@ -70,12 +70,12 @@ export const executeOperation: AgentFunction = {
         } catch {
           return {
             ok: false,
-            error: `Invalid arguments provided for operation ${options.namespace}: '${options.arguments}' is not valid JSON!`,
+            error: `Invalid arguments provided for script ${options.namespace}: '${options.arguments}' is not valid JSON!`,
           };
         }
 
         const invokeArgs = {
-          src: nodeShims + functionCodeWrapper(operation.code),
+          src: nodeShims + functionCodeWrapper(script.code),
           globals: Object.keys(args).map((key) => ({
             name: key,
             value: JSON.stringify(args[key]),
@@ -89,7 +89,7 @@ export const executeOperation: AgentFunction = {
         });
 
         console.log("----------------");
-        console.log("Execute operation output", client.jsPromiseOutput);
+        console.log("Execute script output", client.jsPromiseOutput);
         console.log("----------------");
 
         if (result.ok && client.jsPromiseOutput.result) {
@@ -105,11 +105,11 @@ export const executeOperation: AgentFunction = {
               }
               : {
                 ok: false,
-                error: "No result returned from operation.",
+                error: "No result returned from script.",
               }
             : {
               ok: false,
-              error: result.value.error + "\nCode: " + operation.code,
+              error: result.value.error + "\nCode: " + script.code,
              }
           : {
             ok: false,
