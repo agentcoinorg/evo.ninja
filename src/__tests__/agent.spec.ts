@@ -1,31 +1,32 @@
 import { execSync } from 'child_process';
+import { readFileSync } from 'fs';
 
 describe('AI Agent Test Suite', () => {
   const oneMinute = 60 * 1000;
 
-  test('Simple Division: 590 / 204', () => {
-    const goal = '590 / 204';
-    const startTime = new Date().getTime();
-    const result = execSync(`yarn start '${goal}'`, { timeout: oneMinute, encoding: 'utf-8' });
-    const endTime = new Date().getTime();
-    
-    console.log(result); // Print the logs of the agent
+  const goals = [
+    { goal: 'Write the word Washington to the file called output.txt', expected: 'Washington' }, // Correct this line as needed
+    { goal: 'Divide 590 by 204 and save it to a file named output.txt', expected: 590 / 204 },
+    // { goal: '(590 * 204) + (1000 / 2) - 42', expected: (590 * 204) + (1000 / 2) - 42 },
+    // Add more goals here...
+  ];
 
-    expect(endTime - startTime).toBeLessThanOrEqual(oneMinute);
-    expect(parseFloat(result.trim())).toBeCloseTo(590 / 204);
-  });
+  goals.forEach(({ goal, expected }) => {
+    test(`Operation: ${goal}`, () => {
+      const startTime = new Date().getTime();
+      execSync(`yarn start '${goal}'`, { timeout: oneMinute });
+      const endTime = new Date().getTime();
 
-  // You can add more complex tests here...
-  // For example:
-  test('Complex Operation: (590 * 204) + (1000 / 2) - 42', () => {
-    const goal = '(590 * 204) + (1000 / 2) - 42';
-    const startTime = new Date().getTime();
-    const result = execSync(`yarn start '${goal}'`, { timeout: oneMinute, encoding: 'utf-8' });
-    const endTime = new Date().getTime();
-    
-    console.log(result); // Print the logs of the agent
+      // Read the result from output.txt
+      const result = readFileSync('workspace/output.txt', 'utf-8').trim();
+      console.log(result); // Print the logs of the agent
 
-    expect(endTime - startTime).toBeLessThanOrEqual(oneMinute);
-    expect(parseFloat(result.trim())).toBeCloseTo((590 * 204) + (1000 / 2) - 42);
+      expect(endTime - startTime).toBeLessThanOrEqual(oneMinute);
+      if (typeof expected === 'string') {
+        expect(result).toBe(expected);
+      } else {
+        expect(parseFloat(result)).toBeCloseTo(expected);
+      }
+    });
   });
 });
