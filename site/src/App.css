@@ -1,6 +1,6 @@
 .App {
   text-align: center;
-  color: #0c79e6;
+  color: #ffeba0;
   background-color: #000000b8;
 }
 
@@ -22,17 +22,17 @@
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: #0c79e6;
+  color: #ffeba0;
 }
 
 .App-link {
-  color: #0c79e6;
+  color: #ffeba0;
 }
 
 .App button {
   padding: 10px 20px;
   font-size: 1em;
-  color: #0c79e6;
+  color: #ffeba0;
   background-color: #181818b8;
   border: none;
   border-radius: 5px;
@@ -57,7 +57,7 @@
   display: flex;
   justify-content: space-between;
   padding: 20px;
-  color: #0c79e6;
+  color: #ffeba0;
   align-items: stretch;
   justify-content: center;
   max-width: 75vw;
@@ -100,7 +100,7 @@
   justify-content: space-between;
   padding: 20px;
   background-color: #00000000b8;
-  color: #0c79e6;
+  color: #ffeba0;
   align-items: stretch;
   justify-content: center;
   max-width: 75vw;
@@ -131,45 +131,44 @@
 }
 
 @import url(https://fonts.googleapis.com/css?family=Exo:100);
-
 @-webkit-keyframes bg-scrolling-reverse {
   100% {
-    background-position: 50px 50px;
+    background-position: 0 500px;
   }
 }
 @-moz-keyframes bg-scrolling-reverse {
   100% {
-    background-position: 50px 50px;
+    background-position: 0 500px;
   }
 }
 @-o-keyframes bg-scrolling-reverse {
   100% {
-    background-position: 50px 50px;
+    background-position: 0 500px;
   }
 }
 @keyframes bg-scrolling-reverse {
   100% {
-    background-position: 50px 50px;
+    background-position: 0 500px;
   }
 }
 @-webkit-keyframes bg-scrolling {
   0% {
-    background-position: 50px 50px;
+    background-position: 0 500px;
   }
 }
 @-moz-keyframes bg-scrolling {
   0% {
-    background-position: 50px 50px;
+    background-position: 0 500px;
   }
 }
 @-o-keyframes bg-scrolling {
   0% {
-    background-position: 50px 50px;
+    background-position: 0 500px;
   }
 }
 @keyframes bg-scrolling {
   0% {
-    background-position: 50px 50px;
+    background-position: 0 500px;
   }
 }
 
@@ -178,14 +177,14 @@ body {
   font: 400 16px/1.5 exo, ubuntu, "segoe ui", helvetica, arial, sans-serif;
   text-align: center;
   /* img size is 50x50 */
-  background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAIAAACRXR/mAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABnSURBVHja7M5RDYAwDEXRDgmvEocnlrQS2SwUFST9uEfBGWs9c97nbGtDcquqiKhOImLs/UpuzVzWEi1atGjRokWLFi1atGjRokWLFi1atGjRokWLFi1af7Ukz8xWp8z8AAAA//8DAJ4LoEAAlL1nAAAAAElFTkSuQmCC") repeat 0 0;
-  -webkit-animation: bg-scrolling-reverse 0.92s infinite;
+  background: url("/public/wallpaper-bw.png") repeat 0 0;
+  -webkit-animation: bg-scrolling-reverse 5s infinite;
   /* Safari 4+ */
-  -moz-animation: bg-scrolling-reverse 0.92s infinite;
+  -moz-animation: bg-scrolling-reverse 5s infinite;
   /* Fx 5+ */
-  -o-animation: bg-scrolling-reverse 0.92s infinite;
+  -o-animation: bg-scrolling-reverse 5s infinite;
   /* Opera 12+ */
-  animation: bg-scrolling-reverse 0.92s infinite;
+  animation: bg-scrolling-reverse 5s infinite;
   /* IE 10+ */
   -webkit-animation-timing-function: linear;
   -moz-animation-timing-function: linear;
@@ -198,3 +197,4 @@ body::before {
   font-weight: 100;
   font-style: normal;
 }
+

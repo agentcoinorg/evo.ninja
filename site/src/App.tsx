@@ -16,8 +16,8 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Meet "Evo"</h1>
-        <img src="evo.png" alt="Evo" />
+        <h1>evo.ninja</h1>
+        <img src="avatar-shadow.png" alt="Evo" width={200} />
         <h2>An AI that never stops learning.</h2>
         <button onClick={scrollToFeatures}>Learn More</button>
       </header>
