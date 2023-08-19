@@ -26,20 +26,22 @@ export function searchOperations(query: string): Operation[] {
 
 export function getAllOperations(): Operation[] {
   const ops: Operation[] = [];
-  fs.readdirSync("./operations").forEach((file) => {
-    const operation = JSON.parse(fs.readFileSync(`./operations/${file}`, "utf8"));
+  fs.readdirSync("./operations")
+    .filter(file => path.extname(file) === ".json")
+    .forEach((file) => {
+      const operation = JSON.parse(fs.readFileSync(`./operations/${file}`, "utf8"));
 
-    // If "code" is a path
-    if (operation.code.startsWith("./")) {
-      // Read it from disk
-      operation.code = fs.readFileSync(
-        path.join("./operations", operation.code),
-        "utf-8"
-      );
-    }
+      // If "code" is a path
+      if (operation.code.startsWith("./")) {
+        // Read it from disk
+        operation.code = fs.readFileSync(
+          path.join("./operations", operation.code),
+          "utf-8"
+        );
+      }
 
-    ops.push(operation);
-  });
+      ops.push(operation);
+    });
 
   return ops;
 }
