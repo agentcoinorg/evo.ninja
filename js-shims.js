@@ -87,9 +87,9 @@ function require(lib) {
 }
 
 const __temp = (async function () { 
-  // OPERATION CODE HERE (do not forget to declare arguments of the operation function as local vars)
+  // SCRIPT CODE HERE (do not forget to declare arguments of the script function as local vars)
 
-  //END OPERATION CODE
+  //END SCRIPT CODE
  })().then(result => {
   __wrap_subinvoke("plugin/result", "post", { result: result != null ? result : "undefined" })
 }, error => {

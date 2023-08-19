@@ -1,19 +1,19 @@
-import { AgentFunction, WrapClient, searchOperations } from "../..";
+import { AgentFunction, WrapClient, searchScripts } from "../..";
 
-export const findOperation: AgentFunction = {
+export const findScript: AgentFunction = {
   definition: {
-    name: "findOperation",
-    description: `Search for an operation.`,
+    name: "findScript",
+    description: `Search for an script.`,
     parameters: {
       type: "object",
       properties: {
         namespace: {
           type: "string",
-          description: "Partial namespace of the operation"
+          description: "Partial namespace of the script"
         },
         description: {
           type: "string",
-          description: "The detailed description of the arguments and output of the operation."
+          description: "The detailed description of the arguments and output of the script."
         },
       },
       required: ["namespace", "description"],
@@ -25,17 +25,17 @@ export const findOperation: AgentFunction = {
     client: WrapClient
   ) => {
     return async (options: { namespace: string, description: string }) => {
-      const candidates = searchOperations(`${options.namespace} ${options.description}`).slice(0, 5);
+      const candidates = searchScripts(`${options.namespace} ${options.description}`).slice(0, 5);
   
       if (candidates.length === 0) {
         return {
           ok: true,
-          result: `Found no candidates for operation ${options.namespace}. Try creating the operation instead.`,
+          result: `Found no candidates for script ${options.namespace}. Try creating the script instead.`,
         };
       }
       return {
         ok: true,
-        result: `Found the following candidates for operation: ${options.namespace}:` + 
+        result: `Found the following candidates for script: ${options.namespace}:` + 
         `\n--------------\n` + 
         `${candidates.map((c) => `Namespace: ${c.name}\nArguments: ${c.arguments}\nDescription: ${c.description}`).join("\n--------------\n")}` +
         `\n--------------\n`,

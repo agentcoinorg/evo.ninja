@@ -1,0 +1,6 @@
+{
+  "name": "crypto.getPrice",
+  "description": "Get the current price of a specified cryptocurrency.",
+  "arguments": "{ currency: string }",
+  "code": "./crypto.getPrice.js"
+}

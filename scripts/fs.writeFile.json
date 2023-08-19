@@ -2,5 +2,5 @@
   "name": "fs.writeFile",
   "description": "Writes data to a file, replacing the file if it already exists.",
   "arguments": "{ path: string, data: string, encoding: string }",
-  "code": "const fs = require('fs');\ntry {\n  fs.writeFileSync(path, data, encoding);\n} catch (error) {\n  throw new Error(`Failed to write file: ${error.message}`);\n}"
+  "code": "./fs.writeFile.js"
 }

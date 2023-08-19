@@ -1,32 +1,32 @@
 import { AgentFunction } from "../../functions";
 import { WrapClient } from "../../wrap";
-import { addOperation } from "../../operations";
+import { addScript } from "../../scripts";
 import { InMemoryWorkspace } from "../../workspaces";
 import { Agent as CodeWriterAgent } from "../../code-writer";
 import chalk from "chalk";
 
-export const createOperation: AgentFunction = {
+export const createScript: AgentFunction = {
   definition: {
-    name: "createOperation",
-      description: `Create an operation using JavaScript.`,
+    name: "createScript",
+      description: `Create a script using JavaScript.`,
       parameters: {
         type: "object",
         properties: {
           namespace: {
             type: "string",
-            description: "The namespace of the operation, e.g. fs.readFile"
+            description: "The namespace of the script, e.g. fs.readFile"
           },
           description: {
             type: "string",
-            description: "The detailed description of the operation."
+            description: "The detailed description of the script."
           },
           arguments: {
             type: "string",
-            description: "The arguments of the operation. E.g. '{ path: string, encoding: string }'. Use only what you need, no optional arguments."
+            description: "The arguments of the script. E.g. '{ path: string, encoding: string }'. Use only what you need, no optional arguments."
           },
           developerNote: {
             type: "string",
-            description: "A note for the developer of the operation, if any."
+            description: "A note for the developer of the script, if any."
           }
         },
         required: ["namespace", "description", "arguments"],
@@ -41,14 +41,14 @@ export const createOperation: AgentFunction = {
       if (options.namespace.startsWith("agent.")) {
         return {
           ok: false,
-          result: `Cannot create an operation with namespace ${options.namespace}. Try searching for operations in that namespace instead.`,
+          result: `Cannot create an script with namespace ${options.namespace}. Try searching for script in that namespace instead.`,
         }
       }
-      
+
       const workspace = new InMemoryWorkspace();
       const writer = new CodeWriterAgent(workspace);
-      console.log(chalk.yellow(`Creating operation '${options.namespace}'...`));
-  
+      console.log(chalk.yellow(`Creating script '${options.namespace}'...`));
+
       let iterator = writer.run(options.namespace, options.description, options.arguments, options.developerNote);
   
       while(true) {
@@ -69,15 +69,15 @@ export const createOperation: AgentFunction = {
         arguments: options.arguments,
         code: index
       };
-      addOperation(options.namespace, op);
-  
+      addScript(options.namespace, op);
+
       const candidates = [
        op
       ];
-  
+
       return {
         ok: true,
-        result: `Created the following operations:` + 
+        result: `Created the following scripts:` + 
         `\n--------------\n` + 
         `${candidates.map((c) => `Namespace: ${c.name}\nArguments: ${c.arguments}\nDescription: ${c.description}`).join("\n--------------\n")}` +
         `\n--------------\n`,
