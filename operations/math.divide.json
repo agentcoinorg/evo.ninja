@@ -1,0 +1,6 @@
+{
+  "name": "math.divide",
+  "description": "This operation divides two numbers and returns the result.",
+  "arguments": "{ numerator: number, denominator: number }",
+  "code": "if (denominator === 0) {\n  throw new Error('Cannot divide by zero');\n}\nreturn numerator / denominator;"
+}

@@ -5,8 +5,8 @@ import { JS_ENGINE_URI } from "./constants";
 
 export async function run(): Promise<void> {
   const client = new WrapClient(new FileSystemWorkspace());
-  
-  const code = fs.readFileSync("test.js", "utf8");
+
+  const code = fs.readFileSync("js-shims.js", "utf8");
 
   const invokeArgs = {
     src: code,

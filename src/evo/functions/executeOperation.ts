@@ -48,16 +48,16 @@ export const executeOperation: AgentFunction = {
             error: `Operation ${options.namespace} not found.`,
           };
         }
-  
+
         let args: any = undefined;
         args = options.arguments.replace(/\{\{/g, "\\{\\{").replace(/\}\}/g, "\\}\\}");
         try {
          
-  
+
           args = JSON.parse(options.arguments);
-  
+
           if (args) {
-            function replaceVars(str: string, vars: any) {
+            const replaceVars = (str: string, vars: any) => {
               return str.replace(/{{(.*?)}}/g, (match, key) => {
                 return vars[key.trim()] || match;  // if the key doesn't exist in vars, keep the original match
               });
