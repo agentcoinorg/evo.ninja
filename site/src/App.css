@@ -1,7 +1,7 @@
 .App {
   text-align: center;
-  color: #FF572E;
-  background-color: #000000b8;
+  color: #FFFFFF;
+  background-color: #00000078;
 }
 
 .App-logo {
@@ -18,21 +18,40 @@
 .App-header {
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: #FF572E;
+  color: #FFFFFF;
+}
+
+.Header-Links {
+  position: absolute;
+  display: flex;
+  top: 0;
+  right: 0;
+  height: 60px;
+  margin-right: 50px;
+}
+
+.Header-Links a {
+  margin: 10px;
+  margin-top: 20px;
+  display: inherit;
+}
+
+.Header-Links a:hover {
+  filter: contrast(0.5)
 }
 
 .App-link {
-  color: #FF572E;
+  color: #FFFFFF;
 }
 
 .App button {
   padding: 10px 20px;
   font-size: 1em;
-  color: #FF572E;
+  color: #FFFFFF;
   background-color: #181818b8;
   border: none;
   border-radius: 5px;
@@ -50,14 +69,14 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #000000b8;
+  background-color: #00000098;
 }
 
 .Features {
   display: flex;
   justify-content: space-between;
   padding: 20px;
-  color: #FF572E;
+  color: #FFFFFF;
   align-items: stretch;
   justify-content: center;
   max-width: 75vw;
@@ -99,8 +118,8 @@
   display: flex;
   justify-content: space-between;
   padding: 20px;
-  background-color: #00000000b8;
-  color: #FF572E;
+  background-color: #00000000;
+  color: #FFFFFF;
   align-items: stretch;
   justify-content: center;
   max-width: 75vw;
@@ -133,42 +152,42 @@
 @import url(https://fonts.googleapis.com/css?family=Exo:100);
 @-webkit-keyframes bg-scrolling-reverse {
   100% {
-    background-position: 0 500px;
+    background-position: 0 250px;
   }
 }
 @-moz-keyframes bg-scrolling-reverse {
   100% {
-    background-position: 0 500px;
+    background-position: 0 250px;
   }
 }
 @-o-keyframes bg-scrolling-reverse {
   100% {
-    background-position: 0 500px;
+    background-position: 0 250px;
   }
 }
 @keyframes bg-scrolling-reverse {
   100% {
-    background-position: 0 500px;
+    background-position: 0 250px;
   }
 }
 @-webkit-keyframes bg-scrolling {
   0% {
-    background-position: 0 500px;
+    background-position: 0 250px;
   }
 }
 @-moz-keyframes bg-scrolling {
   0% {
-    background-position: 0 500px;
+    background-position: 0 250px;
   }
 }
 @-o-keyframes bg-scrolling {
   0% {
-    background-position: 0 500px;
+    background-position: 0 250px;
   }
 }
 @keyframes bg-scrolling {
   0% {
-    background-position: 0 500px;
+    background-position: 0 250px;
   }
 }
 
@@ -176,8 +195,8 @@ body {
   color: #999;
   font: 400 16px/1.5 exo, ubuntu, "segoe ui", helvetica, arial, sans-serif;
   text-align: center;
-  /* img size is 50x50 */
-  background: url("/public/wallpaper-bw.png") repeat 0 0;
+  /* img size is 25x25 */
+  background: url("/public/wallpaper.png") repeat 0 0 / 461px 250px;
   -webkit-animation: bg-scrolling-reverse 5s infinite;
   /* Safari 4+ */
   -moz-animation: bg-scrolling-reverse 5s infinite;
