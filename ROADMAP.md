@@ -1,5 +1,9 @@
 # Roadmap
 
+## High-Pri
+- chat log, used for showing examples
+    - example https://github.com/polywrap/polygpt#examples
+
 ## Test prompts
 - "write 'Hello world!' into hello.txt" (works)
 - "read in.txt and output the factorial to a file" (works)
