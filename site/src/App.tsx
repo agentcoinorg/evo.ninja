@@ -17,7 +17,7 @@ function App() {
     <div className="App">
       <header className="App-header">
         <h1>evo.ninja</h1>
-        <img src="avatar-shadow.png" alt="Evo" width={200} />
+        <img src="avatar.png" alt="Evo" width={200} />
         <h2>An AI that never stops learning.</h2>
         <button onClick={scrollToFeatures}>Learn More</button>
       </header>
