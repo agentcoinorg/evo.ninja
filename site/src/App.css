@@ -1,6 +1,6 @@
 .App {
   text-align: center;
-  color: #ffeba0;
+  color: #FF572E;
   background-color: #000000b8;
 }
 
@@ -22,17 +22,17 @@
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: #ffeba0;
+  color: #FF572E;
 }
 
 .App-link {
-  color: #ffeba0;
+  color: #FF572E;
 }
 
 .App button {
   padding: 10px 20px;
   font-size: 1em;
-  color: #ffeba0;
+  color: #FF572E;
   background-color: #181818b8;
   border: none;
   border-radius: 5px;
@@ -57,7 +57,7 @@
   display: flex;
   justify-content: space-between;
   padding: 20px;
-  color: #ffeba0;
+  color: #FF572E;
   align-items: stretch;
   justify-content: center;
   max-width: 75vw;
@@ -100,7 +100,7 @@
   justify-content: space-between;
   padding: 20px;
   background-color: #00000000b8;
-  color: #ffeba0;
+  color: #FF572E;
   align-items: stretch;
   justify-content: center;
   max-width: 75vw;
