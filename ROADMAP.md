@@ -1,5 +1,9 @@
 # Roadmap
 
+## High-Pri
+- chat log, used for showing examples
+    - example https://github.com/polywrap/polygpt#examples
+
 ## Improvements for hackathon
 - Shims
     - axios (done?)
