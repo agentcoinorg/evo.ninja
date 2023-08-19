@@ -1,0 +1,3 @@
+"write 'Hello world!' into hello.txt"
+"read in.txt and output the factorial to a file"
+"get top 3 tesla news and save each one in a separate file in a 'tesla-news' directory"
