@@ -2,7 +2,7 @@ import { Result, ResultErr, ResultOk } from "@polywrap/result";
 import { Workspace } from "../workspaces";
 import { WrapClient } from "../wrap";
 import { AgentFunction } from ".";
-import { trimText, FUNCTION_NOT_FOUND, UNDEFINED_FUNCTION_ARGS, UNDEFINED_FUNCTION_NAME, UNPARSABLE_FUNCTION_ARGS } from "..";
+import { trimText, FUNCTION_NOT_FOUND, UNDEFINED_FUNCTION_ARGS, UNDEFINED_FUNCTION_NAME, UNPARSABLE_FUNCTION_ARGS, FUNCTION_CALL_FAILED, EXECUTE_SCRIPT_OUTPUT, OTHER_EXECUTE_FUNCTION_OUTPUT, READ_GLOBAL_VAR_OUTPUT } from "..";
 
 export type ExecuteFunc = (
   name: string | undefined,
@@ -21,6 +21,43 @@ export const executeFunc: ExecuteFunc = async (
   workspace: Workspace,
   functions: AgentFunction[],
 ): Promise<Result<string, string>> => {
+  const result = processFunctionAndArgs(name, args, functions);
+
+  if (!result.ok) {
+    return ResultErr(result.error);
+  }
+
+  const [fnArgs, func] = result.value;
+  const fnName = name as string;
+
+  const argsStr = JSON.stringify(fnArgs, null, 2);
+  let functionCallSummary = `Function call: \`${fnName}(${argsStr})\`\n`;
+  
+  const executor = func.buildExecutor(globals, client, workspace);
+
+  const response = await executor(fnArgs);
+
+  if (!response.ok) {
+    return ResultErr(FUNCTION_CALL_FAILED(fnName, response.error, args));
+  }
+
+  if (fnName === "executeScript") {
+    functionCallSummary += `Result stored into global var: \`{{${fnArgs.result}}}\`. Preview: \`${trimText(response.result, 200)}\`\n`;
+    functionCallSummary +=  EXECUTE_SCRIPT_OUTPUT(fnArgs.result, response.result);
+  } else if (fnName === "readVar") {
+    functionCallSummary += READ_GLOBAL_VAR_OUTPUT(fnArgs.name, response.result);
+  } else {
+    functionCallSummary += OTHER_EXECUTE_FUNCTION_OUTPUT(response.result);
+  }
+
+  return ResultOk(functionCallSummary);
+}
+
+function processFunctionAndArgs(
+  name: string | undefined,
+  args: string | undefined,
+  functions: AgentFunction[],
+): Result<[any, AgentFunction], string> {
   if (!name) {
     return ResultErr(UNDEFINED_FUNCTION_NAME);
   }
@@ -43,29 +80,5 @@ export const executeFunc: ExecuteFunc = async (
     return ResultErr(UNPARSABLE_FUNCTION_ARGS(name, args, err));
   }
 
-  const argsStr = JSON.stringify(fnArgs, null, 2);
-  let functionCallSummary = `Function call: \`${name}(${argsStr})\`\n`;
-  
-  const executor = func.buildExecutor(globals, client, workspace);
-
-  const response = await executor(fnArgs);
-
-  // If the function call was unsuccessful
-  if (!response.ok) {
-    return ResultErr(`The function '${name}' failed, this is the error:\n----------\n` +
-    `${response.error && typeof response.error === "string"
-      ? trimText(response.error, 300)
-      : "Unknown error."}\nJSON Arguments: ${args}\n----------\\n`
-    );
-  }
-  // const resultStr = JSON.stringify(response.result, null, 2);
-  if (name === "executeScript" || name === "eval") {
-    functionCallSummary += `Result stored into global var: \`{{${fnArgs.result}}}\`. Preview: \`${trimText(response.result, 200)}\`\n`;
-  } else if (name === "readVar") {
-    functionCallSummary += `Global var '{{${fnArgs.name}}}': Preview: \`${trimText(response.result, 200)}\`\n`;
-  } else {
-    functionCallSummary += `Result: \`${response.result}\`\n`;
-  }
-
-  return ResultOk(functionCallSummary);
+  return ResultOk([fnArgs, func]);
 }

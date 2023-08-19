@@ -83,7 +83,6 @@ export class WrapClient extends PolywrapClient {
               headers: result.headers,
               data: result.data
             };
-            console.log(res);
           } catch (e) {
             console.error(e);
             res = {

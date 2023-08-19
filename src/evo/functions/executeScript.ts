@@ -88,10 +88,6 @@ export const executeScript: AgentFunction = {
           args: invokeArgs,
         });
 
-        console.log("----------------");
-        console.log("Execute script output", client.jsPromiseOutput);
-        console.log("----------------");
-
         if (result.ok && client.jsPromiseOutput.result) {
           globals[options.result] = JSON.stringify(client.jsPromiseOutput.result);
         }
