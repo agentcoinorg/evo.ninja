@@ -2,6 +2,16 @@ import readline from "readline";
 import { Agent } from "./evo";
 import { FileSystemWorkspace } from "./workspaces";
 
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  terminal: false
+});
+
+const prompt = (query: string) => new Promise<string>(
+  (resolve) => rl.question(query, resolve)
+);
+
 export async function cli(): Promise<void> {
   let goal: string | undefined = process.argv[2];
 
@@ -28,6 +38,3 @@ cli()
     console.error(err);
     process.abort();
   });
-
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-const prompt = (query: string) => new Promise<string>((resolve) => rl.question(query, resolve));
