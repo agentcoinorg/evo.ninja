@@ -74,7 +74,7 @@ export const executeOperation: AgentFunction = {
             error: `Invalid arguments provided for operation ${options.namespace}: '${options.arguments}' is not valid JSON!`,
           };
         }
-  
+
         const invokeArgs = {
           src: nodeShims + `const __temp = (async function () { \n${operation.code}\n })().then(result => {
             __wrap_subinvoke("plugin/result", "post", { result: result != null ? result : "undefined" })

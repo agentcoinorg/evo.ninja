@@ -60,9 +60,9 @@ export const createOperation: AgentFunction = {
           break;
         }
       }
-  
+
       const index = workspace.readFileSync("index.ts");
-  
+
       const op = {
         name: options.namespace,
         description: options.description,
