@@ -1,7 +1,6 @@
-import { AgentFunction, WrapClient } from "../..";
+import { AgentFunction, WrapClient, functionCodeWrapper, nodeShims } from "../..";
 import { JS_ENGINE_URI } from "../../constants";
 import { getScriptByName } from "../../scripts";
-import { nodeShims } from "../helpers";
 
 export const executeScript: AgentFunction = {
   definition: {
@@ -76,11 +75,7 @@ export const executeScript: AgentFunction = {
         }
 
         const invokeArgs = {
-          src: nodeShims + `const __temp = (async function () { \n${script.code}\n })().then(result => {
-            __wrap_subinvoke("plugin/result", "post", { result: result != null ? result : "undefined" })
-          }, error => {
-            __wrap_subinvoke("plugin/result", "post", { result: error != null ? error : "undefined" })
-          });\nconst result = __temp === undefined ? "undefined" : __temp;\nresult`,
+          src: nodeShims + functionCodeWrapper(script.code),
           globals: Object.keys(args).map((key) => ({
             name: key,
             value: JSON.stringify(args[key]),

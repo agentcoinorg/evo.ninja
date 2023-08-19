@@ -5,7 +5,7 @@
   "main": "build/index.js",
   "scripts": {
     "start": "ts-node src/cli.ts",
-    "test-sims": "ts-node src/shim-test.ts",
+    "test-shims": "ts-node src/shim-test.ts",
     "build": "rimraf build && tsc",
     "test": "jest --passWithNoTests --runInBand --verbose"
   },

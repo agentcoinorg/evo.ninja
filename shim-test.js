@@ -1,4 +1,3 @@
-
 const console = {
   log: (message) => {
     __wrap_subinvoke("plugin/console", "log", { message: JSON.stringify(message) });
@@ -52,33 +51,33 @@ function require(lib) {
         break;
       case "axios":
         return wrap("axios", {
-            get: (url, config) => {
-              // This is hack because 'undefined' is not supported by JSON
-              return config
-                ? new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "get", { url, config }).value))
-                : new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "get", { url }).value));
-            },
-            post: (url, data, config) => {
-              return config
-                ? new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "post", { url, data, config }).value))
-                : new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "post", { url, data }).value));
-            },
-            put: (url, data, config) => {
-              return config
-                ? new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "put", { url, data, config }).value))
-                : new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "put", { url, data }).value));
-            },
-            delete: (url, config) => {
-              return config
-                ? new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "delete", { url, config }).value))
-                : new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "delete", { url}).value));
-              
-            },
-            head: (url, config) => {
-              return config
-                ? new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "head", { url, config }).value))
-                : new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "head", { url }).value));
-            },
+          get: (url, config) => {
+            // This is hack because 'undefined' is not supported by JSON
+            return config
+              ? new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "get", { url, config }).value))
+              : new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "get", { url }).value));
+          },
+          post: (url, data, config) => {
+            return config
+              ? new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "post", { url, data, config }).value))
+              : new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "post", { url, data }).value));
+          },
+          put: (url, data, config) => {
+            return config
+              ? new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "put", { url, data, config }).value))
+              : new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "put", { url, data }).value));
+          },
+          delete: (url, config) => {
+            return config
+              ? new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "delete", { url, config }).value))
+              : new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "delete", { url}).value));
+            
+          },
+          head: (url, config) => {
+            return config
+              ? new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "head", { url, config }).value))
+              : new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "head", { url }).value));
+          },
         });
         break;
     default:

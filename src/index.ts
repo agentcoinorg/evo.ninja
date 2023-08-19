@@ -9,3 +9,4 @@ export * from './openai';
 export * from './scripts';
 export * from './workspaces';
 export * from './wrap';
+export * from './boilerplate';

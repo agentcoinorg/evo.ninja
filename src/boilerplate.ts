@@ -1,4 +1,3 @@
-
 export const nodeShims = 
 `
 const console = {
@@ -88,3 +87,9 @@ function require(lib) {
   }
 }
 `;
+
+export const functionCodeWrapper = (code: string) => `\nconst __temp = (async function () { \n${code}\n })().then(result => {
+  __wrap_subinvoke("plugin/result", "post", { result: result != null ? result : "undefined" })
+}, error => {
+  __wrap_subinvoke("plugin/result", "post", { result: error != null ? error : "undefined" })
+});\nconst result = __temp === undefined ? "undefined" : __temp;\nresult`;
