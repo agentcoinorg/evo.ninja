@@ -1,6 +1,4 @@
-import { Evo } from "./agents/evo";
-import { FileSystemWorkspace } from "./sys/workspaces";
-
+import { Evo, FileSystemWorkspace } from "@evo-ninja/core";
 import readline from "readline";
 import path from "path";
 
