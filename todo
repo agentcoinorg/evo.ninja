@@ -1,8 +1,12 @@
-x file naming, unify it
-- unify ' & "
+- logger
+  - markdown
+- dogo app
+  - logger->html
+- math + algo use-cases
+- web scraping use-case
+- benchmarks
 - add wrap scripts
 - add script metadata to file?
-- logger
 
 `evo "prompt"`
 `evo -a script-writer -p "prompt"`
