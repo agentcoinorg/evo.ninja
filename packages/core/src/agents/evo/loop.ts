@@ -3,6 +3,7 @@ import { RunResult, StepOutput } from "../agent";
 import { AgentFunction, ExecuteAgentFunction } from "../agent-function";
 import { LlmApi, LlmResponse, Chat } from "../../llm";
 import { WrapClient } from "../../wrap";
+import { Scripts } from "../../Scripts";
 import { Workspace } from "../../sys";
 
 export async function* loop(
@@ -12,6 +13,7 @@ export async function* loop(
   client: WrapClient, 
   globals: Record<string, any>,
   workspace: Workspace,
+  scripts: Scripts,
   executeAgentFunction: ExecuteAgentFunction,
   agentFunctions: AgentFunction[],
 ): AsyncGenerator<StepOutput, RunResult, string | undefined> {
@@ -29,7 +31,18 @@ export async function* loop(
 
     if (response.function_call) {
       const { name, arguments: args } = response.function_call;
-      const result = await executeAgentFunction(name, args, client, globals, workspace, agentFunctions);
+      const result = await executeAgentFunction(
+        name,
+        args, {
+          globals,
+          client,
+          workspace,
+          scripts,
+          llm,
+          chat
+        },
+        agentFunctions
+      );
 
       if (result.ok) {
         yield StepOutput.message(chat.temporary({ role: "system", name, content: result.value}));

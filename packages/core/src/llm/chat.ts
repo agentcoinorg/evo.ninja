@@ -31,25 +31,27 @@ export class Chat {
       msgs: []
     }
   };
+  private _maxContextTokens: number;
   private _summaryTokens: number;
   private _chunkTokens: number;
 
   constructor(
-    private _contextWindowTokens: number,
     private _workspace: Workspace,
     private _llm: LlmApi,
     private _msgsFile: string = ".msgs",
   ) {
+    this._maxContextTokens = this._llm.getMaxContextTokens();
+
     // Summary size should be ~10% of total tokens
     const summaryPerc = 0.10;
     this._summaryTokens = Math.floor(
-      this._contextWindowTokens * summaryPerc
+      this._maxContextTokens * summaryPerc
     );
 
     // Chunk size should be ~70% of total tokens
     const chunkPerc = 0.7;
     this._chunkTokens = Math.floor(
-      this._contextWindowTokens * chunkPerc
+      this._maxContextTokens * chunkPerc
     );
   }
 
@@ -122,16 +124,16 @@ export class Chat {
       msgLogs["persistent"].tokens +
       msgLogs["temporary"].tokens;
 
-    if (totalTokens() < this._contextWindowTokens) {
+    if (totalTokens() < this._maxContextTokens) {
       return;
     }
 
-    console.error(`! Max Tokens Exceeded (${totalTokens()} / ${this._contextWindowTokens})`);
+    console.error(`! Max Tokens Exceeded (${totalTokens()} / ${this._maxContextTokens})`);
 
     // Start with "temporary" messages
     await this._summarize("temporary");
 
-    if (totalTokens() < this._contextWindowTokens) {
+    if (totalTokens() < this._maxContextTokens) {
       return;
     }
 
@@ -209,7 +211,7 @@ export class Chat {
         const content = msg.content || "";
         const contentTokens = gpt2.encode(content).length;
 
-        if ((tokenCounter + contentTokens) > (this._contextWindowTokens - this._summaryTokens)) {
+        if ((tokenCounter + contentTokens) > (this._maxContextTokens - this._summaryTokens)) {
           break;
         }
 

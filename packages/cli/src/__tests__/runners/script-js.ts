@@ -1,20 +1,24 @@
-import { getScriptByName } from "../../scripts";
+import { FileSystemWorkspace } from "../../sys/FileSystemWorkspace";
+
 import {
   WrapClient,
   JsEngine_GlobalVar,
   JsEngine_Module,
+  Scripts,
+  Workspace,
   shimCode
-} from "../../wrap";
-import { FileSystemWorkspace } from "../../sys/workspaces";
+} from "@evo-ninja/core";
 import fs from "fs";
-import path from "path";
+import path from "path-browserify";
 
 export async function runScriptJs(
+  workspace: Workspace,
+  scripts: Scripts,
   scriptName: string,
   scriptArgsPath?: string
 ): Promise<void> {
 
-  const script = getScriptByName(scriptName);
+  const script = scripts.getScriptByName(scriptName);
 
   if (!script) {
     throw Error(`Cannot find script (${scriptName})`);
@@ -40,9 +44,7 @@ export async function runScriptJs(
     }
   }
 
-  const client = new WrapClient(new FileSystemWorkspace(
-    path.join(__dirname, "../../../../../workspace")
-  ));
+  const client = new WrapClient(workspace);
 
   const result = await JsEngine_Module.evalWithGlobals({
     src: shimCode(script.code),
@@ -63,7 +65,15 @@ if (args.length < 3) {
 const scriptName = args[2];
 const scriptPath = args.length > 2 ? args[3] : undefined;
 
-runScriptJs(scriptName, scriptPath)
+const workspace = new FileSystemWorkspace(
+  path.join(__dirname, "../../../../../workspace")
+);
+const scripts = new Scripts(
+  workspace,
+  path.join(__dirname, "../../../../../scripts")
+);
+
+runScriptJs(workspace, scripts, scriptName, scriptPath)
   .then(() => {
     process.exit();
   })
