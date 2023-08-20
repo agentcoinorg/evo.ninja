@@ -1,0 +1,49 @@
+.Sidebar {
+  width: 20%;
+  background-color: #333232;
+  color: #ecf0f1; /* Light color for contrast */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%; /* Full height */
+  overflow: auto; /* In case the content overflows */
+  padding: 10px; /* Padding around the content */
+}
+
+.Logo {
+  width: 175px; /* Increase logo size for visibility */
+  margin-bottom: 20px; /* Space below the logo */
+}
+
+.Scripts {
+  border: 1px solid #ff572e;
+  color: white;
+  background-color: #121312;
+  border-radius: 30px;
+}
+
+.Script {
+  width: 80%;
+}
+
+.File {
+  width: 80%;
+}
+
+.Workspace {
+  border: 1px solid #ff572e;
+  color: white;
+  background-color: #121312;
+  border-radius: 30px;
+}
+
+.ImageBanner {
+  width: 15rem;
+}
+
+.Footer {
+  display: flex;
+  justify-content: space-around;
+  width: 10rem;
+  margin: 2rem 0 2rem 0;
+}

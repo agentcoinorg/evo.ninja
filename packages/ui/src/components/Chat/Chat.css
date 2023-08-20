@@ -1,0 +1,46 @@
+.Chat {
+  background-color: #121312;
+  border: 1px solid #ff572e;
+  height: 90vh;
+  width: 75%;
+  align-self: center;
+  border-radius: 30px;
+}
+
+.Chat__Container {
+  display: flex;
+  margin: 20px;
+  align-items: center;
+  justify-content: center;
+}
+
+.Chat__Input {
+  border-radius: 15px;
+  padding: 10px;
+  font-size: 16px;
+  width: 80%;
+  height: 3.25rem;
+  background-color: #656564;
+  box-sizing: border-box;
+  outline: none;
+  margin: 0 15px;
+}
+
+.Chat__Btn {
+  background-color: #ff572e;
+  height: 3.25rem;
+  border: none;
+  color: white;
+  text-align: center;
+  display: inline-block;
+  font-size: 16px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  padding: 10px 24px;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.Message {
+  background: #b09898;
+}
