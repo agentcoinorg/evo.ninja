@@ -1,84 +1,79 @@
-import React from 'react';
-
+import React, { useState } from 'react';
 import './App.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTwitter, faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons';
+import { faCog } from '@fortawesome/free-solid-svg-icons';
+
+type Message = {
+  text: string;
+  user: string;
+};
 
 function App() {
-  const scrollToFeatures = () => {
-    const element = document.querySelector('.FeaturesSection');
-    element && element.scrollIntoView({ behavior: 'smooth' });
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+
+  const gibberishResponse = () => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < 15; i++) {
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
   };
 
-  const scrollToHowItWorks = () => {
-    const element = document.querySelector('.HowItWorksSection');
-    element && element.scrollIntoView({ behavior: 'smooth' });
+  const sendMessage = () => {
+    setMessages([...messages, { text: input, user: 'user' }]);
+    setInput('');
+    setTimeout(() => {
+      setMessages([...messages, { text: input, user: 'user' }, { text: gibberishResponse(), user: 'evo' }]);
+    }, 1000); // Simulating a delay for the EVO response
   };
 
   return (
     <div className="App">
-      <header className="App-header">
-        <section className="Header-Links">
-          <a href="https://discord.polywrap.io" target="_blank" rel="noopener noreferrer">
-            <img src="discord.svg" alt="Discord" />
-          </a>
-          <a href="https://twitter.com/evo_ninja_ai" target="_blank" rel="noopener noreferrer">
-            <img src="twitter.svg" alt="Twitter" />
-          </a>
-          <a href="https://github.com/polywrap/evo.ninja" target="_blank" rel="noopener noreferrer">
-            <img src="github.svg" alt="Github" />
-          </a>
-        </section>
-        <section className="Hero">
-          <h1>evo.ninja</h1>
-          <img src="avatar.png" alt="Evo" width={200} />
-          <h2>The AI that evolves in real-time</h2>
-          <button onClick={scrollToFeatures}>Learn More</button>
-        </section>
-      </header>
-      <section className="FeaturesSection">
-        <h1>Under The Hood</h1>
-        <div className="Features">
-          <div className="Feature">
-            <h3>On-the-Fly Learning</h3>
-            <p style={{ fontSize: '2em', textAlign: 'center' }}>🚀</p>
-            <p>Evo updates its skills in real time, adapting to new tasks seamlessly.</p>
-          </div>
-          <div className="Feature">
-            <h3>Internet Integrated</h3>
-            <p style={{ fontSize: '2em', textAlign: 'center' }}>🌐</p>
-            <p>Evo connects and learns from the vastness of the web, harnessing global knowledge.</p>
-          </div>
-          <div className="Feature">
-            <h3>Self-Improving System</h3>
-            <p style={{ fontSize: '2em', textAlign: 'center' }}>🔄</p>
-            <p>In-built algorithms enable Evo to refine and enhance its abilities continuously.</p>
-          </div>
+      <div className="Sidebar">
+        <img src="avatar.png" alt="Main Logo" className="Logo" />
+        <div className="Scripts">
+          <h3>Scripts</h3>
+          <div className="Script">Script 1</div>
+          <div className="Script">Script 2</div>
+          {/* More scripts */}
         </div>
-        <button onClick={scrollToHowItWorks}>Get Started</button>
-      </section>
-      <section className="HowItWorksSection">
-        <h1>How It Works</h1>
-        <div className="HowItWorks">
-          <div className="HowItWorksStep">
-            <h3>1. Connect</h3>
-            <p style={{ fontSize: '2em', textAlign: 'center' }}>🔌</p>
-            <p>Integrate Evo into your systems.</p>
-          </div>
-          <div className="HowItWorksStep">
-            <h3>2. Command</h3>
-            <p style={{ fontSize: '2em', textAlign: 'center' }}>🎯</p>
-            <p>Assign a task or challenge.</p>
-          </div>
-          <div className="HowItWorksStep">
-            <h3>3. See Evo Evolve</h3>
-            <p style={{ fontSize: '2em', textAlign: 'center' }}>👀</p>
-            <p>Witness real-time learning and dynamic function adaptation.</p>
-          </div>
+        <div className="Workspace">
+          <h3>Workspace</h3>
+          <div className="File">File 1</div>
+          <div className="File">File 2</div>
+          {/* More files */}
         </div>
-      </section>
+        <img src="polywrap-logo.png" alt="Image Banner" className="ImageBanner" />
+        <footer className="Footer">
+          <FontAwesomeIcon icon={faCog} />
+          <FontAwesomeIcon icon={faTwitter} />
+          <FontAwesomeIcon icon={faDiscord} />
+          <FontAwesomeIcon icon={faGithub} />
+        </footer>
+      </div>
+      <div className="Chat">
+        <div className="Messages">
+          {messages.map((message, index) => (
+            <div key={index} className={`Message ${message.user}`}>
+              {message.text}
+            </div>
+          ))}
+        </div>
+        <div className="SendMessage">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type a message"
+          />
+          <button onClick={sendMessage}>Send</button>
+        </div>
+      </div>
     </div>
   );
 }
 
 export default App;
-
-
