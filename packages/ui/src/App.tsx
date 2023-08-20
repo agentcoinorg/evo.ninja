@@ -1,6 +1,21 @@
 import React from 'react';
 
+import { Evo, InMemoryWorkspace, Scripts, OpenAI, Chat } from "@evo-ninja/core";
+
 import './App.css';
+
+const workspace = new InMemoryWorkspace();
+const scripts = new Scripts(workspace, "./scripts");
+const llm = new OpenAI(
+  "foo",
+  "foo",
+  510102
+);
+const chat = new Chat(
+  workspace,
+  llm
+);
+const evo = new Evo(workspace, scripts, llm, chat);
 
 function App() {
   const scrollToFeatures = () => {

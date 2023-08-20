@@ -1,5 +1,4 @@
-import { AgentFunction } from "../../agent-function";
-import { WrapClient, searchScripts } from "../../../";
+import { AgentFunction, AgentContext } from "../../agent-function";
 
 export const findScript: AgentFunction = {
   definition: {
@@ -22,12 +21,13 @@ export const findScript: AgentFunction = {
     },
   },
   buildExecutor: (
-    globals: Record<string, string>,
-    client: WrapClient
+    context: AgentContext
   ) => {
     return async (options: { namespace: string, description: string }) => {
-      const candidates = searchScripts(`${options.namespace} ${options.description}`).slice(0, 5);
-  
+      const candidates = context.scripts.searchScripts(
+        `${options.namespace} ${options.description}`
+      ).slice(0, 5);
+
       if (candidates.length === 0) {
         return {
           ok: true,

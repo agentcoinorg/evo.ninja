@@ -1,5 +1,4 @@
-import { AgentFunction } from "../../agent-function";
-import { WrapClient } from "../../../wrap";
+import { AgentFunction, AgentContext } from "../../agent-function";
 
 export const readVar: AgentFunction = {
   definition: {
@@ -18,20 +17,19 @@ export const readVar: AgentFunction = {
     },
   },
   buildExecutor: (
-    globals: Record<string, string>,
-    client: WrapClient
+    context: AgentContext
   ) => {
     return async (options: { name: string }) => {
-      if (!globals[options.name]) {
+      if (!context.globals[options.name]) {
         return {
           ok: false,
           result: `Global variable {{${options.name}}} not found.`,
         };
       } 
-    
+
       return {
         ok: true,
-        result: globals[options.name],
+        result: context.globals[options.name],
       };
     };
   }

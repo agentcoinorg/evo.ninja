@@ -1,5 +1,4 @@
 import { LlmApi, LlmOptions, LlmResponse, Chat } from ".";
-import { env } from "../sys";
 
 import {
   ChatCompletionRequestMessage,
@@ -20,12 +19,17 @@ export class OpenAI implements LlmApi {
 
   constructor(
     private _apiKey: string,
-    private _defaultModel: string
+    private _defaultModel: string,
+    private _defaultMaxTokens: number
   ) {
     this._configuration = new Configuration({
     apiKey: this._apiKey
     });
     this._api = new OpenAIApi(this._configuration);
+  }
+
+  getMaxContextTokens() {
+    return this._defaultMaxTokens;
   }
 
   async getResponse(
@@ -37,7 +41,7 @@ export class OpenAI implements LlmApi {
       messages: chat.messages,
       functions: functionDefinitions,
       temperature: options ? options.temperature : 0,
-      max_tokens: options ? options.max_tokens : env().MAX_TOKENS_PER_RESPONSE
+      max_tokens: options ? options.max_tokens : this._defaultMaxTokens
     });
 
     if (completion.data.choices.length < 1) {

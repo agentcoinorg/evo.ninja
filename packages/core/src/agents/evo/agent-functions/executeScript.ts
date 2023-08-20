@@ -1,11 +1,9 @@
-import { AgentFunction } from "../../agent-function";
+import { AgentFunction, AgentContext } from "../../agent-function";
 import {
-  WrapClient,
   JsEngine_GlobalVar,
   JsEngine_Module,
   shimCode
 } from "../../../wrap";
-import { getScriptByName } from "../../../scripts";
 
 export const executeScript: AgentFunction = {
   definition: {
@@ -32,19 +30,11 @@ export const executeScript: AgentFunction = {
     },
   },
   buildExecutor: (
-    externGlobals: Record<string, string>,
-    client: WrapClient
+    context: AgentContext
   ) => {
     return async (options: { namespace: string, arguments: any, result: string }) => {
       try {
-        // if (!options.arguments) {
-        //   return {
-        //     ok: false,
-        //     error: `No arguments provided for script ${options.name}.`,
-        //   };
-        // }
-
-        const script = getScriptByName(options.namespace);
+        const script = context.scripts.getScriptByName(options.namespace);
 
         if (!script) {
           return {
@@ -67,7 +57,12 @@ export const executeScript: AgentFunction = {
             }
             for (const key of Object.keys(args)) {
               if (typeof args[key] === "string") {
-                args[key] = replaceVars(args[key], Object.keys(externGlobals).reduce((a, b) => ({ [b]: JSON.parse(externGlobals[b]), ...a}), {}));
+                args[key] = replaceVars(
+                  args[key],
+                  Object.keys(context.globals).reduce(
+                    (a, b) => ({ [b]: JSON.parse(context.globals[b]), ...a}), {}
+                  )
+                );
               }
             }
           }
@@ -79,7 +74,7 @@ export const executeScript: AgentFunction = {
         }
 
         const globals: JsEngine_GlobalVar[] =
-          Object.entries(args).concat(Object.entries(externGlobals))
+          Object.entries(args).concat(Object.entries(context.globals))
             .map((entry) => ({
               name: entry[0],
               value: JSON.stringify(entry[1]),
@@ -89,18 +84,19 @@ export const executeScript: AgentFunction = {
         const result = await JsEngine_Module.evalWithGlobals({
           src: shimCode(script.code),
           globals
-        }, client);
+        }, context.client);
 
-        if (result.ok && client.jsPromiseOutput.result) {
-          externGlobals[options.result] = JSON.stringify(client.jsPromiseOutput.result);
+        if (result.ok && context.client.jsPromiseOutput.result) {
+          context.globals[options.result] =
+            JSON.stringify(context.client.jsPromiseOutput.result);
         }
 
         return result.ok
           ? result.value.error == null
-            ? client.jsPromiseOutput.result
+            ? context.client.jsPromiseOutput.result
               ? {
                 ok: true,
-                result: JSON.stringify(client.jsPromiseOutput.result),
+                result: JSON.stringify(context.client.jsPromiseOutput.result),
               }
               : {
                 ok: false,

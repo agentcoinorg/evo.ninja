@@ -1,4 +1,4 @@
-import { InMemoryFS } from ".";
+import { InMemoryFS } from "./InMemoryFS";
 
 export class InMemoryWorkspace {
   private fs: InMemoryFS = new InMemoryFS();

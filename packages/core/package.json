@@ -2,12 +2,10 @@
   "name": "@evo-ninja/core",
   "version": "0.1.0",
   "license": "MIT",
-  "main": "build/index.js",
+  "main": "./build/index.js",
   "scripts": {
     "build": "rimraf build && tsc",
-    "codegen:js-engine": "polywrap codegen -m ./src/wrap/js-engine/polywrap.yaml --codegen-dir ./src/wrap/js-engine/types",
-    "test": "jest --passWithNoTests --runInBand --verbose --rootDir . --config ../../jest.config.js",
-    "test:script": "ts-node ./src/__tests__/runners/script-js.ts"
+    "codegen:js-engine": "polywrap codegen -m ./src/wrap/js-engine/polywrap.yaml --codegen-dir ./src/wrap/js-engine/types"
   },
   "dependencies": {
     "@dqbd/tiktoken": "~1.0.7",
@@ -16,11 +14,13 @@
     "axios": "^0.26.0",
     "figlet": "~1.6.0",
     "fuse.js": "^6.6.2",
-    "openai": "~3.3.0"
+    "openai": "~3.3.0",
+    "path-browserify": "1.0.1"
   },
   "devDependencies": {
     "@types/figlet": "~1.5.6",
     "@types/jest": "~29.5.0",
+    "@types/path-browserify": "1.0.0",
     "jest": "~29.5.0",
     "polywrap": "~0.11.0",
     "rimraf": "~5.0.1",

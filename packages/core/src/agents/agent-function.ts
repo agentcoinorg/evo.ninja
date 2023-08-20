@@ -9,34 +9,39 @@ import {
   OTHER_EXECUTE_FUNCTION_OUTPUT,
   READ_GLOBAL_VAR_OUTPUT
 } from "./prompts";
-import { Workspace } from "../sys/workspaces";
+import { Workspace, } from "../sys";
+import { Scripts } from "../Scripts";
 import { WrapClient } from "../wrap";
+import { LlmApi, Chat } from "../llm";
 import { trimText } from "./utils";
+
+export interface AgentContext {
+  globals: Record<string, string>;
+  client: WrapClient;
+  workspace: Workspace;
+  scripts: Scripts;
+  llm: LlmApi;
+  chat: Chat;
+}
 
 export interface AgentFunction {
   definition: any;
   buildExecutor: (
-    globals: Record<string, string>,
-    client: WrapClient,
-    workspace: Workspace
+    context: AgentContext
   ) => (options: any) => Promise<any>;
 }
 
 export type ExecuteAgentFunction = (
   name: string | undefined,
   args: string | undefined,
-  client: WrapClient,
-  globals: Record<string, any>,
-  workspace: Workspace,
+  context: AgentContext,
   agentFunctions: AgentFunction[],
 ) => Promise<Result<string, string>>;
 
 export const executeAgentFunction: ExecuteAgentFunction = async (
   name: string | undefined,
   args: string | undefined,
-  client: WrapClient,
-  globals: Record<string, any>,
-  workspace: Workspace,
+  context: AgentContext,
   agentFunctions: AgentFunction[],
 ): Promise<Result<string, string>> => {
   const result = processFunctionAndArgs(name, args, agentFunctions);
@@ -51,7 +56,7 @@ export const executeAgentFunction: ExecuteAgentFunction = async (
   const argsStr = JSON.stringify(fnArgs, null, 2);
   let functionCallSummary = `Function call: \`${fnName}(${argsStr})\`\n`;
 
-  const executor = func.buildExecutor(globals, client, workspace);
+  const executor = func.buildExecutor(context);
 
   const response = await executor(fnArgs);
 
