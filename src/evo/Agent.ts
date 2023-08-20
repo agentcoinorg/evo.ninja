@@ -7,7 +7,7 @@ import { Workspace } from "../workspaces";
 import { RunResult, StepOutput } from "..";
 import { LlmApi } from "../llm";
 import { loop } from "./loop";
-import { functions } from "./functions";
+import { agentFunctions } from "./agent-functions";
 
 export class Agent {
   public chat: Chat;
@@ -45,7 +45,7 @@ export class Agent {
         this.globals,
         this.workspace,
         executeAgentFunction,
-        functions
+        agentFunctions
       );
     } catch (err) {
       console.error(err);

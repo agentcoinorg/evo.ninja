@@ -29,7 +29,7 @@ export async function* loop(
 
     if (response.function_call) {
       const { name, arguments: args } = response.function_call;
-      const result = await executeAgentFunction(name, args, client, globals, workspace, functions);
+      const result = await executeAgentFunction(name, args, client, globals, workspace, agentFunctions);
 
       if (result.ok) {
         yield StepOutput.message(chat.temporary({ role: "system", name, content: result.value}));
