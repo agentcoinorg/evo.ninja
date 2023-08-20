@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
+
+import * as EvoNinja from "@evo-ninja/core";
+
 import './App.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTwitter, faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons';
@@ -6,11 +9,23 @@ import { faCog, faUpload } from '@fortawesome/free-solid-svg-icons';
 import Sidebar from './components/Sidebar/Sidebar'
 import Chat from './components/Chat/Chat'
 
-
 type Message = {
   text: string;
   user: string;
 };
+
+const workspace = new EvoNinja.InMemoryWorkspace();
+const scripts = new EvoNinja.Scripts(workspace, "./scripts");
+const llm = new EvoNinja.OpenAI(
+  "foo",
+  "foo",
+  510102
+);
+const chat = new EvoNinja.Chat(
+  workspace,
+  llm
+);
+const evo = new EvoNinja.Evo(workspace, scripts, llm, chat);
 
 function App() {
   // const [messages, setMessages] = useState<Message[]>([]);

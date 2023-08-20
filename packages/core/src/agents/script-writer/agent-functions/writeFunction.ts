@@ -1,6 +1,4 @@
-import { AgentFunction } from "../../agent-function";
-import { WrapClient } from "../../../wrap";
-import { Workspace } from "../../../sys/workspaces";
+import { AgentFunction, AgentContext } from "../../agent-function";
 
 export const writeFunction: AgentFunction = {
   definition: {
@@ -31,9 +29,7 @@ export const writeFunction: AgentFunction = {
     },
   },
   buildExecutor: (
-    globals: Record<string, string>,
-    client: WrapClient,
-    workspace: Workspace
+    context: AgentContext
   ) => {
     return async (options: { namespace: string, description: string, arguments: string, code: string }) => {
       if (options.namespace.startsWith("agent.")) {
@@ -43,8 +39,8 @@ export const writeFunction: AgentFunction = {
         }
       }
 
-      workspace.writeFileSync("index.ts", options.code);
-  
+      context.workspace.writeFileSync("index.js", options.code);
+
       return {
         ok: true,
         result: `Wrote the function ${options.namespace} to the workspace.`,

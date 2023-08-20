@@ -2,37 +2,36 @@ import { loop } from "./loop";
 import { agentFunctions } from "./agent-functions";
 import { RunResult, StepOutput, Agent } from "../agent";
 import { executeAgentFunction } from "../agent-function";
-import { LlmApi, OpenAI, Chat } from "../../llm";
+import { ScriptWriter } from "../script-writer";
+import { LlmApi, Chat } from "../../llm";
 import { WrapClient } from "../../wrap";
-import { Workspace, env } from "../../sys";
+import { Scripts } from "../../Scripts";
+import { InMemoryWorkspace, Workspace } from "../../sys";
 
 export class Evo implements Agent {
-  public chat: Chat;
-  private llm: LlmApi;
-
   private client: WrapClient;
   private globals: Record<string, any> = {};
 
-  constructor(private readonly workspace: Workspace) {
-    this.llm = new OpenAI(
-      env().OPENAI_API_KEY,
-      env().GPT_MODEL
-    );
-  
-    this.chat = new Chat(
-      env().CONTEXT_WINDOW_TOKENS,
-      this.workspace,
-      this.llm as OpenAI
-    );
-  
+  constructor(
+    private readonly workspace: Workspace,
+    private readonly scripts: Scripts,
+    private readonly llm: LlmApi,
+    private readonly chat: Chat
+  ) {
     this.client = new WrapClient(
       this.workspace,
     );
-  
+
     this.globals = {};
   }
 
   public async* run(goal: string): AsyncGenerator<StepOutput, RunResult, string | undefined> {
+    const createScriptWriter = (): ScriptWriter => {
+      const workspace = new InMemoryWorkspace();
+      const chat = new Chat(workspace, this.llm);
+      return new ScriptWriter(workspace, this.scripts, this.llm, chat);
+    };
+
     try {
       return yield* loop(
         goal,
@@ -41,8 +40,9 @@ export class Evo implements Agent {
         this.client,
         this.globals,
         this.workspace,
+        this.scripts,
         executeAgentFunction,
-        agentFunctions
+        agentFunctions(createScriptWriter)
       );
     } catch (err) {
       console.error(err);

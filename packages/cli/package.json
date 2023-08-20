@@ -5,7 +5,9 @@
   "main": "build/index.js",
   "scripts": {
     "start": "ts-node src/cli.ts",
-    "build": "rimraf build && tsc"
+    "build": "rimraf build && tsc",
+    "test": "jest --passWithNoTests --runInBand --verbose --rootDir . --config ../../jest.config.js",
+    "test:script": "ts-node ./src/__tests__/runners/script-js.ts"
   },
   "dependencies": {
     "@dqbd/tiktoken": "~1.0.7",

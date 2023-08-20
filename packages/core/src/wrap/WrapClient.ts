@@ -5,7 +5,6 @@ import {
   InvokeResult
 } from "@polywrap/client-js";
 import { PluginPackage } from "@polywrap/plugin-js";
-import fs from "fs";
 import axios from "axios";
 
 import chalk from "chalk";
@@ -45,7 +44,6 @@ export class WrapClient extends PolywrapClient {
         },
         "appendFileSync": async (args: any) => {
           console.log(chalk.yellow("FS.APPEND = " + args.path));
-          fs.appendFileSync(args.path, args.data.toString());
           workspace.appendFileSync(args.path, args.data.toString());
           return true;
         },

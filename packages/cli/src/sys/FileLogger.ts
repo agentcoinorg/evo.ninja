@@ -1,8 +1,7 @@
-import { ILogger } from "./";
-import { Message } from "../../llm";
+import { ILogger, Message } from "@evo-ninja/core";
 
 import fs from "fs";
-import path from "path";
+import path from "path-browserify";
 
 export class FileLogger implements ILogger {
   constructor(

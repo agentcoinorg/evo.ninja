@@ -3,10 +3,13 @@ import { executeScript } from "./executeScript";
 import { findScript } from "./findScript";
 import { readVar } from "./readVar";
 import { AgentFunction } from "../../agent-function";
+import { ScriptWriter } from "../../script-writer";
 
-export const agentFunctions: AgentFunction[] = [
-  createScript,
-  executeScript,
-  findScript,
-  readVar,
-];
+export function agentFunctions(createScriptWriter: () => ScriptWriter): AgentFunction[] {
+  return [
+    createScript(createScriptWriter),
+    executeScript,
+    findScript,
+    readVar,
+  ];
+}
