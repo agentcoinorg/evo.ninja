@@ -1,5 +1,5 @@
 import { ScriptWriter } from "../../script-writer";
-import { AgentFunction } from "../../../agent-function";
+import { AgentFunction } from "../../agent-function";
 import { WrapClient } from "../../../wrap";
 import { addScript } from "../../../scripts";
 import { InMemoryWorkspace } from "../../../workspaces";

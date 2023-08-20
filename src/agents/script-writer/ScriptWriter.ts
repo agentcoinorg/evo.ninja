@@ -1,13 +1,13 @@
 import { loop } from "./loop";
 import { agentFunctions } from "./agent-functions";
-import { RunResult, StepOutput, Agent } from "../types";
+import { RunResult, StepOutput, Agent } from "../agent";
+import { executeAgentFunction } from "../agent-function";
 import { Chat } from "../../chat";
 import { OpenAI } from "../../openai";
 import { WrapClient } from "../../wrap";
 import { LlmApi } from "../../llm";
 import { Workspace } from "../../workspaces";
 import { env } from "../../env";
-import { executeAgentFunction } from "../../agent-function";
 
 export class ScriptWriter implements Agent {
   public chat: Chat;

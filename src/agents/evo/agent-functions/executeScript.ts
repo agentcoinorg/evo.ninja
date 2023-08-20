@@ -1,6 +1,6 @@
+import { AgentFunction } from "../../agent-function";
 import { functionCodeWrapper, nodeShims } from "../../../boilerplate";
 import { WrapClient } from "../../../wrap";
-import { AgentFunction } from "../../../agent-function";
 import { JS_ENGINE_URI } from "../../../constants";
 import { getScriptByName } from "../../../scripts";
 

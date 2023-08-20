@@ -1,6 +1,6 @@
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
-import { Workspace } from "./workspaces";
-import { WrapClient } from "./wrap";
+import { Workspace } from "../workspaces";
+import { WrapClient } from "../wrap";
 import {
   FUNCTION_NOT_FOUND,
   UNDEFINED_FUNCTION_ARGS,
@@ -10,8 +10,8 @@ import {
   EXECUTE_SCRIPT_OUTPUT,
   OTHER_EXECUTE_FUNCTION_OUTPUT,
   READ_GLOBAL_VAR_OUTPUT
-} from "./prompts";
-import { trimText } from "./utils";
+} from "../prompts";
+import { trimText } from "../utils";
 
 export interface AgentFunction {
   definition: any;
