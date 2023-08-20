@@ -1,4 +1,4 @@
-name: cd-site
+name: cd-ui
 
 on:
   push:
