@@ -1,8 +1,8 @@
-import { AgentFunction } from "../../functions";
+import { AgentFunction } from "../../agent-function";
 import { think } from "./think";
 import { writeFunction } from "./writeFunction";
 
-export const functions: AgentFunction[] = [
+export const agentFunctions: AgentFunction[] = [
   writeFunction,
   think,
 ];

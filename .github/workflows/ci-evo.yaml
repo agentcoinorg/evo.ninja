@@ -1,0 +1,29 @@
+name: ci-site
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**"
+  pull_request:
+    paths:
+      - "src/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js 18.15
+      uses: actions/setup-node@v1
+      with:
+        node-version: 18.15
+
+    - name: Install dependencies
+      run: yarn
+
+    - name: Build
+      run: yarn build

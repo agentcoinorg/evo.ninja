@@ -3,7 +3,7 @@ export * from './cli';
 export * from './constants';
 export * from './env';
 export * from './evo';
-export * from './functions';
+export * from './agent-function';
 export * from './llm';
 export * from './openai';
 export * from './scripts';
