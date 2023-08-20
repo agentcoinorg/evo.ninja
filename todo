@@ -1,0 +1,40 @@
+- logger
+  - markdown
+- dogo app
+  - logger->html
+- math + algo use-cases
+- web scraping use-case
+- benchmarks
+- add wrap scripts
+- add script metadata to file?
+
+`evo "prompt"`
+`evo -a script-writer -p "prompt"`
+`evo -a script-finder -p "prompt"`
+
+```typescript
+import { Agents } from "evo-ninja";
+
+const evo = new Agents.Evo(
+  ...
+);
+
+evo.run(...);
+
+const writer = Agents.ScriptWriter(...);
+```
+
+```typescript
+import { createEvo, runEvo } from "evo-ninja";
+
+createEvo()
+
+runEvo()
+```
+
+# thoughts
+- run evos in parallel
+  - `evo "propt 1" "propt 2"`
+  - run agents like docker containers
+  - dev console shows what the state of each agent is
+- search wraps + execute wraps
