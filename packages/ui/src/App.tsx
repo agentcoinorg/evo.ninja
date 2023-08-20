@@ -14,18 +14,6 @@ type Message = {
   user: string;
 };
 
-const workspace = new EvoNinja.InMemoryWorkspace();
-const scripts = new EvoNinja.Scripts(workspace, "./scripts");
-const llm = new EvoNinja.OpenAI(
-  "foo",
-  "foo",
-  510102
-);
-const chat = new EvoNinja.Chat(
-  workspace,
-  llm
-);
-const evo = new EvoNinja.Evo(workspace, scripts, llm, chat);
 
 function App() {
   // const [messages, setMessages] = useState<Message[]>([]);
