@@ -1,4 +1,4 @@
-import { AgentFunction } from "../../functions";
+import { AgentFunction } from "../../agent-function";
 import { WrapClient } from "../../wrap";
 
 export const think: AgentFunction = {
@@ -25,7 +25,7 @@ export const think: AgentFunction = {
       return { 
         ok: true,
         result: `I think: ${options.thoughts}.`,
-      };  
+      };
     };
   }
 };

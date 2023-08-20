@@ -1,27 +1,45 @@
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
-import { Workspace } from "../workspaces";
-import { WrapClient } from "../wrap";
-import { AgentFunction } from ".";
-import { trimText, FUNCTION_NOT_FOUND, UNDEFINED_FUNCTION_ARGS, UNDEFINED_FUNCTION_NAME, UNPARSABLE_FUNCTION_ARGS, FUNCTION_CALL_FAILED, EXECUTE_SCRIPT_OUTPUT, OTHER_EXECUTE_FUNCTION_OUTPUT, READ_GLOBAL_VAR_OUTPUT } from "..";
+import { Workspace } from "./workspaces";
+import { WrapClient } from "./wrap";
+import {
+  FUNCTION_NOT_FOUND,
+  UNDEFINED_FUNCTION_ARGS,
+  UNDEFINED_FUNCTION_NAME,
+  UNPARSABLE_FUNCTION_ARGS,
+  FUNCTION_CALL_FAILED,
+  EXECUTE_SCRIPT_OUTPUT,
+  OTHER_EXECUTE_FUNCTION_OUTPUT,
+  READ_GLOBAL_VAR_OUTPUT
+} from "./prompts";
+import { trimText } from "./utils";
 
-export type ExecuteFunc = (
+export interface AgentFunction {
+  definition: any;
+  buildExecutor: (
+    globals: Record<string, string>,
+    client: WrapClient,
+    workspace: Workspace
+  ) => (options: any) => Promise<any>;
+}
+
+export type ExecuteAgentFunction = (
   name: string | undefined,
   args: string | undefined,
   client: WrapClient,
   globals: Record<string, any>,
   workspace: Workspace,
-  functions: AgentFunction[],
+  agentFunctions: AgentFunction[],
 ) => Promise<Result<string, string>>;
 
-export const executeFunc: ExecuteFunc = async (
+export const executeAgentFunction: ExecuteAgentFunction = async (
   name: string | undefined,
   args: string | undefined,
   client: WrapClient,
   globals: Record<string, any>,
   workspace: Workspace,
-  functions: AgentFunction[],
+  agentFunctions: AgentFunction[],
 ): Promise<Result<string, string>> => {
-  const result = processFunctionAndArgs(name, args, functions);
+  const result = processFunctionAndArgs(name, args, agentFunctions);
 
   if (!result.ok) {
     return ResultErr(result.error);
@@ -32,7 +50,7 @@ export const executeFunc: ExecuteFunc = async (
 
   const argsStr = JSON.stringify(fnArgs, null, 2);
   let functionCallSummary = `Function call: \`${fnName}(${argsStr})\`\n`;
-  
+
   const executor = func.buildExecutor(globals, client, workspace);
 
   const response = await executor(fnArgs);
@@ -56,13 +74,13 @@ export const executeFunc: ExecuteFunc = async (
 function processFunctionAndArgs(
   name: string | undefined,
   args: string | undefined,
-  functions: AgentFunction[],
+  agentFunctions: AgentFunction[],
 ): Result<[any, AgentFunction], string> {
   if (!name) {
     return ResultErr(UNDEFINED_FUNCTION_NAME);
   }
 
-  const func = functions.find((f) => f.definition.name === name);
+  const func = agentFunctions.find((f) => f.definition.name === name);
   if (!func) {
     return ResultErr(FUNCTION_NOT_FOUND(name));
   }

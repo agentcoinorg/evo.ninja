@@ -1,7 +1,10 @@
 import { Chat } from "../chat";
 import { OpenAI } from "../openai";
 import { WrapClient } from "../wrap";
-import { RunResult, StepOutput, Workspace, env, executeFunc } from "..";
+import { executeAgentFunction } from "../agent-function";
+import { env } from "../env";
+import { Workspace } from "../workspaces";
+import { RunResult, StepOutput } from "..";
 import { LlmApi } from "../llm";
 import { loop } from "./loop";
 import { functions } from "./functions";
@@ -34,7 +37,16 @@ export class Agent {
 
   public async* run(goal: string): AsyncGenerator<StepOutput, RunResult, string | undefined> {
     try {
-      return yield* loop(goal, this.llm, this.chat, this.client, this.globals, this.workspace, executeFunc, functions);
+      return yield* loop(
+        goal,
+        this.llm,
+        this.chat,
+        this.client,
+        this.globals,
+        this.workspace,
+        executeAgentFunction,
+        functions
+      );
     } catch (err) {
       console.error(err);
       return RunResult.error("Unrecoverable error encountered.");

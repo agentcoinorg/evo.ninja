@@ -1,4 +1,6 @@
-import { AgentFunction, WrapClient, functionCodeWrapper, nodeShims } from "../..";
+import { functionCodeWrapper, nodeShims } from "../../boilerplate";
+import { WrapClient } from "../../wrap";
+import { AgentFunction } from "../../agent-function";
 import { JS_ENGINE_URI } from "../../constants";
 import { getScriptByName } from "../../scripts";
 
@@ -38,9 +40,9 @@ export const executeScript: AgentFunction = {
         //     error: `No arguments provided for script ${options.name}.`,
         //   };
         // }
-      
+
         const script = getScriptByName(options.namespace);
-  
+
         if (!script) {
           return {
             ok: false,
@@ -81,7 +83,7 @@ export const executeScript: AgentFunction = {
             value: JSON.stringify(args[key]),
           })).concat(Object.keys(globals).map((key) => ({ name: key, value: globals[key]}))),
         };
-  
+
         const result = await client.invoke<{value: string | undefined, error: string | undefined}>({ 
           uri: JS_ENGINE_URI,
           method: "evalWithGlobals",

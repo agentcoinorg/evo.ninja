@@ -5,8 +5,8 @@ import { RunResult, StepOutput, loop } from ".";
 import { LlmApi } from "../llm";
 import { Workspace } from "../workspaces";
 import { env } from "../env";
-import { executeFunc } from "../functions";
-import { functions } from "./functions";
+import { executeAgentFunction } from "../agent-function";
+import { agentFunctions } from "./agent-functions";
 
 export class Agent {
   public chat: Chat;
@@ -51,8 +51,8 @@ export class Agent {
         this.client, 
         this.globals,
         this.workspace,
-        executeFunc,
-        functions
+        executeAgentFunction,
+        agentFunctions
       );
     } catch (err) {
       console.error(err);

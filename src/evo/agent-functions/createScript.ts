@@ -1,4 +1,4 @@
-import { AgentFunction } from "../../functions";
+import { AgentFunction } from "../../agent-function";
 import { WrapClient } from "../../wrap";
 import { addScript } from "../../scripts";
 import { InMemoryWorkspace } from "../../workspaces";

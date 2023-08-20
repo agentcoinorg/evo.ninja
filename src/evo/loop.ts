@@ -1,7 +1,7 @@
 import { Chat } from "../chat";
 import { RunResult, StepOutput, GOAL_PROMPT, INITIAL_PROMP, LOOP_PREVENTION_PROMPT } from ".";
 import { LlmApi, LlmResponse } from "../llm";
-import { AgentFunction, ExecuteFunc } from "../functions";
+import { AgentFunction, ExecuteAgentFunction } from "../agent-function";
 import { Workspace } from "../workspaces";
 import { WrapClient } from "../wrap";
 
@@ -12,8 +12,8 @@ export async function* loop(
   client: WrapClient, 
   globals: Record<string, any>,
   workspace: Workspace,
-  executeFunc: ExecuteFunc,
-  functions: AgentFunction[],
+  executeAgentFunction: ExecuteAgentFunction,
+  agentFunctions: AgentFunction[],
 ): AsyncGenerator<StepOutput, RunResult, string | undefined> {
   chat.persistent("system", INITIAL_PROMP);
   chat.persistent("system", GOAL_PROMPT(goal));
@@ -21,7 +21,7 @@ export async function* loop(
   while (true) {
     await chat.fitToContextWindow();
 
-    const response = await llm.getResponse(chat, functions.map(f => f.definition));
+    const response = await llm.getResponse(chat, agentFunctions.map(f => f.definition));
 
     if (!response) {
       return RunResult.error("No response from LLM.");
@@ -29,8 +29,8 @@ export async function* loop(
 
     if (response.function_call) {
       const { name, arguments: args } = response.function_call;
-      const result = await executeFunc(name, args, client, globals, workspace, functions);
-      
+      const result = await executeAgentFunction(name, args, client, globals, workspace, functions);
+
       if (result.ok) {
         yield StepOutput.message(chat.temporary({ role: "system", name, content: result.value}));
       }
