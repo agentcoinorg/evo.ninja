@@ -8,13 +8,9 @@ import { PluginPackage } from "@polywrap/plugin-js";
 import fs from "fs";
 import axios from "axios";
 
-import readline from "readline";
 import chalk from "chalk";
 import { Workspace } from "..";
 import { InvokerOptions } from "@polywrap/client-js/build/types";
-
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-const prompt = (query: string) => new Promise<string>((resolve) => rl.question(query, resolve));
 
 export class WrapClient extends PolywrapClient {
 

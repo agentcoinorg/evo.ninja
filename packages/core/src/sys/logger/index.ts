@@ -2,15 +2,8 @@ import { ConsoleLogger } from "./console";
 import { FileLogger } from "./file";
 import { Message } from "../../llm";
 
-import chalk from "chalk";
 import figlet from "figlet";
 import clui from "clui";
-import * as read from "readline";
-
-const readline = read.promises.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
 
 export interface ILogger {
   info: (info: string) => void;
@@ -91,19 +84,6 @@ export class Logger implements ILogger {
     }
 
     this._loggers.forEach((l) => l.error(`${msg}${errorStr}`));
-  }
-
-  async question(query: string): Promise<string> {
-    this._fileLogger.info(`**System**: ${query}\n`);
-    const response = await readline.question(chalk.cyan(query));
-    this._fileLogger.info(`**User**: ${response}\n`);
-    return response;
-  }
-
-  async prompt(query: string): Promise<string> {
-    const response = await readline.question(chalk.cyan(query));
-    this._fileLogger.info(`**User**: ${response}\n`);
-    return response;
   }
 
   logHeader() {

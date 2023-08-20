@@ -5,6 +5,7 @@
     "./packages/**"
   ],
   "scripts": {
+    "start": "yarn workspace evo-ninja run start",
     "build": "yarn build:core && yarn build:cli && yarn build:ui",
     "build:core": "yarn workspace @evo-ninja/core run build",
     "build:cli": "yarn workspace evo-ninja run build",
