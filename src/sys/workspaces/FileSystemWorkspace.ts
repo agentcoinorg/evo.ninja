@@ -3,7 +3,7 @@ import path from "path";
 
 export class FileSystemWorkspace {
   constructor(
-    private _workspacePath: string = path.join(__dirname, "../../workspace")
+    private _workspacePath: string
   ) {
     // Fully resolve the workspace path
     this._workspacePath = path.resolve(

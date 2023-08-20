@@ -7,6 +7,7 @@ import {
 } from "../../wrap";
 import { FileSystemWorkspace } from "../../sys/workspaces";
 import fs from "fs";
+import path from "path";
 
 export async function runScriptJs(
   scriptName: string,
@@ -39,7 +40,9 @@ export async function runScriptJs(
     }
   }
 
-  const client = new WrapClient(new FileSystemWorkspace());
+  const client = new WrapClient(new FileSystemWorkspace(
+    path.join(__dirname, "../../../workspace")
+  ));
 
   const result = await JsEngine_Module.evalWithGlobals({
     src: shimCode(script.code),
