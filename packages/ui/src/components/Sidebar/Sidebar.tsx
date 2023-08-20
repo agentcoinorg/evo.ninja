@@ -24,6 +24,7 @@ const Sidebar = () => {
           <FontAwesomeIcon icon={faUpload} /> Upload files
         </button>
       </div>
+      <span className="BuiltWithLove">Built with love by</span>
       <img src="polywrap-logo.png" alt="Image Banner" className="ImageBanner" />
       <footer className="Footer">
         <FontAwesomeIcon icon={faCog} />

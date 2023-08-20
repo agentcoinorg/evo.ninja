@@ -15,17 +15,18 @@ html {
 
 .UploadButton {
   float: right;
-  background-color: #4caf50; /* or any color you like */
+  background-color: #ff4f4f; /* or any color you like */
   border: none;
   color: white;
   padding: 10px 20px;
   text-align: center;
   font-size: 16px;
   cursor: pointer;
+  border-radius: 20px;
 }
 
 .UploadButton:hover {
-  background-color: #45a049; /* or any color you like for hover */
+  background-color: #bf3636; /* or any color you like for hover */
 }
 
 .ImageBanner {
@@ -49,8 +50,9 @@ html {
 
 .Message {
   padding: 10px;
+  padding-left: 15px;
   margin: 5px;
-  border-radius: 5px;
+  border-radius: 25px;
 }
 
 .Message.user {
@@ -81,6 +83,18 @@ html {
   cursor: pointer;
 }
 
+.Chat__Input {
+  flex: 1;
+  padding: 10px;
+  margin-right: 10px;
+  /* font-size: 29px; Adjust this value as needed */
+}
+
+
+.Chat__Container input {
+  font-size: 25px; /* Adjust this value to set the font size */
+}
+
 .Scripts,
 .Workspace {
   background-color: white; /* Add background color */
@@ -93,8 +107,11 @@ html {
 
 .File,
 .Script {
-  border-radius: 5px; /* Rounded corners for files and scripts */
-  padding: 5px; /* Padding inside the files and scripts */
+  border-radius: 20px; /* Rounded corners for files and scripts */
+  padding: 5px; 
+  padding-left: 15px;
   margin: 5px 0; /* Margin around the files and scripts */
-  background-color: #f3f3f3; /* Background color */
+  padding-left: 15px;
+  padding-right: 15px;
+  background-color: #da3232; /* Background color */
 }
