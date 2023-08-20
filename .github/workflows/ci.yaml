@@ -1,14 +1,14 @@
-name: ci-site
+name: ci
 
 on:
   push:
     branches:
       - main
     paths:
-      - "site/**"
+      - "packages/**"
   pull_request:
     paths:
-      - "site/**"
+      - "packages/**"
 
 jobs:
   build:
@@ -23,9 +23,7 @@ jobs:
         node-version: 18.15
 
     - name: Install dependencies
-      working-directory: ./site
       run: yarn
 
     - name: Build
-      working-directory: ./site
-      run: yarn build && mv CNAME ./build
+      run: yarn build
