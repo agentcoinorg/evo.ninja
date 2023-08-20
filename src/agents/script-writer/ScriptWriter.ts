@@ -2,9 +2,8 @@ import { loop } from "./loop";
 import { agentFunctions } from "./agent-functions";
 import { RunResult, StepOutput, Agent } from "../agent";
 import { executeAgentFunction } from "../agent-function";
-import { Chat } from "../../chat";
 import { WrapClient } from "../../wrap";
-import { LlmApi, OpenAI } from "../../llm";
+import { LlmApi, OpenAI, Chat } from "../../llm";
 import { Workspace, env } from "../../sys";
 
 export class ScriptWriter implements Agent {

@@ -1,4 +1,4 @@
-import { Chat } from "../chat";
+import { Chat } from ".";
 
 export declare const LlmRoles: {
   readonly System: "system";

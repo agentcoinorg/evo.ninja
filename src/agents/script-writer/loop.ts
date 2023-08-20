@@ -1,8 +1,7 @@
 import { GOAL_PROMPT, INITIAL_PROMP, LOOP_PREVENTION_PROMPT } from "./prompts";
 import { RunResult, StepOutput } from "../agent";
 import { AgentFunction, ExecuteAgentFunction } from "../agent-function";
-import { Chat } from "../../chat";
-import { LlmApi, LlmResponse } from "../../llm";
+import { LlmApi, LlmResponse, Chat } from "../../llm";
 import { WrapClient } from "../../wrap";
 import { Workspace } from "../../sys";
 

@@ -1,5 +1,5 @@
-import { LlmApi } from "./llm";
-import { Workspace } from "./sys";
+import { LlmApi } from ".";
+import { Workspace } from "../sys";
 
 import {
   ChatCompletionRequestMessageRoleEnum,
