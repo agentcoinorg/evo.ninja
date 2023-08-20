@@ -1,4 +1,4 @@
-import { trimText } from "..";
+import { trimText } from "./utils";
 
 export const UNDEFINED_FUNCTION_NAME =
   "Function call name was undefined.";

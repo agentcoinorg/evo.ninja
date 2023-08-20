@@ -1,3 +1,7 @@
+import { LlmApi, LlmOptions, LlmResponse } from ".";
+import { Chat } from "../chat";
+import { env } from "../sys";
+
 import {
   ChatCompletionRequestMessage,
   ChatCompletionResponseMessage,
@@ -5,9 +9,7 @@ import {
   Configuration,
   OpenAIApi
 } from "openai";
-import { Chat } from "./chat";
-import { env } from ".";
-import { LlmApi, LlmResponse } from "./llm";
+
 export {
   ChatCompletionResponseMessage as OpenAIResponse,
   ChatCompletionRequestMessageFunctionCall as OpenAIFunctionCall
@@ -27,24 +29,28 @@ export class OpenAI implements LlmApi {
     this._api = new OpenAIApi(this._configuration);
   }
 
-  async getResponse(chat: Chat, functionDefinitions: any[]): Promise<LlmResponse | undefined> {
+  async getResponse(
+    chat: Chat,
+    functionDefinitions: any[],
+    options?: LlmOptions
+  ): Promise<LlmResponse | undefined> {
     const completion = await this.createChatCompletion({
-    messages: chat.messages,
-    functions: functionDefinitions,
-    temperature: 0,
-    max_tokens: env().MAX_TOKENS_PER_RESPONSE
+      messages: chat.messages,
+      functions: functionDefinitions,
+      temperature: options ? options.temperature : 0,
+      max_tokens: options ? options.max_tokens : env().MAX_TOKENS_PER_RESPONSE
     });
 
     if (completion.data.choices.length < 1) {
-    throw Error("Chat completion choices length was 0...");
+      throw Error("Chat completion choices length was 0...");
     }
 
     const choice = completion.data.choices[0];
 
     if (!choice.message) {
-    throw Error(
+      throw Error(
         `Chat completion message was undefined: ${JSON.stringify(choice, null, 2)}`
-    );
+      );
     }
 
     return choice.message;
@@ -54,9 +60,7 @@ export class OpenAI implements LlmApi {
     messages: ChatCompletionRequestMessage[];
     model?: string;
     functions?: any;
-    temperature?: number
-    max_tokens?: number
-  }) {
+  } & LlmOptions) {
     return this._api.createChatCompletion({
       messages: options.messages,
       model: options.model || this._defaultModel,
@@ -65,6 +69,5 @@ export class OpenAI implements LlmApi {
       temperature: options.temperature || 0,
       max_tokens: options.max_tokens
     });
-  } 
+  }
 }
-  

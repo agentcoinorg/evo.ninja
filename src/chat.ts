@@ -1,9 +1,11 @@
+import { LlmApi } from "./llm";
+import { Workspace } from "./sys";
+
 import {
   ChatCompletionRequestMessageRoleEnum,
   ChatCompletionRequestMessage as Message
 } from "openai";
 import { get_encoding } from "@dqbd/tiktoken";
-import { OpenAI, Workspace } from ".";
 
 const gpt2 = get_encoding("gpt2");
 
@@ -35,7 +37,7 @@ export class Chat {
   constructor(
     private _contextWindowTokens: number,
     private _workspace: Workspace,
-    private _openai: OpenAI,
+    private _llm: LlmApi,
     private _msgsFile: string = ".msgs",
   ) {
     // Summary size should be ~10% of total tokens
@@ -217,22 +219,25 @@ export class Chat {
       }
 
       // Summarize
-      const response = await this._openai.createChatCompletion({
-        messages: toSummarize,
-        temperature: 0,
-        max_tokens: this._summaryTokens
-      });
-
-      const message = response.data.choices[0].message!;
+      const message = await this._llm.getResponse(
+        this,
+        [],
+        {
+          temperature: 0,
+          max_tokens: this._summaryTokens
+        }
+      );
 
       // Remove messages from the queue
       queue = queue.splice(index);
 
       // Add the new message to the queue
-      queue = [
-        message,
-        ...queue
-      ];
+      if (message) {
+        queue = [
+          message,
+          ...queue
+        ];
+      }
     }
 
     if (queue.length > 0) {

@@ -11,7 +11,7 @@ import {
 } from "./prompts";
 import { Workspace } from "../sys/workspaces";
 import { WrapClient } from "../wrap";
-import { trimText } from "../utils";
+import { trimText } from "./utils";
 
 export interface AgentFunction {
   definition: any;
