@@ -24,6 +24,27 @@ body, html {
   overflow: auto; /* In case the content overflows */
 }
 
+
+.UploadButton {
+  float: right;
+  background-color: #4CAF50; /* or any color you like */
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.UploadButton:hover {
+  background-color: #45a049; /* or any color you like for hover */
+}
+
+.ImageBanner {
+  width: 15vw; /* 15% of the viewport width */
+}
+
+
 .Chat {
   width: 80%;
   background-color: #1c1c1c;

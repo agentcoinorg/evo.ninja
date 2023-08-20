@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import './App.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTwitter, faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons';
-import { faCog } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faUpload } from '@fortawesome/free-solid-svg-icons';
+
 
 type Message = {
   text: string;
@@ -45,6 +46,10 @@ function App() {
           <div className="File">File 1</div>
           <div className="File">File 2</div>
           {/* More files */}
+
+          <button className="UploadButton" title="Upload files">
+            <FontAwesomeIcon icon={faUpload} /> Upload files
+          </button>
         </div>
         <img src="polywrap-logo.png" alt="Image Banner" className="ImageBanner" />
         <footer className="Footer">
