@@ -1,33 +1,21 @@
-body, html {
+body,
+html {
   margin: 0;
   height: 100%;
 }
-
 #root {
   height: 100%;
 }
 
 .App {
   display: flex;
-  background-color: black;
+  background-color: #333232;
   height: 100%; /* Add this to take full height */
 }
-
-.Sidebar {
-  width: 20%;
-  background-color: gray;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 100%; /* Add this to take full height */
-  overflow: auto; /* In case the content overflows */
-}
-
 
 .UploadButton {
   float: right;
-  background-color: #4CAF50; /* or any color you like */
+  background-color: #4caf50; /* or any color you like */
   border: none;
   color: white;
   padding: 10px 20px;
@@ -44,7 +32,6 @@ body, html {
   width: 15vw; /* 15% of the viewport width */
 }
 
-
 .Chat {
   width: 80%;
   background-color: #1c1c1c;
@@ -59,7 +46,6 @@ body, html {
   overflow: scroll;
   flex: 1; /* Add this to take remaining height */
 }
-
 
 .Message {
   padding: 10px;
@@ -88,15 +74,15 @@ body, html {
 }
 
 .SendMessage button {
-  background-color: #FF5151;
+  background-color: #ff5151;
   color: white;
   border: none;
   padding: 10px;
   cursor: pointer;
 }
 
-
-.Scripts, .Workspace {
+.Scripts,
+.Workspace {
   background-color: white; /* Add background color */
   border-radius: 10px; /* Rounded corners */
   padding: 10px; /* Padding inside the card */
@@ -105,7 +91,8 @@ body, html {
   width: 80%; /* Width of the card */
 }
 
-.File, .Script {
+.File,
+.Script {
   border-radius: 5px; /* Rounded corners for files and scripts */
   padding: 5px; /* Padding inside the files and scripts */
   margin: 5px 0; /* Margin around the files and scripts */
