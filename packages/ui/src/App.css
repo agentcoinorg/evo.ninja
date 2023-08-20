@@ -1,219 +1,100 @@
+body,
+html {
+  margin: 0;
+  height: 100%;
+}
+#root {
+  height: 100%;
+}
+
 .App {
-  text-align: center;
-  color: #FFFFFF;
-  background-color: #00000078;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  min-height: 100vh;
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: #FFFFFF;
+  background-color: #333232;
+  height: 100%; /* Add this to take full height */
 }
 
-.Header-Links {
-  position: absolute;
-  display: flex;
-  top: 0;
-  right: 0;
-  height: 60px;
-  margin-right: 50px;
-}
-
-.Header-Links a {
-  margin: 10px;
-  margin-top: 20px;
-  display: inherit;
-}
-
-.Header-Links a:hover {
-  filter: contrast(0.5)
-}
-
-.App-link {
-  color: #FFFFFF;
-}
-
-.App button {
-  padding: 10px 20px;
-  font-size: 1em;
-  color: #FFFFFF;
-  background-color: #181818b8;
+.UploadButton {
+  float: right;
+  background-color: #4caf50; /* or any color you like */
   border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.App button:hover {
-  background-color: #252525;
-}
-
-.FeaturesSection {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: #00000098;
-}
-
-.Features {
-  display: flex;
-  justify-content: space-between;
-  padding: 20px;
-  color: #FFFFFF;
-  align-items: stretch;
-  justify-content: center;
-  max-width: 75vw;
-}
-
-.Feature {
-  max-width: 200px;
-}
-
-.Features .Feature {
-  flex: 1;
-  margin: 10px;
-  padding: 10px;
-  border-radius: 5px;
-  background-color: #181818;
-  height: auto; /* Height grows to the text inside */
-}
-
-.Features h3 {
-  font-size: 1.5em;
-  margin-bottom: 10px;
-  font-weight: bolder;
-}
-
-.Features p {
-  font-size: 1em;
-  font-weight: bold;
-}
-
-.HowItWorksSection {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.HowItWorks {
-  display: flex;
-  justify-content: space-between;
-  padding: 20px;
-  background-color: #00000000;
-  color: #FFFFFF;
-  align-items: stretch;
-  justify-content: center;
-  max-width: 75vw;
-}
-
-.HowItWorksStep {
-  max-width: 200px;
-}
-
-.HowItWorks .HowItWorksStep {
-  flex: 1;
-  margin: 10px;
-  padding: 10px;
-  border-radius: 5px;
-  background-color: #252525;
-  height: auto; /* Height grows to the text inside */
-}
-
-.HowItWorks h2 {
-  font-size: 1.5em;
-  margin-bottom: 10px;
-  font-weight: bolder;
-}
-
-.HowItWorks p {
-  font-size: 1em;
-  font-weight: bold;
-}
-
-@import url(https://fonts.googleapis.com/css?family=Exo:100);
-@-webkit-keyframes bg-scrolling-reverse {
-  100% {
-    background-position: 0 250px;
-  }
-}
-@-moz-keyframes bg-scrolling-reverse {
-  100% {
-    background-position: 0 250px;
-  }
-}
-@-o-keyframes bg-scrolling-reverse {
-  100% {
-    background-position: 0 250px;
-  }
-}
-@keyframes bg-scrolling-reverse {
-  100% {
-    background-position: 0 250px;
-  }
-}
-@-webkit-keyframes bg-scrolling {
-  0% {
-    background-position: 0 250px;
-  }
-}
-@-moz-keyframes bg-scrolling {
-  0% {
-    background-position: 0 250px;
-  }
-}
-@-o-keyframes bg-scrolling {
-  0% {
-    background-position: 0 250px;
-  }
-}
-@keyframes bg-scrolling {
-  0% {
-    background-position: 0 250px;
-  }
-}
-
-body {
-  color: #999;
-  font: 400 16px/1.5 exo, ubuntu, "segoe ui", helvetica, arial, sans-serif;
+  color: white;
+  padding: 10px 20px;
   text-align: center;
-  /* img size is 25x25 */
-  background: url("/public/wallpaper.png") repeat 0 0 / 461px 250px;
-  -webkit-animation: bg-scrolling-reverse 5s infinite;
-  /* Safari 4+ */
-  -moz-animation: bg-scrolling-reverse 5s infinite;
-  /* Fx 5+ */
-  -o-animation: bg-scrolling-reverse 5s infinite;
-  /* Opera 12+ */
-  animation: bg-scrolling-reverse 5s infinite;
-  /* IE 10+ */
-  -webkit-animation-timing-function: linear;
-  -moz-animation-timing-function: linear;
-  -o-animation-timing-function: linear;
-  animation-timing-function: linear;
+  font-size: 16px;
+  cursor: pointer;
 }
 
-body::before {
-  font-size: 8rem;
-  font-weight: 100;
-  font-style: normal;
+.UploadButton:hover {
+  background-color: #45a049; /* or any color you like for hover */
 }
 
+.ImageBanner {
+  width: 15vw; /* 15% of the viewport width */
+}
+
+.Chat {
+  width: 80%;
+  background-color: #1c1c1c;
+  color: white;
+  display: flex; /* Add this to make flex layout */
+  flex-direction: column; /* Add this to make flex layout */
+  height: 100%; /* Add this to take full height */
+}
+
+.Messages {
+  padding: 20px;
+  overflow: scroll;
+  flex: 1; /* Add this to take remaining height */
+}
+
+.Message {
+  padding: 10px;
+  margin: 5px;
+  border-radius: 5px;
+}
+
+.Message.user {
+  background-color: #489dff;
+  color: #333;
+}
+
+.Message.evo {
+  background-color: #ff4f4f;
+  color: #333;
+}
+.SendMessage {
+  display: flex;
+  padding: 10px;
+}
+
+.SendMessage input {
+  flex: 1;
+  padding: 10px;
+  margin-right: 10px;
+}
+
+.SendMessage button {
+  background-color: #ff5151;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.Scripts,
+.Workspace {
+  background-color: white; /* Add background color */
+  border-radius: 10px; /* Rounded corners */
+  padding: 10px; /* Padding inside the card */
+  margin: 10px; /* Margin around the card */
+  color: black; /* Text color */
+  width: 80%; /* Width of the card */
+}
+
+.File,
+.Script {
+  border-radius: 5px; /* Rounded corners for files and scripts */
+  padding: 5px; /* Padding inside the files and scripts */
+  margin: 5px 0; /* Margin around the files and scripts */
+  background-color: #f3f3f3; /* Background color */
+}
