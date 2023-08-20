@@ -1,4 +1,3 @@
-export * from './Agent';
+export * from './ScriptWriter';
 export * from './loop';
-export * from './types';
 export * from './prompts';

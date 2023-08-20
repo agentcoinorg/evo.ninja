@@ -1,3 +1,12 @@
+export abstract class Agent {
+  abstract run(
+    namespace: string, 
+    description: string,
+    args: string,
+    developerNote?: string
+  ): AsyncGenerator<StepOutput, RunResult, string | undefined>;
+}
+
 export class RunResult {
   message?: string;
   isError?: boolean;

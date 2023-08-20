@@ -1,4 +1,4 @@
-import { AgentFunction, WrapClient, searchScripts } from "../..";
+import { AgentFunction, WrapClient, searchScripts } from "../../../";
 
 export const findScript: AgentFunction = {
   definition: {

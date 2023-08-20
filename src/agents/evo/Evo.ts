@@ -1,15 +1,15 @@
-import { Chat } from "../chat";
-import { OpenAI } from "../openai";
-import { WrapClient } from "../wrap";
-import { executeAgentFunction } from "../agent-function";
-import { env } from "../env";
-import { Workspace } from "../workspaces";
-import { RunResult, StepOutput } from "..";
-import { LlmApi } from "../llm";
 import { loop } from "./loop";
 import { agentFunctions } from "./agent-functions";
+import { RunResult, StepOutput, Agent } from "../types";
+import { env } from "../../env";
+import { Chat } from "../../chat";
+import { LlmApi } from "../../llm";
+import { OpenAI } from "../../openai";
+import { WrapClient } from "../../wrap";
+import { executeAgentFunction } from "../../agent-function";
+import { Workspace } from "../../workspaces";
 
-export class Agent {
+export class Evo implements Agent {
   public chat: Chat;
   private llm: LlmApi;
 

@@ -1,5 +1,5 @@
 import readline from "readline";
-import { Agent } from "./evo";
+import { Evo } from "./agents/evo";
 import { FileSystemWorkspace } from "./workspaces";
 
 const rl = readline.createInterface({
@@ -19,9 +19,9 @@ export async function cli(): Promise<void> {
     goal = await prompt("Enter your goal: ");
   }
 
-  const agent = new Agent(new FileSystemWorkspace());
+  const evo = new Evo(new FileSystemWorkspace());
 
-  let iterator = agent.run(goal);
+  let iterator = evo.run(goal);
 
   while(true) {
     const response = await iterator.next();

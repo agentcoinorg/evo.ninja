@@ -1,5 +1,5 @@
-import { AgentFunction } from "../../agent-function";
-import { WrapClient } from "../../wrap";
+import { WrapClient } from "../../../wrap";
+import { AgentFunction } from "../../../agent-function";
 
 export const think: AgentFunction = {
   definition: {

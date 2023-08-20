@@ -1,5 +1,5 @@
-import { AgentFunction } from "../../agent-function";
-import { WrapClient } from "../../wrap";
+import { AgentFunction } from "../../../agent-function";
+import { WrapClient } from "../../../wrap";
 
 export const readVar: AgentFunction = {
   definition: {
