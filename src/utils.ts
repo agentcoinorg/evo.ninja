@@ -3,7 +3,7 @@ export function trimText(text: string | undefined, maxLength: number): string {
     return "Undefined";
   }
 
-  return text.length > 200 
-    ? text.substring(0, 200) + "..." 
+  return text.length > maxLength 
+    ? text.substring(0, maxLength) + "..." 
     : text;
 }

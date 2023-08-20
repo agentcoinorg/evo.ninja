@@ -1,7 +1,7 @@
 import { getScriptByName } from "../../scripts";
-import { nodeShims, functionCodeWrapper } from "../../boilerplate";
+import { shimCode } from "../../wrap/js-engine/shims";
 import { WrapClient } from "../../wrap";
-import { JS_ENGINE_URI } from "../../constants";
+import { JsEngine_GlobalVar, JsEngine_Module } from "../../wrap/js-engine";
 import { FileSystemWorkspace } from "../../workspaces";
 import fs from "fs";
 
@@ -16,7 +16,7 @@ export async function runScriptJs(
     throw Error(`Cannot find script (${scriptName})`);
   }
 
-  const globals: { name: string, value: string }[] = [];
+  const globals: JsEngine_GlobalVar[] = [];
 
   const scriptArgs = scriptArgsPath && JSON.parse(fs.readFileSync(
     scriptArgsPath,
@@ -38,16 +38,10 @@ export async function runScriptJs(
 
   const client = new WrapClient(new FileSystemWorkspace());
 
-  const invokeArgs = {
-    src: nodeShims + functionCodeWrapper(script.code),
+  const result = await JsEngine_Module.evalWithGlobals({
+    src: shimCode(script.code),
     globals,
-  };
-
-  const result = await client.invoke<{value: string | undefined, error: string | undefined}>({ 
-    uri: JS_ENGINE_URI,
-    method: "evalWithGlobals",
-    args: invokeArgs,
-  });
+  }, client);
 
   console.log(result);
 
