@@ -1,8 +1,8 @@
-import { AgentFunction } from "../../agent-function";
-import { WrapClient } from "../../wrap";
-import { addScript } from "../../scripts";
-import { InMemoryWorkspace } from "../../workspaces";
-import { Agent as CodeWriterAgent } from "../../code-writer";
+import { ScriptWriter } from "../../script-writer";
+import { AgentFunction } from "../../../agent-function";
+import { WrapClient } from "../../../wrap";
+import { addScript } from "../../../scripts";
+import { InMemoryWorkspace } from "../../../workspaces";
 import chalk from "chalk";
 
 export const createScript: AgentFunction = {
@@ -46,16 +46,16 @@ export const createScript: AgentFunction = {
       }
 
       const workspace = new InMemoryWorkspace();
-      const writer = new CodeWriterAgent(workspace);
+      const writer = new ScriptWriter(workspace);
       console.log(chalk.yellow(`Creating script '${options.namespace}'...`));
 
       let iterator = writer.run(options.namespace, options.description, options.arguments, options.developerNote);
-  
+
       while(true) {
         const response = await iterator.next();
-    
+
         response.value.message && console.log(chalk.yellow(response.value.message));
-  
+
         if (workspace.existsSync("index.ts")) {
           break;
         }

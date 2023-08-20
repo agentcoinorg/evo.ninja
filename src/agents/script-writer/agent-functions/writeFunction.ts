@@ -1,6 +1,6 @@
-import { AgentFunction } from "../../agent-function";
-import { Workspace } from "../../workspaces";
-import { WrapClient } from "../../wrap";
+import { WrapClient } from "../../../wrap";
+import { Workspace } from "../../../workspaces";
+import { AgentFunction } from "../../../agent-function";
 
 export const writeFunction: AgentFunction = {
   definition: {

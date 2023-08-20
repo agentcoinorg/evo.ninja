@@ -1,14 +1,15 @@
-import { Chat } from "../chat";
-import { OpenAI } from "../openai";
-import { WrapClient } from "../wrap";
-import { RunResult, StepOutput, loop } from ".";
-import { LlmApi } from "../llm";
-import { Workspace } from "../workspaces";
-import { env } from "../env";
-import { executeAgentFunction } from "../agent-function";
+import { loop } from "./loop";
 import { agentFunctions } from "./agent-functions";
+import { RunResult, StepOutput, Agent } from "../types";
+import { Chat } from "../../chat";
+import { OpenAI } from "../../openai";
+import { WrapClient } from "../../wrap";
+import { LlmApi } from "../../llm";
+import { Workspace } from "../../workspaces";
+import { env } from "../../env";
+import { executeAgentFunction } from "../../agent-function";
 
-export class Agent {
+export class ScriptWriter implements Agent {
   public chat: Chat;
   private llm: LlmApi;
 
@@ -20,7 +21,7 @@ export class Agent {
       env().OPENAI_API_KEY,
       env().GPT_MODEL
     );
-  
+
     this.chat = new Chat(
       env().CONTEXT_WINDOW_TOKENS,
       this.workspace,

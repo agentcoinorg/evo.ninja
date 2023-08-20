@@ -2,7 +2,7 @@ export * from './chat';
 export * from './cli';
 export * from './constants';
 export * from './env';
-export * from './evo';
+export * from './agents/evo';
 export * from './agent-function';
 export * from './llm';
 export * from './openai';
