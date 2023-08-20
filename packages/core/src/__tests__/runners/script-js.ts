@@ -41,7 +41,7 @@ export async function runScriptJs(
   }
 
   const client = new WrapClient(new FileSystemWorkspace(
-    path.join(__dirname, "../../../workspace")
+    path.join(__dirname, "../../../../../workspace")
   ));
 
   const result = await JsEngine_Module.evalWithGlobals({

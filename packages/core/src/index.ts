@@ -3,5 +3,4 @@ export * from "./llm";
 export * from "./scripts";
 export * from "./sys";
 export * from "./wrap";
-export * from "./cli";
 export * from "./scripts";

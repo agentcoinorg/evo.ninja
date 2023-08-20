@@ -9,6 +9,8 @@ export interface Script {
   code: string;
 }
 
+const scriptsDir = path.join(__dirname, "../../../scripts");
+
 export function searchScripts(query: string): Script[] {
   const scripts = getAllScripts();
 
@@ -26,16 +28,16 @@ export function searchScripts(query: string): Script[] {
 
 export function getAllScripts(): Script[] {
   const ops: Script[] = [];
-  fs.readdirSync("./scripts")
+  fs.readdirSync(scriptsDir)
     .filter(file => path.extname(file) === ".json")
     .forEach((file) => {
-      const script = JSON.parse(fs.readFileSync(`./scripts/${file}`, "utf8"));
+      const script = JSON.parse(fs.readFileSync(path.join(scriptsDir, file), "utf8"));
 
       // If "code" is a path
       if (script.code.startsWith("./")) {
         // Read it from disk
         script.code = fs.readFileSync(
-          path.join("./scripts", script.code),
+          path.join(scriptsDir, script.code),
           "utf-8"
         );
       }
@@ -51,7 +53,7 @@ export function getScriptByName(name: string): Script | undefined {
 }
 
 export function addScript(name: string, script: Script) {
-  fs.writeFileSync(`./scripts/${name}.js`, script.code);
+  fs.writeFileSync(path.join(scriptsDir, `${name}.js`), script.code);
   script.code = `./${name}.js`;
-  fs.writeFileSync(`./scripts/${name}.json`, JSON.stringify(script, null, 2));
+  fs.writeFileSync(path.join(scriptsDir, `${name}.json`), JSON.stringify(script, null, 2));
 }

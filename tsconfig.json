@@ -24,9 +24,5 @@
     "target": "es5",
     "resolveJsonModule": true,
     "strictNullChecks": true
-  },
-  "include": [
-    "./src/**/*.ts"
-  ],
-  "exclude": []
+  }
 }

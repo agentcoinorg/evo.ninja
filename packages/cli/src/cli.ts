@@ -1,13 +1,10 @@
-import { Evo } from "./agents/evo";
-import { FileSystemWorkspace } from "./sys/workspaces";
-
+import { Evo, FileSystemWorkspace } from "@evo-ninja/core";
 import readline from "readline";
 import path from "path";
 
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout,
-  terminal: false
+  output: process.stdout
 });
 
 const prompt = (query: string) => new Promise<string>(
@@ -22,7 +19,7 @@ export async function cli(): Promise<void> {
   }
 
   const evo = new Evo(new FileSystemWorkspace(
-    path.join(__dirname, "../workspace")
+    path.join(__dirname, "../../../workspace")
   ));
 
   let iterator = evo.run(goal);
