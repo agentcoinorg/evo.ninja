@@ -1,7 +1,10 @@
 import { AgentFunction } from "../../agent-function";
-import { shimCode } from "../../../wrap/js-engine/shims";
-import { WrapClient } from "../../../wrap";
-import { JsEngine_GlobalVar, JsEngine_Module } from "../../../wrap/js-engine";
+import {
+  WrapClient,
+  JsEngine_GlobalVar,
+  JsEngine_Module,
+  shimCode
+} from "../../../wrap";
 import { getScriptByName } from "../../../scripts";
 
 export const executeScript: AgentFunction = {

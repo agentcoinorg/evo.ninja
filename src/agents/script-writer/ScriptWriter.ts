@@ -6,8 +6,8 @@ import { Chat } from "../../chat";
 import { OpenAI } from "../../openai";
 import { WrapClient } from "../../wrap";
 import { LlmApi } from "../../llm";
-import { Workspace } from "../../workspaces";
-import { env } from "../../env";
+import { Workspace } from "../../sys/workspaces";
+import { env } from "../../sys/env";
 
 export class ScriptWriter implements Agent {
   public chat: Chat;

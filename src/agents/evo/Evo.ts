@@ -2,12 +2,12 @@ import { loop } from "./loop";
 import { agentFunctions } from "./agent-functions";
 import { RunResult, StepOutput, Agent } from "../agent";
 import { executeAgentFunction } from "../agent-function";
-import { env } from "../../env";
+import { env } from "../../sys/env";
 import { Chat } from "../../chat";
 import { LlmApi } from "../../llm";
 import { OpenAI } from "../../openai";
 import { WrapClient } from "../../wrap";
-import { Workspace } from "../../workspaces";
+import { Workspace } from "../../sys/workspaces";
 
 export class Evo implements Agent {
   public chat: Chat;

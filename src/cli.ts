@@ -1,6 +1,6 @@
 import readline from "readline";
 import { Evo } from "./agents/evo";
-import { FileSystemWorkspace } from "./workspaces";
+import { FileSystemWorkspace } from "./sys/workspaces";
 
 const rl = readline.createInterface({
   input: process.stdin,

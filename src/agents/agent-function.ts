@@ -9,7 +9,7 @@ import {
   OTHER_EXECUTE_FUNCTION_OUTPUT,
   READ_GLOBAL_VAR_OUTPUT
 } from "./prompts";
-import { Workspace } from "../workspaces";
+import { Workspace } from "../sys/workspaces";
 import { WrapClient } from "../wrap";
 import { trimText } from "../utils";
 

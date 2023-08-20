@@ -4,7 +4,7 @@ import { AgentFunction, ExecuteAgentFunction } from "../agent-function";
 import { Chat } from "../../chat";
 import { LlmApi, LlmResponse } from "../../llm";
 import { WrapClient } from "../../wrap";
-import { Workspace } from "../../workspaces";
+import { Workspace } from "../../sys/workspaces";
 
 export async function* loop(
   goal: string, 

@@ -1,8 +1,11 @@
 import { getScriptByName } from "../../scripts";
-import { shimCode } from "../../wrap/js-engine/shims";
-import { WrapClient } from "../../wrap";
-import { JsEngine_GlobalVar, JsEngine_Module } from "../../wrap/js-engine";
-import { FileSystemWorkspace } from "../../workspaces";
+import {
+  WrapClient,
+  JsEngine_GlobalVar,
+  JsEngine_Module,
+  shimCode
+} from "../../wrap";
+import { FileSystemWorkspace } from "../../sys/workspaces";
 import fs from "fs";
 
 export async function runScriptJs(
