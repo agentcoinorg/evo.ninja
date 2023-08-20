@@ -3,7 +3,8 @@ import './App.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTwitter, faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faCog, faUpload } from '@fortawesome/free-solid-svg-icons';
-
+import UploadContainer from './UploadContainer';
+import { InMemoryFile } from './file';
 
 type Message = {
   text: string;
@@ -13,6 +14,13 @@ type Message = {
 function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
+
+  const [files, setFiles] = useState<InMemoryFile[]>([]);
+
+  function onUploadFiles(files: InMemoryFile[]) {
+    console.log(files);
+    setFiles(old => [...files]);
+  }
 
   const gibberishResponse = () => {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -41,16 +49,15 @@ function App() {
           <div className="Script">Script 2</div>
           {/* More scripts */}
         </div>
-        <div className="Workspace">
-          <h3>Workspace</h3>
-          <div className="File">File 1</div>
-          <div className="File">File 2</div>
-          {/* More files */}
-
-          <button className="UploadButton" title="Upload files">
-            <FontAwesomeIcon icon={faUpload} /> Upload files
-          </button>
-        </div>
+        <UploadContainer className="Workspace" onUpload={onUploadFiles}>
+            <h3>Workspace</h3>
+            {
+              files.map((file, i) => (
+                <div className="File" key={i}>{file.path}</div>
+              ))
+            }
+        </UploadContainer>
+       
         <img src="polywrap-logo.png" alt="Image Banner" className="ImageBanner" />
         <footer className="Footer">
           <FontAwesomeIcon icon={faCog} />

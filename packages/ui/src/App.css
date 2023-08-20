@@ -111,3 +111,12 @@ body, html {
   margin: 5px 0; /* Margin around the files and scripts */
   background-color: #f3f3f3; /* Background color */
 }
+
+.drop-hover {
+  background-color: #e1f1e5;
+  border: 2px dashed #b5bcff;
+}
+
+.inner-dropzone {
+  padding: 20px;
+}
