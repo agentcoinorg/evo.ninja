@@ -2,6 +2,7 @@ import { Evo } from "./agents/evo";
 import { FileSystemWorkspace } from "./sys/workspaces";
 
 import readline from "readline";
+import path from "path";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -20,7 +21,9 @@ export async function cli(): Promise<void> {
     goal = await prompt("Enter your goal: ");
   }
 
-  const evo = new Evo(new FileSystemWorkspace());
+  const evo = new Evo(new FileSystemWorkspace(
+    path.join(__dirname, "../workspace")
+  ));
 
   let iterator = evo.run(goal);
 
