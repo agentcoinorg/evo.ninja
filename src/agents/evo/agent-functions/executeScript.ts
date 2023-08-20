@@ -1,7 +1,10 @@
-import { functionCodeWrapper, nodeShims } from "../../../boilerplate";
-import { WrapClient } from "../../../wrap";
-import { AgentFunction } from "../../../agent-function";
-import { JS_ENGINE_URI } from "../../../constants";
+import { AgentFunction } from "../../agent-function";
+import {
+  WrapClient,
+  JsEngine_GlobalVar,
+  JsEngine_Module,
+  shimCode
+} from "../../../wrap";
 import { getScriptByName } from "../../../scripts";
 
 export const executeScript: AgentFunction = {
@@ -29,7 +32,7 @@ export const executeScript: AgentFunction = {
     },
   },
   buildExecutor: (
-    globals: Record<string, string>,
+    externGlobals: Record<string, string>,
     client: WrapClient
   ) => {
     return async (options: { namespace: string, arguments: any, result: string }) => {
@@ -53,7 +56,6 @@ export const executeScript: AgentFunction = {
         let args: any = undefined;
         args = options.arguments.replace(/\{\{/g, "\\{\\{").replace(/\}\}/g, "\\}\\}");
         try {
-         
 
           args = JSON.parse(options.arguments);
 
@@ -65,7 +67,7 @@ export const executeScript: AgentFunction = {
             }
             for (const key of Object.keys(args)) {
               if (typeof args[key] === "string") {
-                args[key] = replaceVars(args[key], Object.keys(globals).reduce((a, b) => ({ [b]: JSON.parse(globals[b]), ...a}), {}));
+                args[key] = replaceVars(args[key], Object.keys(externGlobals).reduce((a, b) => ({ [b]: JSON.parse(externGlobals[b]), ...a}), {}));
               }
             }
           }
@@ -76,24 +78,23 @@ export const executeScript: AgentFunction = {
           };
         }
 
-        const invokeArgs = {
-          src: nodeShims + functionCodeWrapper(script.code),
-          globals: Object.keys(args).map((key) => ({
-            name: key,
-            value: JSON.stringify(args[key]),
-          })).concat(Object.keys(globals).map((key) => ({ name: key, value: globals[key]}))),
-        };
+        const globals: JsEngine_GlobalVar[] =
+          Object.entries(args).concat(Object.entries(externGlobals))
+            .map((entry) => ({
+              name: entry[0],
+              value: JSON.stringify(entry[1]),
+            })
+          );
 
-        const result = await client.invoke<{value: string | undefined, error: string | undefined}>({ 
-          uri: JS_ENGINE_URI,
-          method: "evalWithGlobals",
-          args: invokeArgs,
-        });
+        const result = await JsEngine_Module.evalWithGlobals({
+          src: shimCode(script.code),
+          globals
+        }, client);
 
         if (result.ok && client.jsPromiseOutput.result) {
-          globals[options.result] = JSON.stringify(client.jsPromiseOutput.result);
+          externGlobals[options.result] = JSON.stringify(client.jsPromiseOutput.result);
         }
-  
+
         return result.ok
           ? result.value.error == null
             ? client.jsPromiseOutput.result

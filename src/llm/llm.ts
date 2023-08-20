@@ -1,4 +1,4 @@
-import { Chat } from "./chat";
+import { Chat } from ".";
 
 export declare const LlmRoles: {
   readonly System: "system";
@@ -7,6 +7,11 @@ export declare const LlmRoles: {
   readonly Function: "function";
 };
 export declare type LlmRole = typeof LlmRoles[keyof typeof LlmRoles];
+
+export interface LlmOptions {
+  temperature?: number;
+  max_tokens?: number;
+}
 
 export interface LlmResponse {
   role: LlmRole,
@@ -18,5 +23,9 @@ export interface LlmResponse {
 }
 
 export interface LlmApi {
-  getResponse(chat: Chat, functionDefinitions: any[]): Promise<LlmResponse | undefined>;
+  getResponse(
+    chat: Chat,
+    functionDefinitions: any[],
+    options?: LlmOptions
+  ): Promise<LlmResponse | undefined>;
 }

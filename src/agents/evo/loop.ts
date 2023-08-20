@@ -1,10 +1,9 @@
 import { GOAL_PROMPT, INITIAL_PROMP, LOOP_PREVENTION_PROMPT } from "./prompts";
-import { RunResult, StepOutput } from "../types";
-import { Chat } from "../../chat";
-import { LlmApi, LlmResponse } from "../../llm";
+import { RunResult, StepOutput } from "../agent";
+import { AgentFunction, ExecuteAgentFunction } from "../agent-function";
+import { LlmApi, LlmResponse, Chat } from "../../llm";
 import { WrapClient } from "../../wrap";
-import { Workspace } from "../../workspaces";
-import { AgentFunction, ExecuteAgentFunction } from "../../agent-function";
+import { Workspace } from "../../sys";
 
 export async function* loop(
   goal: string, 

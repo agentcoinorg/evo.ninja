@@ -1,8 +1,8 @@
 import { ScriptWriter } from "../../script-writer";
-import { AgentFunction } from "../../../agent-function";
+import { AgentFunction } from "../../agent-function";
 import { WrapClient } from "../../../wrap";
 import { addScript } from "../../../scripts";
-import { InMemoryWorkspace } from "../../../workspaces";
+import { InMemoryWorkspace } from "../../../sys/workspaces";
 import chalk from "chalk";
 
 export const createScript: AgentFunction = {

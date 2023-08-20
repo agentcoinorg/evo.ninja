@@ -1,4 +1,4 @@
-export const nodeShims = 
+export const packagesShim =
 `
 const console = {
   log: (message) => {
@@ -56,29 +56,28 @@ function require(lib) {
           get: (url, config) => {
             // This is hack because 'undefined' is not supported by JSON
             return config
-              ? new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "get", { url, config }).value))
-              : new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "get", { url }).value));
+              ? Promise.resolve(__wrap_subinvoke("plugin/axios", "get", { url, config }).value)
+              : Promise.resolve(__wrap_subinvoke("plugin/axios", "get", { url }).value);
           },
           post: (url, data, config) => {
             return config
-              ? new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "post", { url, data, config }).value))
-              : new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "post", { url, data }).value));
+              ? Promise.resolve(__wrap_subinvoke("plugin/axios", "post", { url, data, config }).value)
+              : Promise.resolve(__wrap_subinvoke("plugin/axios", "post", { url, data }).value);
           },
           put: (url, data, config) => {
             return config
-              ? new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "put", { url, data, config }).value))
-              : new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "put", { url, data }).value));
+              ? Promise.resolve(__wrap_subinvoke("plugin/axios", "put", { url, data, config }).value)
+              : Promise.resolve(__wrap_subinvoke("plugin/axios", "put", { url, data }).value);
           },
           delete: (url, config) => {
             return config
-              ? new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "delete", { url, config }).value))
-              : new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "delete", { url}).value));
-            
+              ? Promise.resolve(__wrap_subinvoke("plugin/axios", "delete", { url, config }).value)
+              : Promise.resolve(__wrap_subinvoke("plugin/axios", "delete", { url}).value);
           },
           head: (url, config) => {
             return config
-              ? new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "head", { url, config }).value))
-              : new Promise(resolve => resolve(__wrap_subinvoke("plugin/axios", "head", { url }).value));
+              ? Promise.resolve(__wrap_subinvoke("plugin/axios", "head", { url, config }).value)
+              : Promise.resolve(__wrap_subinvoke("plugin/axios", "head", { url }).value);
           },
         });
         break;
@@ -88,7 +87,7 @@ function require(lib) {
 }
 `;
 
-export const functionCodeWrapper = (code: string) => `\nconst __temp = (async function () { \n${code}\n })().then(result => {
+export const shimCode = (code: string) => `${packagesShim}\nconst __temp = (async function () { \n${code}\n })().then(result => {
   __wrap_subinvoke("plugin/result", "post", { result: result != null ? result : "undefined" })
 }, error => {
   __wrap_subinvoke("plugin/result", "post", { result: error != null ? error : "undefined" })

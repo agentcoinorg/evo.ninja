@@ -1,12 +1,12 @@
-import { execSync } from 'child_process';
+import { execSync } from "child_process";
 
-describe('AI Agent Test Suite', () => {
+describe("AI Agent Test Suite", () => {
   const oneMinute = 60 * 1000;
 
-  test('Simple Division: 590 / 204', () => {
-    const goal = '590 / 204';
+  test("Simple Division: 590 / 204", () => {
+    const goal = "590 / 204";
     const startTime = new Date().getTime();
-    const result = execSync(`yarn start '${goal}'`, { timeout: oneMinute, encoding: 'utf-8' });
+    const result = execSync(`yarn start "${goal}"`, { timeout: oneMinute, encoding: "utf-8" });
     const endTime = new Date().getTime();
     
     console.log(result); // Print the logs of the agent
@@ -17,10 +17,10 @@ describe('AI Agent Test Suite', () => {
 
   // You can add more complex tests here...
   // For example:
-  test('Complex script: (590 * 204) + (1000 / 2) - 42', () => {
-    const goal = '(590 * 204) + (1000 / 2) - 42';
+  test("Complex script: (590 * 204) + (1000 / 2) - 42", () => {
+    const goal = "(590 * 204) + (1000 / 2) - 42";
     const startTime = new Date().getTime();
-    const result = execSync(`yarn start '${goal}'`, { timeout: oneMinute, encoding: 'utf-8' });
+    const result = execSync(`yarn start "${goal}"`, { timeout: oneMinute, encoding: "utf-8" });
     const endTime = new Date().getTime();
     
     console.log(result); // Print the logs of the agent

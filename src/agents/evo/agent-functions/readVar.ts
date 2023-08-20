@@ -1,4 +1,4 @@
-import { AgentFunction } from "../../../agent-function";
+import { AgentFunction } from "../../agent-function";
 import { WrapClient } from "../../../wrap";
 
 export const readVar: AgentFunction = {
