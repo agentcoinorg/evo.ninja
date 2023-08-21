@@ -1,29 +1,19 @@
 import React from 'react';
-
-import * as EvoNinja from "@evo-ninja/core";
+import { HashRouter as Router, Route, Routes } from "react-router-dom";
 
 import './App.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTwitter, faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons';
-import { faCog, faUpload } from '@fortawesome/free-solid-svg-icons';
-import Sidebar from './components/Sidebar/Sidebar'
-import Chat from './components/Chat/Chat'
 
-// import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
-
-type Message = {
-  text: string;
-  user: string;
-};
-
-const workspace = new EvoNinja.InMemoryWorkspace();
+import Landing from "./pages/Landing";
+import Dojo from "./pages/Dojo";
 
 function App() {
   return (
-    <div className="App">
-      <Sidebar/>
-      <Chat/>
-    </div>
+    <Router>
+      <Routes>
+          <Route path="/" Component={Landing} />
+          <Route path="/dojo" Component={Dojo} />
+      </Routes>
+    </Router>
   );
 }
 
