@@ -11,12 +11,10 @@ const File = ({ file }: { file: FileType }) => {
   const [showContent, setShowContent] = useState(false);
 
   const handleClick = () => {
-    console.log("TRUEEEE")
     setShowContent(true);
   };
 
   const handleClose = () => {
-    console.log("HEREREREREE")
     setShowContent(false);
   };
 
@@ -31,7 +29,6 @@ const File = ({ file }: { file: FileType }) => {
     contentString = contentString.substring(0, 800) + "...";
   }
 
-  console.log("RENDERING", showContent)
   return (
     <>
     <div className="File" onClick={handleClick}>
