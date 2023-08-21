@@ -7,15 +7,17 @@ import {
 import { PluginPackage } from "@polywrap/plugin-js";
 import axios from "axios";
 
-import chalk from "chalk";
-import { Workspace } from "..";
+import { Workspace, Logger } from "..";
 import { InvokerOptions } from "@polywrap/client-js/build/types";
 
 export class WrapClient extends PolywrapClient {
 
   public jsPromiseOutput: { result: any };
 
-  constructor(workspace: Workspace) {
+  constructor(
+    workspace: Workspace,
+    logger: Logger
+  ) {
     const jsPromiseOutput = { result: undefined };
 
     const builder = new PolywrapClientConfigBuilder()
@@ -29,45 +31,45 @@ export class WrapClient extends PolywrapClient {
 
       .setPackage("plugin/console", PluginPackage.from(module => ({
         "log": async (args: any) => {
-          console.log("CONSOLE.LOG", JSON.parse(args.message));
+          logger.info("CONSOLE.LOG " + JSON.parse(args.message));
         },
       })))
       .setPackage("plugin/fs", PluginPackage.from(module => ({
         "readFileSync": async (args: any) => {
-          console.log(chalk.yellow("FS.READ = " + args.path));
+          logger.notice("FS.READ = " + args.path);
           return workspace.readFileSync(args.path);
         },
         "writeFileSync": async (args: any) => {
-          console.log(chalk.yellow("FS.WRITE = " + args.path));
+          logger.notice("FS.WRITE = " + args.path);
           workspace.writeFileSync(args.path, args.data.toString());
           return true;
         },
         "appendFileSync": async (args: any) => {
-          console.log(chalk.yellow("FS.APPEND = " + args.path));
+          logger.notice("FS.APPEND = " + args.path);
           workspace.appendFileSync(args.path, args.data.toString());
           return true;
         },
         "existsSync": async (args: any) => {
-          console.log(chalk.yellow("FS.EXISTS = " + args.path));
+          logger.notice("FS.EXISTS = " + args.path);
           return workspace.existsSync(args.path);
         },
         "renameSync": async (args: any) => {
-          console.log(chalk.yellow("FS.RENAME FROM = " + args.oldPath + " TO = " + args.newPath));
+          logger.notice("FS.RENAME FROM = " + args.oldPath + " TO = " + args.newPath);
           return workspace.renameSync(args.oldPath, args.newPath);
         },
         "mkdirSync": async (args: any) => {
-          console.log(chalk.yellow("FS.MKDIR = " + args.path));
+          logger.notice("FS.MKDIR = " + args.path);
           workspace.mkdirSync(args.path);
           return true;
         },
         "readdirSync": async (args: any) => {
-          console.log(chalk.yellow("FS.READDIR = " + args.path));
+          logger.notice("FS.READDIR = " + args.path);
           return workspace.readdirSync(args.path);
         }
       })))
       .setPackage("plugin/axios", PluginPackage.from(module => ({
         "get": async (args: any) => {
-          console.log(chalk.yellow(`AXIOS.GET = ${args.url}`));
+          logger.notice(`AXIOS.GET = ${args.url}`);
           let res;
           try {
             const result = await axios.get(args.url, args.config);
@@ -78,7 +80,7 @@ export class WrapClient extends PolywrapClient {
               data: result.data
             };
           } catch (e) {
-            console.error(e);
+            logger.error(e);
             res = {
               error: JSON.stringify(e)
             };
@@ -87,38 +89,38 @@ export class WrapClient extends PolywrapClient {
           return res;
         },
         "post": async (args: any) => {
-            console.log(chalk.yellow(`AXIOS.POST = ${args.url}`));
-            return await axios.post(args.url, args.data, args.config);
+          logger.notice(`AXIOS.POST = ${args.url}`);
+          return await axios.post(args.url, args.data, args.config);
         },
         "put": async (args: any) => {
-            console.log(chalk.yellow(`AXIOS.PUT = ${args.url}`));
-            return await axios.put(args.url, args.data, args.config);
+          logger.notice(`AXIOS.PUT = ${args.url}`);
+          return await axios.put(args.url, args.data, args.config);
         },
         "delete": async (args: any) => {
-            console.log(chalk.yellow(`AXIOS.DELETE = ${args.url}`));
-            return await axios.delete(args.url, args.config);
+          logger.notice(`AXIOS.DELETE = ${args.url}`);
+          return await axios.delete(args.url, args.config);
         },
         "head": async (args: any) => {
-            console.log(chalk.yellow(`AXIOS.HEAD = ${args.url}`));
-            return await axios.head(args.url, args.config);
+          logger.notice(`AXIOS.HEAD = ${args.url}`);
+          return await axios.head(args.url, args.config);
         },
       })))
       .setPackage("plugin/agent", PluginPackage.from(module => ({
         "onGoalAchieved": async (args: any) => {
-          console.log(chalk.green("Goal has been achieved!"));
+          logger.success("Goal has been achieved!");
           process.exit(0);
         },
         "speak": async (args: any) => {
-          console.log(chalk.green("Agent: " + args.message));
+          logger.success("Agent: " + args.message);
           return "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.";
         },
         "ask": async (args: any) => {
-          console.log(chalk.red("Agent: " + args.message));
+          logger.error("Agent: " + args.message);
           const response = await prompt("");
           return "User: " + response;
         },
       })));
-  
+
     super(builder.build());
 
     this.jsPromiseOutput = jsPromiseOutput;

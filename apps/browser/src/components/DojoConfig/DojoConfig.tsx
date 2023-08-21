@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-import './DojoConfig.css';
+import "./DojoConfig.css";
 
 export interface DojoConfigProps {
   apiKey: string | null;
@@ -15,8 +15,20 @@ function DojoConfig(props: DojoConfigProps) {
     <div className="DojoConfig">
       <div className="DojoConfig-apikey">
         <h2>Please enter your OpenAI API key</h2>
-        <input type="text" value={apiKey} onChange={(e) => setApiKey(e.target.value)} />
-        <button onClick={() => onConfigSaved(apiKey)}>Save</button>
+        <div className="DojoConfig__InputContainer">
+          <input
+            className="DojoConfig__Input"
+            type="text"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+          />
+          <button
+            className="DojoConfig__Btn"
+            onClick={() => onConfigSaved(apiKey)}
+          >
+            Save
+          </button>
+        </div>
       </div>
     </div>
   );

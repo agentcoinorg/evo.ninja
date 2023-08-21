@@ -1,5 +1,5 @@
 import { LlmApi, Tokenizer } from ".";
-import { Workspace } from "../sys";
+import { Workspace, Logger } from "../sys";
 
 import {
   ChatCompletionRequestMessageRoleEnum,
@@ -36,6 +36,7 @@ export class Chat {
     private _workspace: Workspace,
     private _llm: LlmApi,
     private _tokenizer: Tokenizer,
+    private _logger: Logger,
     private _msgsFile: string = ".msgs",
   ) {
     this._maxContextTokens = this._llm.getMaxContextTokens();
@@ -130,7 +131,7 @@ export class Chat {
       return;
     }
 
-    console.error(`! Max Tokens Exceeded (${totalTokens()} / ${this._maxContextTokens})`);
+    this._logger.error(`! Max Tokens Exceeded (${totalTokens()} / ${this._maxContextTokens})`);
 
     // Start with "temporary" messages
     await this._summarize("temporary");

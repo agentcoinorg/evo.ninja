@@ -6,6 +6,7 @@ import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 import './Dojo.css';
 
 import DojoConfig from "../components/DojoConfig/DojoConfig";
+import DojoError from "../components/DojoError/DojoError";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Chat from "../components/Chat/Chat";
 import { InMemoryFile } from '../file';
@@ -21,6 +22,7 @@ function Dojo() {
     localStorage.getItem("openai-api-key")
   );
   const [configOpen, setConfigOpen] = useState(false);
+  const [dojoError, setDojoError] = useState<unknown | undefined>(undefined);
   const [evo, setEvo] = useState<EvoCore.Evo | undefined>(undefined);
   const [scripts, setScripts] = useState<InMemoryFile[]>([]);
   const [userFiles, setUserFiles] = useState<InMemoryFile[]>([]);
@@ -85,46 +87,58 @@ function Dojo() {
   }
 
   useEffect(() => {
-    if (!apiKey) {
-      return;
-    }
-
-    const scriptsWorkspace = new EvoCore.InMemoryWorkspace();
-    const scripts = new EvoCore.Scripts(
-      scriptsWorkspace
-    );
-    setScriptsWorkspace(scriptsWorkspace);
-
-    const env = new EvoCore.Env(
-      {
-        "OPENAI_API_KEY": apiKey,
-        "GPT_MODEL": "gpt-4-0613",
-        "CONTEXT_WINDOW_TOKENS": "8000",
-        "MAX_RESPONSE_TOKENS": "2000"
+    try {
+      if (!apiKey) {
+        setConfigOpen(true);
+        return;
       }
-    );
-    const llm = new EvoCore.OpenAI(
-      env.OPENAI_API_KEY,
-      env.GPT_MODEL,
-      env.CONTEXT_WINDOW_TOKENS,
-      env.MAX_RESPONSE_TOKENS
-    );
-    const userWorkspace = new EvoCore.InMemoryWorkspace();
-    setUserWorkspace(userWorkspace);
+      setDojoError(undefined);
+      const logger = new EvoCore.Logger([
+        new EvoCore.ConsoleLogger()
+      ], {
+        promptUser: () => Promise.resolve("N/A"),
+        logUserPrompt: () => {}
+      });
+      const scriptsWorkspace = new EvoCore.InMemoryWorkspace();
+      const scripts = new EvoCore.Scripts(
+        scriptsWorkspace
+      );
+      setScriptsWorkspace(scriptsWorkspace);
+      const env = new EvoCore.Env(
+        {
+          "OPENAI_API_KEY": apiKey,
+          "GPT_MODEL": "gpt-4-0613",
+          "CONTEXT_WINDOW_TOKENS": "8000",
+          "MAX_RESPONSE_TOKENS": "2000"
+        }
+      );
+      const llm = new EvoCore.OpenAI(
+        env.OPENAI_API_KEY,
+        env.GPT_MODEL,
+        env.CONTEXT_WINDOW_TOKENS,
+        env.MAX_RESPONSE_TOKENS,
+        logger
+      );
+      const userWorkspace = new EvoCore.InMemoryWorkspace();
+      setUserWorkspace(userWorkspace);
+      const chat = new EvoCore.Chat(
+        userWorkspace,
+        llm,
+        cl100k_base,
+        logger
+      );
 
-    const chat = new EvoCore.Chat(
-      userWorkspace,
-      llm,
-      cl100k_base
-    );
-
-    setEvo(new EvoCore.Evo(
-      userWorkspace,
-      scripts,
-      llm,
-      chat
-    ));
-  }, [apiKey]);
+      setEvo(new EvoCore.Evo(
+        userWorkspace,
+        scripts,
+        llm,
+        chat,
+        logger
+      ));
+    } catch (err) {
+      setDojoError(err);
+    }
+  }, [apiKey])
 
   return (
     <div className="Dojo">
@@ -135,7 +149,10 @@ function Dojo() {
         />
       }
       <Sidebar onSettingsClick={() => setConfigOpen(true)} scripts={scripts} userFiles={userFiles} uploadUserFiles={setUploadedFiles} />
-      {evo && <Chat evo={evo} onMessage={onMessage} />}
+      <>
+        {evo && <Chat evo={evo} onMessage={onMessage} />}
+        {dojoError && <DojoError error={dojoError} />}
+      </>
     </div>
   );
 }

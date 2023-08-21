@@ -38,6 +38,10 @@ const Chat: React.FC<ChatProps> = ({evo, onMessage }: ChatProps) => {
       while (evoRunning) {
         const response = await evoItr.next();
 
+        // TODO:
+        // - handle proptType === "Prompt"
+        console.log(response);
+
         if (response.value && response.value.message) {
           messageLog = [...messageLog, {
             text: response.value.message,
@@ -59,7 +63,11 @@ const Chat: React.FC<ChatProps> = ({evo, onMessage }: ChatProps) => {
   }, [evoRunning, evoItr]);
 
   const handleSend = async () => {
-    const newMessages = [...messages, { text: message, user: 'user' }];
+    const newMessages = [...messages, {
+      type: "info",
+      text: message,
+      user: 'user'
+    }];
     setMessages(newMessages);
     setEvoRunning(true);
   };

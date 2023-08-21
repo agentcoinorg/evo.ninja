@@ -121,9 +121,15 @@
 
 .Footer__Links {
   color: white;
+  font-size: larger;
   opacity: 0.8;
   display: flex;
   justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+.Footer__Links:hover {
+  opacity: 1;
 }
 
 .Polywrap {
