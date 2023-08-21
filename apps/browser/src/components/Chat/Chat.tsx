@@ -11,10 +11,10 @@ export interface ChatMessage {
 export interface ChatProps {
   evo: Evo;
   onMessage: (message: ChatMessage) => void;
-  getMessages: () => ChatMessage[];
+  messages: ChatMessage[];
 }
 
-const Chat: React.FC<ChatProps> = ({ evo, onMessage, getMessages }: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
   const [sending, setSending] = useState<boolean>(false);
@@ -34,7 +34,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, getMessages }: ChatProps) =
         return Promise.resolve();
       }
 
-      let messageLog = getMessages();
+      let messageLog = messages;
 
       while (evoRunning) {
         const response = await evoItr.next();
@@ -83,7 +83,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, getMessages }: ChatProps) =
   return (
     <div className="Chat">
       <div className="Messages">
-        {getMessages().map((msg, index) => (
+        {messages.map((msg, index) => (
           <div key={index} className={`MessageContainer ${msg.user}`}>
             <div className="SenderName">{msg.user.toUpperCase()}</div>
             <div className={`Message ${msg.user}`}>{msg.text}</div>

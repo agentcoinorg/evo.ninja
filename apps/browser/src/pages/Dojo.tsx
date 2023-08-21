@@ -10,6 +10,7 @@ import DojoError from "../components/DojoError/DojoError";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Chat, { ChatMessage } from "../components/Chat/Chat";
 import { InMemoryFile } from '../sys/file';
+import { MarkdownLogger } from '../sys/logger';
 import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
 
 function Dojo() {
@@ -54,7 +55,7 @@ function Dojo() {
   }
 
   function onMessage(message: ChatMessage) {
-    setMessages([
+    setMessages((messages) => [
       ...messages,
       message
     ]);
@@ -93,17 +94,29 @@ function Dojo() {
         return;
       }
       setDojoError(undefined);
+
+      const markdownLogger = new MarkdownLogger({
+        onLog: (markdown: string) => {
+          onMessage({
+            user: "evo",
+            text: markdown
+          })
+        }
+      });
       const logger = new EvoCore.Logger([
+        markdownLogger,
         new EvoCore.ConsoleLogger()
       ], {
         promptUser: () => Promise.resolve("N/A"),
         logUserPrompt: () => {}
       });
+
       const scriptsWorkspace = new EvoCore.InMemoryWorkspace();
       const scripts = new EvoCore.Scripts(
         scriptsWorkspace
       );
       setScriptsWorkspace(scriptsWorkspace);
+
       const env = new EvoCore.Env(
         {
           "OPENAI_API_KEY": apiKey,
@@ -112,6 +125,7 @@ function Dojo() {
           "MAX_RESPONSE_TOKENS": "2000"
         }
       );
+
       const llm = new EvoCore.OpenAI(
         env.OPENAI_API_KEY,
         env.GPT_MODEL,
@@ -119,6 +133,7 @@ function Dojo() {
         env.MAX_RESPONSE_TOKENS,
         logger
       );
+
       const userWorkspace = new EvoCore.InMemoryWorkspace();
       setUserWorkspace(userWorkspace);
       const chat = new EvoCore.Chat(
@@ -150,7 +165,7 @@ function Dojo() {
       }
       <Sidebar onSettingsClick={() => setConfigOpen(true)} scripts={scripts} userFiles={userFiles} uploadUserFiles={setUploadedFiles} />
       <>
-        {evo && <Chat evo={evo} onMessage={onMessage} getMessages={() => messages} />}
+        {evo && <Chat evo={evo} onMessage={onMessage} messages={messages} />}
         {dojoError && <DojoError error={dojoError} />}
       </>
     </div>
