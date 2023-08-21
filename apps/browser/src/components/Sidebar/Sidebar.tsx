@@ -21,13 +21,6 @@ export interface SidebarProps {
 }
 
 const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles }: SidebarProps) => {
-  const [files, setFiles] = React.useState<InMemoryFile[]>([]);
-  const [uploadedFiles, setUploadedFiles] = React.useState<InMemoryFile[]>([]);
-
-  useEffect(() => {
-    setFiles((old) => [...old, ...uploadedFiles]);
-  }, [uploadedFiles]);
-
   return (
     <div className="Sidebar">
       <div className="Content">
@@ -44,7 +37,7 @@ const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles }: Sideb
           <h3>
             <FontAwesomeIcon icon={faFolder} style={{ marginRight: "10px" }} /> WORKSPACE
           </h3>
-          {files.map((file, i) => (
+          {userFiles.map((file, i) => (
             <File file={file} />
           ))}
         </Upload>
