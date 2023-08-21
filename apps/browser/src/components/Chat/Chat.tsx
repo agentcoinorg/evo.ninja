@@ -17,6 +17,7 @@ const Chat: React.FC<ChatProps> = ({evo, onMessage }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
+  const [sending, setSending] = useState<boolean>(false);
   const [evoItr, setEvoItr] = useState<ReturnType<Evo["run"]> | undefined>(
     undefined
   );
@@ -53,6 +54,7 @@ const Chat: React.FC<ChatProps> = ({evo, onMessage }: ChatProps) => {
 
         if (response.done) {
           setEvoRunning(false);
+          setSending(false); // Reset the sending state when done
           return Promise.resolve();
         }
       }
@@ -63,6 +65,7 @@ const Chat: React.FC<ChatProps> = ({evo, onMessage }: ChatProps) => {
   }, [evoRunning, evoItr]);
 
   const handleSend = async () => {
+    setSending(true); // Set the sending state when starting to send
     const newMessages = [...messages, {
       type: "info",
       text: message,
@@ -77,7 +80,7 @@ const Chat: React.FC<ChatProps> = ({evo, onMessage }: ChatProps) => {
   };
 
   const handleKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" && !sending) {
       handleSend();
     }
   };
@@ -100,10 +103,15 @@ const Chat: React.FC<ChatProps> = ({evo, onMessage }: ChatProps) => {
           onKeyPress={handleKeyPress}
           placeholder="Enter your main goal here..."
           className="Chat__Input"
+          disabled={sending} // Disable input while sending
         />
-        <button className="Chat__Btn" onClick={handleSend} disabled={evoRunning}>
-          Send
-        </button>
+        {sending ? (
+          <div className="Spinner" />
+        ) : (
+          <button className="Chat__Btn" onClick={handleSend} disabled={evoRunning || sending}>
+            Send
+          </button>
+        )}
       </div>
     </div>
   );
