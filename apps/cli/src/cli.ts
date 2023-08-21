@@ -4,6 +4,7 @@ import { Evo, Scripts, Env, OpenAI, Chat } from "@evo-ninja/core";
 import dotenv from "dotenv";
 import readline from "readline";
 import path from "path";
+import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 
 dotenv.config({
   path: path.join(__dirname, "../../../.env")
@@ -44,7 +45,8 @@ export async function cli(): Promise<void> {
   );
   const chat = new Chat(
     workspace,
-    llm
+    llm,
+    cl100k_base
   );
 
   const evo = new Evo(

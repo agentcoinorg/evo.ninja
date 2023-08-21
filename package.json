@@ -1,16 +1,26 @@
 {
   "name": "root",
   "private": true,
-  "workspaces": [
-    "./packages/**"
-  ],
+  "workspaces": {
+    "packages": [
+      "./packages/**",
+      "./apps/cli"
+    ],
+    "nohoist": ["gpt-tokenizer"]
+  },
   "scripts": {
-    "start": "yarn workspace evo-ninja run start",
     "reset": "yarn clean && yarn && yarn build",
-    "clean": "npx rimraf ./**/node_modules ./**/yarn.lock ./**/build ./**/coverage ./**/.polywrap",
-    "build": "yarn build:core && yarn build:cli && yarn build:ui",
+    "clean": "npx rimraf ./node_modules ./*/**/node_modules ./*/**/yarn.lock ./*/**/build",
+    "postinstall": "yarn install:browser",
+    "install:browser": "cd ./apps/browser && yarn",
+    "start": "yarn workspace evo-ninja run start",
+    "start:browser": "cd ./apps/browser && yarn start",
+    "build": "yarn build:core && yarn build:cli && yarn build:browser",
     "build:core": "yarn workspace @evo-ninja/core run build",
     "build:cli": "yarn workspace evo-ninja run build",
-    "build:ui": "yarn workspace @evo-ninja/ui run build"
+    "build:browser": "cd ./apps/browser && yarn build"
+  },
+  "devDependencies": {
+    "rimraf": "5.0.1"
   }
 }

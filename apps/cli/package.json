@@ -2,6 +2,10 @@
   "name": "evo-ninja",
   "version": "0.1.0",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/polywrap/evo.ninja.git"
+  },
   "main": "build/index.js",
   "scripts": {
     "start": "ts-node src/cli.ts",
@@ -10,11 +14,11 @@
     "test:script": "ts-node ./src/__tests__/runners/script-js.ts"
   },
   "dependencies": {
-    "@dqbd/tiktoken": "~1.0.7",
     "@evo-ninja/core": "0.1.0",
     "chalk": "^4.1.2",
     "clui": "~0.3.6",
     "dotenv": "~16.3.1",
+    "gpt-tokenizer": "~2.1.1",
     "readline": "~1.3.0"
   },
   "devDependencies": {

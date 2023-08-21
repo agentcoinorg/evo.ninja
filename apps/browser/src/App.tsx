@@ -9,10 +9,14 @@ import { faCog, faUpload } from '@fortawesome/free-solid-svg-icons';
 import Sidebar from './components/Sidebar/Sidebar'
 import Chat from './components/Chat/Chat'
 
+// import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
+
 type Message = {
   text: string;
   user: string;
 };
+
+const workspace = new EvoNinja.InMemoryWorkspace();
 
 function App() {
   return (

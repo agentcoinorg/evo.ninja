@@ -32,6 +32,10 @@ export class OpenAI implements LlmApi {
     return this._defaultMaxTokens;
   }
 
+  getModel() {
+    return this._defaultModel;
+  }
+
   async getResponse(
     chat: Chat,
     functionDefinitions: any[],

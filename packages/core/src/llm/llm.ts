@@ -24,7 +24,7 @@ export interface LlmResponse {
 
 export interface LlmApi {
   getMaxContextTokens(): number;
-
+  getModel(): string;
   getResponse(
     chat: Chat,
     functionDefinitions: any[],

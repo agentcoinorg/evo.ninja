@@ -28,7 +28,7 @@ export class Evo implements Agent {
   public async* run(goal: string): AsyncGenerator<StepOutput, RunResult, string | undefined> {
     const createScriptWriter = (): ScriptWriter => {
       const workspace = new InMemoryWorkspace();
-      const chat = new Chat(workspace, this.llm);
+      const chat = new Chat(workspace, this.llm, this.chat.tokenizer);
       return new ScriptWriter(workspace, this.scripts, this.llm, chat);
     };
 
