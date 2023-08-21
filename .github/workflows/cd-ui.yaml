@@ -24,11 +24,13 @@ jobs:
         node-version: 18.15
 
     - name: Install dependencies
-      working-directory: ./apps/browser
       run: yarn
 
     - name: Build
-      run: yarn build && mv ./apps/browser/CNAME ./apps/browser/build
+      run: yarn build
+
+    - name: Move CNAME File
+      run: mv ./apps/browser/CNAME ./apps/browser/build
 
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@v4
