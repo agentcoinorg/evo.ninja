@@ -68,7 +68,6 @@ const Chat: React.FC<ChatProps> = (props: ChatProps) => {
       user: 'user'
     }];
     setMessages(newMessages);
-    setMessage("");
     setEvoRunning(true);
   };
 
@@ -101,7 +100,7 @@ const Chat: React.FC<ChatProps> = (props: ChatProps) => {
           placeholder="Enter your main goal here..."
           className="Chat__Input"
         />
-        <button className="Chat__Btn" onClick={handleSend}>
+        <button className="Chat__Btn" onClick={handleSend} disabled={evoRunning}>
           Send
         </button>
       </div>
