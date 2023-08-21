@@ -18,6 +18,7 @@ export interface ChatProps {
 const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
+  const [paused, setPaused] = useState<boolean>(false);
   const [sending, setSending] = useState<boolean>(false);
   const [evoItr, setEvoItr] = useState<ReturnType<Evo["run"]> | undefined>(
     undefined
@@ -38,6 +39,11 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages }: ChatProps) => {
       let messageLog = messages;
 
       while (evoRunning) {
+        if (paused) {
+          return Promise.resolve();
+        }
+
+        console.log("evoooo", paused);
         const response = await evoItr.next();
 
         if (response.value && response.value.message) {
@@ -62,13 +68,22 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages }: ChatProps) => {
   }, [evoRunning, evoItr]);
 
   const handleSend = async () => {
-    setSending(true); // Set the sending state when starting to send
-    setMessage("");
-    onMessage({
+    setMessages(messages => [...messages, {
+      type: "info",
       text: message,
       user: 'user'
-    });
+    }]);
+    setSending(true);
+    setMessage("");
     setEvoRunning(true);
+  };
+
+  const handlePause = async () => {
+    setPaused(true);
+  };
+
+  const handleContinue = async () => {
+    setPaused(false);
   };
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -103,11 +118,30 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages }: ChatProps) => {
           className="Chat__Input"
           disabled={sending} // Disable input while sending
         />
-        {sending ? (
+        {evoRunning && (
+          <>
+            {
+              !paused && (
+                <button className="Chat__Btn" onClick={handlePause} disabled={!evoRunning || paused}>
+                Pause
+                </button>
+              )
+            }
+            {
+              paused && (
+                <button className="Chat__Btn" onClick={handleContinue} disabled={evoRunning && !paused}>
+                Continue
+                </button>
+              )
+            }
+          </>
+        )}
+
+        {evoRunning ? (
           <div className="Spinner" />
         ) : (
           <button className="Chat__Btn" onClick={handleSend} disabled={evoRunning || sending}>
-            Send
+            Start
           </button>
         )}
       </div>

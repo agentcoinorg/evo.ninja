@@ -13,6 +13,13 @@ import Chat, { ChatMessage } from "../components/Chat/Chat";
 import { InMemoryFile } from '../sys/file';
 import { MarkdownLogger } from '../sys/logger';
 import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
+import { Workspace } from '@evo-ninja/core';
+import { onGoalAchievedScript, speakScript } from '../scripts';
+
+function addScript(script: {name: string, definition: string, code: string}, scriptsWorkspace: Workspace) {
+  scriptsWorkspace.writeFileSync(`${script.name}.json`, script.definition);
+  scriptsWorkspace.writeFileSync(`${script.name}.js`, script.code);
+}
 
 function Dojo() {
   const [apiKey, setApiKey] = useState<string | null>(
@@ -113,9 +120,13 @@ function Dojo() {
       });
 
       const scriptsWorkspace = new EvoCore.InMemoryWorkspace();
+      addScript(onGoalAchievedScript, scriptsWorkspace);
+      addScript(speakScript, scriptsWorkspace);
+
       const scripts = new EvoCore.Scripts(
         scriptsWorkspace
       );
+      
       setScriptsWorkspace(scriptsWorkspace);
 
       const env = new EvoCore.Env(
@@ -145,16 +156,14 @@ function Dojo() {
       );
       const agentPackage = PluginPackage.from(module => ({
         "onGoalAchieved": async (args: any) => {
-          logger.success("Goal has been achieved!!!!!");
+          logger.success("Goal has been achieved!");
         },
         "speak": async (args: any) => {
-          logger.success("Agent: " + args.message);
+          logger.success("Evo: " + args.message);
           return "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.";
         },
         "ask": async (args: any) => {
-          logger.error("Agent: " + args.message);
-          const response = await prompt("");
-          return "User: " + response;
+          throw new Error("Not implemented");
         },
       }));
 
