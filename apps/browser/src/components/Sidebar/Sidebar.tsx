@@ -8,7 +8,8 @@ import {
 import { faCog, faUpload } from "@fortawesome/free-solid-svg-icons";
 import { faUserNinja, faFolder } from "@fortawesome/free-solid-svg-icons";
 import Upload from "../Upload";
-import { InMemoryFile } from "../../sys/file";
+import { InMemoryFile } from "../../file";
+import File from "../File/File";
 
 import "./Sidebar.css";
 
@@ -20,6 +21,13 @@ export interface SidebarProps {
 }
 
 const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles }: SidebarProps) => {
+  const [files, setFiles] = React.useState<InMemoryFile[]>([]);
+  const [uploadedFiles, setUploadedFiles] = React.useState<InMemoryFile[]>([]);
+
+  useEffect(() => {
+    setFiles((old) => [...old, ...uploadedFiles]);
+  }, [uploadedFiles]);
+
   return (
     <div className="Sidebar">
       <div className="Content">
@@ -39,10 +47,8 @@ const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles }: Sideb
             <FontAwesomeIcon icon={faFolder} />
             Workspace
           </h3>
-          {userFiles.map((file, i) => (
-            <div className="File" key={i}>
-              {file.path}
-            </div>
+          {files.map((file, i) => (
+            <File file={file} />
           ))}
         </Upload>
         <footer className="Footer">
