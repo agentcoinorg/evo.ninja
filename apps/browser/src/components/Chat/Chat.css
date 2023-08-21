@@ -1,42 +1,37 @@
 .Chat {
-  background-color: #121312;
-  border: 1px solid #ff572e;
-  height: 90vh;
-  width: 75%;
-  align-self: center;
-  border-radius: 30px;
-}
-
-.Chat {
   width: 80%;
-  background-color: #1c1c1c;
-  color: white;
-  display: flex; /* Add this to make flex layout */
-  flex-direction: column; /* Add this to make flex layout */
-  height: 100%; /* Add this to take full height */
+  /* background-color: #1c1c1c; */
+  background-color: #121212;
+  color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid #2b2b30;
 }
 
 .Messages {
   padding: 20px;
-  overflow: scroll;
-  flex: 1; /* Add this to take remaining height */
+  overflow: auto;
+  flex: 1;
+  border-bottom: 1px solid #2b2b30;
 }
 
 .Message {
-  padding: 10px;
-  padding-left: 15px;
-  margin: 5px;
-  border-radius: 25px;
+  padding: 10px 15px;
+  margin: 5px 0;
+  background-color: #1a1a1d;
+  border-radius: 5px;
+  color: #f5f5f5;
 }
 
 .Message.user {
-  background-color: #489dff;
-  color: #333;
+  background-color: #4a90e2;
+  color: #f5f5f5;
 }
 
 .Message.evo {
   background-color: #ff4f4f;
-  color: #333;
+  color: #f5f5f5;
 }
 .SendMessage {
   display: flex;
@@ -47,25 +42,42 @@
   flex: 1;
   padding: 10px;
   margin-right: 10px;
+  border: 1px solid #888;
+  border-radius: 5px;
+  background-color: #202020;
+  color: #f5f5f5;
 }
 
 .SendMessage button {
-  background-color: #ff5151;
+  background-color: #ff572e;
   color: white;
   border: none;
   padding: 10px;
   cursor: pointer;
+  border-radius: 12px;
+  transition: all 0.3s ease-in-out;
+  &:hover {
+    background-color: #ff4516;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.24),
+      0 2px 10px 0 rgba(0, 0, 0, 0.19);
+  }
 }
 
 .Chat__Input {
   flex: 1;
   padding: 10px;
   margin-right: 10px;
-  /* font-size: 29px; Adjust this value as needed */
+  font-size: 15px;
+  border: 1px solid #888;
+  border-radius: 5px;
+  background-color: #202020;
+  color: #f5f5f5;
+  outline: none;
+  transition: all 0.3s ease-in-out;
 }
 
 .Chat__Container input {
-  font-size: 25px; /* Adjust this value to set the font size */
+  font-size: 15px;
 }
 
 .Chat__Container {
@@ -75,33 +87,26 @@
   justify-content: center;
 }
 
-.Chat__Input {
-  border-radius: 15px;
-  padding: 10px;
-  font-size: 16px;
-  width: 80%;
-  height: 3.25rem;
-  background-color: #656564;
-  box-sizing: border-box;
-  outline: none;
-  margin: 0 15px;
-}
-
 .Chat__Btn {
   background-color: #ff572e;
   height: 3.25rem;
   border: none;
-  color: white;
+  color: #1f1f1f;
   text-align: center;
   display: inline-block;
   font-size: 16px;
-  transition-duration: 0.4s;
+  transition: all 0.3s ease-in-out;
   cursor: pointer;
   padding: 10px 24px;
   border-radius: 12px;
-  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+  &:hover {
+    background-color: #ff4516;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.24),
+      0 2px 10px 0 rgba(0, 0, 0, 0.19);
+  }
 }
 
 .Message {
-  background: #b09898;
+  background: #1a1a1d;
 }
