@@ -9,6 +9,8 @@ import DojoConfig from "../components/DojoConfig/DojoConfig";
 import DojoError from "../components/DojoError/DojoError";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Chat from "../components/Chat/Chat";
+import { InMemoryFile } from '../file';
+import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
 
 type Message = {
   text: string;
@@ -20,8 +22,57 @@ function Dojo() {
     localStorage.getItem("openai-api-key")
   );
   const [configOpen, setConfigOpen] = useState(false);
-  const [evo, setEvo] = useState<EvoCore.Evo | undefined>(undefined);
   const [dojoError, setDojoError] = useState<unknown | undefined>(undefined);
+  const [evo, setEvo] = useState<EvoCore.Evo | undefined>(undefined);
+  const [scripts, setScripts] = useState<InMemoryFile[]>([]);
+  const [userFiles, setUserFiles] = useState<InMemoryFile[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<InMemoryFile[]>([]);
+  const [userWorkspace, setUserWorkspace] = useState<EvoCore.InMemoryWorkspace | undefined>(undefined);
+  const [scriptsWorkspace, setScriptsWorkspace] = useState<EvoCore.InMemoryWorkspace | undefined>(undefined);
+
+  useEffect(() => {
+    if (!evo || !scriptsWorkspace) {
+      return;
+    }
+
+    const items = scriptsWorkspace.readdirSync("");
+    if (!items) {
+      return;
+    }
+
+    setScripts(items.map(x => new InMemoryFile(x, new TextEncoder().encode(scriptsWorkspace.readFileSync(x)) || "")));
+  }, [scriptsWorkspace]);
+
+  function checkForUserFiles() {
+    if (!evo || !userWorkspace) {
+      return;
+    }
+    updateWorkspaceFiles(userWorkspace, userFiles, setUserFiles);
+  }
+
+  function checkForScriptFiles() {
+    if (!evo || !scriptsWorkspace) {
+      return;
+    }
+    updateWorkspaceFiles(scriptsWorkspace, scripts, setScripts);
+  }
+
+  function onMessage() {
+    checkForUserFiles();
+    checkForScriptFiles();
+  }
+
+  useEffect(() => {
+    if (!evo || !userWorkspace) {
+      return;
+    }
+
+    for (const file of uploadedFiles) {
+      userWorkspace.writeFileSync(file.path, new TextDecoder().decode(file.content));
+    }
+
+    checkForUserFiles();
+  }, [uploadedFiles]);
 
   const onConfigSaved = (apiKey: string) => {
     if (!apiKey) {
@@ -52,6 +103,7 @@ function Dojo() {
       const scripts = new EvoCore.Scripts(
         scriptsWorkspace
       );
+      setScriptsWorkspace(scriptsWorkspace);
       const env = new EvoCore.Env(
         {
           "OPENAI_API_KEY": apiKey,
@@ -68,6 +120,7 @@ function Dojo() {
         logger
       );
       const userWorkspace = new EvoCore.InMemoryWorkspace();
+      setUserWorkspace(userWorkspace);
       const chat = new EvoCore.Chat(
         userWorkspace,
         llm,
@@ -95,9 +148,9 @@ function Dojo() {
           onConfigSaved={onConfigSaved}
         />
       }
-      <Sidebar onSettingsClick={() => setConfigOpen(true)} />
+      <Sidebar onSettingsClick={() => setConfigOpen(true)} scripts={scripts} userFiles={userFiles} uploadUserFiles={setUploadedFiles} />
       <>
-        {evo && <Chat evo={evo} />}
+        {evo && <Chat evo={evo} onMessage={onMessage} />}
         {dojoError && <DojoError error={dojoError} />}
       </>
     </div>

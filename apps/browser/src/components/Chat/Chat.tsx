@@ -10,9 +10,10 @@ type Message = {
 
 export interface ChatProps {
   evo: Evo;
+  onMessage: (message: string) => void;
 }
 
-const Chat: React.FC<ChatProps> = (props: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({evo, onMessage }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
@@ -28,7 +29,6 @@ const Chat: React.FC<ChatProps> = (props: ChatProps) => {
 
       // Create a new iteration thread
       if (!evoItr) {
-        const { evo } = props;
         setEvoItr(evo.run(message));
         return Promise.resolve();
       }
@@ -48,6 +48,7 @@ const Chat: React.FC<ChatProps> = (props: ChatProps) => {
             user: "evo"
           }];
           setMessages(messageLog);
+          onMessage(response.value.message);
         }
 
         if (response.done) {
