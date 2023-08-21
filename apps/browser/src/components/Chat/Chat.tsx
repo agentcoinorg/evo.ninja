@@ -13,10 +13,11 @@ export interface ChatProps {
   onMessage: (message: string) => void;
 }
 
-const Chat: React.FC<ChatProps> = ({evo, onMessage }: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({ evo, onMessage }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
+  const [paused, setPaused] = useState<boolean>(false);
   const [evoItr, setEvoItr] = useState<ReturnType<Evo["run"]> | undefined>(
     undefined
   );
@@ -36,6 +37,11 @@ const Chat: React.FC<ChatProps> = ({evo, onMessage }: ChatProps) => {
       let messageLog = messages;
 
       while (evoRunning) {
+        if (paused) {
+          return Promise.resolve();
+        }
+
+        console.log("evoooo", paused);
         const response = await evoItr.next();
 
         // TODO:
@@ -72,6 +78,14 @@ const Chat: React.FC<ChatProps> = ({evo, onMessage }: ChatProps) => {
     setEvoRunning(true);
   };
 
+  const handlePause = async () => {
+    setPaused(true);
+  };
+
+  const handleContinue = async () => {
+    setPaused(false);
+  };
+
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setMessage(event.target.value);
   };
@@ -101,9 +115,30 @@ const Chat: React.FC<ChatProps> = ({evo, onMessage }: ChatProps) => {
           placeholder="Enter your main goal here..."
           className="Chat__Input"
         />
-        <button className="Chat__Btn" onClick={handleSend} disabled={evoRunning}>
-          Send
-        </button>
+        {evoRunning && (
+          <>
+            {
+              !paused && (
+                <button className="Chat__Btn" onClick={handlePause} disabled={!evoRunning || paused}>
+                Pause
+                </button>
+              )
+            }
+            {
+              paused && (
+                <button className="Chat__Btn" onClick={handleContinue} disabled={evoRunning && !paused}>
+                Continue
+                </button>
+              )
+            }
+          </>
+        )}
+
+        {!evoRunning && (
+          <button className="Chat__Btn" onClick={handleSend} disabled={evoRunning}>
+            Start
+          </button>
+        )}
       </div>
     </div>
   );

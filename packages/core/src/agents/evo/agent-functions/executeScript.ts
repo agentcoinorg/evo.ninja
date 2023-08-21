@@ -92,6 +92,10 @@ export const executeScript: AgentFunction = {
             JSON.stringify(context.client.jsPromiseOutput.result);
         }
 
+        if (result.ok && !context.client.jsPromiseOutput.result) { 
+          console.log("No result returned from script.", context.client.jsPromiseOutput, result.value);
+        }
+
         return result.ok
           ? result.value.error == null
             ? context.client.jsPromiseOutput.result
