@@ -1,23 +1,25 @@
 import React, { useState, useEffect, ChangeEvent, KeyboardEvent } from "react";
 import { Evo } from "@evo-ninja/core";
+import ReactMarkdown from "react-markdown";
 
 import "./Chat.css";
 
-type Message = {
+export interface ChatMessage {
   text: string;
   user: string;
-};
+}
 
 export interface ChatProps {
   evo: Evo;
-  onMessage: (message: string) => void;
+  onMessage: (message: ChatMessage) => void;
+  messages: ChatMessage[];
 }
 
-const Chat: React.FC<ChatProps> = ({ evo, onMessage }: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
-  const [messages, setMessages] = useState<Message[]>([]);
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
   const [paused, setPaused] = useState<boolean>(false);
+  const [sending, setSending] = useState<boolean>(false);
   const [evoItr, setEvoItr] = useState<ReturnType<Evo["run"]> | undefined>(
     undefined
   );
@@ -44,21 +46,18 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage }: ChatProps) => {
         console.log("evoooo", paused);
         const response = await evoItr.next();
 
-        // TODO:
-        // - handle proptType === "Prompt"
-        console.log(response);
-
         if (response.value && response.value.message) {
-          messageLog = [...messageLog, {
+          const evoMessage = {
             text: response.value.message,
             user: "evo"
-          }];
-          setMessages(messageLog);
-          onMessage(response.value.message);
+          };
+          messageLog = [...messageLog, evoMessage];
+          onMessage(evoMessage);
         }
 
         if (response.done) {
           setEvoRunning(false);
+          setSending(false); // Reset the sending state when done
           return Promise.resolve();
         }
       }
@@ -74,6 +73,8 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage }: ChatProps) => {
       text: message,
       user: 'user'
     }]);
+    setSending(true);
+    setMessage("");
     setEvoRunning(true);
   };
 
@@ -90,7 +91,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage }: ChatProps) => {
   };
 
   const handleKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" && !sending) {
       handleSend();
     }
   };
@@ -101,7 +102,9 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage }: ChatProps) => {
         {messages.map((msg, index) => (
           <div key={index} className={`MessageContainer ${msg.user}`}>
             <div className="SenderName">{msg.user.toUpperCase()}</div>
-            <div className={`Message ${msg.user}`}>{msg.text}</div>
+            <div className={`Message ${msg.user}`}>
+              <ReactMarkdown>{msg.text}</ReactMarkdown>
+            </div>
           </div>
         ))}
       </div>
@@ -113,6 +116,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage }: ChatProps) => {
           onKeyPress={handleKeyPress}
           placeholder="Enter your main goal here..."
           className="Chat__Input"
+          disabled={sending} // Disable input while sending
         />
         {evoRunning && (
           <>
@@ -133,8 +137,10 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage }: ChatProps) => {
           </>
         )}
 
-        {!evoRunning && (
-          <button className="Chat__Btn" onClick={handleSend} disabled={evoRunning}>
+        {evoRunning ? (
+          <div className="Spinner" />
+        ) : (
+          <button className="Chat__Btn" onClick={handleSend} disabled={evoRunning || sending}>
             Start
           </button>
         )}
