@@ -2,7 +2,7 @@ import React, { useEffect, useState, PropsWithChildren } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload } from '@fortawesome/free-solid-svg-icons';
 import { useDropzone } from "react-dropzone";
-import { InMemoryFile, readFile } from '../file';
+import { InMemoryFile, readFile } from '../sys/file';
 import '../App.css';
 
 interface UploadProps {

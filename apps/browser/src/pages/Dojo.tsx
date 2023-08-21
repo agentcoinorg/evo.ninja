@@ -9,14 +9,10 @@ import './Dojo.css';
 import DojoConfig from "../components/DojoConfig/DojoConfig";
 import DojoError from "../components/DojoError/DojoError";
 import Sidebar from "../components/Sidebar/Sidebar";
-import Chat from "../components/Chat/Chat";
-import { InMemoryFile } from '../file';
+import Chat, { ChatMessage } from "../components/Chat/Chat";
+import { InMemoryFile } from '../sys/file';
+import { MarkdownLogger } from '../sys/logger';
 import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
-
-type Message = {
-  text: string;
-  user: string;
-};
 
 function Dojo() {
   const [apiKey, setApiKey] = useState<string | null>(
@@ -30,6 +26,7 @@ function Dojo() {
   const [uploadedFiles, setUploadedFiles] = useState<InMemoryFile[]>([]);
   const [userWorkspace, setUserWorkspace] = useState<EvoCore.InMemoryWorkspace | undefined>(undefined);
   const [scriptsWorkspace, setScriptsWorkspace] = useState<EvoCore.InMemoryWorkspace | undefined>(undefined);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   useEffect(() => {
     if (!evo || !scriptsWorkspace) {
@@ -58,7 +55,11 @@ function Dojo() {
     updateWorkspaceFiles(scriptsWorkspace, scripts, setScripts);
   }
 
-  function onMessage() {
+  function onMessage(message: ChatMessage) {
+    setMessages((messages) => [
+      ...messages,
+      message
+    ]);
     checkForUserFiles();
     checkForScriptFiles();
   }
@@ -94,17 +95,29 @@ function Dojo() {
         return;
       }
       setDojoError(undefined);
+
+      const markdownLogger = new MarkdownLogger({
+        onLog: (markdown: string) => {
+          onMessage({
+            user: "evo",
+            text: markdown
+          })
+        }
+      });
       const logger = new EvoCore.Logger([
+        markdownLogger,
         new EvoCore.ConsoleLogger()
       ], {
         promptUser: () => Promise.resolve("N/A"),
         logUserPrompt: () => {}
       });
+
       const scriptsWorkspace = new EvoCore.InMemoryWorkspace();
       const scripts = new EvoCore.Scripts(
         scriptsWorkspace
       );
       setScriptsWorkspace(scriptsWorkspace);
+
       const env = new EvoCore.Env(
         {
           "OPENAI_API_KEY": apiKey,
@@ -113,6 +126,7 @@ function Dojo() {
           "MAX_RESPONSE_TOKENS": "2000"
         }
       );
+
       const llm = new EvoCore.OpenAI(
         env.OPENAI_API_KEY,
         env.GPT_MODEL,
@@ -120,6 +134,7 @@ function Dojo() {
         env.MAX_RESPONSE_TOKENS,
         logger
       );
+
       const userWorkspace = new EvoCore.InMemoryWorkspace();
       setUserWorkspace(userWorkspace);
       const chat = new EvoCore.Chat(
@@ -166,7 +181,7 @@ function Dojo() {
       }
       <Sidebar onSettingsClick={() => setConfigOpen(true)} scripts={scripts} userFiles={userFiles} uploadUserFiles={setUploadedFiles} />
       <>
-        {evo && <Chat evo={evo} onMessage={onMessage} />}
+        {evo && <Chat evo={evo} onMessage={onMessage} messages={messages} />}
         {dojoError && <DojoError error={dojoError} />}
       </>
     </div>

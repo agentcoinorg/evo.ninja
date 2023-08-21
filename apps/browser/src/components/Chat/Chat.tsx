@@ -4,19 +4,19 @@ import ReactMarkdown from "react-markdown";
 
 import "./Chat.css";
 
-type Message = {
+export interface ChatMessage {
   text: string;
   user: string;
-};
+}
 
 export interface ChatProps {
   evo: Evo;
-  onMessage: (message: string) => void;
+  onMessage: (message: ChatMessage) => void;
+  messages: ChatMessage[];
 }
 
-const Chat: React.FC<ChatProps> = ({evo, onMessage }: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
-  const [messages, setMessages] = useState<Message[]>([]);
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
   const [sending, setSending] = useState<boolean>(false);
   const [evoItr, setEvoItr] = useState<ReturnType<Evo["run"]> | undefined>(
@@ -40,17 +40,13 @@ const Chat: React.FC<ChatProps> = ({evo, onMessage }: ChatProps) => {
       while (evoRunning) {
         const response = await evoItr.next();
 
-        // TODO:
-        // - handle proptType === "Prompt"
-        console.log(response);
-
         if (response.value && response.value.message) {
-          messageLog = [...messageLog, {
+          const evoMessage = {
             text: response.value.message,
             user: "evo"
-          }];
-          setMessages(messageLog);
-          onMessage(response.value.message);
+          };
+          messageLog = [...messageLog, evoMessage];
+          onMessage(evoMessage);
         }
 
         if (response.done) {
@@ -67,12 +63,11 @@ const Chat: React.FC<ChatProps> = ({evo, onMessage }: ChatProps) => {
 
   const handleSend = async () => {
     setSending(true); // Set the sending state when starting to send
-    const newMessages = [...messages, {
-      type: "info",
+    setMessage("");
+    onMessage({
       text: message,
       user: 'user'
-    }];
-    setMessages(newMessages);
+    });
     setEvoRunning(true);
   };
 
