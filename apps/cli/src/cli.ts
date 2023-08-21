@@ -100,7 +100,9 @@ export async function cli(): Promise<void> {
   while(true) {
     const response = await iterator.next();
 
-    response.value.message && logger.info(response.value.message);
+    if (response.value) {
+      response.value.message && logger.info(response.value.message);
+    }
   }
 }
 
