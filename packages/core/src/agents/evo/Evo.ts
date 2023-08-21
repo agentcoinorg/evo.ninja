@@ -7,6 +7,7 @@ import { LlmApi, Chat } from "../../llm";
 import { WrapClient } from "../../wrap";
 import { Scripts } from "../../Scripts";
 import { InMemoryWorkspace, Workspace, Logger } from "../../sys";
+import { IWrapPackage } from "@polywrap/client-js";
 
 export class Evo implements Agent {
   private client: WrapClient;
@@ -17,11 +18,13 @@ export class Evo implements Agent {
     private readonly scripts: Scripts,
     private readonly llm: LlmApi,
     private readonly chat: Chat,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    private readonly agentPackage: IWrapPackage
   ) {
     this.client = new WrapClient(
       this.workspace,
-      this.logger
+      this.logger,
+      this.agentPackage
     );
 
     this.globals = {};
