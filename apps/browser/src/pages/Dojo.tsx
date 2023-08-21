@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import * as EvoCore from "@evo-ninja/core";
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
+import { PluginPackage } from "@polywrap/plugin-js";
 
 import './Dojo.css';
 
@@ -127,13 +128,28 @@ function Dojo() {
         cl100k_base,
         logger
       );
+      const agentPackage = PluginPackage.from(module => ({
+        "onGoalAchieved": async (args: any) => {
+          logger.success("Goal has been achieved!!!!!");
+        },
+        "speak": async (args: any) => {
+          logger.success("Agent: " + args.message);
+          return "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.";
+        },
+        "ask": async (args: any) => {
+          logger.error("Agent: " + args.message);
+          const response = await prompt("");
+          return "User: " + response;
+        },
+      }));
 
       setEvo(new EvoCore.Evo(
         userWorkspace,
         scripts,
         llm,
         chat,
-        logger
+        logger,
+        agentPackage
       ));
     } catch (err) {
       setDojoError(err);

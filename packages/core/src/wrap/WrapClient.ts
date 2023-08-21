@@ -2,7 +2,8 @@ import {
   PolywrapClient,
   PolywrapClientConfigBuilder,
   Uri,
-  InvokeResult
+  InvokeResult,
+  IWrapPackage
 } from "@polywrap/client-js";
 import { PluginPackage } from "@polywrap/plugin-js";
 import axios from "axios";
@@ -16,7 +17,8 @@ export class WrapClient extends PolywrapClient {
 
   constructor(
     workspace: Workspace,
-    logger: Logger
+    logger: Logger,
+    agentPlugin: IWrapPackage | undefined = undefined,
   ) {
     const jsPromiseOutput = { result: undefined };
 
@@ -104,22 +106,12 @@ export class WrapClient extends PolywrapClient {
           logger.notice(`AXIOS.HEAD = ${args.url}`);
           return await axios.head(args.url, args.config);
         },
-      })))
-      .setPackage("plugin/agent", PluginPackage.from(module => ({
-        "onGoalAchieved": async (args: any) => {
-          logger.success("Goal has been achieved!");
-          process.exit(0);
-        },
-        "speak": async (args: any) => {
-          logger.success("Agent: " + args.message);
-          return "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.";
-        },
-        "ask": async (args: any) => {
-          logger.error("Agent: " + args.message);
-          const response = await prompt("");
-          return "User: " + response;
-        },
       })));
+
+    if (agentPlugin) {
+      builder
+        .setPackage("plugin/agent", agentPlugin);
+    }
 
     super(builder.build());
 
