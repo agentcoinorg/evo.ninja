@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTwitter, faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faCog, faUpload } from '@fortawesome/free-solid-svg-icons';
@@ -10,11 +10,11 @@ import './Sidebar.css'
 
 const Sidebar = () => {
   const [files, setFiles] = React.useState<InMemoryFile[]>([]);
+  const [uploadedFiles, setUploadedFiles] = React.useState<InMemoryFile[]>([]);
 
-  function onUploadFiles(files: InMemoryFile[]) {
-    console.log(files);
-    setFiles(old => [...files]);
-  }
+  useEffect(() => {
+    setFiles(old => [...old,...uploadedFiles]);
+  }, [uploadedFiles]);
 
   return (
     <div className="Sidebar">
@@ -32,7 +32,7 @@ const Sidebar = () => {
           <button className="UploadButton"><FontAwesomeIcon icon={faUpload} /> Upload files</button>
         </div>
       </div>
-      <Upload className="Workspace" onUpload={onUploadFiles}>
+      <Upload className="Workspace" onUpload={setUploadedFiles}>
             <h3>Workspace</h3>
             {
               files.map((file, i) => (
