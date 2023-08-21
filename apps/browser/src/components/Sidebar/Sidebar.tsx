@@ -44,8 +44,7 @@ const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles }: Sideb
         </div>
         <Upload className="Workspace" onUpload={uploadUserFiles}>
           <h3>
-            <FontAwesomeIcon icon={faFolder} />
-            Workspace
+            <FontAwesomeIcon icon={faFolder} style={{ marginRight: "10px" }} /> WORKSPACE
           </h3>
           {files.map((file, i) => (
             <File file={file} />
