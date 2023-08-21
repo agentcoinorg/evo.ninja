@@ -1,4 +1,6 @@
-import React, { useState, ChangeEvent, KeyboardEvent } from "react";
+import React, { useState, useEffect, ChangeEvent, KeyboardEvent } from "react";
+import { Evo } from "@evo-ninja/core";
+
 import "./Chat.css";
 
 type Message = {
@@ -6,28 +8,60 @@ type Message = {
   user: string;
 };
 
-const Chat: React.FC = () => {
+export interface ChatProps {
+  evo: Evo;
+}
+
+const Chat: React.FC<ChatProps> = (props: ChatProps) => {
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
+  const [evoRunning, setEvoRunning] = useState<boolean>(false);
+  const [evoItr, setEvoItr] = useState<ReturnType<Evo["run"]> | undefined>(
+    undefined
+  );
 
-  const gibberishResponse = () => {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    for (let i = 0; i < 15; i++) {
-      result += characters.charAt(Math.floor(Math.random() * characters.length));
+  useEffect(() => {
+    const runEvo = async () => {
+      if (!evoRunning) {
+        return Promise.resolve();
+      }
+
+      // Create a new iteration thread
+      if (!evoItr) {
+        const { evo } = props;
+        setEvoItr(evo.run(message));
+        return Promise.resolve();
+      }
+
+      let messageLog = messages;
+
+      while (evoRunning) {
+        const response = await evoItr.next();
+
+        if (response.value && response.value.message) {
+          messageLog = [...messageLog, {
+            text: response.value.message,
+            user: "evo"
+          }];
+          setMessages(messageLog);
+        }
+
+        if (response.done) {
+          setEvoRunning(false);
+          return Promise.resolve();
+        }
+      }
+      return Promise.resolve();
     }
-    return result;
-  };
 
-  const handleSend = () => {
+    runEvo();
+  }, [evoRunning, evoItr]);
+
+  const handleSend = async () => {
     const newMessages = [...messages, { text: message, user: 'user' }];
     setMessages(newMessages);
     setMessage("");
-
-    // Simulating a delay for the Evo response
-    setTimeout(() => {
-      setMessages([...newMessages, { text: gibberishResponse(), user: 'evo' }]);
-    }, 1000);
+    setEvoRunning(true);
   };
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {

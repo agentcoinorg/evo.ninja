@@ -4,6 +4,12 @@
   height: 100%; /* Add this to take full height */
 }
 
+.Sidebar {
+  color: #f5f5f5;
+  background-color: #131313DF;
+  border-right: 2px solid #2b2b30;
+}
+
 .Chat {
   width: 80%;
   background-color: #1c1c1c;
@@ -78,4 +84,71 @@
 
 .inner-dropzone {
   padding: 20px;
+}
+
+@-webkit-keyframes bg-scrolling-reverse {
+  100% {
+    background-position: 0 250px;
+  }
+}
+@-moz-keyframes bg-scrolling-reverse {
+  100% {
+    background-position: 0 250px;
+  }
+}
+@-o-keyframes bg-scrolling-reverse {
+  100% {
+    background-position: 0 250px;
+  }
+}
+@keyframes bg-scrolling-reverse {
+  100% {
+    background-position: 0 250px;
+  }
+}
+@-webkit-keyframes bg-scrolling {
+  0% {
+    background-position: 0 250px;
+  }
+}
+@-moz-keyframes bg-scrolling {
+  0% {
+    background-position: 0 250px;
+  }
+}
+@-o-keyframes bg-scrolling {
+  0% {
+    background-position: 0 250px;
+  }
+}
+@keyframes bg-scrolling {
+  0% {
+    background-position: 0 250px;
+  }
+}
+
+.Dojo {
+  color: #999;
+  font: 400 16px/1.5 exo, ubuntu, "segoe ui", helvetica, arial, sans-serif;
+  text-align: center;
+  /* img size is 25x25 */
+  background: url("/public/wallpaper-bw.png") repeat 0 0 / 461px 250px;
+  -webkit-animation: bg-scrolling-reverse 5s infinite;
+  /* Safari 4+ */
+  -moz-animation: bg-scrolling-reverse 5s infinite;
+  /* Fx 5+ */
+  -o-animation: bg-scrolling-reverse 5s infinite;
+  /* Opera 12+ */
+  animation: bg-scrolling-reverse 5s infinite;
+  /* IE 10+ */
+  -webkit-animation-timing-function: linear;
+  -moz-animation-timing-function: linear;
+  -o-animation-timing-function: linear;
+  animation-timing-function: linear;
+}
+
+.Dojo::before {
+  font-size: 8rem;
+  font-weight: 100;
+  font-style: normal;
 }
