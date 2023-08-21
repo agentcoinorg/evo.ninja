@@ -5,12 +5,12 @@ import { useDropzone } from "react-dropzone";
 import { InMemoryFile, readFile } from '../file';
 import '../App.css';
 
-interface FooProps {
+interface UploadProps {
   className: string,
   onUpload: (files: InMemoryFile[]) => void
 }
 
-function Upload(props: PropsWithChildren<FooProps>) {
+function Upload({ className, onUpload, children }: PropsWithChildren<UploadProps>) {
   const [showUpload, setShowUpload] = useState(false);
   const { acceptedFiles, getRootProps, getInputProps, isDragAccept, open } =
     useDropzone({ noClick: true });
@@ -24,17 +24,17 @@ function Upload(props: PropsWithChildren<FooProps>) {
         })
       );
 
-      props.onUpload(result);
+      onUpload(result);
 
       setShowUpload(false);
     }
   })();
-  }, [acceptedFiles, props]);
+  }, [acceptedFiles, onUpload]);
 
   const dropHover = isDragAccept ? " drop-hover" : "";
 
   return (
-    <div className={props.className}>
+    <div className={className}>
       <div
           {...getRootProps({
             className: `dropzone ${dropHover}`,
@@ -53,7 +53,7 @@ function Upload(props: PropsWithChildren<FooProps>) {
             <>
               <div>
                 <div>
-                  {props.children}
+                  {children}
                 </div>
                   <button 
                     className="UploadButton" 
