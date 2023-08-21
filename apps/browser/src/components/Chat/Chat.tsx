@@ -43,7 +43,6 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages }: ChatProps) => {
           return Promise.resolve();
         }
 
-        console.log("evoooo", paused);
         const response = await evoItr.next();
 
         if (response.value && response.value.message) {

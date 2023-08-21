@@ -30,25 +30,27 @@ const File = ({ file }: { file: FileType }) => {
   }
 
   return (
+    <>
     <div className="File" onClick={handleClick}>
       {file.path}
-      <Modal
-        className="File__Modal"
-        isOpen={showContent}
-        onRequestClose={handleClose}
-        contentLabel="File Content"
-        style={{
-          overlay: {
-            backgroundColor: "transparent",
-          },
-        }}
-      >
-        <button className="File__Btn" onClick={handleClose}>
-          Close
-        </button>
-        <pre>{contentString}</pre>
-      </Modal>
     </div>
+    <Modal
+      className="File__Modal"
+      isOpen={showContent}
+      onRequestClose={handleClose}
+      contentLabel="File Content"
+      style={{
+        overlay: {
+          backgroundColor: "transparent",
+        },
+      }}
+    >
+      <button className="File__Btn" onClick={handleClose}>
+        Close
+      </button>
+      <pre>{contentString}</pre>
+    </Modal>
+    </>
   );
 };
 
