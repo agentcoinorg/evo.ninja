@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTwitter,
@@ -18,13 +18,13 @@ export interface SidebarProps {
 
 const Sidebar = (props: SidebarProps) => {
   const [files, setFiles] = React.useState<InMemoryFile[]>([]);
+  const [uploadedFiles, setUploadedFiles] = React.useState<InMemoryFile[]>([]);
   const { onSettingsClick } = props;
 
-  function onUploadFiles(files: InMemoryFile[]) {
-    console.log(files);
-    setFiles((old) => [...files]);
-  }
-
+  useEffect(() => {
+    setFiles(old => [...old,...uploadedFiles]);
+  }, [uploadedFiles]);
+  
   return (
     <div className="Sidebar">
       <div className="Content">
@@ -36,7 +36,7 @@ const Sidebar = (props: SidebarProps) => {
           <div className="Script">Script 1</div>
           <div className="Script">Script 2</div>
         </div>
-        <Upload className="Workspace" onUpload={onUploadFiles}>
+        <Upload className="Workspace" onUpload={setUploadedFiles}>
           <h3>
             <FontAwesomeIcon icon={faFolder} />
             Workspace
