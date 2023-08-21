@@ -23,7 +23,7 @@ const Sidebar = () => {
   return (
     <div className="Sidebar">
       <div className="Content">
-        <img src="avatar.png" alt="Main Logo" className="Logo" />
+        <img src="avatar-name.png" alt="Main Logo" className="Logo" />
         <div className="Scripts">
           <h3>
             <FontAwesomeIcon icon={faUserNinja} /> SCRIPTS

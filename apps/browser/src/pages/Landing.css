@@ -1,0 +1,121 @@
+.Landing {
+  text-align: center;
+  color: #FFFFFF;
+  background-color: #00000000;
+}
+
+.Landing-header {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: #FFFFFF;
+}
+
+.Header-Links {
+  position: absolute;
+  display: flex;
+  top: 0;
+  right: 0;
+  height: 60px;
+  margin-right: 50px;
+}
+
+.Header-Links a {
+  margin: 10px;
+  margin-top: 20px;
+  display: inherit;
+}
+
+.Header-Links a:hover {
+  filter: contrast(0.5)
+}
+
+.Landing-link {
+  color: #FFFFFF;
+}
+
+.Landing button {
+  padding: 10px 20px;
+  font-size: 1em;
+  color: #FFFFFF;
+  background-color: #181818b8;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.Landing button:hover {
+  background-color: #252525;
+}
+
+
+@-webkit-keyframes bg-scrolling-reverse {
+  100% {
+    background-position: 0 250px;
+  }
+}
+@-moz-keyframes bg-scrolling-reverse {
+  100% {
+    background-position: 0 250px;
+  }
+}
+@-o-keyframes bg-scrolling-reverse {
+  100% {
+    background-position: 0 250px;
+  }
+}
+@keyframes bg-scrolling-reverse {
+  100% {
+    background-position: 0 250px;
+  }
+}
+@-webkit-keyframes bg-scrolling {
+  0% {
+    background-position: 0 250px;
+  }
+}
+@-moz-keyframes bg-scrolling {
+  0% {
+    background-position: 0 250px;
+  }
+}
+@-o-keyframes bg-scrolling {
+  0% {
+    background-position: 0 250px;
+  }
+}
+@keyframes bg-scrolling {
+  0% {
+    background-position: 0 250px;
+  }
+}
+
+.Landing {
+  color: #999;
+  font: 400 16px/1.5 exo, ubuntu, "segoe ui", helvetica, arial, sans-serif;
+  text-align: center;
+  /* img size is 25x25 */
+  background: url("/public/wallpaper.png") repeat 0 0 / 461px 250px;
+  -webkit-animation: bg-scrolling-reverse 5s infinite;
+  /* Safari 4+ */
+  -moz-animation: bg-scrolling-reverse 5s infinite;
+  /* Fx 5+ */
+  -o-animation: bg-scrolling-reverse 5s infinite;
+  /* Opera 12+ */
+  animation: bg-scrolling-reverse 5s infinite;
+  /* IE 10+ */
+  -webkit-animation-timing-function: linear;
+  -moz-animation-timing-function: linear;
+  -o-animation-timing-function: linear;
+  animation-timing-function: linear;
+}
+
+.Landing::before {
+  font-size: 8rem;
+  font-weight: 100;
+  font-style: normal;
+}
