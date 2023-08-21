@@ -52,7 +52,7 @@ describe('AI Agent Test Suite', () => {
     { goal: 'Calculate the number of neutrons in an isotope of carbon-14 and save it in a file named output.txt', expected: '8' },
     { goal: 'Calculate the number of valence electrons in a chlorine atom and save it in a file named output.txt', expected: '7' },
     { goal: 'Calculate the boiling point of ethanol at standard atmospheric pressure (in degrees Celsius) and save it in a file named output.txt', expected: '78.37' },
-      
+
     // General Challenges
     { goal: 'Create a CSV file named output.txt with the numbers from 1 to 10 and verify the content', expected: '1,2,3,4,5,6,7,8,9,10' },
     { goal: 'Write the word Washington to the file called output.txt', expected: 'Washington' },
