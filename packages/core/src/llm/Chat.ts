@@ -1,13 +1,10 @@
-import { LlmApi } from ".";
+import { LlmApi, Tokenizer } from ".";
 import { Workspace } from "../sys";
 
 import {
   ChatCompletionRequestMessageRoleEnum,
   ChatCompletionRequestMessage as Message
 } from "openai";
-import { get_encoding } from "@dqbd/tiktoken";
-
-const gpt2 = get_encoding("gpt2");
 
 export { Message };
 
@@ -38,6 +35,7 @@ export class Chat {
   constructor(
     private _workspace: Workspace,
     private _llm: LlmApi,
+    private _tokenizer: Tokenizer,
     private _msgsFile: string = ".msgs",
   ) {
     this._maxContextTokens = this._llm.getMaxContextTokens();
@@ -55,6 +53,10 @@ export class Chat {
     );
   }
 
+  get tokenizer(): Tokenizer {
+    return this._tokenizer;
+  }
+
   get messages(): Message[] {
     return [
       ...this._msgLogs["persistent"].msgs,
@@ -70,7 +72,7 @@ export class Chat {
     let msgs = Array.isArray(msg) ? msg : [msg];
 
     for (const msg of msgs) {
-      const tokens = gpt2.encode(msg.content || "").length;
+      const tokens = this._tokenizer.encode(msg.content || "").length;
 
       // If the message is larger than the context window
       if (tokens > this._chunkTokens) {
@@ -153,7 +155,7 @@ export class Chat {
       const contentChunk = content.slice(0, this._chunkTokens);
 
       // Append the chunk
-      chunks.tokens += gpt2.encode(contentChunk).length;
+      chunks.tokens += this._tokenizer.encode(contentChunk).length;
       chunks.msgs.push({
         ...msg,
         content: contentChunk
@@ -184,7 +186,7 @@ export class Chat {
       return;
     }
 
-    const tokens = gpt2.encode(message.content || "").length;
+    const tokens = this._tokenizer.encode(message.content || "").length;
 
     this._msgLogs[msgType] = {
       tokens,
@@ -209,14 +211,14 @@ export class Chat {
       while (index < queue.length) {
         const msg = queue[index];
         const content = msg.content || "";
-        const contentTokens = gpt2.encode(content).length;
+        const contentTokens = this._tokenizer.encode(content).length;
 
         if ((tokenCounter + contentTokens) > (this._maxContextTokens - this._summaryTokens)) {
           break;
         }
 
         toSummarize.push(msg);
-        tokenCounter += gpt2.encode(content).length;
+        tokenCounter += this._tokenizer.encode(content).length;
         index++;
       }
 
