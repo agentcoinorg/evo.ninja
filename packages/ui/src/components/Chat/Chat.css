@@ -7,6 +7,67 @@
   border-radius: 30px;
 }
 
+.Chat {
+  width: 80%;
+  background-color: #1c1c1c;
+  color: white;
+  display: flex; /* Add this to make flex layout */
+  flex-direction: column; /* Add this to make flex layout */
+  height: 100%; /* Add this to take full height */
+}
+
+.Messages {
+  padding: 20px;
+  overflow: scroll;
+  flex: 1; /* Add this to take remaining height */
+}
+
+.Message {
+  padding: 10px;
+  padding-left: 15px;
+  margin: 5px;
+  border-radius: 25px;
+}
+
+.Message.user {
+  background-color: #489dff;
+  color: #333;
+}
+
+.Message.evo {
+  background-color: #ff4f4f;
+  color: #333;
+}
+.SendMessage {
+  display: flex;
+  padding: 10px;
+}
+
+.SendMessage input {
+  flex: 1;
+  padding: 10px;
+  margin-right: 10px;
+}
+
+.SendMessage button {
+  background-color: #ff5151;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.Chat__Input {
+  flex: 1;
+  padding: 10px;
+  margin-right: 10px;
+  /* font-size: 29px; Adjust this value as needed */
+}
+
+.Chat__Container input {
+  font-size: 25px; /* Adjust this value to set the font size */
+}
+
 .Chat__Container {
   display: flex;
   margin: 20px;
