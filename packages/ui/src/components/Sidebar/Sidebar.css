@@ -1,0 +1,88 @@
+.Sidebar {
+  width: 20%;
+  background-color: #333232;
+  color: #ecf0f1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  overflow: auto;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.Content {
+  overflow: auto;
+}
+
+.Logo {
+  width: 175px;
+  margin-bottom: 20px;
+}
+
+.Scripts,
+.Workspace {
+  background-color: white;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px;
+  color: black;
+  width: calc(100% - 20px); /* Adjusting for margins */
+  box-sizing: border-box;
+}
+
+.File,
+.Script {
+  border-radius: 20px;
+  padding: 5px;
+  margin: 5px 0;
+  background-color: #da3232;
+  width: 100%;
+}
+
+.Scripts,
+.Workspace {
+  border: 1px solid #ff572e;
+  color: white;
+  background-color: #121312;
+  border-radius: 30px;
+}
+
+.UploadButton {
+  float: right;
+  background-color: #ff4f4f;
+  border: none;
+  color: rgb(0, 0, 0);
+  padding: 10px 20px;
+  text-align: center;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 20px;
+}
+
+.UploadButton:hover {
+  background-color: #bf3636;
+}
+
+.ImageBanner {
+  width: 15vw;
+}
+
+.BuiltWithLove,
+.ImageBanner,
+.Footer {
+  margin-top: auto;
+}
+
+.Footer {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin: 2rem 0 2rem 0;
+  box-sizing: border-box;
+}
+
+.Footer a {
+  color: #ff4f4f;
+  text-decoration: none;
+}

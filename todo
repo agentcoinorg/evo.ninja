@@ -1,3 +1,9 @@
+- monorepo
+  - ENV vars -> cli
+  - scripts dir
+  - workspace dir
+
+
 - logger
   - markdown
 - dogo app
