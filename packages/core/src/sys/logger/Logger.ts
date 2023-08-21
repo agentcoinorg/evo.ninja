@@ -63,21 +63,25 @@ export class Logger implements ILogger {
     this._loggers.forEach((l) => l.error(`${msg}${errorStr}`));
   }
 
-  logHeader() {
+  async logHeader(): Promise<void> {
     const logger = this;
 
-    figlet.text("EVO.NINJA", {
-      font: "Slant",
-      horizontalLayout: "default",
-      verticalLayout: "default",
-      whitespaceBreak: true
-    }, function(err: Error | null, data?: string) {
-      if (err) {
-        logger.error("Something went wrong...", err);
-        return;
-      }
-      logger.info("```\n" + data + "\n```\n");
-      logger.info("Support: https://discord.polywrap.io");
+    return new Promise<void>((resolve, reject) => {
+      figlet.text("EVO", {
+        font: "Slant",
+        horizontalLayout: "default",
+        verticalLayout: "default",
+        whitespaceBreak: true
+      }, function(err: Error | null, data?: string) {
+        if (err) {
+          logger.error("Something went wrong...", err);
+          reject(err);
+          return;
+        }
+        logger.info("```\n" + data + "\n```\n");
+        logger.info("Support: https://discord.polywrap.io");
+        resolve();
+      });
     });
   }
 }

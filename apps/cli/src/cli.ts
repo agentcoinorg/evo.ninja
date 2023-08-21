@@ -1,6 +1,6 @@
-import { FileSystemWorkspace } from "./sys";
+import { FileSystemWorkspace, FileLogger } from "./sys";
 
-import { Evo, Scripts, Env, OpenAI, Chat } from "@evo-ninja/core";
+import { Evo, Scripts, Env, OpenAI, Chat, Logger, ConsoleLogger } from "@evo-ninja/core";
 import dotenv from "dotenv";
 import readline from "readline";
 import path from "path";
@@ -20,11 +20,6 @@ const prompt = (query: string) => new Promise<string>(
 );
 
 export async function cli(): Promise<void> {
-  let goal: string | undefined = process.argv[2];
-
-  if (!goal) {
-    goal = await prompt("Enter your goal: ");
-  }
 
   const rootDir = path.join(__dirname, "../../../");
 
@@ -52,13 +47,34 @@ export async function cli(): Promise<void> {
     llm,
     cl100k_base
   );
+  // Generate a unique log file name
+  const date = new Date();
+  const logFile = `chat_${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}.md`;
+  const logWorkspace = new FileSystemWorkspace(
+    path.join(rootDir, "chats")
+  );
+  // Create a console & file logger
+  const logger = new Logger([
+    new ConsoleLogger(),
+    new FileLogger(logWorkspace.toWorkspacePath(logFile))
+  ])
 
+  // Create Evo
   const evo = new Evo(
     userWorkspace,
     scripts,
     llm,
-    chat
+    chat,
+    logger
   );
+
+  await logger.logHeader();
+
+  let goal: string | undefined = process.argv[2];
+
+  if (!goal) {
+    goal = await prompt("Enter your goal: ");
+  }
 
   let iterator = evo.run(goal);
 

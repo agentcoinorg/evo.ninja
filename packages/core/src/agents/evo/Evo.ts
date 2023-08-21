@@ -6,7 +6,7 @@ import { ScriptWriter } from "../script-writer";
 import { LlmApi, Chat } from "../../llm";
 import { WrapClient } from "../../wrap";
 import { Scripts } from "../../Scripts";
-import { InMemoryWorkspace, Workspace } from "../../sys";
+import { InMemoryWorkspace, Workspace, Logger } from "../../sys";
 
 export class Evo implements Agent {
   private client: WrapClient;
@@ -16,7 +16,8 @@ export class Evo implements Agent {
     private readonly workspace: Workspace,
     private readonly scripts: Scripts,
     private readonly llm: LlmApi,
-    private readonly chat: Chat
+    private readonly chat: Chat,
+    private readonly logger: Logger
   ) {
     this.client = new WrapClient(
       this.workspace,
@@ -45,7 +46,7 @@ export class Evo implements Agent {
         agentFunctions(createScriptWriter)
       );
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       return RunResult.error("Unrecoverable error encountered.");
     }
   }
