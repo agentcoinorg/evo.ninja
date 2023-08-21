@@ -1,5 +1,4 @@
-import { WrapClient } from "../../../wrap";
-import { AgentFunction } from "../../agent-function";
+import { AgentFunction, AgentContext } from "../../agent-function";
 
 export const think: AgentFunction = {
   definition: {
@@ -18,8 +17,7 @@ export const think: AgentFunction = {
     },
   },
   buildExecutor: (
-    globals: Record<string, string>,
-    client: WrapClient
+    context: AgentContext
   ) => {
     return async (options: { thoughts: string }) => {
       return { 

@@ -1,17 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import './App.css';
+import React, { useEffect, useState, PropsWithChildren } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload } from '@fortawesome/free-solid-svg-icons';
 import { useDropzone } from "react-dropzone";
-import { InMemoryFile, readFile } from './file';
-import { PropsWithChildren } from 'react'
+import { InMemoryFile, readFile } from '../file';
+import '../App.css';
 
 interface FooProps {
   className: string,
   onUpload: (files: InMemoryFile[]) => void
 }
 
-function UploadContainer(props: PropsWithChildren<FooProps>) {
+function Upload(props: PropsWithChildren<FooProps>) {
   const [showUpload, setShowUpload] = useState(false);
   const { acceptedFiles, getRootProps, getInputProps, isDragAccept, open } =
     useDropzone({ noClick: true });
@@ -70,4 +69,4 @@ function UploadContainer(props: PropsWithChildren<FooProps>) {
   );
 }
 
-export default UploadContainer;
+export default Upload;

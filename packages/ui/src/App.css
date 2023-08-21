@@ -1,29 +1,17 @@
-body, html {
+body,
+html {
   margin: 0;
   height: 100%;
 }
-
 #root {
   height: 100%;
 }
 
 .App {
   display: flex;
-  background-color: black;
+  background-color: #333232;
   height: 100%; /* Add this to take full height */
 }
-
-.Sidebar {
-  width: 20%;
-  background-color: gray;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 100%; /* Add this to take full height */
-  overflow: auto; /* In case the content overflows */
-}
-
 
 .UploadButton {
   float: right;
@@ -94,7 +82,6 @@ body, html {
   padding: 10px;
   cursor: pointer;
 }
-
 
 .Scripts, .Workspace {
   background-color: white; /* Add background color */

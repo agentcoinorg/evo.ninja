@@ -3,28 +3,20 @@ import { agentFunctions } from "./agent-functions";
 import { RunResult, StepOutput, Agent } from "../agent";
 import { executeAgentFunction } from "../agent-function";
 import { WrapClient } from "../../wrap";
-import { LlmApi, OpenAI, Chat } from "../../llm";
-import { Workspace, env } from "../../sys";
+import { Scripts } from "../../Scripts";
+import { LlmApi, Chat } from "../../llm";
+import { Workspace } from "../../sys";
 
 export class ScriptWriter implements Agent {
-  public chat: Chat;
-  private llm: LlmApi;
-
   private client: WrapClient;
   private globals: Record<string, any> = {};
 
-  constructor(private readonly workspace: Workspace) {
-    this.llm = new OpenAI(
-      env().OPENAI_API_KEY,
-      env().GPT_MODEL
-    );
-
-    this.chat = new Chat(
-      env().CONTEXT_WINDOW_TOKENS,
-      this.workspace,
-      this.llm as OpenAI
-    );
-
+  constructor(
+    public readonly workspace: Workspace,
+    private readonly scripts: Scripts,
+    private readonly llm: LlmApi,
+    private readonly chat: Chat
+  ) {
     this.client = new WrapClient(
       this.workspace,
     );
@@ -49,6 +41,7 @@ export class ScriptWriter implements Agent {
         this.client, 
         this.globals,
         this.workspace,
+        this.scripts,
         executeAgentFunction,
         agentFunctions
       );

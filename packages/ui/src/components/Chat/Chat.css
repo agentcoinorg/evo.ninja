@@ -1,0 +1,107 @@
+.Chat {
+  background-color: #121312;
+  border: 1px solid #ff572e;
+  height: 90vh;
+  width: 75%;
+  align-self: center;
+  border-radius: 30px;
+}
+
+.Chat {
+  width: 80%;
+  background-color: #1c1c1c;
+  color: white;
+  display: flex; /* Add this to make flex layout */
+  flex-direction: column; /* Add this to make flex layout */
+  height: 100%; /* Add this to take full height */
+}
+
+.Messages {
+  padding: 20px;
+  overflow: scroll;
+  flex: 1; /* Add this to take remaining height */
+}
+
+.Message {
+  padding: 10px;
+  padding-left: 15px;
+  margin: 5px;
+  border-radius: 25px;
+}
+
+.Message.user {
+  background-color: #489dff;
+  color: #333;
+}
+
+.Message.evo {
+  background-color: #ff4f4f;
+  color: #333;
+}
+.SendMessage {
+  display: flex;
+  padding: 10px;
+}
+
+.SendMessage input {
+  flex: 1;
+  padding: 10px;
+  margin-right: 10px;
+}
+
+.SendMessage button {
+  background-color: #ff5151;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.Chat__Input {
+  flex: 1;
+  padding: 10px;
+  margin-right: 10px;
+  /* font-size: 29px; Adjust this value as needed */
+}
+
+.Chat__Container input {
+  font-size: 25px; /* Adjust this value to set the font size */
+}
+
+.Chat__Container {
+  display: flex;
+  margin: 20px;
+  align-items: center;
+  justify-content: center;
+}
+
+.Chat__Input {
+  border-radius: 15px;
+  padding: 10px;
+  font-size: 16px;
+  width: 80%;
+  height: 3.25rem;
+  background-color: #656564;
+  box-sizing: border-box;
+  outline: none;
+  margin: 0 15px;
+}
+
+.Chat__Btn {
+  background-color: #ff572e;
+  height: 3.25rem;
+  border: none;
+  color: white;
+  text-align: center;
+  display: inline-block;
+  font-size: 16px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  padding: 10px 24px;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.Message {
+  background: #b09898;
+}
