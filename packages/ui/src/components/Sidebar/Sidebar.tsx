@@ -3,10 +3,19 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTwitter, faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faCog, faUpload } from '@fortawesome/free-solid-svg-icons';
 import { faUserNinja, faFolder } from '@fortawesome/free-solid-svg-icons';
+import Upload from '../Upload';
+import { InMemoryFile } from '../../file';
 
 import './Sidebar.css'
 
 const Sidebar = () => {
+  const [files, setFiles] = React.useState<InMemoryFile[]>([]);
+
+  function onUploadFiles(files: InMemoryFile[]) {
+    console.log(files);
+    setFiles(old => [...files]);
+  }
+
   return (
     <div className="Sidebar">
       <img src="avatar.png" alt="Main Logo" className="Logo" />
@@ -23,6 +32,14 @@ const Sidebar = () => {
           <button className="UploadButton"><FontAwesomeIcon icon={faUpload} /> Upload files</button>
         </div>
       </div>
+      <Upload className="Workspace" onUpload={onUploadFiles}>
+            <h3>Workspace</h3>
+            {
+              files.map((file, i) => (
+                <div className="File" key={i}>{file.path}</div>
+              ))
+            }
+        </Upload>
       <span className="BuiltWithLove">Built with love by</span>
       <img src="polywrap-logo.png" alt="Image Banner" className="ImageBanner" />
       <footer className="Footer">
