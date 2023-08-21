@@ -68,11 +68,10 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages }: ChatProps) => {
   }, [evoRunning, evoItr]);
 
   const handleSend = async () => {
-    setMessages(messages => [...messages, {
-      type: "info",
+    onMessage({
       text: message,
-      user: 'user'
-    }]);
+      user: "user"
+    });
     setSending(true);
     setMessage("");
     setEvoRunning(true);
