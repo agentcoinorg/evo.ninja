@@ -28,8 +28,7 @@ jobs:
       run: yarn
 
     - name: Build
-      working-directory: ./apps/browser
-      run: yarn build && mv CNAME ./build
+      run: yarn build && mv ./apps/browser/CNAME ./apps/browser/build
 
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@v4
