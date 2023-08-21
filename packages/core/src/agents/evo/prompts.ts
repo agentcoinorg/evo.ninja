@@ -5,7 +5,7 @@ export const INITIAL_PROMP = `You are an agent that executes scripts to accompli
 `When creating scripts be sure to declare all the require statements. The code of the scripts should be written as if in a function.\n` +
 `Do not use async/await or promises.\n` + 
 `Use the speak script to inform the user.\n` +
-`Once you have achieved the goal, execute the onGoalAchieved script in the agent namespace.`;
+`Once you have achieved the goal, use executeScript function to execute agent.onGoalAchieved script.`;
 
 export const GOAL_PROMPT = (goal: string) => `The user has the following goal: ${goal}.`
 export const LOOP_PREVENTION_PROMPT = "Assistant, are you trying to inform the user? If so, Try calling findScript with the agent namespace.";
