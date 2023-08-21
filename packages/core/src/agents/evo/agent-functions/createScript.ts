@@ -1,6 +1,5 @@
 import { ScriptWriter } from "../../script-writer";
 import { AgentContext, AgentFunction } from "../../agent-function";
-import chalk from "chalk";
 
 export function createScript(createScriptWriter: () => ScriptWriter): AgentFunction {
   return {
@@ -45,14 +44,14 @@ export function createScript(createScriptWriter: () => ScriptWriter): AgentFunct
         // Create a fresh ScriptWriter agent
         const writer = createScriptWriter();
 
-        console.log(chalk.yellow(`Creating script '${options.namespace}'...`));
+        context.logger.notice(`Creating script '${options.namespace}'...`);
 
         let iterator = writer.run(options.namespace, options.description, options.arguments, options.developerNote);
 
         while(true) {
           const response = await iterator.next();
 
-          response.value.message && console.log(chalk.yellow(response.value.message));
+          response.value.message && context.logger.notice(response.value.message);
 
           // TODO: we should not be communicating the ScriptWriter's completion
           //       via a special file in the workspace

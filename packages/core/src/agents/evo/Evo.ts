@@ -6,7 +6,7 @@ import { ScriptWriter } from "../script-writer";
 import { LlmApi, Chat } from "../../llm";
 import { WrapClient } from "../../wrap";
 import { Scripts } from "../../Scripts";
-import { InMemoryWorkspace, Workspace } from "../../sys";
+import { InMemoryWorkspace, Workspace, Logger } from "../../sys";
 
 export class Evo implements Agent {
   private client: WrapClient;
@@ -16,10 +16,12 @@ export class Evo implements Agent {
     private readonly workspace: Workspace,
     private readonly scripts: Scripts,
     private readonly llm: LlmApi,
-    private readonly chat: Chat
+    private readonly chat: Chat,
+    private readonly logger: Logger
   ) {
     this.client = new WrapClient(
       this.workspace,
+      this.logger
     );
 
     this.globals = {};
@@ -28,8 +30,8 @@ export class Evo implements Agent {
   public async* run(goal: string): AsyncGenerator<StepOutput, RunResult, string | undefined> {
     const createScriptWriter = (): ScriptWriter => {
       const workspace = new InMemoryWorkspace();
-      const chat = new Chat(workspace, this.llm, this.chat.tokenizer);
-      return new ScriptWriter(workspace, this.scripts, this.llm, chat);
+      const chat = new Chat(workspace, this.llm, this.chat.tokenizer, this.logger);
+      return new ScriptWriter(workspace, this.scripts, this.llm, chat, this.logger);
     };
 
     try {
@@ -41,6 +43,7 @@ export class Evo implements Agent {
         this.globals,
         this.workspace,
         this.scripts,
+        this.logger,
         executeAgentFunction,
         agentFunctions(createScriptWriter)
       );

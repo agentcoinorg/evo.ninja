@@ -11,11 +11,17 @@ export interface ILogger {
   error: (msg: string, error?: unknown) => void;
 }
 
+export interface LoggerCallbacks {
+  promptUser: (query: string) => Promise<string>;
+  logUserPrompt: (response: string) => void;
+}
+
 export class Logger implements ILogger {
   protected _logDir: string = "chats";
 
   constructor(
-    protected _loggers: ILogger[]
+    protected _loggers: ILogger[],
+    protected _callbacks: LoggerCallbacks
   ) { }
 
   info(info: string) {
@@ -63,21 +69,31 @@ export class Logger implements ILogger {
     this._loggers.forEach((l) => l.error(`${msg}${errorStr}`));
   }
 
-  logHeader() {
+  async prompt(query: string): Promise<string> {
+    const response = await this._callbacks.promptUser(query);
+    this._callbacks.logUserPrompt(response);
+    return response;
+  }
+
+  async logHeader(): Promise<void> {
     const logger = this;
 
-    figlet.text("EVO.NINJA", {
-      font: "Slant",
-      horizontalLayout: "default",
-      verticalLayout: "default",
-      whitespaceBreak: true
-    }, function(err: Error | null, data?: string) {
-      if (err) {
-        logger.error("Something went wrong...", err);
-        return;
-      }
-      logger.info("```\n" + data + "\n```\n");
-      logger.info("Support: https://discord.polywrap.io");
+    return new Promise<void>((resolve, reject) => {
+      figlet.text("E V O", {
+        font: "Slant",
+        horizontalLayout: "default",
+        verticalLayout: "default",
+        whitespaceBreak: true
+      }, function(err: Error | null, data?: string) {
+        if (err) {
+          logger.error("Something went wrong...", err);
+          reject(err);
+          return;
+        }
+        logger.info("```\n" + data + "\n```\n");
+        logger.info("Support: https://discord.polywrap.io");
+        resolve();
+      });
     });
   }
 }

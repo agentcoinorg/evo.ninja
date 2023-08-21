@@ -9,7 +9,7 @@ import {
   OTHER_EXECUTE_FUNCTION_OUTPUT,
   READ_GLOBAL_VAR_OUTPUT
 } from "./prompts";
-import { Workspace, } from "../sys";
+import { Workspace, Logger } from "../sys";
 import { Scripts } from "../Scripts";
 import { WrapClient } from "../wrap";
 import { LlmApi, Chat } from "../llm";
@@ -22,6 +22,7 @@ export interface AgentContext {
   scripts: Scripts;
   llm: LlmApi;
   chat: Chat;
+  logger: Logger;
 }
 
 export interface AgentFunction {
