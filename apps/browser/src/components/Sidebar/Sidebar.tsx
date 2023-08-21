@@ -9,6 +9,7 @@ import { faCog, faUpload } from "@fortawesome/free-solid-svg-icons";
 import { faUserNinja, faFolder } from "@fortawesome/free-solid-svg-icons";
 import Upload from "../Upload";
 import { InMemoryFile } from "../../file";
+import File from "../File/File";
 
 import "./Sidebar.css";
 
@@ -22,9 +23,9 @@ const Sidebar = (props: SidebarProps) => {
   const { onSettingsClick } = props;
 
   useEffect(() => {
-    setFiles(old => [...old,...uploadedFiles]);
+    setFiles((old) => [...old, ...uploadedFiles]);
   }, [uploadedFiles]);
-  
+
   return (
     <div className="Sidebar">
       <div className="Content">
@@ -42,9 +43,7 @@ const Sidebar = (props: SidebarProps) => {
             Workspace
           </h3>
           {files.map((file, i) => (
-            <div className="File" key={i}>
-              {file.path}
-            </div>
+            <File file={file} />
           ))}
         </Upload>
         <footer className="Footer">
