@@ -12,11 +12,49 @@ import Sidebar from "../components/Sidebar/Sidebar";
 import Chat from "../components/Chat/Chat";
 import { InMemoryFile } from '../file';
 import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
+import { Workspace } from '@evo-ninja/core';
 
 type Message = {
   text: string;
   user: string;
 };
+
+const onGoalAchievedScript = {
+  name: "agent.onGoalAchieved",
+  definition: `{
+  "name":"agent.onGoalAchieved",
+  "description":"Informs the user that the goal has been achieved.",
+  "arguments":"None",
+  "code":"./agent.onGoalAchieved.js"
+}`,
+  code: `return __wrap_subinvoke(
+  'plugin/agent',
+  'onGoalAchieved',
+  { }
+).value
+`
+};
+
+const speakScript = {
+  name: "agent.speak",
+  definition: `{
+    "name":"agent.speak",
+    "description":"Informs the user by sending a message.",
+    "arguments":"{ message: string }",
+    "code":"./agent.speak.js"
+}`,
+  code: `return __wrap_subinvoke(
+  'plugin/agent',
+  'speak',
+  { message: message }
+).value
+`
+};
+
+function addScript(script: {name: string, definition: string, code: string}, scriptsWorkspace: Workspace) {
+  scriptsWorkspace.writeFileSync(`${script.name}.json`, script.definition);
+  scriptsWorkspace.writeFileSync(`${script.name}.js`, script.code);
+}
 
 function Dojo() {
   const [apiKey, setApiKey] = useState<string | null>(
@@ -101,9 +139,13 @@ function Dojo() {
         logUserPrompt: () => {}
       });
       const scriptsWorkspace = new EvoCore.InMemoryWorkspace();
+      addScript(onGoalAchievedScript, scriptsWorkspace);
+      addScript(speakScript, scriptsWorkspace);
+
       const scripts = new EvoCore.Scripts(
         scriptsWorkspace
       );
+      
       setScriptsWorkspace(scriptsWorkspace);
       const env = new EvoCore.Env(
         {
