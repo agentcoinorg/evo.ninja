@@ -1,6 +1,14 @@
-import { FileSystemWorkspace } from "./sys";
+import { FileSystemWorkspace, FileLogger } from "./sys";
 
-import { Evo, Scripts, Env, OpenAI, Chat } from "@evo-ninja/core";
+import {
+  Evo,
+  Scripts,
+  Env,
+  OpenAI,
+  Chat,
+  ConsoleLogger,
+  Logger
+} from "@evo-ninja/core";
 import dotenv from "dotenv";
 import readline from "readline";
 import path from "path";
@@ -20,13 +28,31 @@ const prompt = (query: string) => new Promise<string>(
 );
 
 export async function cli(): Promise<void> {
-  let goal: string | undefined = process.argv[2];
-
-  if (!goal) {
-    goal = await prompt("Enter your goal: ");
-  }
-
   const rootDir = path.join(__dirname, "../../../");
+
+  const env = new Env(
+    process.env as Record<string, string>
+  );
+
+  // Generate a unique log file
+  const date = new Date();
+  const logFile = `chat_${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}.md`;
+  const logWorkspace = new FileSystemWorkspace(
+    path.join(rootDir, "chats")
+  );
+  const fileLogger = new FileLogger(logWorkspace.toWorkspacePath(logFile));
+
+  // Create logger
+  const consoleLogger = new ConsoleLogger();
+  const logger = new Logger([
+    fileLogger,
+    consoleLogger
+  ], {
+    promptUser: prompt,
+    logUserPrompt: (response: string) => {
+      fileLogger.info(`**User**: ${response}`);
+    }
+  })
 
   const scriptsWorkspace = new FileSystemWorkspace(
     path.join(rootDir, "scripts")
@@ -35,14 +61,12 @@ export async function cli(): Promise<void> {
     scriptsWorkspace,
     "./"
   );
-  const env = new Env(
-    process.env as Record<string, string>
-  );
   const llm = new OpenAI(
     env.OPENAI_API_KEY,
     env.GPT_MODEL,
     env.CONTEXT_WINDOW_TOKENS,
-    env.MAX_RESPONSE_TOKENS
+    env.MAX_RESPONSE_TOKENS,
+    logger
   );
   const userWorkspace = new FileSystemWorkspace(
     path.join(rootDir, "workspace")
@@ -50,22 +74,35 @@ export async function cli(): Promise<void> {
   const chat = new Chat(
     userWorkspace,
     llm,
-    cl100k_base
+    cl100k_base,
+    logger
   );
 
+  // Create Evo
   const evo = new Evo(
     userWorkspace,
     scripts,
     llm,
-    chat
+    chat,
+    logger
   );
+
+  await logger.logHeader();
+
+  let goal: string | undefined = process.argv[2];
+
+  if (!goal) {
+    goal = await logger.prompt("Enter your goal: ");
+  }
 
   let iterator = evo.run(goal);
 
   while(true) {
     const response = await iterator.next();
 
-    response.value.message && console.log(response.value.message);
+    if (response.value) {
+      response.value.message && logger.info(response.value.message);
+    }
   }
 }
 

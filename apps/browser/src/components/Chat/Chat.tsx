@@ -10,9 +10,10 @@ type Message = {
 
 export interface ChatProps {
   evo: Evo;
+  onMessage: (message: string) => void;
 }
 
-const Chat: React.FC<ChatProps> = (props: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({evo, onMessage }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
@@ -29,7 +30,6 @@ const Chat: React.FC<ChatProps> = (props: ChatProps) => {
 
       // Create a new iteration thread
       if (!evoItr) {
-        const { evo } = props;
         setEvoItr(evo.run(message));
         return Promise.resolve();
       }
@@ -39,12 +39,17 @@ const Chat: React.FC<ChatProps> = (props: ChatProps) => {
       while (evoRunning) {
         const response = await evoItr.next();
 
+        // TODO:
+        // - handle proptType === "Prompt"
+        console.log(response);
+
         if (response.value && response.value.message) {
           messageLog = [...messageLog, {
             text: response.value.message,
             user: "evo"
           }];
           setMessages(messageLog);
+          onMessage(response.value.message);
         }
 
         if (response.done) {
@@ -61,7 +66,11 @@ const Chat: React.FC<ChatProps> = (props: ChatProps) => {
 
   const handleSend = async () => {
     setSending(true); // Set the sending state when starting to send
-    const newMessages = [...messages, { text: message, user: 'user' }];
+    const newMessages = [...messages, {
+      type: "info",
+      text: message,
+      user: 'user'
+    }];
     setMessages(newMessages);
     setEvoRunning(true);
   };

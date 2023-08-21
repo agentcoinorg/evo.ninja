@@ -5,7 +5,7 @@ import { executeAgentFunction } from "../agent-function";
 import { WrapClient } from "../../wrap";
 import { Scripts } from "../../Scripts";
 import { LlmApi, Chat } from "../../llm";
-import { Workspace } from "../../sys";
+import { Workspace, Logger } from "../../sys";
 
 export class ScriptWriter implements Agent {
   private client: WrapClient;
@@ -15,10 +15,12 @@ export class ScriptWriter implements Agent {
     public readonly workspace: Workspace,
     private readonly scripts: Scripts,
     private readonly llm: LlmApi,
-    private readonly chat: Chat
+    private readonly chat: Chat,
+    private readonly logger: Logger
   ) {
     this.client = new WrapClient(
       this.workspace,
+      this.logger
     );
     
     this.globals = {};
@@ -42,11 +44,12 @@ export class ScriptWriter implements Agent {
         this.globals,
         this.workspace,
         this.scripts,
+        this.logger,
         executeAgentFunction,
         agentFunctions
       );
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       return RunResult.error( "Unrecoverable error encountered.");
     }
   }

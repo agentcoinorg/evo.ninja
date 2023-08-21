@@ -9,11 +9,12 @@ import {
   OTHER_EXECUTE_FUNCTION_OUTPUT,
   READ_GLOBAL_VAR_OUTPUT
 } from "./prompts";
-import { Workspace, } from "../sys";
+import { Workspace, Logger } from "../sys";
 import { Scripts } from "../Scripts";
 import { WrapClient } from "../wrap";
 import { LlmApi, Chat } from "../llm";
 import { trimText } from "./utils";
+import JSON5 from "json5";
 
 export interface AgentContext {
   globals: Record<string, string>;
@@ -22,6 +23,7 @@ export interface AgentContext {
   scripts: Scripts;
   llm: LlmApi;
   chat: Chat;
+  logger: Logger;
 }
 
 export interface AgentFunction {
@@ -97,7 +99,7 @@ function processFunctionAndArgs(
   let fnArgs;
   try {
     fnArgs = args
-      ? JSON.parse(args)
+      ? JSON5.parse(args)
       : undefined;
   } catch(err: any) {
     return ResultErr(UNPARSABLE_FUNCTION_ARGS(name, args, err));
