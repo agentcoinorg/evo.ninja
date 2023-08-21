@@ -6,7 +6,7 @@
 .DojoConfig-apikey {
   position: fixed;
   color: #f5f5f5;
-  background: #000000BB;
+  background: #000000bb;
   padding: 50px;
   top: 50%;
   left: 50%;
@@ -79,4 +79,37 @@
   font-size: 8rem;
   font-weight: 100;
   font-style: normal;
+}
+
+.DojoConfig__Btn {
+  background-color: #ff572e;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: all 0.3s ease-in-out;
+  &:hover {
+    background-color: #ff4516;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.24),
+      0 2px 10px 0 rgba(0, 0, 0, 0.19);
+  }
+}
+
+.DojoConfig__Input {
+  flex: 1;
+  padding: 10px;
+  width: 100%;
+  margin-right: 10px;
+  font-size: 15px;
+  border: 1px solid #888;
+  border-radius: 5px;
+  background-color: #202020;
+  color: #f5f5f5;
+  outline: none;
+  transition: all 0.3s ease-in-out;
+}
+
+.DojoConfig__InputContainer {
+  display: flex;
 }

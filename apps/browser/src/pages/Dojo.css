@@ -6,7 +6,7 @@
 
 .Sidebar {
   color: #f5f5f5;
-  background-color: #131313DF;
+  background-color: #131313df;
   border-right: 2px solid #2b2b30;
 }
 
@@ -37,7 +37,7 @@
 }
 
 .Message.evo {
-  background-color: #ff4f4f;
+  background-color: #b5b5b5;
   color: #333;
 }
 .SendMessage {
@@ -52,7 +52,7 @@
 }
 
 .SendMessage button {
-  background-color: #ff5151;
+  background-color: #b4b4b4;
   color: white;
   border: none;
   padding: 10px;
