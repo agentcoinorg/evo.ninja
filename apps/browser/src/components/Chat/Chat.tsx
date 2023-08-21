@@ -1,5 +1,6 @@
 import React, { useState, useEffect, ChangeEvent, KeyboardEvent } from "react";
 import { Evo } from "@evo-ninja/core";
+import ReactMarkdown from "react-markdown";
 
 import "./Chat.css";
 
@@ -91,7 +92,9 @@ const Chat: React.FC<ChatProps> = ({evo, onMessage }: ChatProps) => {
         {messages.map((msg, index) => (
           <div key={index} className={`MessageContainer ${msg.user}`}>
             <div className="SenderName">{msg.user.toUpperCase()}</div>
-            <div className={`Message ${msg.user}`}>{msg.text}</div>
+            <div className={`Message ${msg.user}`}>
+              <ReactMarkdown>{msg.text}</ReactMarkdown>
+            </div>
           </div>
         ))}
       </div>
