@@ -78,6 +78,7 @@ export async function cli(): Promise<void> {
     logger
   );
 
+  // Create Evo
   const evo = new Evo(
     userWorkspace,
     scripts,

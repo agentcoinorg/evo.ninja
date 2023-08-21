@@ -48,7 +48,7 @@ export class Evo implements Agent {
         agentFunctions(createScriptWriter)
       );
     } catch (err) {
-      console.error(err);
+      this.logger.error(err);
       return RunResult.error("Unrecoverable error encountered.");
     }
   }

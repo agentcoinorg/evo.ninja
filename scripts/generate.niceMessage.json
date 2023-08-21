@@ -1,0 +1,6 @@
+{
+  "name": "generate.niceMessage",
+  "description": "This script generates a nice message for the user.",
+  "arguments": "{}",
+  "code": "./generate.niceMessage.js"
+}
