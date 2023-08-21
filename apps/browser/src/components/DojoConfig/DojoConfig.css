@@ -1,61 +1,17 @@
-.Landing {
-  text-align: center;
-  color: #FFFFFF;
-  background-color: #131313AF;
-}
-
-.Landing::before {
-  font-size: 8rem;
-  font-weight: 100;
-  font-style: normal;
-}
-
-.Landing-header {
-  min-height: 100vh;
+.DojoConfig {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: #FFFFFF;
+  height: 100%; /* Add this to take full height */
 }
 
-.Header-Links {
-  position: absolute;
-  display: flex;
-  top: 0;
-  right: 0;
-  height: 60px;
-  margin-right: 50px;
-}
-
-.Header-Links a {
-  margin: 10px;
-  margin-top: 20px;
-  display: inherit;
-}
-
-.Header-Links a:hover {
-  filter: contrast(0.5)
-}
-
-.Landing-link {
-  color: #FFFFFF;
-}
-
-.Landing button {
-  padding: 10px 20px;
-  font-size: 1em;
-  color: #FFFFFF;
-  background-color: #181818b8;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.Landing button:hover {
-  background-color: #252525;
+.DojoConfig-apikey {
+  position: fixed;
+  color: #f5f5f5;
+  background: #000000BB;
+  padding: 50px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 10px;
 }
 
 @-webkit-keyframes bg-scrolling-reverse {
@@ -99,12 +55,12 @@
   }
 }
 
-.Landing-background {
+.DojoConfig {
   color: #999;
   font: 400 16px/1.5 exo, ubuntu, "segoe ui", helvetica, arial, sans-serif;
   text-align: center;
   /* img size is 25x25 */
-  background: url("/public/wallpaper.png") repeat 0 0 / 461px 250px;
+  background: url("/public/wallpaper-bw.png") repeat 0 0 / 461px 250px;
   -webkit-animation: bg-scrolling-reverse 5s infinite;
   /* Safari 4+ */
   -moz-animation: bg-scrolling-reverse 5s infinite;
@@ -117,4 +73,10 @@
   -moz-animation-timing-function: linear;
   -o-animation-timing-function: linear;
   animation-timing-function: linear;
+}
+
+.DojoConfig::before {
+  font-size: 8rem;
+  font-weight: 100;
+  font-style: normal;
 }

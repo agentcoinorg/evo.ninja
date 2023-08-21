@@ -12,8 +12,13 @@ import { InMemoryFile } from "../../file";
 
 import "./Sidebar.css";
 
-const Sidebar = () => {
+export interface SidebarProps {
+  onSettingsClick: () => void;
+}
+
+const Sidebar = (props: SidebarProps) => {
   const [files, setFiles] = React.useState<InMemoryFile[]>([]);
+  const { onSettingsClick } = props;
 
   function onUploadFiles(files: InMemoryFile[]) {
     console.log(files);
@@ -73,7 +78,7 @@ const Sidebar = () => {
             >
               <FontAwesomeIcon icon={faGithub} />
             </a>
-            <a>
+            <a onClick={onSettingsClick}>
               <FontAwesomeIcon icon={faCog} />
             </a>
           </div>

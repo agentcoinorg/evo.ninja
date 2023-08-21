@@ -62,6 +62,9 @@ export class InMemoryFS {
   private navigateToPath(path: string[]): [InMemoryDir, string] {
       let currentDir = this.root;
       for (let i = 0; i < path.length - 1; i++) {
+          if (path[i] === "." || path[i] === "./") {
+            continue;
+          }
           const nextDir = currentDir.getDirectory(path[i]);
           if (!nextDir) {
               throw new Error(`Path not found: ${path.slice(0, i + 1).join("/")}`);
@@ -130,7 +133,7 @@ export class InMemoryFS {
   readdirSync(dirPath: string): string[] {
       const path = dirPath.split("/");
       let currentDir: InMemoryDir;
-      
+
       if (path.length === 1 && path[0] === "") {
           currentDir = this.root; // Root directory
       } else {
