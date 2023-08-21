@@ -104,11 +104,12 @@ function Dojo() {
       setDojoError(undefined);
 
       const markdownLogger = new MarkdownLogger({
-        onLog: (markdown: string) => {
+        onLog: (markdown: string, color?: string) => {
           onMessage({
             user: "evo",
-            text: markdown
-          })
+            text: markdown,
+            color
+          });
         }
       });
       const logger = new EvoCore.Logger([

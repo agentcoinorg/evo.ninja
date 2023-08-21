@@ -1,7 +1,7 @@
 import { ILogger, Message } from "@evo-ninja/core";
 
 export interface MarkdownLoggerConfig {
-  onLog(markdown: string): void;
+  onLog(markdown: string, color?: string): void;
 }
 
 export class MarkdownLogger implements ILogger {
@@ -32,18 +32,24 @@ export class MarkdownLogger implements ILogger {
   }
 
   notice(msg: string): void {
-    this._config.onLog(
-      `**Notice!**\n${msg}`
-    );
+    this._config.onLog(msg, "cyan");
   }
 
   success(msg: string): void {
     this._config.onLog(
-      `**Success!**\n${msg}`
+      `**Success!**\n${msg}`,
+      "green"
+    );
+  }
+
+  warning(msg: string): void {
+    this._config.onLog(
+      `**Warning:** ${msg}`,
+      "yellow"
     );
   }
 
   error(msg: string): void {
-    this._config.onLog(`**ERROR:**\n${msg}`);
+    this._config.onLog(`**ERROR:**\n${msg}`, "red");
   }
 }

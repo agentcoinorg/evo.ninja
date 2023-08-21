@@ -43,6 +43,10 @@ export class FileLogger implements ILogger {
     this.info(msg + "\n  \n");
   }
 
+  warning(msg: string): void {
+    this.info(msg + "\n  \n");
+  }
+
   error(msg: string): void {
     this.info(msg + "\n  \n");
   }

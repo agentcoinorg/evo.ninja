@@ -29,7 +29,7 @@ const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles }: Sideb
           <h3>
             <FontAwesomeIcon icon={faUserNinja} /> SCRIPTS
           </h3>
-          {scripts.map((file, i) => (
+          {scripts.filter((file) => !file.path.startsWith("agent.")).map((file, i) => (
             <File file={file} />
           ))}
         </div>
@@ -44,11 +44,17 @@ const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles }: Sideb
         <footer className="Footer">
           <div className="Polywrap">
             <span className="BuiltWithLove">Built with love by</span>
-            <img
-              src="polywrap-logo.png"
-              alt="Image Banner"
-              className="ImageBanner"
-            />
+            <a
+              href="https://polywrap.io"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="polywrap-logo.png"
+                alt="Image Banner"
+                className="ImageBanner"
+              />
+            </a>
           </div>
           <div className="Footer__Links">
             <a
