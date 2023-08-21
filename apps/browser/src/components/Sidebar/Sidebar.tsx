@@ -8,7 +8,7 @@ import {
 import { faCog, faUpload } from "@fortawesome/free-solid-svg-icons";
 import { faUserNinja, faFolder } from "@fortawesome/free-solid-svg-icons";
 import Upload from "../Upload";
-import { InMemoryFile } from "../../file";
+import { InMemoryFile } from "../../sys/file";
 
 import "./Sidebar.css";
 

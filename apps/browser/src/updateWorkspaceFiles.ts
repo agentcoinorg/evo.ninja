@@ -1,4 +1,4 @@
-import { InMemoryFile } from "./file";
+import { InMemoryFile } from "./sys/file";
 import * as EvoCore from "@evo-ninja/core";
 
 export function updateWorkspaceFiles(workspace: EvoCore.Workspace, files: InMemoryFile[], setFiles: (files: InMemoryFile[]) => void) {

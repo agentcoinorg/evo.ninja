@@ -9,7 +9,7 @@ import DojoConfig from "../components/DojoConfig/DojoConfig";
 import DojoError from "../components/DojoError/DojoError";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Chat from "../components/Chat/Chat";
-import { InMemoryFile } from '../file';
+import { InMemoryFile } from '../sys/file';
 import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
 
 type Message = {
