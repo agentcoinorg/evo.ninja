@@ -4,11 +4,14 @@
   flex-direction: column;
   align-items: center;
   overflow: auto;
-  padding: 20px;
+  padding: 15px;
   box-sizing: border-box;
 }
 
 .Content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin-top: 1.5rem;
   width: 100%;
   height: auto;

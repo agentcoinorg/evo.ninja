@@ -24,32 +24,28 @@ const File = ({ file }: { file: FileType }) => {
     contentString = decoder.decode(file.content);
   }
 
-  // Snips off file at 800 characters.
-  if (contentString.length > 800) {
-    contentString = contentString.substring(0, 800) + "...";
-  }
-
   return (
     <>
-    <div className="File" onClick={handleClick}>
-      {file.path}
-    </div>
-    <Modal
-      className="File__Modal"
-      isOpen={showContent}
-      onRequestClose={handleClose}
-      contentLabel="File Content"
-      style={{
-        overlay: {
-          backgroundColor: "transparent",
-        },
-      }}
-    >
-      <button className="File__Btn" onClick={handleClose}>
-        Close
-      </button>
-      <pre>{contentString}</pre>
-    </Modal>
+      <div className="File" onClick={handleClick}>
+        {file.path}
+      </div>
+      <Modal
+        className="File__Modal"
+        isOpen={showContent}
+        onRequestClose={handleClose}
+        contentLabel="File Content"
+        style={{
+          overlay: {
+            backgroundColor: "transparent",
+            backdropFilter: "blur(8px)",
+          },
+        }}
+      >
+        <button className="File__Btn" onClick={handleClose}>
+          Close
+        </button>
+        <pre>{contentString}</pre>
+      </Modal>
     </>
   );
 };
