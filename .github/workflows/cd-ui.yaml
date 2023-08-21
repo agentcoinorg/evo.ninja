@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - "packages/ui/**"
+      - "apps/browser/**"
 
 permissions:
   contents: write
@@ -24,15 +24,15 @@ jobs:
         node-version: 18.15
 
     - name: Install dependencies
-      working-directory: ./packages/ui
+      working-directory: ./apps/browser
       run: yarn
 
     - name: Build
-      working-directory: ./packages/ui
+      working-directory: ./apps/browser
       run: yarn build && mv CNAME ./build
 
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         branch: gh-pages
-        folder: ./packages/ui/build
+        folder: ./apps/browser/build
