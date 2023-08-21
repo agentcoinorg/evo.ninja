@@ -11,11 +11,17 @@ export interface ILogger {
   error: (msg: string, error?: unknown) => void;
 }
 
+export interface LoggerCallbacks {
+  promptUser: (query: string) => Promise<string>;
+  logUserPrompt: (response: string) => void;
+}
+
 export class Logger implements ILogger {
   protected _logDir: string = "chats";
 
   constructor(
-    protected _loggers: ILogger[]
+    protected _loggers: ILogger[],
+    protected _callbacks: LoggerCallbacks
   ) { }
 
   info(info: string) {
@@ -63,11 +69,17 @@ export class Logger implements ILogger {
     this._loggers.forEach((l) => l.error(`${msg}${errorStr}`));
   }
 
+  async prompt(query: string): Promise<string> {
+    const response = await this._callbacks.promptUser(query);
+    this._callbacks.logUserPrompt(response);
+    return response;
+  }
+
   async logHeader(): Promise<void> {
     const logger = this;
 
     return new Promise<void>((resolve, reject) => {
-      figlet.text("EVO", {
+      figlet.text("E V O", {
         font: "Slant",
         horizontalLayout: "default",
         verticalLayout: "default",

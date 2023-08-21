@@ -1,4 +1,5 @@
 import { LlmApi, LlmOptions, LlmResponse, Chat } from ".";
+import { Logger } from "../";
 
 import {
   ChatCompletionRequestMessage,
@@ -28,6 +29,7 @@ export class OpenAI implements LlmApi {
     private _defaultModel: string,
     private _defaultMaxTokens: number,
     private _defaultMaxResponseTokens: number,
+    private _logger: Logger,
     private _maxRateLimitRetries: number = 5
   ) {
     this._configuration = new Configuration({
@@ -80,7 +82,7 @@ export class OpenAI implements LlmApi {
 
         // If a rate limit error is thrown
         if (maybeOpenAiError.status === 429) {
-          console.warn("Warning: OpenAI rate limit exceeded, sleeping for 15 seconds.");
+          this._logger.notice("Warning: OpenAI rate limit exceeded, sleeping for 15 seconds.");
 
           // Try again after a short sleep
           await new Promise((resolve) => setTimeout(resolve, 15000));

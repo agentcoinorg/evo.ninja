@@ -21,6 +21,7 @@ export class Evo implements Agent {
   ) {
     this.client = new WrapClient(
       this.workspace,
+      this.logger
     );
 
     this.globals = {};
@@ -29,8 +30,8 @@ export class Evo implements Agent {
   public async* run(goal: string): AsyncGenerator<StepOutput, RunResult, string | undefined> {
     const createScriptWriter = (): ScriptWriter => {
       const workspace = new InMemoryWorkspace();
-      const chat = new Chat(workspace, this.llm, this.chat.tokenizer);
-      return new ScriptWriter(workspace, this.scripts, this.llm, chat);
+      const chat = new Chat(workspace, this.llm, this.chat.tokenizer, this.logger);
+      return new ScriptWriter(workspace, this.scripts, this.llm, chat, this.logger);
     };
 
     try {
@@ -42,6 +43,7 @@ export class Evo implements Agent {
         this.globals,
         this.workspace,
         this.scripts,
+        this.logger,
         executeAgentFunction,
         agentFunctions(createScriptWriter)
       );

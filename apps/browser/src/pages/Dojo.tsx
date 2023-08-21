@@ -42,6 +42,12 @@ function Dojo() {
         return;
       }
       setDojoError(undefined);
+      const logger = new EvoCore.Logger([
+        new EvoCore.ConsoleLogger()
+      ], {
+        promptUser: () => Promise.resolve("N/A"),
+        logUserPrompt: () => {}
+      });
       const scriptsWorkspace = new EvoCore.InMemoryWorkspace();
       const scripts = new EvoCore.Scripts(
         scriptsWorkspace
@@ -58,17 +64,16 @@ function Dojo() {
         env.OPENAI_API_KEY,
         env.GPT_MODEL,
         env.CONTEXT_WINDOW_TOKENS,
-        env.MAX_RESPONSE_TOKENS
+        env.MAX_RESPONSE_TOKENS,
+        logger
       );
       const userWorkspace = new EvoCore.InMemoryWorkspace();
       const chat = new EvoCore.Chat(
         userWorkspace,
         llm,
-        cl100k_base
+        cl100k_base,
+        logger
       );
-      const logger = new EvoCore.Logger([
-        new EvoCore.ConsoleLogger()
-      ]);
 
       setEvo(new EvoCore.Evo(
         userWorkspace,

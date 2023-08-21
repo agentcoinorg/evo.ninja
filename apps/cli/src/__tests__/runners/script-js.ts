@@ -6,7 +6,9 @@ import {
   JsEngine_Module,
   Scripts,
   Workspace,
-  shimCode
+  shimCode,
+  Logger,
+  ConsoleLogger
 } from "@evo-ninja/core";
 import fs from "fs";
 import path from "path-browserify";
@@ -44,7 +46,11 @@ export async function runScriptJs(
     }
   }
 
-  const client = new WrapClient(workspace);
+  const logger = new Logger([new ConsoleLogger()], {
+    promptUser: () => Promise.resolve("N/A"),
+    logUserPrompt: () => {}
+  });
+  const client = new WrapClient(workspace, logger);
 
   const result = await JsEngine_Module.evalWithGlobals({
     src: shimCode(script.code),

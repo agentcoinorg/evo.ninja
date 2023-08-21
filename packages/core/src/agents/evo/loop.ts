@@ -4,7 +4,7 @@ import { AgentFunction, ExecuteAgentFunction } from "../agent-function";
 import { LlmApi, LlmResponse, Chat } from "../../llm";
 import { WrapClient } from "../../wrap";
 import { Scripts } from "../../Scripts";
-import { Workspace } from "../../sys";
+import { Workspace, Logger } from "../../sys";
 
 export async function* loop(
   goal: string, 
@@ -14,6 +14,7 @@ export async function* loop(
   globals: Record<string, any>,
   workspace: Workspace,
   scripts: Scripts,
+  logger: Logger,
   executeAgentFunction: ExecuteAgentFunction,
   agentFunctions: AgentFunction[],
 ): AsyncGenerator<StepOutput, RunResult, string | undefined> {
@@ -39,7 +40,8 @@ export async function* loop(
           workspace,
           scripts,
           llm,
-          chat
+          chat,
+          logger
         },
         agentFunctions
       );
