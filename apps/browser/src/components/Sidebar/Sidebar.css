@@ -1,71 +1,104 @@
 .Sidebar {
   width: 20%;
-  background-color: #333232;
-  color: #ecf0f1;
+  color: #f5f5f5;
+  background-color: #131313;
   display: flex;
   flex-direction: column;
   align-items: center;
   height: 100%;
   overflow: auto;
-  padding: 10px;
+  padding: 20px;
   box-sizing: border-box;
+  border-right: 2px solid #2b2b30;
 }
 
 .Content {
-  overflow: auto;
+  margin-top: 1.5rem;
+  width: 100%;
+  height: auto;
 }
 
 .Logo {
-  width: 175px;
+  width: 100%;
   margin-bottom: 20px;
 }
 
+.Workspace {
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.File {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.File:hover {
+  background-color: #2b2b30;
+}
+
+.BuiltWithLove {
+  font-size: 0.8rem;
+  color: #f5f5f5;
+  margin-top: 12rem;
+}
+
+.ImageBanner {
+  width: 100%;
+  max-width: 200px;
+  margin-top: 2rem;
+}
 .Scripts,
 .Workspace {
-  background-color: white;
-  border-radius: 10px;
-  padding: 10px;
-  margin: 10px;
-  color: black;
-  width: calc(100% - 20px); /* Adjusting for margins */
+  background-color: #171717;
+  padding: 1rem;
+  margin: 15px 0 15px 0;
+  color: #f5f5f5;
+  width: calc(100% - 30px);
   box-sizing: border-box;
+  border-radius: 5px;
 }
 
 .File,
 .Script {
-  border-radius: 20px;
-  padding: 5px;
-  margin: 5px 0;
-  background-color: #da3232;
-  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  background-color: #171717;
+  width: auto;
+  box-sizing: border-box;
+  border-radius: 5px;
+  border: 2px solid #4b4b50; /* Increased border visibility */
 }
 
 .Scripts,
 .Workspace {
-  border: 1px solid #ff572e;
   color: white;
-  background-color: #121312;
-  border-radius: 30px;
+  background-color: #171717;
+  border: 1px solid #4b4b50;
 }
 
 .UploadButton {
-  float: right;
-  background-color: #ff4f4f;
-  border: none;
-  color: rgb(0, 0, 0);
-  padding: 10px 20px;
-  text-align: center;
-  font-size: 16px;
+  background-color: transparent;
+  color: #a5a5a5;
+  border: 1px solid #a5a5a5;
+  padding: 10px;
   cursor: pointer;
-  border-radius: 20px;
-}
-
-.UploadButton:hover {
-  background-color: #bf3636;
+  border-radius: 12px;
+  transition: all 0.3s ease-in-out;
+  &:hover {
+    background-color: #ff4516;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.24),
+      0 2px 10px 0 rgba(0, 0, 0, 0.19);
+  }
 }
 
 .ImageBanner {
-  width: 15vw;
+  width: 50%;
+  margin: 0 1rem 0 1rem;
 }
 
 .BuiltWithLove,
@@ -76,13 +109,26 @@
 
 .Footer {
   display: flex;
+  flex-direction: column;
+  height: 10rem;
   justify-content: space-around;
-  width: 100%;
+  width: 90%;
   margin: 2rem 0 2rem 0;
   box-sizing: border-box;
 }
 
 .Footer a {
-  color: #ff4f4f;
+  color: white;
   text-decoration: none;
+}
+
+.Footer__Links {
+  color: white;
+  opacity: 0.8;
+  display: flex;
+  justify-content: space-between;
+}
+
+.Polywrap {
+  justify-content: center;
 }
