@@ -141,16 +141,14 @@ function Dojo() {
       );
       const agentPackage = PluginPackage.from(module => ({
         "onGoalAchieved": async (args: any) => {
-          logger.success("Goal has been achieved!!!!!");
+          logger.success("Goal has been achieved!");
         },
         "speak": async (args: any) => {
-          logger.success("Agent: " + args.message);
+          logger.success("Evo: " + args.message);
           return "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.";
         },
         "ask": async (args: any) => {
-          logger.error("Agent: " + args.message);
-          const response = await prompt("");
-          return "User: " + response;
+          throw new Error("Not implemented");
         },
       }));
 
