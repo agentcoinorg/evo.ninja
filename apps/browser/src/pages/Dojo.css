@@ -1,26 +1,7 @@
 .Dojo {
   display: flex;
-  background-color: #33323278;
+  background-color: #333232;
   height: 100%; /* Add this to take full height */
-}
-
-.UploadButton {
-  float: right;
-  background-color: #4CAF50; /* or any color you like */
-  border: none;
-  color: white;
-  padding: 10px 20px;
-  text-align: center;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.UploadButton:hover {
-  background-color: #45a049; /* or any color you like for hover */
-}
-
-.ImageBanner {
-  width: 15vw; /* 15% of the viewport width */
 }
 
 .Chat {
@@ -37,7 +18,6 @@
   overflow: scroll;
   flex: 1; /* Add this to take remaining height */
 }
-
 
 .Message {
   padding: 10px;
@@ -66,14 +46,15 @@
 }
 
 .SendMessage button {
-  background-color: #FF5151;
+  background-color: #ff5151;
   color: white;
   border: none;
   padding: 10px;
   cursor: pointer;
 }
 
-.Scripts, .Workspace {
+.Scripts,
+.Workspace {
   background-color: white; /* Add background color */
   border-radius: 10px; /* Rounded corners */
   padding: 10px; /* Padding inside the card */
@@ -82,7 +63,8 @@
   width: 80%; /* Width of the card */
 }
 
-.File, .Script {
+.File,
+.Script {
   border-radius: 5px; /* Rounded corners for files and scripts */
   padding: 5px; /* Padding inside the files and scripts */
   margin: 5px 0; /* Margin around the files and scripts */
