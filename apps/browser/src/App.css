@@ -15,7 +15,7 @@ html {
 
 .UploadButton {
   float: right;
-  background-color: #4caf50; /* or any color you like */
+  background-color: #4CAF50; /* or any color you like */
   border: none;
   color: white;
   padding: 10px 20px;
@@ -32,6 +32,7 @@ html {
   width: 15vw; /* 15% of the viewport width */
 }
 
+
 .Chat {
   width: 80%;
   background-color: #1c1c1c;
@@ -46,6 +47,7 @@ html {
   overflow: scroll;
   flex: 1; /* Add this to take remaining height */
 }
+
 
 .Message {
   padding: 10px;
@@ -74,15 +76,14 @@ html {
 }
 
 .SendMessage button {
-  background-color: #ff5151;
+  background-color: #FF5151;
   color: white;
   border: none;
   padding: 10px;
   cursor: pointer;
 }
 
-.Scripts,
-.Workspace {
+.Scripts, .Workspace {
   background-color: white; /* Add background color */
   border-radius: 10px; /* Rounded corners */
   padding: 10px; /* Padding inside the card */
@@ -91,10 +92,18 @@ html {
   width: 80%; /* Width of the card */
 }
 
-.File,
-.Script {
+.File, .Script {
   border-radius: 5px; /* Rounded corners for files and scripts */
   padding: 5px; /* Padding inside the files and scripts */
   margin: 5px 0; /* Margin around the files and scripts */
   background-color: #f3f3f3; /* Background color */
+}
+
+.drop-hover {
+  background-color: #e1f1e5;
+  border: 2px dashed #b5bcff;
+}
+
+.inner-dropzone {
+  padding: 20px;
 }
