@@ -14,17 +14,12 @@ import "./Sidebar.css";
 
 export interface SidebarProps {
   onSettingsClick: () => void;
+  scripts: InMemoryFile[];
+  userFiles: InMemoryFile[];
+  uploadUserFiles: (files: InMemoryFile[]) => void;
 }
 
-const Sidebar = (props: SidebarProps) => {
-  const [files, setFiles] = React.useState<InMemoryFile[]>([]);
-  const [uploadedFiles, setUploadedFiles] = React.useState<InMemoryFile[]>([]);
-  const { onSettingsClick } = props;
-
-  useEffect(() => {
-    setFiles(old => [...old,...uploadedFiles]);
-  }, [uploadedFiles]);
-  
+const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles }: SidebarProps) => {
   return (
     <div className="Sidebar">
       <div className="Content">
@@ -33,15 +28,18 @@ const Sidebar = (props: SidebarProps) => {
           <h3>
             <FontAwesomeIcon icon={faUserNinja} /> SCRIPTS
           </h3>
-          <div className="Script">Script 1</div>
-          <div className="Script">Script 2</div>
+          {scripts.map((file, i) => (
+            <div className="Script" key={i}>
+              {file.path}
+            </div>
+          ))}
         </div>
-        <Upload className="Workspace" onUpload={setUploadedFiles}>
+        <Upload className="Workspace" onUpload={uploadUserFiles}>
           <h3>
             <FontAwesomeIcon icon={faFolder} />
             Workspace
           </h3>
-          {files.map((file, i) => (
+          {userFiles.map((file, i) => (
             <div className="File" key={i}>
               {file.path}
             </div>
