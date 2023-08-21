@@ -11,10 +11,12 @@ const File = ({ file }: { file: FileType }) => {
   const [showContent, setShowContent] = useState(false);
 
   const handleClick = () => {
+    console.log("TRUEEEE")
     setShowContent(true);
   };
 
   const handleClose = () => {
+    console.log("HEREREREREE")
     setShowContent(false);
   };
 
@@ -29,26 +31,29 @@ const File = ({ file }: { file: FileType }) => {
     contentString = contentString.substring(0, 800) + "...";
   }
 
+  console.log("RENDERING", showContent)
   return (
+    <>
     <div className="File" onClick={handleClick}>
       {file.path}
-      <Modal
-        className="File__Modal"
-        isOpen={showContent}
-        onRequestClose={handleClose}
-        contentLabel="File Content"
-        style={{
-          overlay: {
-            backgroundColor: "transparent",
-          },
-        }}
-      >
-        <button className="File__Btn" onClick={handleClose}>
-          Close
-        </button>
-        <pre>{contentString}</pre>
-      </Modal>
     </div>
+    <Modal
+      className="File__Modal"
+      isOpen={showContent}
+      onRequestClose={handleClose}
+      contentLabel="File Content"
+      style={{
+        overlay: {
+          backgroundColor: "transparent",
+        },
+      }}
+    >
+      <button className="File__Btn" onClick={handleClose}>
+        Close
+      </button>
+      <pre>{contentString}</pre>
+    </Modal>
+    </>
   );
 };
 

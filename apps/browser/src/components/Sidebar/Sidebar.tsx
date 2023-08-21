@@ -37,9 +37,7 @@ const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles }: Sideb
             <FontAwesomeIcon icon={faUserNinja} /> SCRIPTS
           </h3>
           {scripts.map((file, i) => (
-            <div className="Script" key={i}>
-              {file.path}
-            </div>
+            <File file={file} />
           ))}
         </div>
         <Upload className="Workspace" onUpload={uploadUserFiles}>
