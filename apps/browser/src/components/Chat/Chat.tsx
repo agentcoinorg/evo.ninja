@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent, KeyboardEvent } from "react";
+import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef } from "react";
 import { Evo } from "@evo-ninja/core";
 import ReactMarkdown from "react-markdown";
 
@@ -14,9 +14,10 @@ export interface ChatProps {
   evo: Evo;
   onMessage: (message: ChatMessage) => void;
   messages: ChatMessage[];
+  goalAchieved: boolean
 }
 
-const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages }: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
   const [paused, setPaused] = useState<boolean>(false);
@@ -24,6 +25,23 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages }: ChatProps) => {
   const [evoItr, setEvoItr] = useState<ReturnType<Evo["run"]> | undefined>(
     undefined
   );
+  const [stopped, setStopped] = useState<boolean>(false);
+
+  const pausedRef = useRef(paused);
+  useEffect(() => {
+      pausedRef.current = paused;
+  }, [paused]);
+
+  const goalAchievedRef = useRef(paused);
+  useEffect(() => {
+    goalAchievedRef.current = goalAchieved;
+  }, [goalAchieved]);
+
+  useEffect(() => {
+    if (goalAchieved) {
+      setPaused(true);
+    }
+  }, [goalAchieved]);
 
   useEffect(() => {
     const runEvo = async () => {
@@ -41,9 +59,12 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages }: ChatProps) => {
       let messageLog = messages;
 
       while (evoRunning) {
-        if (paused) {
+        if (pausedRef.current || goalAchievedRef.current) {
+          setStopped(true);
           return Promise.resolve();
         }
+
+        setStopped(false);
 
         const response = await evoItr.next();
 
@@ -53,7 +74,9 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages }: ChatProps) => {
             user: "evo"
           };
           messageLog = [...messageLog, evoMessage];
-          onMessage(evoMessage);
+          if (!goalAchievedRef.current) {
+            onMessage(evoMessage);
+          }
         }
 
         if (response.done) {
@@ -65,7 +88,8 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages }: ChatProps) => {
       return Promise.resolve();
     }
 
-    runEvo();
+    const timer = setTimeout(runEvo, 200);
+    return () => clearTimeout(timer);
   }, [evoRunning, evoItr]);
 
   const handleSend = async () => {
@@ -129,9 +153,19 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages }: ChatProps) => {
             }
             {
               paused && (
-                <button className="Chat__Btn" onClick={handleContinue} disabled={evoRunning && !paused}>
-                Continue
-                </button>
+                <>
+                  {!stopped && (
+                     <button className="Chat__Btn" disabled={true}>
+                     Pausing
+                     </button>
+                  )}
+
+                  {stopped && (
+                     <button className="Chat__Btn" onClick={handleContinue} disabled={evoRunning && !paused}>
+                     Paused
+                     </button>
+                  )}
+                </>
               )
             }
           </>
