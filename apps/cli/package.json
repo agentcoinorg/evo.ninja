@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@evo-ninja/core": "0.1.0",
+    "@polywrap/client-js": "~0.12.0",
     "chalk": "^4.1.2",
     "clui": "~0.3.6",
     "dotenv": "~16.3.1",

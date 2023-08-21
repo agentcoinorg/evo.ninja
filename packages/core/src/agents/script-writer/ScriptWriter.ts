@@ -20,7 +20,7 @@ export class ScriptWriter implements Agent {
   ) {
     this.client = new WrapClient(
       this.workspace,
-      this.logger
+      this.logger,
     );
     
     this.globals = {};
