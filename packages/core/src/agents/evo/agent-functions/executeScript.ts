@@ -4,6 +4,7 @@ import {
   JsEngine_Module,
   shimCode
 } from "../../../wrap";
+import JSON5 from "json5";
 
 export const executeScript: AgentFunction = {
   definition: {
@@ -47,7 +48,7 @@ export const executeScript: AgentFunction = {
         args = options.arguments.replace(/\{\{/g, "\\{\\{").replace(/\}\}/g, "\\}\\}");
         try {
 
-          args = JSON.parse(options.arguments);
+          args = JSON5.parse(options.arguments);
 
           if (args) {
             const replaceVars = (str: string, vars: any) => {
