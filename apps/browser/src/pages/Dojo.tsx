@@ -8,14 +8,9 @@ import './Dojo.css';
 import DojoConfig from "../components/DojoConfig/DojoConfig";
 import DojoError from "../components/DojoError/DojoError";
 import Sidebar from "../components/Sidebar/Sidebar";
-import Chat from "../components/Chat/Chat";
+import Chat, { ChatMessage } from "../components/Chat/Chat";
 import { InMemoryFile } from '../sys/file';
 import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
-
-type Message = {
-  text: string;
-  user: string;
-};
 
 function Dojo() {
   const [apiKey, setApiKey] = useState<string | null>(
@@ -29,6 +24,7 @@ function Dojo() {
   const [uploadedFiles, setUploadedFiles] = useState<InMemoryFile[]>([]);
   const [userWorkspace, setUserWorkspace] = useState<EvoCore.InMemoryWorkspace | undefined>(undefined);
   const [scriptsWorkspace, setScriptsWorkspace] = useState<EvoCore.InMemoryWorkspace | undefined>(undefined);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   useEffect(() => {
     if (!evo || !scriptsWorkspace) {
@@ -57,7 +53,11 @@ function Dojo() {
     updateWorkspaceFiles(scriptsWorkspace, scripts, setScripts);
   }
 
-  function onMessage() {
+  function onMessage(message: ChatMessage) {
+    setMessages([
+      ...messages,
+      message
+    ]);
     checkForUserFiles();
     checkForScriptFiles();
   }
@@ -150,7 +150,7 @@ function Dojo() {
       }
       <Sidebar onSettingsClick={() => setConfigOpen(true)} scripts={scripts} userFiles={userFiles} uploadUserFiles={setUploadedFiles} />
       <>
-        {evo && <Chat evo={evo} onMessage={onMessage} />}
+        {evo && <Chat evo={evo} onMessage={onMessage} getMessages={() => messages} />}
         {dojoError && <DojoError error={dojoError} />}
       </>
     </div>

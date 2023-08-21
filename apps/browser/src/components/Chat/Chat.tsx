@@ -3,19 +3,19 @@ import { Evo } from "@evo-ninja/core";
 
 import "./Chat.css";
 
-type Message = {
+export interface ChatMessage {
   text: string;
   user: string;
-};
+}
 
 export interface ChatProps {
   evo: Evo;
-  onMessage: (message: string) => void;
+  onMessage: (message: ChatMessage) => void;
+  getMessages: () => ChatMessage[];
 }
 
-const Chat: React.FC<ChatProps> = ({evo, onMessage }: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({ evo, onMessage, getMessages }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
-  const [messages, setMessages] = useState<Message[]>([]);
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
   const [sending, setSending] = useState<boolean>(false);
   const [evoItr, setEvoItr] = useState<ReturnType<Evo["run"]> | undefined>(
@@ -34,22 +34,18 @@ const Chat: React.FC<ChatProps> = ({evo, onMessage }: ChatProps) => {
         return Promise.resolve();
       }
 
-      let messageLog = messages;
+      let messageLog = getMessages();
 
       while (evoRunning) {
         const response = await evoItr.next();
 
-        // TODO:
-        // - handle proptType === "Prompt"
-        console.log(response);
-
         if (response.value && response.value.message) {
-          messageLog = [...messageLog, {
+          const evoMessage = {
             text: response.value.message,
             user: "evo"
-          }];
-          setMessages(messageLog);
-          onMessage(response.value.message);
+          };
+          messageLog = [...messageLog, evoMessage];
+          onMessage(evoMessage);
         }
 
         if (response.done) {
@@ -66,12 +62,11 @@ const Chat: React.FC<ChatProps> = ({evo, onMessage }: ChatProps) => {
 
   const handleSend = async () => {
     setSending(true); // Set the sending state when starting to send
-    const newMessages = [...messages, {
-      type: "info",
+    setMessage("");
+    onMessage({
       text: message,
       user: 'user'
-    }];
-    setMessages(newMessages);
+    });
     setEvoRunning(true);
   };
 
@@ -88,7 +83,7 @@ const Chat: React.FC<ChatProps> = ({evo, onMessage }: ChatProps) => {
   return (
     <div className="Chat">
       <div className="Messages">
-        {messages.map((msg, index) => (
+        {getMessages().map((msg, index) => (
           <div key={index} className={`MessageContainer ${msg.user}`}>
             <div className="SenderName">{msg.user.toUpperCase()}</div>
             <div className={`Message ${msg.user}`}>{msg.text}</div>
