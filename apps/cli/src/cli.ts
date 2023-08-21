@@ -28,12 +28,12 @@ export async function cli(): Promise<void> {
 
   const rootDir = path.join(__dirname, "../../../");
 
-  const workspace = new FileSystemWorkspace(
-    path.join(rootDir, "workspace")
+  const scriptsWorkspace = new FileSystemWorkspace(
+    path.join(rootDir, "scripts")
   );
   const scripts = new Scripts(
-    workspace,
-    path.join(rootDir, "scripts")
+    scriptsWorkspace,
+    "./"
   );
   const env = new Env(
     process.env as Record<string, string>
@@ -41,16 +41,20 @@ export async function cli(): Promise<void> {
   const llm = new OpenAI(
     env.OPENAI_API_KEY,
     env.GPT_MODEL,
-    env.CONTEXT_WINDOW_TOKENS
+    env.CONTEXT_WINDOW_TOKENS,
+    env.MAX_RESPONSE_TOKENS
+  );
+  const userWorkspace = new FileSystemWorkspace(
+    path.join(rootDir, "workspace")
   );
   const chat = new Chat(
-    workspace,
+    userWorkspace,
     llm,
     cl100k_base
   );
 
   const evo = new Evo(
-    workspace,
+    userWorkspace,
     scripts,
     llm,
     chat
