@@ -8,6 +8,7 @@ export interface ILogger {
   action: (msg: Message) => void;
   notice: (msg: string) => void;
   success: (msg: string) => void;
+  warning: (msg: string) => void;
   error: (msg: string, error?: unknown) => void;
 }
 
@@ -42,6 +43,10 @@ export class Logger implements ILogger {
 
   success(msg: string) {
     this._loggers.forEach((l) => l.success(msg));
+  }
+
+  warning(msg: string) {
+    this._loggers.forEach((l) => l.warning(msg));
   }
 
   error(msg: string, error?: unknown) {

@@ -13,7 +13,6 @@ import { Workspace, Logger } from "../sys";
 import { Scripts } from "../Scripts";
 import { WrapClient } from "../wrap";
 import { LlmApi, Chat } from "../llm";
-import { trimText } from "./utils";
 import JSON5 from "json5";
 
 export interface AgentContext {
@@ -56,7 +55,7 @@ export const executeAgentFunction: ExecuteAgentFunction = async (
   const fnName = name as string;
 
   const argsStr = JSON.stringify(fnArgs, null, 2);
-  let functionCallSummary = `Function call: \`${fnName}(${argsStr})\`\n`;
+  let functionCallSummary = `# Function Call:\n\`\`\`javascript\n${fnName}(${argsStr})\n\`\`\`\n`;
 
   const executor = func.buildExecutor(context);
 
@@ -67,7 +66,6 @@ export const executeAgentFunction: ExecuteAgentFunction = async (
   }
 
   if (fnName === "executeScript") {
-    functionCallSummary += `Result stored into global var: \`{{${fnArgs.result}}}\`. Preview: \`${trimText(response.result, 200)}\`\n`;
     functionCallSummary +=  EXECUTE_SCRIPT_OUTPUT(fnArgs.result, response.result);
   } else if (fnName === "readVar") {
     functionCallSummary += READ_GLOBAL_VAR_OUTPUT(fnArgs.name, response.result);

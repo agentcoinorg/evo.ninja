@@ -32,6 +32,10 @@ export class ConsoleLogger implements ILogger {
     this.info(chalk.green(msg));
   }
 
+  warning(msg: string): void {
+    this.info(chalk.yellow(msg));
+  }
+
   error(msg: string): void {
     this.info(chalk.red(msg));
   }

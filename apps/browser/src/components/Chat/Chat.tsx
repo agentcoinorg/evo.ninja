@@ -7,6 +7,7 @@ import "./Chat.css";
 export interface ChatMessage {
   text: string;
   user: string;
+  color?: string;
 }
 
 export interface ChatProps {
@@ -101,7 +102,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages }: ChatProps) => {
         {messages.map((msg, index) => (
           <div key={index} className={`MessageContainer ${msg.user}`}>
             <div className="SenderName">{msg.user.toUpperCase()}</div>
-            <div className={`Message ${msg.user}`}>
+            <div className={`Message ${msg.user}`} style={msg.color ? { borderColor: msg.color } : undefined}>
               <ReactMarkdown>{msg.text}</ReactMarkdown>
             </div>
           </div>

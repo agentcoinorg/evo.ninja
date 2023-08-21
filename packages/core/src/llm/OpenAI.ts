@@ -82,7 +82,7 @@ export class OpenAI implements LlmApi {
 
         // If a rate limit error is thrown
         if (maybeOpenAiError.status === 429) {
-          this._logger.notice("Warning: OpenAI rate limit exceeded, sleeping for 15 seconds.");
+          this._logger.warning("Warning: OpenAI rate limit exceeded, sleeping for 15 seconds.");
 
           // Try again after a short sleep
           await new Promise((resolve) => setTimeout(resolve, 15000));

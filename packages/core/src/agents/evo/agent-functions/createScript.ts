@@ -51,7 +51,7 @@ export function createScript(createScriptWriter: () => ScriptWriter): AgentFunct
         while(true) {
           const response = await iterator.next();
 
-          response.value.message && context.logger.notice(response.value.message);
+          response.value.message && context.logger.info(response.value.message);
 
           // TODO: we should not be communicating the ScriptWriter's completion
           //       via a special file in the workspace
