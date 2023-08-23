@@ -21,24 +21,48 @@ export interface SidebarProps {
 }
 
 const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles }: SidebarProps) => {
+  const groupFilesByName = (files: InMemoryFile[]) => {
+    return files.reduce((acc, file) => {
+      // Handle .msgs files
+      if (file.path === '.msgs') {
+        acc[file.path] = [file];
+      } else {
+        const fileNameWithoutExt = file.path.split('.').slice(0, -1).join('.');
+        // Group other files by name without extension
+        acc[fileNameWithoutExt] = acc[fileNameWithoutExt] || [];
+        acc[fileNameWithoutExt].push(file);
+      }
+      return acc;
+    }, {} as { [name: string]: InMemoryFile[] });
+  };
+  
+
+  const scriptsGrouped = groupFilesByName(
+    scripts.filter((file) => !file.path.startsWith("agent."))
+  );  
+
+  const userFilesGrouped = groupFilesByName(userFiles);
+
+
+  
   return (
     <div className="Sidebar">
       <div className="Content">
         <img src="avatar-name.png" alt="Main Logo" className="Logo" />
         <div className="Scripts">
-          <h3>
+        <h3>
             <FontAwesomeIcon icon={faUserNinja} /> SCRIPTS
           </h3>
-          {scripts.filter((file) => !file.path.startsWith("agent.")).map((file, i) => (
-            <File file={file} />
+          {Object.keys(scriptsGrouped).map((name, i) => (
+            <File key={i} files={scriptsGrouped[name]} />
           ))}
         </div>
         <Upload className="Workspace" onUpload={uploadUserFiles}>
           <h3>
             <FontAwesomeIcon icon={faFolder} style={{ marginRight: "10px" }} /> WORKSPACE
           </h3>
-          {userFiles.map((file, i) => (
-            <File file={file} />
+          {Object.keys(userFilesGrouped).map((name, i) => (
+            <File key={i} files={userFilesGrouped[name]} />
           ))}
         </Upload>
         <footer className="Footer">
