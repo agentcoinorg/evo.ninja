@@ -14,6 +14,22 @@ export const onGoalAchievedScript = {
 `
 };
 
+export const onGoalFailedScript = {
+  name: "agent.onGoalFailed",
+  definition: `{
+  "name":"agent.onGoalFailed",
+  "description":"Informs the user that the agent could not achieve the goal.",
+  "arguments":"None",
+  "code":"./agent.onGoalFailed.js"
+}`,
+  code: `return __wrap_subinvoke(
+  'plugin/agent',
+  'onGoalFailed',
+  { }
+).value
+`
+};
+
 export const speakScript = {
   name: "agent.speak",
   definition: `{

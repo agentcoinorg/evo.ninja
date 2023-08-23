@@ -84,9 +84,13 @@ export async function cli(): Promise<void> {
       logger.success("Goal has been achieved!");
       process.exit(0);
     },
+    "onGoalFailed": async (args: any) => {
+      logger.error("Goal could not be achieved!");
+      process.exit(0);
+    },
     "speak": async (args: any) => {
       logger.success("Agent: " + args.message);
-      return "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.";
+      return "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.\nIf you think you've failed, execute onGoalFailed.";
     },
     "ask": async (args: any) => {
       logger.error("Agent: " + args.message);

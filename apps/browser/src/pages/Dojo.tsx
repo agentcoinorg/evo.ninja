@@ -14,7 +14,7 @@ import Sidebar from "../components/Sidebar/Sidebar";
 import Chat, { ChatMessage } from "../components/Chat/Chat";
 import { MarkdownLogger } from '../sys/logger';
 import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
-import { onGoalAchievedScript, speakScript } from '../scripts';
+import { onGoalAchievedScript, onGoalFailedScript, speakScript } from '../scripts';
 import { defaultModel } from '../supportedModels';
 
 function addScript(script: {name: string, definition: string, code: string}, scriptsWorkspace: Workspace) {
@@ -137,6 +137,7 @@ function Dojo() {
 
       const scriptsWorkspace = new EvoCore.InMemoryWorkspace();
       addScript(onGoalAchievedScript, scriptsWorkspace);
+      addScript(onGoalFailedScript, scriptsWorkspace);
       addScript(speakScript, scriptsWorkspace);
 
       const scripts = new EvoCore.Scripts(
@@ -175,9 +176,13 @@ function Dojo() {
           logger.success("Goal has been achieved!");
           setGoalAchieved(true);
         },
+        "onGoalFailed": async (args: any) => {
+          logger.error("Goal could not be achieved!");
+          setGoalAchieved(true);
+        },
         "speak": async (args: any) => {
           logger.success("Evo: " + args.message);
-          return "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.";
+          return "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.\nIf you think you've failed, execute onGoalFailed.";
         },
         "ask": async (args: any) => {
           throw new Error("Not implemented");
