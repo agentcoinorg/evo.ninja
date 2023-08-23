@@ -21,10 +21,6 @@ export function createScript(createScriptWriter: () => ScriptWriter): AgentFunct
               type: "string",
               description: "The arguments of the script. E.g. '{ path: string, encoding: string }'. Use only what you need, no optional arguments."
             },
-            developerNote: {
-              type: "string",
-              description: "A note for the developer of the script, if any."
-            }
           },
           required: ["namespace", "description", "arguments"],
           additionalProperties: false
@@ -33,7 +29,7 @@ export function createScript(createScriptWriter: () => ScriptWriter): AgentFunct
     buildExecutor: (
       context: AgentContext
     ) => {
-      return async (options: { namespace: string, description: string, arguments: string, developerNote?: string }) => {
+      return async (options: { namespace: string, description: string, arguments: string }) => {
         if (options.namespace.startsWith("agent.")) {
           return {
             ok: false,
@@ -46,7 +42,7 @@ export function createScript(createScriptWriter: () => ScriptWriter): AgentFunct
 
         context.logger.notice(`Creating script '${options.namespace}'...`);
 
-        let iterator = writer.run(options.namespace, options.description, options.arguments, options.developerNote);
+        let iterator = writer.run(options.namespace, options.description, options.arguments);
 
         while(true) {
           const response = await iterator.next();

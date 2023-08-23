@@ -3,7 +3,6 @@ export abstract class Agent {
     namespace: string, 
     description: string,
     args: string,
-    developerNote?: string
   ): AsyncGenerator<StepOutput, RunResult, string | undefined>;
 }
 
