@@ -10,7 +10,6 @@ export async function* loop(
   namespace: string, 
   description: string,
   args: string, 
-  developerNote: string | undefined,
   llm: LlmApi, 
   chat: Chat, 
   client: WrapClient, 
@@ -22,7 +21,7 @@ export async function* loop(
   agentFunctions: AgentFunction[],
 ): AsyncGenerator<StepOutput, RunResult, string | undefined> {
   chat.persistent("system", INITIAL_PROMP);
-  chat.persistent("system", GOAL_PROMPT(namespace, description, args, developerNote));
+  chat.persistent("system", GOAL_PROMPT(namespace, description, args));
 
   while (true) {
     await chat.fitToContextWindow();
