@@ -30,14 +30,12 @@ export class ScriptWriter implements Agent {
     namespace: string, 
     description: string,
     args: string,
-    developerNote?: string
   ): AsyncGenerator<StepOutput, RunResult, string | undefined> {
     try {
       return yield* loop(
         namespace, 
         description, 
         args, 
-        developerNote,
         this.llm, 
         this.chat, 
         this.client, 

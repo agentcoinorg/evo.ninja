@@ -3,15 +3,18 @@
   height: 100%; /* Add this to take full height */
 }
 
-.DojoConfig-apikey {
+.DojoConfig-container {
   position: fixed;
   color: #f5f5f5;
-  background: #000000bb;
+  background: #222222;
   padding: 50px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 @-webkit-keyframes bg-scrolling-reverse {
@@ -97,19 +100,24 @@
 }
 
 .DojoConfig__Input {
-  flex: 1;
   padding: 10px;
-  width: 100%;
-  margin-right: 10px;
   font-size: 15px;
   border: 1px solid #888;
-  border-radius: 5px;
+  border-radius: 0.25rem;
   background-color: #202020;
   color: #f5f5f5;
   outline: none;
   transition: all 0.3s ease-in-out;
 }
 
-.DojoConfig__InputContainer {
-  display: flex;
+.DojoConfig__Select {
+  padding: 10px;
+  background-color: #202020;
+  color: #f5f5f5;
+  border-radius: 0.25rem;
+}
+
+.DojoConfig-container h3 {
+  margin-top: 0;
+  margin-bottom: 0;
 }
