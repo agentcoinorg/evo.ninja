@@ -14,7 +14,7 @@ import { InMemoryFile } from '../sys/file';
 import { MarkdownLogger } from '../sys/logger';
 import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
 import { Workspace } from '@evo-ninja/core';
-import { onGoalAchievedScript, speakScript } from '../scripts';
+import { onGoalAchievedScript, onGoalFailedScript, speakScript } from '../scripts';
 
 function addScript(script: {name: string, definition: string, code: string}, scriptsWorkspace: Workspace) {
   scriptsWorkspace.writeFileSync(`${script.name}.json`, script.definition);
@@ -123,6 +123,7 @@ function Dojo() {
 
       const scriptsWorkspace = new EvoCore.InMemoryWorkspace();
       addScript(onGoalAchievedScript, scriptsWorkspace);
+      addScript(onGoalFailedScript, scriptsWorkspace);
       addScript(speakScript, scriptsWorkspace);
 
       const scripts = new EvoCore.Scripts(
@@ -161,9 +162,13 @@ function Dojo() {
           logger.success("Goal has been achieved!");
           setGoalAchieved(true);
         },
+        "onGoalFailed": async (args: any) => {
+          logger.error("Goal could not be achieved!");
+          setGoalAchieved(true);
+        },
         "speak": async (args: any) => {
           logger.success("Evo: " + args.message);
-          return "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.";
+          return "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.\nIf you think you've failed, execute onGoalFailed.";
         },
         "ask": async (args: any) => {
           throw new Error("Not implemented");
