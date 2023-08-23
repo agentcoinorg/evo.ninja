@@ -5,13 +5,14 @@ import {
   faDiscord,
   faGithub,
 } from "@fortawesome/free-brands-svg-icons";
-import { faCog, faUpload } from "@fortawesome/free-solid-svg-icons";
+import { faCog, faDownload, faUpload } from "@fortawesome/free-solid-svg-icons";
 import { faUserNinja, faFolder } from "@fortawesome/free-solid-svg-icons";
 import Upload from "../Upload";
 import File from "../File/File";
 
 import "./Sidebar.css";
-import { InMemoryFile } from "../../sys/file";
+import { downloadFilesAsZip } from "../../sys/file/downloadFilesAsZip";
+import { InMemoryFile } from "@nerfzael/memory-fs";
 
 export interface SidebarProps {
   onSettingsClick: () => void;
@@ -21,6 +22,10 @@ export interface SidebarProps {
 }
 
 const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles }: SidebarProps) => {
+  function downloadUserFiles() {
+    downloadFilesAsZip("workspace.zip", userFiles);
+  }
+
   return (
     <div className="Sidebar">
       <div className="Content">
@@ -37,9 +42,22 @@ const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles }: Sideb
           <h3>
             <FontAwesomeIcon icon={faFolder} style={{ marginRight: "10px" }} /> WORKSPACE
           </h3>
-          {userFiles.map((file, i) => (
-            <File file={file} />
-          ))}
+      
+          <div>
+            {userFiles.map((file, i) => (
+              <File file={file} />
+            ))}
+          </div> 
+          {
+            userFiles.length !== 0 && (
+              <button 
+                className="DownloadButton" 
+                title="Download" 
+                onClick={downloadUserFiles}>
+                <FontAwesomeIcon icon={faDownload} />  Download
+              </button>
+            )
+          }
         </Upload>
         <footer className="Footer">
           <div className="Polywrap">
