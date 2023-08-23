@@ -25,7 +25,7 @@ function require(lib) {
       return __wrap_subinvoke("plugin/fs", "readFileSync", { path }).value;
     },
     readFile: (path) => {
-      return Promise.resolve(__wrap_subinvoke("plugin/fs", "readFileSync", { path, data }).value);
+      return Promise.resolve(__wrap_subinvoke("plugin/fs", "readFileSync", { path }).value);
     },
     writeFileSync: (path, data) => {
       return __wrap_subinvoke("plugin/fs", "writeFileSync", { path, data }).value;
@@ -42,17 +42,32 @@ function require(lib) {
     existsSync: (path) => {
       return __wrap_subinvoke("plugin/fs", "existsSync", { path }).value;
     },
+    exists: (path) => {
+      return Promise.resolve(__wrap_subinvoke("plugin/fs", "existsSync", { path }).value);
+    },
     unlinkSync: (path) => {
       return __wrap_subinvoke("plugin/fs", "unlinkSync", { path }).value;
+    },
+    unlink: (path) => {
+      return Promise.resolve(__wrap_subinvoke("plugin/fs", "unlinkSync", { path }).value);
     },
     renameSync: (oldPath, newPath) => {
       return __wrap_subinvoke("plugin/fs", "renameSync", { oldPath, newPath }).value;
     },
+    rename: (oldPath, newPath) => {
+      return Promise.resolve(__wrap_subinvoke("plugin/fs", "renameSync", { oldPath, newPath }).value);
+    },
     mkdirSync: (path) => {
       return __wrap_subinvoke("plugin/fs", "mkdirSync", { path }).value;
     },
+    mkdir: (path) => {
+      return Promise.resolve(__wrap_subinvoke("plugin/fs", "mkdirSync", { path }).value);
+    },
     readdirSync: (path) => {
       return __wrap_subinvoke("plugin/fs", "readdirSync", { path }).value;
+    },
+    readdir: (path) => {
+      return Promise.resolve(__wrap_subinvoke("plugin/fs", "readdirSync", { path }).value);
     }
   };
 
