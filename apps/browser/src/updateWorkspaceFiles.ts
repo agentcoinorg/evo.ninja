@@ -1,5 +1,5 @@
-import { InMemoryFile } from "./sys/file";
 import * as EvoCore from "@evo-ninja/core";
+import { InMemoryFile } from "@nerfzael/memory-fs";
 
 export function updateWorkspaceFiles(workspace: EvoCore.Workspace, files: InMemoryFile[], setFiles: (files: InMemoryFile[]) => void) {
   const items = workspace.readdirSync("");

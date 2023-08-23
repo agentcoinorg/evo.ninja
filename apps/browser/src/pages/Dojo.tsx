@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
 import * as EvoCore from "@evo-ninja/core";
+import { Workspace } from '@evo-ninja/core';
+import { InMemoryFile } from '@nerfzael/memory-fs';
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 import { PluginPackage } from "@polywrap/plugin-js";
 
@@ -10,10 +12,8 @@ import DojoConfig from "../components/DojoConfig/DojoConfig";
 import DojoError from "../components/DojoError/DojoError";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Chat, { ChatMessage } from "../components/Chat/Chat";
-import { InMemoryFile } from '../sys/file';
 import { MarkdownLogger } from '../sys/logger';
 import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
-import { Workspace } from '@evo-ninja/core';
 import { onGoalAchievedScript, speakScript } from '../scripts';
 import { defaultModel } from '../supportedModels';
 
