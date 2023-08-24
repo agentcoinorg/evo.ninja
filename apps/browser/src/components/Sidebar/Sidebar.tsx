@@ -36,7 +36,6 @@ const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles, deleteU
     }, {} as { [name: string]: InMemoryFile[] });
   };
   
-
   const scriptsGrouped = groupFilesByName(
     scripts.filter((file) => !file.path.startsWith("agent."))
   );  

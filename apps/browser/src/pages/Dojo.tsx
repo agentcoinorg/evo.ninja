@@ -72,7 +72,6 @@ function Dojo() {
     setUserFiles(updatedUserFiles);
   }
   
-
   function onMessage(message: ChatMessage) {
     setMessages((messages) => [
       ...messages,
