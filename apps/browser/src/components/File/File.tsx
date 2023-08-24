@@ -26,15 +26,22 @@ const File = ({ files, showExtension, deleteFile }: { files: FileType[]; showExt
     }
   });
   
+  const handleDelete = (file: FileType, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent the click event from bubbling up to the parent element
+    if (window.confirm('Are you sure you want to delete this file?')) {
+      deleteFile?.(file);
+    }
+  };
+  
   return (
     <>
     <div className="File" onClick={handleClick}>
       <span>
-        {showExtension ? files[0].path : files[0].path === '.msgs' ? '.msgs' : files[0].path.split('.').slice(0, -1).join('.')}
-      </span>
-      {deleteFile && (
-        <button className="delete-button" onClick={(e) => { e.stopPropagation(); deleteFile(files[0]); }}>X</button> // Delete button
-      )}
+          {showExtension ? files[0].path : files[0].path === '.msgs' ? '.msgs' : files[0].path.split('.').slice(0, -1).join('.')}
+        </span>
+        {deleteFile && (
+          <button className="delete-button" onClick={(e) => handleDelete(files[0], e)}>X</button>
+        )}
       </div>
       <Modal
         className="File__Modal"
