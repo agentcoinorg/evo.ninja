@@ -41,7 +41,9 @@ Please install the following:
 `nvm install && nvm use`
 5. Install all dependencies
 `yarn install`
-6. Run evo.ninja!
+6. Build all packages
+`yarn build`
+7. Run evo.ninja!
 `yarn start`
 
 Optional: You can also pass a goal on startup:

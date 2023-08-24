@@ -15,6 +15,9 @@
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@fortawesome/react-fontawesome": "^0.2.0",
     "gpt-tokenizer": "~2.1.1",
+    "jszip": "^3.10.0",
+    "file-saver": "^2.0.5",
+    "@nerfzael/memory-fs": "0.1.1",
     "buffer": "6.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -30,6 +33,7 @@
     "@testing-library/react": "^13.4.0",
     "@types/react-modal": "3.16.0",
     "@testing-library/user-event": "^13.5.0",
+    "@types/file-saver": "^2.0.5",
     "@types/jest": "^27.5.2",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7"
