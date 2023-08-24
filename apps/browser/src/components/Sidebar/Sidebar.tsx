@@ -61,8 +61,8 @@ const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles }: Sideb
           <h3>
             <FontAwesomeIcon icon={faFolder} style={{ marginRight: "10px" }} /> WORKSPACE
           </h3>
-          {Object.keys(userFilesGrouped).map((name, i) => (
-            <File key={i} files={userFilesGrouped[name]} />
+          {userFiles.map((file, i) => (
+            <File key={i} files={[file]} />
           ))}
         </Upload>
         <footer className="Footer">
