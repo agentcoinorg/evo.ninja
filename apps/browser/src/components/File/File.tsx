@@ -26,9 +26,6 @@ const File = ({ files, showExtension, deleteFile }: { files: FileType[]; showExt
     }
   });
   
-  
-
-  
   return (
     <>
     <div className="File" onClick={handleClick}>

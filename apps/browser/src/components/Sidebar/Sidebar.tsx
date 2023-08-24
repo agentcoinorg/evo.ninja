@@ -64,13 +64,11 @@ const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles, deleteU
             <FontAwesomeIcon icon={faFolder} style={{ marginRight: "10px" }} /> WORKSPACE
           </h3>
           <div>
-          
           {userFiles.map((file, i) => (
             <div key={i} className="file-wrapper">
               <File files={[file]} showExtension={true} deleteFile={deleteUserFile} />
             </div>
           ))}
-
           </div> 
           {
             userFiles.length !== 0 && (
