@@ -67,6 +67,12 @@ function Dojo() {
     updateWorkspaceFiles(scriptsWorkspace, scripts, setScripts);
   }
 
+  function deleteUserFile(fileToDelete: InMemoryFile) {
+    const updatedUserFiles = userFiles.filter(file => file !== fileToDelete);
+    setUserFiles(updatedUserFiles);
+  }
+  
+
   function onMessage(message: ChatMessage) {
     setMessages((messages) => [
       ...messages,
@@ -211,7 +217,7 @@ function Dojo() {
           onConfigSaved={onConfigSaved}
         />
       }
-      <Sidebar onSettingsClick={() => setConfigOpen(true)} scripts={scripts} userFiles={userFiles} uploadUserFiles={setUploadedFiles} />
+      <Sidebar onSettingsClick={() => setConfigOpen(true)} scripts={scripts} userFiles={userFiles} uploadUserFiles={setUploadedFiles} deleteUserFile={deleteUserFile} />
       <>
         {evo && <Chat evo={evo} onMessage={onMessage} messages={messages} goalAchieved={goalAchieved} />}
         {dojoError && <DojoError error={dojoError} />}

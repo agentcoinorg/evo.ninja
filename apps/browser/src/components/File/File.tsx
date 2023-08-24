@@ -7,7 +7,7 @@ type FileType = {
   content?: Uint8Array;
 };
 
-const File = ({ files, showExtension }: { files: FileType[]; showExtension: boolean }) => {
+const File = ({ files, showExtension, deleteFile }: { files: FileType[]; showExtension: boolean; deleteFile?: (file: FileType) => void }) => {
   const [showContent, setShowContent] = useState(false);
 
   const handleClick = () => {
@@ -31,8 +31,13 @@ const File = ({ files, showExtension }: { files: FileType[]; showExtension: bool
   
   return (
     <>
-      <div className="File" onClick={handleClick}>
-      {showExtension ? files[0].path : files[0].path === '.msgs' ? '.msgs' : files[0].path.split('.').slice(0, -1).join('.')}
+    <div className="File" onClick={handleClick}>
+      <span>
+        {showExtension ? files[0].path : files[0].path === '.msgs' ? '.msgs' : files[0].path.split('.').slice(0, -1).join('.')}
+      </span>
+      {deleteFile && (
+        <button className="delete-button" onClick={(e) => { e.stopPropagation(); deleteFile(files[0]); }}>X</button> // Delete button
+      )}
       </div>
       <Modal
         className="File__Modal"

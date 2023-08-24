@@ -31,6 +31,7 @@
 }
 
 .File {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -40,6 +41,17 @@
   cursor: pointer;
   background-color: #ff572e;
 }
+
+
+.delete-button {
+  background: none;
+  border: none;
+  color: rgb(255, 180, 180);
+  font-size: 20px;
+  cursor: pointer;
+  margin-left: auto; 
+}
+
 
 .BuiltWithLove {
   font-size: 0.8rem;

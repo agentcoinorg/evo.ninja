@@ -19,9 +19,10 @@ export interface SidebarProps {
   scripts: InMemoryFile[];
   userFiles: InMemoryFile[];
   uploadUserFiles: (files: InMemoryFile[]) => void;
+  deleteUserFile: (file: InMemoryFile) => void;
 }
 
-const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles }: SidebarProps) => {
+const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles, deleteUserFile }: SidebarProps) => {
   const groupFilesByName = (files: InMemoryFile[]) => {
     return files.reduce((acc, file) => {
       if (file.path === '.msgs') {
@@ -63,9 +64,13 @@ const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles }: Sideb
             <FontAwesomeIcon icon={faFolder} style={{ marginRight: "10px" }} /> WORKSPACE
           </h3>
           <div>
-            {userFiles.map((file, i) => (
-              <File key={i} files={[file]} showExtension={true} />
-            ))}
+          
+          {userFiles.map((file, i) => (
+            <div key={i} className="file-wrapper">
+              <File files={[file]} showExtension={true} deleteFile={deleteUserFile} />
+            </div>
+          ))}
+
           </div> 
           {
             userFiles.length !== 0 && (
