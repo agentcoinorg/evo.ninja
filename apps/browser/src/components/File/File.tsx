@@ -7,7 +7,7 @@ type FileType = {
   content?: Uint8Array;
 };
 
-const File = ({ files }: { files: FileType[] }) => {
+const File = ({ files, showExtension }: { files: FileType[]; showExtension: boolean }) => {
   const [showContent, setShowContent] = useState(false);
 
   const handleClick = () => {
@@ -32,7 +32,7 @@ const File = ({ files }: { files: FileType[] }) => {
   return (
     <>
       <div className="File" onClick={handleClick}>
-        {files[0].path === '.msgs' ? '.msgs' : files[0].path.split('.').slice(0, -1).join('.')}
+      {showExtension ? files[0].path : files[0].path === '.msgs' ? '.msgs' : files[0].path.split('.').slice(0, -1).join('.')}
       </div>
       <Modal
         className="File__Modal"

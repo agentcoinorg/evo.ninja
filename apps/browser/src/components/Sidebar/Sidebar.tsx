@@ -55,7 +55,7 @@ const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles }: Sideb
             <FontAwesomeIcon icon={faUserNinja} /> SCRIPTS
           </h3>
           {Object.keys(scriptsGrouped).map((name, i) => (
-            <File key={i} files={scriptsGrouped[name]} />
+            <File key={i} files={scriptsGrouped[name]} showExtension={false} />
           ))}
         </div>
         <Upload className="Workspace" onUpload={uploadUserFiles}>
@@ -64,7 +64,7 @@ const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles }: Sideb
           </h3>
           <div>
             {userFiles.map((file, i) => (
-              <File file={file} />
+              <File key={i} files={[file]} showExtension={true} />
             ))}
           </div> 
           {
