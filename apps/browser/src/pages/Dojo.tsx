@@ -38,7 +38,7 @@ function Dojo() {
   const [userWorkspace, setUserWorkspace] = useState<EvoCore.InMemoryWorkspace | undefined>(undefined);
   const [scriptsWorkspace, setScriptsWorkspace] = useState<EvoCore.InMemoryWorkspace | undefined>(undefined);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [goalAchieved, setGoalAchieved] = useState<boolean>(false);
+  const [goalEnded, setGoalEnded] = useState<boolean>(false);
 
   useEffect(() => {
     if (!evo || !scriptsWorkspace) {
@@ -174,11 +174,11 @@ function Dojo() {
       const agentPackage = PluginPackage.from(module => ({
         "onGoalAchieved": async (args: any) => {
           logger.success("Goal has been achieved!");
-          setGoalAchieved(true);
+          setGoalEnded(true);
         },
         "onGoalFailed": async (args: any) => {
           logger.error("Goal could not be achieved!");
-          setGoalAchieved(true);
+          setGoalEnded(true);
         },
         "speak": async (args: any) => {
           logger.success("Evo: " + args.message);
@@ -213,7 +213,7 @@ function Dojo() {
       }
       <Sidebar onSettingsClick={() => setConfigOpen(true)} scripts={scripts} userFiles={userFiles} uploadUserFiles={setUploadedFiles} />
       <>
-        {evo && <Chat evo={evo} onMessage={onMessage} messages={messages} goalAchieved={goalAchieved} />}
+        {evo && <Chat evo={evo} onMessage={onMessage} messages={messages} goalEnded={goalEnded} />}
         {dojoError && <DojoError error={dojoError} />}
       </>
     </div>

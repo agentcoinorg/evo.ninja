@@ -14,10 +14,10 @@ export interface ChatProps {
   evo: Evo;
   onMessage: (message: ChatMessage) => void;
   messages: ChatMessage[];
-  goalAchieved: boolean
+  goalEnded: boolean
 }
 
-const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
   const [paused, setPaused] = useState<boolean>(false);
@@ -32,16 +32,16 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: C
       pausedRef.current = paused;
   }, [paused]);
 
-  const goalAchievedRef = useRef(paused);
+  const goalEndedRef = useRef(paused);
   useEffect(() => {
-    goalAchievedRef.current = goalAchieved;
-  }, [goalAchieved]);
+    goalEndedRef.current = goalEnded;
+  }, [goalEnded]);
 
   useEffect(() => {
-    if (goalAchieved) {
+    if (goalEnded) {
       setPaused(true);
     }
-  }, [goalAchieved]);
+  }, [goalEnded]);
 
   useEffect(() => {
     const runEvo = async () => {
@@ -59,7 +59,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: C
       let messageLog = messages;
 
       while (evoRunning) {
-        if (pausedRef.current || goalAchievedRef.current) {
+        if (pausedRef.current || goalEndedRef.current) {
           setStopped(true);
           return Promise.resolve();
         }
@@ -74,7 +74,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: C
             user: "evo"
           };
           messageLog = [...messageLog, evoMessage];
-          if (!goalAchievedRef.current) {
+          if (!goalEndedRef.current) {
             onMessage(evoMessage);
           }
         }
