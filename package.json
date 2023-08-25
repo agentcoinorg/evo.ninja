@@ -18,7 +18,7 @@
     "build": "yarn build:core && yarn build:cli && yarn build:browser",
     "build:core": "yarn workspace @evo-ninja/core run build",
     "build:cli": "yarn workspace evo-ninja run build",
-    "build:browser": "cd ./apps/browser && yarn build"
+    "build:browser": "yarn workspace @evo-ninja/ui build"
   },
   "devDependencies": {
     "rimraf": "5.0.1"

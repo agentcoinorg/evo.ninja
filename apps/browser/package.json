@@ -33,6 +33,9 @@
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7"
   },
+  "resolutions": {
+    "strip-ansi": "^6.0.0"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
