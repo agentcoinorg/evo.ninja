@@ -30,16 +30,16 @@ const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles }: Sideb
             <FontAwesomeIcon icon={faUserNinja} /> SCRIPTS
           </h3>
           {scripts.filter((file) => !file.path.startsWith("agent.")).map((file, i) => (
-            <File file={file} />
-          ))}
+            <File files={[file]} showExtension={false} />
+        ))}
         </div>
         <Upload className="Workspace" onUpload={uploadUserFiles}>
           <h3>
             <FontAwesomeIcon icon={faFolder} style={{ marginRight: "10px" }} /> WORKSPACE
           </h3>
           {userFiles.map((file, i) => (
-            <File file={file} />
-          ))}
+             <File files={[file]} showExtension={true} />
+        ))}
         </Upload>
         <footer className="Footer">
           <div className="Polywrap">
