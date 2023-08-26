@@ -2,6 +2,9 @@ import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef } from "
 import { Evo } from "@evo-ninja/core";
 import ReactMarkdown from "react-markdown";
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
+
 import "./Chat.css";
 
 export interface ChatMessage {
@@ -120,8 +123,34 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: C
     }
   };
 
+  const exportChatHistory = (format: 'md') => {
+    let exportedContent = '';
+    if (format === 'md') {
+      exportedContent = messages.map((msg) => {
+        return `# ${msg.user.toUpperCase()}\n${msg.text}\n---\n`;
+      }).join('\n');
+    }
+  
+    // Generate a date-time stamp
+    const date = new Date();
+    const dateTimeStamp = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}_${date.getHours().toString().padStart(2, '0')}-${date.getMinutes().toString().padStart(2, '0')}-${date.getSeconds().toString().padStart(2, '0')}`;
+  
+    const blob = new Blob([exportedContent], { type: 'text/plain;charset=utf-8' });
+    const href = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = href;
+    // Include the date-time stamp in the filename
+    link.download = `evo-ninja-${dateTimeStamp}.md`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="Chat">
+      <div >
+        <FontAwesomeIcon className="Chat__Export" icon={faMarkdown} onClick={() => exportChatHistory('md')} />
+      </div>
       <div className="Messages">
         {messages.map((msg, index) => (
           <div key={index} className={`MessageContainer ${msg.user}`}>
