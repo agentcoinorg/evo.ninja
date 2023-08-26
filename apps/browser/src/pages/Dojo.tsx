@@ -193,7 +193,7 @@ function Dojo() {
       }
       <Sidebar onSettingsClick={() => setConfigOpen(true)} scripts={scripts} userFiles={userFiles} uploadUserFiles={setUploadedFiles} />
       <>
-        {evo && <Chat evo={evo} onMessage={onMessage} messages={messages} goalAchieved={goalAchieved} />}
+      {evo && <Chat evo={evo} onMessage={onMessage} messages={messages} goalAchieved={goalAchieved} apiKey={apiKey} />}
         {dojoError && <DojoError error={dojoError} />}
       </>
     </div>

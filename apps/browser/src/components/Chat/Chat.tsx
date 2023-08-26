@@ -3,9 +3,12 @@ import { Evo } from "@evo-ninja/core";
 import ReactMarkdown from "react-markdown";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
+import { faMarkdown, } from '@fortawesome/free-brands-svg-icons';
+import { faStopCircle, faMicrophone } from '@fortawesome/free-solid-svg-icons';  // Updated import
 
 import "./Chat.css";
+
+let mediaRecorder: MediaRecorder;
 
 export interface ChatMessage {
   text: string;
@@ -17,10 +20,11 @@ export interface ChatProps {
   evo: Evo;
   onMessage: (message: ChatMessage) => void;
   messages: ChatMessage[];
-  goalAchieved: boolean
+  goalAchieved: boolean;
+  apiKey: string | null;
 }
 
-const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved, apiKey }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
   const [paused, setPaused] = useState<boolean>(false);
@@ -29,6 +33,8 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: C
     undefined
   );
   const [stopped, setStopped] = useState<boolean>(false);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [isRecording, setIsRecording] = useState<boolean>(false); // New state variable to track recording status
 
   const pausedRef = useRef(paused);
   useEffect(() => {
@@ -36,6 +42,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: C
   }, [paused]);
 
   const goalAchievedRef = useRef(paused);
+
   useEffect(() => {
     goalAchievedRef.current = goalAchieved;
   }, [goalAchieved]);
@@ -94,6 +101,116 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: C
     const timer = setTimeout(runEvo, 200);
     return () => clearTimeout(timer);
   }, [evoRunning, evoItr]);
+
+  // Initialize media recorder
+  useEffect(() => {
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then((stream) => {
+        // Initialize MediaRecorder with the audio stream
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = event => {
+          // Corrected type issue here
+          setAudioBlob(event.data as Blob);
+        };
+      });
+  }, []);
+
+  const transcribeAudio = async (audio: Blob) => {
+    const audioFile = new File([audio], "audio.wav", { type: "audio/wav" });
+    const formData = new FormData();
+    formData.append("file", audioFile);
+    formData.append("model", "whisper-1");
+  
+    try {
+      const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${"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"}`,
+        },
+        body: formData,
+      });
+  
+      if (response.status === 401) {
+        console.error("Authentication failed. Please check your API key.");
+        return;
+      }
+  
+      if (!response.ok) {
+        console.error(`HTTP error! status: ${response.status}`);
+        return;
+      }
+  
+      const data = await response.json();
+      const transcript = data.text; // Update this based on actual API response
+      console.log("Transcript:", transcript);
+      return transcript;
+    } catch (error) {
+      console.error("An error occurred:", error);
+    }
+  };
+  
+  useEffect(() => {
+    if (audioBlob) {
+      transcribeAudio(audioBlob).then((transcript: string) => {
+        console.log("Transcript:", transcript); // You have this line for logging
+        if (transcript) {
+          onMessage({
+            text: transcript,
+            user: "user"
+          });
+          handleSend();  // Automatically trigger the "Start" button's functionality
+        }
+      }).catch((error: Error) => {
+        console.error('Transcription failed:', error);
+      });
+    }
+  }, [audioBlob]);
+  
+  const toggleRecording = () => {
+    if (isRecording) {
+      mediaRecorder.stop();
+    } else {
+      mediaRecorder.start();
+    }
+    setIsRecording(!isRecording);
+  };
+
+  const handleAudioTranscription = async () => {
+    if (!audioBlob) return;
+  
+    // Convert the Blob to a File
+    const audioFile = new File([audioBlob], "audio.wav", {
+      type: 'audio/wav'
+    });
+  
+    // Create a FormData object to hold the audio file
+    const formData = new FormData();
+    formData.append('audio', audioFile);
+  
+    // Send the audio file to your server or directly to OpenAI API
+    try {
+      // This is a placeholder. Replace with your actual OpenAI API call.
+      const response = await fetch('https://api.openai.com/v1/transcriptions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: formData
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        const transcript = data.text;  // Adjust this based on the actual API response structure
+        console.log('Transcript:', transcript);
+      } else {
+        console.log('Failed to transcribe audio');
+      }
+    } catch (error) {
+      console.error('An error occurred:', error);
+    }
+  };
+  
 
   const handleSend = async () => {
     onMessage({
@@ -171,6 +288,15 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: C
           className="Chat__Input"
           disabled={sending} // Disable input while sending
         />
+
+        <button className={`Chat__Btn ${isRecording ? "Chat__Btn--recording" : ""}`} onClick={toggleRecording}>
+          {isRecording ? (
+            <FontAwesomeIcon icon={faStopCircle} />
+          ) : (
+            <FontAwesomeIcon icon={faMicrophone} />
+          )}
+          {isRecording ? "" : ""}
+        </button>
         {evoRunning && (
           <>
             {
@@ -206,6 +332,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: C
           <button className="Chat__Btn" onClick={handleSend} disabled={evoRunning || sending}>
             Start
           </button>
+          
         )}
       </div>
     </div>
