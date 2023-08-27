@@ -126,7 +126,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved, api
       const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${"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"}`,
+          Authorization: `Bearer ${apiKey}`,
         },
         body: formData,
       });
