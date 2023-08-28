@@ -30,6 +30,9 @@ Please install the following:
 - [yarn](https://classic.yarnpkg.com/lang/en/docs/install/#debian-stable)
 - [nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
+NOTE: Step 5 is for Windows users using WSL2
+`Executing yarn workspace @evo-ninja/core run build specifically builds the @evo-ninja/core package. The command triggers the build script defined in the package.json of the @evo-ninja/core workspace. In your case, this script cleans the build directory and then runs the TypeScript compiler (tsc) to transpile the TypeScript files into JavaScript, which is required for Node.js execution.`
+
 ### Setup
 1. Clone the repository
 `git clone https://github.com/polywrap/evo.ninja`
@@ -39,9 +42,12 @@ Please install the following:
 `OPENAI_API_KEY=sk-...`
 4. Use the correct version of Node.JS
 `nvm install && nvm use`
-5. Install all dependencies
+5. Build the Core Package:
+Given that the main field of your @evo-ninja/core package points to ./build/index.js, make sure you've built the TypeScript files in core to JavaScript:
+`yarn workspace @evo-ninja/core run build`
+6. Install all dependencies
 `yarn install`
-6. Run evo.ninja!
+7. Run evo.ninja!
 `yarn start`
 
 Optional: You can also pass a goal on startup:
