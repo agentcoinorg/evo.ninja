@@ -34,9 +34,6 @@
     "@types/react-modal": "3.16.0",
     "tailwindcss": "^3.3.3"
   },
-  "resolutions": {
-    "strip-ansi": "^6.0.0"
-  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
