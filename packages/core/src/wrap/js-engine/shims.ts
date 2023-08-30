@@ -1,8 +1,38 @@
 export const packagesShim =
 `
+// HACK: This is a hack because undefined, null, and functions are not supported by the JS Engine
+function clean(obj, root = true) {
+  if (obj === undefined) {
+    return root ? "undefined" : undefined;
+  } else if (obj === null) {
+    return root ? "null" : undefined;
+  } else if (Array.isArray(obj)) {
+    return obj.map(x => clean(x, false)).filter(x => x !== undefined);
+  } else if (obj instanceof Error) {
+    return { message: obj.message };
+  } else if (typeof obj === 'function') {
+    return root ? "function" : undefined;
+  } else if (typeof obj !== 'object') {
+    return obj;
+  }
+
+  for (let key in obj) {
+    let value = clean(obj[key], false);
+    if (value === undefined) {
+      delete obj[key];
+    } else {
+      obj[key] = value;
+    }
+  }
+  return obj;
+}
+
 const console = {
-  log: (message) => {
-    __wrap_subinvoke("plugin/console", "log", { message: JSON.stringify(message) });
+  log: function(...args) {
+    __wrap_subinvoke("plugin/console", "log", { args: clean(args) });
+  },
+  error: function(...args) {
+    __wrap_subinvoke("plugin/console", "error", { args: clean(args) });
   },
 };
 
@@ -22,92 +52,187 @@ function require(lib) {
 
   const fs = {
     readFileSync: (path) => {
-      return __wrap_subinvoke("plugin/fs", "readFileSync", { path }).value;
+      return __wrap_subinvoke("plugin/fs", "readFileSync", clean({ path })).value;
     },
-    readFile: (path) => {
-      return Promise.resolve(__wrap_subinvoke("plugin/fs", "readFileSync", { path }).value);
+    readFile: (...args) => {
+      const callback = args[args.length - 1];
+      const result = __wrap_subinvoke("plugin/fs", "readFileSync", clean({ path: args[0] }));
+      callback && callback(result.error ? new Error(result.error) : undefined, result.value);
     },
     writeFileSync: (path, data) => {
-      return __wrap_subinvoke("plugin/fs", "writeFileSync", { path, data }).value;
+      return __wrap_subinvoke("plugin/fs", "writeFileSync", clean({ path, data })).value;
     },
-    writeFile: (path, data) => {
-      return Promise.resolve(__wrap_subinvoke("plugin/fs", "writeFileSync", { path, data }).value);
+    writeFile: (...args) => {
+      const callback = args[args.length - 1];
+      const result = __wrap_subinvoke("plugin/fs", "writeFileSync", clean({ path: args[0], data: args[1] }));
+      callback && callback(result.error ? new Error(result.error) : undefined, result.value);
     },
     appendFileSync: (path, data) => {
-      return __wrap_subinvoke("plugin/fs", "appendFileSync", { path, data }).value;
+      return __wrap_subinvoke("plugin/fs", "appendFileSync", clean({ path, data })).value;
     },
-    appendFile: (path, data) => {
-      return Promise.resolve(__wrap_subinvoke("plugin/fs", "appendFileSync", { path, data }).value);
+    appendFile: (...args) => {
+      const callback = args[args.length - 1];
+      const result = __wrap_subinvoke("plugin/fs", "appendFileSync", clean({ path: args[0], data: args[1] }));
+      callback && callback(result.error ? new Error(result.error) : undefined, result.value);
     },
     existsSync: (path) => {
-      return __wrap_subinvoke("plugin/fs", "existsSync", { path }).value;
+      return __wrap_subinvoke("plugin/fs", "existsSync", clean({ path })).value;
     },
-    exists: (path) => {
-      return Promise.resolve(__wrap_subinvoke("plugin/fs", "existsSync", { path }).value);
-    },
-    unlinkSync: (path) => {
-      return __wrap_subinvoke("plugin/fs", "unlinkSync", { path }).value;
-    },
-    unlink: (path) => {
-      return Promise.resolve(__wrap_subinvoke("plugin/fs", "unlinkSync", { path }).value);
+    exists: (...args) => {
+      const callback = args[args.length - 1];
+      const result = __wrap_subinvoke("plugin/fs", "existsSync", clean({ path: args[0] }));
+      callback && callback(result.error ? new Error(result.error) : undefined, result.value);
     },
     renameSync: (oldPath, newPath) => {
-      return __wrap_subinvoke("plugin/fs", "renameSync", { oldPath, newPath }).value;
+      return __wrap_subinvoke("plugin/fs", "renameSync", clean({ oldPath, newPath })).value;
     },
-    rename: (oldPath, newPath) => {
-      return Promise.resolve(__wrap_subinvoke("plugin/fs", "renameSync", { oldPath, newPath }).value);
+    rename: (...args) => {
+      const callback = args[args.length - 1];
+      const result = __wrap_subinvoke("plugin/fs", "renameSync", clean({ oldPath: args[0], newPath: args[1] }));
+      callback && callback(result.error ? new Error(result.error) : undefined, result.value);
     },
     mkdirSync: (path) => {
-      return __wrap_subinvoke("plugin/fs", "mkdirSync", { path }).value;
+      return __wrap_subinvoke("plugin/fs", "mkdirSync", clean({ path })).value;
     },
-    mkdir: (path) => {
-      return Promise.resolve(__wrap_subinvoke("plugin/fs", "mkdirSync", { path }).value);
+    mkdir: (...args) => {
+      const callback = args[args.length - 1];
+      const result = __wrap_subinvoke("plugin/fs", "mkdirSync", clean({ path: args[0] }));
+      callback && callback(result.error ? new Error(result.error) : undefined, result.value);
     },
     readdirSync: (path) => {
-      return __wrap_subinvoke("plugin/fs", "readdirSync", { path }).value;
+      return __wrap_subinvoke("plugin/fs", "readdirSync", clean({ path })).value;
+    },
+    readdir: (...args) => {
+      const callback = args[args.length - 1];
+      const result = __wrap_subinvoke("plugin/fs", "readdirSync", clean({ path: args[0] }));
+      callback && callback(result.error ? new Error(result.error) : undefined, result.value);
+    },
+  };
+
+  const fsPromises = {
+    readFile: (path) => {
+      return Promise.resolve(fs.readFileSync(path));
+    },
+    writeFile: (path, data) => {
+      return Promise.resolve(fs.writeFileSync(path, data));
+    },
+    appendFile: (path, data) => {
+      return Promise.resolve(fs.appendFileSync(path, data));
+    },
+    exists: (path) => {
+      return Promise.resolve(fs.existsSync(path));
+    },
+    rename: (oldPath, newPath) => {
+      return Promise.resolve(fs.renameSync(oldPath, newPath));
+    },
+    mkdir: (path) => {
+      return Promise.resolve(fs.mkdirSync(path));
     },
     readdir: (path) => {
-      return Promise.resolve(__wrap_subinvoke("plugin/fs", "readdirSync", { path }).value);
+      return Promise.resolve(fs.readdirSync(path));
     }
   };
 
+  const axios = {
+    get: (url, config) => {
+      return Promise.resolve(__wrap_subinvoke("plugin/axios", "get", clean({ url, config })).value);
+    },
+    post: (url, data, config) => {
+      return Promise.resolve(__wrap_subinvoke("plugin/axios", "post", clean({ url, data, config })).value);
+    },
+    put: (url, data, config) => {
+      return Promise.resolve(__wrap_subinvoke("plugin/axios", "put", clean({ url, data, config })).value);
+    },
+    delete: (url, config) => {
+      return Promise.resolve(__wrap_subinvoke("plugin/axios", "delete", clean({ url, config })).value);
+    },
+    head: (url, config) => {
+      return Promise.resolve(__wrap_subinvoke("plugin/axios", "head", clean({ url, config })).value);
+    },
+  };
+
+  const util = (function() {
+    const exports = {};
+
+    var getOwnPropertyDescriptors = 
+      function getOwnPropertyDescriptors(obj) {
+        var keys = Object.keys(obj);
+        var descriptors = {};
+        for (var i = 0; i < keys.length; i++) {
+          descriptors[keys[i]] = Object.getOwnPropertyDescriptor(obj, keys[i]);
+        }
+        return descriptors;
+      };
+        
+    var kCustomPromisifiedSymbol = undefined;
+
+    exports.promisify = function promisify(original) {
+      if (typeof original !== 'function')
+        throw new TypeError('The "original" argument must be of type Function');
+
+      if (kCustomPromisifiedSymbol && original[kCustomPromisifiedSymbol]) {
+        var fn = original[kCustomPromisifiedSymbol];
+        if (typeof fn !== 'function') {
+          throw new TypeError('The "util.promisify.custom" argument must be of type Function');
+        }
+        Object.defineProperty(fn, kCustomPromisifiedSymbol, {
+          value: fn, enumerable: false, writable: false, configurable: true
+        });
+        return fn;
+      }
+
+      function fn() {
+        var promiseResolve, promiseReject;
+        var promise = new Promise(function (resolve, reject) {
+          promiseResolve = resolve;
+          promiseReject = reject;
+        });
+
+        var args = [];
+        for (var i = 0; i < arguments.length; i++) {
+          args.push(arguments[i]);
+        }
+        args.push(function (err, value) {
+          if (err) {
+          promiseReject(err);
+          } else {
+          promiseResolve(value);
+          }
+        });
+
+        try {
+          original.apply(this, args);
+        } catch (err) {
+          promiseReject(err);
+        }
+
+        return promise;
+      }
+
+      Object.setPrototypeOf(fn, Object.getPrototypeOf(original));
+
+      if (kCustomPromisifiedSymbol) Object.defineProperty(fn, kCustomPromisifiedSymbol, {
+        value: fn, enumerable: false, writable: false, configurable: true
+      });
+      return Object.defineProperties(
+        fn,
+        getOwnPropertyDescriptors(original)
+      );
+    }
+
+    return exports;
+  })();
+
   switch (lib) {
     case "fs":
-        return wrap("fs", {
-          ...fs,
-          promises: fs, 
-        });
-        break;
-    case "axios":
-      return wrap("axios", {
-        get: (url, config) => {
-          // This is hack because 'undefined' is not supported by JSON
-          return config
-            ? Promise.resolve(__wrap_subinvoke("plugin/axios", "get", { url, config }).value)
-            : Promise.resolve(__wrap_subinvoke("plugin/axios", "get", { url }).value);
-        },
-        post: (url, data, config) => {
-          return config
-            ? Promise.resolve(__wrap_subinvoke("plugin/axios", "post", { url, data, config }).value)
-            : Promise.resolve(__wrap_subinvoke("plugin/axios", "post", { url, data }).value);
-        },
-        put: (url, data, config) => {
-          return config
-            ? Promise.resolve(__wrap_subinvoke("plugin/axios", "put", { url, data, config }).value)
-            : Promise.resolve(__wrap_subinvoke("plugin/axios", "put", { url, data }).value);
-        },
-        delete: (url, config) => {
-          return config
-            ? Promise.resolve(__wrap_subinvoke("plugin/axios", "delete", { url, config }).value)
-            : Promise.resolve(__wrap_subinvoke("plugin/axios", "delete", { url}).value);
-        },
-        head: (url, config) => {
-          return config
-            ? Promise.resolve(__wrap_subinvoke("plugin/axios", "head", { url, config }).value)
-            : Promise.resolve(__wrap_subinvoke("plugin/axios", "head", { url }).value);
-        },
+      return wrap("fs", {
+        ...fs,
+        promises: fsPromises, 
       });
-      break;
+    case "util":
+      return wrap("util", util);
+    case "axios":
+      return wrap("axios", axios);
     default:
       throw new Error(\`Cannot do require('\${lib}'), '\${lib}' is an unknown import.\`);
   }
@@ -115,7 +240,7 @@ function require(lib) {
 `;
 
 export const shimCode = (code: string) => `${packagesShim}\nconst __temp = (async function () { \n${code}\n })().then(result => {
-  __wrap_subinvoke("plugin/result", "post", { result: result != null ? result : "undefined" })
+  __wrap_subinvoke("plugin/result", "ok", { value: clean(result) })
 }, error => {
-  __wrap_subinvoke("plugin/result", "post", { result: error != null ? error : "undefined" })
-});\nconst result = __temp === undefined ? "undefined" : __temp;\nresult`;
+  __wrap_subinvoke("plugin/result", "err", { error: clean(error) })
+});\nclean(__temp)`;
