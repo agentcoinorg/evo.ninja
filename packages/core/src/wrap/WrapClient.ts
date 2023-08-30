@@ -3,37 +3,43 @@ import {
   PolywrapClientConfigBuilder,
   Uri,
   InvokeResult,
-  IWrapPackage
+  IWrapPackage,
+  Result
 } from "@polywrap/client-js";
 import { PluginPackage } from "@polywrap/plugin-js";
 import axios from "axios";
 
 import { Workspace, Logger } from "..";
 import { InvokerOptions } from "@polywrap/client-js/build/types";
+import { ResultErr, ResultOk } from "@polywrap/result";
 
 export class WrapClient extends PolywrapClient {
 
-  public jsPromiseOutput: { result: any };
+  public jsPromiseOutput: Result<any, any>
 
   constructor(
     workspace: Workspace,
     logger: Logger,
     agentPlugin: IWrapPackage | undefined = undefined,
   ) {
-    const jsPromiseOutput = { result: undefined };
-
     const builder = new PolywrapClientConfigBuilder()
       .addBundle("web3")
       .addBundle("sys")
       .setPackage("plugin/result", PluginPackage.from(module => ({
-        "post": async (args: any) => {
-          jsPromiseOutput.result = args.result;
+        "ok": async (args: any) => {
+          this.jsPromiseOutput = ResultOk(args.value);
+        },
+        "err": async (args: any) => {
+          this.jsPromiseOutput = ResultErr(args.error);
         },
       })))
 
       .setPackage("plugin/console", PluginPackage.from(module => ({
         "log": async (args: any) => {
-          logger.info("CONSOLE.LOG " + JSON.parse(args.message));
+          logger.info("CONSOLE.LOG " + JSON.stringify(args.args, null, 2));
+        },
+        "error": async (args: any) => {
+          logger.info("CONSOLE.ERROR " + JSON.stringify(args.args, null, 2));
         },
       })))
       .setPackage("plugin/fs", PluginPackage.from(module => ({
@@ -114,8 +120,6 @@ export class WrapClient extends PolywrapClient {
     }
 
     super(builder.build());
-
-    this.jsPromiseOutput = jsPromiseOutput;
   }
 
   async invoke<TData = unknown, TUri extends Uri | string = string>(options: InvokerOptions<TUri>): Promise<InvokeResult<TData>> {

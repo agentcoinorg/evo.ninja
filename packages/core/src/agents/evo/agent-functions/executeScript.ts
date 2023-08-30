@@ -87,25 +87,21 @@ export const executeScript: AgentFunction = {
           globals
         }, context.client);
 
-        if (result.ok && context.client.jsPromiseOutput.result) {
+        if (result.ok && context.client.jsPromiseOutput.ok) {
           context.globals[options.result] =
-            JSON.stringify(context.client.jsPromiseOutput.result);
-        }
-
-        if (result.ok && !context.client.jsPromiseOutput.result) { 
-          console.log("No result returned from script.", context.client.jsPromiseOutput, result.value);
+            JSON.stringify(context.client.jsPromiseOutput.value);
         }
 
         return result.ok
           ? result.value.error == null
-            ? context.client.jsPromiseOutput.result
+            ? context.client.jsPromiseOutput.ok
               ? {
                 ok: true,
-                result: JSON.stringify(context.client.jsPromiseOutput.result),
+                result: JSON.stringify(context.client.jsPromiseOutput.value),
               }
               : {
                 ok: false,
-                error: "No result returned from script.",
+                error: JSON.stringify(context.client.jsPromiseOutput.error),
               }
             : {
               ok: false,
