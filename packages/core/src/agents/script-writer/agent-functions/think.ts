@@ -26,21 +26,19 @@ export const think: AgentFunction = {
     return result.ok
       ? {
           type: "success",
-          title: `Script ${args.namespace} executed successfully!`,
+          title: `Thinking...`,
           content: 
             `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
             OTHER_EXECUTE_FUNCTION_OUTPUT(result.value),
         }
       : {
           type: "error",
-          title: `Script ${args.namespace} failed to execute!`,
+          title: `Failed to think!`,
           content: FUNCTION_CALL_FAILED(FN_NAME, result.error, args),
         };
   },
-  buildExecutor: (
-    context: AgentContext
-  ) => {
-    return async (options: { thoughts: string }): Promise<Result<string, any>> => {
+  buildExecutor(context: AgentContext) {
+    return async (options: { thoughts: string }): Promise<AgentFunctionResult> => {
       return ResultOk(`I think: ${options.thoughts}.`);
     };
   }

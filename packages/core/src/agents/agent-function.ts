@@ -26,7 +26,7 @@ export type AgentFunctionResult = Result<string, any>;
 export interface AgentChatMessage {
   type: "success" | "error" | "info" | "warning",
   title: string,
-  content: string,
+  content?: string,
 }
 
 export interface AgentFunction {

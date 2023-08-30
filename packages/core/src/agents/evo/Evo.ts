@@ -8,6 +8,7 @@ import { WrapClient } from "../../wrap";
 import { Scripts } from "../../Scripts";
 import { InMemoryWorkspace, Workspace, Logger } from "../../sys";
 import { IWrapPackage } from "@polywrap/client-js";
+import { ResultErr } from "@polywrap/result";
 
 export class Evo implements Agent {
   private client: WrapClient;
@@ -52,7 +53,7 @@ export class Evo implements Agent {
       );
     } catch (err) {
       this.logger.error(err);
-      return RunResult.error("Unrecoverable error encountered.");
+      return ResultErr("Unrecoverable error encountered.");
     }
   }
 }

@@ -30,21 +30,19 @@ export const findScript: AgentFunction = {
     return result.ok
       ? {
           type: "success",
-          title: `Script ${args.namespace} executed successfully!`,
+          title: `Searched for '${args.namespace}' script ("${args.description}")`,
           content: 
             `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
             OTHER_EXECUTE_FUNCTION_OUTPUT(result.value),
         }
       : {
           type: "error",
-          title: `Script ${args.namespace} failed to execute!`,
+          title: `Failed to search for '${args.namespace}' script!`,
           content: FUNCTION_CALL_FAILED(FN_NAME, result.error, args),
         };
   },
-  buildExecutor: (
-    context: AgentContext
-  ) => {
-    return async (options: { namespace: string, description: string }): Promise<Result<string, any>> => {
+  buildExecutor(context: AgentContext) {
+    return async (options: { namespace: string, description: string }): Promise<AgentFunctionResult> => {
       const candidates = context.scripts.searchScripts(
         `${options.namespace} ${options.description}`
       ).slice(0, 5);

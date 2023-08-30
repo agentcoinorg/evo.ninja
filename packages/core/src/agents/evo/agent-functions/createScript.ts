@@ -1,6 +1,7 @@
 import { ScriptWriter } from "../../script-writer";
 import { AgentChatMessage, AgentContext, AgentFunction, AgentFunctionResult } from "../../agent-function";
 import { FUNCTION_CALL_FAILED, OTHER_EXECUTE_FUNCTION_OUTPUT } from "../../prompts";
+import { ResultErr, ResultOk } from "@polywrap/result";
 
 const FN_NAME = "createScript";
 
@@ -35,21 +36,19 @@ export function createScript(createScriptWriter: () => ScriptWriter): AgentFunct
       return result.ok
         ? {
             type: "success",
-            title: `Script ${args.namespace} executed successfully!`,
+            title: `Created '${args.namespace}' script.`,
             content: 
               `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
               OTHER_EXECUTE_FUNCTION_OUTPUT(result.value),
           }
         : {
             type: "error",
-            title: `Script ${args.namespace} failed to execute!`,
+            title: `Failed to create '${args.namespace}' script!`,
             content: FUNCTION_CALL_FAILED(FN_NAME, result.error, args),
           };
     },
-    buildExecutor: (
-      context: AgentContext
-    ) => {
-      return async (options: { namespace: string, description: string, arguments: string }): Promise<Result<string, any>> => {
+    buildExecutor(context: AgentContext) {
+      return async (options: { namespace: string, description: string, arguments: string }): Promise<AgentFunctionResult> => {
         if (options.namespace.startsWith("agent.")) {
           return ResultErr(`Cannot create an script with namespace ${options.namespace}. Try searching for script in that namespace instead.`);
         }
@@ -64,7 +63,14 @@ export function createScript(createScriptWriter: () => ScriptWriter): AgentFunct
         while(true) {
           const response = await iterator.next();
 
-          response.value.message && context.logger.info(response.value.message);
+          if (response.done) {
+            if (!response.value.ok) {
+              return ResultErr(response.value.error);
+            }
+            break;
+          }
+
+          response.value && context.logger.info(response.value.message.title);
 
           // TODO: we should not be communicating the ScriptWriter's completion
           //       via a special file in the workspace

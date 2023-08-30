@@ -5,6 +5,7 @@ import { LlmApi, LlmResponse, Chat } from "../../llm";
 import { WrapClient } from "../../wrap";
 import { Scripts } from "../../Scripts";
 import { Workspace, Logger } from "../../sys";
+import { ResultErr } from "@polywrap/result";
 
 export async function* loop(
   goal: string, 
@@ -27,7 +28,7 @@ export async function* loop(
     const response = await llm.getResponse(chat, agentFunctions.map(f => f.definition));
 
     if (!response) {
-      return RunResult.error("No response from LLM.");
+      return ResultErr("No response from LLM.");
     }
 
     if (response.function_call) {
@@ -47,10 +48,17 @@ export async function* loop(
       );
 
       if (result.ok) {
-        yield StepOutput.message(chat.temporary({ role: "system", name, content: result.value.content}));
+        chat.temporary({ role: "system", name, content: result.value.content});
+        yield StepOutput.message(result.value);
       }
       else {
-        yield StepOutput.message(chat.temporary("system", result.error as string));
+        chat.temporary("system", result.error as string);
+
+        yield StepOutput.message({
+          type: "error",
+          title: `Failed to execute ${name}!`,
+          content: result.error as string
+        });
       } 
     } else {
       yield* _preventLoopAndSaveMsg(chat, response);
@@ -62,8 +70,17 @@ async function* _preventLoopAndSaveMsg(chat: Chat, response: LlmResponse): Async
   if (chat.messages[chat.messages.length - 1].content === response.content &&
     chat.messages[chat.messages.length - 2].content === response.content) {
       chat.temporary("system", LOOP_PREVENTION_PROMPT);
-      yield StepOutput.message(LOOP_PREVENTION_PROMPT);
+      yield StepOutput.message({
+        type: "warning",
+        title: "Agent is getting stuck. Recovering...",
+        content: LOOP_PREVENTION_PROMPT
+      });
   } else {
-    yield StepOutput.message(chat.temporary(response));
+    chat.temporary(response);
+    yield StepOutput.message({
+      type: "success",
+      title: "Agent response",
+      content: response.content ?? ""
+    });
   }
 }

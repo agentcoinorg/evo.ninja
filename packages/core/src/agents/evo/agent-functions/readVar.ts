@@ -26,21 +26,19 @@ export const readVar: AgentFunction = {
     return result.ok
       ? {
           type: "success",
-          title: `Script ${args.namespace} executed successfully!`,
+          title: `Read '${args.name}' variable.`,
           content: 
             `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
             READ_GLOBAL_VAR_OUTPUT(args.name, result.value),
         }
       : {
           type: "error",
-          title: `Script ${args.namespace} failed to execute!`,
+          title: `Failed to read ${args.namespace} variable!`,
           content: FUNCTION_CALL_FAILED(FN_NAME, result.error, args),
         };
   },
-  buildExecutor: (
-    context: AgentContext
-  ) => {
-    return async (options: { name: string }): Promise<Result<string, any>> => {
+  buildExecutor(context: AgentContext) {
+    return async (options: { name: string }): Promise<AgentFunctionResult> => {
       if (!context.globals[options.name]) {
         return ResultErr(`Global variable ${options.name} not found.`);
       } 
