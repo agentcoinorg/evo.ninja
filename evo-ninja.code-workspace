@@ -1,0 +1,13 @@
+{
+  "folders": [
+    {
+      "name": "root",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.associations": {
+      "**/apps/browser/**/*.css": "tailwindcss"
+    }
+  }
+}
