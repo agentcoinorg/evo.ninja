@@ -9,6 +9,21 @@
   border: 1px solid #2b2b30;
 }
 
+.Chat__Export {
+  cursor: pointer;
+  font-size: 24px;
+  color: #ff572e;
+  transition: color 0.3s ease-in-out;
+  margin: 10px;
+  position: absolute; /* Added */
+  top: 10px; /* Added */
+  right: 10px; /* Added */
+}
+
+.Chat__Export:hover {
+  color: #ff4516;
+}
+
 .Messages {
   text-align: left;
   padding: 20px;
