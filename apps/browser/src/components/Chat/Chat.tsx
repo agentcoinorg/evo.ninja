@@ -5,7 +5,7 @@ import ReactMarkdown from "react-markdown";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMarkdown, } from '@fortawesome/free-brands-svg-icons';
 import { faStopCircle, faMicrophone } from '@fortawesome/free-solid-svg-icons';  // Updated import
-import { initializeMediaRecorder, startRecording, stopRecording, setOnDataAvailable, transcribeAudio, handleAudioTranscription } from '../MediaRecorder';
+import { initializeMediaRecorder, startRecording, stopRecording, setOnDataAvailable, transcribeAudio, handleAudioTranscription } from '../Speech2Text';
 
 
 import "./Chat.css";
