@@ -5,6 +5,8 @@ import ReactMarkdown from "react-markdown";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMarkdown, } from '@fortawesome/free-brands-svg-icons';
 import { faStopCircle, faMicrophone } from '@fortawesome/free-solid-svg-icons';  // Updated import
+import { initializeMediaRecorder, startRecording, stopRecording, setOnDataAvailable, transcribeAudio, handleAudioTranscription } from '../MediaRecorder';
+
 
 import "./Chat.css";
 
@@ -102,58 +104,23 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved, api
     return () => clearTimeout(timer);
   }, [evoRunning, evoItr]);
 
-  // Initialize media recorder
   useEffect(() => {
-    navigator.mediaDevices
-      .getUserMedia({ audio: true })
-      .then((stream) => {
-        // Initialize MediaRecorder with the audio stream
-        mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.ondataavailable = event => {
-          // Corrected type issue here
-          setAudioBlob(event.data as Blob);
-        };
+    initializeMediaRecorder()
+      .then(() => {
+        setOnDataAvailable((dataBlob) => {
+          setAudioBlob(dataBlob);
+        });
+      })
+      .catch((error) => {
+        console.error("Failed to initialize media recorder:", error);
       });
   }, []);
 
-  const transcribeAudio = async (audio: Blob) => {
-    const audioFile = new File([audio], "audio.wav", { type: "audio/wav" });
-    const formData = new FormData();
-    formData.append("file", audioFile);
-    formData.append("model", "whisper-1");
-  
-    try {
-      const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: formData,
-      });
-  
-      if (response.status === 401) {
-        console.error("Authentication failed. Please check your API key.");
-        return;
-      }
-  
-      if (!response.ok) {
-        console.error(`HTTP error! status: ${response.status}`);
-        return;
-      }
-  
-      const data = await response.json();
-      const transcript = data.text; // Update this based on actual API response
-      console.log("Transcript:", transcript);
-      return transcript;
-    } catch (error) {
-      console.error("An error occurred:", error);
-    }
-  };
-  
+
   useEffect(() => {
     if (audioBlob) {
-      transcribeAudio(audioBlob).then((transcript: string) => {
-        console.log("Transcript:", transcript); // You have this line for logging
+      transcribeAudio(audioBlob, apiKey!).then((transcript: string) => {
+        console.log("Transcript:", transcript);
         if (transcript) {
           onMessage({
             text: transcript,
@@ -169,48 +136,30 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved, api
   
   const toggleRecording = () => {
     if (isRecording) {
-      mediaRecorder.stop();
+      stopRecording();
     } else {
-      mediaRecorder.start();
+      startRecording();
     }
     setIsRecording(!isRecording);
   };
 
-  const handleAudioTranscription = async () => {
-    if (!audioBlob) return;
-  
-    // Convert the Blob to a File
-    const audioFile = new File([audioBlob], "audio.wav", {
-      type: 'audio/wav'
-    });
-  
-    // Create a FormData object to hold the audio file
-    const formData = new FormData();
-    formData.append('audio', audioFile);
-  
-    // Send the audio file to your server or directly to OpenAI API
-    try {
-      // This is a placeholder. Replace with your actual OpenAI API call.
-      const response = await fetch('https://api.openai.com/v1/transcriptions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: formData
-      });
-  
-      if (response.ok) {
-        const data = await response.json();
-        const transcript = data.text;  // Adjust this based on the actual API response structure
-        console.log('Transcript:', transcript);
-      } else {
-        console.log('Failed to transcribe audio');
-      }
-    } catch (error) {
-      console.error('An error occurred:', error);
+  useEffect(() => {
+    if (audioBlob) {
+      handleAudioTranscription(audioBlob, apiKey)
+        .then((transcript) => {
+          if (transcript) {
+            onMessage({
+              text: transcript,
+              user: "user",
+            });
+            handleSend(); // Automatically trigger the "Start" button's functionality
+          }
+        })
+        .catch((error: Error) => {
+          console.error("Transcription failed:", error);
+        });
     }
-  };
-  
+  }, [audioBlob]);  
 
   const handleSend = async () => {
     onMessage({
