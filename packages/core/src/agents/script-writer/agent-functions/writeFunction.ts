@@ -1,3 +1,4 @@
+import { Result, ResultErr, ResultOk } from "@polywrap/result";
 import { AgentFunction, AgentContext } from "../../agent-function";
 
 export const writeFunction: AgentFunction = {
@@ -31,20 +32,14 @@ export const writeFunction: AgentFunction = {
   buildExecutor: (
     context: AgentContext
   ) => {
-    return async (options: { namespace: string, description: string, arguments: string, code: string }) => {
+    return async (options: { namespace: string, description: string, arguments: string, code: string }): Promise<Result<string, any>> => {
       if (options.namespace.startsWith("agent.")) {
-        return {
-          ok: false,
-          result: `Cannot create a function with namespace ${options.namespace}. Namespaces starting with 'agent.' are reserved.`,
-        }
+        return ResultErr(`Cannot create a function with namespace ${options.namespace}. Namespaces starting with 'agent.' are reserved.`);
       }
 
       context.workspace.writeFileSync("index.js", options.code);
 
-      return {
-        ok: true,
-        result: `Wrote the function ${options.namespace} to the workspace.`,
-      };
+      return ResultOk(`Wrote the function ${options.namespace} to the workspace.`);
     };
   }
 };
