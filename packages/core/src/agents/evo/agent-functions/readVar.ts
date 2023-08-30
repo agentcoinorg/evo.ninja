@@ -40,18 +40,12 @@ export const readVar: AgentFunction = {
   buildExecutor: (
     context: AgentContext
   ) => {
-    return async (options: { name: string }) => {
+    return async (options: { name: string }): Promise<Result<string, any>> => {
       if (!context.globals[options.name]) {
-        return {
-          ok: false,
-          result: `Global variable {{${options.name}}} not found.`,
-        };
+        return ResultErr(`Global variable ${options.name} not found.`);
       } 
 
-      return {
-        ok: true,
-        result: context.globals[options.name],
-      };
+      return ResultOk(context.globals[options.name]);
     };
   }
 };
