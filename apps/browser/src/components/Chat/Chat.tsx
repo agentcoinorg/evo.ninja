@@ -2,6 +2,7 @@ import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef } from "
 import { Evo } from "@evo-ninja/core";
 import ReactMarkdown from "react-markdown";
 
+import { trackMessageSent } from '../googleAnalytics';
 
 import "./Chat.css";
 
@@ -99,8 +100,8 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: C
     return () => clearTimeout(timer);
   }, [evoRunning, evoItr]);
 
+
   const handleSend = async () => {
-    // Your existing code
     onMessage({
       text: message,
       user: "user"
@@ -108,25 +109,8 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: C
     setSending(true);
     setMessage("");
     setEvoRunning(true);
-  
-    // Google Analytics Event Tracking
-    try {
-      if (window.gtag) { // Check if gtag is initialized
-        window.gtag('event', 'message_sent', {
-          'event_category': 'Chat',
-          'event_label': 'GOALS',
-          'value': message // The actual message content
-        });
-        console.log('GA event sent');
-      } else {
-        console.log('GA not initialized');
-      }
-    } catch (error) {
-      console.log('Error sending GA event:', error);
-    }
+    trackMessageSent(message); // Google Analytics Event tracker
   };
-  
-  
 
   const handlePause = async () => {
     setPaused(true);
