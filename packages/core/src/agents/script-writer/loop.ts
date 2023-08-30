@@ -49,7 +49,7 @@ export async function* loop(
       );
 
       if (result.ok) {
-        yield StepOutput.message(chat.temporary({ role: "system", name, content: result.value}));
+        yield StepOutput.message(chat.temporary({ role: "system", name, content: result.value.content}));
       }
       else {
         yield StepOutput.message(chat.temporary("system", result.error as string));
