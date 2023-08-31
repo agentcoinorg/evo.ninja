@@ -4,10 +4,6 @@ import {
   UNDEFINED_FUNCTION_ARGS,
   UNDEFINED_FUNCTION_NAME,
   UNPARSABLE_FUNCTION_ARGS,
-  FUNCTION_CALL_FAILED,
-  EXECUTE_SCRIPT_OUTPUT,
-  OTHER_EXECUTE_FUNCTION_OUTPUT,
-  READ_GLOBAL_VAR_OUTPUT
 } from "./prompts";
 import { Workspace, Logger } from "../sys";
 import { Scripts } from "../Scripts";
@@ -25,11 +21,20 @@ export interface AgentContext {
   logger: Logger;
 }
 
+export type AgentFunctionResult = Result<string, any>; 
+
+export interface AgentChatMessage {
+  type: "success" | "error" | "info" | "warning",
+  title: string,
+  content?: string,
+}
+
 export interface AgentFunction {
   definition: any;
-  buildExecutor: (
+  buildChatMessage(args: any, result: AgentFunctionResult): AgentChatMessage;
+  buildExecutor(
     context: AgentContext
-  ) => (options: any) => Promise<Result<string, any>>;
+  ): (options: any) => Promise<any>;
 }
 
 export type ExecuteAgentFunction = (
@@ -37,43 +42,27 @@ export type ExecuteAgentFunction = (
   args: string | undefined,
   context: AgentContext,
   agentFunctions: AgentFunction[],
-) => Promise<Result<string, string>>;
+) => Promise<Result<AgentChatMessage, string>>;
 
 export const executeAgentFunction: ExecuteAgentFunction = async (
   name: string | undefined,
   args: string | undefined,
   context: AgentContext,
   agentFunctions: AgentFunction[],
-): Promise<Result<string, string>> => {
-  const result = processFunctionAndArgs(name, args, agentFunctions);
+): Promise<Result<AgentChatMessage, string>> => {
+  const parseResult = processFunctionAndArgs(name, args, agentFunctions);
 
-  if (!result.ok) {
-    return ResultErr(result.error);
+  if (!parseResult.ok) {
+    return ResultErr(parseResult.error);
   }
 
-  const [fnArgs, func] = result.value;
-  const fnName = name as string;
-
-  const argsStr = JSON.stringify(fnArgs, null, 2);
-  let functionCallSummary = `# Function Call:\n\`\`\`javascript\n${fnName}(${argsStr})\n\`\`\`\n`;
+  const [fnArgs, func] = parseResult.value;
 
   const executor = func.buildExecutor(context);
 
-  const response = await executor(fnArgs);
+  const result = await executor(fnArgs);
 
-  if (!response.ok) {
-    return ResultErr(FUNCTION_CALL_FAILED(fnName, JSON.stringify(response.error, null, 2), args));
-  }
-
-  if (fnName === "executeScript") {
-    functionCallSummary +=  EXECUTE_SCRIPT_OUTPUT(fnArgs.result, response.value);
-  } else if (fnName === "readVar") {
-    functionCallSummary += READ_GLOBAL_VAR_OUTPUT(fnArgs.name, response.value);
-  } else {
-    functionCallSummary += OTHER_EXECUTE_FUNCTION_OUTPUT(response.value);
-  }
-
-  return ResultOk(functionCallSummary);
+  return ResultOk(func.buildChatMessage(fnArgs, result));
 }
 
 function processFunctionAndArgs(

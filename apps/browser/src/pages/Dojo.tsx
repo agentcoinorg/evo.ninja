@@ -122,7 +122,7 @@ function Dojo() {
         onLog: (markdown: string, color?: string) => {
           onMessage({
             user: "evo",
-            text: markdown,
+            title: markdown,
             color
           });
         }

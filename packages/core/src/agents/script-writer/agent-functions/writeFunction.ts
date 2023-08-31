@@ -1,9 +1,12 @@
-import { Result, ResultErr, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentContext } from "../../agent-function";
+import { ResultErr, ResultOk } from "@polywrap/result";
+import { AgentFunction, AgentFunctionResult, AgentChatMessage, AgentContext } from "../../agent-function";
+import { FUNCTION_CALL_FAILED, OTHER_EXECUTE_FUNCTION_OUTPUT } from "../../prompts";
+
+const FN_NAME = "writeFunction";
 
 export const writeFunction: AgentFunction = {
   definition: {
-    name: "writeFunction",
+    name: FN_NAME,
     description: `Writes the function.`,
     parameters: {
       type: "object",
@@ -29,10 +32,25 @@ export const writeFunction: AgentFunction = {
       additionalProperties: false
     },
   },
-  buildExecutor: (
-    context: AgentContext
-  ) => {
-    return async (options: { namespace: string, description: string, arguments: string, code: string }): Promise<Result<string, any>> => {
+  buildChatMessage(args: any, result: AgentFunctionResult): AgentChatMessage {
+    const argsStr = JSON.stringify(args, null, 2);
+
+    return result.ok
+      ? {
+          type: "success",
+          title: `Wrote function '${args.namespace}'.`,
+          content: 
+            `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
+            OTHER_EXECUTE_FUNCTION_OUTPUT(result.value),
+        }
+      : {
+          type: "error",
+          title: `Failed to write function '${args.namespace}'!`,
+          content: FUNCTION_CALL_FAILED(FN_NAME, result.error, args),
+        };
+  },
+  buildExecutor(context: AgentContext) {
+    return async (options: { namespace: string, description: string, arguments: string, code: string }): Promise<AgentFunctionResult> => {
       if (options.namespace.startsWith("agent.")) {
         return ResultErr(`Cannot create a function with namespace ${options.namespace}. Namespaces starting with 'agent.' are reserved.`);
       }

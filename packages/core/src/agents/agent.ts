@@ -1,3 +1,6 @@
+import { Result } from "@polywrap/result";
+import { AgentChatMessage } from "./agent-function";
+
 export abstract class Agent {
   abstract run(
     namespace: string, 
@@ -6,23 +9,7 @@ export abstract class Agent {
   ): AsyncGenerator<StepOutput, RunResult, string | undefined>;
 }
 
-export class RunResult {
-  message?: string;
-  isError?: boolean;
-
-  constructor(message?: string, isError?: boolean) {
-    this.message = message;
-    this.isError = isError;
-  }
-
-  static ok(msg?: string): RunResult {
-    return new RunResult(msg);
-  }
-
-  static error(msg?: string): RunResult {
-    return new RunResult(msg, true);
-  }
-}
+export type RunResult = Result<undefined, string>; 
 
 export enum PromptType {
   None,
@@ -31,23 +18,23 @@ export enum PromptType {
 }
 
 export class StepOutput {
-  message: string;
+  message: AgentChatMessage;
   promptType: PromptType;
 
-  constructor(message: string, promptType?: PromptType) {
-      this.message = message;
-      this.promptType = promptType ?? PromptType.None;
+  constructor(message: AgentChatMessage, promptType?: PromptType) {
+    this.message = message;
+    this.promptType = promptType ?? PromptType.None;
   }
 
-  static message(msg?: string): StepOutput {
-      return new StepOutput(msg ?? "");
+  static message(msg: AgentChatMessage): StepOutput {
+    return new StepOutput(msg);
   }
 
-  static prompt(msg: string): StepOutput {
-      return new StepOutput(msg, PromptType.Prompt);
+  static prompt(msg: AgentChatMessage): StepOutput {
+    return new StepOutput(msg, PromptType.Prompt);
   }
 
-  static question(msg: string): StepOutput {
-      return new StepOutput(msg, PromptType.Question);
+  static question(msg: AgentChatMessage): StepOutput {
+    return new StepOutput(msg, PromptType.Question);
   }
 }
