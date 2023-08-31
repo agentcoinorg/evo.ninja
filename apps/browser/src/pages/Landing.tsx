@@ -11,7 +11,7 @@ function Landing() {
       <div className="Landing">
         <header className="Landing-header">
           <section className="Header-Links">
-            <a href="https://discord.polywrap.io" target="_blank" rel="noopener noreferrer">
+            <a href="https://discord.gg/X7ystzGcf5" target="_blank" rel="noopener noreferrer">
               <img src="discord.svg" alt="Discord" />
             </a>
             <a href="https://twitter.com/evo_ninja_ai" target="_blank" rel="noopener noreferrer">
