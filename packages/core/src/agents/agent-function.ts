@@ -29,7 +29,7 @@ export interface AgentFunction {
   definition: any;
   buildExecutor: (
     context: AgentContext
-  ) => (options: any) => Promise<any>;
+  ) => (options: any) => Promise<Result<string, any>>;
 }
 
 export type ExecuteAgentFunction = (
@@ -62,15 +62,15 @@ export const executeAgentFunction: ExecuteAgentFunction = async (
   const response = await executor(fnArgs);
 
   if (!response.ok) {
-    return ResultErr(FUNCTION_CALL_FAILED(fnName, response.error, args));
+    return ResultErr(FUNCTION_CALL_FAILED(fnName, JSON.stringify(response.error, null, 2), args));
   }
 
   if (fnName === "executeScript") {
-    functionCallSummary +=  EXECUTE_SCRIPT_OUTPUT(fnArgs.result, response.result);
+    functionCallSummary +=  EXECUTE_SCRIPT_OUTPUT(fnArgs.result, response.value);
   } else if (fnName === "readVar") {
-    functionCallSummary += READ_GLOBAL_VAR_OUTPUT(fnArgs.name, response.result);
+    functionCallSummary += READ_GLOBAL_VAR_OUTPUT(fnArgs.name, response.value);
   } else {
-    functionCallSummary += OTHER_EXECUTE_FUNCTION_OUTPUT(response.result);
+    functionCallSummary += OTHER_EXECUTE_FUNCTION_OUTPUT(response.value);
   }
 
   return ResultOk(functionCallSummary);

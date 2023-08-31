@@ -1,5 +1,6 @@
 import { ScriptWriter } from "../../script-writer";
 import { AgentContext, AgentFunction } from "../../agent-function";
+import { Result, ResultErr, ResultOk } from "@polywrap/result";
 
 export function createScript(createScriptWriter: () => ScriptWriter): AgentFunction {
   return {
@@ -29,12 +30,9 @@ export function createScript(createScriptWriter: () => ScriptWriter): AgentFunct
     buildExecutor: (
       context: AgentContext
     ) => {
-      return async (options: { namespace: string, description: string, arguments: string }) => {
+      return async (options: { namespace: string, description: string, arguments: string }): Promise<Result<string, any>> => {
         if (options.namespace.startsWith("agent.")) {
-          return {
-            ok: false,
-            result: `Cannot create an script with namespace ${options.namespace}. Try searching for script in that namespace instead.`,
-          }
+          return ResultErr(`Cannot create an script with namespace ${options.namespace}. Try searching for script in that namespace instead.`);
         }
 
         // Create a fresh ScriptWriter agent
@@ -70,13 +68,12 @@ export function createScript(createScriptWriter: () => ScriptWriter): AgentFunct
          op
         ];
   
-        return {
-          ok: true,
-          result: `Created the following scripts:` + 
+        return ResultOk(
+          `Created the following scripts:` + 
           `\n--------------\n` + 
           `${candidates.map((c) => `Namespace: ${c.name}\nArguments: ${c.arguments}\nDescription: ${c.description}`).join("\n--------------\n")}` +
-          `\n--------------\n`,
-        };
+          `\n--------------\n`
+        );
       };
     }
   };

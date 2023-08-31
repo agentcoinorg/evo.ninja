@@ -1,3 +1,4 @@
+import { Result, ResultOk } from "@polywrap/result";
 import { AgentFunction, AgentContext } from "../../agent-function";
 
 export const think: AgentFunction = {
@@ -19,11 +20,8 @@ export const think: AgentFunction = {
   buildExecutor: (
     context: AgentContext
   ) => {
-    return async (options: { thoughts: string }) => {
-      return { 
-        ok: true,
-        result: `I think: ${options.thoughts}.`,
-      };
+    return async (options: { thoughts: string }): Promise<Result<string, any>> => {
+      return ResultOk(`I think: ${options.thoughts}.`);
     };
   }
 };

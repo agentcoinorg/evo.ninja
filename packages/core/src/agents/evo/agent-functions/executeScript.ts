@@ -5,6 +5,7 @@ import {
   shimCode
 } from "../../../wrap";
 import JSON5 from "json5";
+import { Result, ResultErr, ResultOk } from "@polywrap/result";
 
 export const executeScript: AgentFunction = {
   definition: {
@@ -33,15 +34,12 @@ export const executeScript: AgentFunction = {
   buildExecutor: (
     context: AgentContext
   ) => {
-    return async (options: { namespace: string, arguments: any, result: string }) => {
+    return async (options: { namespace: string, arguments: any, result: string }): Promise<Result<string, any>> => {
       try {
         const script = context.scripts.getScriptByName(options.namespace);
 
         if (!script) {
-          return {
-            ok: false,
-            error: `Script ${options.namespace} not found.`,
-          };
+          return ResultErr(`Script ${options.namespace} not found.`);
         }
 
         let args: any = undefined;
@@ -68,10 +66,7 @@ export const executeScript: AgentFunction = {
             }
           }
         } catch {
-          return {
-            ok: false,
-            error: `Invalid arguments provided for script ${options.namespace}: '${options.arguments}' is not valid JSON!`,
-          };
+          return ResultErr(`Invalid arguments provided for script ${options.namespace}: '${options.arguments}' is not valid JSON!`);
         }
 
         const globals: JsEngine_GlobalVar[] =
@@ -95,27 +90,12 @@ export const executeScript: AgentFunction = {
         return result.ok
           ? result.value.error == null
             ? context.client.jsPromiseOutput.ok
-              ? {
-                ok: true,
-                result: JSON.stringify(context.client.jsPromiseOutput.value),
-              }
-              : {
-                ok: false,
-                error: JSON.stringify(context.client.jsPromiseOutput.error),
-              }
-            : {
-              ok: false,
-              error: result.value.error + "\nCode: " + script.code,
-             }
-          : {
-            ok: false,
-            error: result.error?.toString() ?? "",
-          };
+              ? ResultOk(JSON.stringify(context.client.jsPromiseOutput.value))
+              : ResultErr(JSON.stringify(context.client.jsPromiseOutput.error))
+            : ResultErr(result.value.error)
+          : ResultErr(result.error?.toString() ?? "");
       } catch (e: any) {
-        return {
-          ok: false,
-          error: e,
-        };
+        return ResultErr(e);
       }
     };
   }
