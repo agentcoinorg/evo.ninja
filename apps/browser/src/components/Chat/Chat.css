@@ -21,8 +21,13 @@
   border-radius: 10px 10px 0 0;
   border: 2px solid red; 
   display: flex;
-  justify-content: space-between; 
+  justify-content: space-around; 
   align-items: center;
+}
+
+.ButtonWrapper {
+  display: flex;
+  gap: 10px; 
 }
 
 .CloseDisclaimer {
@@ -30,6 +35,13 @@
   padding: 10px 20px; 
   font-weight: bold;
   color: red; 
+}
+
+.CloseWithoutTracking {
+  cursor: pointer;
+  padding: 10px 20px;
+  font-weight: bold;
+  color: white; 
 }
 
 .Chat__Export {

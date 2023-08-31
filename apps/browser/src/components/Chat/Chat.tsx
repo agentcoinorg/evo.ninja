@@ -37,6 +37,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
   );
   const [stopped, setStopped] = useState<boolean>(false);
   const [showDisclaimer, setShowDisclaimer] = useState<boolean>(true);
+  const [trackUser, setTrackUser] = useState<boolean>(false);
 
 
   const pausedRef = useRef(paused);
@@ -104,8 +105,15 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
     return () => clearTimeout(timer);
   }, [evoRunning, evoItr]);
 
+
   const handleCloseDisclaimer = () => {
     setShowDisclaimer(false);
+    setTrackUser(true);  // User accepted disclaimer, enable tracking
+  };
+
+  const handleCloseWithoutTracking = () => {
+    setShowDisclaimer(false);
+    setTrackUser(false); // User did not accept disclaimer, disable tracking
   };
 
   const handleSend = async () => {
@@ -116,7 +124,10 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
     setSending(true);
     setMessage("");
     setEvoRunning(true);
-    trackMessageSent(message); // Google Analytics Event tracker
+
+    if (trackUser) { // Only track if user accepted the disclaimer
+      trackMessageSent(message); 
+    }
   };
 
   const handlePause = async () => {
@@ -178,12 +189,14 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
       
       <div className="Chat__Container">
         {showDisclaimer && (
-            <div className="DisclaimerRibbon">
-            🧠 Disclaimer: In order to improve Evo, all inputs to the agent through this UI will be tracked so don't share any sensitive information or private keys.
-            <span className="CloseDisclaimer" onClick={handleCloseDisclaimer}>Agree and Continue</span>
+          <div className="DisclaimerRibbon">
+            🧠 Disclaimer: In order to improve Evo, all inputs to the agent through this UI will be tracked, so don't share any sensitive information or private keys.
+            <div className="ButtonWrapper">
+              <span className="CloseDisclaimer" onClick={handleCloseDisclaimer}>Agree</span>
+              <span className="CloseWithoutTracking" onClick={handleCloseWithoutTracking}>Disagree</span>
+            </div>
           </div>
         )}
-
         <input
           type="text"
           value={message}
