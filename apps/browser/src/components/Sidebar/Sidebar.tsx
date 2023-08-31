@@ -102,7 +102,7 @@ const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles }: Sideb
               <FontAwesomeIcon icon={faTwitter} />
             </a>
             <a
-              href="https://discord.polywrap.io"
+              href="https://discord.gg/X7ystzGcf5"
               target="_blank"
               rel="noopener noreferrer"
             >
