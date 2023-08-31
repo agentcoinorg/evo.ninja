@@ -162,7 +162,6 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
 
   return (
     <div className="Chat">
-\
       <div >
         <FontAwesomeIcon className="Chat__Export" icon={faMarkdown} onClick={() => exportChatHistory('md')} />
       </div>
