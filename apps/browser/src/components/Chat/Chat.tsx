@@ -21,12 +21,6 @@ export interface ChatProps {
   goalEnded: boolean
 }
 
-interface Window {
-  gtag: any;
-}
-declare var window: Window;
-
-
 const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
@@ -190,10 +184,10 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
       <div className="Chat__Container">
         {showDisclaimer && (
           <div className="DisclaimerRibbon">
-            🧠 Disclaimer: In order to improve Evo, all inputs to the agent through this UI will be tracked, so don't share any sensitive information or private keys.
+            🧠 Hey there! Mind sharing your prompts to help make Evo even better?
             <div className="ButtonWrapper">
-              <span className="CloseDisclaimer" onClick={handleCloseDisclaimer}>Agree</span>
-              <span className="CloseWithoutTracking" onClick={handleCloseWithoutTracking}>Disagree</span>
+              <span className="CloseDisclaimer" onClick={handleCloseDisclaimer}>Accept</span>
+              <span className="CloseWithoutTracking" onClick={handleCloseWithoutTracking}>Decline</span>
             </div>
           </div>
         )}
