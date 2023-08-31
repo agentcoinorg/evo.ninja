@@ -5,13 +5,14 @@ import {
   faDiscord,
   faGithub,
 } from "@fortawesome/free-brands-svg-icons";
-import { faCog, faUpload } from "@fortawesome/free-solid-svg-icons";
+import { faCog, faDownload, faUpload } from "@fortawesome/free-solid-svg-icons";
 import { faUserNinja, faFolder } from "@fortawesome/free-solid-svg-icons";
 import Upload from "../Upload";
 import File from "../File/File";
 
 import "./Sidebar.css";
-import { InMemoryFile } from "../../sys/file";
+import { downloadFilesAsZip } from "../../sys/file/downloadFilesAsZip";
+import { InMemoryFile } from "@nerfzael/memory-fs";
 
 export interface SidebarProps {
   onSettingsClick: () => void;
@@ -21,25 +22,61 @@ export interface SidebarProps {
 }
 
 const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles }: SidebarProps) => {
+  const groupFilesByName = (files: InMemoryFile[]) => {
+    return files.reduce((acc, file) => {
+      if (file.path === '.msgs') {
+        acc[file.path] = [file];
+      } else {
+        const fileNameWithoutExt = file.path.split('.').slice(0, -1).join('.');
+        acc[fileNameWithoutExt] = acc[fileNameWithoutExt] || [];
+        acc[fileNameWithoutExt].push(file);
+      }
+      return acc;
+    }, {} as { [name: string]: InMemoryFile[] });
+  };
+  
+
+  const scriptsGrouped = groupFilesByName(
+    scripts.filter((file) => !file.path.startsWith("agent."))
+  );  
+
+  const userFilesGrouped = groupFilesByName(userFiles);
+
+  function downloadUserFiles() {
+    downloadFilesAsZip("workspace.zip", userFiles);
+  }
+
   return (
     <div className="Sidebar">
       <div className="Content">
         <img src="avatar-name.png" alt="Main Logo" className="Logo" />
         <div className="Scripts">
-          <h3>
+        <h3>
             <FontAwesomeIcon icon={faUserNinja} /> SCRIPTS
           </h3>
-          {scripts.filter((file) => !file.path.startsWith("agent.")).map((file, i) => (
-            <File file={file} />
+          {Object.keys(scriptsGrouped).map((name, i) => (
+            <File key={i} files={scriptsGrouped[name]} showExtension={false} />
           ))}
         </div>
         <Upload className="Workspace" onUpload={uploadUserFiles}>
           <h3>
             <FontAwesomeIcon icon={faFolder} style={{ marginRight: "10px" }} /> WORKSPACE
           </h3>
-          {userFiles.map((file, i) => (
-            <File file={file} />
-          ))}
+          <div>
+            {userFiles.map((file, i) => (
+              <File key={i} files={[file]} showExtension={true} />
+            ))}
+          </div> 
+          {
+            userFiles.length !== 0 && (
+              <button 
+                className="DownloadButton" 
+                title="Download" 
+                onClick={downloadUserFiles}>
+                <FontAwesomeIcon icon={faDownload} />  Download
+              </button>
+            )
+          }
         </Upload>
         <footer className="Footer">
           <div className="Polywrap">

@@ -1,4 +1,4 @@
-import { InMemoryFile } from "./InMemoryFile";
+import { InMemoryFile } from "@nerfzael/memory-fs";
 
 export const readFile = (file: File): Promise<InMemoryFile> => {
   return new Promise<InMemoryFile>((resolve, reject) => {

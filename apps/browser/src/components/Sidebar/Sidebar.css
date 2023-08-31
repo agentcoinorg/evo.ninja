@@ -1,3 +1,8 @@
+/* TODO - remove specific H3 rule and apply per-element */
+h3 {
+  @apply text-lg font-semibold;
+}
+
 .Sidebar {
   width: 20%;
   display: flex;
@@ -41,17 +46,6 @@
   background-color: #ff572e;
 }
 
-.BuiltWithLove {
-  font-size: 0.8rem;
-  color: #f5f5f5;
-  margin-top: 12rem;
-}
-
-.ImageBanner {
-  width: 100%;
-  max-width: 200px;
-  margin-top: 2rem;
-}
 .Scripts,
 .Workspace {
   background-color: #171717;
@@ -103,24 +97,36 @@
   }
 }
 
-.ImageBanner {
-  width: 50%;
-  margin: 0 1rem 0 1rem;
+.DownloadButton {
+  margin: 1rem 0 1rem 0;
+  background-color: #ff572e;
+  height: 2.25rem;
+  border: none;
+  color: #1f1f1f;
+  text-align: center;
+  display: inline-block;
+  font-size: 16px;
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+  outline: none;
+  padding: 10px 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+  &:hover {
+    background-color: #ff4516;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.24),
+      0 2px 10px 0 rgba(0, 0, 0, 0.19);
+  }
 }
 
 .BuiltWithLove,
-.ImageBanner,
 .Footer {
   margin-top: auto;
 }
 
 .Footer {
-  display: flex;
-  flex-direction: column;
-  height: 10rem;
-  justify-content: space-around;
+  @apply flex flex-col gap-4 my-8;
   width: 90%;
-  margin: 2rem 0 2rem 0;
   box-sizing: border-box;
 }
 
@@ -143,5 +149,13 @@
 }
 
 .Polywrap {
-  justify-content: center;
+  @apply flex flex-col items-center gap-2;
+}
+
+.ImageBanner {
+  @apply w-full max-w-[250px];
+}
+
+.BuiltWithLove {
+  color: #f5f5f5;
 }
