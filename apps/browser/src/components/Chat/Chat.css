@@ -1,6 +1,5 @@
 .Chat {
   width: 80%;
-  /* background-color: #1c1c1c; */
   background-color: #121212;
   color: #f5f5f5;
   display: flex;
@@ -10,30 +9,28 @@
 }
 
 .DisclaimerRibbon {
-  background-color: black; /* Black background */
-  color: white; /* White text */
-  text-align: center; /* Centered text */
-  font-size: 12px; /* Smaller font size */
-  padding: 10px; /* Some padding */
-  position: absolute; /* Relative to the Chat container */
-  width: 80%; /* Full width of the Chat container */
-  bottom: 0; /* Stick it to the bottom of the Chat container */
-  z-index: 1000; /* Above everything else */
-  border-radius: 10px 10px 0 0; /* Rounded top corners */
-  border: 2px solid red; /* Red border */
-  display: flex; /* Flex layout */
-  justify-content: space-between; /* Space between text and close button */
-  align-items: center; /* Align items vertically */
+  background-color: black;
+  color: white; 
+  text-align: center;
+  font-size: 12px; 
+  padding: 10px; 
+  position: absolute; 
+  width: 80%;
+  bottom: 0; 
+  z-index: 1000;
+  border-radius: 10px 10px 0 0;
+  border: 2px solid red; 
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
 }
 
 .CloseDisclaimer {
   cursor: pointer;
-  padding: 10px 20px; /* Increased padding */
+  padding: 10px 20px; 
   font-weight: bold;
-  color: red; /* Red text */
+  color: red; 
 }
-
-
 
 .Chat__Export {
   cursor: pointer;
@@ -41,9 +38,9 @@
   color: #ff572e;
   transition: color 0.3s ease-in-out;
   margin: 10px;
-  position: absolute; /* Added */
-  top: 10px; /* Added */
-  right: 10px; /* Added */
+  position: absolute;
+  top: 10px; 
+  right: 10px;
 }
 
 .Chat__Export:hover {
@@ -81,6 +78,7 @@
   word-break: break-word;
   white-space: pre-line;
 }
+
 .SendMessage {
   display: flex;
   padding: 10px;
