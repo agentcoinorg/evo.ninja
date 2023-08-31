@@ -1,4 +1,8 @@
-import { AgentFunction, AgentContext } from "../../agent-function";
+import { ResultErr, ResultOk } from "@polywrap/result";
+import { AgentFunction, AgentContext, AgentFunctionResult, AgentChatMessage } from "../../agent-function";
+import { FUNCTION_CALL_FAILED, READ_GLOBAL_VAR_OUTPUT } from "../../prompts";
+
+const FN_NAME = "readVar";
 
 export const readVar: AgentFunction = {
   definition: {
@@ -16,21 +20,30 @@ export const readVar: AgentFunction = {
       additionalProperties: false
     },
   },
-  buildExecutor: (
-    context: AgentContext
-  ) => {
-    return async (options: { name: string }) => {
-      if (!context.globals[options.name]) {
-        return {
-          ok: false,
-          result: `Global variable {{${options.name}}} not found.`,
+  buildChatMessage(args: any, result: AgentFunctionResult): AgentChatMessage {
+    const argsStr = JSON.stringify(args, null, 2);
+
+    return result.ok
+      ? {
+          type: "success",
+          title: `Read '${args.name}' variable.`,
+          content: 
+            `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
+            READ_GLOBAL_VAR_OUTPUT(args.name, result.value),
+        }
+      : {
+          type: "error",
+          title: `Failed to read ${args.namespace} variable!`,
+          content: FUNCTION_CALL_FAILED(FN_NAME, result.error, args),
         };
+  },
+  buildExecutor(context: AgentContext) {
+    return async (options: { name: string }): Promise<AgentFunctionResult> => {
+      if (!context.globals[options.name]) {
+        return ResultErr(`Global variable ${options.name} not found.`);
       } 
 
-      return {
-        ok: true,
-        result: context.globals[options.name],
-      };
+      return ResultOk(context.globals[options.name]);
     };
   }
 };

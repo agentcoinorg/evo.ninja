@@ -1,14 +1,18 @@
-import { AgentFunction, AgentContext } from "../../agent-function";
+import { AgentFunction, AgentContext, AgentFunctionResult, AgentChatMessage } from "../../agent-function";
 import {
   JsEngine_GlobalVar,
   JsEngine_Module,
   shimCode
 } from "../../../wrap";
 import JSON5 from "json5";
+import { EXECUTE_SCRIPT_OUTPUT, FUNCTION_CALL_FAILED } from "../../prompts";
+import { ResultErr, ResultOk } from "@polywrap/result";
+
+const FN_NAME = "executeScript";
 
 export const executeScript: AgentFunction = {
   definition: {
-    name: "executeScript",
+    name: FN_NAME,
     description: `Execute an script.`,
     parameters: {
       type: "object",
@@ -30,18 +34,30 @@ export const executeScript: AgentFunction = {
       additionalProperties: false
     },
   },
-  buildExecutor: (
-    context: AgentContext
-  ) => {
-    return async (options: { namespace: string, arguments: any, result: string }) => {
+  buildChatMessage(args: any, result: AgentFunctionResult): AgentChatMessage {
+    const argsStr = JSON.stringify(args, null, 2);
+
+    return result.ok
+      ? {
+          type: "success",
+          title: `Executed '${args.namespace}' script.`,
+          content: 
+            `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
+            EXECUTE_SCRIPT_OUTPUT(args.result, result.value),
+        }
+      : {
+          type: "error",
+          title: `'${args.namespace}' script failed to execute!`,
+          content: FUNCTION_CALL_FAILED(FN_NAME, result.error, args),
+        };
+  },
+  buildExecutor(context: AgentContext) {
+    return async (options: { namespace: string, arguments: any, result: string }): Promise<AgentFunctionResult> => {
       try {
         const script = context.scripts.getScriptByName(options.namespace);
 
         if (!script) {
-          return {
-            ok: false,
-            error: `Script ${options.namespace} not found.`,
-          };
+          return ResultErr(`Script ${options.namespace} not found.`);
         }
 
         let args: any = undefined;
@@ -68,10 +84,7 @@ export const executeScript: AgentFunction = {
             }
           }
         } catch {
-          return {
-            ok: false,
-            error: `Invalid arguments provided for script ${options.namespace}: '${options.arguments}' is not valid JSON!`,
-          };
+          return ResultErr(`Invalid arguments provided for script ${options.namespace}: '${options.arguments}' is not valid JSON!`);
         }
 
         const globals: JsEngine_GlobalVar[] =
@@ -95,27 +108,12 @@ export const executeScript: AgentFunction = {
         return result.ok
           ? result.value.error == null
             ? context.client.jsPromiseOutput.ok
-              ? {
-                ok: true,
-                result: JSON.stringify(context.client.jsPromiseOutput.value),
-              }
-              : {
-                ok: false,
-                error: JSON.stringify(context.client.jsPromiseOutput.error),
-              }
-            : {
-              ok: false,
-              error: result.value.error + "\nCode: " + script.code,
-             }
-          : {
-            ok: false,
-            error: result.error?.toString() ?? "",
-          };
+              ? ResultOk(JSON.stringify(context.client.jsPromiseOutput.value))
+              : ResultErr(JSON.stringify(context.client.jsPromiseOutput.error))
+            : ResultErr(result.value.error)
+          : ResultErr(result.error?.toString() ?? "");
       } catch (e: any) {
-        return {
-          ok: false,
-          error: e,
-        };
+        return ResultErr(e);
       }
     };
   }

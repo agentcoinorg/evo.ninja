@@ -1,5 +1,9 @@
 import { ScriptWriter } from "../../script-writer";
-import { AgentContext, AgentFunction } from "../../agent-function";
+import { AgentChatMessage, AgentContext, AgentFunction, AgentFunctionResult } from "../../agent-function";
+import { FUNCTION_CALL_FAILED, OTHER_EXECUTE_FUNCTION_OUTPUT } from "../../prompts";
+import { ResultErr, ResultOk } from "@polywrap/result";
+
+const FN_NAME = "createScript";
 
 export function createScript(createScriptWriter: () => ScriptWriter): AgentFunction {
   return {
@@ -26,15 +30,27 @@ export function createScript(createScriptWriter: () => ScriptWriter): AgentFunct
           additionalProperties: false
         },
     },
-    buildExecutor: (
-      context: AgentContext
-    ) => {
-      return async (options: { namespace: string, description: string, arguments: string }) => {
-        if (options.namespace.startsWith("agent.")) {
-          return {
-            ok: false,
-            result: `Cannot create an script with namespace ${options.namespace}. Try searching for script in that namespace instead.`,
+    buildChatMessage(args: any, result: AgentFunctionResult): AgentChatMessage {
+      const argsStr = JSON.stringify(args, null, 2);
+  
+      return result.ok
+        ? {
+            type: "success",
+            title: `Created '${args.namespace}' script.`,
+            content: 
+              `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
+              OTHER_EXECUTE_FUNCTION_OUTPUT(result.value),
           }
+        : {
+            type: "error",
+            title: `Failed to create '${args.namespace}' script!`,
+            content: FUNCTION_CALL_FAILED(FN_NAME, result.error, args),
+          };
+    },
+    buildExecutor(context: AgentContext) {
+      return async (options: { namespace: string, description: string, arguments: string }): Promise<AgentFunctionResult> => {
+        if (options.namespace.startsWith("agent.")) {
+          return ResultErr(`Cannot create an script with namespace ${options.namespace}. Try searching for script in that namespace instead.`);
         }
 
         // Create a fresh ScriptWriter agent
@@ -47,7 +63,14 @@ export function createScript(createScriptWriter: () => ScriptWriter): AgentFunct
         while(true) {
           const response = await iterator.next();
 
-          response.value.message && context.logger.info(response.value.message);
+          if (response.done) {
+            if (!response.value.ok) {
+              return ResultErr(response.value.error);
+            }
+            break;
+          }
+
+          response.value && context.logger.info(response.value.message.title);
 
           // TODO: we should not be communicating the ScriptWriter's completion
           //       via a special file in the workspace
@@ -70,13 +93,12 @@ export function createScript(createScriptWriter: () => ScriptWriter): AgentFunct
          op
         ];
   
-        return {
-          ok: true,
-          result: `Created the following scripts:` + 
+        return ResultOk(
+          `Created the following scripts:` + 
           `\n--------------\n` + 
           `${candidates.map((c) => `Namespace: ${c.name}\nArguments: ${c.arguments}\nDescription: ${c.description}`).join("\n--------------\n")}` +
-          `\n--------------\n`,
-        };
+          `\n--------------\n`
+        );
       };
     }
   };

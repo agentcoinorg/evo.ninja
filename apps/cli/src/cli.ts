@@ -122,8 +122,15 @@ export async function cli(): Promise<void> {
   while(true) {
     const response = await iterator.next();
 
+    if (response.done) {
+      if (!response.value.ok) {
+        logger.error(response.value.error ?? "Unknown error");
+      }
+      break;
+    }
+
     if (response.value) {
-      response.value.message && logger.info(response.value.message);
+      response.value.message && logger.info(response.value.message.title);
     }
   }
 }

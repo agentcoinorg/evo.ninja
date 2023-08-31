@@ -237,6 +237,10 @@ function require(lib) {
       throw new Error(\`Cannot do require('\${lib}'), '\${lib}' is an unknown import.\`);
   }
 }
+
+Math.random = function() {
+  return __wrap_subinvoke("plugin/math", "random", {}).value;
+};
 `;
 
 export const shimCode = (code: string) => `${packagesShim}\nconst __temp = (async function () { \n${code}\n })().then(result => {

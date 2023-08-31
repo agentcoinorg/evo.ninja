@@ -1,4 +1,8 @@
-import { AgentFunction, AgentContext } from "../../agent-function";
+import { ResultOk } from "@polywrap/result";
+import { AgentFunction, AgentContext, AgentFunctionResult, AgentChatMessage } from "../../agent-function";
+import { FUNCTION_CALL_FAILED, OTHER_EXECUTE_FUNCTION_OUTPUT } from "../../prompts";
+
+const FN_NAME = "findScript";
 
 export const findScript: AgentFunction = {
   definition: {
@@ -20,27 +24,39 @@ export const findScript: AgentFunction = {
       additionalProperties: false
     },
   },
-  buildExecutor: (
-    context: AgentContext
-  ) => {
-    return async (options: { namespace: string, description: string }) => {
+  buildChatMessage(args: any, result: AgentFunctionResult): AgentChatMessage {
+    const argsStr = JSON.stringify(args, null, 2);
+
+    return result.ok
+      ? {
+          type: "success",
+          title: `Searched for '${args.namespace}' script ("${args.description}")`,
+          content: 
+            `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
+            OTHER_EXECUTE_FUNCTION_OUTPUT(result.value),
+        }
+      : {
+          type: "error",
+          title: `Failed to search for '${args.namespace}' script!`,
+          content: FUNCTION_CALL_FAILED(FN_NAME, result.error, args),
+        };
+  },
+  buildExecutor(context: AgentContext) {
+    return async (options: { namespace: string, description: string }): Promise<AgentFunctionResult> => {
       const candidates = context.scripts.searchScripts(
         `${options.namespace} ${options.description}`
       ).slice(0, 5);
 
       if (candidates.length === 0) {
-        return {
-          ok: true,
-          result: `Found no candidates for script ${options.namespace}. Try creating the script instead.`,
-        };
+        return ResultOk(`Found no candidates for script ${options.namespace}. Try creating the script instead.`);
       }
-      return {
-        ok: true,
-        result: `Found the following candidates for script: ${options.namespace}:` + 
+
+      return ResultOk(
+        `Found the following candidates for script: ${options.namespace}:` + 
         `\n--------------\n` + 
         `${candidates.map((c) => `Namespace: ${c.name}\nArguments: ${c.arguments}\nDescription: ${c.description}`).join("\n--------------\n")}` +
-        `\n--------------\n`,
-      };
+        `\n--------------\n`
+      );
     };
   }
 };
