@@ -8,6 +8,27 @@
   height: 100%;
   border: 1px solid #2b2b30;
 }
+.DisclaimerRibbon {
+  background-color: #f443368d; /* Semi-transparent red background */
+  color: white; /* White text */
+  text-align: center; /* Centered text */
+  font-size: 12px; /* Smaller font size */
+  padding: 5px; /* Some padding */
+  padding-left: 10px;
+  position: absolute; /* Relative to the Chat container */
+  width: 79%; /* Full width of the Chat container */
+  top: 0; /* Stick it to the top of the Chat container */
+  z-index: 1000; /* Above everything else */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.CloseDisclaimer {
+  cursor: pointer;
+  padding: 5px 10px;
+  font-weight: bold;
+}
 
 .Messages {
   text-align: left;

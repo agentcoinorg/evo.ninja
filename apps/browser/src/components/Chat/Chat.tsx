@@ -34,6 +34,8 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: C
     undefined
   );
   const [stopped, setStopped] = useState<boolean>(false);
+  const [showDisclaimer, setShowDisclaimer] = useState<boolean>(true);
+
 
   const pausedRef = useRef(paused);
   useEffect(() => {
@@ -100,6 +102,9 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: C
     return () => clearTimeout(timer);
   }, [evoRunning, evoItr]);
 
+  const handleCloseDisclaimer = () => {
+    setShowDisclaimer(false);
+  };
 
   const handleSend = async () => {
     onMessage({
@@ -132,6 +137,12 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: C
 
   return (
     <div className="Chat">
+      {showDisclaimer && (
+        <div className="DisclaimerRibbon">
+          Disclaimer: In order to improve Evo.Ninja, all inputs to this agent through this UI are being tracked so don't share any sensitive information or private keys.
+          <span className="CloseDisclaimer" onClick={handleCloseDisclaimer}>Agree and Continue</span>
+        </div>
+      )}
       <div className="Messages">
         {messages.map((msg, index) => (
           <div key={index} className={`MessageContainer ${msg.user}`}>
