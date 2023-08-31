@@ -6,6 +6,7 @@ import { WrapClient } from "../../wrap";
 import { Scripts } from "../../Scripts";
 import { LlmApi, Chat } from "../../llm";
 import { Workspace, Logger } from "../../sys";
+import { ResultErr } from "@polywrap/result";
 
 export class ScriptWriter implements Agent {
   private client: WrapClient;
@@ -48,7 +49,7 @@ export class ScriptWriter implements Agent {
       );
     } catch (err) {
       this.logger.error(err);
-      return RunResult.error( "Unrecoverable error encountered.");
+      return ResultErr("Unrecoverable error encountered.");
     }
   }
 }

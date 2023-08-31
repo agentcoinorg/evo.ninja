@@ -1,15 +1,18 @@
-import { AgentFunction, AgentContext } from "../../agent-function";
+import { AgentFunction, AgentContext, AgentFunctionResult, AgentChatMessage } from "../../agent-function";
 import {
   JsEngine_GlobalVar,
   JsEngine_Module,
   shimCode
 } from "../../../wrap";
 import JSON5 from "json5";
-import { Result, ResultErr, ResultOk } from "@polywrap/result";
+import { EXECUTE_SCRIPT_OUTPUT, FUNCTION_CALL_FAILED } from "../../prompts";
+import { ResultErr, ResultOk } from "@polywrap/result";
+
+const FN_NAME = "executeScript";
 
 export const executeScript: AgentFunction = {
   definition: {
-    name: "executeScript",
+    name: FN_NAME,
     description: `Execute an script.`,
     parameters: {
       type: "object",
@@ -31,10 +34,25 @@ export const executeScript: AgentFunction = {
       additionalProperties: false
     },
   },
-  buildExecutor: (
-    context: AgentContext
-  ) => {
-    return async (options: { namespace: string, arguments: any, result: string }): Promise<Result<string, any>> => {
+  buildChatMessage(args: any, result: AgentFunctionResult): AgentChatMessage {
+    const argsStr = JSON.stringify(args, null, 2);
+
+    return result.ok
+      ? {
+          type: "success",
+          title: `Executed '${args.namespace}' script.`,
+          content: 
+            `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
+            EXECUTE_SCRIPT_OUTPUT(args.result, result.value),
+        }
+      : {
+          type: "error",
+          title: `'${args.namespace}' script failed to execute!`,
+          content: FUNCTION_CALL_FAILED(FN_NAME, result.error, args),
+        };
+  },
+  buildExecutor(context: AgentContext) {
+    return async (options: { namespace: string, arguments: any, result: string }): Promise<AgentFunctionResult> => {
       try {
         const script = context.scripts.getScriptByName(options.namespace);
 

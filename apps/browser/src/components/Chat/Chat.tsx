@@ -2,13 +2,15 @@ import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef } from "
 import { Evo } from "@evo-ninja/core";
 import ReactMarkdown from "react-markdown";
 
+import { trackMessageSent } from '../googleAnalytics';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
 
 import "./Chat.css";
 
 export interface ChatMessage {
-  text: string;
+  title: string;
+  content?: string;
   user: string;
   color?: string;
 }
@@ -29,6 +31,9 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
     undefined
   );
   const [stopped, setStopped] = useState<boolean>(false);
+  const [showDisclaimer, setShowDisclaimer] = useState<boolean>(true);
+  const [trackUser, setTrackUser] = useState<boolean>(false);
+  const [hoveredMsgIndex, setHoveredMsgIndex] = useState<number>(-1);
 
   const pausedRef = useRef(paused);
   useEffect(() => {
@@ -54,7 +59,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
 
       // Create a new iteration thread
       if (!evoItr) {
-        const goal = messages.filter((msg) => msg.user === "user")[0].text;
+        const goal = messages.filter((msg) => msg.user === "user")[0].title;
         setEvoItr(evo.run(goal));
         return Promise.resolve();
       }
@@ -71,9 +76,10 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
 
         const response = await evoItr.next();
 
-        if (response.value && response.value.message) {
+        if (!response.done && response.value.message) {
           const evoMessage = {
-            text: response.value.message,
+            title: response.value.message.title,
+            content: response.value.message.content,
             user: "evo"
           };
           messageLog = [...messageLog, evoMessage];
@@ -95,14 +101,29 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
     return () => clearTimeout(timer);
   }, [evoRunning, evoItr]);
 
+
+  const handleCloseDisclaimer = () => {
+    setShowDisclaimer(false);
+    setTrackUser(true);  // User accepted disclaimer, enable tracking
+  };
+
+  const handleCloseWithoutTracking = () => {
+    setShowDisclaimer(false);
+    setTrackUser(false); // User did not accept disclaimer, disable tracking
+  };
+
   const handleSend = async () => {
     onMessage({
-      text: message,
+      title: message,
       user: "user"
     });
     setSending(true);
     setMessage("");
     setEvoRunning(true);
+
+    if (trackUser) { // Only track if user accepted the disclaimer
+      trackMessageSent(message); 
+    }
   };
 
   const handlePause = async () => {
@@ -127,7 +148,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
     let exportedContent = '';
     if (format === 'md') {
       exportedContent = messages.map((msg) => {
-        return `# ${msg.user.toUpperCase()}\n${msg.text}\n---\n`;
+        return `# ${msg.user.toUpperCase()}\n${msg.title}\n${msg.content}\n---\n`;
       }).join('\n');
     }
   
@@ -155,13 +176,43 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
         {messages.map((msg, index) => (
           <div key={index} className={`MessageContainer ${msg.user}`}>
             <div className="SenderName">{msg.user.toUpperCase()}</div>
-            <div className={`Message ${msg.user}`} style={msg.color ? { borderColor: msg.color } : undefined}>
-              <ReactMarkdown>{msg.text}</ReactMarkdown>
+            <div 
+              className={`Message ${msg.user}`} 
+              style={msg.color ? { borderColor: msg.color, cursor: 'pointer' } : { cursor: 'pointer'}} 
+              onMouseEnter={() => setHoveredMsgIndex(index)} 
+              onMouseLeave={() => setHoveredMsgIndex(-1)}
+            >
+              <div>
+                {
+                  hoveredMsgIndex === index 
+                    ? (
+                      <>
+                        <div>{msg.title}</div>
+                        <ReactMarkdown>{msg.content ?? ""}</ReactMarkdown>
+                      </>
+                    )
+                    : (
+                      <>
+                        <div>{msg.title}</div>
+                      </>
+                    )
+                }
+              </div>
             </div>
           </div>
         ))}
       </div>
+      
       <div className="Chat__Container">
+        {showDisclaimer && (
+          <div className="DisclaimerRibbon">
+            🧠 Hey there! Mind sharing your prompts to help make Evo even better?
+            <div className="ButtonWrapper">
+              <span className="CloseDisclaimer" onClick={handleCloseDisclaimer}>Accept</span>
+              <span className="CloseWithoutTracking" onClick={handleCloseWithoutTracking}>Decline</span>
+            </div>
+          </div>
+        )}
         <input
           type="text"
           value={message}
@@ -169,7 +220,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
           onKeyPress={handleKeyPress}
           placeholder="Enter your main goal here..."
           className="Chat__Input"
-          disabled={sending} // Disable input while sending
+          disabled={sending || showDisclaimer} // Disable input while sending or if disclaimer is shown
         />
         {evoRunning && (
           <>

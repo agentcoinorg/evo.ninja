@@ -1,6 +1,5 @@
 .Chat {
   width: 80%;
-  /* background-color: #1c1c1c; */
   background-color: #121212;
   color: #f5f5f5;
   display: flex;
@@ -9,15 +8,51 @@
   border: 1px solid #2b2b30;
 }
 
+.DisclaimerRibbon {
+  background-color: black;
+  color: white; 
+  text-align: center;
+  font-size: 12px; 
+  padding: 10px; 
+  position: absolute; 
+  width: 80%;
+  bottom: 0; 
+  z-index: 1000;
+  border-radius: 10px 10px 0 0;
+  border: 2px solid red; 
+  display: flex;
+  justify-content: space-around; 
+  align-items: center;
+}
+
+.ButtonWrapper {
+  display: flex;
+  gap: 10px; 
+}
+
+.CloseDisclaimer {
+  cursor: pointer;
+  padding: 10px 20px; 
+  font-weight: bold;
+  color: red; 
+}
+
+.CloseWithoutTracking {
+  cursor: pointer;
+  padding: 10px 20px;
+  font-weight: bold;
+  color: white; 
+}
+
 .Chat__Export {
   cursor: pointer;
   font-size: 24px;
   color: #ff572e;
   transition: color 0.3s ease-in-out;
   margin: 10px;
-  position: absolute; /* Added */
-  top: 10px; /* Added */
-  right: 10px; /* Added */
+  position: absolute;
+  top: 10px; 
+  right: 10px;
 }
 
 .Chat__Export:hover {
@@ -55,6 +90,7 @@
   word-break: break-word;
   white-space: pre-line;
 }
+
 .SendMessage {
   display: flex;
   padding: 10px;
