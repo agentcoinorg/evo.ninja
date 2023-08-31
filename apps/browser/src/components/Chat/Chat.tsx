@@ -2,6 +2,7 @@ import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef } from "
 import { Evo } from "@evo-ninja/core";
 import ReactMarkdown from "react-markdown";
 
+import { trackMessageSent } from '../googleAnalytics';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
 
@@ -30,6 +31,8 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
     undefined
   );
   const [stopped, setStopped] = useState<boolean>(false);
+  const [showDisclaimer, setShowDisclaimer] = useState<boolean>(true);
+  const [trackUser, setTrackUser] = useState<boolean>(false);
   const [hoveredMsgIndex, setHoveredMsgIndex] = useState<number>(-1);
 
   const pausedRef = useRef(paused);
@@ -98,6 +101,17 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
     return () => clearTimeout(timer);
   }, [evoRunning, evoItr]);
 
+
+  const handleCloseDisclaimer = () => {
+    setShowDisclaimer(false);
+    setTrackUser(true);  // User accepted disclaimer, enable tracking
+  };
+
+  const handleCloseWithoutTracking = () => {
+    setShowDisclaimer(false);
+    setTrackUser(false); // User did not accept disclaimer, disable tracking
+  };
+
   const handleSend = async () => {
     onMessage({
       title: message,
@@ -106,6 +120,10 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
     setSending(true);
     setMessage("");
     setEvoRunning(true);
+
+    if (trackUser) { // Only track if user accepted the disclaimer
+      trackMessageSent(message); 
+    }
   };
 
   const handlePause = async () => {
@@ -184,7 +202,17 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
           </div>
         ))}
       </div>
+      
       <div className="Chat__Container">
+        {showDisclaimer && (
+          <div className="DisclaimerRibbon">
+            🧠 Hey there! Mind sharing your prompts to help make Evo even better?
+            <div className="ButtonWrapper">
+              <span className="CloseDisclaimer" onClick={handleCloseDisclaimer}>Accept</span>
+              <span className="CloseWithoutTracking" onClick={handleCloseWithoutTracking}>Decline</span>
+            </div>
+          </div>
+        )}
         <input
           type="text"
           value={message}
@@ -192,7 +220,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
           onKeyPress={handleKeyPress}
           placeholder="Enter your main goal here..."
           className="Chat__Input"
-          disabled={sending} // Disable input while sending
+          disabled={sending || showDisclaimer} // Disable input while sending or if disclaimer is shown
         />
         {evoRunning && (
           <>
