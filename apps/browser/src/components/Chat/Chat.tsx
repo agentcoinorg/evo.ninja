@@ -139,7 +139,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: C
     <div className="Chat">
       {showDisclaimer && (
         <div className="DisclaimerRibbon">
-          Disclaimer: In order to improve Evo.Ninja, all inputs to this agent through this UI are being tracked so don't share any sensitive information or private keys.
+          🧠 Disclaimer: In order to improve Evo, all inputs to the agent through this UI will be tracked so don't share any sensitive information or private keys.
           <span className="CloseDisclaimer" onClick={handleCloseDisclaimer}>Agree and Continue</span>
         </div>
       )}
