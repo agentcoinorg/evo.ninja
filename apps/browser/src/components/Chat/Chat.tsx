@@ -3,6 +3,8 @@ import { Evo } from "@evo-ninja/core";
 import ReactMarkdown from "react-markdown";
 
 import { trackMessageSent } from '../googleAnalytics';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
 
 import "./Chat.css";
 
@@ -16,7 +18,7 @@ export interface ChatProps {
   evo: Evo;
   onMessage: (message: ChatMessage) => void;
   messages: ChatMessage[];
-  goalAchieved: boolean
+  goalEnded: boolean
 }
 
 interface Window {
@@ -25,7 +27,7 @@ interface Window {
 declare var window: Window;
 
 
-const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
   const [paused, setPaused] = useState<boolean>(false);
@@ -42,16 +44,16 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: C
       pausedRef.current = paused;
   }, [paused]);
 
-  const goalAchievedRef = useRef(paused);
+  const goalEndedRef = useRef(paused);
   useEffect(() => {
-    goalAchievedRef.current = goalAchieved;
-  }, [goalAchieved]);
+    goalEndedRef.current = goalEnded;
+  }, [goalEnded]);
 
   useEffect(() => {
-    if (goalAchieved) {
+    if (goalEnded) {
       setPaused(true);
     }
-  }, [goalAchieved]);
+  }, [goalEnded]);
 
   useEffect(() => {
     const runEvo = async () => {
@@ -69,7 +71,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: C
       let messageLog = messages;
 
       while (evoRunning) {
-        if (pausedRef.current || goalAchievedRef.current) {
+        if (pausedRef.current || goalEndedRef.current) {
           setStopped(true);
           return Promise.resolve();
         }
@@ -84,7 +86,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: C
             user: "evo"
           };
           messageLog = [...messageLog, evoMessage];
-          if (!goalAchievedRef.current) {
+          if (!goalEndedRef.current) {
             onMessage(evoMessage);
           }
         }
@@ -135,14 +137,35 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: C
     }
   };
 
+  const exportChatHistory = (format: 'md') => {
+    let exportedContent = '';
+    if (format === 'md') {
+      exportedContent = messages.map((msg) => {
+        return `# ${msg.user.toUpperCase()}\n${msg.text}\n---\n`;
+      }).join('\n');
+    }
+  
+    // Generate a date-time stamp
+    const date = new Date();
+    const dateTimeStamp = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}_${date.getHours().toString().padStart(2, '0')}-${date.getMinutes().toString().padStart(2, '0')}-${date.getSeconds().toString().padStart(2, '0')}`;
+  
+    const blob = new Blob([exportedContent], { type: 'text/plain;charset=utf-8' });
+    const href = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = href;
+    // Include the date-time stamp in the filename
+    link.download = `evo-ninja-${dateTimeStamp}.md`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="Chat">
-      {showDisclaimer && (
-        <div className="DisclaimerRibbon">
-          🧠 Disclaimer: In order to improve Evo, all inputs to the agent through this UI will be tracked so don't share any sensitive information or private keys.
-          <span className="CloseDisclaimer" onClick={handleCloseDisclaimer}>Agree and Continue</span>
-        </div>
-      )}
+\
+      <div >
+        <FontAwesomeIcon className="Chat__Export" icon={faMarkdown} onClick={() => exportChatHistory('md')} />
+      </div>
       <div className="Messages">
         {messages.map((msg, index) => (
           <div key={index} className={`MessageContainer ${msg.user}`}>
@@ -153,7 +176,15 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: C
           </div>
         ))}
       </div>
+      
       <div className="Chat__Container">
+        {showDisclaimer && (
+            <div className="DisclaimerRibbon">
+            🧠 Disclaimer: In order to improve Evo, all inputs to the agent through this UI will be tracked so don't share any sensitive information or private keys.
+            <span className="CloseDisclaimer" onClick={handleCloseDisclaimer}>Agree and Continue</span>
+          </div>
+        )}
+
         <input
           type="text"
           value={message}
@@ -161,7 +192,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalAchieved }: C
           onKeyPress={handleKeyPress}
           placeholder="Enter your main goal here..."
           className="Chat__Input"
-          disabled={sending} // Disable input while sending
+          disabled={sending || showDisclaimer} // Disable input while sending or if disclaimer is shown
         />
         {evoRunning && (
           <>

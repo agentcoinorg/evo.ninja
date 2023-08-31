@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
 import * as EvoCore from "@evo-ninja/core";
+import { Workspace } from '@evo-ninja/core';
+import { InMemoryFile } from '@nerfzael/memory-fs';
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 import { PluginPackage } from "@polywrap/plugin-js";
 
@@ -10,11 +12,10 @@ import DojoConfig from "../components/DojoConfig/DojoConfig";
 import DojoError from "../components/DojoError/DojoError";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Chat, { ChatMessage } from "../components/Chat/Chat";
-import { InMemoryFile } from '../sys/file';
 import { MarkdownLogger } from '../sys/logger';
 import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
-import { Workspace } from '@evo-ninja/core';
-import { onGoalAchievedScript, speakScript } from '../scripts';
+import { onGoalAchievedScript, onGoalFailedScript, speakScript } from '../scripts';
+import { defaultModel } from '../supportedModels';
 
 function addScript(script: {name: string, definition: string, code: string}, scriptsWorkspace: Workspace) {
   scriptsWorkspace.writeFileSync(`${script.name}.json`, script.definition);
@@ -25,6 +26,9 @@ function Dojo() {
   const [apiKey, setApiKey] = useState<string | null>(
     localStorage.getItem("openai-api-key")
   );
+  const [model, setModel] = useState<string | null>(
+    localStorage.getItem("openai-model")
+  );
   const [configOpen, setConfigOpen] = useState(false);
   const [dojoError, setDojoError] = useState<unknown | undefined>(undefined);
   const [evo, setEvo] = useState<EvoCore.Evo | undefined>(undefined);
@@ -34,7 +38,7 @@ function Dojo() {
   const [userWorkspace, setUserWorkspace] = useState<EvoCore.InMemoryWorkspace | undefined>(undefined);
   const [scriptsWorkspace, setScriptsWorkspace] = useState<EvoCore.InMemoryWorkspace | undefined>(undefined);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [goalAchieved, setGoalAchieved] = useState<boolean>(false);
+  const [goalEnded, setGoalEnded] = useState<boolean>(false);
 
   useEffect(() => {
     if (!evo || !scriptsWorkspace) {
@@ -84,7 +88,7 @@ function Dojo() {
     checkForUserFiles();
   }, [uploadedFiles]);
 
-  const onConfigSaved = (apiKey: string) => {
+  const onConfigSaved = (apiKey: string, model: string) => {
     if (!apiKey) {
       localStorage.removeItem("openai-api-key");
       setApiKey(null);
@@ -94,11 +98,21 @@ function Dojo() {
       setConfigOpen(false);
       setApiKey(apiKey);
     }
+
+    if(!model) {
+      localStorage.removeItem("opeanai-model");
+      setModel(null);
+      setConfigOpen(true);
+    } else {
+      localStorage.setItem("openai-model", model);
+      setModel(model);
+      setConfigOpen(false);
+    }
   }
 
   useEffect(() => {
     try {
-      if (!apiKey) {
+      if (!apiKey || !model) {
         setConfigOpen(true);
         return;
       }
@@ -123,6 +137,7 @@ function Dojo() {
 
       const scriptsWorkspace = new EvoCore.InMemoryWorkspace();
       addScript(onGoalAchievedScript, scriptsWorkspace);
+      addScript(onGoalFailedScript, scriptsWorkspace);
       addScript(speakScript, scriptsWorkspace);
 
       const scripts = new EvoCore.Scripts(
@@ -134,7 +149,7 @@ function Dojo() {
       const env = new EvoCore.Env(
         {
           "OPENAI_API_KEY": apiKey,
-          "GPT_MODEL": "gpt-4-0613",
+          "GPT_MODEL": model,
           "CONTEXT_WINDOW_TOKENS": "8000",
           "MAX_RESPONSE_TOKENS": "2000"
         }
@@ -159,11 +174,15 @@ function Dojo() {
       const agentPackage = PluginPackage.from(module => ({
         "onGoalAchieved": async (args: any) => {
           logger.success("Goal has been achieved!");
-          setGoalAchieved(true);
+          setGoalEnded(true);
+        },
+        "onGoalFailed": async (args: any) => {
+          logger.error("Goal could not be achieved!");
+          setGoalEnded(true);
         },
         "speak": async (args: any) => {
           logger.success("Evo: " + args.message);
-          return "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.";
+          return "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.\nIf you think you've failed, execute onGoalFailed.";
         },
         "ask": async (args: any) => {
           throw new Error("Not implemented");
@@ -181,19 +200,20 @@ function Dojo() {
     } catch (err) {
       setDojoError(err);
     }
-  }, [apiKey])
+  }, [apiKey, model])
 
   return (
     <div className="Dojo">
       {(!apiKey || configOpen) &&
         <DojoConfig
           apiKey={apiKey}
+          model={model}
           onConfigSaved={onConfigSaved}
         />
       }
       <Sidebar onSettingsClick={() => setConfigOpen(true)} scripts={scripts} userFiles={userFiles} uploadUserFiles={setUploadedFiles} />
       <>
-        {evo && <Chat evo={evo} onMessage={onMessage} messages={messages} goalAchieved={goalAchieved} />}
+        {evo && <Chat evo={evo} onMessage={onMessage} messages={messages} goalEnded={goalEnded} />}
         {dojoError && <DojoError error={dojoError} />}
       </>
     </div>
