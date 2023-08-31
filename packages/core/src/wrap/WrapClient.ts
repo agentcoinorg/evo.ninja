@@ -25,6 +25,11 @@ export class WrapClient extends PolywrapClient {
     const builder = new PolywrapClientConfigBuilder()
       .addBundle("web3")
       .addBundle("sys")
+      .setPackage("plugin/math", PluginPackage.from(module => ({
+        "random": async () => {
+          return Math.random();
+        },
+      })))
       .setPackage("plugin/result", PluginPackage.from(module => ({
         "ok": async (args: any) => {
           this.jsPromiseOutput = ResultOk(args.value);
@@ -33,7 +38,6 @@ export class WrapClient extends PolywrapClient {
           this.jsPromiseOutput = ResultErr(args.error);
         },
       })))
-
       .setPackage("plugin/console", PluginPackage.from(module => ({
         "log": async (args: any) => {
           logger.info("CONSOLE.LOG " + JSON.stringify(args.args, null, 2));
