@@ -3,20 +3,22 @@
   "private": true,
   "workspaces": {
     "packages": [
-      "packages/*",
-      "apps/*"
+      "./packages/*",
+      "./apps/cli"
     ],
     "nohoist": ["gpt-tokenizer"]
   },
   "scripts": {
     "reset": "yarn clean && yarn && yarn build",
     "clean": "npx rimraf ./node_modules ./*/**/node_modules ./*/**/yarn.lock ./*/**/build",
+    "postinstall": "yarn install:browser",
+    "install:browser": "cd ./apps/browser && yarn",
     "start": "yarn workspace evo-ninja run start",
     "start:browser": "cd ./apps/browser && yarn start",
     "build": "yarn build:core && yarn build:cli && yarn build:browser",
     "build:core": "yarn workspace @evo-ninja/core run build",
     "build:cli": "yarn workspace evo-ninja run build",
-    "build:browser": "yarn workspace @evo-ninja/ui build"
+    "build:browser": "cd ./apps/browser && yarn build"
   },
   "devDependencies": {
     "rimraf": "5.0.1"
