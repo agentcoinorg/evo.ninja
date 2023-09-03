@@ -31,8 +31,12 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
     undefined
   );
   const [stopped, setStopped] = useState<boolean>(false);
-  const [showDisclaimer, setShowDisclaimer] = useState<boolean>(true);
-  const [trackUser, setTrackUser] = useState<boolean>(false);
+  const [showDisclaimer, setShowDisclaimer] = useState<boolean>(
+    localStorage.getItem('showDisclaimer') !== 'false'
+  );
+  const [trackUser, setTrackUser] = useState<boolean>(
+    localStorage.getItem('trackUser') === 'true'
+  );
   const [hoveredMsgIndex, setHoveredMsgIndex] = useState<number>(-1);
 
   const pausedRef = useRef(paused);
@@ -101,6 +105,13 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
     return () => clearTimeout(timer);
   }, [evoRunning, evoItr]);
 
+  useEffect(() => {
+    localStorage.setItem('showDisclaimer', showDisclaimer.toString());
+  }, [showDisclaimer]);
+
+  useEffect(() => {
+    localStorage.setItem('trackUser', trackUser.toString());
+  }, [trackUser]);
 
   const handleCloseDisclaimer = () => {
     setShowDisclaimer(false);
