@@ -2,7 +2,7 @@
 
 ![](https://hackmd.io/_uploads/ByWjLKAhn.png)
 
-[Discord](https://discord.polywrap.io/) | [Website](https://evo.ninja)
+[Discord](https://discord.gg/X7ystzGcf5) | [Website](https://evo.ninja)
 Give this repo a star if you use it! :star: 
 
 ## Welcome to evo.ninja
