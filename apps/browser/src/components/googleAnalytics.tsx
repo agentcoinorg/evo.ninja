@@ -12,7 +12,6 @@ export const trackMessageSent = (message: string) => {
         event_label: message, // Log the message as a label
         value: 1, // 1 message was sent
       });
-      console.log("GA event sent");
     } else {
       console.log("GA not initialized");
     }
@@ -29,7 +28,6 @@ export const trackThumbsFeedback = (feedback: string) => {
         event_label: feedback,
         value: 1,
       });
-      console.log("GA event sent");
     } else {
       console.log("GA not initialized");
     }
