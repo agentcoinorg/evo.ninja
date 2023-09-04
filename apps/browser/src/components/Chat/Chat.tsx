@@ -2,9 +2,10 @@ import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef } from "
 import { Evo } from "@evo-ninja/core";
 import ReactMarkdown from "react-markdown";
 
-import { trackMessageSent } from '../googleAnalytics';
+import { trackMessageSent, trackThumbsFeedback} from '../googleAnalytics';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
+import { faThumbsUp, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
 
 import "./Chat.css";
 
@@ -52,6 +53,8 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
   useEffect(() => {
     if (goalEnded) {
       setPaused(true);
+      setEvoRunning(false);
+      setSending(false);
     }
   }, [goalEnded]);
 
@@ -155,6 +158,14 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
     }
   };
 
+  const handleThumbsUp = () => {
+    trackThumbsFeedback('positive');
+  };
+
+  const handleThumbsDown = () => {
+    trackThumbsFeedback('negative');
+  };
+
   const exportChatHistory = (format: 'md') => {
     let exportedContent = '';
     if (format === 'md') {
@@ -212,6 +223,15 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
             </div>
           </div>
         ))}
+        {goalEnded && (
+          <div className="FeedbackContainer">
+            <div className="FeedbackTitle">Provide Feedback</div>
+            <div className="FeedbackButtons">
+              <FontAwesomeIcon icon={faThumbsUp} onClick={handleThumbsUp} />
+              <FontAwesomeIcon icon={faThumbsDown} onClick={handleThumbsDown} />
+            </div>
+          </div>
+        )}
       </div>
       
       <div className="Chat__Container">
