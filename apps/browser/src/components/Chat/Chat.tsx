@@ -49,6 +49,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
     if (goalEnded) {
       setPaused(true);
       setEvoRunning(false);
+      setSending(false);
     }
   }, [goalEnded]);
 
