@@ -2,6 +2,12 @@ import { ResultErr, ResultOk } from "@polywrap/result";
 import { AgentFunction, AgentFunctionResult, AgentChatMessage, AgentContext } from "../../agent-function";
 import { FUNCTION_CALL_FAILED, OTHER_EXECUTE_FUNCTION_OUTPUT } from "../../prompts";
 
+const allowedLibs = [
+  "fs",
+  "axios",
+  "util"
+];
+
 const FN_NAME = "writeFunction";
 
 export const writeFunction: AgentFunction = {
@@ -55,9 +61,30 @@ export const writeFunction: AgentFunction = {
         return ResultErr(`Cannot create a function with namespace ${options.namespace}. Namespaces starting with 'agent.' are reserved.`);
       }
 
+      if (extractRequires(options.code).some(x => !allowedLibs.includes(x))) {
+        return ResultErr(`Cannot require libraries other than ${allowedLibs.join(", ")}.`);
+      }
+
       context.workspace.writeFileSync("index.js", options.code);
 
       return ResultOk(`Wrote the function ${options.namespace} to the workspace.`);
     };
   }
+};
+
+const extractRequires = (code: string) => {
+  // This regex specifically matches the 'require' keyword by using word boundaries (\b)
+  // It also accounts for possible whitespaces before or after the quotes.
+  const regex = /\brequire\b\s*\(\s*["']([^"']+)["']\s*\)/g;
+
+  let match;
+  const libraries = [];
+
+  // Use exec() in a loop to capture all occurrences
+  while ((match = regex.exec(code)) !== null) {
+    // match[1] contains the captured group with the library name
+    libraries.push(match[1]);
+  }
+
+  return libraries;
 };

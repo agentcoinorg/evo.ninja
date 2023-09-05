@@ -12,12 +12,12 @@ export const UNPARSABLE_FUNCTION_ARGS = (name: string, args: string, err: any) =
 export const UNDEFINED_FUNCTION_ARGS = (name: string) =>
   `Function call argument for '${name}' were undefined.`;
 
-export const FUNCTION_CALL_FAILED = (name: string, error: string, args: string | undefined) =>
+export const FUNCTION_CALL_FAILED = (name: string, error: string, args: any) =>
   `The function '${name}' failed, this is the error:\n\`\`\`\n${
     error && typeof error === "string"
       ? trimText(error, 300)
       : "Unknown error."
-    }\n\`\`\`\n\nArguments:\n\`\`\`\n${args}\n\`\`\``;
+    }\n\`\`\`\n\nArguments:\n\`\`\`\n${JSON.stringify(args, null, 2)}\n\`\`\``;
 
 export const READ_GLOBAL_VAR_OUTPUT = (name: string, value: string) =>
   `## Read Variable\n**'{{${name}}}'**:\n\`\`\`\n${value}\n\`\`\`\n`;
