@@ -36,6 +36,9 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
   const [trackUser, setTrackUser] = useState<boolean>(false);
   const [hoveredMsgIndex, setHoveredMsgIndex] = useState<number>(-1);
 
+  const [hasUpvoted, setHasUpvoted] = useState<boolean>(false);
+  const [hasDownvoted, setHasDownvoted] = useState<boolean>(false);
+
   const pausedRef = useRef(paused);
   useEffect(() => {
       pausedRef.current = paused;
@@ -147,12 +150,19 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
     }
   };
 
+
   const handleThumbsUp = () => {
-    trackThumbsFeedback('positive');
+    if (!hasDownvoted) {
+      setHasUpvoted(true);
+      trackThumbsFeedback('positive');
+    }
   };
 
   const handleThumbsDown = () => {
-    trackThumbsFeedback('negative');
+    if (!hasUpvoted) {
+      setHasDownvoted(true);
+      trackThumbsFeedback('negative');
+    }
   };
 
   const exportChatHistory = (format: 'md') => {
@@ -212,15 +222,32 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
             </div>
           </div>
         ))}
-        {goalEnded && (
-          <div className="FeedbackContainer">
-            <div className="FeedbackTitle">Provide Feedback</div>
-            <div className="FeedbackButtons">
-              <FontAwesomeIcon icon={faThumbsUp} onClick={handleThumbsUp} />
-              <FontAwesomeIcon icon={faThumbsDown} onClick={handleThumbsDown} />
-            </div>
-          </div>
-        )}
+            {goalEnded && (
+      <div className="FeedbackContainer">
+        <div className="FeedbackTitle">Provide Feedback</div>
+        <div className="FeedbackButtons">
+          <FontAwesomeIcon 
+            icon={faThumbsUp} 
+            onClick={handleThumbsUp} 
+            className={hasUpvoted ? 'UpvoteActive' : ''} 
+          />
+          <FontAwesomeIcon 
+            icon={faThumbsDown} 
+            onClick={handleThumbsDown} 
+            className={hasDownvoted ? 'DownvoteActive' : ''} 
+          />
+        </div>
+        <div className="DetailedFeedback">
+          <a
+            href="https://forms.gle/nidFArD7aPzYL5PQ7"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Fill a Detailed Feedback Form
+          </a>
+        </div>
+      </div>
+    )}
       </div>
       
       <div className="Chat__Container">
