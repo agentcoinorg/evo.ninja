@@ -129,6 +129,22 @@
   gap: 1rem;
 }
 
+.UpvoteActive {
+  color: #ff572e;  /* or your desired accent color */
+}
+
+.DownvoteActive {
+  color: #ff572e;  /* or your desired accent color */
+}
+
+
+.DetailedFeedback a {
+  color: #ff572e; /* or any color you prefer */
+  margin-top: 10px;
+  display: inline-block;
+  text-decoration: underline;
+}
+
 .SendMessage button {
   background-color: #ff572e;
   color: white;
