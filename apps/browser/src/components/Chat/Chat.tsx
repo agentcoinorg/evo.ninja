@@ -222,34 +222,33 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
             </div>
           </div>
         ))}
-            {goalEnded && (
-      <div className="FeedbackContainer">
-        <div className="FeedbackTitle">Provide Feedback</div>
-        <div className="FeedbackButtons">
-          <FontAwesomeIcon 
-            icon={faThumbsUp} 
-            onClick={handleThumbsUp} 
-            className={hasUpvoted ? 'UpvoteActive' : ''} 
-          />
-          <FontAwesomeIcon 
-            icon={faThumbsDown} 
-            onClick={handleThumbsDown} 
-            className={hasDownvoted ? 'DownvoteActive' : ''} 
-          />
-        </div>
-        <div className="DetailedFeedback">
-          <a
-            href="https://forms.gle/nidFArD7aPzYL5PQ7"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Fill a Detailed Feedback Form
-          </a>
-        </div>
+        {goalEnded && (
+          <div className="FeedbackContainer">
+            <div className="FeedbackTitle">Provide Feedback</div>
+            <div className="FeedbackButtons">
+              <FontAwesomeIcon 
+                icon={faThumbsUp} 
+                onClick={handleThumbsUp} 
+                className={hasUpvoted ? 'UpvoteActive' : ''} 
+              />
+              <FontAwesomeIcon 
+                icon={faThumbsDown} 
+                onClick={handleThumbsDown} 
+                className={hasDownvoted ? 'DownvoteActive' : ''} 
+              />
+            </div>
+            <div className="DetailedFeedback">
+              <a
+                href="https://forms.gle/nidFArD7aPzYL5PQ7"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Fill a Detailed Feedback Form
+              </a>
+            </div>
+          </div>
+        )}
       </div>
-    )}
-      </div>
-      
       <div className="Chat__Container">
         {showDisclaimer && (
           <div className="DisclaimerRibbon">
