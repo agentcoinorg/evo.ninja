@@ -2,9 +2,10 @@ import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef } from "
 import { Evo } from "@evo-ninja/core";
 import ReactMarkdown from "react-markdown";
 
-import { trackMessageSent } from '../googleAnalytics';
+import { trackMessageSent, trackThumbsFeedback} from '../googleAnalytics';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
+import { faThumbsUp, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
 
 import "./Chat.css";
 
@@ -31,9 +32,16 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
     undefined
   );
   const [stopped, setStopped] = useState<boolean>(false);
-  const [showDisclaimer, setShowDisclaimer] = useState<boolean>(true);
-  const [trackUser, setTrackUser] = useState<boolean>(false);
+  const [showDisclaimer, setShowDisclaimer] = useState<boolean>(
+    localStorage.getItem('showDisclaimer') !== 'false'
+  );
+  const [trackUser, setTrackUser] = useState<boolean>(
+    localStorage.getItem('trackUser') === 'true'
+  );
   const [hoveredMsgIndex, setHoveredMsgIndex] = useState<number>(-1);
+
+  const [hasUpvoted, setHasUpvoted] = useState<boolean>(false);
+  const [hasDownvoted, setHasDownvoted] = useState<boolean>(false);
 
   const pausedRef = useRef(paused);
   useEffect(() => {
@@ -48,6 +56,8 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
   useEffect(() => {
     if (goalEnded) {
       setPaused(true);
+      setEvoRunning(false);
+      setSending(false);
     }
   }, [goalEnded]);
 
@@ -101,6 +111,13 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
     return () => clearTimeout(timer);
   }, [evoRunning, evoItr]);
 
+  useEffect(() => {
+    localStorage.setItem('showDisclaimer', showDisclaimer.toString());
+  }, [showDisclaimer]);
+
+  useEffect(() => {
+    localStorage.setItem('trackUser', trackUser.toString());
+  }, [trackUser]);
 
   const handleCloseDisclaimer = () => {
     setShowDisclaimer(false);
@@ -141,6 +158,21 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
   const handleKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter" && !sending) {
       handleSend();
+    }
+  };
+
+
+  const handleThumbsUp = () => {
+    if (!hasDownvoted) {
+      setHasUpvoted(true);
+      trackThumbsFeedback('positive');
+    }
+  };
+
+  const handleThumbsDown = () => {
+    if (!hasUpvoted) {
+      setHasDownvoted(true);
+      trackThumbsFeedback('negative');
     }
   };
 
@@ -201,8 +233,33 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
             </div>
           </div>
         ))}
+        {goalEnded && (
+          <div className="FeedbackContainer">
+            <div className="FeedbackTitle">Provide Feedback</div>
+            <div className="FeedbackButtons">
+              <FontAwesomeIcon 
+                icon={faThumbsUp} 
+                onClick={handleThumbsUp} 
+                className={hasUpvoted ? 'UpvoteActive' : ''} 
+              />
+              <FontAwesomeIcon 
+                icon={faThumbsDown} 
+                onClick={handleThumbsDown} 
+                className={hasDownvoted ? 'DownvoteActive' : ''} 
+              />
+            </div>
+            <div className="DetailedFeedback">
+              <a
+                href="https://forms.gle/nidFArD7aPzYL5PQ7"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Fill a Detailed Feedback Form
+              </a>
+            </div>
+          </div>
+        )}
       </div>
-      
       <div className="Chat__Container">
         {showDisclaimer && (
           <div className="DisclaimerRibbon">
