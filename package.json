@@ -3,9 +3,8 @@
   "private": true,
   "workspaces": {
     "packages": [
-      "./packages/*",
-      "./apps/cli",
-      "./apps/browser"
+      "packages/*",
+      "apps/*"
     ],
     "nohoist": ["gpt-tokenizer"]
   },
