@@ -9,6 +9,9 @@
     ],
     "nohoist": ["gpt-tokenizer"]
   },
+  "resolutions": {
+    "react-scripts/**/strip-ansi": "6.0.1"
+  },
   "scripts": {
     "reset": "yarn clean && yarn && yarn build",
     "clean": "npx rimraf ./node_modules ./*/**/node_modules ./*/**/yarn.lock ./*/**/build",
