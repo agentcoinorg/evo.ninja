@@ -1,13 +1,5 @@
 .Landing {
-  text-align: center;
-  color: #FFFFFF;
-  background-color: #131313AF;
-}
-
-.Landing::before {
-  font-size: 8rem;
-  font-weight: 100;
-  font-style: normal;
+  @apply text-center text-white bg-neutral-900/70;
 }
 
 .Landing-header {
@@ -15,22 +7,15 @@
 }
 
 .Header-Links {
-  position: absolute;
-  display: flex;
-  top: 0;
-  right: 0;
-  height: 60px;
-  margin-right: 50px;
+  @apply absolute flex top-0 right-0 h-16 mr-12 gap-6 items-center;
 }
 
 .Header-Links a {
-  margin: 10px;
-  margin-top: 20px;
-  display: inherit;
+  @apply h-10 w-10 filter-none hover:filter contrast-50;
 }
 
-.Header-Links a:hover {
-  filter: contrast(0.5)
+.Header-Links a img {
+  @apply h-full max-w-full;
 }
 
 .Landing button {
@@ -41,63 +26,6 @@
   @apply flex flex-col gap-4 items-center;
 }
 
-@-webkit-keyframes bg-scrolling-reverse {
-  100% {
-    background-position: 0 250px;
-  }
-}
-@-moz-keyframes bg-scrolling-reverse {
-  100% {
-    background-position: 0 250px;
-  }
-}
-@-o-keyframes bg-scrolling-reverse {
-  100% {
-    background-position: 0 250px;
-  }
-}
-@keyframes bg-scrolling-reverse {
-  100% {
-    background-position: 0 250px;
-  }
-}
-@-webkit-keyframes bg-scrolling {
-  0% {
-    background-position: 0 250px;
-  }
-}
-@-moz-keyframes bg-scrolling {
-  0% {
-    background-position: 0 250px;
-  }
-}
-@-o-keyframes bg-scrolling {
-  0% {
-    background-position: 0 250px;
-  }
-}
-@keyframes bg-scrolling {
-  0% {
-    background-position: 0 250px;
-  }
-}
-
 .Landing-background {
-  color: #999;
-  font: 400 16px/1.5 exo, ubuntu, "segoe ui", helvetica, arial, sans-serif;
-  text-align: center;
-  /* img size is 25x25 */
-  background: url("/public/wallpaper.png") repeat 0 0 / 461px 250px;
-  -webkit-animation: bg-scrolling-reverse 5s infinite;
-  /* Safari 4+ */
-  -moz-animation: bg-scrolling-reverse 5s infinite;
-  /* Fx 5+ */
-  -o-animation: bg-scrolling-reverse 5s infinite;
-  /* Opera 12+ */
-  animation: bg-scrolling-reverse 5s infinite;
-  /* IE 10+ */
-  -webkit-animation-timing-function: linear;
-  -moz-animation-timing-function: linear;
-  -o-animation-timing-function: linear;
-  animation-timing-function: linear;
+  @apply animate-landing-bg text-neutral-400 text-center bg-landing-bg bg-repeat;
 }
