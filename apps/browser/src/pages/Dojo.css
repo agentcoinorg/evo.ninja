@@ -1,154 +1,60 @@
 .Dojo {
-  display: flex;
-  background-color: #333232;
-  height: 100%; /* Add this to take full height */
+  @apply flex bg-neutral-800 h-full;
 }
 
 .Sidebar {
-  color: #f5f5f5;
-  background-color: #131313df;
-  border-right: 2px solid #2b2b30;
+  @apply text-neutral-50 bg-neutral-900/80 border-r-2 border-r-neutral-700;
 }
 
 .Chat {
-  width: 80%;
-  background-color: #1c1c1c;
-  color: white;
-  display: flex; /* Add this to make flex layout */
-  flex-direction: column; /* Add this to make flex layout */
-  height: 100%; /* Add this to take full height */
+  @apply w-4/5 bg-neutral-800 text-white flex flex-col h-full;
 }
 
 .Messages {
-  padding: 20px;
-  overflow: scroll;
-  flex: 1; /* Add this to take remaining height */
+  @apply p-5 overflow-scroll flex-1;
 }
 
 .Message {
-  padding: 10px;
-  margin: 5px;
-  border-radius: 5px;
+  @apply p-2.5 m-1 rounded;
 }
 
 .Message.user {
-  background-color: #489dff;
-  color: #333;
+  @apply bg-blue-400 text-neutral-800;
 }
 
 .Message.evo {
-  background-color: #b5b5b5;
-  color: #333;
+  @apply bg-neutral-400 text-neutral-800;
 }
 .SendMessage {
-  display: flex;
-  padding: 10px;
+  @apply flex p-2.5;
 }
 
 .SendMessage input {
-  flex: 1;
-  padding: 10px;
-  margin-right: 10px;
+  @apply flex-1 p-2.5 mr-2.5;
 }
 
 .SendMessage button {
-  background-color: #b4b4b4;
-  color: white;
-  border: none;
-  padding: 10px;
-  cursor: pointer;
+  @apply bg-neutral-400 text-white border-none p-2.5 cursor-pointer;
 }
 
 .Scripts,
 .Workspace {
-  background-color: white; /* Add background color */
-  border-radius: 10px; /* Rounded corners */
-  padding: 10px; /* Padding inside the card */
-  margin: 10px; /* Margin around the card */
-  color: black; /* Text color */
-  width: 80%; /* Width of the card */
+  @apply bg-white rounded-lg p-2.5 m-2.5 text-black w-4/5;
 }
 
 .File,
 .Script {
-  border-radius: 5px; /* Rounded corners for files and scripts */
-  padding: 5px; /* Padding inside the files and scripts */
-  margin: 5px 0; /* Margin around the files and scripts */
-  background-color: #f3f3f3; /* Background color */
+  @apply rounded p-1 my-1 mx-0 bg-neutral-50;
 }
 
 .drop-hover {
-  background-color: #e1f1e5;
-  border: 2px dashed #b5bcff;
+  @apply bg-neutral-50 border-2 border-dashed border-blue-200;
 }
 
 .inner-dropzone {
-  padding: 20px;
-}
-
-@-webkit-keyframes bg-scrolling-reverse {
-  100% {
-    background-position: 0 250px;
-  }
-}
-@-moz-keyframes bg-scrolling-reverse {
-  100% {
-    background-position: 0 250px;
-  }
-}
-@-o-keyframes bg-scrolling-reverse {
-  100% {
-    background-position: 0 250px;
-  }
-}
-@keyframes bg-scrolling-reverse {
-  100% {
-    background-position: 0 250px;
-  }
-}
-@-webkit-keyframes bg-scrolling {
-  0% {
-    background-position: 0 250px;
-  }
-}
-@-moz-keyframes bg-scrolling {
-  0% {
-    background-position: 0 250px;
-  }
-}
-@-o-keyframes bg-scrolling {
-  0% {
-    background-position: 0 250px;
-  }
-}
-@keyframes bg-scrolling {
-  0% {
-    background-position: 0 250px;
-  }
+  @apply p-5;
 }
 
 .Dojo {
-  color: #999;
-  font: 400 16px/1.5 exo, ubuntu, "segoe ui", helvetica, arial, sans-serif;
-  text-align: center;
-  /* img size is 25x25 */
-  background: url("/public/wallpaper-bw.png") repeat 0 0 / 461px 250px;
-  -webkit-animation: bg-scrolling-reverse 5s infinite;
-  /* Safari 4+ */
-  -moz-animation: bg-scrolling-reverse 5s infinite;
-  /* Fx 5+ */
-  -o-animation: bg-scrolling-reverse 5s infinite;
-  /* Opera 12+ */
-  animation: bg-scrolling-reverse 5s infinite;
-  /* IE 10+ */
-  -webkit-animation-timing-function: linear;
-  -moz-animation-timing-function: linear;
-  -o-animation-timing-function: linear;
-  animation-timing-function: linear;
-}
-
-.Dojo::before {
-  font-size: 8rem;
-  font-weight: 100;
-  font-style: normal;
+  @apply animate-landing-bg text-neutral-400 text-center bg-landing-bg bg-repeat;
 }
