@@ -28,7 +28,7 @@ export const think: AgentFunction = {
           type: "success",
           title: `Thinking...`,
           content: 
-            `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
+            `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
             OTHER_EXECUTE_FUNCTION_OUTPUT(result.value),
         }
       : {

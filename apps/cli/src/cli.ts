@@ -51,7 +51,7 @@ export async function cli(): Promise<void> {
   ], {
     promptUser: prompt,
     logUserPrompt: (response: string) => {
-      fileLogger.info(`**User**: ${response}`);
+      fileLogger.info(`# User:\n ${response}`);
     }
   })
 
@@ -81,19 +81,19 @@ export async function cli(): Promise<void> {
 
   const agentPackage = PluginPackage.from(module => ({
     "onGoalAchieved": async (args: any) => {
-      logger.success("Evo: Goal has been achieved!");
+      logger.success("Goal has been achieved!");
       process.exit(0);
     },
     "onGoalFailed": async (args: any) => {
-      logger.error("Evo: Goal could not be achieved!");
+      logger.error("Goal could not be achieved!");
       process.exit(0);
     },
     "speak": async (args: any) => {
-      logger.success("Evo: " + args.message);
+      logger.success(args.message);
       return "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.\nIf you think you've failed, execute onGoalFailed.";
     },
     "ask": async (args: any) => {
-      logger.error("Evo: " + args.message);
+      logger.error(args.message);
       const response = await prompt("");
       return "User: " + response;
     },
@@ -117,6 +117,7 @@ export async function cli(): Promise<void> {
     goal = await logger.prompt("Enter your goal: ");
   }
 
+
   let iterator = evo.run(goal);
 
   while(true) {
@@ -130,8 +131,13 @@ export async function cli(): Promise<void> {
     }
 
     if (response.value) {
-      response.value.message
-      logger.info('Evo: ' + response.value.message.title + '\n' + response.value.message.content);
+      const evoMessage = response.value.message.title + '\n' + response.value.message.content;
+      
+      // Log to file with bold markdown
+      fileLogger.info(`# Evo:\n` + evoMessage);
+      
+      // Log to console in plain text
+      consoleLogger.info('Evo: ' + evoMessage);
     }
   }
 }
