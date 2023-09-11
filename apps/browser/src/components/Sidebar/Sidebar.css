@@ -4,148 +4,58 @@ h3 {
 }
 
 .Sidebar {
-  width: 20%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow: auto;
-  padding: 15px;
-  box-sizing: border-box;
+  @apply w-1/5 flex flex-col items-center overflow-auto p-4 box-border;
 }
 
 .Content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 1.5rem;
-  width: 100%;
-  height: auto;
+  @apply flex flex-col items-center mt-6 w-full h-auto;
 }
 
 .Logo {
-  width: 100%;
-  margin-bottom: 20px;
+  @apply w-full mb-5;
 }
 
 .Workspace {
-  width: 100%;
-  height: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  @apply w-full h-auto flex flex-col justify-between;
 }
 
 .File {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.File:hover {
-  cursor: pointer;
-  background-color: #ff572e;
+  @apply flex items-center justify-between cursor-pointer hover:bg-orange-700;
 }
 
 .Scripts,
 .Workspace {
-  background-color: #171717;
-  padding: 1rem;
-  margin: 15px 0 15px 0;
-  color: #f5f5f5;
-  width: calc(100% - 30px);
-  box-sizing: border-box;
-  border-radius: 5px;
+  @apply bg-neutral-900 p-4 my-4 text-neutral-50 w-full box-border rounded;
 }
 
 .File,
 .Script {
-  padding: 10px;
-  margin: 10px 0;
-  background-color: #171717;
-  width: auto;
-  box-sizing: border-box;
-  border-radius: 5px;
-  border: 2px solid #4b4b50; /* Increased border visibility */
+  @apply p-2.5 my-2.5 bg-neutral-900 w-auto box-border rounded border-2 border-neutral-500;
 }
 
 .Scripts,
 .Workspace {
-  color: white;
-  background-color: #171717;
-  border: 1px solid #4b4b50;
+  @apply text-white bg-neutral-900 border border-neutral-500;
 }
 
 .UploadButton {
-  margin: 1rem 0 1rem 0;
-  background-color: #ff572e;
-  height: 2.25rem;
-  border: none;
-  color: #1f1f1f;
-  text-align: center;
-  display: inline-block;
-  font-size: 16px;
-  transition: all 0.3s ease-in-out;
-  cursor: pointer;
-  outline: none;
-  padding: 10px 24px;
-  border-radius: 12px;
-  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
-  &:hover {
-    background-color: #ff4516;
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.24),
-      0 2px 10px 0 rgba(0, 0, 0, 0.19);
-  }
+  @apply my-4 bg-orange-600 h-9 border-none text-neutral-900 text-center inline-block transition-all cursor-pointer outline-none py-2.5 px-6 rounded-xl shadow-md hover:bg-orange-700;
 }
 
 .DownloadButton {
-  margin: 1rem 0 1rem 0;
-  background-color: #ff572e;
-  height: 2.25rem;
-  border: none;
-  color: #1f1f1f;
-  text-align: center;
-  display: inline-block;
-  font-size: 16px;
-  transition: all 0.3s ease-in-out;
-  cursor: pointer;
-  outline: none;
-  padding: 10px 24px;
-  border-radius: 12px;
-  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
-  &:hover {
-    background-color: #ff4516;
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.24),
-      0 2px 10px 0 rgba(0, 0, 0, 0.19);
-  }
-}
-
-.BuiltWithLove,
-.Footer {
-  margin-top: auto;
+  @apply my-4 bg-orange-600 h-9 border-none text-neutral-900 text-center inline-block transition-all cursor-pointer outline-none py-2.5 px-6 rounded-xl shadow-md hover:bg-orange-700;
 }
 
 .Footer {
-  @apply flex flex-col gap-4 my-8;
-  width: 90%;
-  box-sizing: border-box;
+  @apply flex flex-col gap-4 my-8 w-10/12 box-border;
 }
 
 .Footer a {
-  color: white;
-  text-decoration: none;
+  @apply text-white;
 }
 
 .Footer__Links {
-  color: white;
-  font-size: larger;
-  opacity: 0.8;
-  display: flex;
-  justify-content: space-between;
-  cursor: pointer;
-  transition: all 0.3s ease-in-out;
-}
-.Footer__Links:hover {
-  opacity: 1;
+  @apply text-white opacity-80 text-lg flex justify-between cursor-pointer transition-all hover:opacity-100;
 }
 
 .Polywrap {
@@ -157,5 +67,5 @@ h3 {
 }
 
 .BuiltWithLove {
-  color: #f5f5f5;
+  @apply text-neutral-50;
 }
