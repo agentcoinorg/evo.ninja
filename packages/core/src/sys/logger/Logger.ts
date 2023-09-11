@@ -84,8 +84,8 @@ export class Logger implements ILogger {
     const logger = this;
 
     return new Promise<void>((resolve, reject) => {
-      figlet.text("E V O", {
-        font: "Slant",
+      figlet.text("Evo.Ninja", {
+        font: "Doom",
         horizontalLayout: "default",
         verticalLayout: "default",
         whitespaceBreak: true
@@ -96,7 +96,7 @@ export class Logger implements ILogger {
           return;
         }
         logger.info("```\n" + data + "\n```\n");
-        logger.info("Support: https://discord.polywrap.io");
+        logger.info("Support: https://discord.gg/ZUSDVhA2Vz");
         resolve();
       });
     });
