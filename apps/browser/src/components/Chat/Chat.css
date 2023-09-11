@@ -86,9 +86,22 @@
   border: 1px solid #bee4e2;
 }
 
-.Message pre code {
-  word-break: break-word;
-  white-space: pre-line;
+
+.Message {
+  padding: 10px 15px;
+  margin: 5px 0;
+  background-color: #1a1a1d;
+  border-radius: 5px;
+  color: #f5f5f5;
+  border: 1px solid transparent; /* Initialize border */
+  transition: border-color 0.3s ease-in-out; /* Add transition effect */
+}
+
+.Message:hover {
+  border-color: #ff572e; /* Change to your preferred color when hovered */
+}
+.Message.active {
+  border-color: #ff572e; /* Change to your preferred color when clicked */
 }
 
 .SendMessage {
