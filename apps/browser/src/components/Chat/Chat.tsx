@@ -5,7 +5,7 @@ import ReactMarkdown from "react-markdown";
 import { trackMessageSent, trackThumbsFeedback} from '../googleAnalytics';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
-import { faThumbsUp, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
+import { faThumbsUp, faThumbsDown, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 
 import "./Chat.css";
 
@@ -38,7 +38,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
   const [trackUser, setTrackUser] = useState<boolean>(
     localStorage.getItem('trackUser') === 'true'
   );
-  const [hoveredMsgIndex, setHoveredMsgIndex] = useState<number>(-1);
+  const [clickedMsgIndex, setClickedMsgIndex] = useState<number | null>(null);
 
   const [hasUpvoted, setHasUpvoted] = useState<boolean>(false);
   const [hasDownvoted, setHasDownvoted] = useState<boolean>(false);
@@ -205,18 +205,16 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
         <FontAwesomeIcon className="Chat__Export" icon={faMarkdown} onClick={() => exportChatHistory('md')} />
       </div>
       <div className="Messages">
-        {messages.map((msg, index) => (
+      {messages.map((msg, index) => (
           <div key={index} className={`MessageContainer ${msg.user}`}>
             <div className="SenderName">{msg.user.toUpperCase()}</div>
             <div 
-              className={`Message ${msg.user}`} 
-              style={msg.color ? { borderColor: msg.color, cursor: 'pointer' } : { cursor: 'pointer'}} 
-              onMouseEnter={() => setHoveredMsgIndex(index)} 
-              onMouseLeave={() => setHoveredMsgIndex(-1)}
+              className={`Message ${msg.user} ${clickedMsgIndex === index ? "active" : ""}`} 
+              onClick={() => setClickedMsgIndex(index === clickedMsgIndex ? null : index)}
             >
               <div>
                 {
-                  hoveredMsgIndex === index 
+                  clickedMsgIndex === index 
                     ? (
                       <>
                         <div>{msg.title}</div>
