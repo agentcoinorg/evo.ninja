@@ -81,19 +81,19 @@ export async function cli(): Promise<void> {
 
   const agentPackage = PluginPackage.from(module => ({
     "onGoalAchieved": async (args: any) => {
-      logger.success("Goal has been achieved!");
+      logger.success("Evo: Goal has been achieved!");
       process.exit(0);
     },
     "onGoalFailed": async (args: any) => {
-      logger.error("Goal could not be achieved!");
+      logger.error("Evo: Goal could not be achieved!");
       process.exit(0);
     },
     "speak": async (args: any) => {
-      logger.success("Agent: " + args.message);
+      logger.success("Evo: " + args.message);
       return "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.\nIf you think you've failed, execute onGoalFailed.";
     },
     "ask": async (args: any) => {
-      logger.error("Agent: " + args.message);
+      logger.error("Evo: " + args.message);
       const response = await prompt("");
       return "User: " + response;
     },
@@ -130,7 +130,8 @@ export async function cli(): Promise<void> {
     }
 
     if (response.value) {
-      response.value.message && logger.info(response.value.message.title);
+      response.value.message
+      logger.info('Evo: ' + response.value.message.title + '\n' + response.value.message.content);
     }
   }
 }
