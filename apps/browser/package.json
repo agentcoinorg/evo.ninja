@@ -2,11 +2,6 @@
   "name": "@evo-ninja/ui",
   "version": "0.1.0",
   "private": true,
-  "workspaces": {
-    "packages": [
-      "../../packages/**"
-    ]
-  },
   "dependencies": {
     "@evo-ninja/core": "0.1.0",
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
