@@ -1,5 +1,5 @@
 .Dojo {
-  @apply flex bg-neutral-800 h-full;
+  @apply flex bg-neutral-800 h-full animate-landing-bg text-neutral-400 text-center bg-landing-bg bg-repeat;
 }
 
 .Sidebar {
@@ -53,8 +53,4 @@
 
 .inner-dropzone {
   @apply p-5;
-}
-
-.Dojo {
-  @apply animate-landing-bg text-neutral-400 text-center bg-landing-bg bg-repeat;
 }
