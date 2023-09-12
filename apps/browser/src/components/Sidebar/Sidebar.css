@@ -4,50 +4,50 @@ h3 {
 }
 
 .Sidebar {
-  @apply w-1/5 flex flex-col items-center overflow-auto p-4 box-border;
+  @apply box-border flex w-1/5 flex-col items-center overflow-auto p-4;
 }
 
 .Content {
-  @apply flex flex-col items-center mt-6 w-full h-auto;
+  @apply mt-6 flex h-auto w-full flex-col items-center;
 }
 
 .Logo {
-  @apply w-full mb-5;
+  @apply mb-5 w-full;
 }
 
 .Workspace {
-  @apply w-full h-auto flex flex-col justify-between;
+  @apply flex h-auto w-full flex-col justify-between;
 }
 
 .File {
-  @apply flex items-center justify-between cursor-pointer hover:bg-orange-700;
+  @apply flex cursor-pointer items-center justify-between hover:bg-orange-700;
 }
 
 .Scripts,
 .Workspace {
-  @apply bg-neutral-900 p-4 my-4 text-neutral-50 w-full box-border rounded;
+  @apply my-4 box-border w-full rounded bg-neutral-900 p-4 text-neutral-50;
 }
 
 .File,
 .Script {
-  @apply p-2.5 my-2.5 bg-neutral-900 w-auto box-border rounded border-2 border-neutral-500;
+  @apply my-2.5 box-border w-auto rounded border-2 border-neutral-500 bg-neutral-900 p-2.5;
 }
 
 .Scripts,
 .Workspace {
-  @apply text-white bg-neutral-900 border border-neutral-500;
+  @apply border border-neutral-500 bg-neutral-900 text-white;
 }
 
 .UploadButton {
-  @apply my-4 bg-orange-600 h-9 border-none text-neutral-900 text-center inline-block transition-all cursor-pointer outline-none py-2.5 px-6 rounded-xl shadow-md hover:bg-orange-700;
+  @apply my-4 inline-block h-9 cursor-pointer rounded-xl border-none bg-orange-600 px-6 py-2.5 text-center text-neutral-900 shadow-md outline-none transition-all hover:bg-orange-700;
 }
 
 .DownloadButton {
-  @apply my-4 bg-orange-600 h-9 border-none text-neutral-900 text-center inline-block transition-all cursor-pointer outline-none py-2.5 px-6 rounded-xl shadow-md hover:bg-orange-700;
+  @apply my-4 inline-block h-9 cursor-pointer rounded-xl border-none bg-orange-600 px-6 py-2.5 text-center text-neutral-900 shadow-md outline-none transition-all hover:bg-orange-700;
 }
 
 .Footer {
-  @apply flex flex-col gap-4 my-8 w-10/12 box-border;
+  @apply my-8 box-border flex w-10/12 flex-col gap-4;
 }
 
 .Footer a {
@@ -55,7 +55,7 @@ h3 {
 }
 
 .Footer__Links {
-  @apply text-white opacity-80 text-lg flex justify-between cursor-pointer transition-all hover:opacity-100;
+  @apply flex cursor-pointer justify-between text-lg text-white opacity-80 transition-all hover:opacity-100;
 }
 
 .Polywrap {

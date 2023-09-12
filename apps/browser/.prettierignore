@@ -3,3 +3,9 @@
 **/*.jsx
 **/*.ts
 **/*.tsx
+**/*.json
+
+node_modules
+build
+workspace
+chats

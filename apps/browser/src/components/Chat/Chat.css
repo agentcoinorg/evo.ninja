@@ -1,9 +1,9 @@
 .Chat {
-  @apply w-4/5 bg-neutral-950 text-neutral-50 flex flex-col h-full border border-neutral-700;
+  @apply flex h-full w-4/5 flex-col border border-neutral-700 bg-neutral-950 text-neutral-50;
 }
 
 .DisclaimerRibbon {
-  @apply bg-black text-white text-center text-xs p-2.5 absolute w-4/5 bottom-0 z-50 rounded-t-lg border-2 border-red-500 flex justify-around items-center;
+  @apply absolute bottom-0 z-50 flex w-4/5 items-center justify-around rounded-t-lg border-2 border-red-500 bg-black p-2.5 text-center text-xs text-white;
 }
 
 .ButtonWrapper {
@@ -11,23 +11,23 @@
 }
 
 .CloseDisclaimer {
-  @apply cursor-pointer py-2.5 px-5 font-bold text-red-500;
+  @apply cursor-pointer px-5 py-2.5 font-bold text-red-500;
 }
 
 .CloseWithoutTracking {
-  @apply cursor-pointer py-2.5 px-5 font-bold text-white;
+  @apply cursor-pointer px-5 py-2.5 font-bold text-white;
 }
 
 .Chat__Export {
-  @apply cursor-pointer text-2xl text-orange-600 transition-colors m-2.5 absolute top-2.5 right-2.5 hover:text-orange-700;
+  @apply absolute right-2.5 top-2.5 m-2.5 cursor-pointer text-2xl text-orange-600 transition-colors hover:text-orange-700;
 }
 
 .Messages {
-  @apply text-left p-5 overflow-auto flex-1 border-b border-b-neutral-700;
+  @apply flex-1 overflow-auto border-b border-b-neutral-700 p-5 text-left;
 }
 
 .Message {
-  @apply py-2.5 px-4 my-1 bg-neutral-900 rounded text-neutral-50;
+  @apply my-1 rounded bg-neutral-900 px-4 py-2.5 text-neutral-50;
 }
 
 .Message.user {
@@ -35,12 +35,11 @@
 }
 
 .Message.evo {
-  @apply bg-neutral-900 text-neutral-50 border border-blue-100;
+  @apply border border-blue-100 bg-neutral-900 text-neutral-50;
 }
 
-
 .Message {
-  @apply py-2.5 px-4 my-1 bg-neutral-900 rounded text-neutral-50 border border-transparent transition-all hover:border-orange-600;
+  @apply my-1 rounded border border-transparent bg-neutral-900 px-4 py-2.5 text-neutral-50 transition-all hover:border-orange-600;
 }
 
 .Message.active {
@@ -56,15 +55,15 @@
 }
 
 .SendMessage input {
-  @apply flex-1 p-2.5 mr-2.5 border border-neutral-400 rounded bg-neutral-900 text-neutral-50;
+  @apply mr-2.5 flex-1 rounded border border-neutral-400 bg-neutral-900 p-2.5 text-neutral-50;
 }
 
 .FeedbackContainer {
-  @apply flex flex-col items-center my-4;
+  @apply my-4 flex flex-col items-center;
 }
 
 .FeedbackTitle {
-  @apply text-xl mb-2;
+  @apply mb-2 text-xl;
 }
 
 .FeedbackButtons {
@@ -79,31 +78,30 @@
   @apply text-orange-600;
 }
 
-
 .DetailedFeedback a {
-  @apply text-orange-600 mt-2.5 inline-block underline;
+  @apply mt-2.5 inline-block text-orange-600 underline;
 }
 
 .SendMessage button {
-  @apply bg-orange-600 text-white border-none p-2.5 cursor-pointer rounded-xl transition-all hover:bg-orange-700;
+  @apply cursor-pointer rounded-xl border-none bg-orange-600 p-2.5 text-white transition-all hover:bg-orange-700;
 }
 
 .Chat__Input {
-  @apply flex-1 p-2.5 mr-2.5 border border-neutral-400 rounded bg-neutral-900 text-neutral-50 outline-none transition-all;
+  @apply mr-2.5 flex-1 rounded border border-neutral-400 bg-neutral-900 p-2.5 text-neutral-50 outline-none transition-all;
 }
 
 .Chat__Container {
-  @apply flex m-5 items-center justify-center;
+  @apply m-5 flex items-center justify-center;
 }
 
 .Chat__Btn {
-  @apply bg-orange-600 h-12 border-none text-neutral-950 text-center inline-block transition-all cursor-pointer outline-none py-2.5 px-5 rounded-xl shadow-md hover:bg-orange-700;
+  @apply inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-700;
 }
 
 .Message {
-  @apply bg-neutral-900
+  @apply bg-neutral-900;
 }
 
 .Spinner {
-  @apply border-4 border-black/10 w-9 h-9 rounded-full border-l-red-500 animate-spin;
+  @apply h-9 w-9 animate-spin rounded-full border-4 border-black/10 border-l-red-500;
 }

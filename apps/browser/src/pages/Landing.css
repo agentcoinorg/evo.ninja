@@ -1,17 +1,17 @@
 .Landing {
-  @apply text-center text-white bg-neutral-900/70;
+  @apply bg-neutral-900/70 text-center text-white;
 }
 
 .Landing-header {
-  @apply min-h-screen flex items-center justify-center text-3xl font-semibold text-white;
+  @apply flex min-h-screen items-center justify-center text-3xl font-semibold text-white;
 }
 
 .Header-Links {
-  @apply absolute flex top-0 right-0 h-16 mr-12 gap-6 items-center;
+  @apply absolute right-0 top-0 mr-12 flex h-16 items-center gap-6;
 }
 
 .Header-Links a {
-  @apply h-10 w-10 filter-none hover:filter contrast-50;
+  @apply h-10 w-10 contrast-50 filter-none hover:filter;
 }
 
 .Header-Links a img {
@@ -19,13 +19,13 @@
 }
 
 .Landing button {
-  @apply px-5 py-2.5 text-white bg-slate-900 border-none rounded cursor-pointer hover:bg-slate-700 transition-colors;
+  @apply cursor-pointer rounded border-none bg-slate-900 px-5 py-2.5 text-white transition-colors hover:bg-slate-700;
 }
 
 .Hero {
-  @apply flex flex-col gap-4 items-center;
+  @apply flex flex-col items-center gap-4;
 }
 
 .Landing-background {
-  @apply animate-landing-bg text-neutral-400 text-center bg-landing-bg bg-repeat;
+  @apply animate-landing-bg bg-landing-bg bg-repeat text-center text-neutral-400;
 }

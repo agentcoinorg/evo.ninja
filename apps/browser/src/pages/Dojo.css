@@ -1,21 +1,21 @@
 .Dojo {
-  @apply flex bg-neutral-800 h-full animate-landing-bg text-neutral-400 text-center bg-landing-bg bg-repeat;
+  @apply flex h-full animate-landing-bg bg-neutral-800 bg-landing-bg bg-repeat text-center text-neutral-400;
 }
 
 .Sidebar {
-  @apply text-neutral-50 bg-neutral-900/80 border-r-2 border-r-neutral-700;
+  @apply border-r-2 border-r-neutral-700 bg-neutral-900/80 text-neutral-50;
 }
 
 .Chat {
-  @apply w-4/5 bg-neutral-800 text-white flex flex-col h-full;
+  @apply flex h-full w-4/5 flex-col bg-neutral-800 text-white;
 }
 
 .Messages {
-  @apply p-5 overflow-scroll flex-1;
+  @apply flex-1 overflow-scroll p-5;
 }
 
 .Message {
-  @apply p-2.5 m-1 rounded;
+  @apply m-1 rounded p-2.5;
 }
 
 .Message.user {
@@ -30,25 +30,25 @@
 }
 
 .SendMessage input {
-  @apply flex-1 p-2.5 mr-2.5;
+  @apply mr-2.5 flex-1 p-2.5;
 }
 
 .SendMessage button {
-  @apply bg-neutral-400 text-white border-none p-2.5 cursor-pointer;
+  @apply cursor-pointer border-none bg-neutral-400 p-2.5 text-white;
 }
 
 .Scripts,
 .Workspace {
-  @apply bg-white rounded-lg p-2.5 m-2.5 text-black w-4/5;
+  @apply m-2.5 w-4/5 rounded-lg bg-white p-2.5 text-black;
 }
 
 .File,
 .Script {
-  @apply rounded p-1 my-1 mx-0 bg-neutral-50;
+  @apply mx-0 my-1 rounded bg-neutral-50 p-1;
 }
 
 .drop-hover {
-  @apply bg-neutral-50 border-2 border-dashed border-blue-200;
+  @apply border-2 border-dashed border-blue-200 bg-neutral-50;
 }
 
 .inner-dropzone {
