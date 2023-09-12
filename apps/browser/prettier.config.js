@@ -10,6 +10,7 @@ const config = {
   bracketSpacing: true,
   arrowParens: "always",
   endOfLine: "auto",
+  tailwindFunctions: ['clsx'],
   plugins: ['prettier-plugin-tailwindcss'],
 };
 

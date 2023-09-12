@@ -1,5 +1,5 @@
 .Chat {
-  @apply flex h-full w-4/5 flex-col border border-neutral-700 bg-neutral-950 text-neutral-50;
+  @apply flex h-full w-full flex-col border border-neutral-700 bg-neutral-950 text-neutral-50;
 }
 
 .DisclaimerRibbon {
@@ -91,7 +91,7 @@
 }
 
 .Chat__Container {
-  @apply m-5 flex items-center justify-center;
+  @apply p-4 flex gap-4 items-center justify-center;
 }
 
 .Chat__Btn {

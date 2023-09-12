@@ -8,6 +8,7 @@ import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
 import { faThumbsUp, faThumbsDown, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 
 import "./Chat.css";
+import MenuIcon from "../MenuIcon";
 
 export interface ChatMessage {
   title: string;
@@ -20,10 +21,11 @@ export interface ChatProps {
   evo: Evo;
   onMessage: (message: ChatMessage) => void;
   messages: ChatMessage[];
-  goalEnded: boolean
+  goalEnded: boolean;
+  onSidebarToggleClick: () => void;
 }
 
-const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSidebarToggleClick }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
   const [paused, setPaused] = useState<boolean>(false);
@@ -268,6 +270,9 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
             </div>
           </div>
         )}
+        <div className="cursor-pointer" onClick={onSidebarToggleClick}>
+          <MenuIcon></MenuIcon>
+        </div>
         <input
           type="text"
           value={message}

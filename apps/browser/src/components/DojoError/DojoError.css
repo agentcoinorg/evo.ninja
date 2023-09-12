@@ -1,5 +1,5 @@
 .DojoError {
-  @apply flex h-full w-4/5 flex-col border border-neutral-700 bg-neutral-900 text-neutral-50;
+  @apply flex h-full flex-col border border-neutral-700 bg-neutral-900 text-neutral-50;
 }
 
 .Error {

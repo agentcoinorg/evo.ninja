@@ -4,15 +4,15 @@ h3 {
 }
 
 .Sidebar {
-  @apply box-border flex w-1/5 flex-col items-center overflow-auto p-4;
+  @apply box-border flex w-full h-full flex-col items-center overflow-auto p-4;
 }
 
 .Content {
-  @apply mt-6 flex h-auto w-full flex-col items-center;
+  @apply flex h-auto w-full flex-col items-center;
 }
 
 .Logo {
-  @apply mb-5 w-full;
+  @apply mb-5 w-full max-w-sm;
 }
 
 .Workspace {
