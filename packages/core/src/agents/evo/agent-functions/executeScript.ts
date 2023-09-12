@@ -109,7 +109,7 @@ export const executeScript: AgentFunction = {
           ? result.value.error == null
             ? context.client.jsPromiseOutput.ok
               ? ResultOk(JSON.stringify(context.client.jsPromiseOutput.value))
-              : ResultErr(JSON.stringify(context.client.jsPromiseOutput.error))
+              : ResultErr(context.client.jsPromiseOutput.error)
             : ResultErr(result.value.error)
           : ResultErr(result.error?.toString() ?? "");
       } catch (e: any) {

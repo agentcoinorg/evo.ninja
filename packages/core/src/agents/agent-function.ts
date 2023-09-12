@@ -31,25 +31,27 @@ export interface AgentChatMessage {
 
 export interface AgentFunction {
   definition: any;
-  buildChatMessage(args: any, result: AgentFunctionResult): AgentChatMessage;
+  buildChatMessage(args: AgentFunctionResult, result: AgentFunctionResult): AgentChatMessage;
   buildExecutor(
     context: AgentContext
-  ): (options: any) => Promise<any>;
+  ): (options: any) => Promise<AgentFunctionResult>;
 }
+
+export type ExecuteAgentFunctionResult = Result<AgentChatMessage, string>;
 
 export type ExecuteAgentFunction = (
   name: string | undefined,
   args: string | undefined,
   context: AgentContext,
   agentFunctions: AgentFunction[],
-) => Promise<Result<AgentChatMessage, string>>;
+) => Promise<ExecuteAgentFunctionResult>;
 
 export const executeAgentFunction: ExecuteAgentFunction = async (
-  name: string | undefined,
-  args: string | undefined,
-  context: AgentContext,
-  agentFunctions: AgentFunction[],
-): Promise<Result<AgentChatMessage, string>> => {
+  name,
+  args,
+  context,
+  agentFunctions,
+) => {
   const parseResult = processFunctionAndArgs(name, args, agentFunctions);
 
   if (!parseResult.ok) {
@@ -59,8 +61,10 @@ export const executeAgentFunction: ExecuteAgentFunction = async (
   const [fnArgs, func] = parseResult.value;
 
   const executor = func.buildExecutor(context);
-
   const result = await executor(fnArgs);
+  if (!result.ok) {
+    return ResultErr(result.error.message)
+  }
 
   return ResultOk(func.buildChatMessage(fnArgs, result));
 }
