@@ -207,7 +207,9 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
       <div className="Messages">
       {messages.map((msg, index) => (
           <div key={index} className={`MessageContainer ${msg.user}`}>
-            <div className="SenderName">{msg.user.toUpperCase()}</div>
+            {index === 0 || messages[index - 1].user !== msg.user ? (
+              <div className="SenderName">{msg.user.toUpperCase()}</div>
+            ) : null}
             <div 
               className={`Message ${msg.user} ${clickedMsgIndex === index ? "active" : ""}`} 
               onClick={() => setClickedMsgIndex(index === clickedMsgIndex ? null : index)}
