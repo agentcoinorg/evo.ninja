@@ -68,7 +68,7 @@ export class Evo implements Agent {
     }
   }
 
-  public setTimeout(time: number) {
-    this.timeout = time;
+  public setTimeout(milliseconds: number) {
+    this.timeout = milliseconds;
   }
 }

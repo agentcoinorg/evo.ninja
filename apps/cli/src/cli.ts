@@ -14,6 +14,7 @@ import readline from "readline";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import { PluginPackage } from "@polywrap/plugin-js";
+import { program } from "commander";
 
 dotenv.config({
   path: path.join(__dirname, "../../../.env")
@@ -115,16 +116,17 @@ export async function cli(): Promise<void> {
 
   await logger.logHeader();
 
-  let goal: string | undefined = process.argv[2];
+  program
+    .option("-t, --timeout <number>")
+    .option("-g , --goal <string>")
+    .parse()
 
-  if (!goal) {
-    goal = await logger.prompt("Enter your goal: ");
-  }
+  const options = program.opts()
 
-  let timeout: string | undefined = process.argv[3];
+  let goal = options.goal ?? await logger.prompt("Enter your goal: ");
 
-  if (timeout) {
-    evo.setTimeout(+timeout);
+  if (options.timeout) {
+    evo.setTimeout(+options.timeout);
   }
 
   let iterator = evo.run(goal);
