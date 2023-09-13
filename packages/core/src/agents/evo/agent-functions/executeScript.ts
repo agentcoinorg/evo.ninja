@@ -61,7 +61,7 @@ export const executeScript: AgentFunction = {
         }
 
         let args: any = undefined;
-        args = options.arguments.replace(/\{\{/g, "\\{\\{").replace(/\}\}/g, "\\}\\}");
+        args = options.arguments ? options.arguments.replace(/\{\{/g, "\\{\\{").replace(/\}\}/g, "\\}\\}") : "{}";
         try {
 
           args = JSON5.parse(options.arguments);
@@ -84,7 +84,7 @@ export const executeScript: AgentFunction = {
             }
           }
         } catch {
-          return ResultErr(`Invalid arguments provided for script ${options.namespace}: '${options.arguments}' is not valid JSON!`);
+          return ResultErr(`Invalid arguments provided for script ${options.namespace}: '${options.arguments ?? ""}' is not valid JSON!`);
         }
 
         const globals: JsEngine_GlobalVar[] =
