@@ -13,7 +13,7 @@ import { ResultErr } from "@polywrap/result";
 export class Evo implements Agent {
   private client: WrapClient;
   private globals: Record<string, any> = {};
-  private timeout = 1_200_000; // Default to 20 minutes in milliseconds
+  private timeout = 1_200; // Default to 20 minutes in seconds
 
   constructor(
     private readonly workspace: Workspace,
@@ -68,7 +68,8 @@ export class Evo implements Agent {
     }
   }
 
-  public setTimeout(milliseconds: number) {
+  public setTimeout(seconds: number) {
+    const milliseconds = seconds * 1_000
     this.timeout = milliseconds;
   }
 }
