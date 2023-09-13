@@ -92,6 +92,10 @@ export async function cli(): Promise<void> {
       logger.success("Agent: " + args.message);
       return "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.\nIf you think you've failed, execute onGoalFailed.";
     },
+    "onTimeout": async (args: any) => {
+      logger.error("Agent has timeout")
+      process.exit(0);
+    },
     "ask": async (args: any) => {
       logger.error("Agent: " + args.message);
       const response = await prompt("");
@@ -115,6 +119,12 @@ export async function cli(): Promise<void> {
 
   if (!goal) {
     goal = await logger.prompt("Enter your goal: ");
+  }
+
+  let timeout: string | undefined = process.argv[3];
+
+  if (timeout) {
+    evo.setTimeout(+timeout);
   }
 
   let iterator = evo.run(goal);

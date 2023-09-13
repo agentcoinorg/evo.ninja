@@ -7,12 +7,13 @@ import { LlmApi, Chat } from "../../llm";
 import { WrapClient } from "../../wrap";
 import { Scripts } from "../../Scripts";
 import { InMemoryWorkspace, Workspace, Logger } from "../../sys";
-import { IWrapPackage } from "@polywrap/client-js";
+import { IWrapPackage, Uri } from "@polywrap/client-js";
 import { ResultErr } from "@polywrap/result";
 
 export class Evo implements Agent {
   private client: WrapClient;
   private globals: Record<string, any> = {};
+  private timeout = 1_200_000; // Default to 20 minutes in milliseconds
 
   constructor(
     private readonly workspace: Workspace,
@@ -38,6 +39,16 @@ export class Evo implements Agent {
       return new ScriptWriter(workspace, this.scripts, this.llm, chat, this.logger);
     };
 
+    setTimeout(async () => {
+      const wrapper = await this.agentPackage.createWrapper();
+      if (wrapper.ok) {
+        wrapper.value.invoke(
+          { method: "onTimeout", uri: Uri.from("plugin/agent") },
+          this.client
+        );
+      }
+    }, this.timeout);
+
     try {
       return yield* loop(
         goal,
@@ -55,5 +66,9 @@ export class Evo implements Agent {
       this.logger.error(err);
       return ResultErr("Unrecoverable error encountered.");
     }
+  }
+
+  public setTimeout(time: number) {
+    this.timeout = time;
   }
 }
