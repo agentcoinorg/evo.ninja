@@ -1,6 +1,6 @@
 import { ResultErr, ResultOk } from "@polywrap/result";
 import { AgentFunction, AgentFunctionResult, AgentChatMessage } from "@evo-ninja/agent-utils";
-import { ScriptWriter } from "@evo-ninja/agent-script-writer";
+import { ScriptWriter } from "@evo-ninja/script-writer-agent";
 import { AgentContext } from "../AgentContext";
 import { OTHER_EXECUTE_FUNCTION_OUTPUT, FUNCTION_CALL_FAILED } from "../prompts";
 

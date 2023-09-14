@@ -1,5 +1,5 @@
 import { agentFunctions } from "./agent-functions";
-import { ScriptWriter } from "@evo-ninja/agent-script-writer";
+import { ScriptWriter } from "@evo-ninja/script-writer-agent";
 import { IWrapPackage } from "@polywrap/client-js";
 import { ResultErr } from "@polywrap/result";
 import { IAgent, Workspace, LlmApi, Chat, Logger, StepOutput, RunResult, InMemoryWorkspace, executeAgentFunction, basicFunctionCallLoop } from "@evo-ninja/agent-utils";
