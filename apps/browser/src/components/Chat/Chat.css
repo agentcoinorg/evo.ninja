@@ -23,32 +23,12 @@
 }
 
 .SamplePrompts {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  position: absolute;
-  bottom: 0;
-  width: 80%;
-  padding: 10px;
-  margin-bottom: 130px;
+  @apply grid grid-rows-2 absolute bottom-0 w-full p-2.5 mb-32;
 }
 
 .SamplePromptCard {
-  background-color: rgb(30, 30, 30);
-  color: #f5f5f5;
-  border: 1px solid gray;
-  border-radius: 12px;
-  padding: 10px;
-  margin: 5px;
-  cursor: pointer;
-  transition: all 0.3s ease-in-out;  
-  text-align: left;
-  font-size: 12px;
+  @apply bg-neutral-800 text-neutral-50 border border-neutral-500 rounded-xl p-2.5 m-1 cursor-pointer transition-all text-left text-xs hover:border-red-500;
 }
-
-.SamplePromptCard:hover {
-  border-color: red;
-}
-
 
 .Messages {
   @apply flex-1 overflow-auto border-b border-b-neutral-700 p-5 text-left;
