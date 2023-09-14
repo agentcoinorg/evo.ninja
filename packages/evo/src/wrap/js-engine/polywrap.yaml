@@ -1,0 +1,6 @@
+format: 0.4.0
+project:
+  name: js-engine-ts
+  type: app/typescript
+source:
+  schema: ./polywrap.graphql
