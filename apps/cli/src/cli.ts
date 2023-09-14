@@ -93,16 +93,27 @@ export async function cli(): Promise<void> {
       logger.success("Agent: " + args.message);
       return "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.\nIf you think you've failed, execute onGoalFailed.";
     },
-    "onTimeout": async (args: any) => {
-      logger.error("Agent has timeout")
-      process.exit(0);
-    },
     "ask": async (args: any) => {
       logger.error("Agent: " + args.message);
       const response = await prompt("");
       return "User: " + response;
     },
   }));
+
+  program
+    .argument("[goal]", "Goal to be achieved")
+    .option("-t, --timeout <number>")
+    .parse();
+
+  const options = program.opts();
+
+  const timeout = {
+    callback: () => {
+      logger.error("Agent has timeout");
+      process.exit(0);
+    },
+    seconds: options.timeout
+  };
 
   // Create Evo
   const evo = new Evo(
@@ -111,22 +122,16 @@ export async function cli(): Promise<void> {
     llm,
     chat,
     logger,
-    agentPackage
+    agentPackage,
+    timeout
   );
 
   await logger.logHeader();
 
-  program
-    .option("-t, --timeout <number>")
-    .option("-g , --goal <string>")
-    .parse()
+  let goal: string | undefined = program.args[0]
 
-  const options = program.opts()
-
-  let goal = options.goal ?? await logger.prompt("Enter your goal: ");
-
-  if (options.timeout) {
-    evo.setTimeout(+options.timeout);
+  if (!goal) {
+    goal = await logger.prompt("Enter your goal: ");
   }
 
   let iterator = evo.run(goal);
