@@ -26,6 +26,13 @@ export interface ChatProps {
 }
 
 const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSidebarToggleClick }: ChatProps) => {
+  const samplePrompts = [
+    "Fetch the price of ethereum, bitcoin and dogecoin and save them in a file named crypto.csv",
+    "Calculate the factorial of 38 and save it to a file factorial.txt",
+    "Write a paper about toast and save it as toast.md",
+    "How do I cook spaghetti? Write down the recipe to spaghetti.txt",
+  ];
+  
   const [message, setMessage] = useState<string>("");
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
   const [paused, setPaused] = useState<boolean>(false);
@@ -44,6 +51,8 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
 
   const [hasUpvoted, setHasUpvoted] = useState<boolean>(false);
   const [hasDownvoted, setHasDownvoted] = useState<boolean>(false);
+
+  const [showPrompts, setShowPrompts] = useState<boolean>(true);
 
   const pausedRef = useRef(paused);
   useEffect(() => {
@@ -121,6 +130,13 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
     localStorage.setItem('trackUser', trackUser.toString());
   }, [trackUser]);
 
+  useEffect(() => {
+    if (message !== "") {
+      handleSend();
+      setShowPrompts(false); 
+
+    }
+  }, [message]);
   const handleCloseDisclaimer = () => {
     setShowDisclaimer(false);
     setTrackUser(true);  // User accepted disclaimer, enable tracking
@@ -131,6 +147,9 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
     setTrackUser(false); // User did not accept disclaimer, disable tracking
   };
 
+  const handleSamplePromptClick = async (prompt: string) => {
+    setMessage(prompt);  // Set the message
+  };
   const handleSend = async () => {
     onMessage({
       title: message,
@@ -206,10 +225,26 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
       <div >
         <FontAwesomeIcon className="Chat__Export" icon={faMarkdown} onClick={() => exportChatHistory('md')} />
       </div>
+      {showPrompts && (
+        <div className="SamplePrompts">
+          {samplePrompts.map((prompt, index) => (
+            <div 
+              key={index} 
+              className="SamplePromptCard" 
+              onClick={() => handleSamplePromptClick(prompt)}
+            >
+              {prompt}
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="Messages">
       {messages.map((msg, index) => (
           <div key={index} className={`MessageContainer ${msg.user}`}>
-            <div className="SenderName">{msg.user.toUpperCase()}</div>
+            {index === 0 || messages[index - 1].user !== msg.user ? (
+              <div className="SenderName">{msg.user.toUpperCase()}</div>
+            ) : null}
             <div 
               className={`Message ${msg.user} ${clickedMsgIndex === index ? "active" : ""}`} 
               onClick={() => setClickedMsgIndex(index === clickedMsgIndex ? null : index)}
