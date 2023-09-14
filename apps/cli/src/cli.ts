@@ -1,19 +1,12 @@
 import { FileSystemWorkspace, FileLogger } from "./sys";
 
-import {
-  Evo,
-  Scripts,
-  Env,
-  OpenAI,
-  Chat,
-  ConsoleLogger,
-  Logger
-} from "@evo-ninja/core";
 import dotenv from "dotenv";
 import readline from "readline";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import { PluginPackage } from "@polywrap/plugin-js";
+import { Chat, ConsoleLogger, Env, Logger, OpenAI } from "@evo-ninja/agent-utils";
+import { Scripts, Evo } from "@evo-ninja/evo-agent";
 
 dotenv.config({
   path: path.join(__dirname, "../../../.env")
@@ -101,12 +94,12 @@ export async function cli(): Promise<void> {
 
   // Create Evo
   const evo = new Evo(
-    userWorkspace,
-    scripts,
     llm,
     chat,
     logger,
-    agentPackage
+    userWorkspace,
+    agentPackage,
+    scripts,
   );
 
   await logger.logHeader();

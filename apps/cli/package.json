@@ -14,7 +14,8 @@
     "test:script": "ts-node ./src/__tests__/runners/script-js.ts"
   },
   "dependencies": {
-    "@evo-ninja/core": "0.1.0",
+    "@evo-ninja/evo-agent": "0.1.0",
+    "@evo-ninja/agent-utils": "~0.1.0",
     "@polywrap/client-js": "~0.12.0",
     "chalk": "^4.1.2",
     "clui": "~0.3.6",

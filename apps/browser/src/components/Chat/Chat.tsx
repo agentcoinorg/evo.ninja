@@ -1,5 +1,5 @@
 import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef } from "react";
-import { Evo } from "@evo-ninja/core";
+import { Evo } from "@evo-ninja/evo-agent";
 import ReactMarkdown from "react-markdown";
 
 import { trackMessageSent, trackThumbsFeedback} from '../googleAnalytics';
