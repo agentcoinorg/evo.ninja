@@ -8,6 +8,7 @@ import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
 import { faThumbsUp, faThumbsDown, faChevronDown, faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 
 import "./Chat.css";
+import MenuIcon from "../MenuIcon";
 
 export interface ChatMessage {
   title: string;
@@ -20,18 +21,18 @@ export interface ChatProps {
   evo: Evo;
   onMessage: (message: ChatMessage) => void;
   messages: ChatMessage[];
-  goalEnded: boolean
+  goalEnded: boolean;
+  onSidebarToggleClick: () => void;
 }
 
-const samplePrompts = [
-  "Fetch the price of ethereum, bitcoin and dogecoin and save them in a file named crypto.csv",
-  "Calculate the factorial of 38 and save it to a file factorial.txt",
-  "Write a paper about toast and save it as toast.md",
-  "How do I cook spaghetti? Write down the recipe to spaghetti.txt",
-];
-
-
-const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSidebarToggleClick }: ChatProps) => {
+  const samplePrompts = [
+    "Fetch the price of ethereum, bitcoin and dogecoin and save them in a file named crypto.csv",
+    "Calculate the factorial of 38 and save it to a file factorial.txt",
+    "Write a paper about toast and save it as toast.md",
+    "How do I cook spaghetti? Write down the recipe to spaghetti.txt",
+  ];
+  
   const [message, setMessage] = useState<string>("");
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
   const [paused, setPaused] = useState<boolean>(false);
@@ -307,6 +308,9 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
             </div>
           </div>
         )}
+        <div className="cursor-pointer" onClick={onSidebarToggleClick}>
+          <MenuIcon></MenuIcon>
+        </div>
         <input
           type="text"
           value={message}

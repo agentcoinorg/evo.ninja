@@ -1,46 +1,7 @@
 .File__Modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 75%;
-  height: 75%;
-  /* max-width: 1500px;
-  max-height: 900px; */
-  background-color: #171717;
-  color: #d9d9d9;
-  font-size: 1rem;
-  border: 2px solid #4b4b50;
-  box-sizing: border-box;
-  display: flex;
-  outline: none;
-  flex-direction: column;
-  padding: 2rem;
-  overflow-wrap: break-word;
-  display: inline-block;
-  word-wrap: break-word;
-  word-break: break-all;
-  overflow-y: scroll;
+  @apply fixed left-1/2 top-1/2 box-border inline-block h-3/4 w-3/4 -translate-x-1/2 -translate-y-1/2 overflow-y-scroll break-words break-all border-2 border-neutral-700 bg-neutral-900 p-8 text-neutral-100 outline-none;
 }
 
 .File__Btn {
-  background-color: #ff572e;
-  height: 3.25rem;
-  width: 6rem;
-  border: none;
-  color: #1f1f1f;
-  text-align: center;
-  display: inline-block;
-  font-size: 16px;
-  transition: all 0.3s ease-in-out;
-  cursor: pointer;
-  outline: none;
-  padding: 10px 24px;
-  border-radius: 12px;
-  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
-  &:hover {
-    background-color: #ff4516;
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.24),
-      0 2px 10px 0 rgba(0, 0, 0, 0.19);
-  }
+  @apply inline-block h-12 w-24 cursor-pointer rounded-xl border-none bg-orange-600 px-6 py-2.5 text-center text-neutral-900 shadow-md outline-none transition-all hover:bg-orange-700;
 }

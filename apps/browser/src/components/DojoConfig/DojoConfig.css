@@ -1,123 +1,19 @@
 .DojoConfig {
-  display: flex;
-  height: 100%; /* Add this to take full height */
+  @apply absolute inset-0 z-50 bg-neutral-900/80;
 }
 
 .DojoConfig-container {
-  position: fixed;
-  color: #f5f5f5;
-  background: #222222;
-  padding: 50px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-@-webkit-keyframes bg-scrolling-reverse {
-  100% {
-    background-position: 0 250px;
-  }
-}
-@-moz-keyframes bg-scrolling-reverse {
-  100% {
-    background-position: 0 250px;
-  }
-}
-@-o-keyframes bg-scrolling-reverse {
-  100% {
-    background-position: 0 250px;
-  }
-}
-@keyframes bg-scrolling-reverse {
-  100% {
-    background-position: 0 250px;
-  }
-}
-@-webkit-keyframes bg-scrolling {
-  0% {
-    background-position: 0 250px;
-  }
-}
-@-moz-keyframes bg-scrolling {
-  0% {
-    background-position: 0 250px;
-  }
-}
-@-o-keyframes bg-scrolling {
-  0% {
-    background-position: 0 250px;
-  }
-}
-@keyframes bg-scrolling {
-  0% {
-    background-position: 0 250px;
-  }
-}
-
-.DojoConfig {
-  color: #999;
-  font: 400 16px/1.5 exo, ubuntu, "segoe ui", helvetica, arial, sans-serif;
-  text-align: center;
-  /* img size is 25x25 */
-  background: url("/public/wallpaper-bw.png") repeat 0 0 / 461px 250px;
-  -webkit-animation: bg-scrolling-reverse 5s infinite;
-  /* Safari 4+ */
-  -moz-animation: bg-scrolling-reverse 5s infinite;
-  /* Fx 5+ */
-  -o-animation: bg-scrolling-reverse 5s infinite;
-  /* Opera 12+ */
-  animation: bg-scrolling-reverse 5s infinite;
-  /* IE 10+ */
-  -webkit-animation-timing-function: linear;
-  -moz-animation-timing-function: linear;
-  -o-animation-timing-function: linear;
-  animation-timing-function: linear;
-}
-
-.DojoConfig::before {
-  font-size: 8rem;
-  font-weight: 100;
-  font-style: normal;
+  @apply fixed left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col gap-4 rounded-lg bg-neutral-900 p-12 text-neutral-50 w-96;
 }
 
 .DojoConfig__Btn {
-  background-color: #ff572e;
-  color: white;
-  border: none;
-  padding: 10px;
-  cursor: pointer;
-  border-radius: 12px;
-  transition: all 0.3s ease-in-out;
-  &:hover {
-    background-color: #ff4516;
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.24),
-      0 2px 10px 0 rgba(0, 0, 0, 0.19);
-  }
+  @apply cursor-pointer rounded-xl border-none bg-orange-600 p-2.5 text-white transition-all hover:bg-orange-700;
 }
 
 .DojoConfig__Input {
-  padding: 10px;
-  font-size: 15px;
-  border: 1px solid #888;
-  border-radius: 0.25rem;
-  background-color: #202020;
-  color: #f5f5f5;
-  outline: none;
-  transition: all 0.3s ease-in-out;
+  @apply rounded border border-neutral-600 bg-neutral-950 p-2.5 text-neutral-50 outline-none transition-all;
 }
 
 .DojoConfig__Select {
-  padding: 10px;
-  background-color: #202020;
-  color: #f5f5f5;
-  border-radius: 0.25rem;
-}
-
-.DojoConfig-container h3 {
-  margin-top: 0;
-  margin-bottom: 0;
+  @apply rounded bg-neutral-950 p-2.5 text-neutral-50;
 }
