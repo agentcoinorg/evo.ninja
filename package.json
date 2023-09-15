@@ -20,7 +20,7 @@
     "build:agent-utils": "yarn workspace @evo-ninja/agent-utils run build",
     "build:agents": "yarn build:script-writer && yarn build:evo",
     "build:evo": "yarn workspace @evo-ninja/evo-agent run build",
-    "build:script-writer": "yarn workspace @evo-ninja/script-writer-agent run build",
+    "build:script-writer": "yarn workspace @evo-ninja/js-script-writer-agent run build",
     "build:cli": "yarn workspace evo-ninja run build",
     "build:browser": "yarn workspace @evo-ninja/ui run build"
   },
