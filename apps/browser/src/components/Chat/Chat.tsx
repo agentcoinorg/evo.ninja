@@ -5,9 +5,10 @@ import ReactMarkdown from "react-markdown";
 import { trackMessageSent, trackThumbsFeedback} from '../googleAnalytics';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
-import { faThumbsUp, faThumbsDown, faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { faThumbsUp, faThumbsDown, faChevronDown, faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 
 import "./Chat.css";
+import MenuIcon from "../MenuIcon";
 
 export interface ChatMessage {
   title: string;
@@ -20,10 +21,18 @@ export interface ChatProps {
   evo: Evo;
   onMessage: (message: ChatMessage) => void;
   messages: ChatMessage[];
-  goalEnded: boolean
+  goalEnded: boolean;
+  onSidebarToggleClick: () => void;
 }
 
-const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSidebarToggleClick }: ChatProps) => {
+  const samplePrompts = [
+    "Fetch the price of ethereum, bitcoin and dogecoin and save them in a file named crypto.csv",
+    "Calculate the factorial of 38 and save it to a file factorial.txt",
+    "Write a paper about toast and save it as toast.md",
+    "How do I cook spaghetti? Write down the recipe to spaghetti.txt",
+  ];
+  
   const [message, setMessage] = useState<string>("");
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
   const [paused, setPaused] = useState<boolean>(false);
@@ -42,6 +51,10 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
 
   const [hasUpvoted, setHasUpvoted] = useState<boolean>(false);
   const [hasDownvoted, setHasDownvoted] = useState<boolean>(false);
+  const [showEvoNetPopup, setShowEvoNetPopup] = useState<boolean>(false);
+
+
+  const [showPrompts, setShowPrompts] = useState<boolean>(true);
 
   const pausedRef = useRef(paused);
   useEffect(() => {
@@ -58,6 +71,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
       setPaused(true);
       setEvoRunning(false);
       setSending(false);
+      setShowEvoNetPopup(true);
     }
   }, [goalEnded]);
 
@@ -119,6 +133,13 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
     localStorage.setItem('trackUser', trackUser.toString());
   }, [trackUser]);
 
+  useEffect(() => {
+    if (message !== "") {
+      handleSend();
+      setShowPrompts(false); 
+
+    }
+  }, [message]);
   const handleCloseDisclaimer = () => {
     setShowDisclaimer(false);
     setTrackUser(true);  // User accepted disclaimer, enable tracking
@@ -129,6 +150,9 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
     setTrackUser(false); // User did not accept disclaimer, disable tracking
   };
 
+  const handleSamplePromptClick = async (prompt: string) => {
+    setMessage(prompt);  // Set the message
+  };
   const handleSend = async () => {
     onMessage({
       title: message,
@@ -201,9 +225,23 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
 
   return (
     <div className="Chat">
+      
       <div >
         <FontAwesomeIcon className="Chat__Export" icon={faMarkdown} onClick={() => exportChatHistory('md')} />
       </div>
+      {showPrompts && (
+        <div className="SamplePrompts">
+          {samplePrompts.map((prompt, index) => (
+            <div 
+              key={index} 
+              className="SamplePromptCard" 
+              onClick={() => handleSamplePromptClick(prompt)}
+            >
+              {prompt}
+            </div>
+          ))}
+        </div>
+      )}
       <div className="Messages">
       {messages.map((msg, index) => (
           <div key={index} className={`MessageContainer ${msg.user}`}>
@@ -270,6 +308,9 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
             </div>
           </div>
         )}
+        <div className="cursor-pointer" onClick={onSidebarToggleClick}>
+          <MenuIcon></MenuIcon>
+        </div>
         <input
           type="text"
           value={message}
@@ -316,6 +357,19 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
           </button>
         )}
       </div>
+
+      {showEvoNetPopup && (
+        <div className="PopupCard" onClick={() => window.open('https://forms.gle/Wsjanqiw68DwCLTA9', '_blank')}>
+          <div className="PopupContent">
+            <a href="https://forms.gle/Wsjanqiw68DwCLTA9" target="_blank" rel="noopener noreferrer">
+              <p>Join Evo-Net! <br /> A community where script writers and AI agents collab on AI tools for specialized tasks.</p>
+            </a>
+            <div className="LinkIcon">
+              <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

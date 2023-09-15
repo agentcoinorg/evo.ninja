@@ -130,7 +130,7 @@ export async function cli(): Promise<void> {
     }
 
     if (response.value) {
-      response.value.message && logger.info(response.value.message.title);
+      response.value.message && logger.info(response.value.message.content ?? response.value.message.title);
     }
   }
 }

@@ -13,15 +13,17 @@ import File from "../File/File";
 import "./Sidebar.css";
 import { downloadFilesAsZip } from "../../sys/file/downloadFilesAsZip";
 import { InMemoryFile } from "@nerfzael/memory-fs";
+import CloseIcon from "../CloseIcon";
 
 export interface SidebarProps {
   onSettingsClick: () => void;
   scripts: InMemoryFile[];
   userFiles: InMemoryFile[];
   uploadUserFiles: (files: InMemoryFile[]) => void;
+  onSidebarToggleClick: () => void;
 }
 
-const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles }: SidebarProps) => {
+const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles, onSidebarToggleClick }: SidebarProps) => {
   const groupFilesByName = (files: InMemoryFile[]) => {
     return files.reduce((acc, file) => {
       if (file.path === '.msgs') {
@@ -49,6 +51,11 @@ const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles }: Sideb
   return (
     <div className="Sidebar">
       <div className="Content">
+        <div className="lg:hidden flex justify-end w-full">
+          <div className="cursor-pointer flex gap-2" onClick={onSidebarToggleClick}>
+            <span>Close menu</span><CloseIcon></CloseIcon>
+          </div>
+        </div>
         <img src="avatar-name.png" alt="Main Logo" className="Logo" />
         <div className="Scripts">
         <h3>

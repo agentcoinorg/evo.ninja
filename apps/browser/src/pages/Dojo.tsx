@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 import * as EvoCore from "@evo-ninja/core";
 import { Workspace } from '@evo-ninja/core';
@@ -15,7 +15,9 @@ import Chat, { ChatMessage } from "../components/Chat/Chat";
 import { MarkdownLogger } from '../sys/logger';
 import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
 import { onGoalAchievedScript, onGoalFailedScript, speakScript } from '../scripts';
-import { defaultModel } from '../supportedModels';
+
+import clsx from 'clsx';
+import MenuIcon from "../components/MenuIcon";
 
 function addScript(script: {name: string, definition: string, code: string}, scriptsWorkspace: Workspace) {
   scriptsWorkspace.writeFileSync(`${script.name}.json`, script.definition);
@@ -29,6 +31,8 @@ function Dojo() {
   const [model, setModel] = useState<string | null>(
     localStorage.getItem("openai-model")
   );
+
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [configOpen, setConfigOpen] = useState(false);
   const [dojoError, setDojoError] = useState<unknown | undefined>(undefined);
   const [evo, setEvo] = useState<EvoCore.Evo | undefined>(undefined);
@@ -39,6 +43,12 @@ function Dojo() {
   const [scriptsWorkspace, setScriptsWorkspace] = useState<EvoCore.InMemoryWorkspace | undefined>(undefined);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [goalEnded, setGoalEnded] = useState<boolean>(false);
+
+  useEffect(() => {
+    if(window.innerWidth <= 1024){
+      setSidebarOpen(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!evo || !scriptsWorkspace) {
@@ -202,6 +212,14 @@ function Dojo() {
     }
   }, [apiKey, model])
 
+  const sidebarContainerClassNames = clsx(["w-full lg:w-auto lg:max-w-md relative", {
+    "hidden": !sidebarOpen
+  }]);
+
+  const chatContainerClassNames = clsx(["grow relative", {
+    "max-lg:hidden": sidebarOpen
+  }]);
+
   return (
     <div className="Dojo">
       {(!apiKey || configOpen) &&
@@ -211,11 +229,15 @@ function Dojo() {
           onConfigSaved={onConfigSaved}
         />
       }
-      <Sidebar onSettingsClick={() => setConfigOpen(true)} scripts={scripts} userFiles={userFiles} uploadUserFiles={setUploadedFiles} />
-      <>
-        {evo && <Chat evo={evo} onMessage={onMessage} messages={messages} goalEnded={goalEnded} />}
-        {dojoError && <DojoError error={dojoError} />}
-      </>
+      <div className={sidebarContainerClassNames}>
+        <Sidebar onSidebarToggleClick={() => {setSidebarOpen(!sidebarOpen)}} onSettingsClick={() => setConfigOpen(true)} scripts={scripts} userFiles={userFiles} uploadUserFiles={setUploadedFiles} />
+      </div>
+      <div className={chatContainerClassNames}>
+        <>
+          {evo && <Chat evo={evo} onMessage={onMessage} messages={messages} goalEnded={goalEnded} onSidebarToggleClick={() => {setSidebarOpen(!sidebarOpen)}}/>}
+          {dojoError && <DojoError error={dojoError} />}
+        </>
+      </div>
     </div>
   );
 }
