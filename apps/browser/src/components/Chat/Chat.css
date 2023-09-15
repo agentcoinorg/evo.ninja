@@ -59,6 +59,34 @@
   color: #ff4516;
 }
 
+.SamplePrompts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  position: absolute;
+  bottom: 0;
+  width: 80%;
+  padding: 10px;
+  margin-bottom: 130px;
+}
+
+.SamplePromptCard {
+  background-color: rgb(30, 30, 30);
+  color: #f5f5f5;
+  border: 1px solid gray;
+  border-radius: 12px;
+  padding: 10px;
+  margin: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;  
+  text-align: left;
+  font-size: 12px;
+}
+
+.SamplePromptCard:hover {
+  border-color: red;
+}
+
+
 .Messages {
   text-align: left;
   padding: 20px;
