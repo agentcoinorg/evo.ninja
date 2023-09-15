@@ -5,7 +5,7 @@ import ReactMarkdown from "react-markdown";
 import { trackMessageSent, trackThumbsFeedback} from '../googleAnalytics';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
-import { faThumbsUp, faThumbsDown, faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { faThumbsUp, faThumbsDown, faChevronDown, faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 
 import "./Chat.css";
 
@@ -50,6 +50,8 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
 
   const [hasUpvoted, setHasUpvoted] = useState<boolean>(false);
   const [hasDownvoted, setHasDownvoted] = useState<boolean>(false);
+  const [showEvoNetPopup, setShowEvoNetPopup] = useState<boolean>(false);
+
 
   const [showPrompts, setShowPrompts] = useState<boolean>(true);
 
@@ -68,6 +70,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
       setPaused(true);
       setEvoRunning(false);
       setSending(false);
+      setShowEvoNetPopup(true);
     }
   }, [goalEnded]);
 
@@ -221,6 +224,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
 
   return (
     <div className="Chat">
+      
       <div >
         <FontAwesomeIcon className="Chat__Export" icon={faMarkdown} onClick={() => exportChatHistory('md')} />
       </div>
@@ -237,7 +241,6 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
           ))}
         </div>
       )}
-
       <div className="Messages">
       {messages.map((msg, index) => (
           <div key={index} className={`MessageContainer ${msg.user}`}>
@@ -350,6 +353,19 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded }: Chat
           </button>
         )}
       </div>
+
+      {showEvoNetPopup && (
+        <div className="PopupCard" onClick={() => window.open('https://forms.gle/Wsjanqiw68DwCLTA9', '_blank')}>
+          <div className="PopupContent">
+            <a href="https://forms.gle/Wsjanqiw68DwCLTA9" target="_blank" rel="noopener noreferrer">
+              <p>Join Evo-Net! <br /> A community where script writers and AI agents collab on AI tools for specialized tasks.</p>
+            </a>
+            <div className="LinkIcon">
+              <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
