@@ -1,11 +1,11 @@
 import { agentFunctions } from "./agent-functions";
 import { ResultErr } from "@polywrap/result";
-import { IAgent, Workspace } from "@evo-ninja/agent-utils";
+import { Agent, Workspace } from "@evo-ninja/agent-utils";
 import { LlmApi, Chat, Logger, StepOutput, RunResult, executeAgentFunction, basicFunctionCallLoop } from "@evo-ninja/agent-utils";
 import { AgentContext } from "./AgentContext";
 import { GOAL_PROMPT, INITIAL_PROMP, LOOP_PREVENTION_PROMPT } from "./prompts";
 
-export class ScriptWriter implements IAgent {
+export class ScriptWriter implements Agent {
   private readonly context: AgentContext;
 
   constructor(

@@ -1,7 +1,7 @@
 import { Result } from "@polywrap/result";
 import { AgentChatMessage } from "./agent-function";
 
-export interface IAgent {
+export interface Agent {
   run(
     namespace: string, 
     description: string,

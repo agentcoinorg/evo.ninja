@@ -2,13 +2,13 @@ import { agentFunctions } from "./agent-functions";
 import { ScriptWriter } from "@evo-ninja/js-script-writer-agent";
 import { IWrapPackage } from "@polywrap/client-js";
 import { ResultErr } from "@polywrap/result";
-import { IAgent, Workspace, LlmApi, Chat, Logger, StepOutput, RunResult, InMemoryWorkspace, executeAgentFunction, basicFunctionCallLoop } from "@evo-ninja/agent-utils";
+import { Agent, Workspace, LlmApi, Chat, Logger, StepOutput, RunResult, InMemoryWorkspace, executeAgentFunction, basicFunctionCallLoop } from "@evo-ninja/agent-utils";
 import { AgentContext } from "./AgentContext";
 import { GOAL_PROMPT, INITIAL_PROMP, LOOP_PREVENTION_PROMPT } from "./prompts";
 import { Scripts } from "./Scripts";
 import { WrapClient } from "./wrap";
 
-export class Evo implements IAgent {
+export class Evo implements Agent {
   private readonly context: AgentContext
 
   constructor(
