@@ -1,4 +1,4 @@
-import { ILogger, Message } from "@evo-ninja/core";
+import { ILogger, Message } from "@evo-ninja/agent-utils";
 
 export interface MarkdownLoggerConfig {
   onLog(markdown: string, color?: string): void;
