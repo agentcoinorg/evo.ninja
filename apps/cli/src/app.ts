@@ -10,6 +10,7 @@ import {
   Chat,
   ConsoleLogger,
   Logger,
+  Timeout
 } from "@evo-ninja/agent-utils";
 import dotenv from "dotenv";
 import readline from "readline";
@@ -37,7 +38,7 @@ export interface App {
   consoleLogger: ConsoleLogger;
 }
 
-export function createApp(): App {
+export function createApp(timeout?: Timeout): App {
   const rootDir = path.join(__dirname, "../../../");
 
   const env = new Env(
@@ -115,7 +116,8 @@ export function createApp(): App {
     logger,
     userWorkspace,
     agentPackage,
-    scripts
+    scripts,
+    timeout
   );
 
   return {

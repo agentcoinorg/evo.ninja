@@ -1,12 +1,29 @@
 import { agentFunctions } from "./agent-functions";
+import { AgentContext } from "./AgentContext";
+import { Scripts } from "./Scripts";
+import { WrapClient } from "./wrap";
+import {
+  GOAL_PROMPT,
+  INITIAL_PROMP,
+  LOOP_PREVENTION_PROMPT
+} from "./prompts";
+
+import {
+  Agent,
+  Workspace,
+  LlmApi,
+  Chat,
+  Logger,
+  StepOutput,
+  RunResult,
+  Timeout,
+  InMemoryWorkspace,
+  executeAgentFunction,
+  basicFunctionCallLoop
+} from "@evo-ninja/agent-utils";
 import { ScriptWriter } from "@evo-ninja/js-script-writer-agent";
 import { IWrapPackage } from "@polywrap/client-js";
 import { ResultErr } from "@polywrap/result";
-import { Agent, Workspace, LlmApi, Chat, Logger, StepOutput, RunResult, InMemoryWorkspace, executeAgentFunction, basicFunctionCallLoop } from "@evo-ninja/agent-utils";
-import { AgentContext } from "./AgentContext";
-import { GOAL_PROMPT, INITIAL_PROMP, LOOP_PREVENTION_PROMPT } from "./prompts";
-import { Scripts } from "./Scripts";
-import { WrapClient } from "./wrap";
 
 export class Evo implements Agent {
   private readonly context: AgentContext
@@ -18,6 +35,7 @@ export class Evo implements Agent {
     private readonly workspace: Workspace,
     private readonly agentPackage: IWrapPackage,
     scripts: Scripts,
+    private readonly timeout?: Timeout
   ) {
     this.context = {
       llm,
@@ -41,6 +59,10 @@ export class Evo implements Agent {
       const chat = new Chat(workspace, this.llm, this.chat.tokenizer, this.logger);
       return new ScriptWriter(this.llm, chat, this.logger, workspace);
     };
+
+    if (this.timeout) {
+      setTimeout(this.timeout.callback, this.timeout.milliseconds);
+    }
 
     try {
       chat.persistent("system", INITIAL_PROMP);

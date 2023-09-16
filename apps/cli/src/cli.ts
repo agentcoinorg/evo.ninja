@@ -1,11 +1,29 @@
 import { createApp } from "./app";
 
+import { Logger, Timeout } from "@evo-ninja/agent-utils";
+import { program } from "commander";
+
 export async function cli(): Promise<void> {
-  const app = createApp();
+  program
+    .argument("[goal]", "Goal to be achieved")
+    .option("-t, --timeout <number>")
+    .parse();
+
+  const options = program.opts();
+
+  const timeout = new Timeout(
+    options.timeout,
+    (logger: Logger): void => {
+      logger.error("Agent has timeout");
+      process.exit(0);
+    },
+  );
+
+  const app = createApp(timeout);
 
   await app.logger.logHeader();
 
-  let goal: string | undefined = process.argv[2];
+  let goal: string | undefined = program.args[0]
 
   if (!goal) {
     goal = await app.logger.prompt("Enter your goal: ");
