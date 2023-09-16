@@ -1,5 +1,4 @@
-import { ILogger, Message } from "@evo-ninja/core";
-
+import { ILogger, Message } from "@evo-ninja/agent-utils";
 import fs from "fs";
 import path from "path-browserify";
 

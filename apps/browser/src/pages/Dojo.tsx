@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
-import * as EvoCore from "@evo-ninja/core";
-import { Workspace } from '@evo-ninja/core';
+import * as EvoCore from "@evo-ninja/agent-utils";
 import { InMemoryFile } from '@nerfzael/memory-fs';
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 import { PluginPackage } from "@polywrap/plugin-js";
@@ -15,9 +14,10 @@ import Chat, { ChatMessage } from "../components/Chat/Chat";
 import { MarkdownLogger } from '../sys/logger';
 import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
 import { onGoalAchievedScript, onGoalFailedScript, speakScript } from '../scripts';
-import { defaultModel } from '../supportedModels';
+import { Evo, Scripts } from '@evo-ninja/evo-agent';
+import clsx from 'clsx';
 
-function addScript(script: {name: string, definition: string, code: string}, scriptsWorkspace: Workspace) {
+function addScript(script: {name: string, definition: string, code: string}, scriptsWorkspace: EvoCore.Workspace) {
   scriptsWorkspace.writeFileSync(`${script.name}.json`, script.definition);
   scriptsWorkspace.writeFileSync(`${script.name}.js`, script.code);
 }
@@ -29,9 +29,11 @@ function Dojo() {
   const [model, setModel] = useState<string | null>(
     localStorage.getItem("openai-model")
   );
+
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [configOpen, setConfigOpen] = useState(false);
   const [dojoError, setDojoError] = useState<unknown | undefined>(undefined);
-  const [evo, setEvo] = useState<EvoCore.Evo | undefined>(undefined);
+  const [evo, setEvo] = useState<Evo | undefined>(undefined);
   const [scripts, setScripts] = useState<InMemoryFile[]>([]);
   const [userFiles, setUserFiles] = useState<InMemoryFile[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<InMemoryFile[]>([]);
@@ -39,6 +41,12 @@ function Dojo() {
   const [scriptsWorkspace, setScriptsWorkspace] = useState<EvoCore.InMemoryWorkspace | undefined>(undefined);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [goalEnded, setGoalEnded] = useState<boolean>(false);
+
+  useEffect(() => {
+    if(window.innerWidth <= 1024){
+      setSidebarOpen(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!evo || !scriptsWorkspace) {
@@ -140,7 +148,7 @@ function Dojo() {
       addScript(onGoalFailedScript, scriptsWorkspace);
       addScript(speakScript, scriptsWorkspace);
 
-      const scripts = new EvoCore.Scripts(
+      const scripts = new Scripts(
         scriptsWorkspace
       );
       
@@ -189,18 +197,26 @@ function Dojo() {
         },
       }));
 
-      setEvo(new EvoCore.Evo(
-        userWorkspace,
-        scripts,
+      setEvo(new Evo(
         llm,
         chat,
         logger,
-        agentPackage
+        userWorkspace,
+        agentPackage,
+        scripts,
       ));
     } catch (err) {
       setDojoError(err);
     }
   }, [apiKey, model])
+
+  const sidebarContainerClassNames = clsx(["w-full lg:w-auto lg:max-w-md relative", {
+    "hidden": !sidebarOpen
+  }]);
+
+  const chatContainerClassNames = clsx(["grow relative", {
+    "max-lg:hidden": sidebarOpen
+  }]);
 
   return (
     <div className="Dojo">
@@ -211,11 +227,15 @@ function Dojo() {
           onConfigSaved={onConfigSaved}
         />
       }
-      <Sidebar onSettingsClick={() => setConfigOpen(true)} scripts={scripts} userFiles={userFiles} uploadUserFiles={setUploadedFiles} />
-      <>
-        {evo && <Chat evo={evo} onMessage={onMessage} messages={messages} goalEnded={goalEnded} />}
-        {dojoError && <DojoError error={dojoError} />}
-      </>
+      <div className={sidebarContainerClassNames}>
+        <Sidebar onSidebarToggleClick={() => {setSidebarOpen(!sidebarOpen)}} onSettingsClick={() => setConfigOpen(true)} scripts={scripts} userFiles={userFiles} uploadUserFiles={setUploadedFiles} />
+      </div>
+      <div className={chatContainerClassNames}>
+        <>
+          {evo && <Chat evo={evo} onMessage={onMessage} messages={messages} goalEnded={goalEnded} onSidebarToggleClick={() => {setSidebarOpen(!sidebarOpen)}}/>}
+          {dojoError && <DojoError error={dojoError} />}
+        </>
+      </div>
     </div>
   );
 }
