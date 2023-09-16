@@ -8,6 +8,13 @@
   "settings": {
     "files.associations": {
       "**/apps/browser/**/*.css": "tailwindcss"
-    }
+    },
+    "javascript.preferences.quoteStyle": "double",
+    "typescript.preferences.quoteStyle": "double",
+    "typescript.preferences.jsxAttributeCompletionStyle": "auto",
+    "editor.quickSuggestions": {
+      "strings": "on"
+    },
+    "tailwindCSS.experimental.classRegex": ["clsx\\(([^)]*)\\)"]
   }
 }

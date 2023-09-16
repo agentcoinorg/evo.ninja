@@ -1,7 +1,7 @@
-import * as EvoCore from "@evo-ninja/core";
+import { Workspace } from "@evo-ninja/agent-utils";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 
-export function updateWorkspaceFiles(workspace: EvoCore.Workspace, files: InMemoryFile[], setFiles: (files: InMemoryFile[]) => void) {
+export function updateWorkspaceFiles(workspace: Workspace, files: InMemoryFile[], setFiles: (files: InMemoryFile[]) => void) {
   const items = workspace.readdirSync("");
   if (!items) {
     return;
