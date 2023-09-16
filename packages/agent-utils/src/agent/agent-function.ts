@@ -23,19 +23,21 @@ export interface AgentFunction<TContext> {
   ): (options: any) => Promise<any>;
 }
 
+export type ExecuteAgentFunctionResult = Result<AgentChatMessage, string>;
+
 export type ExecuteAgentFunction = <TContext>(
   name: string | undefined,
   args: string | undefined,
   context: TContext,
   agentFunctions: AgentFunction<TContext>[],
-) => Promise<Result<AgentChatMessage, string>>;
+) => Promise<ExecuteAgentFunctionResult>;
 
 export const executeAgentFunction: ExecuteAgentFunction = async <TContext>(
   name: string | undefined,
   args: string | undefined,
   context: TContext,
   agentFunctions: AgentFunction<TContext>[],
-): Promise<Result<AgentChatMessage, string>> => {
+): Promise<ExecuteAgentFunctionResult> => {
   const parseResult = processFunctionAndArgs(name, args, agentFunctions);
 
   if (!parseResult.ok) {
@@ -45,8 +47,11 @@ export const executeAgentFunction: ExecuteAgentFunction = async <TContext>(
   const [fnArgs, func] = parseResult.value;
 
   const executor = func.buildExecutor(context);
-
   const result = await executor(fnArgs);
+
+  if (!result.ok) {
+    return ResultErr(result.error.message)
+  }
 
   return ResultOk(func.buildChatMessage(fnArgs, result));
 }

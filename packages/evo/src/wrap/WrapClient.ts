@@ -43,7 +43,8 @@ export class WrapClient extends PolywrapClient {
           logger.info("CONSOLE.LOG " + JSON.stringify(args.args, null, 2));
         },
         "error": async (args: any) => {
-          logger.info("CONSOLE.ERROR " + JSON.stringify(args.args, null, 2));
+          logger.error("CONSOLE.ERROR " + JSON.stringify(args.args, null, 2));
+          this.jsPromiseOutput = ResultErr(args.args)
         },
       })))
       .setPackage("plugin/fs", PluginPackage.from(module => ({
