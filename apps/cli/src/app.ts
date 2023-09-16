@@ -3,12 +3,14 @@ import { FileSystemWorkspace, FileLogger } from "./sys";
 import {
   Evo,
   Scripts,
+} from "@evo-ninja/evo-agent";
+import {
   Env,
   OpenAI,
   Chat,
   ConsoleLogger,
-  Logger
-} from "@evo-ninja/core";
+  Logger,
+} from "@evo-ninja/agent-utils";
 import dotenv from "dotenv";
 import readline from "readline";
 import path from "path";
@@ -106,12 +108,12 @@ export function createApp(): App {
 
   // Create Evo
   const evo = new Evo(
-    userWorkspace,
-    scripts,
     llm,
     chat,
     logger,
-    agentPackage
+    userWorkspace,
+    agentPackage,
+    scripts
   );
 
   return {

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import * as EvoCore from "@evo-ninja/core";
-import { Workspace } from '@evo-ninja/core';
+import * as EvoCore from "@evo-ninja/agent-utils";
 import { InMemoryFile } from '@nerfzael/memory-fs';
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 import { PluginPackage } from "@polywrap/plugin-js";
@@ -15,11 +14,10 @@ import Chat, { ChatMessage } from "../components/Chat/Chat";
 import { MarkdownLogger } from '../sys/logger';
 import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
 import { onGoalAchievedScript, onGoalFailedScript, speakScript } from '../scripts';
-
+import { Evo, Scripts } from '@evo-ninja/evo-agent';
 import clsx from 'clsx';
-import MenuIcon from "../components/MenuIcon";
 
-function addScript(script: {name: string, definition: string, code: string}, scriptsWorkspace: Workspace) {
+function addScript(script: {name: string, definition: string, code: string}, scriptsWorkspace: EvoCore.Workspace) {
   scriptsWorkspace.writeFileSync(`${script.name}.json`, script.definition);
   scriptsWorkspace.writeFileSync(`${script.name}.js`, script.code);
 }
@@ -35,7 +33,7 @@ function Dojo() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [configOpen, setConfigOpen] = useState(false);
   const [dojoError, setDojoError] = useState<unknown | undefined>(undefined);
-  const [evo, setEvo] = useState<EvoCore.Evo | undefined>(undefined);
+  const [evo, setEvo] = useState<Evo | undefined>(undefined);
   const [scripts, setScripts] = useState<InMemoryFile[]>([]);
   const [userFiles, setUserFiles] = useState<InMemoryFile[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<InMemoryFile[]>([]);
@@ -150,7 +148,7 @@ function Dojo() {
       addScript(onGoalFailedScript, scriptsWorkspace);
       addScript(speakScript, scriptsWorkspace);
 
-      const scripts = new EvoCore.Scripts(
+      const scripts = new Scripts(
         scriptsWorkspace
       );
       
@@ -199,13 +197,13 @@ function Dojo() {
         },
       }));
 
-      setEvo(new EvoCore.Evo(
-        userWorkspace,
-        scripts,
+      setEvo(new Evo(
         llm,
         chat,
         logger,
-        agentPackage
+        userWorkspace,
+        agentPackage,
+        scripts,
       ));
     } catch (err) {
       setDojoError(err);

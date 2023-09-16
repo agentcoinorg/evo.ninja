@@ -1,15 +1,11 @@
 import { FileSystemWorkspace } from "../../sys/FileSystemWorkspace";
 
 import {
-  WrapClient,
-  JsEngine_GlobalVar,
-  JsEngine_Module,
-  Scripts,
   Workspace,
-  shimCode,
   Logger,
   ConsoleLogger
-} from "@evo-ninja/core";
+} from "@evo-ninja/agent-utils";
+import { JsEngine_GlobalVar, JsEngine_Module, Scripts, WrapClient, shimCode } from "@evo-ninja/evo-agent";
 import fs from "fs";
 import path from "path-browserify";
 
