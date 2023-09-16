@@ -1,103 +1,31 @@
 .Landing {
-  text-align: center;
-  color: #FFFFFF;
-  background-color: #131313AF;
-}
-
-.Landing::before {
-  font-size: 8rem;
-  font-weight: 100;
-  font-style: normal;
+  @apply bg-neutral-900/70 text-center text-white;
 }
 
 .Landing-header {
-  @apply min-h-screen flex items-center justify-center text-3xl font-semibold text-white;
+  @apply flex min-h-screen items-center justify-center text-3xl font-semibold text-white;
 }
 
 .Header-Links {
-  position: absolute;
-  display: flex;
-  top: 0;
-  right: 0;
-  height: 60px;
-  margin-right: 50px;
+  @apply absolute right-0 top-0 mr-12 flex h-16 items-center gap-6;
 }
 
 .Header-Links a {
-  margin: 10px;
-  margin-top: 20px;
-  display: inherit;
+  @apply h-10 w-10 contrast-50 filter-none hover:filter;
 }
 
-.Header-Links a:hover {
-  filter: contrast(0.5)
+.Header-Links a img {
+  @apply h-full max-w-full;
 }
 
 .Landing button {
-  @apply px-5 py-2.5 text-white bg-slate-900 border-none rounded cursor-pointer hover:bg-slate-700 transition-colors;
+  @apply cursor-pointer rounded border-none bg-slate-900 px-5 py-2.5 text-white transition-colors hover:bg-slate-700;
 }
 
 .Hero {
-  @apply flex flex-col gap-4 items-center;
-}
-
-@-webkit-keyframes bg-scrolling-reverse {
-  100% {
-    background-position: 0 250px;
-  }
-}
-@-moz-keyframes bg-scrolling-reverse {
-  100% {
-    background-position: 0 250px;
-  }
-}
-@-o-keyframes bg-scrolling-reverse {
-  100% {
-    background-position: 0 250px;
-  }
-}
-@keyframes bg-scrolling-reverse {
-  100% {
-    background-position: 0 250px;
-  }
-}
-@-webkit-keyframes bg-scrolling {
-  0% {
-    background-position: 0 250px;
-  }
-}
-@-moz-keyframes bg-scrolling {
-  0% {
-    background-position: 0 250px;
-  }
-}
-@-o-keyframes bg-scrolling {
-  0% {
-    background-position: 0 250px;
-  }
-}
-@keyframes bg-scrolling {
-  0% {
-    background-position: 0 250px;
-  }
+  @apply flex flex-col items-center gap-4;
 }
 
 .Landing-background {
-  color: #999;
-  font: 400 16px/1.5 exo, ubuntu, "segoe ui", helvetica, arial, sans-serif;
-  text-align: center;
-  /* img size is 25x25 */
-  background: url("/public/wallpaper.png") repeat 0 0 / 461px 250px;
-  -webkit-animation: bg-scrolling-reverse 5s infinite;
-  /* Safari 4+ */
-  -moz-animation: bg-scrolling-reverse 5s infinite;
-  /* Fx 5+ */
-  -o-animation: bg-scrolling-reverse 5s infinite;
-  /* Opera 12+ */
-  animation: bg-scrolling-reverse 5s infinite;
-  /* IE 10+ */
-  -webkit-animation-timing-function: linear;
-  -moz-animation-timing-function: linear;
-  -o-animation-timing-function: linear;
-  animation-timing-function: linear;
+  @apply animate-landing-bg bg-landing-bg bg-repeat text-center text-neutral-400;
 }
