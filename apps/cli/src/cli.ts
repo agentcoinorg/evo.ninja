@@ -23,8 +23,11 @@ export async function cli(): Promise<void> {
       break;
     }
 
-    if (response.value) {
-      response.value.message && app.logger.info(response.value.message.content ?? response.value.message.title);
+    if (response.value && response.value.message) {
+      const message = response.value.message;
+      const messageStr = `${message.title}\n${message.content}`;
+      app.fileLogger.info(`# Evo:\n${messageStr}`);
+      app.consoleLogger.info(`Evo: ${messageStr}`);
     }
   }
 }

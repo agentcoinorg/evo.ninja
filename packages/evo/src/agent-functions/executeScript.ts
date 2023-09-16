@@ -39,7 +39,7 @@ export const executeScript: AgentFunction<AgentContext> = {
           type: "success",
           title: `Executed '${args.namespace}' script.`,
           content: 
-            `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
+            `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
             EXECUTE_SCRIPT_OUTPUT(args.result, result.value),
         }
       : {

@@ -29,7 +29,7 @@ export const readVar: AgentFunction<AgentContext> = {
           type: "success",
           title: `Read '${args.name}' variable.`,
           content: 
-            `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
+            `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
             READ_GLOBAL_VAR_OUTPUT(args.name, result.value),
         }
       : {

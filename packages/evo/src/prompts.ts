@@ -24,7 +24,7 @@ export const READ_GLOBAL_VAR_OUTPUT = (name: string, value: string) =>
   `## Read Variable\n**'{{${name}}}'**:\n\`\`\`\n${value}\n\`\`\`\n`;
 
 export const EXECUTE_SCRIPT_OUTPUT = (varName: string, result: string) =>
-  `## Result\nPreview: \`\`\`\n${trimText(result, 200)}\`\`\`\n\nResult Stored in Variable: \`{{${varName}}}\`\n`;
+  `## Result\nPreview:\n\`\`\`\n${trimText(result, 200)}\n\`\`\`\n\nResult Stored in Variable: \`{{${varName}}}\`\n`;
 
 export const OTHER_EXECUTE_FUNCTION_OUTPUT = (result: string) =>
   `## Result\n\`\`\`\n${result}\n\`\`\``;

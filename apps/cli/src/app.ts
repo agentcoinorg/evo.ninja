@@ -33,6 +33,8 @@ const prompt = (query: string) => new Promise<string>(
 export interface App {
   evo: Evo;
   logger: Logger;
+  fileLogger: FileLogger;
+  consoleLogger: ConsoleLogger;
 }
 
 export function createApp(): App {
@@ -58,7 +60,7 @@ export function createApp(): App {
   ], {
     promptUser: prompt,
     logUserPrompt: (response: string) => {
-      fileLogger.info(`**User**: ${response}`);
+      fileLogger.info(`#User:\n${response}`);
     }
   })
 
@@ -96,11 +98,11 @@ export function createApp(): App {
       process.exit(0);
     },
     "speak": async (args: any) => {
-      logger.success("Agent: " + args.message);
+      logger.success(args.message);
       return "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.\nIf you think you've failed, execute onGoalFailed.";
     },
     "ask": async (args: any) => {
-      logger.error("Agent: " + args.message);
+      logger.error(args.message);
       const response = await prompt("");
       return "User: " + response;
     },
@@ -118,6 +120,8 @@ export function createApp(): App {
 
   return {
     evo,
-    logger
+    logger,
+    fileLogger,
+    consoleLogger
   };
 }

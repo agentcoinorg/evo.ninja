@@ -33,13 +33,13 @@ export function createScript(createScriptWriter: () => ScriptWriter): AgentFunct
     },
     buildChatMessage(args: any, result: AgentFunctionResult): AgentChatMessage {
       const argsStr = JSON.stringify(args, null, 2);
-  
+
       return result.ok
         ? {
             type: "success",
             title: `Created '${args.namespace}' script.`,
             content: 
-              `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
+              `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
               OTHER_EXECUTE_FUNCTION_OUTPUT(result.value),
           }
         : {
