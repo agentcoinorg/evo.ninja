@@ -92,11 +92,13 @@ export function createApp(timeout?: Timeout): App {
   const agentPackage = PluginPackage.from(module => ({
     "onGoalAchieved": async (args: any) => {
       logger.success("Goal has been achieved!");
-      process.exit(0);
+      const response = await prompt("New Goal: ");
+      return "User: " + response;
     },
     "onGoalFailed": async (args: any) => {
       logger.error("Goal could not be achieved!");
-      process.exit(0);
+      const response = await prompt("Provide feedback: ");
+      return "User: " + response;
     },
     "speak": async (args: any) => {
       logger.success(args.message);
@@ -104,7 +106,7 @@ export function createApp(timeout?: Timeout): App {
     },
     "ask": async (args: any) => {
       logger.error(args.message);
-      const response = await prompt("");
+      const response = await prompt("User Response: ");
       return "User: " + response;
     },
   }));
