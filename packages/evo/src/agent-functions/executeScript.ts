@@ -33,21 +33,33 @@ export const executeScript: AgentFunction<AgentContext> = {
   },
   buildChatMessage(args: any, result: AgentFunctionResult): AgentChatMessage {
     const argsStr = JSON.stringify(args, null, 2);
-
-    return result.ok
-      ? {
-          type: "success",
-          title: `Executed '${args.namespace}' script.`,
-          content: 
-            `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
-            EXECUTE_SCRIPT_OUTPUT(args.result, result.value),
-        }
-      : {
-          type: "error",
-          title: `'${args.namespace}' script failed to execute!`,
-          content: FUNCTION_CALL_FAILED(FN_NAME, result.error, args),
-        };
-  },
+  
+    let type: "success" | "error" = "error";
+    let title = `'${args.namespace}' script failed to execute!`;
+    let content = "";
+  
+    if (result.ok) {
+      type = "success";
+      title = `Executed '${args.namespace}' script.`;
+      content = 
+        `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
+        EXECUTE_SCRIPT_OUTPUT(args.result, result.value);
+    } else {
+      content = FUNCTION_CALL_FAILED(FN_NAME, result.error, args);
+    }
+  
+    // Ensure content is not empty
+    if (!content) {
+      content = "Unknown error";
+    }
+  
+    return {
+      type,
+      title,
+      content
+    };
+  }, 
+  
   buildExecutor(context: AgentContext) {
     return async (options: { namespace: string, arguments: any, result: string }): Promise<AgentFunctionResult> => {
       try {
