@@ -1,0 +1,10 @@
+# References
+Benchmarks v0.0.9: https://github.com/Significant-Gravitas/Auto-GPT-Benchmarks/tree/release-v0.0.9  
+Workflow: https://github.com/Significant-Gravitas/Auto-GPT-Benchmarks/blob/release-v0.0.9/.github/workflows/ci.yml
+
+# Steps
+- Clone Benchmarks: `git clone --branch release-v0.0.9 https://github.com/nificant-Gravitas/Auto-GPT-Benchmarks`
+- `cd Auto-GPT-Benchmarks`
+- Install Deps: `poetry install`
+  - Fails: "cannot find 'agent-protocol-client'"
+- Run benchmark against local evo.ninja
