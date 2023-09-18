@@ -1,0 +1,6 @@
+{
+  "name": "time.getCurrent",
+  "description": "Get the current time in a specified timezone.",
+  "arguments": "{ timezone: string }",
+  "code": "./time.getCurrent.js"
+}

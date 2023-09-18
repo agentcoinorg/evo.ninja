@@ -1,0 +1,38 @@
+{
+    "command": "agbenchmark --test=ReadFile",
+    "benchmark_git_commit_sha": "---",
+    "agent_git_commit_sha": "---",
+    "completion_time": "2023-09-18T13:45:25+00:00",
+    "benchmark_start_time": "2023-09-18T13:45:25+00:00",
+    "metrics": {
+        "run_time": "0.66 seconds",
+        "highest_difficulty": "No successful tests",
+        "total_cost": null
+    },
+    "tests": {
+        "ReadFile": {
+            "data_path": "/home/cesar/.cache/pypoetry/virtualenvs/evo-ninja--wE5xXQU-py3.10/lib/python3.10/site-packages/agbenchmark/challenges/abilities/read_file/data.json",
+            "is_regression": false,
+            "category": [
+                "interface"
+            ],
+            "task": "Read the file called file_to_read.txt and write its content to a file called output.txt",
+            "answer": "The content of output.txt should be 'Hello World!'",
+            "description": "s the ability for an agent to read a file.",
+            "metrics": {
+                "difficulty": "interface",
+                "success": false,
+                "attempted": true,
+                "fail_reason": "(404)\nReason: Not Found\nHTTP response headers: <CIMultiDictProxy('X-Powered-By': 'Express', 'Content-Security-Policy': \"default-src 'none'\", 'X-Content-Type-Options': 'nosniff', 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': '409', 'Date': 'Mon, 18 Sep 2023 13:45:25 GMT', 'Connection': 'keep-alive', 'Keep-Alive': 'timeout=5')>\nHTTP response body: <!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Not Found: not found<br> &nbsp; &nbsp;at /home/cesar/dev/polywrap/evo.ninja/node_modules/express-openapi-validator/src/middlewares/openapi.metadata.ts:58:13<br> &nbsp; &nbsp;at /home/cesar/dev/polywrap/evo.ninja/node_modules/express-openapi-validator/src/openapi.validator.ts:147:18</pre>\n</body>\n</html>\n\n",
+                "success_%": 0.0,
+                "cost": null,
+                "run_time": "0.118 seconds"
+            },
+            "reached_cutoff": false
+        }
+    },
+    "config": {
+        "agent_benchmark_config_path": "/home/cesar/dev/polywrap/evo.ninja/agbenchmark_config/config.json",
+        "host": "http://localhost:8000"
+    }
+}

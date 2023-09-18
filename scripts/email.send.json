@@ -1,0 +1,6 @@
+{
+  "name": "email.send",
+  "description": "This script sends an email to a specified recipient with a specified subject and body.",
+  "arguments": "{ recipient: string, subject: string, body: string }",
+  "code": "./email.send.js"
+}

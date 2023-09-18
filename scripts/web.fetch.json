@@ -1,0 +1,6 @@
+{
+  "name": "web.fetch",
+  "description": "Fetch data from a URL",
+  "arguments": "{ url: string }",
+  "code": "./web.fetch.js"
+}
