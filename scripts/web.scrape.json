@@ -1,6 +1,0 @@
-{
-  "name": "web.scrape",
-  "description": "This script scrapes a web page and returns its content.",
-  "arguments": "{ url: string }",
-  "code": "./web.scrape.js"
-}

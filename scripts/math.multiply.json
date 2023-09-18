@@ -1,6 +1,0 @@
-{
-  "name": "math.multiply",
-  "description": "This script multiplies two numbers and returns the result.",
-  "arguments": "{ a: number, b: number }",
-  "code": "./math.multiply.js"
-}

@@ -1,6 +1,0 @@
-{
-  "name": "html.parse",
-  "description": "This script parses HTML content and returns a structured representation.",
-  "arguments": "{ htmlContent: string }",
-  "code": "./html.parse.js"
-}

@@ -3,3 +3,6 @@ build
 workspace
 .env
 chats
+
+agbenchmark_config/
+!agbenchmark_config/config.json

@@ -1,6 +1,0 @@
-{
-  "name": "text.extract",
-  "description": "This script extracts specific information from a text based on a pattern.",
-  "arguments": "{ text: string, pattern: string }",
-  "code": "./text.extract.js"
-}
