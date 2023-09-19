@@ -1,7 +1,8 @@
-import { ResultErr, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, AgentChatMessage } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
 import { OTHER_EXECUTE_FUNCTION_OUTPUT, FUNCTION_CALL_FAILED } from "../prompts";
+
+import { AgentFunction, AgentFunctionResult, AgentChatMessage } from "@evo-ninja/agent-utils";
+import { ResultErr, ResultOk } from "@polywrap/result";
 
 const allowedLibs = [
   "fs",
@@ -9,7 +10,7 @@ const allowedLibs = [
   "util"
 ];
 
-const FN_NAME = "writeFunction";
+export const FN_NAME = "writeFunction";
 
 export const writeFunction: AgentFunction<AgentContext> = {
   definition: {

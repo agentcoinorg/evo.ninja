@@ -10,7 +10,7 @@
   "scripts": {
     "start": "ts-node src/cli.ts",
     "start:api": "ts-node src/api.ts",
-    "build": "rimraf build && tsc",
+    "build": "rimraf build && tsc --project tsconfig.build.json",
     "test": "jest --passWithNoTests --runInBand --verbose --rootDir . --config ../../jest.config.js",
     "test:script": "ts-node ./src/__tests__/runners/script-js.ts"
   },

@@ -26,7 +26,7 @@ import { ScriptWriter } from "@evo-ninja/js-script-writer-agent";
 import { ResultErr } from "@polywrap/result";
 
 export class Evo implements Agent {
-  private readonly context: AgentContext
+  private readonly context: AgentContext;
 
   constructor(
     private readonly llm: LlmApi,
@@ -66,11 +66,19 @@ export class Evo implements Agent {
     try {
       chat.persistent("system", INITIAL_PROMP);
       chat.persistent("system", GOAL_PROMPT(goal));
-      
+
       return yield* basicFunctionCallLoop(
         this.context,
         executeAgentFunction,
         agentFunctions(createScriptWriter),
+        (functionCalled) => {
+          const namespace = functionCalled.args.namespace || "";
+          const terminationFunctions = [
+            `agent.onGoalAchieved`,
+            `agent.onGoalFailed`
+          ];
+          return terminationFunctions.includes(namespace);
+        },
         LOOP_PREVENTION_PROMPT
       );
     } catch (err) {

@@ -1,0 +1,6 @@
+{
+  "name": "math.factorial",
+  "description": "Calculate the factorial of a number",
+  "arguments": "{ number: number }",
+  "code": "./math.factorial.js"
+}

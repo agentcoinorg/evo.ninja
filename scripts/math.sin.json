@@ -1,0 +1,6 @@
+{
+  "name": "math.sin",
+  "description": "Calculate the sine of a given angle in degrees",
+  "arguments": "{ angle: number }",
+  "code": "./math.sin.js"
+}

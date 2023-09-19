@@ -4,7 +4,7 @@ import { readFileSync } from 'fs';
 type TestResult = {
   goal: string;
   success: boolean;
-  result: string;
+  received: string;
   expected: string;
   timeTaken: number;
 };
@@ -16,10 +16,10 @@ describe('AI Agent Test Suite', () => {
   const goals = [
 
     // Mathematics
-    { goal: 'Calculate the area of a circle with a radius of 5 meters and save it in a file named output.txt', expected: '78.54' },
-    /*{ goal: 'Calculate the perimeter of a square with side length 6 cm and save it in a file named output.txt', expected: '24' },
+    { goal: 'Calculate the area of a circle with a radius of 5 meters and save it in a file named output.txt', expected: '78.53981633974483' },
+    { goal: 'Calculate the perimeter of a square with side length 6 cm and save it in a file named output.txt', expected: '24' },
     { goal: 'Calculate the sum of the first 100 natural numbers and save it in a file named output.txt', expected: '5050' },
-    { goal: 'Calculate the value of sin(45°) and save it in a file named output.txt', expected: '0.7071' },
+    { goal: 'Calculate the value of sin(45°) and save it in a file named output.txt', expected: '0.7071067811865475' },
 
     // Geography
     { goal: 'Write the capital of France and save it in a file named output.txt', expected: 'Paris' },
@@ -61,19 +61,20 @@ describe('AI Agent Test Suite', () => {
     { goal: 'Convert a JSON object {"foo": "bar"} to string and save it to output.txt', expected: '{"foo": "bar"}' },
     { goal: 'Use JavaScript to calculate the sum of the numbers from 1 to 100 and save the result to output.txt', expected: '5050' },
     { goal: 'Create a JavaScript function that reverses the string "OpenAI" and save the result to output.txt', expected: 'IAnepO' },
-    { goal: 'Use JavaScript to calculate the 5th term of the Fibonacci sequence and save the result to output.txt', expected: '3' },*/
+    { goal: 'Use JavaScript to calculate the 5th term of the Fibonacci sequence and save the result to output.txt', expected: '3' },
   ];
 
   afterAll(() => {
     console.log('All test results:');
     testResults.forEach(result => {
-      console.log(`Operation: ${result.goal}, Success: ${result.success}, Time Taken: ${result.timeTaken}ms. Result: ${result.result}, Expected: ${result.expected}`);
+      console.log(`Operation: ${result.goal}, Success: ${result.success}, Time Taken: ${result.timeTaken}ms. Result: ${result.expected}, Expected: ${result.expected}`);
     });
   });
 
   goals.forEach(({ goal, expected }) => {
     test(`Execute operation: ${goal}`, async () => {
       const startTime = new Date().getTime();
+      let result: TestResult | undefined;
 
       await new Promise<void>((resolve, reject) => {
         const child = spawn('yarn', ['start', `'${goal}'`], { shell: true });
@@ -86,33 +87,35 @@ describe('AI Agent Test Suite', () => {
           console.log(data.toString());
         });
 
-        child.on("close", () => {
-          console.log("CLOSE");
-        });
-
-        child.on("disconnect", () => {
-          console.log("DISCONNECT");
-        });
-
         child.on('exit', () => {
-          console.log("ON EXIT")
-          clearTimeout(timeout);
           const endTime = new Date().getTime();
-          const result = readFileSync('workspace/output.txt', 'utf-8').trim();
-          let success = result === expected;
-
-          // Asserting the success condition using the expect function
-          expect(success).toBe(true);
-
-          testResults.push({ goal, success, result, expected, timeTaken: endTime - startTime });
+          const received = readFileSync(
+            `${__dirname}/../../../../workspace/output.txt`,
+            'utf-8'
+          ).trim();
+          result = {
+            goal,
+            success: received === expected,
+            received,
+            expected,
+            timeTaken: endTime - startTime
+          };
           resolve();
+          clearTimeout(timeout);
         });
 
         child.on('error', (error) => {
-          clearTimeout(timeout);
           reject(error);
+          clearTimeout(timeout);
         });
       });
+
+      if (!result) {
+        throw Error("This shouldn't happen.");
+      }
+
+      testResults.push(result);
+      expect(result.received).toBe(result.expected);
     }, oneMinute);
   });
 });
