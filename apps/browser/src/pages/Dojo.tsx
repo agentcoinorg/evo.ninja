@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import * as EvoCore from "@evo-ninja/agent-utils";
 import { InMemoryFile } from '@nerfzael/memory-fs';
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
-import { PluginPackage } from "@polywrap/plugin-js";
 
 import './Dojo.css';
 
@@ -179,30 +178,12 @@ function Dojo() {
         cl100k_base,
         logger
       );
-      const agentPackage = PluginPackage.from(module => ({
-        "onGoalAchieved": async (args: any) => {
-          logger.success("Goal has been achieved!");
-          setGoalEnded(true);
-        },
-        "onGoalFailed": async (args: any) => {
-          logger.error("Goal could not be achieved!");
-          setGoalEnded(true);
-        },
-        "speak": async (args: any) => {
-          logger.success("Evo: " + args.message);
-          return "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.\nIf you think you've failed, execute onGoalFailed.";
-        },
-        "ask": async (args: any) => {
-          throw new Error("Not implemented");
-        },
-      }));
 
       setEvo(new Evo(
         llm,
         chat,
         logger,
         userWorkspace,
-        agentPackage,
         scripts,
       ));
     } catch (err) {

@@ -1,4 +1,5 @@
 import { agentFunctions } from "./agent-functions";
+import { agentPlugin } from "./agent-plugin";
 import { AgentContext } from "./AgentContext";
 import { Scripts } from "./Scripts";
 import { WrapClient } from "./wrap";
@@ -22,7 +23,6 @@ import {
   basicFunctionCallLoop
 } from "@evo-ninja/agent-utils";
 import { ScriptWriter } from "@evo-ninja/js-script-writer-agent";
-import { IWrapPackage } from "@polywrap/client-js";
 import { ResultErr } from "@polywrap/result";
 
 export class Evo implements Agent {
@@ -33,7 +33,6 @@ export class Evo implements Agent {
     private readonly chat: Chat,
     private readonly logger: Logger,
     private readonly workspace: Workspace,
-    private readonly agentPackage: IWrapPackage,
     scripts: Scripts,
     private readonly timeout?: Timeout
   ) {
@@ -47,7 +46,7 @@ export class Evo implements Agent {
       client: new WrapClient(
         this.workspace,
         this.logger,
-        this.agentPackage
+        agentPlugin({ logger: this.logger })
       ),
     };
   }

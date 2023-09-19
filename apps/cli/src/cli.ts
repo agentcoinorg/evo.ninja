@@ -35,6 +35,7 @@ export async function cli(): Promise<void> {
     const response = await iterator.next();
 
     if (response.done) {
+      console.log("WE ARE DONENNNNNNNNN")
       if (!response.value.ok) {
         app.logger.error(response.value.error ?? "Unknown error");
       }
@@ -48,6 +49,8 @@ export async function cli(): Promise<void> {
       app.consoleLogger.info(`Evo: ${messageStr}`);
     }
   }
+
+  return Promise.resolve();
 }
 
 cli()
