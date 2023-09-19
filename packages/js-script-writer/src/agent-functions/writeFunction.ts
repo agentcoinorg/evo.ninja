@@ -10,7 +10,7 @@ const allowedLibs = [
   "util"
 ];
 
-export const FN_NAME = "writeFunction";
+const FN_NAME = "writeFunction";
 
 export const writeFunction: AgentFunction<AgentContext> = {
   definition: {
