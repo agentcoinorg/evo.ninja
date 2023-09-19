@@ -1,6 +1,6 @@
 {
     "name":"agent.onGoalAchieved",
     "description":"Informs the user that the goal has been achieved.",
-    "arguments":"None",
+    "arguments":"{}",
     "code":"./agent.onGoalAchieved.js"
 }

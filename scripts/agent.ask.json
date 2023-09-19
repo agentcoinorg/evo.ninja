@@ -1,6 +1,6 @@
 {
     "name":"agent.ask",
     "description":"Sends a message to the user and waits for user response.",
-    "arguments":"{ message: string }",
+    "arguments":"{ message: { type: \"string\" } }",
     "code":"./agent.ask.js"
 }

@@ -1,0 +1,6 @@
+{
+  "name": "fs.appendLine",
+  "description": "This function appends a new line to a string.",
+  "arguments": "{ content: { type: 'string' }, line: { type: 'string' } }",
+  "code": "./fs.appendLine.js"
+}

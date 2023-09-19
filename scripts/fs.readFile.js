@@ -1,7 +1,3 @@
-const fs = require('fs');
-try {
-  const data = fs.readFileSync(path, encoding);
-  return data;
-} catch (error) {
-  throw error;
-}
+const fs = require('fs').promises;
+
+return fs.readFile(path, 'utf-8');

@@ -1,6 +1,11 @@
 const fs = require('fs');
-try {
-  fs.writeFileSync(path, data, encoding);
-} catch (error) {
-  throw new Error(`Failed to write file: ${error.message}`);
-}
+
+return new Promise((resolve, reject) => {
+  fs.writeFile(path, data, (err) => {
+    if (err) {
+      reject(err);
+    } else {
+      resolve();
+    }
+  });
+});

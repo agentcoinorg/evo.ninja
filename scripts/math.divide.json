@@ -1,6 +1,0 @@
-{
-  "name": "math.divide",
-  "description": "This script divides two numbers and returns the result.",
-  "arguments": "{ numerator: number, denominator: number }",
-  "code": "./math.divide.js"
-}
