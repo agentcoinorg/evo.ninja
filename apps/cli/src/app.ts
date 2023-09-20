@@ -16,7 +16,6 @@ import dotenv from "dotenv";
 import readline from "readline";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
-import { PluginPackage } from "@polywrap/plugin-js";
 
 dotenv.config({
   path: path.join(__dirname, "../../../.env")
@@ -89,33 +88,12 @@ export function createApp(timeout?: Timeout): App {
     logger
   );
 
-  const agentPackage = PluginPackage.from(module => ({
-    "onGoalAchieved": async (args: any) => {
-      logger.success("Goal has been achieved!");
-      process.exit(0);
-    },
-    "onGoalFailed": async (args: any) => {
-      logger.error("Goal could not be achieved!");
-      process.exit(0);
-    },
-    "speak": async (args: any) => {
-      logger.success(args.message);
-      return "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.\nIf you think you've failed, execute onGoalFailed.";
-    },
-    "ask": async (args: any) => {
-      logger.error(args.message);
-      const response = await prompt("");
-      return "User: " + response;
-    },
-  }));
-
   // Create Evo
   const evo = new Evo(
     llm,
     chat,
     logger,
     userWorkspace,
-    agentPackage,
     scripts,
     timeout
   );

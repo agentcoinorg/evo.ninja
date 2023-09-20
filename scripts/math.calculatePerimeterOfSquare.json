@@ -1,0 +1,6 @@
+{
+  "name": "math.calculatePerimeterOfSquare",
+  "description": "Calculates the perimeter of a square given the length of one side.",
+  "arguments": "{ sideLength: number }",
+  "code": "./math.calculatePerimeterOfSquare.js"
+}

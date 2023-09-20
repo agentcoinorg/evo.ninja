@@ -1,0 +1,9 @@
+type Module {
+  # User Prompting
+  speak(message: String!): String!
+  ask(message: String!): String!
+
+  # Completion Callbacks
+  onGoalAchieved: Boolean!
+  onGoalFailed: Boolean!
+}

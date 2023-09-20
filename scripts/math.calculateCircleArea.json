@@ -1,0 +1,6 @@
+{
+  "name": "math.calculateCircleArea",
+  "description": "Calculates the area of a circle given its radius",
+  "arguments": "{ radius: number }",
+  "code": "./math.calculateCircleArea.js"
+}
