@@ -113,22 +113,22 @@ export const executeScript: AgentFunction<AgentContext> = {
   }
 };
 
-const ok = (funcName: string, result: any, params: any): AgentFunctionResult => {
+const ok = (scriptName: string, result: any, params: any): AgentFunctionResult => {
   const argsStr = JSON.stringify(params, null, 2);
 
   return ResultOk([
     BasicAgentMessage.ok(
       "system",
-      `Executed '${funcName}' script.`,
-      `# Function Call:\n\`\`\`javascript\n${funcName}(${argsStr})\n\`\`\`\n` +
+      `Executed '${scriptName}' script.`,
+      `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
       EXECUTE_SCRIPT_OUTPUT(params.result, result)
     )
   ]);
 };
 
-const error = (funcName: string, content: string | undefined, params: any): AgentFunctionResult => {
+const error = (scriptName: string, content: string | undefined, params: any): AgentFunctionResult => {
   return ResultOk([
-    BasicAgentMessage.error("system", `'${funcName}' script failed to execute!`, 
-    FUNCTION_CALL_FAILED(funcName, content ?? "Unknown error", params))
+    BasicAgentMessage.error("system", `'${scriptName}' script failed to execute!`, 
+    FUNCTION_CALL_FAILED(FN_NAME, content ?? "Unknown error", params))
   ]);
 };
