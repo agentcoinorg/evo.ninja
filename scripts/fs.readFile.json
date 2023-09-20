@@ -1,6 +1,6 @@
 {
   "name": "fs.readFile",
-  "description": "This function reads a file and returns its content as a string.",
-  "arguments": "{ path: { type: 'string' } }",
+  "description": "Reads the content of a file",
+  "arguments": "{ path: string, encoding: string }",
   "code": "./fs.readFile.js"
 }

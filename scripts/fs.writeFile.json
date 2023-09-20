@@ -1,6 +1,6 @@
 {
   "name": "fs.writeFile",
-  "description": "This function writes data to a file. If the file does not exist, it is created. If it does exist, it is replaced.",
-  "arguments": "{ path: { type: 'string' }, data: { type: 'string' } }",
+  "description": "This script writes data to a file, replacing the file if it already exists.",
+  "arguments": "{ path: string, data: string }",
   "code": "./fs.writeFile.js"
 }

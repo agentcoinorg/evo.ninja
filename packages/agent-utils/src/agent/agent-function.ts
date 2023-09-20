@@ -6,25 +6,63 @@ import {
 } from "./prompts";
 
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
-import { ChatCompletionFunctions } from "openai";
+import { ChatCompletionFunctions, ChatCompletionRequestMessage } from "openai";
 import JSON5 from "json5";
+import { ChatRole } from "../llm";
 
-export interface AgentChatMessage {
+export interface AgentOutputMessage {
   type: "success" | "error" | "info" | "warning",
   title: string,
   content?: string,
 }
 
+export class BasicAgentChatMessage implements AgentChatMessage {
+  constructor(public outputMessage: AgentOutputMessage, public chatMessage: ChatCompletionRequestMessage) {
+  }
+
+  static ok(role: ChatRole, title: string, content?: string): BasicAgentChatMessage {
+    return new BasicAgentChatMessage(
+      {
+        type: "success",
+        title,
+        content
+      },
+      {
+        role,
+        content
+      }
+    );
+  }
+
+  static error(role: ChatRole, title: string, content?: string): BasicAgentChatMessage {
+    return new BasicAgentChatMessage(
+      {
+        type: "error",
+        title,
+        content,
+      },
+      {
+        role,
+        content
+      }
+    );
+  }
+}
+
+export interface AgentChatMessage {
+  outputMessage: AgentOutputMessage,
+  chatMessage: ChatCompletionRequestMessage
+}
+
 export type AgentFunctionDefinition = ChatCompletionFunctions;
 
-export type AgentFunctionResult = Result<string, any>; 
+export type AgentFunctionResult = Result<AgentChatMessage[], string>; 
 
 export interface AgentFunction<TContext> {
   definition: AgentFunctionDefinition;
-  buildChatMessage(args: any, result: AgentFunctionResult): AgentChatMessage;
   buildExecutor(
     context: TContext
-  ): (options: any) => Promise<any>;
+  ): (options: any) => Promise<AgentFunctionResult>;
 }
 
 export interface ExecuteAgentFunctionCalled {
@@ -34,7 +72,7 @@ export interface ExecuteAgentFunctionCalled {
 
 export interface ExecuteAgentFunctionResult {
   functionCalled?: ExecuteAgentFunctionCalled;
-  result: Result<AgentChatMessage, string>;
+  result: Result<AgentChatMessage[], string>;
 }
 
 export type ExecuteAgentFunction = <TContext>(
@@ -63,21 +101,12 @@ export const executeAgentFunction: ExecuteAgentFunction = async <TContext>(
   const executor = func.buildExecutor(context);
   const result = await executor(fnArgs);
 
-  const functionCalled = {
-    name: func.definition.name,
-    args: fnArgs
-  };
-
-  if (!result.ok) {
-    return {
-      functionCalled,
-      result: ResultErr(result.error.message)
-    };
-  }
-
   return {
-    functionCalled,
-    result: ResultOk(func.buildChatMessage(fnArgs, result))
+    result,
+    functionCalled: {
+      name: func.definition.name,
+      args: fnArgs
+    },
   };
 }
 

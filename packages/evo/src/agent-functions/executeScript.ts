@@ -1,11 +1,17 @@
 import JSON5 from "json5";
 import { ResultErr, ResultOk } from "@polywrap/result";
-import { AgentChatMessage, AgentFunction, AgentFunctionResult } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, BasicAgentChatMessage } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
 import { EXECUTE_SCRIPT_OUTPUT, FUNCTION_CALL_FAILED } from "../prompts";
 import { JsEngine_GlobalVar, JsEngine, shimCode } from "../wrap";
 
 const FN_NAME = "executeScript";
+type FuncParameters = { 
+  namespace: string, 
+  description: string, 
+  arguments: string,
+  result: string
+};
 
 export const executeScript: AgentFunction<AgentContext> = {
   definition: {
@@ -27,41 +33,24 @@ export const executeScript: AgentFunction<AgentContext> = {
           description: "The name of the variable to store the result of the script"
         }
       },
-      required: ["name", "arguments", "result"],
+      required: ["namespace", "arguments", "result"],
       additionalProperties: false
     },
   },
-  buildChatMessage(args: any, result: AgentFunctionResult): AgentChatMessage {
-    const argsStr = JSON.stringify(args, null, 2);
-
-    return result.ok
-      ? {
-          type: "success",
-          title: `Executed '${args.namespace}' script.`,
-          content: 
-            `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
-            EXECUTE_SCRIPT_OUTPUT(args.result, result.value),
-        }
-      : {
-          type: "error",
-          title: `'${args.namespace}' script failed to execute!`,
-          content: FUNCTION_CALL_FAILED(FN_NAME, result.error, args),
-        };
-  },
   buildExecutor(context: AgentContext) {
-    return async (options: { namespace: string, arguments: any, result: string }): Promise<AgentFunctionResult> => {
+    return async (params: FuncParameters): Promise<AgentFunctionResult> => {
       try {
-        const script = context.scripts.getScriptByName(options.namespace);
+        const script = context.scripts.getScriptByName(params.namespace);
 
         if (!script) {
-          return ResultErr(`Script ${options.namespace} not found.`);
+          return ResultErr(`Script ${params.namespace} not found.`);
         }
 
         let args: any = undefined;
-        args = options.arguments ? options.arguments.replace(/\{\{/g, "\\{\\{").replace(/\}\}/g, "\\}\\}") : "{}";
+        args = params.arguments ? params.arguments.replace(/\{\{/g, "\\{\\{").replace(/\}\}/g, "\\}\\}") : "{}";
         try {
 
-          args = JSON5.parse(options.arguments);
+          args = JSON5.parse(params.arguments);
 
           if (args) {
             const replaceVars = (str: string, vars: any) => {
@@ -81,7 +70,7 @@ export const executeScript: AgentFunction<AgentContext> = {
             }
           }
         } catch {
-          return ResultErr(`Invalid arguments provided for script ${options.namespace}: '${options.arguments ?? ""}' is not valid JSON!`);
+          return ResultErr(`Invalid arguments provided for script ${params.namespace}: '${params.arguments ?? ""}' is not valid JSON!`);
         }
 
         const globals: JsEngine_GlobalVar[] =
@@ -99,20 +88,41 @@ export const executeScript: AgentFunction<AgentContext> = {
         });
 
         if (result.ok && context.client.jsPromiseOutput.ok) {
-          context.globals[options.result] =
+          context.globals[params.result] =
             JSON.stringify(context.client.jsPromiseOutput.value);
         }
 
         return result.ok
           ? result.value.error == null
             ? context.client.jsPromiseOutput.ok
-              ? ResultOk(JSON.stringify(context.client.jsPromiseOutput.value))
-              : ResultErr(context.client.jsPromiseOutput.error)
-            : ResultErr(result.value.error)
-          : ResultErr(result.error?.toString() ?? "");
+              ? ok(params.namespace, context.client.jsPromiseOutput.value, params)
+              : ok(params.namespace, context.client.jsPromiseOutput.error, params)
+            : error(params.namespace, result.value.error, params)
+          : error(params.namespace, result.error?.toString() ?? "Unknown error", params);
+      
       } catch (e: any) {
         return ResultErr(e);
       }
     };
   }
+};
+
+const ok = (funcName: string, result: any, params: any): AgentFunctionResult => {
+  const argsStr = JSON.stringify(params, null, 2);
+
+  return ResultOk([
+    BasicAgentChatMessage.ok(
+      "system",
+      `Executed '${funcName}' script.`,
+      `# Function Call:\n\`\`\`javascript\n${funcName}(${argsStr})\n\`\`\`\n` +
+      EXECUTE_SCRIPT_OUTPUT(params.result, result)
+    )
+  ]);
+};
+
+const error = (funcName: string, content: string | undefined, params: any): AgentFunctionResult => {
+  return ResultOk([
+    BasicAgentChatMessage.error("system", `'${funcName}' script failed to execute!`, 
+    FUNCTION_CALL_FAILED(funcName, content ?? "Unknown error", params))
+  ]);
 };

@@ -1,3 +1,8 @@
 const fs = require('fs').promises;
 
-return fs.readFile(path, 'utf-8');
+try {
+  const data = await fs.readFile(path, encoding);
+  return data;
+} catch (error) {
+  console.error(`Error reading file at ${path}:`, error);
+}

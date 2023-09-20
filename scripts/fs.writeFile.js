@@ -1,11 +1,5 @@
 const fs = require('fs');
-
-return new Promise((resolve, reject) => {
-  fs.writeFile(path, data, (err) => {
-    if (err) {
-      reject(err);
-    } else {
-      resolve();
-    }
-  });
+fs.writeFile(path, data, (err) => {
+    if (err) throw err;
+    console.log('The file has been saved!');
 });

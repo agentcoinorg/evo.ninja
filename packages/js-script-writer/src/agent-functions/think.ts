@@ -1,7 +1,7 @@
 import { ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, AgentChatMessage } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, BasicAgentChatMessage } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
-import { OTHER_EXECUTE_FUNCTION_OUTPUT, FUNCTION_CALL_FAILED } from "../prompts";
+import { OTHER_EXECUTE_FUNCTION_OUTPUT } from "../prompts";
 
 const FN_NAME = "think";
 
@@ -21,26 +21,16 @@ export const think: AgentFunction<AgentContext> = {
       additionalProperties: false
     },
   },
-  buildChatMessage(args: any, result: AgentFunctionResult): AgentChatMessage {
-    const argsStr = JSON.stringify(args, null, 2);
-
-    return result.ok
-      ? {
-          type: "success",
-          title: `Thinking...`,
-          content: 
-            `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
-            OTHER_EXECUTE_FUNCTION_OUTPUT(result.value),
-        }
-      : {
-          type: "error",
-          title: `Failed to think!`,
-          content: FUNCTION_CALL_FAILED(FN_NAME, result.error, args),
-        };
-  },
   buildExecutor(context: AgentContext) {
     return async (options: { thoughts: string }): Promise<AgentFunctionResult> => {
-      return ResultOk(`I think: ${options.thoughts}.`);
+      return ResultOk([
+        BasicAgentChatMessage.ok(
+          "system",
+          `Thinking...`,
+          `## Function Call:\n\`\`\`javascript\n${FN_NAME}\n\`\`\`\n` +
+          OTHER_EXECUTE_FUNCTION_OUTPUT(`I think: ${options.thoughts}.`)
+        )
+      ]);
     };
   }
 };

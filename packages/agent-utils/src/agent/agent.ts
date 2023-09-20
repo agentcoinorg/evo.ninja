@@ -1,5 +1,5 @@
 import { Result } from "@polywrap/result";
-import { AgentChatMessage } from "./agent-function";
+import { AgentOutputMessage } from "./agent-function";
 
 export interface Agent {
   run(
@@ -18,23 +18,23 @@ export enum PromptType {
 }
 
 export class StepOutput {
-  message: AgentChatMessage;
+  message: AgentOutputMessage;
   promptType: PromptType;
 
-  constructor(message: AgentChatMessage, promptType?: PromptType) {
+  constructor(message: AgentOutputMessage, promptType?: PromptType) {
     this.message = message;
     this.promptType = promptType ?? PromptType.None;
   }
 
-  static message(msg: AgentChatMessage): StepOutput {
+  static message(msg: AgentOutputMessage): StepOutput {
     return new StepOutput(msg);
   }
 
-  static prompt(msg: AgentChatMessage): StepOutput {
+  static prompt(msg: AgentOutputMessage): StepOutput {
     return new StepOutput(msg, PromptType.Prompt);
   }
 
-  static question(msg: AgentChatMessage): StepOutput {
+  static question(msg: AgentOutputMessage): StepOutput {
     return new StepOutput(msg, PromptType.Question);
   }
 }
