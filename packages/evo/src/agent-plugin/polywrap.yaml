@@ -1,0 +1,7 @@
+format: 0.4.0
+project:
+  name: agent-plugin
+  type: plugin/typescript
+source:
+  module: ./index.ts
+  schema: ./polywrap.graphql

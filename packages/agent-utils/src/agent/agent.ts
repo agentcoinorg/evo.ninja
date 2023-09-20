@@ -9,7 +9,7 @@ export interface Agent {
   ): AsyncGenerator<StepOutput, RunResult, string | undefined>;
 }
 
-export type RunResult = Result<undefined, string>; 
+export type RunResult = Result<StepOutput, string>; 
 
 export enum PromptType {
   None,

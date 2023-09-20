@@ -3,7 +3,7 @@ import { ResultErr, ResultOk } from "@polywrap/result";
 import { AgentChatMessage, AgentFunction, AgentFunctionResult } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
 import { EXECUTE_SCRIPT_OUTPUT, FUNCTION_CALL_FAILED } from "../prompts";
-import { JsEngine_GlobalVar, JsEngine_Module, shimCode } from "../wrap";
+import { JsEngine_GlobalVar, JsEngine, shimCode } from "../wrap";
 
 const FN_NAME = "executeScript";
 
@@ -92,10 +92,11 @@ export const executeScript: AgentFunction<AgentContext> = {
             })
           );
 
-        const result = await JsEngine_Module.evalWithGlobals({
+        const jsEngine = new JsEngine(context.client);
+        const result = await jsEngine.evalWithGlobals({
           src: shimCode(script.code),
           globals
-        }, context.client);
+        });
 
         if (result.ok && context.client.jsPromiseOutput.ok) {
           context.globals[options.result] =
