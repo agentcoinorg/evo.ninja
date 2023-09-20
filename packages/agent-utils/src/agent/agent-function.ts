@@ -16,12 +16,12 @@ export interface AgentOutputMessage {
   content?: string,
 }
 
-export class BasicAgentChatMessage implements AgentChatMessage {
+export class BasicAgentMessage implements AgentMessage {
   constructor(public outputMessage: AgentOutputMessage, public chatMessage: ChatCompletionRequestMessage) {
   }
 
-  static ok(role: ChatRole, title: string, content?: string): BasicAgentChatMessage {
-    return new BasicAgentChatMessage(
+  static ok(role: ChatRole, title: string, content?: string): BasicAgentMessage {
+    return new BasicAgentMessage(
       {
         type: "success",
         title,
@@ -34,8 +34,8 @@ export class BasicAgentChatMessage implements AgentChatMessage {
     );
   }
 
-  static error(role: ChatRole, title: string, content?: string): BasicAgentChatMessage {
-    return new BasicAgentChatMessage(
+  static error(role: ChatRole, title: string, content?: string): BasicAgentMessage {
+    return new BasicAgentMessage(
       {
         type: "error",
         title,
@@ -49,14 +49,14 @@ export class BasicAgentChatMessage implements AgentChatMessage {
   }
 }
 
-export interface AgentChatMessage {
+export interface AgentMessage {
   outputMessage: AgentOutputMessage,
   chatMessage: ChatCompletionRequestMessage
 }
 
 export type AgentFunctionDefinition = ChatCompletionFunctions;
 
-export type AgentFunctionResult = Result<AgentChatMessage[], string>; 
+export type AgentFunctionResult = Result<AgentMessage[], string>; 
 
 export interface AgentFunction<TContext> {
   definition: AgentFunctionDefinition;
@@ -72,7 +72,7 @@ export interface ExecuteAgentFunctionCalled {
 
 export interface ExecuteAgentFunctionResult {
   functionCalled?: ExecuteAgentFunctionCalled;
-  result: Result<AgentChatMessage[], string>;
+  result: Result<AgentMessage[], string>;
 }
 
 export type ExecuteAgentFunction = <TContext>(

@@ -1,10 +1,24 @@
 import { ResultErr, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, BasicAgentChatMessage } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, BasicAgentMessage } from "@evo-ninja/agent-utils";
 import { ScriptWriter } from "@evo-ninja/js-script-writer-agent";
 import { AgentContext } from "../AgentContext";
 import { FUNCTION_CALL_FAILED } from "../prompts";
+import { Script } from "../Scripts";
 
 const FN_NAME = "createScript";
+
+const CREATED_SCRIPT_TITLE = (params: FuncParameters) => `Created '${params.namespace}' script.`;
+const CREATED_SCRIPT_CONTENT = (
+  script: Script,
+  argsStr: string
+) => `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
+  `## Result\n\`\`\`\n${
+  `Created the following scripts:` + 
+  `\n--------------\n` + 
+  `Namespace: ${script.name}\nArguments: ${script.arguments}\nDescription: ${script.description}` +
+  `\n--------------\n`
+  }\n\`\`\``;
+
 type FuncParameters = { 
   namespace: string, 
   description: string, 
@@ -40,7 +54,7 @@ export function createScript(createScriptWriter: () => ScriptWriter): AgentFunct
       return async (params: FuncParameters): Promise<AgentFunctionResult> => {
         if (params.namespace.startsWith("agent.")) {
           return ResultOk([
-            BasicAgentChatMessage.error(
+            BasicAgentMessage.error(
               "system", 
               `Failed to create '${params.namespace}' script!`,
               FUNCTION_CALL_FAILED(FN_NAME, `Cannot create an script with namespace ${params.namespace}. Try searching for script in that namespace instead.`, params)
@@ -87,16 +101,10 @@ export function createScript(createScriptWriter: () => ScriptWriter): AgentFunct
         const argsStr = JSON.stringify(params, null, 2);
         
         return ResultOk([
-          BasicAgentChatMessage.ok(
+          BasicAgentMessage.ok(
             "system",
-            `Created '${params.namespace}' script.`,
-            `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
-            `## Result\n\`\`\`\n${
-            `Created the following scripts:` + 
-            `\n--------------\n` + 
-            `Namespace: ${script.name}\nArguments: ${script.arguments}\nDescription: ${script.description}` +
-            `\n--------------\n`
-            }\n\`\`\``
+            CREATED_SCRIPT_TITLE(params),
+            CREATED_SCRIPT_CONTENT(script, argsStr)
           )
         ]);
       };

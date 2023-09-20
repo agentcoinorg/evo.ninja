@@ -1,7 +1,7 @@
 import { AgentContext } from "../AgentContext";
 import { FUNCTION_CALL_FAILED } from "../prompts";
 
-import { AgentFunction, AgentFunctionResult, BasicAgentChatMessage } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, BasicAgentMessage } from "@evo-ninja/agent-utils";
 import { ResultOk } from "@polywrap/result";
 
 const allowedLibs = [
@@ -11,6 +11,7 @@ const allowedLibs = [
 ];
 
 const FN_NAME = "writeFunction";
+
 type FuncParameters = { 
   namespace: string, 
   description: string, 
@@ -50,7 +51,7 @@ export const writeFunction: AgentFunction<AgentContext> = {
     return async (params: FuncParameters): Promise<AgentFunctionResult> => {
       if (params.namespace.startsWith("agent.")) {
         return ResultOk([
-          BasicAgentChatMessage.error(
+          BasicAgentMessage.error(
             "system", 
             `Failed to write function '${params.namespace}'!`,
             FUNCTION_CALL_FAILED(FN_NAME, `Cannot create a function with namespace ${params.namespace}. Namespaces starting with 'agent.' are reserved.`, params)
@@ -59,13 +60,13 @@ export const writeFunction: AgentFunction<AgentContext> = {
       }
 
       if (extractRequires(params.code).some(x => !allowedLibs.includes(x))) {
-        return ResultOk([BasicAgentChatMessage.error("system", `Cannot require libraries other than ${allowedLibs.join(", ")}.`)])
+        return ResultOk([BasicAgentMessage.error("system", `Cannot require libraries other than ${allowedLibs.join(", ")}.`)])
       }
 
       context.workspace.writeFileSync("index.js", params.code);
 
       return ResultOk([
-        BasicAgentChatMessage.ok(
+        BasicAgentMessage.ok(
           "system",
           `Wrote function '${params.namespace}'.`,
           `Wrote the function ${params.namespace} to the workspace.`

@@ -1,11 +1,17 @@
 import JSON5 from "json5";
 import { ResultErr, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, BasicAgentChatMessage } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, BasicAgentMessage } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
 import { EXECUTE_SCRIPT_OUTPUT, FUNCTION_CALL_FAILED } from "../prompts";
 import { JsEngine_GlobalVar, JsEngine, shimCode } from "../wrap";
 
 const FN_NAME = "executeScript";
+
+const INVALID_EXECUTE_SCRIPT_ARGS = (
+  params: FuncParameters
+) => `Invalid arguments provided for script ${params.namespace}: '${params.arguments ?? ""}' is not valid JSON!`;
+const SCRIPT_NOT_FOUND = (params: FuncParameters) => `Script '${params.namespace}' not found!`;
+
 type FuncParameters = { 
   namespace: string, 
   description: string, 
@@ -43,7 +49,7 @@ export const executeScript: AgentFunction<AgentContext> = {
         const script = context.scripts.getScriptByName(params.namespace);
 
         if (!script) {
-          return ResultErr(`Script ${params.namespace} not found.`);
+          return error(params.namespace, SCRIPT_NOT_FOUND(params), params);
         }
 
         let args: any = undefined;
@@ -70,7 +76,7 @@ export const executeScript: AgentFunction<AgentContext> = {
             }
           }
         } catch {
-          return ResultErr(`Invalid arguments provided for script ${params.namespace}: '${params.arguments ?? ""}' is not valid JSON!`);
+          return error(params.namespace, INVALID_EXECUTE_SCRIPT_ARGS(params), params);
         }
 
         const globals: JsEngine_GlobalVar[] =
@@ -111,7 +117,7 @@ const ok = (funcName: string, result: any, params: any): AgentFunctionResult => 
   const argsStr = JSON.stringify(params, null, 2);
 
   return ResultOk([
-    BasicAgentChatMessage.ok(
+    BasicAgentMessage.ok(
       "system",
       `Executed '${funcName}' script.`,
       `# Function Call:\n\`\`\`javascript\n${funcName}(${argsStr})\n\`\`\`\n` +
@@ -122,7 +128,7 @@ const ok = (funcName: string, result: any, params: any): AgentFunctionResult => 
 
 const error = (funcName: string, content: string | undefined, params: any): AgentFunctionResult => {
   return ResultOk([
-    BasicAgentChatMessage.error("system", `'${funcName}' script failed to execute!`, 
+    BasicAgentMessage.error("system", `'${funcName}' script failed to execute!`, 
     FUNCTION_CALL_FAILED(funcName, content ?? "Unknown error", params))
   ]);
 };

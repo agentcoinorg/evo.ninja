@@ -1,8 +1,23 @@
 import { ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, BasicAgentChatMessage } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, BasicAgentMessage } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
+import { Script } from "../Scripts";
 
 const FN_NAME = "findScript";
+
+const FOUND_SCRIPTS_TITLE = (params: FuncParameters) => `Searched for '${params.namespace}' script ("${params.description}")`;
+const FOUND_SCRIPTS_CONTENT = (
+  params: FuncParameters,
+  candidates: Script[],
+  argsStr: string
+) => `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
+  `## Result\n\`\`\`\n${
+  `Found the following candidates for script: ${params.namespace}:` + 
+  `\n--------------\n` + 
+  `${candidates.map((c) => `Namespace: ${c.name}\nArguments: ${c.arguments}\nDescription: ${c.description}`).join("\n--------------\n")}` +
+  `\n--------------\n`
+  }\n\`\`\``;
+
 type FuncParameters = { 
   namespace: string, 
   description: string 
@@ -35,21 +50,15 @@ export const findScript: AgentFunction<AgentContext> = {
       ).slice(0, 5);
 
       if (candidates.length === 0) {
-        return ResultOk([BasicAgentChatMessage.error("system", `No script found.`, NO_SCRIPTS_FOUND(params))])
+        return ResultOk([BasicAgentMessage.error("system", `No script found.`, NO_SCRIPTS_FOUND(params))])
       }
       const argsStr = JSON.stringify(params, null, 2);
     
       return ResultOk([
-        BasicAgentChatMessage.ok(
+        BasicAgentMessage.ok(
           "system",
-          `Searched for '${params.namespace}' script ("${params.description}")`,
-          `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
-          `## Result\n\`\`\`\n${
-          `Found the following candidates for script: ${params.namespace}:` + 
-          `\n--------------\n` + 
-          `${candidates.map((c) => `Namespace: ${c.name}\nArguments: ${c.arguments}\nDescription: ${c.description}`).join("\n--------------\n")}` +
-          `\n--------------\n`
-          }\n\`\`\``
+          FOUND_SCRIPTS_TITLE(params),
+          FOUND_SCRIPTS_CONTENT(params, candidates, argsStr)
         )
       ]);
     };

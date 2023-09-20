@@ -37,7 +37,7 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
 
       if (!result.ok) {
         chat.temporary("system", result.error);
-        yield StepOutput.message({ type: "error", title: "Error", content: result.error });
+        yield StepOutput.message({ type: "error", title: `Failed to execute ${name}!`, content: result.error });
         continue;
       }
 

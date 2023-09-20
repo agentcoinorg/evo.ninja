@@ -1,9 +1,26 @@
 import { ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, BasicAgentChatMessage } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, BasicAgentMessage } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
 import { READ_GLOBAL_VAR_OUTPUT } from "../prompts";
 
 const FN_NAME = "readVar";
+
+const READ_VAR_TITLE = (params: FuncParameters) => 
+  `Read '${params.name}' variable.`;
+const READ_VAR_CONTENT = (
+  argsStr: string,
+  value: string
+) => 
+  `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
+  `## Result\n\`\`\`\n${
+    value
+  }\n\`\`\``;
+const FAILED_TO_READ_VAR_TITLE = (params: FuncParameters) => 
+  `Failed to read '${params.name}' variable.`;
+const FAILED_TO_READ_VAR_CONTENT = (params: FuncParameters, argsStr: string) => 
+  `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
+  READ_GLOBAL_VAR_OUTPUT(params.name, `Global variable ${params.name} not found.`);
+
 type FuncParameters = { 
   name: string 
 };
@@ -30,20 +47,19 @@ export const readVar: AgentFunction<AgentContext> = {
      
       if (!context.globals[params.name]) {
         return ResultOk([
-          BasicAgentChatMessage.error("system", `Failed to read ${params.name} variable!`, 
-          `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
-          READ_GLOBAL_VAR_OUTPUT(params.name, `Global variable ${params.name} not found.`))
+          BasicAgentMessage.error(
+            "system", 
+            FAILED_TO_READ_VAR_TITLE(params), 
+            FAILED_TO_READ_VAR_CONTENT(params, argsStr)
+          )
         ]);
       } 
 
       return ResultOk([
-        BasicAgentChatMessage.ok(
+        BasicAgentMessage.ok(
           "system",
-          `Read '${params.name}' variable.`,
-          `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
-          `## Result\n\`\`\`\n${
-            context.globals[params.name]
-          }\n\`\`\``
+          READ_VAR_TITLE(params),
+          READ_VAR_CONTENT(argsStr, context.globals[params.name])
         )
       ]);
     };
