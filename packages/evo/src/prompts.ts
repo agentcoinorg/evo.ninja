@@ -50,3 +50,6 @@ const STORED_RESULT_IN_VAR = (varName: string | undefined) => {
 
 export const OTHER_EXECUTE_FUNCTION_OUTPUT = (result: string) =>
   `## Result\n\`\`\`\n${result}\n\`\`\``;
+
+export const AGENT_PLUGIN_SPEAK_RESPONSE =
+  "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.\nIf you think you've failed, execute onGoalFailed.";

@@ -4,6 +4,7 @@ import {
   Module,
   manifest
 } from "./types";
+import { AGENT_PLUGIN_SPEAK_RESPONSE } from "../prompts";
 
 import { Logger } from "@evo-ninja/agent-utils";
 import { PluginFactory, PluginPackage } from "@polywrap/plugin-js";
@@ -22,7 +23,7 @@ export class AgentPlugin extends Module<AgentPluginConfig> {
 
   public speak(args: Args_speak): string {
     this._logger.success(args.message);
-    return "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.\nIf you think you've failed, execute onGoalFailed.";
+    return AGENT_PLUGIN_SPEAK_RESPONSE;
   }
 
   public async ask(args: Args_ask): Promise<string> {
