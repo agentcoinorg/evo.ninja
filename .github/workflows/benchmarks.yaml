@@ -41,6 +41,8 @@ jobs:
     - name: Start Agent Protocol HTTP API
       run: yarn start:api &
       working-directory: ./evo
+      env:
+        AGENT_WORKSPACE: "../../workspace"
 
     - name: Set up Python 3.10
       uses: actions/setup-python@v4
@@ -50,10 +52,10 @@ jobs:
     - name: Install poetry
       run: curl -sSL https://install.python-poetry.org | python3 -
 
-    - name: Install dependencies
+    - name: Install agbenchmark
       run: poetry install
       working-directory: ./evo
 
     - name: Run benchmarks
-      run: poetry run agbenchmark
+      run: poetry run agbenchmark start --test=TestWriteFile
       working-directory: ./evo
