@@ -37,7 +37,7 @@ export interface App {
   consoleLogger: ConsoleLogger;
 }
 
-export function createApp(timeout?: Timeout): App {
+export function createApp(timeout?: Timeout, workspaceSubpath?: string): App {
   const rootDir = path.join(__dirname, "../../../");
 
   const env = new Env(
@@ -78,8 +78,11 @@ export function createApp(timeout?: Timeout): App {
     env.MAX_RESPONSE_TOKENS,
     logger
   );
+  const workspacePath = process.env.AGENT_WORKSPACE
+    ? path.resolve(process.env.AGENT_WORKSPACE)
+    : path.join(rootDir, "workspace");
   const userWorkspace = new FileSystemWorkspace(
-    path.join(rootDir, "workspace")
+    path.join(workspacePath, workspaceSubpath ?? "")
   );
   const chat = new Chat(
     userWorkspace,

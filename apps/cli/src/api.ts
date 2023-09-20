@@ -7,8 +7,8 @@ import Agent, {
   TaskInput,
 } from 'agent-protocol';
 
-async function taskHandler(taskInput: TaskInput | null): Promise<StepHandler> {
-  const app = createApp();
+async function taskHandler(taskId: string, taskInput: TaskInput | null): Promise<StepHandler> {
+  const app = createApp(undefined, taskId);
 
   let iterator = app.evo.run(taskInput);
 
@@ -19,16 +19,9 @@ async function taskHandler(taskInput: TaskInput | null): Promise<StepHandler> {
       response.value.message :
       'No message';
 
-    if (response.done) {
-      return {
-        is_last: true,
-        output: outputMessage
-      };
-    } else {
-      return {
-        is_last: false,
-        output: outputMessage
-      };
+    return {
+      is_last: response.done,
+      output: JSON.stringify(outputMessage)
     }
   }
 
