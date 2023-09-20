@@ -1,12 +1,22 @@
-import { ResultErr } from "@polywrap/result";
 import { Chat, LlmApi, LlmResponse } from "../llm";
 import { StepOutput, RunResult } from "./agent";
-import { ExecuteAgentFunction, AgentFunction } from "./agent-function";
+import {
+  ExecuteAgentFunction,
+  ExecuteAgentFunctionResult,
+  ExecuteAgentFunctionCalled,
+  AgentFunction
+} from "./agent-function";
+
+import { ResultErr } from "@polywrap/result";
 
 export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, chat: Chat }>(
   context: TContext,
   executeAgentFunction: ExecuteAgentFunction,
   agentFunctions: AgentFunction<TContext>[],
+  shouldTerminate: (
+    functionCalled: ExecuteAgentFunctionCalled,
+    result: ExecuteAgentFunctionResult["result"]
+  ) => boolean,
   loopPreventionPrompt: string,
 ): AsyncGenerator<StepOutput, RunResult, string | undefined>
 {
@@ -23,21 +33,32 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
 
     if (response.function_call) {
       const { name, arguments: args } = response.function_call;
-      const result = await executeAgentFunction(name, args, context, agentFunctions);
+      const { result, functionCalled } = await executeAgentFunction(name, args, context, agentFunctions);
+
+      let output: StepOutput;
 
       if (result.ok) {
         chat.temporary({ role: "system", name, content: result.value.content});
-        yield StepOutput.message(result.value);
-      }
-      else {
+        output = StepOutput.message(result.value);
+      } else {
         chat.temporary("system", result.error as string);
-
-        yield StepOutput.message({
+        output = StepOutput.message({
           type: "error",
           title: `Failed to execute ${name}!`,
           content: result.error as string
         });
-      } 
+      }
+
+      const terminate = functionCalled && shouldTerminate(functionCalled, result);
+
+      if (terminate) {
+        return {
+          ok: true,
+          value: output
+        };
+      } else {
+        yield output;
+      }
     } else {
       yield* _preventLoopAndSaveMsg(chat, response, loopPreventionPrompt);
     }

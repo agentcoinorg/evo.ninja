@@ -5,7 +5,7 @@ import {
   Logger,
   ConsoleLogger
 } from "@evo-ninja/agent-utils";
-import { JsEngine_GlobalVar, JsEngine_Module, Scripts, WrapClient, shimCode } from "@evo-ninja/evo-agent";
+import { JsEngine_GlobalVar, JsEngine, Scripts, WrapClient, shimCode } from "@evo-ninja/evo-agent";
 import fs from "fs";
 import path from "path-browserify";
 
@@ -48,10 +48,11 @@ export async function runScriptJs(
   });
   const client = new WrapClient(workspace, logger);
 
-  const result = await JsEngine_Module.evalWithGlobals({
+  const jsEngine = new JsEngine(client);
+  const result = await jsEngine.evalWithGlobals({
     src: shimCode(script.code),
     globals,
-  }, client);
+  });
 
   console.log(result);
 

@@ -1,0 +1,6 @@
+{
+  "name": "math.sum",
+  "description": "Calculate the sum of a range of numbers",
+  "arguments": "{ start: number, end: number }",
+  "code": "./math.sum.js"
+}
