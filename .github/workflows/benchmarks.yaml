@@ -1,0 +1,59 @@
+name: benchmarks
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clone evo.ninja repository
+      uses: actions/checkout@v3
+      with:
+        path: evo
+
+    - name: Clone Auto-GPT repository
+      uses: actions/checkout@v3
+      with:
+        repository: Significant-Gravitas/Auto-GPT
+        path: Auto-GPT
+        ref: "agbenchmark-v0.0.10"
+
+    - name: Set up Node.js 18.15
+      uses: actions/setup-node@v1
+      with:
+        node-version: 18.15
+
+    - name: Install dependencies
+      run: yarn
+      working-directory: ./evo
+
+    - name: Build
+      run: yarn build
+      working-directory: ./evo
+      env:
+        CI: false
+
+    - name: Start Agent Protocol HTTP API
+      run: yarn start:api &
+      working-directory: ./evo
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install poetry
+      run: curl -sSL https://install.python-poetry.org | python3 -
+
+    - name: Install dependencies
+      run: poetry install
+      working-directory: ./evo
+
+    - name: Run benchmarks
+      run: poetry run agbenchmark
+      working-directory: ./evo

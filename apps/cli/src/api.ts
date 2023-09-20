@@ -5,7 +5,7 @@ import Agent, {
   StepInput,
   StepResult,
   TaskInput,
-} from 'agent-protocol';
+} from 'forked-agent-protocol';
 
 async function taskHandler(taskId: string, taskInput: TaskInput | null): Promise<StepHandler> {
   const app = createApp(undefined, taskId);
