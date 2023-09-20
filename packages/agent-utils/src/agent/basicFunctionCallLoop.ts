@@ -1,6 +1,11 @@
 import { Chat, LlmApi, LlmResponse } from "../llm";
 import { StepOutput, RunResult } from "./agent";
-import { ExecuteAgentFunction, ExecuteAgentFunctionCalled, AgentFunction } from "./agent-function";
+import {
+  ExecuteAgentFunction,
+  ExecuteAgentFunctionResult,
+  ExecuteAgentFunctionCalled,
+  AgentFunction
+} from "./agent-function";
 
 import { ResultErr } from "@polywrap/result";
 
@@ -9,7 +14,8 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
   executeAgentFunction: ExecuteAgentFunction,
   agentFunctions: AgentFunction<TContext>[],
   shouldTerminate: (
-    functionCalled: ExecuteAgentFunctionCalled
+    functionCalled: ExecuteAgentFunctionCalled,
+    result: ExecuteAgentFunctionResult["result"]
   ) => boolean,
   loopPreventionPrompt: string,
 ): AsyncGenerator<StepOutput, RunResult, string | undefined>
@@ -43,7 +49,7 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
         });
       }
 
-      const terminate = functionCalled && shouldTerminate(functionCalled);
+      const terminate = functionCalled && shouldTerminate(functionCalled, result);
 
       if (terminate) {
         return {
