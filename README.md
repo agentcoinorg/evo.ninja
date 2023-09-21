@@ -54,8 +54,6 @@ NOTE: Please remember that this is a prototype. Its main purpose is to demonstra
 ## Workspace
 Once evo.ninja is run, there will be a `./workspace` directory created. This is the root directory for the agent. Any files will be read & written from this directory.
 
-This will run the `agbenchmark` framework against the API of the [Agent Protocol](https://github.com/AI-Engineers-Foundation/agent-protocol-sdk-js) 
-
 ## Debugging
 evo.ninja keeps an up-to-date version of all messages being sent to the OpenAI API in the `./workspace/.msgs` file. All of these messages will be sent to OpenAI on each chat completion. This is useful because as the message log grows, summarizations are performed upon the message history to fit them within a maximum context window token limit.
 
@@ -86,4 +84,4 @@ must go to `benchmarks` folder and run:
 
 >`agbenchmark start --nc --test=TestCaseName`
 
-
+This will run the `agbenchmark` framework against the API of the [Agent Protocol](https://github.com/AI-Engineers-Foundation/agent-protocol-sdk-js) 
