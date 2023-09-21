@@ -86,19 +86,6 @@ export class AgentProtocolWorkspace implements Workspace {
     this._artifactLog.forEach((artifact) => {
       let artifactDirectoryPath = this.directoryPath;
 
-      // If the artifact has a relative_path, append it to the main directory
-      if (artifact.relative_path) {
-        artifactDirectoryPath = path.join(
-          this.directoryPath,
-          artifact.relative_path
-        );
-        if (!fs.existsSync(artifactDirectoryPath)) {
-          throw new Error(
-            `Artifact directory path: ${artifactDirectoryPath} does not exists`
-          );
-        }
-      }
-
       const filePath = path.join(artifactDirectoryPath, artifact.file_name);
       callback(artifact, filePath);
     });
@@ -108,7 +95,6 @@ export class AgentProtocolWorkspace implements Workspace {
     const artifacts: ArtifactLog[] = [];
 
     this.processArtifacts((artifact, filePath) => {
-      fs.writeFileSync(filePath, artifact.data);
       artifacts.push(artifact);
     });
 
