@@ -1,8 +1,8 @@
 import { AgentContext } from "../AgentContext";
-import { OTHER_EXECUTE_FUNCTION_OUTPUT, FUNCTION_CALL_FAILED } from "../prompts";
+import { FUNCTION_CALL_FAILED } from "../prompts";
 
-import { AgentFunction, AgentFunctionResult, AgentChatMessage } from "@evo-ninja/agent-utils";
-import { ResultErr, ResultOk } from "@polywrap/result";
+import { AgentFunction, AgentFunctionResult, BasicAgentMessage } from "@evo-ninja/agent-utils";
+import { ResultOk } from "@polywrap/result";
 
 const allowedLibs = [
   "fs",
@@ -11,6 +11,13 @@ const allowedLibs = [
 ];
 
 const FN_NAME = "writeFunction";
+
+type FuncParameters = { 
+  namespace: string, 
+  description: string, 
+  arguments: string, 
+  code: string 
+};
 
 export const writeFunction: AgentFunction<AgentContext> = {
   definition: {
@@ -40,36 +47,32 @@ export const writeFunction: AgentFunction<AgentContext> = {
       additionalProperties: false
     },
   },
-  buildChatMessage(args: any, result: AgentFunctionResult): AgentChatMessage {
-    const argsStr = JSON.stringify(args, null, 2);
-
-    return result.ok
-      ? {
-          type: "success",
-          title: `Wrote function '${args.namespace}'.`,
-          content: 
-            `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
-            OTHER_EXECUTE_FUNCTION_OUTPUT(result.value),
-        }
-      : {
-          type: "error",
-          title: `Failed to write function '${args.namespace}'!`,
-          content: FUNCTION_CALL_FAILED(FN_NAME, result.error, args),
-        };
-  },
   buildExecutor(context: AgentContext) {
-    return async (options: { namespace: string, description: string, arguments: string, code: string }): Promise<AgentFunctionResult> => {
-      if (options.namespace.startsWith("agent.")) {
-        return ResultErr(`Cannot create a function with namespace ${options.namespace}. Namespaces starting with 'agent.' are reserved.`);
+    return async (params: FuncParameters): Promise<AgentFunctionResult> => {
+      if (params.namespace.startsWith("agent.")) {
+        return ResultOk([
+          BasicAgentMessage.error(
+            "system", 
+            `Failed to write function '${params.namespace}'!`,
+            FUNCTION_CALL_FAILED(FN_NAME, `Cannot create a function with namespace ${params.namespace}. Namespaces starting with 'agent.' are reserved.`, params)
+          )
+        ]);
       }
 
-      if (extractRequires(options.code).some(x => !allowedLibs.includes(x))) {
-        return ResultErr(`Cannot require libraries other than ${allowedLibs.join(", ")}.`);
+      if (extractRequires(params.code).some(x => !allowedLibs.includes(x))) {
+        return ResultOk([BasicAgentMessage.error("system", `Cannot require libraries other than ${allowedLibs.join(", ")}.`)])
       }
 
-      context.workspace.writeFileSync("index.js", options.code);
+      context.workspace.writeFileSync("index.js", params.code);
 
-      return ResultOk(`Wrote the function ${options.namespace} to the workspace.`);
+      return ResultOk([
+        BasicAgentMessage.ok(
+          "system",
+          `Wrote function '${params.namespace}'.`,
+          `Wrote the function ${params.namespace} to the workspace.`,
+          FN_NAME
+        )
+      ]);
     };
   }
 };

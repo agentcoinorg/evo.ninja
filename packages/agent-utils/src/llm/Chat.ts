@@ -17,6 +17,8 @@ interface MessageLog {
   msgs: Message[];
 }
 
+export type ChatRole = ChatCompletionRequestMessageRoleEnum;
+
 export class Chat {
   private _msgLogs: Record<MessageType, MessageLog> = {
     "persistent": {
@@ -91,7 +93,7 @@ export class Chat {
   }
 
   public persistent(
-    role: ChatCompletionRequestMessageRoleEnum,
+    role: ChatRole,
     content: string
   ): string {
     this.add("persistent", { role, content });
@@ -99,19 +101,19 @@ export class Chat {
   }
 
   public temporary(
-    role: ChatCompletionRequestMessageRoleEnum,
-    content: string
+    role: ChatRole,
+    content?: string
   ): string | undefined;
   public temporary(
     msg: Message
   ): string | undefined;
   public temporary(
-    roleOrMsg: ChatCompletionRequestMessageRoleEnum | Message,
+    roleOrMsg: ChatRole | Message,
     content?: string
   ): string | undefined {
     switch(typeof roleOrMsg) {
       case "string":
-        this.add("temporary", { role: roleOrMsg as ChatCompletionRequestMessageRoleEnum, content });
+        this.add("temporary", { role: roleOrMsg as ChatRole, content });
         return content;
       case "object":
         this.add("temporary", roleOrMsg as Message);

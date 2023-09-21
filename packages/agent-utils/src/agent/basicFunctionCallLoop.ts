@@ -1,5 +1,6 @@
 import { Chat, LlmApi, LlmResponse } from "../llm";
-import { StepOutput, RunResult } from "./agent";
+import { AgentOutput } from "./AgentOutput";
+import { RunResult } from "./agent";
 import {
   ExecuteAgentFunction,
   ExecuteAgentFunctionResult,
@@ -7,7 +8,7 @@ import {
   AgentFunction
 } from "./agent-function";
 
-import { ResultErr } from "@polywrap/result";
+import { ResultErr, ResultOk } from "@polywrap/result";
 
 export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, chat: Chat }>(
   context: TContext,
@@ -18,7 +19,7 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
     result: ExecuteAgentFunctionResult["result"]
   ) => boolean,
   loopPreventionPrompt: string,
-): AsyncGenerator<StepOutput, RunResult, string | undefined>
+): AsyncGenerator<AgentOutput, RunResult, string | undefined>
 {
   const { llm, chat } = context;
 
@@ -35,29 +36,23 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
       const { name, arguments: args } = response.function_call;
       const { result, functionCalled } = await executeAgentFunction(name, args, context, agentFunctions);
 
-      let output: StepOutput;
-
-      if (result.ok) {
-        chat.temporary({ role: "system", name, content: result.value.content});
-        output = StepOutput.message(result.value);
-      } else {
-        chat.temporary("system", result.error as string);
-        output = StepOutput.message({
-          type: "error",
-          title: `Failed to execute ${name}!`,
-          content: result.error as string
-        });
+      if (!result.ok) {
+        chat.temporary("system", result.error);
+        yield { type: "error", title: `Failed to execute ${name}!`, content: result.error } as AgentOutput;
+        continue;
       }
 
-      const terminate = functionCalled && shouldTerminate(functionCalled, result);
+      for (let i = 0; i < result.value.length; i++) {
+        const msg = result.value[i];
+        chat.temporary(msg.chatMessage);
 
-      if (terminate) {
-        return {
-          ok: true,
-          value: output
-        };
-      } else {
-        yield output;
+        if (i === result.value.length - 1 &&
+          functionCalled && shouldTerminate(functionCalled, result)
+        ) {
+          return ResultOk(msg.output);
+        }
+
+        yield msg.output;
       }
     } else {
       yield* _preventLoopAndSaveMsg(chat, response, loopPreventionPrompt);
@@ -65,21 +60,21 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
   }
 }
 
-async function* _preventLoopAndSaveMsg(chat: Chat, response: LlmResponse, loopPreventionPrompt: string): AsyncGenerator<StepOutput, void, string | undefined> {
+async function* _preventLoopAndSaveMsg(chat: Chat, response: LlmResponse, loopPreventionPrompt: string): AsyncGenerator<AgentOutput, void, string | undefined> {
   if (chat.messages[chat.messages.length - 1].content === response.content &&
     chat.messages[chat.messages.length - 2].content === response.content) {
       chat.temporary("system", loopPreventionPrompt);
-      yield StepOutput.message({
+      yield {
         type: "warning",
         title: "Loop prevention",
         content: loopPreventionPrompt
-      });
+      } as AgentOutput;
   } else {
     chat.temporary(response);
-    yield StepOutput.message({
+    yield {
       type: "success",
       title: "Agent response",
       content: response.content ?? ""
-    });
+    } as AgentOutput;
   }
 }

@@ -8,23 +8,17 @@ import {
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
 import { ChatCompletionFunctions } from "openai";
 import JSON5 from "json5";
-
-export interface AgentChatMessage {
-  type: "success" | "error" | "info" | "warning",
-  title: string,
-  content?: string,
-}
+import { AgentMessage } from "./messages";
 
 export type AgentFunctionDefinition = ChatCompletionFunctions;
 
-export type AgentFunctionResult = Result<string, any>; 
+export type AgentFunctionResult = Result<AgentMessage[], string>; 
 
 export interface AgentFunction<TContext> {
   definition: AgentFunctionDefinition;
-  buildChatMessage(args: any, result: AgentFunctionResult): AgentChatMessage;
   buildExecutor(
     context: TContext
-  ): (options: any) => Promise<any>;
+  ): (options: any) => Promise<AgentFunctionResult>;
 }
 
 export interface ExecuteAgentFunctionCalled {
@@ -34,7 +28,7 @@ export interface ExecuteAgentFunctionCalled {
 
 export interface ExecuteAgentFunctionResult {
   functionCalled?: ExecuteAgentFunctionCalled;
-  result: Result<AgentChatMessage, string>;
+  result: Result<AgentMessage[], string>;
 }
 
 export type ExecuteAgentFunction = <TContext>(
@@ -63,21 +57,12 @@ export const executeAgentFunction: ExecuteAgentFunction = async <TContext>(
   const executor = func.buildExecutor(context);
   const result = await executor(fnArgs);
 
-  const functionCalled = {
-    name: func.definition.name,
-    args: fnArgs
-  };
-
-  if (!result.ok) {
-    return {
-      functionCalled,
-      result: ResultErr(result.error.message)
-    };
-  }
-
   return {
-    functionCalled,
-    result: ResultOk(func.buildChatMessage(fnArgs, result))
+    result,
+    functionCalled: {
+      name: func.definition.name,
+      args: fnArgs
+    },
   };
 }
 
