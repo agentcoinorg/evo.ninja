@@ -1,6 +1,6 @@
 {
     "name":"agent.speak",
     "description":"Informs the user by sending a message.",
-    "arguments":"{ message: { type: \"string\" } }",
+    "arguments":"{ message: string }",
     "code":"./agent.speak.js"
 }
