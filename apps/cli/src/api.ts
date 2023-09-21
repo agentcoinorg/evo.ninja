@@ -12,8 +12,9 @@ async function taskHandler(
   id: string,
   input: TaskInput | null
 ): Promise<StepHandler> {
-  const workspacePath = process.env.AGENT_WORKSPACE ?? "../../workspace";
-  const workspace = new AgentProtocolWorkspace(path.join(process.cwd(), workspacePath, id));
+  const workspace = new AgentProtocolWorkspace(
+    path.join(process.cwd(), "../../workspace", id)
+  );
   const app = createApp({ userWorkspace: workspace });
 
   let iterator = app.evo.run(input);
@@ -26,11 +27,11 @@ async function taskHandler(
         : "No message";
 
     const artifacts = workspace.createArtifacts();
-    workspace.cleanArtifacts()
+    workspace.cleanArtifacts();
     return {
       is_last: response.done,
       output: JSON.stringify(outputMessage),
-      artifacts
+      artifacts,
     };
   }
 
