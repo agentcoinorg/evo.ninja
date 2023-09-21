@@ -1,0 +1,15 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "evo.ninja-benchmarks"
+version = "0.1.0"
+description = "Package to run benchmarks with agent protocol"
+authors = ["Polywrap DAO <contact@polywrap.io>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+agbenchmark = { path = "./Auto-GPT/benchmark" }
+
+

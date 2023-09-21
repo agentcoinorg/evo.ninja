@@ -1,0 +1,74 @@
+name: benchmarks
+
+on:
+  issue_comment:
+    types: [created, edited]
+
+jobs:
+  run:
+    if: |
+      github.event.issue.pull_request != null &&
+      contains(github.event.comment.body, '/workflows/benchmarks')
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./evo
+    steps:
+    - name: Clone evo.ninja repository
+      uses: actions/checkout@v3
+      with:
+        path: evo
+        submodules: 'recursive'
+
+    - name: Read .nvmrc into outputs.NVMRC
+      run: echo NVMRC=$(cat .nvmrc) >> "$GITHUB_OUTPUT"
+      id: nvm
+
+    - name: Set up Node.js 18.15
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ steps.nvm.outputs.NVMRC }}
+
+    - name: Install dependencies
+      run: yarn
+
+    - name: Build
+      run: yarn build
+      env:
+        CI: false
+
+    - name: Start Agent Protocol HTTP API
+      run: yarn start:api &
+      env:
+        AGENT_WORKSPACE: "../../workspace"
+        OPENAI_API_KEY: ${{ secrets.BENCHMARK_CI_OPENAI_API_KEY }}
+        GPT_MODEL: "gpt-4-0613"
+        CONTEXT_WINDOW_TOKENS: 16000
+        MAX_RESPONSE_TOKENS: 2000
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install poetry
+      run: curl -sSL https://install.python-poetry.org | python3 -
+
+    - name: Install agbenchmark
+      run: poetry install
+      working-directory: './evo/benchmarks'
+
+    - name: Benchmarks PR comment
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '[Running Benchmarks](https://github.com/${{github.repository}}/actions/runs/${{github.run_id}})'
+          })
+
+    - name: Run benchmarks
+      run: poetry run agbenchmark start --cutoff 300
+      working-directory: './evo/benchmarks'

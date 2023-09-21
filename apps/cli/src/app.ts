@@ -1,16 +1,14 @@
 import { FileSystemWorkspace, FileLogger } from "./sys";
 
-import {
-  Evo,
-  Scripts,
-} from "@evo-ninja/evo-agent";
+import { Evo, Scripts } from "@evo-ninja/evo-agent";
 import {
   Env,
   OpenAI,
   Chat,
   ConsoleLogger,
   Logger,
-  Timeout
+  Timeout,
+  Workspace,
 } from "@evo-ninja/agent-utils";
 import dotenv from "dotenv";
 import readline from "readline";
@@ -18,17 +16,16 @@ import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 
 dotenv.config({
-  path: path.join(__dirname, "../../../.env")
+  path: path.join(__dirname, "../../../.env"),
 });
 
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 });
 
-const prompt = (query: string) => new Promise<string>(
-  (resolve) => rl.question(query, resolve)
-);
+const prompt = (query: string) =>
+  new Promise<string>((resolve) => rl.question(query, resolve));
 
 export interface App {
   evo: Evo;
@@ -37,47 +34,40 @@ export interface App {
   consoleLogger: ConsoleLogger;
 }
 
-export interface AppConfig { 
+export interface AppConfig {
   rootDir?: string;
   timeout?: Timeout;
+  userWorkspace?: Workspace;
 }
 
 export function createApp(config?: AppConfig): App {
-  const rootDir = config?.rootDir ?
-    path.resolve(config?.rootDir) :
-    path.join(__dirname, "../../../");
+  const rootDir = config?.rootDir
+    ? path.resolve(config?.rootDir)
+    : path.join(__dirname, "../../../");
 
-  const env = new Env(
-    process.env as Record<string, string>
-  );
+  const env = new Env(process.env as Record<string, string>);
 
   // Generate a unique log file
   const date = new Date();
-  const logFile = `chat_${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}.md`;
-  const logWorkspace = new FileSystemWorkspace(
-    path.join(rootDir, "chats")
-  );
+  const logFile = `chat_${date.getFullYear()}-${
+    date.getMonth() + 1
+  }-${date.getDate()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}.md`;
+  const logWorkspace = new FileSystemWorkspace(path.join(rootDir, "chats"));
   const fileLogger = new FileLogger(logWorkspace.toWorkspacePath(logFile));
 
   // Create logger
   const consoleLogger = new ConsoleLogger();
-  const logger = new Logger([
-    fileLogger,
-    consoleLogger
-  ], {
+  const logger = new Logger([fileLogger, consoleLogger], {
     promptUser: prompt,
     logUserPrompt: (response: string) => {
       fileLogger.info(`#User:\n${response}`);
-    }
-  })
+    },
+  });
 
   const scriptsWorkspace = new FileSystemWorkspace(
     path.join(rootDir, "scripts")
   );
-  const scripts = new Scripts(
-    scriptsWorkspace,
-    "./"
-  );
+  const scripts = new Scripts(scriptsWorkspace, "./");
   const llm = new OpenAI(
     env.OPENAI_API_KEY,
     env.GPT_MODEL,
@@ -85,15 +75,11 @@ export function createApp(config?: AppConfig): App {
     env.MAX_RESPONSE_TOKENS,
     logger
   );
-  const userWorkspace = new FileSystemWorkspace(
-    path.join(rootDir, "workspace")
-  );
-  const chat = new Chat(
-    userWorkspace,
-    llm,
-    cl100k_base,
-    logger
-  );
+
+  const userWorkspace =
+    config?.userWorkspace ??
+    new FileSystemWorkspace(path.join(rootDir, "workspace"));
+  const chat = new Chat(userWorkspace, llm, cl100k_base, logger);
 
   // Create Evo
   const evo = new Evo(
@@ -109,6 +95,6 @@ export function createApp(config?: AppConfig): App {
     evo,
     logger,
     fileLogger,
-    consoleLogger
+    consoleLogger,
   };
 }
