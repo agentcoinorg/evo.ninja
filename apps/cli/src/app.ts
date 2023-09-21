@@ -37,8 +37,15 @@ export interface App {
   consoleLogger: ConsoleLogger;
 }
 
-export function createApp(timeout?: Timeout): App {
-  const rootDir = path.join(__dirname, "../../../");
+export interface AppConfig { 
+  rootDir?: string;
+  timeout?: Timeout;
+}
+
+export function createApp(config?: AppConfig): App {
+  const rootDir = config?.rootDir ?
+    path.resolve(config?.rootDir) :
+    path.join(__dirname, "../../../");
 
   const env = new Env(
     process.env as Record<string, string>
@@ -95,7 +102,7 @@ export function createApp(timeout?: Timeout): App {
     logger,
     userWorkspace,
     scripts,
-    timeout
+    config?.timeout
   );
 
   return {

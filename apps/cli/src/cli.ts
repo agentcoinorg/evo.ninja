@@ -6,7 +6,8 @@ import { program } from "commander";
 export async function cli(): Promise<void> {
   program
     .argument("[goal]", "Goal to be achieved")
-    .option("-t, --timeout <number>")
+    .option("-t, --timeout <seconds>")
+    .option("-r, --root <path>")
     .parse();
 
   const options = program.opts();
@@ -19,7 +20,10 @@ export async function cli(): Promise<void> {
     },
   );
 
-  const app = createApp(timeout);
+  const app = createApp({
+    timeout,
+    rootDir: options.root || undefined
+  });
 
   await app.logger.logHeader();
 
