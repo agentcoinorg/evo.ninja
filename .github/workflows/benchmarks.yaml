@@ -70,5 +70,5 @@ jobs:
           })
 
     - name: Run benchmarks
-      run: poetry run agbenchmark start --cutoff 300
+      run: poetry run agbenchmark start --cutoff 300 --test=TestReadFile
       working-directory: './evo/benchmarks'
