@@ -1,4 +1,4 @@
-import { ILogger, Message } from "@evo-ninja/agent-utils";
+import { ILogger, ChatMessage } from "@evo-ninja/agent-utils";
 import fs from "fs";
 import path from "path-browserify";
 
@@ -22,7 +22,7 @@ export class FileLogger implements ILogger {
     fs.appendFileSync(this._filePath, info + "\n\n");
   }
 
-  message(msg: Message): void {
+  message(msg: ChatMessage): void {
     const roleUpper = msg.role[0].toUpperCase() + (
       msg.role.length > 1 ? msg.role.substring(1) : ""
     );
@@ -30,7 +30,7 @@ export class FileLogger implements ILogger {
     this.info(`**${roleUpper}**: ${msg.content}\n  \n`);
   }
 
-  action(msg: Message): void {
+  action(msg: ChatMessage): void {
     this.message(msg);
   }
 

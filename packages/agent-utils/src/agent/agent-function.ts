@@ -8,17 +8,21 @@ import {
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
 import { ChatCompletionFunctions } from "openai";
 import JSON5 from "json5";
-import { AgentMessage } from "./messages";
+import { AgentOutput } from "./AgentOutput";
+import { ChatMessage } from "../llm";
 
 export type AgentFunctionDefinition = ChatCompletionFunctions;
 
-export type AgentFunctionResult = Result<AgentMessage[], string>; 
+export type AgentFunctionResult = {
+  outputs: AgentOutput[];
+  messages: ChatMessage[];
+}; 
 
 export interface AgentFunction<TContext> {
   definition: AgentFunctionDefinition;
   buildExecutor(
     context: TContext
-  ): (options: any) => Promise<AgentFunctionResult>;
+  ): (options: any) => Promise<Result<AgentFunctionResult, string>>;
 }
 
 export interface ExecuteAgentFunctionCalled {
@@ -28,7 +32,7 @@ export interface ExecuteAgentFunctionCalled {
 
 export interface ExecuteAgentFunctionResult {
   functionCalled?: ExecuteAgentFunctionCalled;
-  result: Result<AgentMessage[], string>;
+  result: Result<AgentFunctionResult, string>;
 }
 
 export type ExecuteAgentFunction = <TContext>(

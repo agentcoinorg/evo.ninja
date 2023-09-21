@@ -1,4 +1,4 @@
-import { Chat, LlmApi, LlmResponse } from "../llm";
+import { Chat, ChatMessage, LlmApi } from "../llm";
 import { AgentOutput } from "./AgentOutput";
 import { RunResult } from "./agent";
 import {
@@ -42,17 +42,18 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
         continue;
       }
 
-      for (let i = 0; i < result.value.length; i++) {
-        const msg = result.value[i];
-        chat.temporary(msg.chatMessage);
+      result.value.messages.forEach(x => chat.temporary(x));
 
-        if (i === result.value.length - 1 &&
+      for (let i = 0; i < result.value.outputs.length; i++) {
+        const output = result.value.outputs[i];
+
+        if (i === result.value.outputs.length - 1 &&
           functionCalled && shouldTerminate(functionCalled, result)
         ) {
-          return ResultOk(msg.output);
+          return ResultOk(output);
         }
 
-        yield msg.output;
+        yield output;
       }
     } else {
       yield* _preventLoopAndSaveMsg(chat, response, loopPreventionPrompt);
@@ -60,7 +61,7 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
   }
 }
 
-async function* _preventLoopAndSaveMsg(chat: Chat, response: LlmResponse, loopPreventionPrompt: string): AsyncGenerator<AgentOutput, void, string | undefined> {
+async function* _preventLoopAndSaveMsg(chat: Chat, response: ChatMessage, loopPreventionPrompt: string): AsyncGenerator<AgentOutput, void, string | undefined> {
   if (chat.messages[chat.messages.length - 1].content === response.content &&
     chat.messages[chat.messages.length - 2].content === response.content) {
       chat.temporary("system", loopPreventionPrompt);

@@ -1,4 +1,4 @@
-import { ILogger, Message } from "@evo-ninja/agent-utils";
+import { ILogger, ChatMessage } from "@evo-ninja/agent-utils";
 
 export interface MarkdownLoggerConfig {
   onLog(markdown: string, color?: string): void;
@@ -15,7 +15,7 @@ export class MarkdownLogger implements ILogger {
     );
   }
 
-  message(msg: Message): void {
+  message(msg: ChatMessage): void {
     const roleUpper = msg.role[0].toUpperCase() + (
       msg.role.length > 1 ? msg.role.substring(1) : ""
     );
@@ -23,7 +23,7 @@ export class MarkdownLogger implements ILogger {
     this._config.onLog(`**"${roleUpper}" Message**:\n${msg.content}`);
   }
 
-  action(msg: Message): void {
+  action(msg: ChatMessage): void {
     const roleUpper = msg.role[0].toUpperCase() + (
       msg.role.length > 1 ? msg.role.substring(1) : ""
     );

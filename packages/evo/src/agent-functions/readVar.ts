@@ -1,10 +1,59 @@
-import { ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, BasicAgentMessage } from "@evo-ninja/agent-utils";
+import { Result, ResultOk } from "@polywrap/result";
+import { AgentFunction, AgentFunctionResult } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
 import { FUNCTION_CALL_FAILED, READ_GLOBAL_VAR_OUTPUT } from "../prompts";
 
 const FN_NAME = "readVar";
+type FuncParameters = { 
+  name: string 
+};
 
+const SUCCESS = (params: FuncParameters, varValue: string): AgentFunctionResult => ({
+  outputs: [
+    {
+      type: "success",
+      title: READ_VAR_TITLE(params),
+      content: READ_VAR_CONTENT(params, JSON.stringify(params, null, 2), varValue)
+    }
+  ],
+  messages: [
+    {
+      role: "assistant",
+      content: "",
+      function_call: {
+        name: FN_NAME,
+        arguments: JSON.stringify(params)
+      },
+    },
+    {
+      role: "system",
+      content: READ_VAR_CONTENT(params, JSON.stringify(params, null, 2), varValue)
+    },
+  ]
+});
+const VAR_NOT_FOUND_ERROR = (params: FuncParameters): AgentFunctionResult => ({
+  outputs: [
+    {
+      type: "success",
+      title: FAILED_TO_READ_VAR_TITLE(params), 
+      content: FAILED_TO_READ_VAR_CONTENT(params)
+    }
+  ],
+  messages: [
+    {
+      role: "assistant",
+      content: "",
+      function_call: {
+        name: FN_NAME,
+        arguments: JSON.stringify(params)
+      },
+    },
+    {
+      role: "system",
+      content: FAILED_TO_READ_VAR_CONTENT(params)
+    },
+  ]
+});
 const READ_VAR_TITLE = (params: FuncParameters) => 
   `Read '${params.name}' variable.`;
 const READ_VAR_CONTENT = (
@@ -20,10 +69,6 @@ const FAILED_TO_READ_VAR_TITLE = (params: FuncParameters) =>
   `Failed to read '${params.name}' variable.`;
 const FAILED_TO_READ_VAR_CONTENT = (params: FuncParameters) => 
   FUNCTION_CALL_FAILED(FN_NAME, `Global variable ${params.name} not found.`, params);
-
-type FuncParameters = { 
-  name: string 
-};
 
 export const readVar: AgentFunction<AgentContext> = {
   definition: {
@@ -42,27 +87,12 @@ export const readVar: AgentFunction<AgentContext> = {
     },
   },
   buildExecutor(context: AgentContext) {
-    return async (params: FuncParameters): Promise<AgentFunctionResult> => {
-      const argsStr = JSON.stringify(params, null, 2);
-     
+    return async (params: FuncParameters): Promise<Result<AgentFunctionResult, string>> => {
       if (!context.globals[params.name]) {
-        return ResultOk([
-          BasicAgentMessage.error(
-            "system", 
-            FAILED_TO_READ_VAR_TITLE(params), 
-            FAILED_TO_READ_VAR_CONTENT(params)
-          )
-        ]);
+        return ResultOk(VAR_NOT_FOUND_ERROR(params));
       } 
 
-      return ResultOk([
-        BasicAgentMessage.ok(
-          "system",
-          READ_VAR_TITLE(params),
-          READ_VAR_CONTENT(params, argsStr, context.globals[params.name]),
-          FN_NAME
-        )
-      ]);
+      return ResultOk(SUCCESS(params, context.globals[params.name]));
     };
   }
 };

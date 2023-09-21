@@ -1,4 +1,4 @@
-import { LlmApi, LlmOptions, LlmResponse, Chat } from ".";
+import { LlmApi, LlmOptions, Chat, ChatMessage } from ".";
 import { Logger } from "../";
 
 import {
@@ -51,7 +51,7 @@ export class OpenAI implements LlmApi {
     functionDefinitions: any[],
     options?: LlmOptions,
     tries?: number
-  ): Promise<LlmResponse | undefined> {
+  ): Promise<ChatMessage | undefined> {
     try {
       const completion = await this._createChatCompletion({
         messages: chat.messages,
