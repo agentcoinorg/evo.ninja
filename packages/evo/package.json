@@ -7,7 +7,8 @@
     "build": "rimraf build && tsc",
     "codegen": "yarn codegen:js-engine && yarn codegen:agent-plugin",
     "codegen:js-engine": "polywrap codegen -m ./src/wrap/js-engine/polywrap.yaml --codegen-dir ./src/wrap/js-engine/types",
-    "codegen:agent-plugin": "polywrap codegen -m ./src/agent-plugin/polywrap.yaml --codegen-dir ./src/agent-plugin/types"
+    "codegen:agent-plugin": "polywrap codegen -m ./src/agent-plugin/polywrap.yaml --codegen-dir ./src/agent-plugin/types",
+    "test": "jest --passWithNoTests --runInBand --verbose --rootDir . --config ../../jest.config.js"
   },
   "dependencies": {
     "@polywrap/client-js": "~0.12.0",
