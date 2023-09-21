@@ -1,4 +1,6 @@
+import { AgentProtocolWorkspace } from "./sys/AgentProtocolWorkspace";
 import { createApp } from "./app";
+
 import path from "path";
 import Agent, {
   StepHandler,
@@ -6,7 +8,6 @@ import Agent, {
   StepResult,
   TaskInput,
 } from "forked-agent-protocol";
-import { AgentProtocolWorkspace } from "./sys/AgentProtocolWorkspace";
 
 async function taskHandler(
   id: string,
