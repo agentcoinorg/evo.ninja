@@ -3,10 +3,12 @@ name: benchmarks
 on:
   issue_comment:
     types: [created, edited]
-  pull_request:
 
 jobs:
   run:
+    if: |
+      github.event.issue.pull_request != null &&
+      contains(github.event.comment.body, '/workflows/benchmarks')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -56,7 +58,7 @@ jobs:
       run: poetry install
       working-directory: './evo/benchmarks'
 
-    - name: Running Benchmarks...
+    - name: Benchmarks PR comment
       uses: actions/github-script@v6
       with:
         script: |
@@ -68,5 +70,5 @@ jobs:
           })
 
     - name: Run benchmarks
-      run: poetry run agbenchmark start --cutoff 300 --test=TestReadFile
+      run: poetry run agbenchmark start --cutoff 300
       working-directory: './evo/benchmarks'
