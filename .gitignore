@@ -6,4 +6,4 @@ workspace
 chats
 
 !/benchmarks/agbenchmark_config/config.json
-/benchmarks/agbenchmark_config/
+/benchmarks/agbenchmark_config
