@@ -1,5 +1,6 @@
 import { Chat, LlmApi, LlmResponse } from "../llm";
-import { StepOutput, RunResult } from "./agent";
+import { AgentOutput } from "./AgentOutput";
+import { RunResult } from "./agent";
 import {
   ExecuteAgentFunction,
   ExecuteAgentFunctionResult,
@@ -18,7 +19,7 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
     result: ExecuteAgentFunctionResult["result"]
   ) => boolean,
   loopPreventionPrompt: string,
-): AsyncGenerator<StepOutput, RunResult, string | undefined>
+): AsyncGenerator<AgentOutput, RunResult, string | undefined>
 {
   const { llm, chat } = context;
 
@@ -37,7 +38,7 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
 
       if (!result.ok) {
         chat.temporary("system", result.error);
-        yield StepOutput.message({ type: "error", title: `Failed to execute ${name}!`, content: result.error });
+        yield { type: "error", title: `Failed to execute ${name}!`, content: result.error } as AgentOutput;
         continue;
       }
 
@@ -48,10 +49,10 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
         if (i === result.value.length - 1 &&
           functionCalled && shouldTerminate(functionCalled, result)
         ) {
-          return ResultOk(StepOutput.message(msg.outputMessage));
+          return ResultOk(msg.output);
         }
 
-        yield StepOutput.message(msg.outputMessage);
+        yield msg.output;
       }
     } else {
       yield* _preventLoopAndSaveMsg(chat, response, loopPreventionPrompt);
@@ -59,21 +60,21 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
   }
 }
 
-async function* _preventLoopAndSaveMsg(chat: Chat, response: LlmResponse, loopPreventionPrompt: string): AsyncGenerator<StepOutput, void, string | undefined> {
+async function* _preventLoopAndSaveMsg(chat: Chat, response: LlmResponse, loopPreventionPrompt: string): AsyncGenerator<AgentOutput, void, string | undefined> {
   if (chat.messages[chat.messages.length - 1].content === response.content &&
     chat.messages[chat.messages.length - 2].content === response.content) {
       chat.temporary("system", loopPreventionPrompt);
-      yield StepOutput.message({
+      yield {
         type: "warning",
         title: "Loop prevention",
         content: loopPreventionPrompt
-      });
+      } as AgentOutput;
   } else {
     chat.temporary(response);
-    yield StepOutput.message({
+    yield {
       type: "success",
       title: "Agent response",
       content: response.content ?? ""
-    });
+    } as AgentOutput;
   }
 }

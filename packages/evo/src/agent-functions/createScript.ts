@@ -79,7 +79,7 @@ export function createScript(createScriptWriter: () => ScriptWriter): AgentFunct
             break;
           }
 
-          response.value && context.logger.info(response.value.message.title);
+          response.value && context.logger.info(response.value.title);
 
           // TODO: we should not be communicating the ScriptWriter's completion
           //       via a special file in the workspace

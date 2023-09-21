@@ -6,54 +6,9 @@ import {
 } from "./prompts";
 
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
-import { ChatCompletionFunctions, ChatCompletionRequestMessage } from "openai";
+import { ChatCompletionFunctions } from "openai";
 import JSON5 from "json5";
-import { ChatRole } from "../llm";
-
-export interface AgentOutputMessage {
-  type: "success" | "error" | "info" | "warning",
-  title: string,
-  content?: string,
-}
-
-export class BasicAgentMessage implements AgentMessage {
-  constructor(public outputMessage: AgentOutputMessage, public chatMessage: ChatCompletionRequestMessage) {
-  }
-
-  static ok(role: ChatRole, title: string, content?: string, name?: string): BasicAgentMessage {
-    return new BasicAgentMessage(
-      {
-        type: "success",
-        title,
-        content
-      },
-      {
-        role,
-        name,
-        content,
-      }
-    );
-  }
-
-  static error(role: ChatRole, title: string, content?: string): BasicAgentMessage {
-    return new BasicAgentMessage(
-      {
-        type: "error",
-        title,
-        content,
-      },
-      {
-        role,
-        content
-      }
-    );
-  }
-}
-
-export interface AgentMessage {
-  outputMessage: AgentOutputMessage,
-  chatMessage: ChatCompletionRequestMessage
-}
+import { AgentMessage } from "./messages";
 
 export type AgentFunctionDefinition = ChatCompletionFunctions;
 

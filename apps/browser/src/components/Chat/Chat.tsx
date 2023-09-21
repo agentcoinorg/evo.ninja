@@ -100,10 +100,10 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
 
         const response = await evoItr.next();
 
-        if (!response.done && response.value.message) {
+        if (!response.done) {
           const evoMessage = {
-            title: response.value.message.title,
-            content: response.value.message.content,
+            title: response.value.title,
+            content: response.value.content,
             user: "evo"
           };
           messageLog = [...messageLog, evoMessage];
