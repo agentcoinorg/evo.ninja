@@ -69,7 +69,8 @@ export const writeFunction: AgentFunction<AgentContext> = {
         BasicAgentMessage.ok(
           "system",
           `Wrote function '${params.namespace}'.`,
-          `Wrote the function ${params.namespace} to the workspace.`
+          `Wrote the function ${params.namespace} to the workspace.`,
+          FN_NAME
         )
       ]);
     };

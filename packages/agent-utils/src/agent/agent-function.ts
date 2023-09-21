@@ -20,7 +20,7 @@ export class BasicAgentMessage implements AgentMessage {
   constructor(public outputMessage: AgentOutputMessage, public chatMessage: ChatCompletionRequestMessage) {
   }
 
-  static ok(role: ChatRole, title: string, content?: string): BasicAgentMessage {
+  static ok(role: ChatRole, title: string, content?: string, name?: string): BasicAgentMessage {
     return new BasicAgentMessage(
       {
         type: "success",
@@ -29,7 +29,8 @@ export class BasicAgentMessage implements AgentMessage {
       },
       {
         role,
-        content
+        name,
+        content,
       }
     );
   }

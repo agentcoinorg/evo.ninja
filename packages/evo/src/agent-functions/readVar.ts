@@ -12,7 +12,7 @@ const READ_VAR_CONTENT = (
   argsStr: string,
   value: string
 ) => 
-  `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
+  `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
   `## Result\n\`\`\`\n${
     READ_GLOBAL_VAR_OUTPUT(params.name, value)
   }\n\`\`\``;
@@ -59,7 +59,8 @@ export const readVar: AgentFunction<AgentContext> = {
         BasicAgentMessage.ok(
           "system",
           READ_VAR_TITLE(params),
-          READ_VAR_CONTENT(params, argsStr, context.globals[params.name])
+          READ_VAR_CONTENT(params, argsStr, context.globals[params.name]),
+          FN_NAME
         )
       ]);
     };

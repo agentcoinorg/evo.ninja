@@ -32,7 +32,8 @@ export const think: AgentFunction<AgentContext> = {
           "system",
           `Thinking...`,
           `## Function Call:\n\`\`\`javascript\n${FN_NAME}\n\`\`\`\n` +
-          OTHER_EXECUTE_FUNCTION_OUTPUT(`I think: ${params.thoughts}.`)
+          OTHER_EXECUTE_FUNCTION_OUTPUT(`I think: ${params.thoughts}.`),
+          FN_NAME
         )
       ]);
     };

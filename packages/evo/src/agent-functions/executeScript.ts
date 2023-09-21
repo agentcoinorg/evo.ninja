@@ -120,8 +120,9 @@ const ok = (scriptName: string, result: any, params: FuncParameters): AgentFunct
     BasicAgentMessage.ok(
       "system",
       `Executed '${scriptName}' script.`,
-      `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
-      EXECUTE_SCRIPT_OUTPUT(params.result, result)
+      `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
+      EXECUTE_SCRIPT_OUTPUT(params.result, result),
+      FN_NAME
     )
   ]);
 };

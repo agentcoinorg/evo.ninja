@@ -10,7 +10,7 @@ const FOUND_SCRIPTS_CONTENT = (
   params: FuncParameters,
   candidates: Script[],
   argsStr: string
-) => `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
+) => `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
   `## Result\n\`\`\`\n${
   `Found the following candidates for script: ${params.namespace}:` + 
   `\n--------------\n` + 
@@ -19,7 +19,7 @@ const FOUND_SCRIPTS_CONTENT = (
   }\n\`\`\``;
 
 const NO_SCRIPTS_FOUND = (params: FuncParameters, argsStr: string) =>
-  `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
+  `### Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
   `## Result\n\`\`\`\n` +
   `Found no candidates for script '${params.namespace}'. Try creating the script instead.\n` +
   `\`\`\``;
@@ -65,7 +65,8 @@ export const findScript: AgentFunction<AgentContext> = {
         BasicAgentMessage.ok(
           "system",
           FIND_SCRIPT_TITLE(params),
-          FOUND_SCRIPTS_CONTENT(params, candidates, argsStr)
+          FOUND_SCRIPTS_CONTENT(params, candidates, argsStr),
+          FN_NAME
         )
       ]);
     };

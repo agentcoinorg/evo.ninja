@@ -11,7 +11,7 @@ const CREATED_SCRIPT_TITLE = (params: FuncParameters) => `Created '${params.name
 const CREATED_SCRIPT_CONTENT = (
   script: Script,
   argsStr: string
-) => `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
+) => `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
   `## Result\n\`\`\`\n${
   `Created the following script:` + 
   `\n--------------\n` + 
@@ -104,7 +104,8 @@ export function createScript(createScriptWriter: () => ScriptWriter): AgentFunct
           BasicAgentMessage.ok(
             "system",
             CREATED_SCRIPT_TITLE(params),
-            CREATED_SCRIPT_CONTENT(script, argsStr)
+            CREATED_SCRIPT_CONTENT(script, argsStr),
+            FN_NAME
           )
         ]);
       };
