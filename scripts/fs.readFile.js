@@ -1,8 +1,7 @@
-const fs = require('fs').promises;
-
+const fs = require('fs');
 try {
-  const data = await fs.readFile(path, encoding);
+  const data = fs.readFileSync(path, encoding);
   return data;
 } catch (error) {
-  console.error(`Error reading file at ${path}:`, error);
+  throw error;
 }

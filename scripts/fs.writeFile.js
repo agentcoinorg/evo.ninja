@@ -1,5 +1,6 @@
 const fs = require('fs');
-fs.writeFile(path, data, (err) => {
-    if (err) throw err;
-    console.log('The file has been saved!');
-});
+try {
+  fs.writeFileSync(path, data, encoding);
+} catch (error) {
+  throw new Error(`Failed to write file: ${error.message}`);
+}
