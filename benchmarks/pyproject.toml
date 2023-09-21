@@ -5,11 +5,11 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry]
 name = "evo.ninja"
 version = "0.1.0"
-description = "A minimal Python package."
-authors = ["Your Name <your.email@example.com>"]
+description = "Package to run benchmarks with agent protocol"
+authors = ["Polywrap DAO <contact@polywrap.io>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-agbenchmark = { path = "../Auto-GPT/benchmark" }
+agbenchmark = { path = "./Auto-GPT/benchmark" }
 
 

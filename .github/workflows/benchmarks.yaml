@@ -18,13 +18,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         path: evo
-
-    - name: Clone Auto-GPT repository
-      uses: actions/checkout@v3
-      with:
-        repository: Significant-Gravitas/Auto-GPT
-        path: Auto-GPT
-        ref: "agbenchmark-v0.0.10"
+        submodules: 'recursive'
 
     - name: Read .nvmrc into outputs.NVMRC
       run: echo NVMRC=$(cat .nvmrc) >> "$GITHUB_OUTPUT"
@@ -62,6 +56,8 @@ jobs:
 
     - name: Install agbenchmark
       run: poetry install
+      working-directory: './evo/benchmarks'
 
     - name: Run benchmarks
       run: poetry run agbenchmark start --nc
+      working-directory: './evo/benchmarks'
