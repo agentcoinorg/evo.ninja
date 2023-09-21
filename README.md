@@ -54,19 +54,6 @@ NOTE: Please remember that this is a prototype. Its main purpose is to demonstra
 ## Workspace
 Once evo.ninja is run, there will be a `./workspace` directory created. This is the root directory for the agent. Any files will be read & written from this directory.
 
-## Benchmarks
-In order to run Agent Protocol Benchmarks you must have the already mentioned pre-requests and:
-- [python](https://www.python.org/downloads/)
-- [poetry](https://python-poetry.org/docs/#installation)
-
-Then, in one terminal you must start the Agent Protocol HTTP Server: `yarn start:api`; in another terminal you
-must go to `benchmarks` folder and run:
-> `poetry shell`
-
->`poetry install`
-
->`agbenchmark start --nc --test=TestCaseName`
-
 This will run the `agbenchmark` framework against the API of the [Agent Protocol](https://github.com/AI-Engineers-Foundation/agent-protocol-sdk-js) 
 
 ## Debugging
@@ -83,5 +70,17 @@ Remember, the best way to submit these changes is via a pull-request. If you're 
 
 Also, please feel free to join our [discord](https://discord.com/invite/Z5m88a5qWu) and discuss your ideas or ask any questions. We are an open, welcoming community and we'd love to hear from you!
 
+## Benchmarks
+In order to run Agent Protocol Benchmarks you must have all pre-requisites mentioned above, as well as:
+- [python](https://www.python.org/downloads/)
+- [poetry](https://python-poetry.org/docs/#installation)
+
+Then, in one terminal you must start the Agent Protocol HTTP Server: `yarn start:api`; in another terminal you
+must go to `benchmarks` folder and run:
+> `poetry shell`
+
+>`poetry install`
+
+>`agbenchmark start --nc --test=TestCaseName`
 
 
