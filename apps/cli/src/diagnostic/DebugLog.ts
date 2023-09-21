@@ -3,14 +3,14 @@ import { Timer } from "./Timer";
 import { Workspace } from "@evo-ninja/agent-utils";
 
 interface DebugStep {
-  timer: Timer;
+  time: Timer;
   message?: string;
   error?: string;
 }
 
 export class DebugLog {
   private _goal: string = "";
-  private _goalTimer: Timer = new Timer();
+  private _goalTime: Timer = new Timer();
   private _steps: DebugStep[] = [];
 
   constructor(
@@ -30,23 +30,23 @@ export class DebugLog {
 
   goalStart(goal: string): void {
     this._goal = goal;
-    this._goalTimer.start();
+    this._goalTime.start();
   }
 
   goalEnd(): void {
-    this._goalTimer.end();
+    this._goalTime.end();
   }
 
   stepStart(): void {
     const step: DebugStep = {
-      timer: new Timer()
+      time: new Timer()
     };
-    step.timer.start();
+    step.time.start();
     this._steps.push(step);
   }
 
   stepEnd(): void {
-    this._latestStep.timer.end();
+    this._latestStep.time.end();
   }
 
   stepLog(message: string): void {
@@ -65,7 +65,7 @@ export class DebugLog {
     return {
       goal: {
         prompt: this._goal,
-        time: this._goalTimer.getHHMMSS()
+        time: this._goalTime.getHHMMSS()
       },
       steps: this._steps,
     };
