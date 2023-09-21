@@ -75,6 +75,9 @@ In order to run Agent Protocol Benchmarks you must have all pre-requisites menti
 - [python](https://www.python.org/downloads/)
 - [poetry](https://python-poetry.org/docs/#installation)
 
+If you haven't fetched the submodules you can do it by doing the command:
+> `git submodule update --init`
+
 Then, in one terminal you must start the Agent Protocol HTTP Server: `yarn start:api`; in another terminal you
 must go to `benchmarks` folder and run:
 > `poetry shell`
