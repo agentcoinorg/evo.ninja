@@ -1,7 +1,7 @@
 import { AgentContext } from "../AgentContext";
 import { FUNCTION_CALL_FAILED } from "../prompts";
 
-import { AgentFunction, AgentFunctionResult } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, FunctionCallMessage } from "@evo-ninja/agent-utils";
 import { Result, ResultOk } from "@polywrap/result";
 
 const allowedLibs = [
@@ -27,14 +27,7 @@ const SUCCESS = (params: FuncParameters): AgentFunctionResult => ({
     }
   ],
   messages: [
-    {
-      role: "assistant",
-      content: "",
-      function_call: {
-        name: FN_NAME,
-        arguments: JSON.stringify(params)
-      },
-    },
+    new FunctionCallMessage(FN_NAME, params),
     {
       role: "system",
       content: `Wrote the function ${params.namespace} to the workspace.`

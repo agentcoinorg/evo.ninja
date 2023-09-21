@@ -4,3 +4,4 @@ export * from './AgentOutput';
 export * from './prompts';
 export * from './utils';
 export * from './basicFunctionCallLoop';
+export * from './FunctionCallMessage';

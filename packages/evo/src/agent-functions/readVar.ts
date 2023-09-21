@@ -1,5 +1,5 @@
 import { Result, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, FunctionCallMessage } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
 import { FUNCTION_CALL_FAILED, READ_GLOBAL_VAR_OUTPUT } from "../prompts";
 
@@ -17,14 +17,7 @@ const SUCCESS = (params: FuncParameters, varValue: string): AgentFunctionResult 
     }
   ],
   messages: [
-    {
-      role: "assistant",
-      content: "",
-      function_call: {
-        name: FN_NAME,
-        arguments: JSON.stringify(params)
-      },
-    },
+    new FunctionCallMessage(FN_NAME, params),
     {
       role: "system",
       content: READ_VAR_CONTENT(params, JSON.stringify(params, null, 2), varValue)

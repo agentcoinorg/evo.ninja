@@ -1,5 +1,5 @@
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, FunctionCallMessage } from "@evo-ninja/agent-utils";
 import { ScriptWriter } from "@evo-ninja/js-script-writer-agent";
 import { AgentContext } from "../AgentContext";
 import { FUNCTION_CALL_FAILED } from "../prompts";
@@ -45,14 +45,7 @@ const CANNOT_CREATE_SCRIPTS_ON_AGENT_NAMESPACE = (params: FuncParameters): Agent
     }
   ],
   messages: [
-    {
-      role: "assistant",
-      content: "",
-      function_call: {
-        name: FN_NAME,
-        arguments: JSON.stringify(params)
-      },
-    },
+    new FunctionCallMessage(FN_NAME, params),
     {
       role: "system",
       content: FUNCTION_CALL_FAILED(FN_NAME, `Cannot create an script with namespace ${params.namespace}. Try searching for script in that namespace instead.`, params)

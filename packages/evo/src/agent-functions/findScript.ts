@@ -1,5 +1,5 @@
 import { Result, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, FunctionCallMessage } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
 import { Script } from "../Scripts";
 
@@ -18,14 +18,7 @@ const SUCCESS = (params: FuncParameters, candidates: Script[]): AgentFunctionRes
     }
   ],
   messages: [
-    {
-      role: "assistant",
-      content: "",
-      function_call: {
-        name: FN_NAME,
-        arguments: JSON.stringify(params)
-      },
-    },
+    new FunctionCallMessage(FN_NAME, params),
     {
       role: "system",
       content: FOUND_SCRIPTS_CONTENT(params, candidates, JSON.stringify(params, null, 2))

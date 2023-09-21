@@ -1,6 +1,6 @@
 import JSON5 from "json5";
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, FunctionCallMessage } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
 import { EXECUTE_SCRIPT_OUTPUT, FUNCTION_CALL_FAILED } from "../prompts";
 import { JsEngine_GlobalVar, JsEngine, shimCode } from "../wrap";
@@ -24,14 +24,7 @@ const SUCCESS = (scriptName: string, result: any, params: FuncParameters): Agent
     }
   ],
   messages: [
-    {
-      role: "assistant",
-      content: "",
-      function_call: {
-        name: FN_NAME,
-        arguments: JSON.stringify(params)
-      },
-    },
+    new FunctionCallMessage(FN_NAME, params),
     {
       role: "system",
       content: `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${JSON.stringify(params, null, 2)})\n\`\`\`\n` +
