@@ -17,12 +17,9 @@ dotenv.config({
   path: path.join(__dirname, "../../../../.env")
 });
 
-describe('AI Agent Test Suite', () => {
-  const oneMinute = 300 * 1000;
+describe('LLM Test Suite', () => {
+  const ONE_MINUTE_TIMEOUT = 300 * 1000;
 
-  afterAll(() => {
-  
-  });
   test(`Execute`, async() => {
     const msgs = {
       "persistent": {
@@ -97,5 +94,5 @@ describe('AI Agent Test Suite', () => {
         }, null, 2)
       } 
      } as LlmResponse);
-  }, oneMinute);
+  }, ONE_MINUTE_TIMEOUT);
 });
