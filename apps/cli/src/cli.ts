@@ -2,8 +2,11 @@ import { createApp } from "./app";
 
 import { Logger, Timeout } from "@evo-ninja/agent-utils";
 import { program } from "commander";
+import { FileSystemWorkspace } from "./sys";
+import path from "path";
 
 export async function cli(): Promise<void> {
+  const rootDir = path.join(__dirname, "../../../");
   program
     .argument("[goal]", "Goal to be achieved")
     .option("-t, --timeout <number>")
@@ -19,7 +22,10 @@ export async function cli(): Promise<void> {
     },
   );
 
-  const app = createApp(timeout);
+  const userWorkspace = new FileSystemWorkspace(
+    path.join(rootDir, "workspace")
+  )
+  const app = createApp({ timeout, userWorkspace });
 
   await app.logger.logHeader();
 

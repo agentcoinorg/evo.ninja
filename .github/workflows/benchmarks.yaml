@@ -10,6 +10,9 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./evo
     steps:
     - name: Clone evo.ninja repository
       uses: actions/checkout@v3
@@ -23,26 +26,28 @@ jobs:
         path: Auto-GPT
         ref: "agbenchmark-v0.0.10"
 
+    - name: Read .nvmrc into outputs.NVMRC
+      run: echo NVMRC=$(cat .nvmrc) >> "$GITHUB_OUTPUT"
+      id: nvm
+
     - name: Set up Node.js 18.15
       uses: actions/setup-node@v1
       with:
-        node-version: 18.15
+        node-version: ${{ steps.nvm.outputs.NVMRC }}
 
     - name: Install dependencies
       run: yarn
-      working-directory: ./evo
 
     - name: Build
       run: yarn build
-      working-directory: ./evo
       env:
         CI: false
 
     - name: Start Agent Protocol HTTP API
       run: yarn start:api &
-      working-directory: ./evo
       env:
         AGENT_WORKSPACE: "../../workspace"
+        OPENAI_API_KEY: ${{ secrets.BENCHMARK_CI_OPENAI_API_KEY }}
 
     - name: Set up Python 3.10
       uses: actions/setup-python@v4
@@ -54,8 +59,6 @@ jobs:
 
     - name: Install agbenchmark
       run: poetry install
-      working-directory: ./evo
 
     - name: Run benchmarks
       run: poetry run agbenchmark start --test=TestWriteFile
-      working-directory: ./evo

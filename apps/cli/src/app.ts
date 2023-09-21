@@ -10,7 +10,8 @@ import {
   Chat,
   ConsoleLogger,
   Logger,
-  Timeout
+  Timeout,
+  Workspace
 } from "@evo-ninja/agent-utils";
 import dotenv from "dotenv";
 import readline from "readline";
@@ -37,7 +38,12 @@ export interface App {
   consoleLogger: ConsoleLogger;
 }
 
-export function createApp(timeout?: Timeout, workspaceSubpath?: string): App {
+interface AppConfig {
+  timeout?: Timeout,
+  userWorkspace: Workspace
+}
+
+export function createApp({ timeout, userWorkspace }: AppConfig): App {
   const rootDir = path.join(__dirname, "../../../");
 
   const env = new Env(
@@ -67,10 +73,7 @@ export function createApp(timeout?: Timeout, workspaceSubpath?: string): App {
   const scriptsWorkspace = new FileSystemWorkspace(
     path.join(rootDir, "scripts")
   );
-  const scripts = new Scripts(
-    scriptsWorkspace,
-    "./"
-  );
+  const scripts = new Scripts(scriptsWorkspace, "./");
   const llm = new OpenAI(
     env.OPENAI_API_KEY,
     env.GPT_MODEL,
@@ -78,12 +81,7 @@ export function createApp(timeout?: Timeout, workspaceSubpath?: string): App {
     env.MAX_RESPONSE_TOKENS,
     logger
   );
-  const workspacePath = process.env.AGENT_WORKSPACE
-    ? path.resolve(process.env.AGENT_WORKSPACE)
-    : path.join(rootDir, "workspace");
-  const userWorkspace = new FileSystemWorkspace(
-    path.join(workspacePath, workspaceSubpath ?? "")
-  );
+
   const chat = new Chat(
     userWorkspace,
     llm,
