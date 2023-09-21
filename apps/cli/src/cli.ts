@@ -2,14 +2,12 @@ import { createApp } from "./app";
 
 import { Logger, Timeout } from "@evo-ninja/agent-utils";
 import { program } from "commander";
-import { FileSystemWorkspace } from "./sys";
-import path from "path";
 
 export async function cli(): Promise<void> {
-  const rootDir = path.join(__dirname, "../../../");
   program
     .argument("[goal]", "Goal to be achieved")
-    .option("-t, --timeout <number>")
+    .option("-t, --timeout <seconds>")
+    .option("-r, --root <path>")
     .parse();
 
   const options = program.opts();
@@ -22,10 +20,10 @@ export async function cli(): Promise<void> {
     },
   );
 
-  const userWorkspace = new FileSystemWorkspace(
-    path.join(rootDir, "workspace")
-  )
-  const app = createApp({ timeout, userWorkspace });
+  const app = createApp({
+    timeout,
+    rootDir: options.root || undefined
+  });
 
   await app.logger.logHeader();
 
@@ -50,13 +48,13 @@ export async function cli(): Promise<void> {
       if (!response.value.ok) {
         app.logger.error(response.value.error ?? "Unknown error");
       } else {
-        logMessage(response.value.value.message);
+        logMessage(response.value.value);
       }
       break;
     }
 
-    if (response.value && response.value.message) {
-      logMessage(response.value.message);
+    if (response.value && response.value) {
+      logMessage(response.value);
     }
   }
 

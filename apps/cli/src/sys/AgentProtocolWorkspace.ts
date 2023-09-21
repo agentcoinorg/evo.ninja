@@ -26,6 +26,7 @@ export class AgentProtocolWorkspace implements Workspace {
       data,
     };
     this._artifactLog.set(subpath, artifact);
+    fs.writeFileSync(subpath, data)
   }
 
   readFileSync(subpath: string): string {
@@ -69,7 +70,7 @@ export class AgentProtocolWorkspace implements Workspace {
   readdirSync(subpath: string): string[] {
     // This can be implemented by iterating through the Map's keys and filtering by those
     // that start with the given subpath. However, for this example, it's just a placeholder.
-    return []
+    throw Error("Not implemented")
   }
 
   appendFileSync(subpath: string, data: string): void {

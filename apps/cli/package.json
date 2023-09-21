@@ -19,7 +19,6 @@
     "@evo-ninja/agent-utils": "~0.1.0",
     "forked-agent-protocol": "0.0.3",
     "chalk": "^4.1.2",
-    "clui": "~0.3.6",
     "commander": "11.0.0",
     "dotenv": "~16.3.1",
     "gpt-tokenizer": "~2.1.1",

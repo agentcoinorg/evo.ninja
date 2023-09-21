@@ -13,9 +13,8 @@ async function taskHandler(
   id: string,
   input: TaskInput | null
 ): Promise<StepHandler> {
-  const workspace = new AgentProtocolWorkspace(
-    path.join(process.cwd(), "../../workspace", id)
-  );
+  const workspacePath = path.join(process.cwd(), "../../workspace", id)
+  const workspace = new AgentProtocolWorkspace(workspacePath);
   const app = createApp({ userWorkspace: workspace });
 
   let iterator = app.evo.run(input);

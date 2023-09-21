@@ -1,9 +1,29 @@
-import { ResultErr, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, AgentChatMessage } from "@evo-ninja/agent-utils";
+import { ResultOk } from "@polywrap/result";
+import { AgentFunction, AgentFunctionResult, BasicAgentMessage } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
-import { READ_GLOBAL_VAR_OUTPUT, FUNCTION_CALL_FAILED } from "../prompts";
+import { FUNCTION_CALL_FAILED, READ_GLOBAL_VAR_OUTPUT } from "../prompts";
 
 const FN_NAME = "readVar";
+
+const READ_VAR_TITLE = (params: FuncParameters) => 
+  `Read '${params.name}' variable.`;
+const READ_VAR_CONTENT = (
+  params: FuncParameters,
+  argsStr: string,
+  value: string
+) => 
+  `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
+  `## Result\n\`\`\`\n${
+    READ_GLOBAL_VAR_OUTPUT(params.name, value)
+  }\n\`\`\``;
+const FAILED_TO_READ_VAR_TITLE = (params: FuncParameters) => 
+  `Failed to read '${params.name}' variable.`;
+const FAILED_TO_READ_VAR_CONTENT = (params: FuncParameters) => 
+  FUNCTION_CALL_FAILED(FN_NAME, `Global variable ${params.name} not found.`, params);
+
+type FuncParameters = { 
+  name: string 
+};
 
 export const readVar: AgentFunction<AgentContext> = {
   definition: {
@@ -21,30 +41,28 @@ export const readVar: AgentFunction<AgentContext> = {
       additionalProperties: false
     },
   },
-  buildChatMessage(args: any, result: AgentFunctionResult): AgentChatMessage {
-    const argsStr = JSON.stringify(args, null, 2);
-
-    return result.ok
-      ? {
-          type: "success",
-          title: `Read '${args.name}' variable.`,
-          content: 
-            `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
-            READ_GLOBAL_VAR_OUTPUT(args.name, result.value),
-        }
-      : {
-          type: "error",
-          title: `Failed to read ${args.namespace} variable!`,
-          content: FUNCTION_CALL_FAILED(FN_NAME, result.error, args),
-        };
-  },
   buildExecutor(context: AgentContext) {
-    return async (options: { name: string }): Promise<AgentFunctionResult> => {
-      if (!context.globals[options.name]) {
-        return ResultErr(`Global variable ${options.name} not found.`);
+    return async (params: FuncParameters): Promise<AgentFunctionResult> => {
+      const argsStr = JSON.stringify(params, null, 2);
+     
+      if (!context.globals[params.name]) {
+        return ResultOk([
+          BasicAgentMessage.error(
+            "system", 
+            FAILED_TO_READ_VAR_TITLE(params), 
+            FAILED_TO_READ_VAR_CONTENT(params)
+          )
+        ]);
       } 
 
-      return ResultOk(context.globals[options.name]);
+      return ResultOk([
+        BasicAgentMessage.ok(
+          "system",
+          READ_VAR_TITLE(params),
+          READ_VAR_CONTENT(params, argsStr, context.globals[params.name]),
+          FN_NAME
+        )
+      ]);
     };
   }
 };
