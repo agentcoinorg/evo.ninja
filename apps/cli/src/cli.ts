@@ -8,6 +8,7 @@ export async function cli(): Promise<void> {
     .argument("[goal]", "Goal to be achieved")
     .option("-t, --timeout <seconds>")
     .option("-r, --root <path>")
+    .option("-d, --debug")
     .parse();
 
   const options = program.opts();
@@ -22,7 +23,8 @@ export async function cli(): Promise<void> {
 
   const app = createApp({
     timeout,
-    rootDir: options.root || undefined
+    rootDir: options.root,
+    debug: options.debug
   });
 
   await app.logger.logHeader();
@@ -33,20 +35,32 @@ export async function cli(): Promise<void> {
     goal = await app.logger.prompt("Enter your goal: ");
   }
 
+  app.debugLog?.goalStart(goal);
+
   let iterator = app.evo.run(goal);
 
   while(true) {
+    app.debugLog?.stepStart();
+
     const response = await iterator.next();
+
+    app.debugLog?.stepEnd();
 
     const logMessage = (message: any) => {
       const messageStr = `${message.title}\n${message.content}`;
       app.fileLogger.info(`# Evo:\n${messageStr}`);
       app.consoleLogger.info(`Evo: ${messageStr}`);
+      app.debugLog?.stepLog(message);
+    }
+
+    const logError = (error: string) => {
+      app.logger.error(error ?? "Unknown error");
+      app.debugLog?.stepError(error);
     }
 
     if (response.done) {
       if (!response.value.ok) {
-        app.logger.error(response.value.error ?? "Unknown error");
+        logError(response.value.error ?? "Unknown error");
       } else {
         logMessage(response.value.value);
       }
@@ -57,6 +71,9 @@ export async function cli(): Promise<void> {
       logMessage(response.value);
     }
   }
+
+  app.debugLog?.goalEnd();
+  app.debugLog?.save();
 
   return Promise.resolve();
 }
