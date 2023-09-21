@@ -1,25 +1,25 @@
 import { ResultOk } from "@polywrap/result";
 import { AgentFunction, AgentFunctionResult, BasicAgentMessage } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
-import { READ_GLOBAL_VAR_OUTPUT } from "../prompts";
+import { FUNCTION_CALL_FAILED, READ_GLOBAL_VAR_OUTPUT } from "../prompts";
 
 const FN_NAME = "readVar";
 
 const READ_VAR_TITLE = (params: FuncParameters) => 
   `Read '${params.name}' variable.`;
 const READ_VAR_CONTENT = (
+  params: FuncParameters,
   argsStr: string,
   value: string
 ) => 
   `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
   `## Result\n\`\`\`\n${
-    value
+    READ_GLOBAL_VAR_OUTPUT(params.name, value)
   }\n\`\`\``;
 const FAILED_TO_READ_VAR_TITLE = (params: FuncParameters) => 
   `Failed to read '${params.name}' variable.`;
-const FAILED_TO_READ_VAR_CONTENT = (params: FuncParameters, argsStr: string) => 
-  `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
-  READ_GLOBAL_VAR_OUTPUT(params.name, `Global variable ${params.name} not found.`);
+const FAILED_TO_READ_VAR_CONTENT = (params: FuncParameters) => 
+  FUNCTION_CALL_FAILED(FN_NAME, `Global variable ${params.name} not found.`, params);
 
 type FuncParameters = { 
   name: string 
@@ -50,7 +50,7 @@ export const readVar: AgentFunction<AgentContext> = {
           BasicAgentMessage.error(
             "system", 
             FAILED_TO_READ_VAR_TITLE(params), 
-            FAILED_TO_READ_VAR_CONTENT(params, argsStr)
+            FAILED_TO_READ_VAR_CONTENT(params)
           )
         ]);
       } 
@@ -59,7 +59,7 @@ export const readVar: AgentFunction<AgentContext> = {
         BasicAgentMessage.ok(
           "system",
           READ_VAR_TITLE(params),
-          READ_VAR_CONTENT(argsStr, context.globals[params.name])
+          READ_VAR_CONTENT(params, argsStr, context.globals[params.name])
         )
       ]);
     };

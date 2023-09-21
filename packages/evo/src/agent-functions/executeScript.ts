@@ -113,7 +113,7 @@ export const executeScript: AgentFunction<AgentContext> = {
   }
 };
 
-const ok = (scriptName: string, result: any, params: any): AgentFunctionResult => {
+const ok = (scriptName: string, result: any, params: FuncParameters): AgentFunctionResult => {
   const argsStr = JSON.stringify(params, null, 2);
 
   return ResultOk([
@@ -126,7 +126,7 @@ const ok = (scriptName: string, result: any, params: any): AgentFunctionResult =
   ]);
 };
 
-const error = (scriptName: string, content: string | undefined, params: any): AgentFunctionResult => {
+const error = (scriptName: string, content: string | undefined, params: FuncParameters): AgentFunctionResult => {
   return ResultOk([
     BasicAgentMessage.error("system", `'${scriptName}' script failed to execute!`, 
     FUNCTION_CALL_FAILED(FN_NAME, content ?? "Unknown error", params))

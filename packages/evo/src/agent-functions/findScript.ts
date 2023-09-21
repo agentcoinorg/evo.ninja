@@ -5,7 +5,7 @@ import { Script } from "../Scripts";
 
 const FN_NAME = "findScript";
 
-const FOUND_SCRIPTS_TITLE = (params: FuncParameters) => `Searched for '${params.namespace}' script ("${params.description}")`;
+const FIND_SCRIPT_TITLE = (params: FuncParameters) => `Searched for '${params.namespace}' script ("${params.description}")`;
 const FOUND_SCRIPTS_CONTENT = (
   params: FuncParameters,
   candidates: Script[],
@@ -17,6 +17,12 @@ const FOUND_SCRIPTS_CONTENT = (
   `${candidates.map((c) => `Namespace: ${c.name}\nArguments: ${c.arguments}\nDescription: ${c.description}`).join("\n--------------\n")}` +
   `\n--------------\n`
   }\n\`\`\``;
+
+const NO_SCRIPTS_FOUND = (params: FuncParameters, argsStr: string) =>
+  `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
+  `## Result\n\`\`\`\n` +
+  `Found no candidates for script '${params.namespace}'. Try creating the script instead.\n` +
+  `\`\`\``;
 
 type FuncParameters = { 
   namespace: string, 
@@ -49,20 +55,19 @@ export const findScript: AgentFunction<AgentContext> = {
         `${params.namespace} ${params.description}`
       ).slice(0, 5);
 
-      if (candidates.length === 0) {
-        return ResultOk([BasicAgentMessage.error("system", `No script found.`, NO_SCRIPTS_FOUND(params))])
-      }
       const argsStr = JSON.stringify(params, null, 2);
+     
+      if (candidates.length === 0) {
+        return ResultOk([BasicAgentMessage.error("system", FIND_SCRIPT_TITLE(params), NO_SCRIPTS_FOUND(params, argsStr))])
+      }
     
       return ResultOk([
         BasicAgentMessage.ok(
           "system",
-          FOUND_SCRIPTS_TITLE(params),
+          FIND_SCRIPT_TITLE(params),
           FOUND_SCRIPTS_CONTENT(params, candidates, argsStr)
         )
       ]);
     };
   }
 };
-
-const NO_SCRIPTS_FOUND = (params: FuncParameters) =>`Found no candidates for script '${params.namespace}'. Try creating the script instead.`;

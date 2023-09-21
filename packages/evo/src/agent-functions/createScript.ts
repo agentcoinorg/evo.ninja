@@ -13,7 +13,7 @@ const CREATED_SCRIPT_CONTENT = (
   argsStr: string
 ) => `# Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
   `## Result\n\`\`\`\n${
-  `Created the following scripts:` + 
+  `Created the following script:` + 
   `\n--------------\n` + 
   `Namespace: ${script.name}\nArguments: ${script.arguments}\nDescription: ${script.description}` +
   `\n--------------\n`
