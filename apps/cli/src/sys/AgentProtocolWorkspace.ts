@@ -26,7 +26,6 @@ export class AgentProtocolWorkspace implements Workspace {
       data,
     };
     this._artifactLog.set(subpath, artifact);
-    fs.writeFileSync(subpath, data)
   }
 
   readFileSync(subpath: string): string {
@@ -61,16 +60,16 @@ export class AgentProtocolWorkspace implements Workspace {
     this._artifactLog.set(newPath, artifact);
   }
 
-  mkdirSync(subpath: string): void {
+  mkdirSync(_: string): void {
     // Since this is an in-memory representation, we don't need to create "directories" per se.
     // However, if you want to maintain a list of directories, you can use another Map or Set.
     // For now, this method can be left as a no-op.
   }
 
-  readdirSync(subpath: string): string[] {
+  readdirSync(_: string): string[] {
     // This can be implemented by iterating through the Map's keys and filtering by those
     // that start with the given subpath. However, for this example, it's just a placeholder.
-    throw Error("Not implemented")
+    throw Error("Not implemented");
   }
 
   appendFileSync(subpath: string, data: string): void {
@@ -81,12 +80,9 @@ export class AgentProtocolWorkspace implements Workspace {
     artifact.data += data;
   }
 
-  createArtifacts(): Artifact[] {
-    if (!fs.existsSync(this.directoryPath)) {
-      fs.mkdirSync(this.directoryPath, { recursive: true });
-    }
-
-    const artifacts: ArtifactLog[] = [];
+  private processArtifacts(
+    callback: (artifact: ArtifactLog, filePath: string) => void
+  ): void {
     this._artifactLog.forEach((artifact) => {
       let artifactDirectoryPath = this.directoryPath;
 
@@ -97,16 +93,38 @@ export class AgentProtocolWorkspace implements Workspace {
           artifact.relative_path
         );
         if (!fs.existsSync(artifactDirectoryPath)) {
-          fs.mkdirSync(artifactDirectoryPath, { recursive: true });
+          throw new Error(
+            `Artifact directory path: ${artifactDirectoryPath} does not exists`
+          );
         }
       }
 
       const filePath = path.join(artifactDirectoryPath, artifact.file_name);
+      callback(artifact, filePath);
+    });
+  }
+
+  getArtifacts(): Artifact[] {
+    const artifacts: ArtifactLog[] = [];
+
+    this.processArtifacts((artifact, filePath) => {
       fs.writeFileSync(filePath, artifact.data);
       artifacts.push(artifact);
     });
 
     return artifacts;
+  }
+
+  writeArtifacts(): void {
+    if (!fs.existsSync(this.directoryPath)) {
+      throw new Error(
+        `Workspace directory path: ${this.directoryPath} does not exists`
+      );
+    }
+
+    this.processArtifacts((artifact, filePath) => {
+      fs.writeFileSync(filePath, artifact.data);
+    });
   }
 
   cleanArtifacts(): void {

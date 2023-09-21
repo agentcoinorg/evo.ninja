@@ -13,8 +13,9 @@ async function taskHandler(
   id: string,
   input: TaskInput | null
 ): Promise<StepHandler> {
-  const workspacePath = path.join(process.cwd(), "../../workspace", id)
-  const workspace = new AgentProtocolWorkspace(workspacePath);
+  const workspace = new AgentProtocolWorkspace(
+    path.join(process.cwd(), "../../workspace", id)
+  );
   const app = createApp({ userWorkspace: workspace });
 
   let iterator = app.evo.run(input);
@@ -26,7 +27,8 @@ async function taskHandler(
         ? response.value.message
         : "No message";
 
-    const artifacts = workspace.createArtifacts();
+    workspace.writeArtifacts();
+    const artifacts = workspace.getArtifacts();
     workspace.cleanArtifacts();
     return {
       is_last: response.done,
