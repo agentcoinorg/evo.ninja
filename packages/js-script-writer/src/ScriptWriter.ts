@@ -5,7 +5,7 @@ import { GOAL_PROMPT, INITIAL_PROMP, LOOP_PREVENTION_PROMPT } from "./prompts";
 
 import { ResultErr } from "@polywrap/result";
 import { Agent, Workspace } from "@evo-ninja/agent-utils";
-import { LlmApi, Chat, Logger, StepOutput, RunResult, executeAgentFunction, basicFunctionCallLoop } from "@evo-ninja/agent-utils";
+import { LlmApi, Chat, Logger, AgentOutput, RunResult, executeAgentFunction, basicFunctionCallLoop } from "@evo-ninja/agent-utils";
 
 export class ScriptWriter implements Agent {
   private readonly context: AgentContext;
@@ -27,7 +27,7 @@ export class ScriptWriter implements Agent {
     namespace: string, 
     description: string,
     args: string,
-  ): AsyncGenerator<StepOutput, RunResult, string | undefined> {
+  ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
     try {
       chat.persistent("system", INITIAL_PROMP);

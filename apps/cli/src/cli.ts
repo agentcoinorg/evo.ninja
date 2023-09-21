@@ -48,13 +48,13 @@ export async function cli(): Promise<void> {
       if (!response.value.ok) {
         app.logger.error(response.value.error ?? "Unknown error");
       } else {
-        logMessage(response.value.value.message);
+        logMessage(response.value.value);
       }
       break;
     }
 
-    if (response.value && response.value.message) {
-      logMessage(response.value.message);
+    if (response.value && response.value) {
+      logMessage(response.value);
     }
   }
 

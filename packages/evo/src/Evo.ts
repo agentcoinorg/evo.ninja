@@ -15,7 +15,7 @@ import {
   LlmApi,
   Chat,
   Logger,
-  StepOutput,
+  AgentOutput,
   RunResult,
   Timeout,
   InMemoryWorkspace,
@@ -51,7 +51,7 @@ export class Evo implements Agent {
     };
   }
 
-  public async* run(goal: string): AsyncGenerator<StepOutput, RunResult, string | undefined> {
+  public async* run(goal: string): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
     const createScriptWriter = (): ScriptWriter => {
       const workspace = new InMemoryWorkspace();
