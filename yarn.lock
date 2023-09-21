@@ -3388,6 +3388,11 @@
   resolved "https://registry.yarnpkg.com/@types/unist/-/unist-2.0.8.tgz#bb197b9639aa1a04cf464a617fe800cccd92ad5c"
   integrity sha512-d0XxK3YTObnWVp6rZuev3c49+j4Lo8g4L1ZRm9z5L0xpoZycUPshHgczK5gsUMaZOstjVYYi09p5gYvUtfChYw==
 
+"@types/uuid@^9.0.2":
+  version "9.0.4"
+  resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-9.0.4.tgz#e884a59338da907bda8d2ed03e01c5c49d036f1c"
+  integrity sha512-zAuJWQflfx6dYJM62vna+Sn5aeSWhh3OB+wfUEACNcqUSc0AGc5JKl+ycL1vrH7frGTXhJchYjE1Hak8L819dA==
+
 "@types/ws@^8.5.5":
   version "8.5.5"
   resolved "https://registry.yarnpkg.com/@types/ws/-/ws-8.5.5.tgz#af587964aa06682702ee6dcbc7be41a80e4b28eb"
@@ -6455,11 +6460,12 @@ fork-ts-checker-webpack-plugin@^6.5.0:
     semver "^7.3.2"
     tapable "^1.0.0"
 
-forked-agent-protocol@0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/forked-agent-protocol/-/forked-agent-protocol-0.0.1.tgz#6710adbf7255e6df84a33b4fb085fd893e09e4b7"
-  integrity sha512-ui7GPx5mr07LzcTACIAFdH85VnfUoW1EzsZysA38CSzvfyJD8oXU4Kxv4YYp0lEjUL72CYhiYD677qhnVrh3Gg==
+forked-agent-protocol@0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/forked-agent-protocol/-/forked-agent-protocol-0.0.3.tgz#0a1a3832f65dec12044b4cac23a51f30f345d6d2"
+  integrity sha512-h60/xtipI3pRvUMgBcl/Ljor99c1UBP9qCpYqz7PZCCAXBGq+sqGxe6mWmvcFdkIrkTfkOWREc31Ktg2asDE/w==
   dependencies:
+    "@types/uuid" "^9.0.2"
     express "^4.18.2"
     express-openapi-validator "^5.0.4"
     js-yaml "^4.1.0"
