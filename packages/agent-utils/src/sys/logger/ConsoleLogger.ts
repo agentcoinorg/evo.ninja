@@ -1,5 +1,5 @@
 import { ILogger } from "./";
-import { Message } from "../../llm";
+import { ChatMessage } from "../../llm";
 
 import chalk from "chalk";
 
@@ -10,7 +10,7 @@ export class ConsoleLogger implements ILogger {
     console.log(info);
   }
 
-  message(msg: Message): void {
+  message(msg: ChatMessage): void {
     const roleUpper = msg.role[0].toUpperCase() + (
       msg.role.length > 1 ? msg.role.substring(1) : ""
     );
@@ -20,7 +20,7 @@ export class ConsoleLogger implements ILogger {
     );
   }
 
-  action(msg: Message): void {
+  action(msg: ChatMessage): void {
     this.message(msg);
   }
 
