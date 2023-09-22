@@ -1,7 +1,7 @@
 import { Timer } from "./Timer";
 import { DebugLlmReq } from "./DebugLlmReq";
 
-import { ChatMessageLog, LlmResponse, Workspace } from "@evo-ninja/agent-utils";
+import { ChatMessageLog, ChatMessage, Workspace } from "@evo-ninja/agent-utils";
 
 interface DebugGoal {
   prompt: string;
@@ -77,7 +77,7 @@ export class DebugLog {
     this.save();
   }
 
-  stepLlmReq(time: Timer, chat: ChatMessageLog, response?: LlmResponse): void {
+  stepLlmReq(time: Timer, chat: ChatMessageLog, response?: ChatMessage): void {
     const req = new DebugLlmReq(time, chat, response);
     this.goal.llmReqs += 1;
     this.goal.tokens += req.tokens;

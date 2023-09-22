@@ -1,12 +1,12 @@
 import { Timer } from "./Timer";
 
-import { ChatMessageLog, LlmResponse } from "@evo-ninja/agent-utils";
+import { ChatMessageLog, ChatMessage } from "@evo-ninja/agent-utils";
 
 export class DebugLlmReq {
   constructor(
     public time: Timer,
     public chat: ChatMessageLog,
-    public response?: LlmResponse
+    public response?: ChatMessage
   ) { }
 
   get tokens() {

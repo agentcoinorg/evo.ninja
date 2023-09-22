@@ -1,7 +1,7 @@
 import { DebugLog } from "./DebugLog";
 import { Timer } from "./Timer";
 
-import { Chat, LlmApi, LlmOptions, LlmResponse } from "@evo-ninja/agent-utils";
+import { Chat, LlmApi, LlmOptions, ChatMessage } from "@evo-ninja/agent-utils";
 
 export class DebugLlmApi implements LlmApi {
   constructor(
@@ -21,7 +21,7 @@ export class DebugLlmApi implements LlmApi {
     chat: Chat,
     functionDefinitions: any[],
     options?: LlmOptions | undefined
-  ): Promise<LlmResponse | undefined> {
+  ): Promise<ChatMessage | undefined> {
     console.log(this.getModel());
 
     const time = new Timer();
