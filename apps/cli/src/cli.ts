@@ -73,7 +73,6 @@ export async function cli(): Promise<void> {
   }
 
   app.debugLog?.goalEnd();
-  app.debugLog?.save();
 
   return Promise.resolve();
 }
