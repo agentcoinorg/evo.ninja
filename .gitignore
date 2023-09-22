@@ -1,8 +1,9 @@
+.env
 node_modules
 build
+debug
 coverage
 workspace
-.env
 chats
 
 !/benchmarks/agbenchmark_config/config.json

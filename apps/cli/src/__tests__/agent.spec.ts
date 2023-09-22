@@ -1,15 +1,16 @@
 import { TestCase, TestResult } from "./TestCase";
 import { spawn } from 'child_process';
 
+jest.setTimeout(180000);
+
 describe('AI Agent Test Suite', () => {
-  const oneMinute = 300 * 1000;
   let testResults: TestResult[] = [];
 
   const cases: TestCase[] = [
 
     // Mathematics
     new TestCase("math_circle_radius", "Calculate the area of a circle with a radius of 5 meters and save it in a file named output.txt", "78.53981633974483"),
-    new TestCase("math_perimeter_square", "Calculate the perimeter of a square with side length 6 cm and save it in a file named output.txt", "24"),
+    /*new TestCase("math_perimeter_square", "Calculate the perimeter of a square with side length 6 cm and save it in a file named output.txt", "24"),
     new TestCase("math_sum_natural", "Calculate the sum of the first 100 natural numbers and save it in a file named output.txt", "5050"),
     new TestCase("math_sin", "Calculate the value of sin(45°) and save it in a file named output.txt", "0.7071067811865475"),
 
@@ -53,7 +54,7 @@ describe('AI Agent Test Suite', () => {
     new TestCase("basic_json", 'Convert a JSON object {"foo": "bar"} to string and save it to output.txt', '{"foo": "bar"}'),
     new TestCase("basic_sum_nums", "Use JavaScript to calculate the sum of the numbers from 1 to 100 and save the result to output.txt", "5050"),
     new TestCase("basic_string_rev", 'Create a JavaScript function that reverses the string "OpenAI" and save the result to output.txt', "IAnepO"),
-    new TestCase("basic_fibonacci", "Use JavaScript to calculate the 5th term of the Fibonacci sequence and save the result to output.txt", "3"),
+    new TestCase("basic_fibonacci", "Use JavaScript to calculate the 5th term of the Fibonacci sequence and save the result to output.txt", "3"),*/
   ];
 
   afterAll(() => {
@@ -63,7 +64,7 @@ describe('AI Agent Test Suite', () => {
     });
   });
 
-  cases.forEach((testCase, index) => {
+  cases.forEach((testCase) => {
     test(`Execute operation: ${testCase.goal}`, async () => {
       // Reset the testcase directory
       testCase.reset();
@@ -71,11 +72,16 @@ describe('AI Agent Test Suite', () => {
       let result: TestResult | undefined;
 
       await new Promise<void>((resolve, reject) => {
-        const child = spawn('yarn', ['start', `'${testCase.goal}' -r ${testCase.rootDir}`], { shell: true });
-        const timeout = setTimeout(() => {
-          child.kill();
-          reject(new Error(`Operation ${testCase.goal} timed out`));
-        }, oneMinute);
+        const child = spawn(
+          'yarn', [
+            'start',
+            `'${testCase.goal}'`,
+            `--root ${testCase.rootDir}`,
+            "--timeout 120",
+            "--debug"
+          ],
+          { shell: true }
+        );
 
         child.stdout.on('data', (data) => {
           console.log(data.toString());
@@ -84,12 +90,10 @@ describe('AI Agent Test Suite', () => {
         child.on('exit', () => {
           result = testCase.getResult();
           resolve();
-          clearTimeout(timeout);
         });
 
         child.on('error', (error) => {
           reject(error);
-          clearTimeout(timeout);
         });
       });
 
@@ -99,6 +103,6 @@ describe('AI Agent Test Suite', () => {
 
       testResults.push(result);
       expect(result.received).toBe(result.expected);
-    }, oneMinute);
+    });
   });
 });

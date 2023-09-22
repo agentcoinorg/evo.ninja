@@ -1,4 +1,5 @@
 import { FileSystemWorkspace, FileLogger } from "./sys";
+import { DebugLog } from "./diagnostic";
 
 import { Evo, Scripts } from "@evo-ninja/evo-agent";
 import {
@@ -32,12 +33,14 @@ export interface App {
   logger: Logger;
   fileLogger: FileLogger;
   consoleLogger: ConsoleLogger;
+  debugLog?: DebugLog;
 }
 
 export interface AppConfig {
   rootDir?: string;
   timeout?: Timeout;
   userWorkspace?: Workspace;
+  debug?: boolean;
 }
 
 export function createApp(config?: AppConfig): App {
@@ -47,7 +50,7 @@ export function createApp(config?: AppConfig): App {
 
   const env = new Env(process.env as Record<string, string>);
 
-  // Generate a unique log file
+  // Chat Log File
   const date = new Date();
   const logFile = `chat_${date.getFullYear()}-${
     date.getMonth() + 1
@@ -55,7 +58,7 @@ export function createApp(config?: AppConfig): App {
   const logWorkspace = new FileSystemWorkspace(path.join(rootDir, "chats"));
   const fileLogger = new FileLogger(logWorkspace.toWorkspacePath(logFile));
 
-  // Create logger
+  // Logger
   const consoleLogger = new ConsoleLogger();
   const logger = new Logger([fileLogger, consoleLogger], {
     promptUser: prompt,
@@ -64,10 +67,13 @@ export function createApp(config?: AppConfig): App {
     },
   });
 
+  // Scripts
   const scriptsWorkspace = new FileSystemWorkspace(
     path.join(rootDir, "scripts")
   );
   const scripts = new Scripts(scriptsWorkspace, "./");
+
+  // LLM
   const llm = new OpenAI(
     env.OPENAI_API_KEY,
     env.GPT_MODEL,
@@ -76,12 +82,15 @@ export function createApp(config?: AppConfig): App {
     logger
   );
 
+  // User Workspace
   const userWorkspace =
     config?.userWorkspace ??
     new FileSystemWorkspace(path.join(rootDir, "workspace"));
+
+  // Chat
   const chat = new Chat(userWorkspace, llm, cl100k_base, logger);
 
-  // Create Evo
+  // Evo
   const evo = new Evo(
     llm,
     chat,
@@ -91,10 +100,16 @@ export function createApp(config?: AppConfig): App {
     config?.timeout
   );
 
+  // Debug Log
+  const debugLog = config?.debug ? new DebugLog(
+    new FileSystemWorkspace(path.join(rootDir, "debug"))
+  ) : undefined;
+
   return {
     evo,
     logger,
     fileLogger,
     consoleLogger,
+    debugLog,
   };
 }
