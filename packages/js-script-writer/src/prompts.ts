@@ -26,12 +26,3 @@ export const FUNCTION_CALL_FAILED = (name: string, error: string, args: any) =>
       ? trimText(error, 300)
       : "Unknown error."
     }\n\`\`\`\n\nArguments:\n\`\`\`\n${JSON.stringify(args, null, 2)}\n\`\`\``;
-
-export const READ_GLOBAL_VAR_OUTPUT = (name: string, value: string) =>
-  `## Read Variable\n**'{{${name}}}'**:\n\`\`\`\n${value}\n\`\`\`\n`;
-
-export const EXECUTE_SCRIPT_OUTPUT = (varName: string, result: string) =>
-  `## Result\nPreview:\n\`\`\`\n${trimText(result, 200)}\n\`\`\`\n\nResult Stored in Variable: \`{{${varName}}}\`\n`;
-
-export const OTHER_EXECUTE_FUNCTION_OUTPUT = (result: string) =>
-  `## Result\n\`\`\`\n${result}\n\`\`\``;

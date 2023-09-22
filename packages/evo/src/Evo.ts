@@ -4,7 +4,6 @@ import { AgentContext } from "./AgentContext";
 import { Scripts } from "./Scripts";
 import { WrapClient } from "./wrap";
 import {
-  GOAL_PROMPT,
   INITIAL_PROMP,
   LOOP_PREVENTION_PROMPT
 } from "./prompts";
@@ -65,7 +64,7 @@ export class Evo implements Agent {
 
     try {
       chat.persistent("system", INITIAL_PROMP);
-      chat.persistent("system", GOAL_PROMPT(goal));
+      chat.persistent("user", goal);
 
       return yield* basicFunctionCallLoop(
         this.context,

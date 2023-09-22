@@ -1,7 +1,7 @@
 import { AgentContext } from "../AgentContext";
 import { FUNCTION_CALL_FAILED } from "../prompts";
 
-import { AgentFunction, AgentFunctionResult, FunctionCallMessage } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { Result, ResultOk } from "@polywrap/result";
 
 const allowedLibs = [
@@ -27,11 +27,8 @@ const SUCCESS = (params: FuncParameters): AgentFunctionResult => ({
     }
   ],
   messages: [
-    new FunctionCallMessage(FN_NAME, params),
-    {
-      role: "system",
-      content: `Wrote the function ${params.namespace} to the workspace.`
-    },
+    ChatMessageBuilder.functionCall(FN_NAME, params),
+    ChatMessageBuilder.system(`Success.`),
   ]
 });
 const CANNOT_CREATE_IN_AGENT_NAMESPACE_ERROR = (params: FuncParameters): AgentFunctionResult => ({
@@ -43,17 +40,11 @@ const CANNOT_CREATE_IN_AGENT_NAMESPACE_ERROR = (params: FuncParameters): AgentFu
     }
   ],
   messages: [
-    {
-      role: "assistant",
-      function_call: {
-        name: FN_NAME,
-        arguments: JSON.stringify(params)
-      },
-    },
-    {
-      role: "system",
-      content: FUNCTION_CALL_FAILED(FN_NAME, `Cannot create a function with namespace ${params.namespace}. Namespaces starting with 'agent.' are reserved.`, params)
-    },
+    ChatMessageBuilder.functionCall(FN_NAME, params),
+    ChatMessageBuilder.system(
+      `Failed writing the function.\n` +
+      `Namespaces starting with 'agent.' are reserved.`
+    ),
   ]
 });
 const CANNOT_REQUIRE_LIB_ERROR = (params: FuncParameters): AgentFunctionResult => ({
@@ -65,17 +56,8 @@ const CANNOT_REQUIRE_LIB_ERROR = (params: FuncParameters): AgentFunctionResult =
     }
   ],
   messages: [
-    {
-      role: "assistant",
-      function_call: {
-        name: FN_NAME,
-        arguments: JSON.stringify(params)
-      },
-    },
-    {
-      role: "system",
-      content: FUNCTION_CALL_FAILED(FN_NAME, `Cannot require libraries other than ${allowedLibs.join(", ")}.`, params)
-    },
+    ChatMessageBuilder.functionCall(FN_NAME, params),
+    ChatMessageBuilder.system(`Cannot require libraries other than ${allowedLibs.join(", ")}.`),
   ]
 });
 
