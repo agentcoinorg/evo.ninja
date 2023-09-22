@@ -1,5 +1,5 @@
 import { FileSystemWorkspace, FileLogger } from "./sys";
-import { DebugLog } from "./diagnostic";
+import { DebugLog, DebugLlmApi } from "./diagnostic";
 
 import { Evo, Scripts } from "@evo-ninja/evo-agent";
 import {
@@ -10,6 +10,7 @@ import {
   Logger,
   Timeout,
   Workspace,
+  LlmApi,
 } from "@evo-ninja/agent-utils";
 import dotenv from "dotenv";
 import readline from "readline";
@@ -74,7 +75,7 @@ export function createApp(config?: AppConfig): App {
   const scripts = new Scripts(scriptsWorkspace, "./");
 
   // LLM
-  const llm = new OpenAI(
+  let llm: LlmApi = new OpenAI(
     env.OPENAI_API_KEY,
     env.GPT_MODEL,
     env.CONTEXT_WINDOW_TOKENS,
@@ -90,6 +91,18 @@ export function createApp(config?: AppConfig): App {
   // Chat
   const chat = new Chat(userWorkspace, llm, cl100k_base, logger);
 
+  // Debug Logging
+  let debugLog: DebugLog | undefined;
+
+  if (config?.debug) {
+    debugLog = new DebugLog(
+      new FileSystemWorkspace(path.join(rootDir, "debug"))
+    );
+
+    // Wrap the LLM API
+    llm = new DebugLlmApi(debugLog, llm);
+  }
+
   // Evo
   const evo = new Evo(
     llm,
@@ -99,11 +112,6 @@ export function createApp(config?: AppConfig): App {
     scripts,
     config?.timeout
   );
-
-  // Debug Log
-  const debugLog = config?.debug ? new DebugLog(
-    new FileSystemWorkspace(path.join(rootDir, "debug"))
-  ) : undefined;
 
   return {
     evo,

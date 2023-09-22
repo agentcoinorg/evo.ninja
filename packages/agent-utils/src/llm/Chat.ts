@@ -19,8 +19,10 @@ interface MessageLog {
 
 export type ChatRole = ChatCompletionRequestMessageRoleEnum;
 
+export type ChatMessageLog = Record<MessageType, MessageLog>;
+
 export class Chat {
-  private _msgLogs: Record<MessageType, MessageLog> = {
+  private _msgLogs: ChatMessageLog = {
     "persistent": {
       tokens: 0,
       msgs: []
@@ -54,6 +56,11 @@ export class Chat {
     this._chunkTokens = Math.floor(
       this._maxContextTokens * chunkPerc
     );
+  }
+
+  get tokens(): number {
+    return this._msgLogs["persistent"].tokens +
+      this._msgLogs["temporary"].tokens;
   }
 
   get tokenizer(): Tokenizer {
@@ -124,26 +131,33 @@ export class Chat {
   }
 
   public async fitToContextWindow(): Promise<void> {
-    const msgLogs = this._msgLogs;
-    const totalTokens = () =>
-      msgLogs["persistent"].tokens +
-      msgLogs["temporary"].tokens;
-
-    if (totalTokens() < this._maxContextTokens) {
+    if (this.tokens < this._maxContextTokens) {
       return;
     }
 
-    this._logger.error(`! Max Tokens Exceeded (${totalTokens()} / ${this._maxContextTokens})`);
+    this._logger.error(`! Max Tokens Exceeded (${this.tokens} / ${this._maxContextTokens})`);
 
     // Start with "temporary" messages
     await this._summarize("temporary");
 
-    if (totalTokens() < this._maxContextTokens) {
+    if (this.tokens < this._maxContextTokens) {
       return;
     }
 
     // Move onto "persistent" messages
     await this._summarize("persistent");
+  }
+
+  public export(): ChatMessageLog {
+    return JSON.parse(JSON.stringify(this._msgLogs));
+  }
+
+  public toString() {
+    return JSON.stringify(this, null, 2);
+  }
+
+  public toJSON() {
+    return this._msgLogs;
   }
 
   private _chunk(msg: ChatMessage): MessageLog {
@@ -174,7 +188,7 @@ export class Chat {
   private _save() {
     this._workspace.writeFileSync(
       this._msgsFile,
-      JSON.stringify(this._msgLogs, null, 2)
+      this.toString()
     );
   }
 

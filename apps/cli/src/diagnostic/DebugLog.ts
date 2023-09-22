@@ -1,24 +1,37 @@
 import { Timer } from "./Timer";
+import { DebugLlmReq } from "./DebugLlmReq";
 
-import { Workspace } from "@evo-ninja/agent-utils";
+import { ChatMessageLog, ChatMessage, Workspace } from "@evo-ninja/agent-utils";
+
+interface DebugGoal {
+  prompt: string;
+  time: Timer;
+  tokens: number;
+  llmReqs: number;
+}
 
 interface DebugStep {
   time: Timer;
   message?: string;
   error?: string;
+  llmReqs: DebugLlmReq[];
 }
 
 export class DebugLog {
-  private _goal: string = "";
-  private _goalTime: Timer = new Timer();
-  private _steps: DebugStep[] = [];
+  private goal: DebugGoal = {
+    prompt: "",
+    time: new Timer(),
+    tokens: 0,
+    llmReqs: 0
+  };
+  private steps: DebugStep[] = [];
 
   constructor(
     public workspace: Workspace
   ) { }
 
   private get _latestStep() {
-    return this._steps[this._steps.length - 1];
+    return this.steps[this.steps.length - 1];
   }
 
   save(): void {
@@ -28,33 +41,48 @@ export class DebugLog {
     );
   }
 
-  goalStart(goal: string): void {
-    this._goal = goal;
-    this._goalTime.start();
+  goalStart(prompt: string): void {
+    this.goal.prompt = prompt;
+    this.goal.time.start();
+    this.save();
   }
 
   goalEnd(): void {
-    this._goalTime.end();
+    this.goal.time.end();
+    this.save();
   }
 
   stepStart(): void {
     const step: DebugStep = {
-      time: new Timer()
+      time: new Timer(),
+      llmReqs: []
     };
     step.time.start();
-    this._steps.push(step);
+    this.steps.push(step);
+    this.save();
   }
 
   stepEnd(): void {
     this._latestStep.time.end();
+    this.save();
   }
 
   stepLog(message: string): void {
     this._latestStep.message = message;
+    this.save();
   }
 
   stepError(error: string): void {
     this._latestStep.error = error;
+    this.save();
+  }
+
+  stepLlmReq(time: Timer, chat: ChatMessageLog, response?: ChatMessage): void {
+    const req = new DebugLlmReq(time, chat, response);
+    this.goal.llmReqs += 1;
+    this.goal.tokens += req.tokens;
+    this._latestStep.llmReqs.push(req);
+    this.save();
   }
 
   toString(): string {
@@ -63,11 +91,8 @@ export class DebugLog {
 
   toJSON() {
     return {
-      goal: {
-        prompt: this._goal,
-        time: this._goalTime.getHHMMSS()
-      },
-      steps: this._steps,
+      goal: this.goal,
+      steps: this.steps,
     };
   }
 }

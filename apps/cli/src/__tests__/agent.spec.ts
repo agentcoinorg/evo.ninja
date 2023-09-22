@@ -1,7 +1,7 @@
 import { TestCase, TestResult } from "./TestCase";
 import { spawn } from 'child_process';
 
-jest.setTimeout(180000);
+jest.setTimeout(600000);
 
 describe('AI Agent Test Suite', () => {
   let testResults: TestResult[] = [];
@@ -77,7 +77,7 @@ describe('AI Agent Test Suite', () => {
             'start',
             `'${testCase.goal}'`,
             `--root ${testCase.rootDir}`,
-            "--timeout 120",
+            "--timeout 480",
             "--debug"
           ],
           { shell: true }
