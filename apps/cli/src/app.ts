@@ -45,12 +45,9 @@ export interface AppConfig {
 }
 
 export function createApp(config?: AppConfig): App {
-  console.log("HERERER", process.cwd())
   const rootDir = config?.rootDir
-    ? (path.isAbsolute(config?.rootDir) ?
-        config?.rootDir :
-        path.join(process.cwd(), config?.rootDir)
-    ) : path.join(__dirname, "../../../");
+    ? path.resolve(config?.rootDir)
+    : path.join(__dirname, "../../../");
 
   const env = new Env(process.env as Record<string, string>);
 
