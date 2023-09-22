@@ -1,6 +1,6 @@
-const dateShim = require("./date");
+// language=javascript
+import {dateShim} from "./Date";
 
-// language=typescript
 export const packagesShim =
 `
 ${dateShim}

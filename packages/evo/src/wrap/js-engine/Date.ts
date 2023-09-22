@@ -1,4 +1,5 @@
-module.exports = `class Date {
+// language=javascript
+export const dateShim = `class Date {
 
   _timestamp;
 
@@ -158,18 +159,7 @@ module.exports = `class Date {
   setUTCSeconds(second) {
     return __wrap_subinvoke("plugin/datetime", "setUTCSeconds", clean({ timestamp: this._timestamp, second })).value;
   }
-
-  //         "toDateString": async (args: any) => new Date(args.timestamp).toDateString(),
-  //         "toISOString": async (args: any) => new Date(args.timestamp).toISOString(),
-  //         "toJSON": async (args: any) => new Date(args.timestamp).toJSON(),
-  //         "toLocaleDateString": async (args: any) => new Date(args.timestamp).toLocaleDateString(),
-  //         "toLocaleString": async (args: any) => new Date(args.timestamp).toLocaleString(),
-  //         "toLocaleTimeString": async (args: any) => new Date(args.timestamp).toLocaleTimeString(),
-  //         "toString": async (args: any) => new Date(args.timestamp).toString(),
-  //         "toTimeString": async (args: any) => new Date(args.timestamp).toTimeString(),
-  //         "toUTCString": async (args: any) => new Date(args.timestamp).toUTCString(),
-  //         "valueOf": async (args: any) => new Date(args.timestamp).valueOf(),
-
+  
   toDateString() {
     return __wrap_subinvoke("plugin/datetime", "toDateString", clean({ timestamp: this._timestamp })).value;
   }
