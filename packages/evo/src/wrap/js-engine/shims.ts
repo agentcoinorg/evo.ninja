@@ -1,5 +1,10 @@
+const dateShim = require("./date");
+
+// language=typescript
 export const packagesShim =
 `
+${dateShim}
+  
 // HACK: This is a hack because undefined, null, and functions are not supported by the JS Engine
 function clean(obj, root = true) {
   if (obj === undefined) {
