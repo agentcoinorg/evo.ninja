@@ -32,7 +32,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
     "Write a paper about toast and save it as toast.md",
     "How do I cook spaghetti? Write down the recipe to spaghetti.txt",
   ];
-  
+
   const [message, setMessage] = useState<string>("");
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
   const [paused, setPaused] = useState<boolean>(false);
@@ -52,8 +52,6 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
   const [hasUpvoted, setHasUpvoted] = useState<boolean>(false);
   const [hasDownvoted, setHasDownvoted] = useState<boolean>(false);
   const [showEvoNetPopup, setShowEvoNetPopup] = useState<boolean>(false);
-
-
   const [showPrompts, setShowPrompts] = useState<boolean>(true);
 
   const pausedRef = useRef(paused);
@@ -133,13 +131,6 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
     localStorage.setItem('trackUser', trackUser.toString());
   }, [trackUser]);
 
-  useEffect(() => {
-    if (message !== "") {
-      handleSend();
-      setShowPrompts(false); 
-
-    }
-  }, [message]);
   const handleCloseDisclaimer = () => {
     setShowDisclaimer(false);
     setTrackUser(true);  // User accepted disclaimer, enable tracking
@@ -159,6 +150,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
       user: "user"
     });
     setSending(true);
+    setShowPrompts(false);
     setMessage("");
     setEvoRunning(true);
 
@@ -176,6 +168,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
   };
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    console.log(`handleChange: ${event}`);
     setMessage(event.target.value);
   };
 
@@ -184,7 +177,6 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
       handleSend();
     }
   };
-
 
   const handleThumbsUp = () => {
     if (!hasDownvoted) {
@@ -207,11 +199,11 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
         return `# ${msg.user.toUpperCase()}\n${msg.title}\n${msg.content}\n---\n`;
       }).join('\n');
     }
-  
+
     // Generate a date-time stamp
     const date = new Date();
     const dateTimeStamp = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}_${date.getHours().toString().padStart(2, '0')}-${date.getMinutes().toString().padStart(2, '0')}-${date.getSeconds().toString().padStart(2, '0')}`;
-  
+
     const blob = new Blob([exportedContent], { type: 'text/plain;charset=utf-8' });
     const href = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -225,7 +217,6 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
 
   return (
     <div className="Chat">
-      
       <div >
         <FontAwesomeIcon className="Chat__Export" icon={faMarkdown} onClick={() => exportChatHistory('md')} />
       </div>
