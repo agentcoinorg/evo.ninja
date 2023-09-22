@@ -1,8 +1,8 @@
 import { AgentContext } from "../AgentContext";
 import { FUNCTION_CALL_FAILED } from "../prompts";
 
-import { AgentFunction, AgentFunctionResult, BasicAgentMessage } from "@evo-ninja/agent-utils";
-import { ResultOk } from "@polywrap/result";
+import { AgentFunction, AgentFunctionResult, FunctionCallMessage } from "@evo-ninja/agent-utils";
+import { Result, ResultOk } from "@polywrap/result";
 
 const allowedLibs = [
   "fs",
@@ -11,13 +11,73 @@ const allowedLibs = [
 ];
 
 const FN_NAME = "writeFunction";
-
 type FuncParameters = { 
   namespace: string, 
   description: string, 
   arguments: string, 
   code: string 
 };
+
+const SUCCESS = (params: FuncParameters): AgentFunctionResult => ({
+  outputs: [
+    {
+      type: "success",
+      title: `Wrote function '${params.namespace}'.`,
+      content: `Wrote the function ${params.namespace} to the workspace.`
+    }
+  ],
+  messages: [
+    new FunctionCallMessage(FN_NAME, params),
+    {
+      role: "system",
+      content: `Wrote the function ${params.namespace} to the workspace.`
+    },
+  ]
+});
+const CANNOT_CREATE_IN_AGENT_NAMESPACE_ERROR = (params: FuncParameters): AgentFunctionResult => ({
+  outputs: [
+    {
+      type: "success",
+      title: `Failed to write function '${params.namespace}'!`,
+      content: FUNCTION_CALL_FAILED(FN_NAME, `Cannot create a function with namespace ${params.namespace}. Namespaces starting with 'agent.' are reserved.`, params)
+    }
+  ],
+  messages: [
+    {
+      role: "assistant",
+      function_call: {
+        name: FN_NAME,
+        arguments: JSON.stringify(params)
+      },
+    },
+    {
+      role: "system",
+      content: FUNCTION_CALL_FAILED(FN_NAME, `Cannot create a function with namespace ${params.namespace}. Namespaces starting with 'agent.' are reserved.`, params)
+    },
+  ]
+});
+const CANNOT_REQUIRE_LIB_ERROR = (params: FuncParameters): AgentFunctionResult => ({
+  outputs: [
+    {
+      type: "success",
+      title:`Failed to write function '${params.namespace}'!`,
+      content: FUNCTION_CALL_FAILED(FN_NAME,  `Cannot require libraries other than ${allowedLibs.join(", ")}.`, params)
+    }
+  ],
+  messages: [
+    {
+      role: "assistant",
+      function_call: {
+        name: FN_NAME,
+        arguments: JSON.stringify(params)
+      },
+    },
+    {
+      role: "system",
+      content: FUNCTION_CALL_FAILED(FN_NAME, `Cannot require libraries other than ${allowedLibs.join(", ")}.`, params)
+    },
+  ]
+});
 
 export const writeFunction: AgentFunction<AgentContext> = {
   definition: {
@@ -48,31 +108,18 @@ export const writeFunction: AgentFunction<AgentContext> = {
     },
   },
   buildExecutor(context: AgentContext) {
-    return async (params: FuncParameters): Promise<AgentFunctionResult> => {
+    return async (params: FuncParameters): Promise<Result<AgentFunctionResult, string>> => {
       if (params.namespace.startsWith("agent.")) {
-        return ResultOk([
-          BasicAgentMessage.error(
-            "system", 
-            `Failed to write function '${params.namespace}'!`,
-            FUNCTION_CALL_FAILED(FN_NAME, `Cannot create a function with namespace ${params.namespace}. Namespaces starting with 'agent.' are reserved.`, params)
-          )
-        ]);
+        return ResultOk(CANNOT_CREATE_IN_AGENT_NAMESPACE_ERROR(params));
       }
 
       if (extractRequires(params.code).some(x => !allowedLibs.includes(x))) {
-        return ResultOk([BasicAgentMessage.error("system", `Cannot require libraries other than ${allowedLibs.join(", ")}.`)])
+        return ResultOk(CANNOT_REQUIRE_LIB_ERROR(params));
       }
 
       context.workspace.writeFileSync("index.js", params.code);
 
-      return ResultOk([
-        BasicAgentMessage.ok(
-          "system",
-          `Wrote function '${params.namespace}'.`,
-          `Wrote the function ${params.namespace} to the workspace.`,
-          FN_NAME
-        )
-      ]);
+      return ResultOk(SUCCESS(params));
     };
   }
 };

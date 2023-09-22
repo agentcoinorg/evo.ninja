@@ -1,11 +1,11 @@
-import { Message } from "../../llm";
+import { ChatMessage } from "../../llm";
 
 import figlet from "figlet";
 
 export interface ILogger {
   info: (info: string) => void;
-  message: (msg: Message) => void;
-  action: (msg: Message) => void;
+  message: (msg: ChatMessage) => void;
+  action: (msg: ChatMessage) => void;
   notice: (msg: string) => void;
   success: (msg: string) => void;
   warning: (msg: string) => void;
@@ -29,11 +29,11 @@ export class Logger implements ILogger {
     this._loggers.forEach((l) => l.info(info));
   }
 
-  message(msg: Message) {
+  message(msg: ChatMessage) {
     this._loggers.forEach((l) => l.message(msg));
   };
 
-  action(msg: Message) {
+  action(msg: ChatMessage) {
     this._loggers.forEach((l) => l.action(msg));
   }
 

@@ -1,4 +1,4 @@
-import { Chat } from ".";
+import { Chat, ChatMessage } from ".";
 
 export declare const LlmRoles: {
   readonly System: "system";
@@ -13,15 +13,6 @@ export interface LlmOptions {
   max_tokens?: number;
 }
 
-export interface LlmResponse {
-  role: LlmRole,
-  content?: string;
-  function_call?: {
-    name?: string,
-    arguments?: string
-  };
-}
-
 export interface LlmApi {
   getMaxContextTokens(): number;
   getModel(): string;
@@ -29,5 +20,5 @@ export interface LlmApi {
     chat: Chat,
     functionDefinitions: any[],
     options?: LlmOptions
-  ): Promise<LlmResponse | undefined>;
+  ): Promise<ChatMessage | undefined>;
 }

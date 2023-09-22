@@ -1,13 +1,32 @@
-import { ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, BasicAgentMessage } from "@evo-ninja/agent-utils";
+import { Result, ResultOk } from "@polywrap/result";
+import { AgentFunction, AgentFunctionResult, FunctionCallMessage } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
 import { OTHER_EXECUTE_FUNCTION_OUTPUT } from "../prompts";
 
 const FN_NAME = "think";
-
 type FuncParameters = { 
   thoughts: string
 };
+
+const SUCCESS = (params: FuncParameters): AgentFunctionResult => ({
+  outputs: [
+    {
+      type: "success",
+      title: `Thinking...`,
+      content: 
+        `## Function Call:\n\`\`\`javascript\n${FN_NAME}\n\`\`\`\n` +
+        OTHER_EXECUTE_FUNCTION_OUTPUT(`I think: ${params.thoughts}.`)
+    }
+  ],
+  messages: [
+    new FunctionCallMessage(FN_NAME, params),
+    {
+      role: "system",
+      content: `## Function Call:\n\`\`\`javascript\n${FN_NAME}\n\`\`\`\n` +
+        OTHER_EXECUTE_FUNCTION_OUTPUT(`I think: ${params.thoughts}.`)
+    },
+  ]
+});
 
 export const think: AgentFunction<AgentContext> = {
   definition: {
@@ -26,16 +45,8 @@ export const think: AgentFunction<AgentContext> = {
     },
   },
   buildExecutor(context: AgentContext) {
-    return async (params: FuncParameters): Promise<AgentFunctionResult> => {
-      return ResultOk([
-        BasicAgentMessage.ok(
-          "system",
-          `Thinking...`,
-          `## Function Call:\n\`\`\`javascript\n${FN_NAME}\n\`\`\`\n` +
-          OTHER_EXECUTE_FUNCTION_OUTPUT(`I think: ${params.thoughts}.`),
-          FN_NAME
-        )
-      ]);
+    return async (params: FuncParameters): Promise<Result<AgentFunctionResult, string>> => {
+      return ResultOk(SUCCESS(params));
     };
   }
 };

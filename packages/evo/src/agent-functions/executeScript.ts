@@ -1,23 +1,65 @@
 import JSON5 from "json5";
-import { ResultErr, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, BasicAgentMessage } from "@evo-ninja/agent-utils";
+import { Result, ResultErr, ResultOk } from "@polywrap/result";
+import { AgentFunction, AgentFunctionResult, FunctionCallMessage } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
 import { EXECUTE_SCRIPT_OUTPUT, FUNCTION_CALL_FAILED } from "../prompts";
 import { JsEngine_GlobalVar, JsEngine, shimCode } from "../wrap";
 
 const FN_NAME = "executeScript";
-
-const INVALID_EXECUTE_SCRIPT_ARGS = (
-  params: FuncParameters
-) => `Invalid arguments provided for script ${params.namespace}: '${params.arguments ?? ""}' is not valid JSON!`;
-const SCRIPT_NOT_FOUND = (params: FuncParameters) => `Script '${params.namespace}' not found!`;
-
 type FuncParameters = { 
   namespace: string, 
   description: string, 
   arguments: string,
   result: string
 };
+
+const SUCCESS = (scriptName: string, result: any, params: FuncParameters): AgentFunctionResult => ({
+  outputs: [
+    {
+      type: "success",
+      title: `Executed '${scriptName}' script.`,
+      content: 
+        `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${JSON.stringify(params, null, 2)})\n\`\`\`\n` +
+        EXECUTE_SCRIPT_OUTPUT(params.result, result),
+    }
+  ],
+  messages: [
+    new FunctionCallMessage(FN_NAME, params),
+    {
+      role: "system",
+      content: `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${JSON.stringify(params, null, 2)})\n\`\`\`\n` +
+        EXECUTE_SCRIPT_OUTPUT(params.result, result),
+    },
+  ]
+});
+const EXECUTE_SCRIPT_ERROR_RESULT = (scriptName: string, error: string | undefined, params: FuncParameters): AgentFunctionResult => ({
+  outputs: [
+    {
+      type: "success",
+      title: `'${scriptName}' script failed to execute!`,
+      content: FUNCTION_CALL_FAILED(FN_NAME, error ?? "Unknown error", params),
+    }
+  ],
+  messages: [
+    {
+      role: "assistant",
+      content: "",
+      function_call: {
+        name: FN_NAME,
+        arguments: JSON.stringify(params)
+      },
+    },
+    {
+      role: "system",
+      content: FUNCTION_CALL_FAILED(FN_NAME, error ?? "Unknown error", params),
+    },
+  ]
+});
+
+const INVALID_EXECUTE_SCRIPT_ARGS = (
+  params: FuncParameters
+) => `Invalid arguments provided for script ${params.namespace}: '${params.arguments ?? ""}' is not valid JSON!`;
+const SCRIPT_NOT_FOUND = (params: FuncParameters) => `Script '${params.namespace}' not found!`;
 
 export const executeScript: AgentFunction<AgentContext> = {
   definition: {
@@ -44,12 +86,12 @@ export const executeScript: AgentFunction<AgentContext> = {
     },
   },
   buildExecutor(context: AgentContext) {
-    return async (params: FuncParameters): Promise<AgentFunctionResult> => {
+    return async (params: FuncParameters): Promise<Result<AgentFunctionResult, string>> => {
       try {
         const script = context.scripts.getScriptByName(params.namespace);
 
         if (!script) {
-          return error(params.namespace, SCRIPT_NOT_FOUND(params), params);
+          return ResultOk(EXECUTE_SCRIPT_ERROR_RESULT(params.namespace, SCRIPT_NOT_FOUND(params), params));
         }
 
         let args: any = undefined;
@@ -76,7 +118,7 @@ export const executeScript: AgentFunction<AgentContext> = {
             }
           }
         } catch {
-          return error(params.namespace, INVALID_EXECUTE_SCRIPT_ARGS(params), params);
+          return ResultOk(EXECUTE_SCRIPT_ERROR_RESULT(params.namespace, INVALID_EXECUTE_SCRIPT_ARGS(params), params));
         }
 
         const globals: JsEngine_GlobalVar[] =
@@ -101,35 +143,14 @@ export const executeScript: AgentFunction<AgentContext> = {
         return result.ok
           ? result.value.error == null
             ? context.client.jsPromiseOutput.ok
-              ? ok(params.namespace, context.client.jsPromiseOutput.value, params)
-              : ok(params.namespace, context.client.jsPromiseOutput.error, params)
-            : error(params.namespace, result.value.error, params)
-          : error(params.namespace, result.error?.toString() ?? "Unknown error", params);
+              ? ResultOk(SUCCESS(params.namespace, context.client.jsPromiseOutput.value, params))
+              : ResultOk(SUCCESS(params.namespace, context.client.jsPromiseOutput.error, params))
+            : ResultOk(EXECUTE_SCRIPT_ERROR_RESULT(params.namespace, result.value.error, params))
+          : ResultOk(EXECUTE_SCRIPT_ERROR_RESULT(params.namespace, result.error?.toString(), params));
       
       } catch (e: any) {
         return ResultErr(e);
       }
     };
   }
-};
-
-const ok = (scriptName: string, result: any, params: FuncParameters): AgentFunctionResult => {
-  const argsStr = JSON.stringify(params, null, 2);
-
-  return ResultOk([
-    BasicAgentMessage.ok(
-      "system",
-      `Executed '${scriptName}' script.`,
-      `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
-      EXECUTE_SCRIPT_OUTPUT(params.result, result),
-      FN_NAME
-    )
-  ]);
-};
-
-const error = (scriptName: string, content: string | undefined, params: FuncParameters): AgentFunctionResult => {
-  return ResultOk([
-    BasicAgentMessage.error("system", `'${scriptName}' script failed to execute!`, 
-    FUNCTION_CALL_FAILED(FN_NAME, content ?? "Unknown error", params))
-  ]);
 };

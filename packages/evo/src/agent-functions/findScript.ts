@@ -1,10 +1,53 @@
-import { ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, BasicAgentMessage } from "@evo-ninja/agent-utils";
+import { Result, ResultOk } from "@polywrap/result";
+import { AgentFunction, AgentFunctionResult, FunctionCallMessage } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
 import { Script } from "../Scripts";
 
 const FN_NAME = "findScript";
+type FuncParameters = { 
+  namespace: string, 
+  description: string 
+};
 
+const SUCCESS = (params: FuncParameters, candidates: Script[]): AgentFunctionResult => ({
+  outputs: [
+    {
+      type: "success",
+      title: FIND_SCRIPT_TITLE(params),
+      content: FOUND_SCRIPTS_CONTENT(params, candidates, JSON.stringify(params, null, 2)),
+    }
+  ],
+  messages: [
+    new FunctionCallMessage(FN_NAME, params),
+    {
+      role: "system",
+      content: FOUND_SCRIPTS_CONTENT(params, candidates, JSON.stringify(params, null, 2))
+    },
+  ]
+});
+const NO_SCRIPTS_FOUND_ERROR = (params: FuncParameters): AgentFunctionResult => ({
+  outputs: [
+    {
+      type: "success",
+      title: FIND_SCRIPT_TITLE(params),
+      content: NO_SCRIPTS_FOUND(params, JSON.stringify(params, null, 2))
+    }
+  ],
+  messages: [
+    {
+      role: "assistant",
+      content: "",
+      function_call: {
+        name: FN_NAME,
+        arguments: JSON.stringify(params)
+      },
+    },
+    {
+      role: "system",
+      content: NO_SCRIPTS_FOUND(params, JSON.stringify(params, null, 2)),
+    },
+  ]
+});
 const FIND_SCRIPT_TITLE = (params: FuncParameters) => `Searched for '${params.namespace}' script ("${params.description}")`;
 const FOUND_SCRIPTS_CONTENT = (
   params: FuncParameters,
@@ -24,10 +67,6 @@ const NO_SCRIPTS_FOUND = (params: FuncParameters, argsStr: string) =>
   `Found no candidates for script '${params.namespace}'. Try creating the script instead.\n` +
   `\`\`\``;
 
-type FuncParameters = { 
-  namespace: string, 
-  description: string 
-};
 
 export const findScript: AgentFunction<AgentContext> = {
   definition: {
@@ -50,25 +89,16 @@ export const findScript: AgentFunction<AgentContext> = {
     },
   },
   buildExecutor(context: AgentContext) {
-    return async (params: FuncParameters): Promise<AgentFunctionResult> => {
+    return async (params: FuncParameters): Promise<Result<AgentFunctionResult, string>> => {
       const candidates = context.scripts.searchScripts(
         `${params.namespace} ${params.description}`
       ).slice(0, 5);
 
-      const argsStr = JSON.stringify(params, null, 2);
-     
       if (candidates.length === 0) {
-        return ResultOk([BasicAgentMessage.error("system", FIND_SCRIPT_TITLE(params), NO_SCRIPTS_FOUND(params, argsStr))])
+        return ResultOk(NO_SCRIPTS_FOUND_ERROR(params))
       }
     
-      return ResultOk([
-        BasicAgentMessage.ok(
-          "system",
-          FIND_SCRIPT_TITLE(params),
-          FOUND_SCRIPTS_CONTENT(params, candidates, argsStr),
-          FN_NAME
-        )
-      ]);
+      return ResultOk(SUCCESS(params, candidates));
     };
   }
 };

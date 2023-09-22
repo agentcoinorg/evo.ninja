@@ -6,7 +6,7 @@ import {
   InMemoryWorkspace,
   Env,
   ChatRole,
-  LlmResponse
+  ChatMessage
 } from "@evo-ninja/agent-utils";
 import dotenv from "dotenv";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
@@ -93,6 +93,6 @@ describe('LLM Test Suite', () => {
           result: "writeFileResult"
         }, null, 2)
       } 
-     } as LlmResponse);
+     } as ChatMessage);
   }, ONE_MINUTE_TIMEOUT);
 });
