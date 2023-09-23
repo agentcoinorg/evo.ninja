@@ -26,3 +26,6 @@ jobs:
       run: yarn build
       env:
         CI: false
+
+    - name: Unit tests
+      run: yarn test:unit

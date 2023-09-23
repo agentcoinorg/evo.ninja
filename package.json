@@ -23,7 +23,9 @@
     "build:evo": "yarn workspace @evo-ninja/evo-agent run build",
     "build:script-writer": "yarn workspace @evo-ninja/js-script-writer-agent run build",
     "build:cli": "yarn workspace evo-ninja run build",
-    "build:browser": "yarn workspace @evo-ninja/ui run build"
+    "build:browser": "yarn workspace @evo-ninja/ui run build",
+    "test:unit": "yarn test:agent-utils",
+    "test:agent-utils": "yarn workspace @evo-ninja/agent-utils run test"
   },
   "devDependencies": {
     "rimraf": "5.0.1"
