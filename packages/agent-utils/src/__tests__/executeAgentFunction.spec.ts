@@ -2,6 +2,9 @@ import {
   AgentFunctionResult,
   FUNCTION_NOT_FOUND,
   executeAgentFunction,
+  UNPARSABLE_FUNCTION_ARGS,
+  UNDEFINED_FUNCTION_ARGS,
+  UNDEFINED_FUNCTION_NAME,
 } from "../agent";
 
 import { ResultOk } from "@polywrap/result";
@@ -27,19 +30,14 @@ const readMockState = (globalState: any) => async (executorState: any) => {
   }
 
   return ResultOk({
-    outputs: [
-      {
-        type: "success",
-        title: "Mock title",
-      },
-    ],
+    ...mockedFunctionResult,
     messages: [
       {
-        role: "user",
+        role: mockedFunctionResult.messages[0].role,
         content: globalState[executorState.name],
       },
     ],
-  } as AgentFunctionResult);
+  });
 };
 
 const mockAgentFunctions = [
@@ -86,7 +84,7 @@ describe("Execute agent function", () => {
     expect(response.result.value).toBe(mockedFunctionResult);
   });
 
-  test("Should fail if executes an non existant agent function", async () => {
+  test("Should fail if executes an non existent agent function", async () => {
     const context = { bar: "baz" };
     const wrongFunctionName = "non-existant";
     const response = await executeAgentFunction(
@@ -99,5 +97,50 @@ describe("Execute agent function", () => {
     expect(response.result.ok).toBeFalsy();
     //@ts-ignore
     expect(response.result.error).toBe(FUNCTION_NOT_FOUND(wrongFunctionName));
+  });
+
+  test("Should fail if executes a function with invalid arguments", async () => {
+    const context = {};
+    const name = "foo";
+    const args = "{wrong-args}";
+    const response = await executeAgentFunction(
+      name,
+      args,
+      context,
+      mockAgentFunctions
+    );
+    if (response.result.ok) throw Error("Response should be error");
+    expect(response.result.ok).toBe(false);
+    expect(
+      UNPARSABLE_FUNCTION_ARGS(name, args, response.result.error)
+    ).toContain(response.result.error);
+  });
+
+  test("Should fail if arguments is undefined", async () => {
+    const context = {};
+    const name = "foo";
+    const response = await executeAgentFunction(
+      name,
+      undefined,
+      context,
+      mockAgentFunctions
+    );
+    if (response.result.ok) throw Error("Response should be error");
+    expect(response.result.ok).toBe(false);
+    expect(UNDEFINED_FUNCTION_ARGS(name)).toContain(response.result.error);
+  });
+
+  test("Should fail if name is undefined", async () => {
+    const context = {};
+    const name = undefined;
+    const response = await executeAgentFunction(
+      name,
+      undefined,
+      context,
+      mockAgentFunctions
+    );
+    if (response.result.ok) throw Error("Response should be error");
+    expect(response.result.ok).toBe(false);
+    expect(UNDEFINED_FUNCTION_NAME).toContain(response.result.error);
   });
 });
