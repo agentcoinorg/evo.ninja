@@ -1,5 +1,5 @@
 // language=javascript
-import {dateShim} from "./Date";
+import { dateShim } from "./Date";
 
 export const packagesShim =
 `
