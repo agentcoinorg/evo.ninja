@@ -6,7 +6,8 @@ import {
   ChatCompletionResponseMessage,
   ChatCompletionRequestMessageFunctionCall,
   Configuration,
-  OpenAIApi
+  OpenAIApi,
+  CreateChatCompletionRequest
 } from "openai";
 
 export {
@@ -19,6 +20,8 @@ interface OpenAIError {
   message: string;
   data: unknown;
 }
+
+export type OpenAIFunctions = CreateChatCompletionRequest["functions"]
 
 export class OpenAI implements LlmApi {
   private _configuration: Configuration;
@@ -48,7 +51,7 @@ export class OpenAI implements LlmApi {
 
   async getResponse(
     chat: Chat,
-    functionDefinitions: any[],
+    functionDefinitions: OpenAIFunctions,
     options?: LlmOptions,
     tries?: number
   ): Promise<ChatMessage | undefined> {
@@ -105,7 +108,7 @@ export class OpenAI implements LlmApi {
   private _createChatCompletion(options: {
     messages: ChatCompletionRequestMessage[];
     model?: string;
-    functions?: any;
+    functions?: OpenAIFunctions;
   } & LlmOptions) {
     return this._api.createChatCompletion({
       messages: options.messages,
