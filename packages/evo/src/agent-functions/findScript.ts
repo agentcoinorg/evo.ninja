@@ -1,7 +1,8 @@
 import { Result, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, FunctionCallMessage } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
 import { Script } from "../Scripts";
+import { FUNCTION_CALL_SUCCESS_CONTENT } from "../prompts";
 
 const FN_NAME = "findScript";
 type FuncParameters = { 
@@ -14,15 +15,23 @@ const SUCCESS = (params: FuncParameters, candidates: Script[]): AgentFunctionRes
     {
       type: "success",
       title: FIND_SCRIPT_TITLE(params),
-      content: FOUND_SCRIPTS_CONTENT(params, candidates, JSON.stringify(params, null, 2)),
+      content: FUNCTION_CALL_SUCCESS_CONTENT(
+        FN_NAME,
+        params,
+        `Found the following results for script '${params.namespace}'` + 
+        `\n--------------\n` + 
+        `${candidates.map((c) => `Namespace: ${c.name}\nArguments: ${c.arguments}\nDescription: ${c.description}`).join("\n--------------\n")}\n` +
+        `\n--------------\n`
+      )
     }
   ],
   messages: [
-    new FunctionCallMessage(FN_NAME, params),
-    {
-      role: "system",
-      content: FOUND_SCRIPTS_CONTENT(params, candidates, JSON.stringify(params, null, 2))
-    },
+    ChatMessageBuilder.functionCall(FN_NAME, params),
+    ChatMessageBuilder.system(
+      `Found the following results for script '${params.namespace}'\n` + 
+      `${candidates.map((c) => `Namespace: ${c.name}\nArguments: ${c.arguments}\nDescription: ${c.description}`).join("\n--------------\n")}\n` +
+      `\`\`\``
+    ),
   ]
 });
 const NO_SCRIPTS_FOUND_ERROR = (params: FuncParameters): AgentFunctionResult => ({
@@ -30,43 +39,19 @@ const NO_SCRIPTS_FOUND_ERROR = (params: FuncParameters): AgentFunctionResult => 
     {
       type: "success",
       title: FIND_SCRIPT_TITLE(params),
-      content: NO_SCRIPTS_FOUND(params, JSON.stringify(params, null, 2))
+      content: FUNCTION_CALL_SUCCESS_CONTENT(
+        FN_NAME,
+        params,
+        `Found no results for script '${params.namespace}'. Try creating the script instead.`
+      ),
     }
   ],
   messages: [
-    {
-      role: "assistant",
-      content: "",
-      function_call: {
-        name: FN_NAME,
-        arguments: JSON.stringify(params)
-      },
-    },
-    {
-      role: "system",
-      content: NO_SCRIPTS_FOUND(params, JSON.stringify(params, null, 2)),
-    },
+    ChatMessageBuilder.functionCall(FN_NAME, params),
+    ChatMessageBuilder.system(`Found no results for script '${params.namespace}'. Try creating the script instead.`),
   ]
 });
 const FIND_SCRIPT_TITLE = (params: FuncParameters) => `Searched for '${params.namespace}' script ("${params.description}")`;
-const FOUND_SCRIPTS_CONTENT = (
-  params: FuncParameters,
-  candidates: Script[],
-  argsStr: string
-) => `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
-  `## Result\n\`\`\`\n${
-  `Found the following candidates for script: ${params.namespace}:` + 
-  `\n--------------\n` + 
-  `${candidates.map((c) => `Namespace: ${c.name}\nArguments: ${c.arguments}\nDescription: ${c.description}`).join("\n--------------\n")}` +
-  `\n--------------\n`
-  }\n\`\`\``;
-
-const NO_SCRIPTS_FOUND = (params: FuncParameters, argsStr: string) =>
-  `### Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
-  `## Result\n\`\`\`\n` +
-  `Found no candidates for script '${params.namespace}'. Try creating the script instead.\n` +
-  `\`\`\``;
-
 
 export const findScript: AgentFunction<AgentContext> = {
   definition: {

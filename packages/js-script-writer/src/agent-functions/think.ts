@@ -1,7 +1,6 @@
 import { Result, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, FunctionCallMessage } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
-import { OTHER_EXECUTE_FUNCTION_OUTPUT } from "../prompts";
 
 const FN_NAME = "think";
 type FuncParameters = { 
@@ -14,17 +13,20 @@ const SUCCESS = (params: FuncParameters): AgentFunctionResult => ({
       type: "success",
       title: `Thinking...`,
       content: 
-        `## Function Call:\n\`\`\`javascript\n${FN_NAME}\n\`\`\`\n` +
-        OTHER_EXECUTE_FUNCTION_OUTPUT(`I think: ${params.thoughts}.`)
+        `## Thoughts:\n` +
+        `\`\`\`\n` +
+        `${params.thoughts}\n` +
+        `\`\`\``
     }
   ],
   messages: [
-    new FunctionCallMessage(FN_NAME, params),
-    {
-      role: "system",
-      content: `## Function Call:\n\`\`\`javascript\n${FN_NAME}\n\`\`\`\n` +
-        OTHER_EXECUTE_FUNCTION_OUTPUT(`I think: ${params.thoughts}.`)
-    },
+    ChatMessageBuilder.functionCall(FN_NAME, params),
+    ChatMessageBuilder.system(
+      `Thoughts:\n` + 
+      `\`\`\`\n` + 
+      `${params.thoughts}\n` + 
+      `\`\`\``
+    ),
   ]
 });
 

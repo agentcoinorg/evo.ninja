@@ -1,8 +1,8 @@
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, FunctionCallMessage } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { ScriptWriter } from "@evo-ninja/js-script-writer-agent";
 import { AgentContext } from "../AgentContext";
-import { FUNCTION_CALL_FAILED } from "../prompts";
+import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../prompts";
 import { Script } from "../Scripts";
 
 const FN_NAME = "createScript";
@@ -16,23 +16,20 @@ const SUCCESS = (script: Script, params: FuncParameters): AgentFunctionResult =>
   outputs: [
     {
       type: "success",
-      title: CREATED_SCRIPT_TITLE(params),
-      content: CREATED_SCRIPT_CONTENT(script, JSON.stringify(params, null, 2)),
+      title:`Created '${params.namespace}' script.`,
+      content: FUNCTION_CALL_SUCCESS_CONTENT(
+        FN_NAME,
+        params, 
+        `Created the following script:` + 
+        `\n--------------\n` + 
+        `Namespace: ${script.name}\nArguments: ${script.arguments}\nDescription: ${script.description}` +
+        `\n--------------\n`
+      )
     }
   ],
   messages: [
-    {
-      role: "assistant",
-      content: "",
-      function_call: {
-        name: FN_NAME,
-        arguments: JSON.stringify(params)
-      },
-    },
-    {
-      role: "system",
-      content: CREATED_SCRIPT_CONTENT(script, JSON.stringify(params, null, 2)),
-    },
+    ChatMessageBuilder.functionCall(FN_NAME, params),
+    ChatMessageBuilder.system(`Script '${script.name}' created.`)
   ]
 });
 
@@ -41,29 +38,18 @@ const CANNOT_CREATE_SCRIPTS_ON_AGENT_NAMESPACE = (params: FuncParameters): Agent
     {
       type: "error",
       title: `Failed to create '${params.namespace}' script!`,
-      content: FUNCTION_CALL_FAILED(FN_NAME, `Cannot create an script with namespace ${params.namespace}. Try searching for script in that namespace instead.`, params)
+      content: FUNCTION_CALL_FAILED(
+        params, 
+        FN_NAME, 
+        `Scripts in the 'agent' namespace cannot be created. Try searching for an existing script instead.`
+      )
     }
   ],
   messages: [
-    new FunctionCallMessage(FN_NAME, params),
-    {
-      role: "system",
-      content: FUNCTION_CALL_FAILED(FN_NAME, `Cannot create an script with namespace ${params.namespace}. Try searching for script in that namespace instead.`, params)
-    }
+    ChatMessageBuilder.functionCall(FN_NAME, params),
+    ChatMessageBuilder.system(`Scripts in the 'agent' namespace cannot be created. Try searching for an existing script instead.`)
   ]
 });
-
-const CREATED_SCRIPT_TITLE = (params: FuncParameters) => `Created '${params.namespace}' script.`;
-const CREATED_SCRIPT_CONTENT = (
-  script: Script,
-  argsStr: string
-) => `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
-  `## Result\n\`\`\`\n${
-  `Created the following script:` + 
-  `\n--------------\n` + 
-  `Namespace: ${script.name}\nArguments: ${script.arguments}\nDescription: ${script.description}` +
-  `\n--------------\n`
-  }\n\`\`\``;
 
 export function createScript(createScriptWriter: () => ScriptWriter): AgentFunction<AgentContext> {
   return {

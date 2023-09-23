@@ -1,7 +1,7 @@
 import { Result, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, FunctionCallMessage } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, ChatMessageBuilder, trimText } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
-import { FUNCTION_CALL_FAILED, READ_GLOBAL_VAR_OUTPUT } from "../prompts";
+import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../prompts";
 
 const FN_NAME = "readVar";
 type FuncParameters = { 
@@ -12,56 +12,51 @@ const SUCCESS = (params: FuncParameters, varValue: string): AgentFunctionResult 
   outputs: [
     {
       type: "success",
-      title: READ_VAR_TITLE(params),
-      content: READ_VAR_CONTENT(params, JSON.stringify(params, null, 2), varValue)
+      title: `Read '${params.name}' variable.`,
+      content: FUNCTION_CALL_SUCCESS_CONTENT(
+        FN_NAME,
+        params,
+        READ_GLOBAL_VAR_OUTPUT(params.name, varValue)
+      )
     }
   ],
   messages: [
-    new FunctionCallMessage(FN_NAME, params),
-    {
-      role: "system",
-      content: READ_VAR_CONTENT(params, JSON.stringify(params, null, 2), varValue)
-    },
+    ChatMessageBuilder.functionCall(FN_NAME, params),
+    ChatMessageBuilder.system(READ_GLOBAL_VAR_MESSAGE(params.name, varValue))
   ]
 });
 const VAR_NOT_FOUND_ERROR = (params: FuncParameters): AgentFunctionResult => ({
   outputs: [
     {
       type: "success",
-      title: FAILED_TO_READ_VAR_TITLE(params), 
-      content: FAILED_TO_READ_VAR_CONTENT(params)
+      title: `Failed to read '${params.name}' variable.`, 
+      content: FUNCTION_CALL_FAILED(params, FN_NAME, `Global variable {{${params.name}}} not found.`)
     }
   ],
   messages: [
-    {
-      role: "assistant",
-      content: "",
-      function_call: {
-        name: FN_NAME,
-        arguments: JSON.stringify(params)
-      },
-    },
-    {
-      role: "system",
-      content: FAILED_TO_READ_VAR_CONTENT(params)
-    },
+    ChatMessageBuilder.functionCall(FN_NAME, params),
+    ChatMessageBuilder.system(FUNCTION_CALL_FAILED(params, FN_NAME, `Global variable {{${params.name}}} not found.`))
   ]
 });
-const READ_VAR_TITLE = (params: FuncParameters) => 
-  `Read '${params.name}' variable.`;
-const READ_VAR_CONTENT = (
-  params: FuncParameters,
-  argsStr: string,
-  value: string
-) => 
-  `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${argsStr})\n\`\`\`\n` +
-  `## Result\n\`\`\`\n${
-    READ_GLOBAL_VAR_OUTPUT(params.name, value)
-  }\n\`\`\``;
-const FAILED_TO_READ_VAR_TITLE = (params: FuncParameters) => 
-  `Failed to read '${params.name}' variable.`;
-const FAILED_TO_READ_VAR_CONTENT = (params: FuncParameters) => 
-  FUNCTION_CALL_FAILED(FN_NAME, `Global variable ${params.name} not found.`, params);
+
+export const READ_GLOBAL_VAR_OUTPUT = (varName: string, value: string | undefined) => {
+  if (!value || value === "\"undefined\"") {
+    return `## Variable {{${varName}}} is undefined`;
+  } else if (value.length > 200) {
+    return `## Read variable {{${varName}}}, but it is too large, JSON preview:\n\`\`\`\n${trimText(value, 200)}\n\`\`\``;
+  } else {
+    return `## Read variable {{${varName}}}, JSON:\n\`\`\`\n${value}\n\`\`\``;
+  }
+};
+export const READ_GLOBAL_VAR_MESSAGE = (varName: string, value: string | undefined) => {
+  if (!value || value === "\"undefined\"") {
+    return `Variable {{${varName}}} is undefined`;
+  } else if (value.length > 200) {
+    return `Read variable {{${varName}}}, but it is too large, JSON preview:\n\`\`\`\n${trimText(value, 200)}\n\`\`\``;
+  } else {
+    return `Read variable {{${varName}}}, JSON:\n\`\`\`\n${value}\n\`\`\``;
+  }
+};
 
 export const readVar: AgentFunction<AgentContext> = {
   definition: {

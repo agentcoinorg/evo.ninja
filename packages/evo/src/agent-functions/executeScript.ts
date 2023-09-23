@@ -1,8 +1,8 @@
 import JSON5 from "json5";
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, FunctionCallMessage } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, ChatMessageBuilder, trimText } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
-import { EXECUTE_SCRIPT_OUTPUT, FUNCTION_CALL_FAILED } from "../prompts";
+import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../prompts";
 import { JsEngine_GlobalVar, JsEngine, shimCode } from "../wrap";
 
 const FN_NAME = "executeScript";
@@ -18,41 +18,41 @@ const SUCCESS = (scriptName: string, result: any, params: FuncParameters): Agent
     {
       type: "success",
       title: `Executed '${scriptName}' script.`,
-      content: 
-        `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${JSON.stringify(params, null, 2)})\n\`\`\`\n` +
+      content: FUNCTION_CALL_SUCCESS_CONTENT(
+        FN_NAME,
+        params,
         EXECUTE_SCRIPT_OUTPUT(params.result, result),
+      )
     }
   ],
   messages: [
-    new FunctionCallMessage(FN_NAME, params),
-    {
-      role: "system",
-      content: `## Function Call:\n\`\`\`javascript\n${FN_NAME}(${JSON.stringify(params, null, 2)})\n\`\`\`\n` +
-        EXECUTE_SCRIPT_OUTPUT(params.result, result),
-    },
+    ChatMessageBuilder.functionCall(FN_NAME, params),
+    ChatMessageBuilder.system(EXECUTE_SCRIPT_OUTPUT(params.result, result)),
   ]
 });
+
 const EXECUTE_SCRIPT_ERROR_RESULT = (scriptName: string, error: string | undefined, params: FuncParameters): AgentFunctionResult => ({
   outputs: [
     {
       type: "success",
       title: `'${scriptName}' script failed to execute!`,
-      content: FUNCTION_CALL_FAILED(FN_NAME, error ?? "Unknown error", params),
+      content: FUNCTION_CALL_FAILED(params, FN_NAME, error ?? "Unknown error"),
     }
   ],
   messages: [
-    {
-      role: "assistant",
-      content: "",
-      function_call: {
-        name: FN_NAME,
-        arguments: JSON.stringify(params)
-      },
-    },
-    {
-      role: "system",
-      content: FUNCTION_CALL_FAILED(FN_NAME, error ?? "Unknown error", params),
-    },
+    ChatMessageBuilder.functionCall(FN_NAME, params),
+    ChatMessageBuilder.system(
+      `Error executing script '${scriptName}'\n` + 
+      `\`\`\`\n` +
+      `${
+        error && typeof error === "string"
+          ? trimText(error, 300)
+          : error 
+            ? trimText(JSON.stringify(error, null, 2), 300)
+            : "Unknown error"
+        }\n` +
+      `\`\`\``
+    ),
   ]
 });
 
@@ -60,6 +60,26 @@ const INVALID_EXECUTE_SCRIPT_ARGS = (
   params: FuncParameters
 ) => `Invalid arguments provided for script ${params.namespace}: '${params.arguments ?? ""}' is not valid JSON!`;
 const SCRIPT_NOT_FOUND = (params: FuncParameters) => `Script '${params.namespace}' not found!`;
+const EXECUTE_SCRIPT_OUTPUT = (varName: string | undefined, result: string | undefined) => {
+  if (!result || result === "undefined" || result === "\"undefined\"") {
+    return `No result returned.`;
+  } else if (result.length > 200) {
+    return `Preview of JSON result:\n` + 
+          `\`\`\`\n` + 
+          `${trimText(result, 200)}\n` + 
+          `\`\`\`\n` + 
+          `${STORED_RESULT_IN_VAR(varName)}`;
+  } else {
+    return `JSON result: \n\`\`\`\n${result}\n\`\`\`\n${STORED_RESULT_IN_VAR(varName)}`;
+  }
+};
+const STORED_RESULT_IN_VAR = (varName: string | undefined) => {
+  if (varName && varName.length > 0) {
+    return `Result stored in variable: {{${varName}}}`;
+  } else {
+    return "";
+  }
+}
 
 export const executeScript: AgentFunction<AgentContext> = {
   definition: {
