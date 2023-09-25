@@ -43,6 +43,14 @@ async function taskHandler(
     workspace.writeArtifacts();
     const artifacts = workspace.getArtifacts();
     workspace.cleanArtifacts();
+
+    if (response.done) {
+      if (!response.value.ok) {
+        app.debugLog?.stepError(response.value.error ?? "Unknown error");
+      } else {
+        app.debugLog?.stepLog(response.value.value as any);
+      }
+    }
     return {
       is_last: response.done,
       output: JSON.stringify(outputMessage),
