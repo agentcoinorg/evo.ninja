@@ -1,5 +1,5 @@
 import { LlmApi, Tokenizer } from ".";
-import { Workspace, Logger } from "../sys";
+import { Logger } from "../sys";
 
 import {
   ChatCompletionRequestMessageRoleEnum,
@@ -37,11 +37,9 @@ export class Chat {
   private _chunkTokens: number;
 
   constructor(
-    private _workspace: Workspace,
     private _llm: LlmApi,
     private _tokenizer: Tokenizer,
-    private _logger: Logger,
-    private _msgsFile: string = ".msgs",
+    private _logger?: Logger,
   ) {
     this._maxContextTokens = this._llm.getMaxContextTokens();
 
@@ -94,9 +92,6 @@ export class Chat {
         msgLog.msgs.push(msg);
       }
     }
-
-    // Save the full log to disk
-    this._save();
   }
 
   public persistent(
@@ -135,7 +130,7 @@ export class Chat {
       return;
     }
 
-    this._logger.error(`! Max Tokens Exceeded (${this.tokens} / ${this._maxContextTokens})`);
+    this._logger?.error(`! Max Tokens Exceeded (${this.tokens} / ${this._maxContextTokens})`);
 
     // Start with "temporary" messages
     await this._summarize("temporary");
@@ -183,13 +178,6 @@ export class Chat {
     }
 
     return chunks;
-  }
-
-  private _save() {
-    this._workspace.writeFileSync(
-      this._msgsFile,
-      this.toString()
-    );
   }
 
   private async _summarize(
