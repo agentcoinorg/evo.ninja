@@ -42,6 +42,7 @@ export interface AppConfig {
   timeout?: Timeout;
   userWorkspace?: Workspace;
   debug?: boolean;
+  taskId?: string;
 }
 
 export function createApp(config?: AppConfig): App {
@@ -49,15 +50,16 @@ export function createApp(config?: AppConfig): App {
     ? path.resolve(config?.rootDir)
     : path.join(__dirname, "../../../");
 
-  const env = new Env(process.env as Record<string, string>);
-
-  // Chat Log File
   const date = new Date();
-  const logFile = `chat_${date.getFullYear()}-${
+  const defaultId = `${date.getFullYear()}-${
     date.getMonth() + 1
-  }-${date.getDate()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}.md`;
-  const logWorkspace = new FileSystemWorkspace(path.join(rootDir, "chats"));
-  const fileLogger = new FileLogger(logWorkspace.toWorkspacePath(logFile));
+  }-${date.getDate()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`;
+  const taskId = config?.taskId ?? defaultId;
+  const env = new Env(process.env as Record<string, string>);
+  const workspacePath = path.join(rootDir, "workspace", taskId);
+  // Chat Log File
+  const logWorkspace = new FileSystemWorkspace(workspacePath);
+  const fileLogger = new FileLogger(logWorkspace.toWorkspacePath("chat.md"));
 
   // Logger
   const consoleLogger = new ConsoleLogger();
@@ -85,8 +87,7 @@ export function createApp(config?: AppConfig): App {
 
   // User Workspace
   const userWorkspace =
-    config?.userWorkspace ??
-    new FileSystemWorkspace(path.join(rootDir, "workspace"));
+    config?.userWorkspace ?? new FileSystemWorkspace(workspacePath);
 
   // Chat
   const chat = new Chat(llm, cl100k_base, logger);

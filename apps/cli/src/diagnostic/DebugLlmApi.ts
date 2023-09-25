@@ -34,7 +34,8 @@ export class DebugLlmApi implements LlmApi {
     );
 
     time.end();
-
+    console.log("get response debug")
+    console.log(this)
     this.debugLog.stepLlmReq(
       time,
       chat.export(),
