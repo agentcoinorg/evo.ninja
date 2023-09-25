@@ -12,7 +12,8 @@ export const GOAL_PROMPT = (namespace: string, description: string, args: string
   `Since you are writing the body of the function, remember to use the return keyword if needed.\n` +
   `When using libraries, use the require function to import them.\n` +
   `Do not require libraries aside from 'fs' and 'axios'\n` +
-  `Do not use external APIs that require authentication or an API key.\n` + 
+  `Do not use external APIs that require authentication or an API key.\n` +
+  `Do not recursively call the "${namespace}" function.\n` +
   `Example function body:\n` +
   `const fs = require('fs');\n` +
   `return fs.readFileSync(path, encoding);\n`;
