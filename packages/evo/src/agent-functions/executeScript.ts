@@ -94,7 +94,7 @@ export const executeScript: AgentFunction<AgentContext> = {
         },
         arguments: {
           type: "string",
-          description: "The arguments to pass into the script being executed",
+          description: "JSON-formatted arguments to pass into the script being executed",
         },
         result: {
           type: "string",
