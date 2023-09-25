@@ -30,20 +30,25 @@ async function taskHandler(
     app.debugLog?.stepStart();
     const response = await iterator.next(stepInput);
     app.debugLog?.stepEnd();
-    const outputMessage =
+    const outputTitle =
       response.value && "title" in response.value
         ? response.value.title
-        : "No message";
+        : "No Title";
+
+    const outputMessage =
+      response.value && "message" in response.value
+        ? response.value.message
+        : "No Message";
 
     workspace.writeArtifacts();
     const artifacts = workspace.getArtifacts();
     workspace.cleanArtifacts();
     return {
       is_last: response.done,
-      output: JSON.stringify(response.value),
+      output: JSON.stringify(outputMessage),
       artifacts,
       //@ts-ignore
-      name: outputMessage
+      name: outputTitle,
     };
   }
   return stepHandler;
