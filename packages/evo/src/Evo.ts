@@ -54,7 +54,7 @@ export class Evo implements Agent {
     const { chat } = this.context;
     const createScriptWriter = (): ScriptWriter => {
       const workspace = new InMemoryWorkspace();
-      const chat = new Chat(workspace, this.llm, this.chat.tokenizer, this.logger);
+      const chat = new Chat(this.llm, this.chat.tokenizer, this.logger);
       return new ScriptWriter(this.llm, chat, this.logger, workspace);
     };
 

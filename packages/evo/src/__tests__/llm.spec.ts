@@ -3,7 +3,6 @@ import {
   Chat,
   ConsoleLogger,
   Logger,
-  InMemoryWorkspace,
   Env,
   ChatRole,
   ChatMessage
@@ -66,8 +65,8 @@ describe('LLM Test Suite', () => {
       logger
     );
 
-    const chat = new Chat(new InMemoryWorkspace(), llm, cl100k_base, logger);
-      
+    const chat = new Chat(llm, cl100k_base, logger);
+
     for (const msg of msgs.persistent.msgs) {
       chat.persistent(msg.role as ChatRole, msg.content);
     }

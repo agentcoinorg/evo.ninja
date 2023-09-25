@@ -89,7 +89,7 @@ export function createApp(config?: AppConfig): App {
     new FileSystemWorkspace(path.join(rootDir, "workspace"));
 
   // Chat
-  const chat = new Chat(userWorkspace, llm, cl100k_base, logger);
+  const chat = new Chat(llm, cl100k_base, logger);
 
   // Debug Logging
   let debugLog: DebugLog | undefined;
