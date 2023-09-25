@@ -35,16 +35,12 @@ async function taskHandler(
         ? response.value.title
         : "No message";
 
-    console.log("Response from iterator");
-    console.log(response);
-    console.log("This is the output message:");
-    console.log(outputMessage);
     workspace.writeArtifacts();
     const artifacts = workspace.getArtifacts();
     workspace.cleanArtifacts();
     return {
       is_last: response.done,
-      output: outputMessage,
+      output: JSON.stringify(response.value),
       artifacts,
       //@ts-ignore
       name: outputMessage
