@@ -26,7 +26,8 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
   while (true) {
     await chat.fitToContextWindow();
 
-    const response = await llm.getResponse(chat, agentFunctions.map(f => f.definition));
+    const functionDefinitions = agentFunctions.map(f => f.definition);
+    const response = await llm.getResponse(chat, functionDefinitions);
 
     if (!response) {
       return ResultErr("No response from LLM.");
