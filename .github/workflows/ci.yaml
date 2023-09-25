@@ -19,6 +19,9 @@ jobs:
       with:
         node-version: 18.15
 
+    - name: Remove lock file
+      run: rm yarn.lock
+
     - name: Install dependencies
       run: yarn
 
