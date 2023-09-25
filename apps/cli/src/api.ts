@@ -17,7 +17,6 @@ async function taskHandler(
   const workspace = new AgentProtocolWorkspace(
     path.join(rootDir, "workspace", id)
   );
-  console.log(rootDir);
   const app = createApp({
     rootDir,
     userWorkspace: workspace,
@@ -25,31 +24,32 @@ async function taskHandler(
     debug: true,
   });
 
+  app.debugLog?.goalStart(input);
   let iterator = app.evo.run(input);
-
   async function stepHandler(stepInput: StepInput | null): Promise<StepResult> {
+    app.debugLog?.stepStart();
     const response = await iterator.next(stepInput);
+    app.debugLog?.stepEnd();
     const outputMessage =
-      response.value && "message" in response.value
-        ? response.value.message
+      response.value && "title" in response.value
+        ? response.value.title
         : "No message";
 
-    console.log("This is the response from the iteration: ");
+    console.log("Response from iterator");
     console.log(response);
-
-    console.log("This is the output message: ");
+    console.log("This is the output message:");
     console.log(outputMessage);
-
     workspace.writeArtifacts();
     const artifacts = workspace.getArtifacts();
     workspace.cleanArtifacts();
     return {
       is_last: response.done,
-      output: JSON.stringify(outputMessage),
+      output: outputMessage,
       artifacts,
+      //@ts-ignore
+      name: outputMessage
     };
   }
-
   return stepHandler;
 }
 

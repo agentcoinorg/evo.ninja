@@ -97,7 +97,7 @@ export function createApp(config?: AppConfig): App {
 
   if (config?.debug) {
     debugLog = new DebugLog(
-      new FileSystemWorkspace(path.join(rootDir, "debug"))
+      new FileSystemWorkspace(workspacePath)
     );
 
     // Wrap the LLM API
