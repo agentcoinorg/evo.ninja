@@ -1,0 +1,6 @@
+{
+  "name": "websScraper.get_links",
+  "description": "scrapes a web page and returns a string containing a common-separated list of links found",
+  "arguments": "{ uri: string }",
+  "code": "wrap://ipfs/QmVtnj3YqzvoP68xTdAtNT2eTVTZuMDG6agWK1SgNPPdn4"
+}

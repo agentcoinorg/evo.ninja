@@ -1,0 +1,6 @@
+{
+  "name": "math.fibonnaci_loop",
+  "description": "calculates the fibonnaci sequence up to the given number",
+  "arguments": "{ n: number }",
+  "code": "wrap://ipfs/QmXTYY4HAhurxZURrnRM8uD2oBCog8ATYDruVekuXQB192"
+}

@@ -66,11 +66,11 @@ const EXECUTE_SCRIPT_OUTPUT = (varName: string | undefined, result: string | und
   } else if (result.length > 200) {
     return `Preview of JSON result:\n` + 
           `\`\`\`\n` + 
-          `${trimText(result, 200)}\n` + 
+          `${trimText(JSON.stringify(result), 200)}\n` +
           `\`\`\`\n` + 
           `${STORED_RESULT_IN_VAR(varName)}`;
   } else {
-    return `JSON result: \n\`\`\`\n${result}\n\`\`\`\n${STORED_RESULT_IN_VAR(varName)}`;
+    return `JSON result: \n\`\`\`\n${JSON.stringify(result)}\n\`\`\`\n${STORED_RESULT_IN_VAR(varName)}`;
   }
 };
 const STORED_RESULT_IN_VAR = (varName: string | undefined) => {

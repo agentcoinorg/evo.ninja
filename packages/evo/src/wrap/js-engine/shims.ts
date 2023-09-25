@@ -1,3 +1,4 @@
+// language=javascript
 export const packagesShim =
 `
 // HACK: This is a hack because undefined, null, and functions are not supported by the JS Engine
@@ -223,6 +224,20 @@ function require(lib) {
     return exports;
   })();
 
+  // TODO: implement shim for polywrap client with fidelity
+  const polywrapClientShim = {
+    invoke: (options) => {
+      return Promise.resolve(__wrap_subinvoke(options.uri.toString(), options.method, clean(options.args)));
+    }
+  }
+
+  // // TODO: implement shim for polywrap client with fidelity
+  // const polywrapClientShim = {
+  //   invoke: (options) => {
+  //     return Promise.resolve(__wrap_subinvoke("plugin/polywrap", "invoke", clean(options)).value);
+  //   }
+  // }
+
   switch (lib) {
     case "fs":
       return wrap("fs", {
@@ -233,6 +248,8 @@ function require(lib) {
       return wrap("util", util);
     case "axios":
       return wrap("axios", axios);
+    case "@polywrap/client-js":
+      return wrap("@polywrap/client-js", polywrapClientShim);
     default:
       throw new Error(\`Cannot do require('\${lib}'), '\${lib}' is an unknown import.\`);
   }

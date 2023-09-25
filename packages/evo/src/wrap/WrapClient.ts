@@ -118,6 +118,20 @@ export class WrapClient extends PolywrapClient {
           return await axios.head(args.url, args.config);
         },
       })));
+      // .setPackage("plugin/polywrap", PluginPackage.from(module => ({
+      //   "invoke": async (args: any, client: CoreClient) => {
+      //     logger.notice(`POLYWRAP.INVOKE = ${args.uri} ${args.method} ${JSON.stringify(args.args, null, 2)}`);
+      //     const result = await client.invoke(args);
+      //     if (!result.ok) {
+      //       const errorString = result.error!.toString();
+      //       logger.error(errorString);
+      //       logger.notice(`POLYWRAP.INVOKE.ERROR = ${errorString}`);
+      //       return { ok: false, error: errorString }
+      //     }
+      //     logger.notice(`POLYWRAP.INVOKE.RESULT = ${JSON.stringify(result, null, 2)}`);
+      //     return result.value;
+      //   }
+      // })));
 
     if (agentPlugin) {
       builder

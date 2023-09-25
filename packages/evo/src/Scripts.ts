@@ -1,6 +1,7 @@
 import { Workspace } from "@evo-ninja/agent-utils";
 import Fuse from "fuse.js";
 import path from "path-browserify";
+import {Uri} from "@polywrap/core-js";
 
 export interface Script {
   name: string;
@@ -13,7 +14,8 @@ export class Scripts {
   constructor(
     private _workspace: Workspace,
     private _directory?: string
-  ) { }
+  ) {
+  }
 
   searchScripts(query: string): Script[] {
     const scripts = this.getAllScripts();
@@ -46,6 +48,10 @@ export class Scripts {
             this._toSubpath(script.code)
           );
         }
+        // if "code" is a URI
+        else if (Uri.isValidUri(script.code)) {
+          script.code = this._getWrapScriptCode(script);
+        }
 
         ops.push(script);
       });
@@ -77,5 +83,21 @@ export class Scripts {
     } else {
       return subpath;
     }
+  }
+
+  private _getWrapScriptCode(script: Script) {
+    const method = script.name.split(".").pop();
+    // language=javascript
+    return `const client = require("@polywrap/client-js");
+const result = await client.invoke({
+  uri: "${script.code}",
+  method: "${method}",
+  args: ${script.arguments.replace(/:\s*\w+/g, '')},
+});
+if (!result.ok) {
+  throw Error(result.error);
+}
+return result.value;
+`
   }
 }
