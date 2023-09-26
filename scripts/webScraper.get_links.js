@@ -1,5 +1,5 @@
 const result = __wrap_subinvoke(
-  "wrapscan.io/polywrap/web-scraper@1.0.0",
+  "wrapscan.io/polywrap/web-scraper@1.0",
   "get_links",
   { uri }
 )
