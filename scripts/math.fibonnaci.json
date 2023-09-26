@@ -1,0 +1,7 @@
+{
+  "name": "math.fibonacci",
+  "description": "calculates the fibonacci sequence up to the given number of iterations",
+  "arguments": "{ n: number }",
+  "code": "./math.fibonacci.js"
+}
+
