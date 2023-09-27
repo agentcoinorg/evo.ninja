@@ -146,7 +146,7 @@ export class Chat {
     await this._summarize("persistent");
   }
 
-  // TODO: doesn't work
+  // TODO: this works internally but does not change the output written in the logs
   // TODO: How to generalize this so it isn't coupled with findScript or executeScript?
   public condenseFindScriptMessages(fnNamespace: string): void {
     const log = this._msgLogs.temporary;
