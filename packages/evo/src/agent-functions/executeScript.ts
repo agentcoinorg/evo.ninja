@@ -114,6 +114,8 @@ export const executeScript: AgentFunction<AgentContext> = {
           return ResultOk(EXECUTE_SCRIPT_ERROR_RESULT(params.namespace, SCRIPT_NOT_FOUND(params), params));
         }
 
+        context.chat.condenseFindScriptMessages(params.namespace);
+
         let args: any = undefined;
         args = params.arguments ? params.arguments.replace(/\{\{/g, "\\{\\{").replace(/\}\}/g, "\\}\\}") : "{}";
         try {

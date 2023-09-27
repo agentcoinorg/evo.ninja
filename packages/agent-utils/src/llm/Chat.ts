@@ -78,6 +78,9 @@ export class Chat {
   ) {
     const msgLog = this._msgLogs[type];
     let msgs = Array.isArray(msg) ? msg : [msg];
+    msgs = msgs.map((m) => ({
+      ...m,
+    }));
 
     for (const msg of msgs) {
       const tokens = this._tokenizer.encode(msg.content || "").length;
@@ -141,6 +144,33 @@ export class Chat {
 
     // Move onto "persistent" messages
     await this._summarize("persistent");
+  }
+
+  // TODO: doesn't work
+  // TODO: How to generalize this so it isn't coupled with findScript or executeScript?
+  public condenseFindScriptMessages(fnNamespace: string): void {
+    const log = this._msgLogs.temporary;
+
+    for (let i = log.msgs.length - 1; i >= 0; i--) {
+      const msg = log.msgs[i];
+      if (msg.role === "system" &&
+        msg.content?.startsWith("Found the following results for script") &&
+        msg.content?.includes(`Namespace: ${fnNamespace}`)
+      ) {
+        // condense findScript results message
+        const nsIndex = msg.content.indexOf(`Namespace: ${fnNamespace}`);
+        const scriptEndIndex = msg.content.indexOf("\n--------------", nsIndex);
+        const newContent = "Found the following script\n" + msg.content.slice(nsIndex, scriptEndIndex) + "\n\`\`\`";
+        this._replaceMessageContentAtIndex(log, i, newContent);
+
+        // remove findScript function call message
+        const prevMsg = log.msgs[i - 1];
+        if (prevMsg.role === "assistant" && prevMsg.function_call?.name === "findScript") {
+          this._removeMessageAtIndex(log, i);
+        }
+        break;
+      }
+    }
   }
 
   public export(): ChatMessageLog {
@@ -222,11 +252,13 @@ export class Chat {
           break;
         }
 
+        // TODO: this is the only usage of the toSummarize array, so only the index variable is used outside the loop
         toSummarize.push(msg);
         tokenCounter += this._tokenizer.encode(content).length;
         index++;
       }
 
+      // TODO: should we have a summarization prompt?
       // Summarize
       const message = await this._llm.getResponse(
         this,
@@ -254,5 +286,22 @@ export class Chat {
     }
 
     return result;
+  }
+
+  private _removeMessageAtIndex(log: MessageLog, index: number) {
+    const msg = log.msgs[index];
+    const content = msg.content || "";
+    const contentTokens = this._tokenizer.encode(content).length;
+    log.msgs.splice(index, 1);
+    log.tokens -= contentTokens;
+  }
+
+  private _replaceMessageContentAtIndex(log: MessageLog, index: number, newContent: string) {
+    const msg = log.msgs[index];
+    const content = msg.content || "";
+    const contentTokens = this._tokenizer.encode(content).length;
+    const newContentTokens = this._tokenizer.encode(newContent).length;
+    log.tokens += (newContentTokens - contentTokens);
+    msg.content = newContent;
   }
 }
