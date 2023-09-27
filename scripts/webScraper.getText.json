@@ -1,6 +1,6 @@
 {
   "name": "websScraper.get_text",
-  "description": "scrapes a web page and returns a string containing all of the text on the page",
+  "description": "web scrapes a web page and returns a string containing all of the text on the page",
   "arguments": "{ url: string }",
   "code": "./webScraper.getText.js"
 }

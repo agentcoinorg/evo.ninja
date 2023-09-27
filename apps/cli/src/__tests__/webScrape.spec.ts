@@ -1,7 +1,28 @@
 import { TestCase, TestResult } from "./TestCase";
 import { spawn } from 'child_process';
+import copyfiles from "copyfiles";
+import fs from "fs";
+import path from "path";
 
 jest.setTimeout(600000);
+
+const copyFiles = async (src: string, dest: string) => {
+  const absSrc = path.resolve(src);
+  const absDest = path.resolve(dest);
+
+  if (!fs.existsSync(absDest)) {
+    fs.mkdirSync(absDest, { recursive: true });
+  }
+  await new Promise<void>((resolve, reject) => {
+    copyfiles([`${absSrc}/*`, absDest], { up: true }, async (error) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve();
+      }
+    });
+  });
+}
 
 describe('AI Agent Test Suite - Web Scraping', () => {
   let testResults: TestResult[] = [];
@@ -27,7 +48,11 @@ describe('AI Agent Test Suite - Web Scraping', () => {
 
       let result: TestResult | undefined;
 
-      await new Promise<void>((resolve, reject) => {
+      await new Promise<void>(async (resolve, reject) => {
+        const rootScriptsDir = `${__dirname}/../../../../scripts`;
+        const testRootScriptsDir = `${testCase.rootDir}/scripts`;
+        await copyFiles(rootScriptsDir, testRootScriptsDir);
+
         const child = spawn(
           'yarn', [
             'start',
