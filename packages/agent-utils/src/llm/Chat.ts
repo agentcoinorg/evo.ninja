@@ -163,7 +163,7 @@ export class Chat {
         const newContent = "Found the following script\n" + msg.content.slice(nsIndex, scriptEndIndex) + "\n\`\`\`";
         this._replaceMessageContentAtIndex(log, i, newContent);
 
-        // remove findScript function call message
+        // remove findScript function call message (currently always precedes findScript results message)
         const prevMsg = log.msgs[i - 1];
         if (prevMsg.role === "assistant" && prevMsg.function_call?.name === "findScript") {
           this._removeMessageAtIndex(log, i);
