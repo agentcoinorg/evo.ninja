@@ -76,12 +76,12 @@ In order to run Agent Protocol Benchmarks you must have all pre-requisites menti
 If you haven't fetched the submodules you can do it by doing the command:
 > `git submodule update --init`
 
-Then, in one terminal you must start the Agent Protocol HTTP Server: `yarn start:api`; in another terminal you
+Then, in one terminal you must start the Agent Protocol HTTP Server: `AGENT_WORKSPACE="../../workspace" yarn start:api`; in another terminal you
 must go to `benchmarks` folder and run:
 > `poetry shell`
 
 >`poetry install`
 
->`agbenchmark start --nc --test=TestCaseName`
+>`agbenchmark start --cutoff=300`
 
-This will run the `agbenchmark` framework against the API of the [Agent Protocol](https://github.com/AI-Engineers-Foundation/agent-protocol-sdk-js) 
+This will run the `agbenchmark` framework against the API of the [Agent Protocol](https://github.com/AI-Engineers-Foundation/agent-protocol-sdk-js). And will set a timeout of 5 minutes per task; if you'd like to run just one test in particular you can just add the flag `--test=TestCaseName`
