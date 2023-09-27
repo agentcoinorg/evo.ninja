@@ -1,5 +1,5 @@
 export enum AgentOutputType {
-  SUCCESS = "sucess",
+  SUCCESS = "success",
   ERROR = "error",
   INFO = "info",
   WARNING = "warning"
