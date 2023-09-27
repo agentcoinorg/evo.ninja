@@ -25,6 +25,7 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
 
   while (true) {
     await chat.fitToContextWindow();
+    await chat.condenseFindScriptMessages();
 
     const functionDefinitions = agentFunctions.map(f => f.definition);
     const response = await llm.getResponse(chat, functionDefinitions);

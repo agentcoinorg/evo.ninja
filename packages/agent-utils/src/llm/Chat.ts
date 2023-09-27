@@ -146,28 +146,49 @@ export class Chat {
     await this._summarize("persistent");
   }
 
-  // TODO: How to generalize this so it isn't coupled with findScript or executeScript?
-  public async condenseFindScriptMessages(fnNamespace: string): Promise<void> {
+  public async condenseFindScriptMessages(): Promise<void> {
     const log = this._msgLogs.temporary;
     for (let i = log.msgs.length - 1; i >= 0; i--) {
-      const msg = log.msgs[i];
-      if (msg.role === "system" &&
-        msg.content?.startsWith("Found the following results for script") &&
-        msg.content?.includes(`Namespace: ${fnNamespace}`)
-      ) {
-        // condense findScript results message
-        const nsIndex = msg.content.indexOf(`Namespace: ${fnNamespace}`);
-        const scriptEndIndex = msg.content.indexOf("\n--------------", nsIndex);
-        const newContent = "Found the following script\n" + msg.content.slice(nsIndex, scriptEndIndex) + "\n\`\`\`";
-        this._replaceMessageContentAtIndex(log, i, newContent);
+      const executeScriptMsg = log.msgs[i];
 
-        // remove findScript function call message (currently always precedes findScript results message)
-        const prevMsgIndex = i - 1;
-        const prevMsg = log.msgs[prevMsgIndex];
-        if (prevMsg.role === "assistant" && prevMsg.function_call?.name === "findScript") {
-          this._removeMessageAtIndex(log, prevMsgIndex);
+      // we can use fnNamespace to identify the findScript results message
+      let fnNamespace: string | undefined = undefined;
+      if (executeScriptMsg.role === "assistant" && executeScriptMsg.function_call?.name === "executeScript") {
+        const args = executeScriptMsg.function_call.arguments;
+        fnNamespace = JSON.parse(args ?? "{}").namespace;
+      }
+
+      if (fnNamespace) {
+        for (let j = i - 1; j >= 0; j--) {
+          const foundScriptMsg = log.msgs[j];
+          // stop searching if we find a system message that indicates we have already modified the log
+          if (
+            foundScriptMsg.role === "system" &&
+            foundScriptMsg.content?.startsWith("Found the following script\n")
+          ) {
+            break;
+          }
+
+          if (
+            foundScriptMsg.role === "system" &&
+            foundScriptMsg.content?.startsWith("Found the following results for script") &&
+            foundScriptMsg.content?.includes(`Namespace: ${fnNamespace}`)
+          ) {
+            // condense findScript results message
+            const nsIndex = foundScriptMsg.content.indexOf(`Namespace: ${fnNamespace}`);
+            const scriptEndIndex = foundScriptMsg.content.indexOf("\n--------------", nsIndex);
+            const newContent = "Found the following script\n" + foundScriptMsg.content.slice(nsIndex, scriptEndIndex) + "\n\`\`\`";
+            this._replaceMessageContentAtIndex(log, j, newContent);
+
+            // remove findScript function call message (currently always precedes findScript results message)
+            const prevMsgIndex = j - 1;
+            const findScriptMsg = log.msgs[prevMsgIndex];
+            if (findScriptMsg.role === "assistant" && findScriptMsg.function_call?.name === "findScript") {
+              this._removeMessageAtIndex(log, prevMsgIndex);
+            }
+            break;
+          }
         }
-        break;
       }
     }
     this._logger?.notice("Internally condensed findScript messages. This won't be reflected in the logs");
