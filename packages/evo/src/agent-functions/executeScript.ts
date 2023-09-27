@@ -1,6 +1,6 @@
 import JSON5 from "json5";
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, ChatMessageBuilder, trimText } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, trimText } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../prompts";
 import { JsEngine_GlobalVar, JsEngine, shimCode } from "../wrap";
@@ -16,7 +16,7 @@ type FuncParameters = {
 const SUCCESS = (scriptName: string, result: any, params: FuncParameters): AgentFunctionResult => ({
   outputs: [
     {
-      type: "success",
+      type: AgentOutputType.SUCCESS,
       title: `Executed '${scriptName}' script.`,
       content: FUNCTION_CALL_SUCCESS_CONTENT(
         FN_NAME,
@@ -34,7 +34,7 @@ const SUCCESS = (scriptName: string, result: any, params: FuncParameters): Agent
 const EXECUTE_SCRIPT_ERROR_RESULT = (scriptName: string, error: string | undefined, params: FuncParameters): AgentFunctionResult => ({
   outputs: [
     {
-      type: "success",
+      type: AgentOutputType.ERROR,
       title: `'${scriptName}' script failed to execute!`,
       content: FUNCTION_CALL_FAILED(params, FN_NAME, error ?? "Unknown error"),
     }

@@ -1,5 +1,5 @@
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { ScriptWriter } from "@evo-ninja/js-script-writer-agent";
 import { AgentContext } from "../AgentContext";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../prompts";
@@ -15,7 +15,7 @@ type FuncParameters = {
 const SUCCESS = (script: Script, params: FuncParameters): AgentFunctionResult => ({
   outputs: [
     {
-      type: "success",
+      type: AgentOutputType.SUCCESS,
       title:`Created '${params.namespace}' script.`,
       content: FUNCTION_CALL_SUCCESS_CONTENT(
         FN_NAME,
@@ -36,7 +36,7 @@ const SUCCESS = (script: Script, params: FuncParameters): AgentFunctionResult =>
 const CANNOT_CREATE_SCRIPTS_ON_AGENT_NAMESPACE = (params: FuncParameters): AgentFunctionResult => ({
   outputs: [
     {
-      type: "error",
+      type: AgentOutputType.ERROR,
       title: `Failed to create '${params.namespace}' script!`,
       content: FUNCTION_CALL_FAILED(
         params, 
