@@ -1,0 +1,6 @@
+{
+  "name": "web.search",
+  "description": "Search the web for a specific query",
+  "arguments": "{ query: string }",
+  "code": "./web.search.js"
+}

@@ -9,6 +9,7 @@ import {
 import { PluginPackage } from "@polywrap/plugin-js";
 import axios from "axios";
 
+
 import { InvokerOptions } from "@polywrap/client-js/build/types";
 import { ResultErr, ResultOk } from "@polywrap/result";
 import { Logger, Workspace } from "@evo-ninja/agent-utils";
@@ -30,6 +31,29 @@ export class WrapClient extends PolywrapClient {
           return Math.random();
         },
       })))
+      .setPackage("plugins/search", PluginPackage.from(module => ({
+        "webSearch": async (args: any) => {
+          const apiKey = 'YOUR_GOOGLE_API_KEY';
+          const searchEngineId = 'YOUR_SEARCH_ENGINE_ID';
+          const query = args.query;
+      
+          const url = `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(query)}&key=${apiKey}&cx=${searchEngineId}`;
+      
+          try {
+            const response = await axios.get(url);
+            const data = response.data;
+            
+            return data.items.map((item: any) => ({
+              title: item.title,
+              link: item.link,
+              snippet: item.snippet,
+            }));
+          } catch (error) {
+            logger.error(`Error performing search: ${error}`);
+            return [];
+          }
+        }
+      })))      
       .setPackage("plugin/result", PluginPackage.from(module => ({
         "ok": async (args: any) => {
           this.jsPromiseOutput = ResultOk(args.value);
