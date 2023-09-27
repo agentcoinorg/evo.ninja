@@ -149,7 +149,6 @@ export class Chat {
   // TODO: How to generalize this so it isn't coupled with findScript or executeScript?
   public async condenseFindScriptMessages(fnNamespace: string): Promise<void> {
     const log = this._msgLogs.temporary;
-
     for (let i = log.msgs.length - 1; i >= 0; i--) {
       const msg = log.msgs[i];
       if (msg.role === "system" &&
@@ -163,9 +162,10 @@ export class Chat {
         this._replaceMessageContentAtIndex(log, i, newContent);
 
         // remove findScript function call message (currently always precedes findScript results message)
-        const prevMsg = log.msgs[i - 1];
+        const prevMsgIndex = i - 1;
+        const prevMsg = log.msgs[prevMsgIndex];
         if (prevMsg.role === "assistant" && prevMsg.function_call?.name === "findScript") {
-          this._removeMessageAtIndex(log, i);
+          this._removeMessageAtIndex(log, prevMsgIndex);
         }
         break;
       }
