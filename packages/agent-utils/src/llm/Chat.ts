@@ -146,9 +146,8 @@ export class Chat {
     await this._summarize("persistent");
   }
 
-  // TODO: this works internally but does not change the output written in the logs
   // TODO: How to generalize this so it isn't coupled with findScript or executeScript?
-  public condenseFindScriptMessages(fnNamespace: string): void {
+  public async condenseFindScriptMessages(fnNamespace: string): Promise<void> {
     const log = this._msgLogs.temporary;
 
     for (let i = log.msgs.length - 1; i >= 0; i--) {
@@ -171,6 +170,7 @@ export class Chat {
         break;
       }
     }
+    this._logger?.notice("Internally condensed findScript messages. This won't be reflected in the logs");
   }
 
   public export(): ChatMessageLog {
