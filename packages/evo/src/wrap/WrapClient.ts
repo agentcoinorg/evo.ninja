@@ -31,10 +31,10 @@ export class WrapClient extends PolywrapClient {
           return Math.random();
         },
       })))
-      .setPackage("plugins/search", PluginPackage.from(module => ({
-        "webSearch": async (args: any) => {
-          const apiKey = 'YOUR_GOOGLE_API_KEY';
-          const searchEngineId = 'YOUR_SEARCH_ENGINE_ID';
+      .setPackage("plugin/web", PluginPackage.from(module => ({
+        "search": async (args: any) => {
+          const apiKey = 'GOOGLE API KEY';
+          const searchEngineId = 'Seach Engine';
           const query = args.query;
       
           const url = `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(query)}&key=${apiKey}&cx=${searchEngineId}`;
