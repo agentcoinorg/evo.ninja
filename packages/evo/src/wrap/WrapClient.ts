@@ -12,6 +12,7 @@ import axios from "axios";
 import { InvokerOptions } from "@polywrap/client-js/build/types";
 import { ResultErr, ResultOk } from "@polywrap/result";
 import { Logger, Workspace } from "@evo-ninja/agent-utils";
+import * as  path from "path-browserify"
 
 export class WrapClient extends PolywrapClient {
 
@@ -164,6 +165,20 @@ export class WrapClient extends PolywrapClient {
         "toString": async (args: any) => new Date(args.timestamp).toString(),
         "toTimeString": async (args: any) => new Date(args.timestamp).toTimeString(),
         "toUTCString": async (args: any) => new Date(args.timestamp).toUTCString(),
+      })))
+      .setPackage("plugin/path", PluginPackage.from(module => ({
+        "resolve": (args: any) => {
+          return path.resolve("/", args.pathSegments)
+        },
+        "normalize": (args: any) => path.normalize(args.path),
+        "isAbsolute": (args: any) => path.isAbsolute(args.path),
+        "join": (args: any) => path.join(args.paths),
+        "relative": (args: any) => path.relative(args.from, args.to),
+        "dirname": (args: any) => path.dirname(args.path),
+        "basename": (args: any) => path.basename(args.path, args.ext),
+        "extname": (args: any) => path.extname(args.path),
+        "format": (args: any) => path.format(args.pathObject),
+        "parse": (args: any) => path.parse(args.path)
       })));
 
     if (agentPlugin) {

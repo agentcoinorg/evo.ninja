@@ -156,6 +156,36 @@ function require(lib) {
     },
   };
 
+  const path = {
+    resolve: (pathSegments) => {
+      return __wrap_subinvoke("plugin/path", "resolve", clean({ pathSegments })).value
+    },
+    normalize: (path) => {
+      return __wrap_subinvoke("plugin/path", "normalize", clean({ path })).value
+    },
+    isAbsolute: (path) => {
+      return __wrap_subinvoke("plugin/path", "isAbsolute", clean({ path })).value
+    },
+    join: (path) => {
+      return __wrap_subinvoke("plugin/path", "join", clean({ path })).value
+    },
+    relative: (from, to) => {
+      return __wrap_subinvoke("plugin/path", "relative", clean({ from, to })).value
+    },
+    dirname: (path) => {
+      return __wrap_subinvoke("plugin/path", "dirname", clean({ path })).value
+    },
+    basename: (path) => {
+      return __wrap_subinvoke("plugin/path", "basename", clean({ path, ext })).value
+    },
+    format: (pathObject) => {
+      return __wrap_subinvoke("plugin/path", "format", clean({ pathObject })).value
+    },
+    parse: (path) => {
+      return __wrap_subinvoke("plugin/path", "parse", clean({ path })).value
+    }
+  };
+
   const util = (function() {
     const exports = {};
 
@@ -238,6 +268,8 @@ function require(lib) {
       return wrap("util", util);
     case "axios":
       return wrap("axios", axios);
+    case "path":
+      return wrap("path", path);
     default:
       throw new Error(\`Cannot do require('\${lib}'), '\${lib}' is an unknown import.\`);
   }
