@@ -70,5 +70,12 @@ jobs:
           })
 
     - name: Run benchmarks
-      run: poetry run agbenchmark start --cutoff 300
       working-directory: './evo/benchmarks'
+      run: |
+        TEST_NAME=$(echo "${{ github.event.comment.body }}" | grep -oP '(?<=/workflows/benchmarks\s)\w+')
+        if [ -n "$TEST_NAME" ]; then
+          echo "Found test name: $TEST_NAME"
+          poetry run agbenchmark start --cutoff 300 --test=$TEST_NAME
+        else
+          poetry run agbenchmark start --cutoff 300
+        fi
