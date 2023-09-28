@@ -1,7 +1,6 @@
 {
-  "name": "websScraper.get_links",
-  "description": "web scrapes a web page and returns a string containing a common-separated list of links found",
-  "arguments": "{ uri: string }",
+  "name": "webScraper.getLinks",
+  "description": "Open a web page and scrape all links found in the html",
+  "arguments": "{ url: string }",
   "code": "./webScraper.getLinks.js"
 }
-
