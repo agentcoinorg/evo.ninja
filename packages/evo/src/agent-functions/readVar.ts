@@ -42,8 +42,8 @@ const VAR_NOT_FOUND_ERROR = (params: FuncParameters): AgentFunctionResult => ({
 export const READ_GLOBAL_VAR_OUTPUT = (varName: string, value: string | undefined) => {
   if (!value || value === "\"undefined\"") {
     return `## Variable {{${varName}}} is undefined`;
-  } else if (value.length > 200) {
-    return `## Read variable {{${varName}}}, but it is too large, JSON preview:\n\`\`\`\n${trimText(value, 200)}\n\`\`\``;
+  } else if (value.length > 3000) {
+    return `## Read variable {{${varName}}}, but it is too large, JSON preview:\n\`\`\`\n${trimText(value, 3000)}\n\`\`\``;
   } else {
     return `## Read variable {{${varName}}}, JSON:\n\`\`\`\n${value}\n\`\`\``;
   }
@@ -51,8 +51,8 @@ export const READ_GLOBAL_VAR_OUTPUT = (varName: string, value: string | undefine
 export const READ_GLOBAL_VAR_MESSAGE = (varName: string, value: string | undefined) => {
   if (!value || value === "\"undefined\"") {
     return `Variable {{${varName}}} is undefined`;
-  } else if (value.length > 200) {
-    return `Read variable {{${varName}}}, but it is too large, JSON preview:\n\`\`\`\n${trimText(value, 200)}\n\`\`\``;
+  } else if (value.length > 3000) {
+    return `Read variable {{${varName}}}, but it is too large, JSON preview:\n\`\`\`\n${trimText(value, 3000)}\n\`\`\``;
   } else {
     return `Read variable {{${varName}}}, JSON:\n\`\`\`\n${value}\n\`\`\``;
   }
