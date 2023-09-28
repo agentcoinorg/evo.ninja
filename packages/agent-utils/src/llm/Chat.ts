@@ -78,9 +78,6 @@ export class Chat {
   ) {
     const msgLog = this._msgLogs[type];
     let msgs = Array.isArray(msg) ? msg : [msg];
-    msgs = msgs.map((m) => ({
-      ...m,
-    }));
 
     for (const msg of msgs) {
       const tokens = this._tokenizer.encode(msg.content || "").length;
