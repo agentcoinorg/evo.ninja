@@ -252,13 +252,11 @@ export class Chat {
           break;
         }
 
-        // TODO: this is the only usage of the toSummarize array, so only the index variable is used outside the loop
         toSummarize.push(msg);
         tokenCounter += this._tokenizer.encode(content).length;
         index++;
       }
 
-      // TODO: should we have a summarization prompt?
       // Summarize
       const message = await this._llm.getResponse(
         this,
