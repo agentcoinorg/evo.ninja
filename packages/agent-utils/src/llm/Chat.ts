@@ -146,52 +146,31 @@ export class Chat {
     await this._summarize("persistent");
   }
 
-  public async condenseFindScriptMessages(): Promise<void> {
-    const log = this._msgLogs.temporary;
-    for (let i = log.msgs.length - 1; i >= 0; i--) {
-      const executeScriptMsg = log.msgs[i];
-
-      // we can use fnNamespace to identify the findScript results message
-      let fnNamespace: string | undefined = undefined;
-      if (executeScriptMsg.role === "assistant" && executeScriptMsg.function_call?.name === "executeScript") {
-        const args = executeScriptMsg.function_call.arguments;
-        fnNamespace = JSON.parse(args ?? "{}").namespace;
-      }
-
-      if (fnNamespace) {
-        for (let j = i - 1; j >= 0; j--) {
-          const foundScriptMsg = log.msgs[j];
-          // stop searching if we find a system message that indicates we have already modified the log
-          if (
-            foundScriptMsg.role === "system" &&
-            foundScriptMsg.content?.startsWith("Found the following script\n")
-          ) {
-            break;
-          }
-
-          if (
-            foundScriptMsg.role === "system" &&
-            foundScriptMsg.content?.startsWith("Found the following results for script") &&
-            foundScriptMsg.content?.includes(`Namespace: ${fnNamespace}`)
-          ) {
-            // condense findScript results message
-            const nsIndex = foundScriptMsg.content.indexOf(`Namespace: ${fnNamespace}`);
-            const scriptEndIndex = foundScriptMsg.content.indexOf("\n--------------", nsIndex);
-            const newContent = "Found the following script\n" + foundScriptMsg.content.slice(nsIndex, scriptEndIndex) + "\n\`\`\`";
-            this._replaceMessageContentAtIndex(log, j, newContent);
-
-            // remove findScript function call message (currently always precedes findScript results message)
-            const prevMsgIndex = j - 1;
-            const findScriptMsg = log.msgs[prevMsgIndex];
-            if (findScriptMsg.role === "assistant" && findScriptMsg.function_call?.name === "findScript") {
-              this._removeMessageAtIndex(log, prevMsgIndex);
-            }
-            break;
-          }
-        }
-      }
+  public removeMessageAtIndex(index: number) {
+    if (index < this._msgLogs.persistent.msgs.length) {
+      throw new Error("Cannot remove persistent messages");
     }
-    this._logger?.notice("Internally condensed findScript messages. This won't be reflected in the logs");
+    index -= this._msgLogs.persistent.msgs.length;
+    const log = this._msgLogs.temporary;
+    const msg = log.msgs[index];
+    const content = msg.content || "";
+    const contentTokens = this._tokenizer.encode(content).length;
+    log.msgs.splice(index, 1);
+    log.tokens -= contentTokens;
+  }
+
+  public replaceMessageContentAtIndex(index: number, newContent: string) {
+    if (index < this._msgLogs.persistent.msgs.length) {
+      throw new Error("Cannot modify persistent messages");
+    }
+    index -= this._msgLogs.persistent.msgs.length;
+    const log = this._msgLogs.temporary;
+    const msg = log.msgs[index];
+    const content = msg.content || "";
+    const contentTokens = this._tokenizer.encode(content).length;
+    const newContentTokens = this._tokenizer.encode(newContent).length;
+    log.tokens += (newContentTokens - contentTokens);
+    msg.content = newContent;
   }
 
   public export(): ChatMessageLog {
@@ -307,22 +286,5 @@ export class Chat {
     }
 
     return result;
-  }
-
-  private _removeMessageAtIndex(log: MessageLog, index: number) {
-    const msg = log.msgs[index];
-    const content = msg.content || "";
-    const contentTokens = this._tokenizer.encode(content).length;
-    log.msgs.splice(index, 1);
-    log.tokens -= contentTokens;
-  }
-
-  private _replaceMessageContentAtIndex(log: MessageLog, index: number, newContent: string) {
-    const msg = log.msgs[index];
-    const content = msg.content || "";
-    const contentTokens = this._tokenizer.encode(content).length;
-    const newContentTokens = this._tokenizer.encode(newContent).length;
-    log.tokens += (newContentTokens - contentTokens);
-    msg.content = newContent;
   }
 }
