@@ -1,7 +1,6 @@
 import { AgentProtocolWorkspace } from "./sys/AgentProtocolWorkspace";
 import { createApp } from "./app";
 
-import path from "path";
 import Agent, {
   StepHandler,
   StepInput,
@@ -9,18 +8,18 @@ import Agent, {
   TaskInput,
 } from "forked-agent-protocol";
 import { exec } from "child_process";
+import path from "path";
 
-const rootDir = path.join(__dirname, "../../../");
+const rootDir = path.resolve(
+  path.join(__dirname, "../../../")
+);
 
-// AGENT_WORKSPACE is used by the agent-protocol
-if (!process.env.AGENT_WORKSPACE) {
-  process.env.AGENT_WORKSPACE = path.join(rootDir, "workspace");
-}
+const workspaceDir = process.env.AGENT_WORKSPACE || path.join(rootDir, "workspace");
 
-function execPromise(command: string) {
+function removeNewScripts() {
   return new Promise(function (resolve, reject) {
     exec(
-      command,
+      "git clean -fd",
       { cwd: path.join(__dirname, "../../../scripts") },
       (error, stdout, stderr) => {
         if (error) {
@@ -88,7 +87,7 @@ async function taskHandler(
         debugLog?.stepLog(response.value.value as any);
       }
       logger.info("Task is done - Removing generated scripts...");
-      await execPromise("git clean -fd");
+      await removeNewScripts();
       logger.info("////////////////////////////////////////////\n");
     }
 
@@ -106,4 +105,6 @@ async function taskHandler(
   return stepHandler;
 }
 
-Agent.handleTask(taskHandler).start();
+Agent.handleTask(taskHandler, {
+  workspace: workspaceDir
+}).start();
