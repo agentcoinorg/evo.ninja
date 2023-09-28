@@ -22,6 +22,7 @@ Before you can run evo.ninja, ensure you have Node.js and yarn installed.
 - `Write the word Washington to the file called output.txt`
 - `Calculate the (590 * 204) + (1000 / 2) - 42`
 - `Fetch the price of ethereum, bitcoin and dogecoin and save them in a file named crypto.csv`
+
 ## Getting Started
 ### Pre-Requisites
 Please install the following:
@@ -76,8 +77,7 @@ In order to run Agent Protocol Benchmarks you must have all pre-requisites menti
 If you haven't fetched the submodules you can do it by doing the command:
 > `git submodule update --init`
 
-Then, in one terminal you must start the Agent Protocol HTTP Server: `AGENT_WORKSPACE="../../workspace" yarn start:api`; in another terminal you
-must go to `benchmarks` folder and run:
+Then, in one terminal you must start the Agent Protocol HTTP Server: `yarn start:api`; in another terminal you must go to `benchmarks` folder and run:
 > `poetry shell`
 
 >`poetry install`

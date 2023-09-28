@@ -10,6 +10,13 @@ import Agent, {
 } from "forked-agent-protocol";
 import { exec } from "child_process";
 
+const rootDir = path.join(__dirname, "../../../");
+
+// AGENT_WORKSPACE is used by the agent-protocol
+if (!process.env.AGENT_WORKSPACE) {
+  process.env.AGENT_WORKSPACE = path.join(rootDir, "workspace");
+}
+
 function execPromise(command: string) {
   return new Promise(function (resolve, reject) {
     exec(
@@ -31,9 +38,11 @@ async function taskHandler(
   id: string,
   input: TaskInput | null
 ): Promise<StepHandler> {
-  const rootDir = path.join(process.cwd(), "../..");
+
   const workspace = new AgentProtocolWorkspace(
-    path.join(rootDir, "workspace", id)
+    path.join(
+      process.env.AGENT_WORKSPACE as string, id
+    )
   );
   const app = createApp({
     rootDir,
@@ -41,16 +50,21 @@ async function taskHandler(
     taskId: id,
     debug: true,
   });
-  app.logger.info("\n////////////////////////////////////////////");
-  app.logger.info(`Trying to achieve goal: ${input}\nTask with ID: ${id}`);
-  app.debugLog?.goalStart(input);
+
+  const { logger, debugLog } = app;
+
+  logger.info("\n////////////////////////////////////////////");
+  logger.info(`Trying to achieve goal: ${input}\nTask with ID: ${id}`);
+  debugLog?.goalStart(input);
+
   let iterator = app.evo.run(input);
 
   async function stepHandler(stepInput: StepInput | null): Promise<StepResult> {
-    app.debugLog?.stepStart();
+    logger.info(`Running step....`);
+    debugLog?.stepStart();
     const response = await iterator.next(stepInput);
-    app.debugLog?.stepEnd();
-    app.logger.info(`Running step....`);
+    debugLog?.stepEnd();
+
     const outputTitle =
       response.value && "title" in response.value
         ? response.value.title
@@ -67,19 +81,19 @@ async function taskHandler(
 
     if (response.done) {
       if (!response.value.ok) {
-        app.logger.error(response.value.error ?? "Unknown error");
-        app.debugLog?.stepError(response.value.error ?? "Unknown error");
+        logger.error(response.value.error ?? "Unknown error");
+        debugLog?.stepError(response.value.error ?? "Unknown error");
       } else {
-        app.logger.info(JSON.stringify(response.value.value) as any);
-        app.debugLog?.stepLog(response.value.value as any);
+        logger.info(JSON.stringify(response.value.value) as any);
+        debugLog?.stepLog(response.value.value as any);
       }
-      app.logger.info("Task is done - Removing generated scripts...");
+      logger.info("Task is done - Removing generated scripts...");
       await execPromise("git clean -fd");
-      app.logger.info("////////////////////////////////////////////\n");
+      logger.info("////////////////////////////////////////////\n");
     }
 
     if (outputMessage !== "No Message") {
-      app.logger.info(JSON.stringify(outputMessage));
+      logger.info(JSON.stringify(outputMessage));
     }
     return {
       is_last: response.done,
