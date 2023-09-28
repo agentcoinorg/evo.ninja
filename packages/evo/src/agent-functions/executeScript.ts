@@ -63,10 +63,10 @@ const SCRIPT_NOT_FOUND = (params: FuncParameters) => `Script '${params.namespace
 const EXECUTE_SCRIPT_OUTPUT = (varName: string | undefined, result: string | undefined) => {
   if (!result || result === "undefined" || result === "\"undefined\"") {
     return `No result returned.`;
-  } else if (result.length > 200) {
+  } else if (result.length > 3000) {
     return `Preview of JSON result:\n` + 
           `\`\`\`\n` + 
-          `${trimText(result, 200)}\n` + 
+          `${trimText(result, 3000)}\n` + 
           `\`\`\`\n` + 
           `${STORED_RESULT_IN_VAR(varName)}`;
   } else {

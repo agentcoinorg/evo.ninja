@@ -1,0 +1,7 @@
+{
+  "name": "webScraper.getText",
+  "description": "Open a web page and scrape all text found in the html",
+  "arguments": "{ url: string }",
+  "code": "./webScraper.getText.js"
+}
+

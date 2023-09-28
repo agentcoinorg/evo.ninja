@@ -21,12 +21,6 @@ const SUCCESS = (params: FuncParameters): AgentFunctionResult => ({
   ],
   messages: [
     ChatMessageBuilder.functionCall(FN_NAME, params),
-    ChatMessageBuilder.system(
-      `Thoughts:\n` + 
-      `\`\`\`\n` + 
-      `${params.thoughts}\n` + 
-      `\`\`\``
-    ),
   ]
 });
 
