@@ -2906,11 +2906,6 @@
   dependencies:
     "@types/node" "*"
 
-"@types/copyfiles@2.4.1":
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/@types/copyfiles/-/copyfiles-2.4.1.tgz#b0119c781457910115454bacb35f59e91145e7ec"
-  integrity sha512-v2JLxXeWUeWYWVo3/tlpxqiDCvgewSvf58HHjHYNaCi0lAthhRQ7jz8InxGzJsrMbWmWkYaxBO+BEtKjBU4ebw==
-
 "@types/debug@^4.0.0":
   version "4.1.9"
   resolved "https://registry.yarnpkg.com/@types/debug/-/debug-4.1.9.tgz#906996938bc672aaf2fb8c0d3733ae1dda05b005"
