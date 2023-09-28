@@ -1,4 +1,4 @@
-import { LlmApi, LlmOptions, Chat, ChatMessage } from ".";
+import { LlmApi, LlmOptions, ChatLogs, ChatMessage } from ".";
 import { Logger } from "../";
 
 import {
@@ -50,14 +50,14 @@ export class OpenAI implements LlmApi {
   }
 
   async getResponse(
-    chat: Chat,
+    chatLog: ChatLogs,
     functionDefinitions: OpenAIFunctions,
     options?: LlmOptions,
     tries?: number
   ): Promise<ChatMessage | undefined> {
     try {
       const completion = await this._createChatCompletion({
-        messages: chat.messages,
+        messages: chatLog.messages,
         functions: functionDefinitions,
         temperature: options ? options.temperature : 0,
         max_tokens: options ? options.max_tokens : this._defaultMaxResponseTokens
@@ -92,7 +92,7 @@ export class OpenAI implements LlmApi {
 
           if (!tries || tries < this._maxRateLimitRetries) {
             return this.getResponse(
-              chat,
+              chatLog,
               functionDefinitions,
               options,
               tries === undefined ? 0 : ++tries

@@ -172,9 +172,10 @@ function Dojo() {
 
       const userWorkspace = new EvoCore.InMemoryWorkspace();
       setUserWorkspace(userWorkspace);
+      const contextWindow = new EvoCore.ContextWindow(llm);
       const chat = new EvoCore.Chat(
-        llm,
         cl100k_base,
+        contextWindow,
         logger
       );
 

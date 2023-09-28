@@ -1,17 +1,16 @@
 import { Timer } from "./Timer";
 
-import { ChatMessageLog, ChatMessage } from "@evo-ninja/agent-utils";
+import { ChatLogs, ChatMessage } from "@evo-ninja/agent-utils";
 
 export class DebugLlmReq {
   constructor(
     public time: Timer,
-    public chat: ChatMessageLog,
+    public chatLogs: ChatLogs,
     public response?: ChatMessage
   ) { }
 
   get tokens() {
-    return this.chat["persistent"].tokens +
-      this.chat["temporary"].tokens;
+    return this.chatLogs.tokens;
   }
 
   toString(): string {
@@ -22,7 +21,7 @@ export class DebugLlmReq {
     return {
       time: this.time,
       tokens: this.tokens,
-      chat: this.chat,
+      chat: this.chatLogs,
       response: this.response
     };
   }
