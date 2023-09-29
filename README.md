@@ -11,7 +11,6 @@ Give this repo a star if you use it! :star:
 
 It executes scripts to achieve a goal. It is capable of using fuzzy search to find and execute any script in its library. Scripts are namespaced JavaScript functions with typed arguments and a description. If it can not find a script, it will write one itself.
 
-
 Dive in to explore the capabilities and features provided by this agent.
 Before you can run evo.ninja, ensure you have Node.js and yarn installed.
 
@@ -22,6 +21,7 @@ Before you can run evo.ninja, ensure you have Node.js and yarn installed.
 - `Write the word Washington to the file called output.txt`
 - `Calculate the (590 * 204) + (1000 / 2) - 42`
 - `Fetch the price of ethereum, bitcoin and dogecoin and save them in a file named crypto.csv`
+
 ## Getting Started
 ### Pre-Requisites
 Please install the following:
@@ -54,9 +54,6 @@ NOTE: Please remember that this is a prototype. Its main purpose is to demonstra
 ## Workspace
 Once evo.ninja is run, there will be a `./workspace` directory created. This is the root directory for the agent. Any files will be read & written from this directory.
 
-## Debugging
-evo.ninja keeps an up-to-date version of all messages being sent to the OpenAI API in the `./workspace/.msgs` file. All of these messages will be sent to OpenAI on each chat completion. This is useful because as the message log grows, summarizations are performed upon the message history to fit them within a maximum context window token limit.
-
 ## Collaborating
 We are eager to work with the community to continue improving this agent, and building more wraps. If you're interested in contributing, we welcome pull-requests! Here are some ways you can contribute:
 
@@ -76,12 +73,11 @@ In order to run Agent Protocol Benchmarks you must have all pre-requisites menti
 If you haven't fetched the submodules you can do it by doing the command:
 > `git submodule update --init`
 
-Then, in one terminal you must start the Agent Protocol HTTP Server: `AGENT_WORKSPACE="../../workspace" yarn start:api`; in another terminal you
-must go to `benchmarks` folder and run:
+Then, in one terminal you must start the Agent Protocol HTTP Server: `yarn start:api`; in another terminal you must go to `benchmarks` folder and run:
 > `poetry shell`
 
->`poetry install`
+> `poetry install`
 
->`agbenchmark start --cutoff=300`
+> `agbenchmark --cutoff=300`
 
 This will run the `agbenchmark` framework against the API of the [Agent Protocol](https://github.com/AI-Engineers-Foundation/agent-protocol-sdk-js). And will set a timeout of 5 minutes per task; if you'd like to run just one test in particular you can just add the flag `--test=TestCaseName`

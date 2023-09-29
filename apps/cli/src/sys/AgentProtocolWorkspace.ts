@@ -15,7 +15,6 @@ export class AgentProtocolWorkspace implements Workspace {
   }
 
   writeFileSync(subpath: string, data: string): void {
-    if (subpath === ".msgs") return;
     const artifact: ArtifactLog = {
       file_name: path.basename(subpath),
       agent_created: true,
