@@ -17,7 +17,7 @@
   "dependencies": {
     "@evo-ninja/evo-agent": "0.1.0",
     "@evo-ninja/agent-utils": "~0.1.0",
-    "forked-agent-protocol": "0.0.3",
+    "forked-agent-protocol": "0.0.5",
     "chalk": "^4.1.2",
     "commander": "11.0.0",
     "dotenv": "~16.3.1",
@@ -26,7 +26,9 @@
   },
   "devDependencies": {
     "@types/clui": "~0.3.1",
+    "@types/fs-extra": "11.0.2",
     "@types/jest": "29.5.0",
+    "fs-extra": "11.1.1",
     "jest": "29.5.0",
     "rimraf": "~5.0.1",
     "ts-jest": "29.1.1",

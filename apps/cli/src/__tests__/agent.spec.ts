@@ -1,15 +1,20 @@
-import { TestCase, TestResult } from "./TestCase";
-import { spawn } from 'child_process';
+import { TestCase, runTestCases } from "./TestCase";
+
+import path from "path";
 
 jest.setTimeout(600000);
 
 describe('AI Agent Test Suite', () => {
-  let testResults: TestResult[] = [];
+  const scriptsDir = path.join(__dirname, "../../../../scripts");
 
   const cases: TestCase[] = [
-
     // Mathematics
-    new TestCase("math_circle_radius", "Calculate the area of a circle with a radius of 5 meters and save it in a file named output.txt", "78.53981633974483"),
+    new TestCase(
+      "math_circle_radius",
+      "Calculate the area of a circle with a radius of 5 meters and save it in a file named output.txt",
+      "78.53981633974483",
+      scriptsDir
+    ),
     /*new TestCase("math_perimeter_square", "Calculate the perimeter of a square with side length 6 cm and save it in a file named output.txt", "24"),
     new TestCase("math_sum_natural", "Calculate the sum of the first 100 natural numbers and save it in a file named output.txt", "5050"),
     new TestCase("math_sin", "Calculate the value of sin(45°) and save it in a file named output.txt", "0.7071067811865475"),
@@ -57,52 +62,5 @@ describe('AI Agent Test Suite', () => {
     new TestCase("basic_fibonacci", "Use JavaScript to calculate the 5th term of the Fibonacci sequence and save the result to output.txt", "3"),*/
   ];
 
-  afterAll(() => {
-    console.log('All test results:');
-    testResults.forEach(result => {
-      console.log(`Operation: ${result.goal}, Success: ${result.success}, Result: ${result.expected}, Expected: ${result.expected}`);
-    });
-  });
-
-  cases.forEach((testCase) => {
-    test(`Execute operation: ${testCase.goal}`, async () => {
-      // Reset the testcase directory
-      testCase.reset();
-
-      let result: TestResult | undefined;
-
-      await new Promise<void>((resolve, reject) => {
-        const child = spawn(
-          'yarn', [
-            'start',
-            `'${testCase.goal}'`,
-            `--root ${testCase.rootDir}`,
-            "--timeout 480",
-            "--debug"
-          ],
-          { shell: true }
-        );
-
-        child.stdout.on('data', (data) => {
-          console.log(data.toString());
-        });
-
-        child.on('exit', () => {
-          result = testCase.getResult();
-          resolve();
-        });
-
-        child.on('error', (error) => {
-          reject(error);
-        });
-      });
-
-      if (!result) {
-        throw Error("This shouldn't happen.");
-      }
-
-      testResults.push(result);
-      expect(result.received).toBe(result.expected);
-    });
-  });
+  runTestCases(cases);
 });

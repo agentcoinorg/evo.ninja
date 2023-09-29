@@ -31,7 +31,7 @@ export class ScriptWriter implements Agent {
     const { chat } = this.context;
     try {
       chat.persistent("system", INITIAL_PROMP);
-      chat.persistent("system", GOAL_PROMPT(namespace, description, args));
+      chat.persistent("user", GOAL_PROMPT(namespace, description, args));
 
       return yield* basicFunctionCallLoop(
         this.context,

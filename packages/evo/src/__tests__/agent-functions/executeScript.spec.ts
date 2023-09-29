@@ -46,7 +46,7 @@ class MockLlm implements LlmApi {
   }
 }
 
-class MockScripts {}
+// class MockScripts {}
 
 describe("Evo Execute script", () => {
   test("Should execute given script", async () => {
