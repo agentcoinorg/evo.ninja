@@ -79,3 +79,9 @@ jobs:
         else
           poetry run agbenchmark --cutoff 300
         fi
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: workspaces-debug
+        path: workspace
