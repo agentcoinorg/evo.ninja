@@ -7,8 +7,15 @@ import { Result, ResultOk } from "@polywrap/result";
 const allowedLibs = [
   "fs",
   "axios",
-  "util"
+  "util",
+  "path"
 ];
+
+export function formatSupportedLibraries() {
+  const [last] = allowedLibs.slice(-1);
+  const others = allowedLibs.slice(0, -1);
+  return others.length ? `"${others.join('", "')}", and "${last}"` : `"${last}"`;
+}
 
 const FN_NAME = "writeFunction";
 type FuncParameters = { 
