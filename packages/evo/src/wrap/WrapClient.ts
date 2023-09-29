@@ -179,7 +179,47 @@ export class WrapClient extends PolywrapClient {
         "extname": (args: any) => path.extname(args.path),
         "format": (args: any) => path.format(args.pathObject),
         "parse": (args: any) => path.parse(args.path)
-      })));
+      })))
+      .setPackage("plugin/googleSearch", PluginPackage.from(module => ({
+        "search": async (args: { query: string }) => {
+          const axiosClient =  axios.create({ baseURL: 'https://serpapi.com' });
+          const apiKey = process.env.SERP_API_KEY as string
+          const searchQuery = encodeURI(args.query)
+          const urlParams = new URLSearchParams({
+            api_key: apiKey,
+            async: 'true',
+            engine: 'google',
+            gl: 'us',
+            google_domain: 'google.com',
+            hl: 'en',
+            location: 'United States',
+            q: searchQuery
+          })
+          const { data } = await axiosClient.get<{
+            related_questions?: {
+              question: string,
+              snippet: string,
+              title: string,
+            },
+            answer_box?: {
+              title: string,
+              snippet: string,
+              answer: string,
+            },
+            organic_results: {
+              title: string,
+              snippet: string,
+            }[]
+          }>(`/search.json?${urlParams.toString()}`)
+
+          const result = data.organic_results.map((result) => ({
+            title: result.title,
+            snippet: result.snippet,
+          }))
+
+          return JSON.stringify(result)
+        }
+      })))
 
     if (agentPlugin) {
       builder
