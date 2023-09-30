@@ -180,7 +180,7 @@ export class WrapClient extends PolywrapClient {
         "format": (args: any) => path.format(args.pathObject),
         "parse": (args: any) => path.parse(args.path)
       })))
-      .setPackage("plugin/googleSearch", PluginPackage.from(module => ({
+      .setPackage("plugin/websearch", PluginPackage.from(module => ({
         "search": async (args: { query: string }) => {
           const axiosClient =  axios.create({ baseURL: 'https://serpapi.com' });
           const apiKey = process.env.SERP_API_KEY as string
@@ -196,16 +196,6 @@ export class WrapClient extends PolywrapClient {
             q: searchQuery
           })
           const { data } = await axiosClient.get<{
-            related_questions?: {
-              question: string,
-              snippet: string,
-              title: string,
-            },
-            answer_box?: {
-              title: string,
-              snippet: string,
-              answer: string,
-            },
             organic_results: {
               title: string,
               snippet: string,
