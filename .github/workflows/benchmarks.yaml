@@ -69,13 +69,25 @@ jobs:
             body: '[Running Benchmarks](https://github.com/${{github.repository}}/actions/runs/${{github.run_id}})'
           })
 
+    - name: Get test name if provided
+      id: get-name
+      run: |
+        TEST_NAME=$(echo "${{ github.event.comment.body }}" | grep -oP '(?<=/workflows/benchmarks\s)\w+')
+        echo "TEST_NAME=$TEST_NAME" >> "$GITHUB_OUTPUT"
+
     - name: Run benchmarks
       working-directory: './evo/benchmarks'
       run: |
-        TEST_NAME=$(echo "${{ github.event.comment.body }}" | grep -oP '(?<=/workflows/benchmarks\s)\w+')
-        if [ -n "$TEST_NAME" ]; then
-          echo "Found test name: $TEST_NAME"
-          poetry run agbenchmark --cutoff 300 --test=$TEST_NAME
+        if [ -n "${{ steps.get-name.outputs.TEST_NAME }}" ]; then
+          echo "Running benchmarks for test: ${{ steps.get-name.outputs.TEST_NAME }}"
+          poetry run agbenchmark --cutoff 300 --test=${{ steps.get-name.outputs.TEST_NAME }}
         else
+          echo "Running benchmarks with default settings"
           poetry run agbenchmark --cutoff 300
         fi
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: workspaces-debug
+        path: workspace

@@ -73,11 +73,24 @@ In order to run Agent Protocol Benchmarks you must have all pre-requisites menti
 If you haven't fetched the submodules you can do it by doing the command:
 > `git submodule update --init`
 
+If you have already fetched the submodules and need to update it, you can run:
+> `git submodule update --recursive`
+
 Then, in one terminal you must start the Agent Protocol HTTP Server: `yarn start:api`; in another terminal you must go to `benchmarks` folder and run:
-> `poetry shell`
 
-> `poetry install`
+```
+poetry shell
+poetry install
+agbenchmark --cutoff=300
+``````
 
-> `agbenchmark --cutoff=300`
+**Note: If you have an existing environment and you have updated the git submodule its recommended that you delete the environment and create a new one by doing:**
+
+```shell
+$ poetry env list                                                                                                                        
+myenv-dL2uBROB-py3.10 (Activated)
+
+$ poetry env remove myenv-dL2uBROB-py3.10
+```
 
 This will run the `agbenchmark` framework against the API of the [Agent Protocol](https://github.com/AI-Engineers-Foundation/agent-protocol-sdk-js). And will set a timeout of 5 minutes per task; if you'd like to run just one test in particular you can just add the flag `--test=TestCaseName`
