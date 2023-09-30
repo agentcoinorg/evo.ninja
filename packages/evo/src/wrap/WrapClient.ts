@@ -182,35 +182,46 @@ export class WrapClient extends PolywrapClient {
       })))
       .setPackage("plugin/websearch", PluginPackage.from(module => ({
         "search": async (args: { query: string }) => {
-          const axiosClient =  axios.create({ baseURL: 'https://serpapi.com' });
+          const axiosClient =  axios.create({ baseURL: 'https://api.search.brave.com/res/v1/web' });
 
-          if (!process.env.SERP_API_KEY) {
-            throw new Error(`Cannot use websearch plugin without SERP_API_KEY environment variable`)
+          if (!process.env.BRAVE_API_KEY) {
+            throw new Error(`Cannot use websearch plugin without BRAVE_API_KEY environment variable`)
           }
 
-          const apiKey = process.env.SERP_API_KEY as string
+          const apiKey = process.env.BRAVE_API_KEY as string
           const searchQuery = encodeURI(args.query)
           const urlParams = new URLSearchParams({
-            api_key: apiKey,
-            async: 'true',
-            engine: 'google',
-            gl: 'us',
-            google_domain: 'google.com',
-            hl: 'en',
-            location: 'United States',
             q: searchQuery
           })
+          
           const { data } = await axiosClient.get<{
-            organic_results: {
-              title: string,
-              snippet: string,
-            }[]
-          }>(`/search.json?${urlParams.toString()}`)
+            web: {
+              results: {
+                title: string;
+                url: string;
+                description: string;
+              }[]
+            }
+          }>(`/search?${urlParams.toString()}`, {
+            headers: {
+              'X-Subscription-Token': apiKey,
+              'Accept': 'application/json'
+            }
+          })
 
-          const result = data.organic_results.map((result) => ({
-            title: result.title,
-            snippet: result.snippet,
-          }))
+          let result: {
+            title: string;
+            url: string;
+            description: string;
+          }[] = [];
+
+          if (data && data.web && Array.isArray(data.web.results)) {
+            result = data.web.results.map((result: any) => ({
+              title: result.title || '',
+              url: result.url || '',
+              description: result.description || ''
+            }));
+          }
 
           return JSON.stringify(result)
         }
