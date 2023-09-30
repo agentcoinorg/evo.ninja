@@ -183,6 +183,11 @@ export class WrapClient extends PolywrapClient {
       .setPackage("plugin/websearch", PluginPackage.from(module => ({
         "search": async (args: { query: string }) => {
           const axiosClient =  axios.create({ baseURL: 'https://serpapi.com' });
+
+          if (!process.env.SERP_API_KEY) {
+            throw new Error(`Cannot use websearch plugin without SERP_API_KEY environment variable`)
+          }
+
           const apiKey = process.env.SERP_API_KEY as string
           const searchQuery = encodeURI(args.query)
           const urlParams = new URLSearchParams({
