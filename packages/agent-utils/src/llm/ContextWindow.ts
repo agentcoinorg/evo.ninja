@@ -141,11 +141,13 @@ export class ContextWindow {
       }
 
       // Summarize
+      const toSummarizeLogs = new ChatLogs();
+      toSummarizeLogs.add("persistent", {
+        msgs: toSummarize,
+        tokens: tokenCounter
+      });
       const message = await this._llm.getResponse(
-        ChatLogs.from({
-          msgs: toSummarize,
-          tokens: tokenCounter
-        }),
+        toSummarizeLogs,
         [],
         {
           temperature: 0,

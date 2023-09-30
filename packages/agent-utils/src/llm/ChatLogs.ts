@@ -41,16 +41,6 @@ export class ChatLogs {
     ];
   }
 
-  static from(chatLog: ChatLog): ChatLogs {
-    return new ChatLogs({
-      "persistent": chatLog,
-      "temporary": {
-        tokens: 0,
-        msgs: []
-      }
-    });
-  }
-
   public get(type: ChatLogType): ChatLog {
     return this._logs[type];
   }
