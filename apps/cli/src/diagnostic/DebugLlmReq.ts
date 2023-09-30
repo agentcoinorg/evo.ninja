@@ -17,7 +17,7 @@ export class DebugLlmReq {
     return JSON.stringify(this.toJSON(), null, 2);
   }
 
-  toJSON() {
+  toJSON(): unknown {
     return {
       time: this.time,
       tokens: this.tokens,

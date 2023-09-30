@@ -96,11 +96,11 @@ export class Chat {
     return this._chatLogs.clone();
   }
 
-  public toString() {
+  public toString(): string {
     return JSON.stringify(this, null, 2);
   }
 
-  public toJSON() {
+  public toJSON(): unknown {
     return this._chatLogs;
   }
 

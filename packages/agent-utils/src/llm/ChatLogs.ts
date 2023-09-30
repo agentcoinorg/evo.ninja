@@ -66,11 +66,11 @@ export class ChatLogs {
     );
   }
 
-  public toString() {
+  public toString(): string {
     return JSON.stringify(this, null, 2);
   }
 
-  public toJSON() {
+  public toJSON(): unknown {
     return this._logs;
   }
 }

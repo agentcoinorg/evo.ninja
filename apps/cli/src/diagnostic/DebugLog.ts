@@ -89,7 +89,7 @@ export class DebugLog {
     return JSON.stringify(this.toJSON(), null, 2);
   }
 
-  toJSON() {
+  toJSON(): unknown {
     return {
       goal: this.goal,
       steps: this.steps,

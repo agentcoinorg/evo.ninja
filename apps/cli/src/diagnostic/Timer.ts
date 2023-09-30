@@ -26,11 +26,11 @@ export class Timer {
     return `${this._pad(hours)}:${this._pad(minutes)}:${this._pad(seconds)}`;
   }
 
-  toString() {
+  toString(): string {
     return this.getHHMMSS();
   }
 
-  toJSON() {
+  toJSON(): unknown {
     return this.toString();
   }
 
