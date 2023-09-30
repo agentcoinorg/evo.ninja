@@ -1,18 +1,17 @@
-import { Chat, ChatMessage, LlmApi } from "../llm";
+import { RunResult } from "./Agent";
 import { AgentOutput } from "./AgentOutput";
-import { RunResult } from "./agent";
+import { AgentFunction } from "./AgentFunction";
 import {
-  ExecuteAgentFunction,
-  ExecuteAgentFunctionResult,
+  executeAgentFunction,
   ExecuteAgentFunctionCalled,
-  AgentFunction
-} from "./agent-function";
+  ExecuteAgentFunctionResult
+} from "./executeAgentFunction";
+import { Chat, ChatMessage, LlmApi } from "../llm";
 
 import { ResultErr, ResultOk } from "@polywrap/result";
 
 export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, chat: Chat }>(
   context: TContext,
-  executeAgentFunction: ExecuteAgentFunction,
   agentFunctions: AgentFunction<TContext>[],
   shouldTerminate: (
     functionCalled: ExecuteAgentFunctionCalled,

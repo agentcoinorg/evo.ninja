@@ -18,7 +18,6 @@ import {
   RunResult,
   Timeout,
   InMemoryWorkspace,
-  executeAgentFunction,
   basicFunctionCallLoop
 } from "@evo-ninja/agent-utils";
 import { ScriptWriter } from "@evo-ninja/js-script-writer-agent";
@@ -68,7 +67,6 @@ export class Evo implements Agent {
 
       return yield* basicFunctionCallLoop(
         this.context,
-        executeAgentFunction,
         agentFunctions(createScriptWriter),
         (functionCalled) => {
           const namespace = functionCalled.args.namespace || "";

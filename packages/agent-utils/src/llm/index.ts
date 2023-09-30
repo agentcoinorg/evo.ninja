@@ -1,4 +1,4 @@
 export * from "./Chat";
-export * from "./llm";
+export * from "./LlmApi";
 export * from "./OpenAI";
 export * from "./Tokenizer";

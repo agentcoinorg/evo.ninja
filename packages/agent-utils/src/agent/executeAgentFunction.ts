@@ -4,26 +4,10 @@ import {
   UNDEFINED_FUNCTION_NAME,
   UNPARSABLE_FUNCTION_ARGS,
 } from "./prompts";
+import { AgentFunction, AgentFunctionResult } from "./AgentFunction";
 
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
-import { ChatCompletionFunctions } from "openai";
 import JSON5 from "json5";
-import { AgentOutput } from "./AgentOutput";
-import { ChatMessage } from "../llm";
-
-export type AgentFunctionDefinition = ChatCompletionFunctions;
-
-export type AgentFunctionResult = {
-  outputs: AgentOutput[];
-  messages: ChatMessage[];
-}; 
-
-export interface AgentFunction<TContext> {
-  definition: AgentFunctionDefinition;
-  buildExecutor(
-    context: TContext
-  ): (options: any) => Promise<Result<AgentFunctionResult, string>>;
-}
 
 export interface ExecuteAgentFunctionCalled {
   name: string;
