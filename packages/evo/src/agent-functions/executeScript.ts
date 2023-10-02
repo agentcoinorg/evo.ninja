@@ -98,7 +98,7 @@ export const executeScript: AgentFunction<AgentContext> = {
         },
         result: {
           type: "string",
-          description: "The name of the variable to store the result of the script"
+          description: "The name of the variable to store the result of the script (starts with '_' and contains letters)"
         }
       },
       required: ["namespace", "arguments", "result"],
@@ -119,7 +119,6 @@ export const executeScript: AgentFunction<AgentContext> = {
           ? params.arguments
             .replace(/\{\{/g, "\\{\\{")
             .replace(/\}\}/g, "\\}\\}")
-            .replace(/\\\"/g, '"')
           : "{}";
         try {
 
