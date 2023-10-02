@@ -3,9 +3,9 @@ export class Env {
   public readonly GPT_MODEL: string;
   public readonly CONTEXT_WINDOW_TOKENS: number;
   public readonly MAX_RESPONSE_TOKENS: number;
-  public readonly BRAVE_API_KEY: string | null;
+  public readonly BRAVE_API_KEY?: string;
 
-  constructor(envVars: Record<string, string | null>) {
+  constructor(envVars: Record<string, string | undefined>) {
     const {
       OPENAI_API_KEY,
       GPT_MODEL,

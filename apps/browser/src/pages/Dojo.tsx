@@ -172,7 +172,7 @@ function Dojo() {
           "GPT_MODEL": model,
           "CONTEXT_WINDOW_TOKENS": "8000",
           "MAX_RESPONSE_TOKENS": "2000",
-          "BRAVE_API_KEY": braveApiKey,
+          "BRAVE_API_KEY": braveApiKey || undefined,
         }
       );
 
