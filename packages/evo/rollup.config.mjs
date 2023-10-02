@@ -15,21 +15,14 @@ export default {
   treeshake: false,
   plugins: [typescript(), commonjs(), resolve(), {
     renderChunk(code) {
-      return `import { globalsShim } from "./shims/globals"
-
+      return `import { globalToShimVarNameMap } from "./shims/globals";
 export const packagesShim = \n\`${code}\`;
-
-const shimGlobals = () => {
-  return Object.keys(globalsShim).map((key) => {
-    const value = (globalsShim as Record<string, { shim: any, name: string }>)[key];
-    return \`var \${key} = \${value.name};\`;
-  }).join("\\n");
-}
 
 export const shimCode = (code: string) => \`
   \${packagesShim}
 
-  \${shimGlobals()}
+  \${Object.entries(globalToShimVarNameMap).map(([global, shim]) => \`var \${global} = \${shim};\`).join("\\n")}
+
   const __temp = (async function () { 
   \${code}
   })().then(result => {

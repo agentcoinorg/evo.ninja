@@ -1,28 +1,16 @@
-import {
+export {
   requireShim
 } from "./require"
 
-import {
+export {
   mathShim
 } from "./math"
-import { dateShim } from "./date";
-import { consoleShim } from "./console";
+export { dateShim } from "./date";
+export { consoleShim } from "./console";
 
-export const globalsShim = {
-  require: {
-    shim: requireShim,
-    name: "requireShim",
-  },
-  Math: {
-    shim: mathShim,
-    name: "mathShim",
-  },
-  Date: {
-    shim: dateShim,
-    name: "dateShim",
-  },
-  console: {
-    shim: consoleShim,
-    name: "consoleShim",
-  },
+export const globalToShimVarNameMap = {
+  require: "requireShim",
+  Math: "mathShim",
+  Date: "dateShim",
+  console:"consoleShim",
 }

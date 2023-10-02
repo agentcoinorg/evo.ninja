@@ -1,5 +1,4 @@
-import { globalsShim } from "./shims/globals"
-
+import { globalToShimVarNameMap } from "./shims/globals";
 export const packagesShim = 
 `'use strict';
 
@@ -480,36 +479,18 @@ var consoleShim = {
     },
 };
 
-var globalsShim = {
-    require: {
-        shim: requireShim,
-        name: "requireShim",
-    },
-    Math: {
-        shim: mathShim,
-        name: "mathShim",
-    },
-    Date: {
-        shim: dateShim,
-        name: "dateShim",
-    },
-    console: {
-        shim: consoleShim,
-        name: "consoleShim",
-    },
+var globalToShimVarNameMap = {
+    require: "requireShim",
+    Math: "mathShim",
+    Date: "dateShim",
+    console: "consoleShim",
 };`;
-
-const shimGlobals = () => {
-  return Object.keys(globalsShim).map((key) => {
-    const value = (globalsShim as Record<string, { shim: any, name: string }>)[key];
-    return `var ${key} = ${value.name};`;
-  }).join("\n");
-}
 
 export const shimCode = (code: string) => `
   ${packagesShim}
 
-  ${shimGlobals()}
+  ${Object.entries(globalToShimVarNameMap).map(([global, shim]) => `var ${global} = ${shim};`).join("\n")}
+
   const __temp = (async function () { 
   ${code}
   })().then(result => {
@@ -518,4 +499,4 @@ export const shimCode = (code: string) => `
           __wrap_subinvoke("plugin/result", "err", { error: clean(error) })
         });
   clean(__temp)
-`
+`;
