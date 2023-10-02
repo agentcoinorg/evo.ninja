@@ -60,7 +60,7 @@ export class ChatLogs {
     return JSON.stringify(this, null, 2);
   }
 
-  public toJSON(): unknown {
+  public toJSON(): Record<ChatLogType, ChatLog> {
     return this._logs;
   }
 }

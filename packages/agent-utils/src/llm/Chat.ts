@@ -100,7 +100,7 @@ export class Chat {
     return JSON.stringify(this, null, 2);
   }
 
-  public toJSON(): unknown {
+  public toJSON(): ChatLogs {
     return this._chatLogs;
   }
 

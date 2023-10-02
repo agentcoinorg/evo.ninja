@@ -30,7 +30,7 @@ export class Timer {
     return this.getHHMMSS();
   }
 
-  toJSON(): unknown {
+  toJSON(): string {
     return this.toString();
   }
 

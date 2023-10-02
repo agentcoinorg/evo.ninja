@@ -9,7 +9,7 @@ export class DebugLlmReq {
     public response?: ChatMessage
   ) { }
 
-  get tokens() {
+  get tokens(): number {
     return this.chatLogs.tokens;
   }
 
@@ -17,7 +17,12 @@ export class DebugLlmReq {
     return JSON.stringify(this.toJSON(), null, 2);
   }
 
-  toJSON(): unknown {
+  toJSON(): {
+    time: Timer;
+    tokens: number;
+    chat: ChatLogs;
+    response?: ChatMessage;
+  } {
     return {
       time: this.time,
       tokens: this.tokens,
