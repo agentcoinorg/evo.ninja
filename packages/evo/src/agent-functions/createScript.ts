@@ -1,9 +1,8 @@
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+import { Script, AgentFunction, AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { ScriptWriter } from "@evo-ninja/js-script-writer-agent";
 import { AgentContext } from "../AgentContext";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../prompts";
-import { Script } from "../Scripts";
 
 const FN_NAME = "createScript";
 type FuncParameters = { 

@@ -1,7 +1,12 @@
 import { Result, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+import {
+  AgentFunction,
+  AgentFunctionResult,
+  AgentOutputType,
+  ChatMessageBuilder,
+  Script
+} from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
-import { Script } from "../Scripts";
 import { FUNCTION_CALL_SUCCESS_CONTENT } from "../prompts";
 
 const FN_NAME = "findScript";

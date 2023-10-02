@@ -1,4 +1,5 @@
-import { Workspace } from "@evo-ninja/agent-utils";
+import { Workspace } from "../sys";
+
 import Fuse from "fuse.js";
 import path from "path-browserify";
 

@@ -1,7 +1,6 @@
 import { agentFunctions } from "./agent-functions";
 import { agentPlugin } from "./agent-plugin";
 import { AgentContext } from "./AgentContext";
-import { Scripts } from "./Scripts";
 import { WrapClient } from "./wrap";
 import {
   INITIAL_PROMP,
@@ -11,6 +10,7 @@ import {
 import {
   Agent,
   Workspace,
+  Scripts,
   LlmApi,
   Chat,
   Logger,

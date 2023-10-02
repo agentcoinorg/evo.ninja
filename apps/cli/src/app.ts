@@ -1,11 +1,12 @@
 import { FileSystemWorkspace, FileLogger } from "./sys";
 import { DebugLog, DebugLlmApi } from "./diagnostic";
 
-import { Evo, Scripts } from "@evo-ninja/evo-agent";
+import { Evo } from "@evo-ninja/evo-agent";
 import {
   Env,
   OpenAI,
   Chat,
+  Scripts,
   ConsoleLogger,
   Logger,
   Timeout,
