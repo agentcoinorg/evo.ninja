@@ -27,9 +27,6 @@ export class Env {
     if (!MAX_RESPONSE_TOKENS) {
       throw missingEnvError("MAX_RESPONSE_TOKENS");
     }
-    if (!MAX_RESPONSE_TOKENS) {
-      throw missingEnvError("MAX_RESPONSE_TOKENS");
-    }
     if (!BRAVE_API_KEY) {
       throw missingEnvError(`BRAVE_API_KEY`)
     }
