@@ -7,7 +7,7 @@ export default {
   output: [
     {
       format: "cjs",
-      file: "./src/wrap/js-engine/new-shims.ts",
+      file: "./src/wrap/js-engine/shims.ts",
       sourcemap: false,
     },
   ],
