@@ -25,14 +25,11 @@ const File = ({ files, showExtension }: { files: FileType[]; showExtension: bool
       contentString += `${file.path}:\n${decoder.decode(file.content)}\n--------\n`;
     }
   });
-  
-  
 
-  
   return (
     <>
       <div className="File" onClick={handleClick}>
-      {showExtension ? files[0].path : files[0].path === '.msgs' ? '.msgs' : files[0].path.split('.').slice(0, -1).join('.')}
+      {showExtension ? files[0].path : files[0].path.split('.').slice(0, -1).join('.')}
       </div>
       <Modal
         className="File__Modal"

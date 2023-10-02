@@ -1,4 +1,5 @@
 import { trimText } from "@evo-ninja/agent-utils";
+import { formatSupportedLibraries } from "./agent-functions/writeFunction";
 
 export const INITIAL_PROMP = `You are an agent that writes JavaScript functions.\n` +
 `Before writing any code think step by step about what you want to implement.\n` +
@@ -11,7 +12,7 @@ export const GOAL_PROMPT = (namespace: string, description: string, args: string
   `Use only the function arguments above, do not add new ones.\n` +
   `Since you are writing the body of the function, remember to use the return keyword if needed.\n` +
   `When using libraries, use the require function to import them.\n` +
-  `Do not require libraries aside from 'fs' and 'axios'\n` +
+  `Do not require libraries aside from ${formatSupportedLibraries()}'\n` +
   `Do not use external APIs that require authentication or an API key.\n` +
   `Do not recursively call the "${namespace}" function.\n` +
   `Example function body:\n` +

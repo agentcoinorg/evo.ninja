@@ -26,17 +26,12 @@ export interface SidebarProps {
 const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles, onSidebarToggleClick }: SidebarProps) => {
   const groupFilesByName = (files: InMemoryFile[]) => {
     return files.reduce((acc, file) => {
-      if (file.path === '.msgs') {
-        acc[file.path] = [file];
-      } else {
-        const fileNameWithoutExt = file.path.split('.').slice(0, -1).join('.');
-        acc[fileNameWithoutExt] = acc[fileNameWithoutExt] || [];
-        acc[fileNameWithoutExt].push(file);
-      }
+      const fileNameWithoutExt = file.path.split('.').slice(0, -1).join('.');
+      acc[fileNameWithoutExt] = acc[fileNameWithoutExt] || [];
+      acc[fileNameWithoutExt].push(file);
       return acc;
     }, {} as { [name: string]: InMemoryFile[] });
   };
-  
 
   const scriptsGrouped = groupFilesByName(
     scripts.filter((file) => !file.path.startsWith("agent."))

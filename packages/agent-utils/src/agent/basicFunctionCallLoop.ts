@@ -38,6 +38,7 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
       const { result, functionCalled } = await executeAgentFunction(name, args, context, agentFunctions);
 
       if (!result.ok) {
+        chat.temporary(response);
         chat.temporary("system", result.error);
         yield { type: AgentOutputType.Error, title: `Failed to execute ${name}!`, content: result.error } as AgentOutput;
         continue;
