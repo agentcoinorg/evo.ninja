@@ -150,8 +150,7 @@ export const executeScript: AgentFunction<AgentContext> = {
         }
 
         const globals: JsEngine_GlobalVar[] =
-          Object.entries(args).concat(Object.entries(context.globals))
-            .map((entry) => ({
+          Object.entries(args).map((entry) => ({
               name: entry[0],
               value: JSON.stringify(entry[1]),
             })
