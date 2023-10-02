@@ -12,6 +12,7 @@ import {
   Timeout,
   Workspace,
   LlmApi,
+  ContextWindow,
 } from "@evo-ninja/agent-utils";
 import dotenv from "dotenv";
 import readline from "readline";
@@ -91,7 +92,8 @@ export function createApp(config?: AppConfig): App {
     config?.userWorkspace ?? new FileSystemWorkspace(workspacePath);
 
   // Chat
-  const chat = new Chat(llm, cl100k_base, logger);
+  const contextWindow = new ContextWindow(llm);
+  const chat = new Chat(cl100k_base, contextWindow, logger);
 
   // Debug Logging
   let debugLog: DebugLog | undefined;

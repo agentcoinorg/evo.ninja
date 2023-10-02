@@ -5,7 +5,7 @@
   "main": "./build/index.js",
   "scripts": {
     "build": "rimraf build && tsc",
-    "codegen:js-engine": "polywrap codegen -m ./src/wrap/js-engine/polywrap.yaml --codegen-dir ./src/wrap/js-engine/types"
+    "codegen:js-engine": "polywrap codegen -m ./src/scripts/js-engine/polywrap.yaml --codegen-dir ./src/scripts/js-engine/types"
   },
   "dependencies": {
     "@polywrap/result": "~0.12.0",

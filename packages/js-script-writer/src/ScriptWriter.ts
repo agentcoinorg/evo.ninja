@@ -5,7 +5,7 @@ import { GOAL_PROMPT, INITIAL_PROMP, LOOP_PREVENTION_PROMPT } from "./prompts";
 
 import { ResultErr } from "@polywrap/result";
 import { Agent, Workspace } from "@evo-ninja/agent-utils";
-import { LlmApi, Chat, Logger, AgentOutput, RunResult, executeAgentFunction, basicFunctionCallLoop } from "@evo-ninja/agent-utils";
+import { LlmApi, Chat, Logger, AgentOutput, RunResult, basicFunctionCallLoop } from "@evo-ninja/agent-utils";
 
 export class ScriptWriter implements Agent {
   private readonly context: AgentContext;
@@ -35,7 +35,6 @@ export class ScriptWriter implements Agent {
 
       return yield* basicFunctionCallLoop(
         this.context,
-        executeAgentFunction,
         agentFunctions,
         (functionCalled) => {
           return functionCalled.name === writeFunction.definition.name;

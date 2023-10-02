@@ -5,7 +5,8 @@ import {
   Logger,
   Env,
   ChatRole,
-  ChatMessage
+  ChatMessage,
+  ContextWindow
 } from "@evo-ninja/agent-utils";
 import dotenv from "dotenv";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
@@ -64,8 +65,8 @@ describe('LLM Test Suite', () => {
       env.MAX_RESPONSE_TOKENS,
       logger
     );
-
-    const chat = new Chat(llm, cl100k_base, logger);
+    const contextWindow = new ContextWindow(llm);
+    const chat = new Chat(cl100k_base, contextWindow, logger);
 
     for (const msg of msgs.persistent.msgs) {
       chat.persistent(msg.role as ChatRole, msg.content);
@@ -77,8 +78,8 @@ describe('LLM Test Suite', () => {
 
     const currentFunctions = agentFunctions(() => ({}) as any);
 
-    const response = await llm.getResponse(chat, currentFunctions.map(f => f.definition));
-    
+    const response = await llm.getResponse(chat.chatLogs, currentFunctions.map(f => f.definition));
+
     expect(response).toEqual({
       role: "assistant",
       function_call: {

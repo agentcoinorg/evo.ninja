@@ -18,8 +18,8 @@ import {
   RunResult,
   Timeout,
   InMemoryWorkspace,
-  executeAgentFunction,
-  basicFunctionCallLoop
+  basicFunctionCallLoop,
+  ContextWindow
 } from "@evo-ninja/agent-utils";
 import { ScriptWriter } from "@evo-ninja/js-script-writer-agent";
 import { ResultErr } from "@polywrap/result";
@@ -54,7 +54,8 @@ export class Evo implements Agent {
     const { chat } = this.context;
     const createScriptWriter = (): ScriptWriter => {
       const workspace = new InMemoryWorkspace();
-      const chat = new Chat(this.llm, this.chat.tokenizer, this.logger);
+      const contextWindow = new ContextWindow(this.llm);
+      const chat = new Chat(this.chat.tokenizer, contextWindow, this.logger);
       return new ScriptWriter(this.llm, chat, this.logger, workspace);
     };
 
@@ -68,7 +69,6 @@ export class Evo implements Agent {
 
       return yield* basicFunctionCallLoop(
         this.context,
-        executeAgentFunction,
         agentFunctions(createScriptWriter),
         (functionCalled) => {
           const namespace = functionCalled.args.namespace || "";

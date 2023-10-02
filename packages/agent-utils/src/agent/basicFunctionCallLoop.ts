@@ -1,18 +1,17 @@
-import { Chat, ChatMessage, LlmApi } from "../llm";
+import { RunResult } from "./Agent";
 import { AgentOutput, AgentOutputType } from "./AgentOutput";
-import { RunResult } from "./agent";
+import { AgentFunction } from "./AgentFunction";
 import {
-  ExecuteAgentFunction,
-  ExecuteAgentFunctionResult,
+  executeAgentFunction,
   ExecuteAgentFunctionCalled,
-  AgentFunction
-} from "./agent-function";
+  ExecuteAgentFunctionResult
+} from "./executeAgentFunction";
+import { Chat, ChatMessage, LlmApi } from "../llm";
 
 import { ResultErr, ResultOk } from "@polywrap/result";
 
 export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, chat: Chat }>(
   context: TContext,
-  executeAgentFunction: ExecuteAgentFunction,
   agentFunctions: AgentFunction<TContext>[],
   shouldTerminate: (
     functionCalled: ExecuteAgentFunctionCalled,
@@ -27,7 +26,7 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
     await chat.fitToContextWindow();
 
     const functionDefinitions = agentFunctions.map(f => f.definition);
-    const response = await llm.getResponse(chat, functionDefinitions);
+    const response = await llm.getResponse(chat.chatLogs, functionDefinitions);
 
     if (!response) {
       return ResultErr("No response from LLM.");
