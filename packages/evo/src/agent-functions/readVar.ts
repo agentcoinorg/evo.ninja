@@ -1,5 +1,5 @@
 import { Result, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../prompts";
 
@@ -15,7 +15,7 @@ const MAX_VAR_LENGTH = 3000;
 const SUCCESS = (params: FuncParameters, varValue: string): AgentFunctionResult => ({
   outputs: [
     {
-      type: "success",
+      type: AgentOutputType.Success,
       title: `Read '${params.name}' variable.`,
       content: FUNCTION_CALL_SUCCESS_CONTENT(
         FN_NAME,
@@ -32,7 +32,7 @@ const SUCCESS = (params: FuncParameters, varValue: string): AgentFunctionResult 
 const VAR_NOT_FOUND_ERROR = (params: FuncParameters): AgentFunctionResult => ({
   outputs: [
     {
-      type: "success",
+      type: AgentOutputType.Error,
       title: `Failed to read '${params.name}' variable.`, 
       content: FUNCTION_CALL_FAILED(params, FN_NAME, `Global variable {{${params.name}}} not found.`)
     }

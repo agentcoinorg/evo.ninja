@@ -1,5 +1,5 @@
 import { Result, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
 
 const FN_NAME = "think";
@@ -10,7 +10,7 @@ type FuncParameters = {
 const SUCCESS = (params: FuncParameters): AgentFunctionResult => ({
   outputs: [
     {
-      type: "success",
+      type: AgentOutputType.Success,
       title: `Thinking...`,
       content: 
         `## Thoughts:\n` +
