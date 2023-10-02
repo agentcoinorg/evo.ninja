@@ -1,9 +1,17 @@
 import JSON5 from "json5";
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, trimText } from "@evo-ninja/agent-utils";
+import {
+  JsEngine_GlobalVar,
+  JsEngine,
+  shimCode,
+  AgentFunction,
+  AgentFunctionResult,
+  AgentOutputType,
+  ChatMessageBuilder,
+  trimText
+} from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../prompts";
-import { JsEngine_GlobalVar, JsEngine, shimCode } from "../wrap";
 
 const FN_NAME = "executeScript";
 type FuncParameters = { 

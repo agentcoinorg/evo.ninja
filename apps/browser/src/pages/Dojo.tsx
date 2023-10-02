@@ -13,7 +13,7 @@ import Chat, { ChatMessage } from "../components/Chat/Chat";
 import { MarkdownLogger } from '../sys/logger';
 import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
 import { onGoalAchievedScript, onGoalFailedScript, speakScript } from '../scripts';
-import { Evo, Scripts } from '@evo-ninja/evo-agent';
+import { Evo } from '@evo-ninja/evo-agent';
 import clsx from 'clsx';
 
 function addScript(script: {name: string, definition: string, code: string}, scriptsWorkspace: EvoCore.Workspace) {
@@ -147,7 +147,7 @@ function Dojo() {
       addScript(onGoalFailedScript, scriptsWorkspace);
       addScript(speakScript, scriptsWorkspace);
 
-      const scripts = new Scripts(
+      const scripts = new EvoCore.Scripts(
         scriptsWorkspace
       );
       
