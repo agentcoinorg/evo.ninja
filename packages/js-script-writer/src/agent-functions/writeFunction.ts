@@ -1,7 +1,7 @@
 import { AgentContext } from "../AgentContext";
 import { FUNCTION_CALL_FAILED } from "../prompts";
 
-import { AgentFunction, AgentFunctionResult, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { Result, ResultOk } from "@polywrap/result";
 
 const allowedLibs = [
@@ -28,7 +28,7 @@ type FuncParameters = {
 const SUCCESS = (params: FuncParameters): AgentFunctionResult => ({
   outputs: [
     {
-      type: "success",
+      type: AgentOutputType.Success,
       title: `Wrote function '${params.namespace}'.`,
       content: `Wrote the function ${params.namespace} to the workspace.`
     }
@@ -41,7 +41,7 @@ const SUCCESS = (params: FuncParameters): AgentFunctionResult => ({
 const CANNOT_CREATE_IN_AGENT_NAMESPACE_ERROR = (params: FuncParameters): AgentFunctionResult => ({
   outputs: [
     {
-      type: "success",
+      type: AgentOutputType.Error,
       title: `Failed to write function '${params.namespace}'!`,
       content: FUNCTION_CALL_FAILED(FN_NAME, `Cannot create a function with namespace ${params.namespace}. Namespaces starting with 'agent.' are reserved.`, params)
     }
@@ -57,7 +57,7 @@ const CANNOT_CREATE_IN_AGENT_NAMESPACE_ERROR = (params: FuncParameters): AgentFu
 const CANNOT_REQUIRE_LIB_ERROR = (params: FuncParameters): AgentFunctionResult => ({
   outputs: [
     {
-      type: "success",
+      type: AgentOutputType.Error,
       title:`Failed to write function '${params.namespace}'!`,
       content: FUNCTION_CALL_FAILED(FN_NAME,  `Cannot require libraries other than ${allowedLibs.join(", ")}.`, params)
     }

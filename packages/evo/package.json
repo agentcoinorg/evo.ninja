@@ -6,7 +6,6 @@
   "scripts": {
     "build": "rimraf build && tsc",
     "codegen": "yarn codegen:js-engine && yarn codegen:agent-plugin",
-    "codegen:js-engine": "polywrap codegen -m ./src/wrap/js-engine/polywrap.yaml --codegen-dir ./src/wrap/js-engine/types",
     "codegen:agent-plugin": "polywrap codegen -m ./src/agent-plugin/polywrap.yaml --codegen-dir ./src/agent-plugin/types",
     "test": "jest --runInBand --verbose --rootDir . --config ../../jest.config.js"
   },
@@ -18,7 +17,6 @@
     "@evo-ninja/agent-utils": "~0.1.0",
     "@evo-ninja/js-script-writer-agent": "~0.1.0",
     "axios": "^0.26.0",
-    "fuse.js": "^6.6.2",
     "json5": "^2.2.3",
     "openai": "~3.3.0",
     "path-browserify": "1.0.1"

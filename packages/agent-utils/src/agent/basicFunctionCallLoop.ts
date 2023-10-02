@@ -1,18 +1,17 @@
-import { Chat, ChatMessage, LlmApi } from "../llm";
-import { AgentOutput } from "./AgentOutput";
-import { RunResult } from "./agent";
+import { RunResult } from "./Agent";
+import { AgentOutput, AgentOutputType } from "./AgentOutput";
+import { AgentFunction } from "./AgentFunction";
 import {
-  ExecuteAgentFunction,
-  ExecuteAgentFunctionResult,
+  executeAgentFunction,
   ExecuteAgentFunctionCalled,
-  AgentFunction
-} from "./agent-function";
+  ExecuteAgentFunctionResult
+} from "./executeAgentFunction";
+import { Chat, ChatMessage, LlmApi } from "../llm";
 
 import { ResultErr, ResultOk } from "@polywrap/result";
 
 export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, chat: Chat }>(
   context: TContext,
-  executeAgentFunction: ExecuteAgentFunction,
   agentFunctions: AgentFunction<TContext>[],
   shouldTerminate: (
     functionCalled: ExecuteAgentFunctionCalled,
@@ -27,7 +26,7 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
     await chat.fitToContextWindow();
 
     const functionDefinitions = agentFunctions.map(f => f.definition);
-    const response = await llm.getResponse(chat, functionDefinitions);
+    const response = await llm.getResponse(chat.chatLogs, functionDefinitions);
 
     if (!response) {
       return ResultErr("No response from LLM.");
@@ -40,7 +39,7 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
       if (!result.ok) {
         chat.temporary(response);
         chat.temporary("system", result.error);
-        yield { type: "error", title: `Failed to execute ${name}!`, content: result.error } as AgentOutput;
+        yield { type: AgentOutputType.Error, title: `Failed to execute ${name}!`, content: result.error } as AgentOutput;
         continue;
       }
 
@@ -68,14 +67,14 @@ async function* _preventLoopAndSaveMsg(chat: Chat, response: ChatMessage, loopPr
     chat.messages[chat.messages.length - 2].content === response.content) {
       chat.temporary("system", loopPreventionPrompt);
       yield {
-        type: "warning",
+        type: AgentOutputType.Warning,
         title: "Loop prevention",
         content: loopPreventionPrompt
       } as AgentOutput;
   } else {
     chat.temporary(response);
     yield {
-      type: "success",
+      type: AgentOutputType.Success,
       title: "Agent response",
       content: response.content ?? ""
     } as AgentOutput;
