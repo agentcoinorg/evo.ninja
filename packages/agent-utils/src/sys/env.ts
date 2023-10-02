@@ -3,13 +3,15 @@ export class Env {
   public readonly GPT_MODEL: string;
   public readonly CONTEXT_WINDOW_TOKENS: number;
   public readonly MAX_RESPONSE_TOKENS: number;
+  public readonly BRAVE_API_KEY: string;
 
   constructor(envVars: Record<string, string>) {
     const {
       OPENAI_API_KEY,
       GPT_MODEL,
       CONTEXT_WINDOW_TOKENS,
-      MAX_RESPONSE_TOKENS
+      MAX_RESPONSE_TOKENS,
+      BRAVE_API_KEY
     } = envVars;
 
     if (!OPENAI_API_KEY) {
@@ -25,12 +27,19 @@ export class Env {
     if (!MAX_RESPONSE_TOKENS) {
       throw missingEnvError("MAX_RESPONSE_TOKENS");
     }
+    if (!MAX_RESPONSE_TOKENS) {
+      throw missingEnvError("MAX_RESPONSE_TOKENS");
+    }
+    if (!BRAVE_API_KEY) {
+      throw missingEnvError(`BRAVE_API_KEY`)
+    }
 
     return {
       OPENAI_API_KEY,
       GPT_MODEL,
       CONTEXT_WINDOW_TOKENS: Number(CONTEXT_WINDOW_TOKENS),
-      MAX_RESPONSE_TOKENS: Number(MAX_RESPONSE_TOKENS)
+      MAX_RESPONSE_TOKENS: Number(MAX_RESPONSE_TOKENS),
+      BRAVE_API_KEY
     };
   }
 }

@@ -11,7 +11,7 @@ import axios from "axios";
 
 import { InvokerOptions } from "@polywrap/client-js/build/types";
 import { ResultErr, ResultOk } from "@polywrap/result";
-import { Logger, Workspace } from "@evo-ninja/agent-utils";
+import { Env, Logger, Workspace } from "@evo-ninja/agent-utils";
 import * as  path from "path-browserify"
 
 export class WrapClient extends PolywrapClient {
@@ -22,6 +22,7 @@ export class WrapClient extends PolywrapClient {
     workspace: Workspace,
     logger: Logger,
     agentPlugin: IWrapPackage | undefined = undefined,
+    env: Env
   ) {
     const builder = new PolywrapClientConfigBuilder()
       .addBundle("web3")
@@ -184,11 +185,7 @@ export class WrapClient extends PolywrapClient {
         "search": async (args: { query: string }) => {
           const axiosClient =  axios.create({ baseURL: 'https://api.search.brave.com/res/v1/web' });
 
-          if (!process.env.BRAVE_API_KEY) {
-            throw new Error(`Cannot use websearch plugin without BRAVE_API_KEY environment variable`)
-          }
-
-          const apiKey = process.env.BRAVE_API_KEY as string
+          const apiKey = env.BRAVE_API_KEY
           const searchQuery = encodeURI(args.query)
           const urlParams = new URLSearchParams({
             q: searchQuery

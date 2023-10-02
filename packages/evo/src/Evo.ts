@@ -19,7 +19,8 @@ import {
   Timeout,
   InMemoryWorkspace,
   executeAgentFunction,
-  basicFunctionCallLoop
+  basicFunctionCallLoop,
+  Env
 } from "@evo-ninja/agent-utils";
 import { ScriptWriter } from "@evo-ninja/js-script-writer-agent";
 import { ResultErr } from "@polywrap/result";
@@ -33,7 +34,8 @@ export class Evo implements Agent {
     private readonly logger: Logger,
     private readonly workspace: Workspace,
     scripts: Scripts,
-    private readonly timeout?: Timeout
+    private readonly env: Env,
+    private readonly timeout?: Timeout,
   ) {
     this.context = {
       llm,
@@ -45,7 +47,8 @@ export class Evo implements Agent {
       client: new WrapClient(
         this.workspace,
         this.logger,
-        agentPlugin({ logger: this.logger })
+        agentPlugin({ logger: this.logger }),
+        this.env
       ),
     };
   }
