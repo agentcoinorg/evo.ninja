@@ -11,7 +11,7 @@ import {
   Scripts,
   Logger,
   basicFunctionCallLoop,
-  executeAgentFunction
+  ExecuteAgentFunctionCalled
 } from "@evo-ninja/agent-utils";
 import { ResultErr } from "@polywrap/result";
 
@@ -41,9 +41,8 @@ export class DevAgent implements Agent {
 
       return yield* basicFunctionCallLoop(
         this.context,
-        executeAgentFunction,
         agentFunctions,
-        (functionCalled) => {
+        (functionCalled: ExecuteAgentFunctionCalled) => {
           const terminationFunctions = [
             `agent_onGoalAchieved`,
             `agent_onGoalFailed`
