@@ -39,9 +39,7 @@ async function taskHandler(
 ): Promise<StepHandler> {
 
   const workspace = new AgentProtocolWorkspace(
-    path.join(
-      process.env.AGENT_WORKSPACE as string, id
-    )
+    path.join(workspaceDir, id)
   );
   const app = createApp({
     rootDir,
