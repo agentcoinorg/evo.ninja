@@ -115,7 +115,12 @@ export const executeScript: AgentFunction<AgentContext> = {
         }
 
         let args: any = undefined;
-        args = params.arguments ? params.arguments.replace(/\{\{/g, "\\{\\{").replace(/\}\}/g, "\\}\\}") : "{}";
+        args = params.arguments
+          ? params.arguments
+            .replace(/\{\{/g, "\\{\\{")
+            .replace(/\}\}/g, "\\}\\}")
+            .replace(/\\\"/g, '"')
+          : "{}";
         try {
 
           args = JSON5.parse(params.arguments);
