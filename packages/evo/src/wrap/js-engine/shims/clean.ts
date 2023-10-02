@@ -1,4 +1,5 @@
-export const clean = (obj: any, root = true): any => {
+// HACK: This is a hack because undefined, null, and functions are not supported by the JS Engine
+export function clean(obj: any, root = true): any {
   if (obj === undefined) {
     return root ? "undefined" : undefined;
   } else if (obj === null) {

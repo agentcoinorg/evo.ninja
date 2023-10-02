@@ -1,6 +1,6 @@
-import { clean } from "../modules";
+import { clean } from "../clean";
 
-export class DateShim {
+export class dateShim {
 
   _timestamp;
 

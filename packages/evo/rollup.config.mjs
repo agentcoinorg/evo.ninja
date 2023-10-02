@@ -15,15 +15,30 @@ export default {
   treeshake: false,
   plugins: [typescript(), commonjs(), resolve(), {
     renderChunk(code) {
-      return `export const packagesShim = \n\`${code}\`;
-      
-      
-      export const shimCode = (code: string) => \`\${packagesShim}\nconst __temp = (async function () { \n\${code}\n })().then(result => {
-        __wrap_subinvoke("plugin/result", "ok", { value: clean(result) })
-      }, error => {
-        __wrap_subinvoke("plugin/result", "err", { error: clean(error) })
-      });\nclean(__temp)\`;
-      `;
+      return `import { globalsShim } from "./shims/globals"
+
+export const packagesShim = \n\`${code}\`;
+
+const shimGlobals = () => {
+  return Object.keys(globalsShim).map((key) => {
+    const value = (globalsShim as Record<string, { shim: any, name: string }>)[key];
+    return \`var \${key} = \${value.name};\`;
+  }).join("\\n");
+}
+
+export const shimCode = (code: string) => \`
+  \${packagesShim}
+
+  \${shimGlobals()}
+  const __temp = (async function () { 
+  \${code}
+  })().then(result => {
+          __wrap_subinvoke("plugin/result", "ok", { value: clean(result) })
+        }, error => {
+          __wrap_subinvoke("plugin/result", "err", { error: clean(error) })
+        });
+  clean(__temp)
+\``;
     }
   }],
 };

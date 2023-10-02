@@ -1,6 +1,139 @@
-import { fs, axios } from "../modules";
+import { clean } from "../clean";
 
 export const requireShim = (lib: string) => {
+  const fs = {
+    readFileSync: (path: string) => {
+      return __wrap_subinvoke("plugin/fs", "readFileSync", clean({ path })).value;
+    },
+    readFile: (...args: any[]) => {
+      const callback = args[args.length - 1];
+      const result = __wrap_subinvoke("plugin/fs", "readFileSync", clean({ path: args[0] }));
+      callback && callback(result.error ? new Error(result.error) : undefined, result.value);
+    },
+    writeFileSync: (path: string, data: string) => {
+      return __wrap_subinvoke("plugin/fs", "writeFileSync", clean({ path, data })).value;
+    },
+    writeFile: (...args: any[]) => {
+      const callback = args[args.length - 1];
+      const result = __wrap_subinvoke("plugin/fs", "writeFileSync", clean({ path: args[0], data: args[1] }));
+      callback && callback(result.error ? new Error(result.error) : undefined, result.value);
+    },
+    appendFileSync: (path: string, data: string) => {
+      return __wrap_subinvoke("plugin/fs", "appendFileSync", clean({ path, data })).value;
+    },
+    appendFile: (...args: any[]) => {
+      const callback = args[args.length - 1];
+      const result = __wrap_subinvoke("plugin/fs", "appendFileSync", clean({ path: args[0], data: args[1] }));
+      callback && callback(result.error ? new Error(result.error) : undefined, result.value);
+    },
+    existsSync: (path: string) => {
+      return __wrap_subinvoke("plugin/fs", "existsSync", clean({ path })).value;
+    },
+    exists: (...args: any[]) => {
+      const callback = args[args.length - 1];
+      const result = __wrap_subinvoke("plugin/fs", "existsSync", clean({ path: args[0] }));
+      callback && callback(result.error ? new Error(result.error) : undefined, result.value);
+    },
+    renameSync: (oldPath: string, newPath: string) => {
+      return __wrap_subinvoke("plugin/fs", "renameSync", clean({ oldPath, newPath })).value;
+    },
+    rename: (...args: any[]) => {
+      const callback = args[args.length - 1];
+      const result = __wrap_subinvoke("plugin/fs", "renameSync", clean({ oldPath: args[0], newPath: args[1] }));
+      callback && callback(result.error ? new Error(result.error) : undefined, result.value);
+    },
+    mkdirSync: (path: string) => {
+      return __wrap_subinvoke("plugin/fs", "mkdirSync", clean({ path })).value;
+    },
+    mkdir: (...args: any[]) => {
+      const callback = args[args.length - 1];
+      const result = __wrap_subinvoke("plugin/fs", "mkdirSync", clean({ path: args[0] }));
+      callback && callback(result.error ? new Error(result.error) : undefined, result.value);
+    },
+    readdirSync: (path: string) => {
+      return __wrap_subinvoke("plugin/fs", "readdirSync", clean({ path })).value;
+    },
+    readdir: (...args: any[]) => {
+      const callback = args[args.length - 1];
+      const result = __wrap_subinvoke("plugin/fs", "readdirSync", clean({ path: args[0] }));
+      callback && callback(result.error ? new Error(result.error) : undefined, result.value);
+    },
+    promises: {
+      readFile: (path: string) => {
+        return Promise.resolve(fs.readFileSync(path));
+      },
+      writeFile: (path: string, data: string) => {
+        return Promise.resolve(fs.writeFileSync(path, data));
+      },
+      appendFile: (path: string, data: string) => {
+        return Promise.resolve(fs.appendFileSync(path, data));
+      },
+      exists: (path: string) => {
+        return Promise.resolve(fs.existsSync(path));
+      },
+      rename: (oldPath: string, newPath: string) => {
+        return Promise.resolve(fs.renameSync(oldPath, newPath));
+      },
+      mkdir: (path: string) => {
+        return Promise.resolve(fs.mkdirSync(path));
+      },
+      readdir: (path: string) => {
+        return Promise.resolve(fs.readdirSync(path));
+      }
+    }
+  };
+
+  const axios = {
+    get: (url: string, config: any) => {
+      return Promise.resolve(__wrap_subinvoke("plugin/axios", "get", clean({ url, config })).value);
+    },
+    post: (url: string, data: string, config: any) => {
+      return Promise.resolve(__wrap_subinvoke("plugin/axios", "post", clean({ url, data, config })).value);
+    },
+    put: (url: string, data: string, config: any) => {
+      return Promise.resolve(__wrap_subinvoke("plugin/axios", "put", clean({ url, data, config })).value);
+    },
+    delete: (url: string, config: any) => {
+      return Promise.resolve(__wrap_subinvoke("plugin/axios", "delete", clean({ url, config })).value);
+    },
+    head: (url: string, config: any) => {
+      return Promise.resolve(__wrap_subinvoke("plugin/axios", "head", clean({ url, config })).value);
+    },
+  };
+
+  const path = {
+    resolve: (pathSegments: any) => {
+      return __wrap_subinvoke("plugin/path", "resolve", clean({ pathSegments })).value
+    },
+    normalize: (path: string) => {
+      return __wrap_subinvoke("plugin/path", "normalize", clean({ path })).value
+    },
+    isAbsolute: (path: string) => {
+      return __wrap_subinvoke("plugin/path", "isAbsolute", clean({ path })).value
+    },
+    join: (path: string) => {
+      return __wrap_subinvoke("plugin/path", "join", clean({ path })).value
+    },
+    relative: (from: string, to: string) => {
+      return __wrap_subinvoke("plugin/path", "relative", clean({ from, to })).value
+    },
+    dirname: (path: string) => {
+      return __wrap_subinvoke("plugin/path", "dirname", clean({ path })).value
+    },
+    basename: (path: string) => {
+      return __wrap_subinvoke("plugin/path", "basename", clean({
+        path,
+        ext: undefined // TODO
+      })).value
+    },
+    format: (pathObject: any) => {
+      return __wrap_subinvoke("plugin/path", "format", clean({ pathObject })).value
+    },
+    parse: (path: string) => {
+      return __wrap_subinvoke("plugin/path", "parse", clean({ path })).value
+    }
+  };
+
   function wrap(objName: string, obj: any) {
     const origin = {};
     return new Proxy(origin, {
@@ -89,6 +222,8 @@ export const requireShim = (lib: string) => {
   switch (lib) {
     case "fs":
       return wrap("fs", fs);
+    case "path":
+      return wrap("path", path);
     case "util":
       return wrap("util", util);
     case "axios":

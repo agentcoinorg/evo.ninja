@@ -1,7 +1,10 @@
+import { globalsShim } from "./shims/globals"
+
 export const packagesShim = 
 `'use strict';
 
-var clean = function (obj, root) {
+// HACK: This is a hack because undefined, null, and functions are not supported by the JS Engine
+function clean(obj, root) {
     if (root === void 0) { root = true; }
     if (obj === undefined) {
         return root ? "undefined" : undefined;
@@ -31,153 +34,167 @@ var clean = function (obj, root) {
         }
     }
     return obj;
-};
-
-var axios = {
-    get: function (url, config) {
-        return Promise.resolve(__wrap_subinvoke("plugin/axios", "get", clean({ url: url, config: config })).value);
-    },
-    post: function (url, data, config) {
-        return Promise.resolve(__wrap_subinvoke("plugin/axios", "post", clean({ url: url, data: data, config: config })).value);
-    },
-    put: function (url, data, config) {
-        return Promise.resolve(__wrap_subinvoke("plugin/axios", "put", clean({ url: url, data: data, config: config })).value);
-    },
-    delete: function (url, config) {
-        return Promise.resolve(__wrap_subinvoke("plugin/axios", "delete", clean({ url: url, config: config })).value);
-    },
-    head: function (url, config) {
-        return Promise.resolve(__wrap_subinvoke("plugin/axios", "head", clean({ url: url, config: config })).value);
-    },
-};
-
-var console = {
-    log: function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        __wrap_debug_log(args.map(function (arg) { return typeof arg === "string" ? arg : JSON.stringify(arg, null, 2); }).join(" "));
-    },
-};
-
-var fs = {
-    readFileSync: function (path) {
-        return __wrap_subinvoke("plugin/fs", "readFileSync", clean({ path: path })).value;
-    },
-    readFile: function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        var callback = args[args.length - 1];
-        var result = __wrap_subinvoke("plugin/fs", "readFileSync", clean({ path: args[0] }));
-        callback && callback(result.error ? new Error(result.error) : undefined, result.value);
-    },
-    writeFileSync: function (path, data) {
-        return __wrap_subinvoke("plugin/fs", "writeFileSync", clean({ path: path, data: data })).value;
-    },
-    writeFile: function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        var callback = args[args.length - 1];
-        var result = __wrap_subinvoke("plugin/fs", "writeFileSync", clean({ path: args[0], data: args[1] }));
-        callback && callback(result.error ? new Error(result.error) : undefined, result.value);
-    },
-    appendFileSync: function (path, data) {
-        return __wrap_subinvoke("plugin/fs", "appendFileSync", clean({ path: path, data: data })).value;
-    },
-    appendFile: function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        var callback = args[args.length - 1];
-        var result = __wrap_subinvoke("plugin/fs", "appendFileSync", clean({ path: args[0], data: args[1] }));
-        callback && callback(result.error ? new Error(result.error) : undefined, result.value);
-    },
-    existsSync: function (path) {
-        return __wrap_subinvoke("plugin/fs", "existsSync", clean({ path: path })).value;
-    },
-    exists: function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        var callback = args[args.length - 1];
-        var result = __wrap_subinvoke("plugin/fs", "existsSync", clean({ path: args[0] }));
-        callback && callback(result.error ? new Error(result.error) : undefined, result.value);
-    },
-    renameSync: function (oldPath, newPath) {
-        return __wrap_subinvoke("plugin/fs", "renameSync", clean({ oldPath: oldPath, newPath: newPath })).value;
-    },
-    rename: function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        var callback = args[args.length - 1];
-        var result = __wrap_subinvoke("plugin/fs", "renameSync", clean({ oldPath: args[0], newPath: args[1] }));
-        callback && callback(result.error ? new Error(result.error) : undefined, result.value);
-    },
-    mkdirSync: function (path) {
-        return __wrap_subinvoke("plugin/fs", "mkdirSync", clean({ path: path })).value;
-    },
-    mkdir: function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        var callback = args[args.length - 1];
-        var result = __wrap_subinvoke("plugin/fs", "mkdirSync", clean({ path: args[0] }));
-        callback && callback(result.error ? new Error(result.error) : undefined, result.value);
-    },
-    readdirSync: function (path) {
-        return __wrap_subinvoke("plugin/fs", "readdirSync", clean({ path: path })).value;
-    },
-    readdir: function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        var callback = args[args.length - 1];
-        var result = __wrap_subinvoke("plugin/fs", "readdirSync", clean({ path: args[0] }));
-        callback && callback(result.error ? new Error(result.error) : undefined, result.value);
-    },
-    promises: {
-        readFile: function (path) {
-            return Promise.resolve(fs.readFileSync(path));
-        },
-        writeFile: function (path, data) {
-            return Promise.resolve(fs.writeFileSync(path, data));
-        },
-        appendFile: function (path, data) {
-            return Promise.resolve(fs.appendFileSync(path, data));
-        },
-        exists: function (path) {
-            return Promise.resolve(fs.existsSync(path));
-        },
-        rename: function (oldPath, newPath) {
-            return Promise.resolve(fs.renameSync(oldPath, newPath));
-        },
-        mkdir: function (path) {
-            return Promise.resolve(fs.mkdirSync(path));
-        },
-        readdir: function (path) {
-            return Promise.resolve(fs.readdirSync(path));
-        }
-    }
-};
-
-var path = {
-    join: function () {
-        throw new Error("path is not supported in the browser");
-    },
-};
+}
 
 var requireShim = function (lib) {
+    var fs = {
+        readFileSync: function (path) {
+            return __wrap_subinvoke("plugin/fs", "readFileSync", clean({ path: path })).value;
+        },
+        readFile: function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            var callback = args[args.length - 1];
+            var result = __wrap_subinvoke("plugin/fs", "readFileSync", clean({ path: args[0] }));
+            callback && callback(result.error ? new Error(result.error) : undefined, result.value);
+        },
+        writeFileSync: function (path, data) {
+            return __wrap_subinvoke("plugin/fs", "writeFileSync", clean({ path: path, data: data })).value;
+        },
+        writeFile: function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            var callback = args[args.length - 1];
+            var result = __wrap_subinvoke("plugin/fs", "writeFileSync", clean({ path: args[0], data: args[1] }));
+            callback && callback(result.error ? new Error(result.error) : undefined, result.value);
+        },
+        appendFileSync: function (path, data) {
+            return __wrap_subinvoke("plugin/fs", "appendFileSync", clean({ path: path, data: data })).value;
+        },
+        appendFile: function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            var callback = args[args.length - 1];
+            var result = __wrap_subinvoke("plugin/fs", "appendFileSync", clean({ path: args[0], data: args[1] }));
+            callback && callback(result.error ? new Error(result.error) : undefined, result.value);
+        },
+        existsSync: function (path) {
+            return __wrap_subinvoke("plugin/fs", "existsSync", clean({ path: path })).value;
+        },
+        exists: function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            var callback = args[args.length - 1];
+            var result = __wrap_subinvoke("plugin/fs", "existsSync", clean({ path: args[0] }));
+            callback && callback(result.error ? new Error(result.error) : undefined, result.value);
+        },
+        renameSync: function (oldPath, newPath) {
+            return __wrap_subinvoke("plugin/fs", "renameSync", clean({ oldPath: oldPath, newPath: newPath })).value;
+        },
+        rename: function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            var callback = args[args.length - 1];
+            var result = __wrap_subinvoke("plugin/fs", "renameSync", clean({ oldPath: args[0], newPath: args[1] }));
+            callback && callback(result.error ? new Error(result.error) : undefined, result.value);
+        },
+        mkdirSync: function (path) {
+            return __wrap_subinvoke("plugin/fs", "mkdirSync", clean({ path: path })).value;
+        },
+        mkdir: function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            var callback = args[args.length - 1];
+            var result = __wrap_subinvoke("plugin/fs", "mkdirSync", clean({ path: args[0] }));
+            callback && callback(result.error ? new Error(result.error) : undefined, result.value);
+        },
+        readdirSync: function (path) {
+            return __wrap_subinvoke("plugin/fs", "readdirSync", clean({ path: path })).value;
+        },
+        readdir: function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            var callback = args[args.length - 1];
+            var result = __wrap_subinvoke("plugin/fs", "readdirSync", clean({ path: args[0] }));
+            callback && callback(result.error ? new Error(result.error) : undefined, result.value);
+        },
+        promises: {
+            readFile: function (path) {
+                return Promise.resolve(fs.readFileSync(path));
+            },
+            writeFile: function (path, data) {
+                return Promise.resolve(fs.writeFileSync(path, data));
+            },
+            appendFile: function (path, data) {
+                return Promise.resolve(fs.appendFileSync(path, data));
+            },
+            exists: function (path) {
+                return Promise.resolve(fs.existsSync(path));
+            },
+            rename: function (oldPath, newPath) {
+                return Promise.resolve(fs.renameSync(oldPath, newPath));
+            },
+            mkdir: function (path) {
+                return Promise.resolve(fs.mkdirSync(path));
+            },
+            readdir: function (path) {
+                return Promise.resolve(fs.readdirSync(path));
+            }
+        }
+    };
+    var axios = {
+        get: function (url, config) {
+            return Promise.resolve(__wrap_subinvoke("plugin/axios", "get", clean({ url: url, config: config })).value);
+        },
+        post: function (url, data, config) {
+            return Promise.resolve(__wrap_subinvoke("plugin/axios", "post", clean({ url: url, data: data, config: config })).value);
+        },
+        put: function (url, data, config) {
+            return Promise.resolve(__wrap_subinvoke("plugin/axios", "put", clean({ url: url, data: data, config: config })).value);
+        },
+        delete: function (url, config) {
+            return Promise.resolve(__wrap_subinvoke("plugin/axios", "delete", clean({ url: url, config: config })).value);
+        },
+        head: function (url, config) {
+            return Promise.resolve(__wrap_subinvoke("plugin/axios", "head", clean({ url: url, config: config })).value);
+        },
+    };
+    var path = {
+        resolve: function (pathSegments) {
+            return __wrap_subinvoke("plugin/path", "resolve", clean({ pathSegments: pathSegments })).value;
+        },
+        normalize: function (path) {
+            return __wrap_subinvoke("plugin/path", "normalize", clean({ path: path })).value;
+        },
+        isAbsolute: function (path) {
+            return __wrap_subinvoke("plugin/path", "isAbsolute", clean({ path: path })).value;
+        },
+        join: function (path) {
+            return __wrap_subinvoke("plugin/path", "join", clean({ path: path })).value;
+        },
+        relative: function (from, to) {
+            return __wrap_subinvoke("plugin/path", "relative", clean({ from: from, to: to })).value;
+        },
+        dirname: function (path) {
+            return __wrap_subinvoke("plugin/path", "dirname", clean({ path: path })).value;
+        },
+        basename: function (path) {
+            return __wrap_subinvoke("plugin/path", "basename", clean({
+                path: path,
+                ext: undefined // TODO
+            })).value;
+        },
+        format: function (pathObject) {
+            return __wrap_subinvoke("plugin/path", "format", clean({ pathObject: pathObject })).value;
+        },
+        parse: function (path) {
+            return __wrap_subinvoke("plugin/path", "parse", clean({ path: path })).value;
+        }
+    };
     function wrap(objName, obj) {
         var origin = {};
         return new Proxy(origin, {
@@ -253,6 +270,8 @@ var requireShim = function (lib) {
     switch (lib) {
         case "fs":
             return wrap("fs", fs);
+        case "path":
+            return wrap("path", path);
         case "util":
             return wrap("util", util);
         case "axios":
@@ -268,8 +287,8 @@ var mathShim = {
     }
 };
 
-var DateShim = /** @class */ (function () {
-    function DateShim() {
+var dateShim = /** @class */ (function () {
+    function dateShim() {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
@@ -287,179 +306,216 @@ var DateShim = /** @class */ (function () {
             this._timestamp = args[0].timestamp;
         }
     }
-    DateShim.now = function () {
+    dateShim.now = function () {
         return __wrap_subinvoke("plugin/datetime", "now", clean(undefined)).value;
     };
-    DateShim.parse = function (date) {
+    dateShim.parse = function (date) {
         return __wrap_subinvoke("plugin/datetime", "parse", clean({ date: date })).value;
     };
-    DateShim.UTC = function (year, month, day, hour, minute, second, millisecond) {
+    dateShim.UTC = function (year, month, day, hour, minute, second, millisecond) {
         var args = clean({ year: year, month: month, day: day, hour: hour, minute: minute, second: second, millisecond: millisecond });
         return __wrap_subinvoke("plugin/datetime", "UTC", args).value;
     };
-    DateShim.prototype.getDate = function () {
+    dateShim.prototype.getDate = function () {
         return __wrap_subinvoke("plugin/datetime", "getDate", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.getDay = function () {
+    dateShim.prototype.getDay = function () {
         return __wrap_subinvoke("plugin/datetime", "getDate", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.getFullYear = function () {
+    dateShim.prototype.getFullYear = function () {
         return __wrap_subinvoke("plugin/datetime", "getFullYear", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.getHours = function () {
+    dateShim.prototype.getHours = function () {
         return __wrap_subinvoke("plugin/datetime", "getHours", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.getMilliseconds = function () {
+    dateShim.prototype.getMilliseconds = function () {
         return __wrap_subinvoke("plugin/datetime", "getMilliseconds", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.getMinutes = function () {
+    dateShim.prototype.getMinutes = function () {
         return __wrap_subinvoke("plugin/datetime", "getMinutes", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.getMonth = function () {
+    dateShim.prototype.getMonth = function () {
         return __wrap_subinvoke("plugin/datetime", "getMonth", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.getSeconds = function () {
+    dateShim.prototype.getSeconds = function () {
         return __wrap_subinvoke("plugin/datetime", "getSeconds", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.getTime = function () {
+    dateShim.prototype.getTime = function () {
         return __wrap_subinvoke("plugin/datetime", "getTime", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.getTimezoneOffset = function () {
+    dateShim.prototype.getTimezoneOffset = function () {
         return __wrap_subinvoke("plugin/datetime", "getTimezoneOffset", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.getUTCDate = function () {
+    dateShim.prototype.getUTCDate = function () {
         return __wrap_subinvoke("plugin/datetime", "getUTCDate", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.getUTCDay = function () {
+    dateShim.prototype.getUTCDay = function () {
         return __wrap_subinvoke("plugin/datetime", "getUTCDay", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.getUTCFullYear = function () {
+    dateShim.prototype.getUTCFullYear = function () {
         return __wrap_subinvoke("plugin/datetime", "getUTCFullYear", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.getUTCHours = function () {
+    dateShim.prototype.getUTCHours = function () {
         return __wrap_subinvoke("plugin/datetime", "getUTCHours", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.getUTCMilliseconds = function () {
+    dateShim.prototype.getUTCMilliseconds = function () {
         return __wrap_subinvoke("plugin/datetime", "getUTCMilliseconds", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.getUTCMinutes = function () {
+    dateShim.prototype.getUTCMinutes = function () {
         return __wrap_subinvoke("plugin/datetime", "getUTCMinutes", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.getUTCMonth = function () {
+    dateShim.prototype.getUTCMonth = function () {
         return __wrap_subinvoke("plugin/datetime", "getUTCMonth", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.getUTCSeconds = function () {
+    dateShim.prototype.getUTCSeconds = function () {
         return __wrap_subinvoke("plugin/datetime", "getUTCSeconds", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.setDate = function (day) {
+    dateShim.prototype.setDate = function (day) {
         this._timestamp = __wrap_subinvoke("plugin/datetime", "setDate", clean({ timestamp: this._timestamp, day: day })).value;
         return this._timestamp;
     };
-    DateShim.prototype.setFullYear = function (year) {
+    dateShim.prototype.setFullYear = function (year) {
         this._timestamp = __wrap_subinvoke("plugin/datetime", "setFullYear", clean({ timestamp: this._timestamp, year: year })).value;
         return this._timestamp;
     };
-    DateShim.prototype.setHours = function (hour) {
+    dateShim.prototype.setHours = function (hour) {
         this._timestamp = __wrap_subinvoke("plugin/datetime", "setHours", clean({ timestamp: this._timestamp, hour: hour })).value;
         return this._timestamp;
     };
-    DateShim.prototype.setMilliseconds = function (millisecond) {
+    dateShim.prototype.setMilliseconds = function (millisecond) {
         this._timestamp = __wrap_subinvoke("plugin/datetime", "setMilliseconds", clean({ timestamp: this._timestamp, millisecond: millisecond })).value;
         return this._timestamp;
     };
-    DateShim.prototype.setMinutes = function (minute) {
+    dateShim.prototype.setMinutes = function (minute) {
         this._timestamp = __wrap_subinvoke("plugin/datetime", "setMinutes", clean({ timestamp: this._timestamp, minute: minute })).value;
         return this._timestamp;
     };
-    DateShim.prototype.setMonth = function (month) {
+    dateShim.prototype.setMonth = function (month) {
         this._timestamp = __wrap_subinvoke("plugin/datetime", "setMonth", clean({ timestamp: this._timestamp, month: month })).value;
         return this._timestamp;
     };
-    DateShim.prototype.setSeconds = function (second) {
+    dateShim.prototype.setSeconds = function (second) {
         this._timestamp = __wrap_subinvoke("plugin/datetime", "setSeconds", clean({ timestamp: this._timestamp, second: second })).value;
         return this._timestamp;
     };
-    DateShim.prototype.setTime = function (time) {
+    dateShim.prototype.setTime = function (time) {
         this._timestamp = __wrap_subinvoke("plugin/datetime", "setTime", clean({ timestamp: this._timestamp, time: time })).value;
         return this._timestamp;
     };
-    DateShim.prototype.setUTCDate = function (day) {
+    dateShim.prototype.setUTCDate = function (day) {
         this._timestamp = __wrap_subinvoke("plugin/datetime", "setUTCDate", clean({ timestamp: this._timestamp, day: day })).value;
         return this._timestamp;
     };
-    DateShim.prototype.setUTCFullYear = function (year) {
+    dateShim.prototype.setUTCFullYear = function (year) {
         this._timestamp = __wrap_subinvoke("plugin/datetime", "setUTCFullYear", clean({ timestamp: this._timestamp, year: year })).value;
         return this._timestamp;
     };
-    DateShim.prototype.setUTCHours = function (hour) {
+    dateShim.prototype.setUTCHours = function (hour) {
         this._timestamp = __wrap_subinvoke("plugin/datetime", "setUTCHours", clean({ timestamp: this._timestamp, hour: hour })).value;
         return this._timestamp;
     };
-    DateShim.prototype.setUTCMilliseconds = function (millisecond) {
+    dateShim.prototype.setUTCMilliseconds = function (millisecond) {
         this._timestamp = __wrap_subinvoke("plugin/datetime", "setUTCMilliseconds", clean({ timestamp: this._timestamp, millisecond: millisecond })).value;
         return this._timestamp;
     };
-    DateShim.prototype.setUTCMinutes = function (minute) {
+    dateShim.prototype.setUTCMinutes = function (minute) {
         this._timestamp = __wrap_subinvoke("plugin/datetime", "setUTCMinutes", clean({ timestamp: this._timestamp, minute: minute })).value;
         return this._timestamp;
     };
-    DateShim.prototype.setUTCMonth = function (month) {
+    dateShim.prototype.setUTCMonth = function (month) {
         this._timestamp = __wrap_subinvoke("plugin/datetime", "setUTCMonth", clean({ timestamp: this._timestamp, month: month })).value;
         return this._timestamp;
     };
-    DateShim.prototype.setUTCSeconds = function (second) {
+    dateShim.prototype.setUTCSeconds = function (second) {
         this._timestamp = __wrap_subinvoke("plugin/datetime", "setUTCSeconds", clean({ timestamp: this._timestamp, second: second })).value;
         return this._timestamp;
     };
-    DateShim.prototype.toDateString = function () {
+    dateShim.prototype.toDateString = function () {
         return __wrap_subinvoke("plugin/datetime", "toDateString", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.toISOString = function () {
+    dateShim.prototype.toISOString = function () {
         return __wrap_subinvoke("plugin/datetime", "toISOString", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.toJSON = function () {
+    dateShim.prototype.toJSON = function () {
         return __wrap_subinvoke("plugin/datetime", "toJSON", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.toLocaleDateString = function () {
+    dateShim.prototype.toLocaleDateString = function () {
         return __wrap_subinvoke("plugin/datetime", "toLocaleDateString", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.toLocaleString = function () {
+    dateShim.prototype.toLocaleString = function () {
         return __wrap_subinvoke("plugin/datetime", "toLocaleString", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.toLocaleTimeString = function () {
+    dateShim.prototype.toLocaleTimeString = function () {
         return __wrap_subinvoke("plugin/datetime", "toLocaleTimeString", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.toString = function () {
+    dateShim.prototype.toString = function () {
         return __wrap_subinvoke("plugin/datetime", "toString", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.toTimeString = function () {
+    dateShim.prototype.toTimeString = function () {
         return __wrap_subinvoke("plugin/datetime", "toTimeString", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.toUTCString = function () {
+    dateShim.prototype.toUTCString = function () {
         return __wrap_subinvoke("plugin/datetime", "toUTCString", clean({ timestamp: this._timestamp })).value;
     };
-    DateShim.prototype.valueOf = function () {
+    dateShim.prototype.valueOf = function () {
         return this._timestamp;
     };
-    return DateShim;
+    return dateShim;
 }());
 
-var globalObject = typeof globalThis !== 'undefined' ? globalThis : global || self;
-// @ts-ignore
-globalObject.require = requireShim;
-// @ts-ignore
-globalObject.Math = mathShim;
-// @ts-ignore
-globalObject.Date = DateShim;`;
-      
-      
-      export const shimCode = (code: string) => `${packagesShim}
-const __temp = (async function () { 
-${code}
- })().then(result => {
-        __wrap_subinvoke("plugin/result", "ok", { value: clean(result) })
-      }, error => {
-        __wrap_subinvoke("plugin/result", "err", { error: clean(error) })
-      });
-clean(__temp)`;
-      
+var consoleShim = {
+    log: function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        __wrap_subinvoke("plugin/console", "log", { args: clean(args) });
+    },
+    error: function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        __wrap_subinvoke("plugin/console", "error", { args: clean(args) });
+    },
+};
+
+var globalsShim = {
+    require: {
+        shim: requireShim,
+        name: "requireShim",
+    },
+    Math: {
+        shim: mathShim,
+        name: "mathShim",
+    },
+    Date: {
+        shim: dateShim,
+        name: "dateShim",
+    },
+    console: {
+        shim: consoleShim,
+        name: "consoleShim",
+    },
+};`;
+
+const shimGlobals = () => {
+  return Object.keys(globalsShim).map((key) => {
+    const value = (globalsShim as Record<string, { shim: any, name: string }>)[key];
+    return `var ${key} = ${value.name};`;
+  }).join("\n");
+}
+
+export const shimCode = (code: string) => `
+  ${packagesShim}
+
+  ${shimGlobals()}
+  const __temp = (async function () { 
+  ${code}
+  })().then(result => {
+          __wrap_subinvoke("plugin/result", "ok", { value: clean(result) })
+        }, error => {
+          __wrap_subinvoke("plugin/result", "err", { error: clean(error) })
+        });
+  clean(__temp)
+`

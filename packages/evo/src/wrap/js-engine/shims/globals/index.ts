@@ -5,13 +5,24 @@ import {
 import {
   mathShim
 } from "./math"
-import { DateShim } from "./date";
+import { dateShim } from "./date";
+import { consoleShim } from "./console";
 
-const globalObject = typeof globalThis !== 'undefined' ? globalThis : global || self;
-
-// @ts-ignore
-globalObject.require = requireShim;
-// @ts-ignore
-globalObject.Math = mathShim;
-// @ts-ignore
-globalObject.Date = DateShim
+export const globalsShim = {
+  require: {
+    shim: requireShim,
+    name: "requireShim",
+  },
+  Math: {
+    shim: mathShim,
+    name: "mathShim",
+  },
+  Date: {
+    shim: dateShim,
+    name: "dateShim",
+  },
+  console: {
+    shim: consoleShim,
+    name: "consoleShim",
+  },
+}
