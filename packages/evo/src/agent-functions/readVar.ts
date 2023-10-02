@@ -11,7 +11,7 @@ type FuncParameters = {
 const SUCCESS = (params: FuncParameters, varValue: string): AgentFunctionResult => ({
   outputs: [
     {
-      type: AgentOutputType.SUCCESS,
+      type: AgentOutputType.Success,
       title: `Read '${params.name}' variable.`,
       content: FUNCTION_CALL_SUCCESS_CONTENT(
         FN_NAME,
@@ -28,7 +28,7 @@ const SUCCESS = (params: FuncParameters, varValue: string): AgentFunctionResult 
 const VAR_NOT_FOUND_ERROR = (params: FuncParameters): AgentFunctionResult => ({
   outputs: [
     {
-      type: AgentOutputType.ERROR,
+      type: AgentOutputType.Error,
       title: `Failed to read '${params.name}' variable.`, 
       content: FUNCTION_CALL_FAILED(params, FN_NAME, `Global variable {{${params.name}}} not found.`)
     }

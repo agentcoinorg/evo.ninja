@@ -10,7 +10,7 @@ type FuncParameters = {
 const SUCCESS = (params: FuncParameters): AgentFunctionResult => ({
   outputs: [
     {
-      type: AgentOutputType.SUCCESS,
+      type: AgentOutputType.Success,
       title: `Thinking...`,
       content: 
         `## Thoughts:\n` +

@@ -16,7 +16,7 @@ type FuncParameters = {
 const SUCCESS = (scriptName: string, result: any, params: FuncParameters): AgentFunctionResult => ({
   outputs: [
     {
-      type: AgentOutputType.SUCCESS,
+      type: AgentOutputType.Success,
       title: `Executed '${scriptName}' script.`,
       content: FUNCTION_CALL_SUCCESS_CONTENT(
         FN_NAME,
@@ -34,7 +34,7 @@ const SUCCESS = (scriptName: string, result: any, params: FuncParameters): Agent
 const EXECUTE_SCRIPT_ERROR_RESULT = (scriptName: string, error: string | undefined, params: FuncParameters): AgentFunctionResult => ({
   outputs: [
     {
-      type: AgentOutputType.ERROR,
+      type: AgentOutputType.Error,
       title: `'${scriptName}' script failed to execute!`,
       content: FUNCTION_CALL_FAILED(params, FN_NAME, error ?? "Unknown error"),
     }

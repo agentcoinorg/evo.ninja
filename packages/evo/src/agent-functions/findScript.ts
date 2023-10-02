@@ -13,7 +13,7 @@ type FuncParameters = {
 const SUCCESS = (params: FuncParameters, candidates: Script[]): AgentFunctionResult => ({
   outputs: [
     {
-      type: AgentOutputType.SUCCESS,
+      type: AgentOutputType.Success,
       title: FIND_SCRIPT_TITLE(params),
       content: FUNCTION_CALL_SUCCESS_CONTENT(
         FN_NAME,
@@ -37,7 +37,7 @@ const SUCCESS = (params: FuncParameters, candidates: Script[]): AgentFunctionRes
 const NO_SCRIPTS_FOUND_ERROR = (params: FuncParameters): AgentFunctionResult => ({
   outputs: [
     {
-      type: AgentOutputType.ERROR,
+      type: AgentOutputType.Error,
       title: FIND_SCRIPT_TITLE(params),
       content: FUNCTION_CALL_SUCCESS_CONTENT(
         FN_NAME,
