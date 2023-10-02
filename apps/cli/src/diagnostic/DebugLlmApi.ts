@@ -1,7 +1,7 @@
 import { DebugLog } from "./DebugLog";
 import { Timer } from "./Timer";
 
-import { Chat, LlmApi, LlmOptions, ChatMessage } from "@evo-ninja/agent-utils";
+import { LlmApi, LlmOptions, ChatLogs, ChatMessage } from "@evo-ninja/agent-utils";
 
 export class DebugLlmApi implements LlmApi {
   constructor(
@@ -18,7 +18,7 @@ export class DebugLlmApi implements LlmApi {
   }
 
   async getResponse(
-    chat: Chat,
+    chatLogs: ChatLogs,
     functionDefinitions: any[],
     options?: LlmOptions | undefined
   ): Promise<ChatMessage | undefined> {
@@ -28,7 +28,7 @@ export class DebugLlmApi implements LlmApi {
     time.start();
 
     const resp = await this.llm.getResponse(
-      chat,
+      chatLogs,
       functionDefinitions,
       options
     );
@@ -36,7 +36,7 @@ export class DebugLlmApi implements LlmApi {
     time.end();
     this.debugLog.stepLlmReq(
       time,
-      chat.export(),
+      chatLogs.clone(),
       resp
     );
 
