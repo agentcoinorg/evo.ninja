@@ -18,7 +18,6 @@ import {
   RunResult,
   Timeout,
   InMemoryWorkspace,
-  executeAgentFunction,
   basicFunctionCallLoop,
   ContextWindow
 } from "@evo-ninja/agent-utils";
