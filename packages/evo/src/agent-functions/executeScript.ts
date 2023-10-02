@@ -102,7 +102,7 @@ export const executeScript: AgentFunction<AgentContext> = {
         },
         arguments: {
           type: "string",
-          description: "JSON-formatted arguments to pass into the script being executed",
+          description: "JSON-formatted arguments to pass into the script being executed. You can replace a value with a global variable by using {{varName}} syntax.",
         },
         result: {
           type: "string",
