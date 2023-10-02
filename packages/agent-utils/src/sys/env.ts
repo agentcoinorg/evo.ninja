@@ -3,9 +3,9 @@ export class Env {
   public readonly GPT_MODEL: string;
   public readonly CONTEXT_WINDOW_TOKENS: number;
   public readonly MAX_RESPONSE_TOKENS: number;
-  public readonly BRAVE_API_KEY: string;
+  public readonly BRAVE_API_KEY: string | null;
 
-  constructor(envVars: Record<string, string>) {
+  constructor(envVars: Record<string, string | null>) {
     const {
       OPENAI_API_KEY,
       GPT_MODEL,
@@ -26,9 +26,6 @@ export class Env {
     }
     if (!MAX_RESPONSE_TOKENS) {
       throw missingEnvError("MAX_RESPONSE_TOKENS");
-    }
-    if (!BRAVE_API_KEY) {
-      throw missingEnvError(`BRAVE_API_KEY`)
     }
 
     return {

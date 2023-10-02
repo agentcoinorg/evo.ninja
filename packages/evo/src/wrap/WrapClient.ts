@@ -186,6 +186,11 @@ export class WrapClient extends PolywrapClient {
           const axiosClient =  axios.create({ baseURL: 'https://api.search.brave.com/res/v1/web' });
 
           const apiKey = env.BRAVE_API_KEY
+
+          if (!apiKey) {
+            throw new Error('BRAVE_API_KEY environment variable is required to use the websearch plugin. See env.template for help')
+          }
+
           const searchQuery = encodeURI(args.query)
           const urlParams = new URLSearchParams({
             q: searchQuery

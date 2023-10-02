@@ -132,7 +132,7 @@ function Dojo() {
 
   useEffect(() => {
     try {
-      if (!apiKey || !model || !braveApiKey) {
+      if (!apiKey || !model) {
         setConfigOpen(true);
         return;
       }
