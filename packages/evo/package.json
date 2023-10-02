@@ -5,8 +5,7 @@
   "main": "./build/index.js",
   "scripts": {
     "build": "rimraf build && tsc",
-    "codegen": "yarn codegen:agent-plugin && yarn codegen:shims",
-    "codegen:shims": "rollup -c",
+    "codegen": "yarn codegen:agent-plugin",
     "codegen:agent-plugin": "polywrap codegen -m ./src/agent-plugin/polywrap.yaml --codegen-dir ./src/agent-plugin/types",
     "test": "jest --runInBand --verbose --rootDir . --config ../../jest.config.js"
   },

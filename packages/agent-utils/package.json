@@ -5,8 +5,9 @@
   "main": "./build/index.js",
   "scripts": {
     "build": "rimraf build && tsc",
+    "codegen": "yarn codegen:shims && yarn codegen:js-engine",
     "codegen:shims": "rollup -c",
-    "codegen:js-engine": "polywrap codegen -m ./src/scripts/js-engine/polywrap.yaml --codegen-dir ./src/scripts/js-engine/types && yarn codegen:shims"
+    "codegen:js-engine": "polywrap codegen -m ./src/scripts/js-engine/polywrap.yaml --codegen-dir ./src/scripts/js-engine/types"
   },
   "dependencies": {
     "@polywrap/result": "~0.12.0",
