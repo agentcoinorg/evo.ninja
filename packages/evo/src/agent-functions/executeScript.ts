@@ -110,7 +110,7 @@ export const executeScript: AgentFunction<AgentContext> = {
         },
         result: {
           type: "string",
-          description: "The name of the variable to store the result of the script (starts with '_' and contains letters)"
+          description: "The name of the variable to store the result of the script (starts with '$' and is UPPERCASE)"
         }
       },
       required: ["namespace", "arguments", "result"],
