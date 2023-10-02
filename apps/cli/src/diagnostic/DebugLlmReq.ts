@@ -1,28 +1,32 @@
 import { Timer } from "./Timer";
 
-import { ChatMessageLog, ChatMessage } from "@evo-ninja/agent-utils";
+import { ChatLogs, ChatMessage } from "@evo-ninja/agent-utils";
 
 export class DebugLlmReq {
   constructor(
     public time: Timer,
-    public chat: ChatMessageLog,
+    public chatLogs: ChatLogs,
     public response?: ChatMessage
   ) { }
 
-  get tokens() {
-    return this.chat["persistent"].tokens +
-      this.chat["temporary"].tokens;
+  get tokens(): number {
+    return this.chatLogs.tokens;
   }
 
   toString(): string {
     return JSON.stringify(this.toJSON(), null, 2);
   }
 
-  toJSON() {
+  toJSON(): {
+    time: Timer;
+    tokens: number;
+    chat: ChatLogs;
+    response?: ChatMessage;
+  } {
     return {
       time: this.time,
       tokens: this.tokens,
-      chat: this.chat,
+      chat: this.chatLogs,
       response: this.response
     };
   }
