@@ -1,5 +1,5 @@
 import { Result, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+import { AgentFunction, AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../AgentContext";
 import { Script } from "../Scripts";
 import { FUNCTION_CALL_SUCCESS_CONTENT } from "../prompts";
@@ -13,7 +13,7 @@ type FuncParameters = {
 const SUCCESS = (params: FuncParameters, candidates: Script[]): AgentFunctionResult => ({
   outputs: [
     {
-      type: "success",
+      type: AgentOutputType.Success,
       title: FIND_SCRIPT_TITLE(params),
       content: FUNCTION_CALL_SUCCESS_CONTENT(
         FN_NAME,
@@ -37,7 +37,7 @@ const SUCCESS = (params: FuncParameters, candidates: Script[]): AgentFunctionRes
 const NO_SCRIPTS_FOUND_ERROR = (params: FuncParameters): AgentFunctionResult => ({
   outputs: [
     {
-      type: "success",
+      type: AgentOutputType.Error,
       title: FIND_SCRIPT_TITLE(params),
       content: FUNCTION_CALL_SUCCESS_CONTENT(
         FN_NAME,

@@ -62,7 +62,7 @@ export class Evo implements Agent {
     }
 
     try {
-      chat.persistent("system", INITIAL_PROMP);
+      chat.persistent("user", INITIAL_PROMP);
       chat.persistent("user", goal);
 
       return yield* basicFunctionCallLoop(

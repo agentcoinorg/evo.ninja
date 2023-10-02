@@ -1,5 +1,5 @@
 import { RunResult } from "./Agent";
-import { AgentOutput } from "./AgentOutput";
+import { AgentOutput, AgentOutputType } from "./AgentOutput";
 import { AgentFunction } from "./AgentFunction";
 import {
   executeAgentFunction,
@@ -39,7 +39,7 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
       if (!result.ok) {
         chat.temporary(response);
         chat.temporary("system", result.error);
-        yield { type: "error", title: `Failed to execute ${name}!`, content: result.error } as AgentOutput;
+        yield { type: AgentOutputType.Error, title: `Failed to execute ${name}!`, content: result.error } as AgentOutput;
         continue;
       }
 
@@ -67,14 +67,14 @@ async function* _preventLoopAndSaveMsg(chat: Chat, response: ChatMessage, loopPr
     chat.messages[chat.messages.length - 2].content === response.content) {
       chat.temporary("system", loopPreventionPrompt);
       yield {
-        type: "warning",
+        type: AgentOutputType.Warning,
         title: "Loop prevention",
         content: loopPreventionPrompt
       } as AgentOutput;
   } else {
     chat.temporary(response);
     yield {
-      type: "success",
+      type: AgentOutputType.Success,
       title: "Agent response",
       content: response.content ?? ""
     } as AgentOutput;
