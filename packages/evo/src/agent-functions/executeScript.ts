@@ -67,10 +67,6 @@ const EXECUTE_SCRIPT_ERROR_RESULT = (scriptName: string, error: string | undefin
 const INVALID_EXECUTE_SCRIPT_ARGS = (
   params: FuncParameters
 ) => `Invalid arguments provided for script ${params.namespace}: '${params.arguments ?? ""}' is not valid JSON!`;
-const SCRIPT_ARGS_NAME_CONFLICT = (
-  params: FuncParameters,
-  conflict: string
-) => `Invalid arguments provided for script ${params.namespace}: Argument '${conflict}' is already defined as a global variable!`;
 const SCRIPT_NOT_FOUND = (params: FuncParameters) => `Script '${params.namespace}' not found!`;
 const EXECUTE_SCRIPT_OUTPUT = (varName: string | undefined, result: string | undefined) => {
   if (!result || result === "undefined" || result === "\"undefined\"") {
@@ -110,7 +106,7 @@ export const executeScript: AgentFunction<AgentContext> = {
         },
         result: {
           type: "string",
-          description: "The name of the variable to store the result of the script (starts with '$' and is UPPERCASE)"
+          description: "The name of the variable to store the result of the script"
         }
       },
       required: ["namespace", "arguments", "result"],
@@ -139,9 +135,6 @@ export const executeScript: AgentFunction<AgentContext> = {
               });
             }
             for (const key of Object.keys(args)) {
-              if (context.globals[key] !== undefined) {
-                return ResultOk(EXECUTE_SCRIPT_ERROR_RESULT(params.namespace, SCRIPT_ARGS_NAME_CONFLICT(params, key), params));
-              }
               if (typeof args[key] === "string") {
                 args[key] = replaceVars(
                   args[key],
