@@ -499,4 +499,4 @@ export const shimCode = (code: string) => `
           __wrap_subinvoke("plugin/result", "err", { error: clean(error) })
         });
   clean(__temp)
-`;
+`

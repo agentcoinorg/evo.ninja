@@ -5,7 +5,8 @@
   "main": "./build/index.js",
   "scripts": {
     "build": "rimraf build && tsc",
-    "codegen:js-engine": "polywrap codegen -m ./src/scripts/js-engine/polywrap.yaml --codegen-dir ./src/scripts/js-engine/types"
+    "codegen:shims": "rollup -c",
+    "codegen:js-engine": "polywrap codegen -m ./src/scripts/js-engine/polywrap.yaml --codegen-dir ./src/scripts/js-engine/types && yarn codegen:shims"
   },
   "dependencies": {
     "@polywrap/result": "~0.12.0",
@@ -17,6 +18,12 @@
     "path-browserify": "1.0.1"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.4",
+    "@rollup/plugin-inject": "^5.0.3",
+    "@rollup/plugin-node-resolve": "^15.2.0",
+    "@rollup/plugin-typescript": "^11.1.2",
+    "rollup": "^3.28.0",
+    "tslib": "^2.6.2",
     "@types/figlet": "~1.5.6",
     "@types/jest": "29.5.0",
     "@types/path-browserify": "1.0.0",

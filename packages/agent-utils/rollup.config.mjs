@@ -3,11 +3,11 @@ import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 
 export default {
-  input: "src/wrap/js-engine/shims/index.ts",
+  input: "src/scripts/js-engine/shims/index.ts",
   output: [
     {
       format: "cjs",
-      file: "./src/wrap/js-engine/shims.ts",
+      file: "./src/scripts/js-engine/shims.ts",
       sourcemap: false,
     },
   ],
