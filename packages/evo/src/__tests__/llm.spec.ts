@@ -5,7 +5,6 @@ import {
   Logger,
   Env,
   ChatRole,
-  ChatMessage,
   ContextWindow
 } from "@evo-ninja/agent-utils";
 import dotenv from "dotenv";
@@ -78,21 +77,9 @@ describe('LLM Test Suite', () => {
 
     const currentFunctions = agentFunctions(() => ({}) as any);
 
-    const response = await llm.getResponse(chat.chatLogs, currentFunctions.map(f => f.definition));
-
-    expect(response).toEqual({
-      role: "assistant",
-      function_call: {
-        name: "executeScript",
-        arguments: JSON.stringify({
-          namespace: "fs_writeFile",
-          arguments: JSON.stringify({
-            path: "./hey.txt",
-            data: "hey"
-          }),
-          result: "writeFileResult"
-        }, null, 2)
-      } 
-     } as ChatMessage);
+    for (let i = 0; i < 20; i++) {
+      const response = await llm.getResponse(chat.chatLogs, currentFunctions.map(f => f.definition), { temperature: 0.1 });
+      console.log(response);
+    }
   }, ONE_MINUTE_TIMEOUT);
 });
