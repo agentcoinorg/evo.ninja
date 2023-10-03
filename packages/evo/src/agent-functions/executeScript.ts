@@ -171,7 +171,7 @@ export const executeScript: AgentFunction<AgentContext> = {
           ? result.value.error == null
             ? context.client.jsPromiseOutput.ok
               ? ResultOk(SUCCESS(params.namespace, context.client.jsPromiseOutput.value, params))
-              : ResultOk(EXECUTE_SCRIPT_ERROR_RESULT(params.namespace, context.client.jsPromiseOutput.error, params))
+              : ResultOk(EXECUTE_SCRIPT_ERROR_RESULT(params.namespace, JSON.stringify(context.client.jsPromiseOutput.error), params))
             : ResultOk(EXECUTE_SCRIPT_ERROR_RESULT(params.namespace, result.value.error, params))
           : ResultOk(EXECUTE_SCRIPT_ERROR_RESULT(params.namespace, result.error?.toString(), params));
       
