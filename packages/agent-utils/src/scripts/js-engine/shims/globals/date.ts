@@ -1,13 +1,22 @@
-// language=javascript
-export const dateShim = `class Date {
+import { clean } from "../clean";
+
+export class dateShim {
 
   _timestamp;
 
-  constructor(...args) {
+  constructor(...args: any[]) {
     if (args.length === 0) {
       this._timestamp = Date.now();
     } else if (args.length > 1) {
-      this._timestamp = Date.UTC(...args);
+      this._timestamp = Date.UTC(
+        args[1],
+        args[2],
+        args[3],
+        args[4],
+        args[5],
+        args[6],
+        args[7]
+      );
     } else if (typeof args[0] === "string") {
       this._timestamp = Date.parse(args[0]);
     } else {
@@ -19,11 +28,11 @@ export const dateShim = `class Date {
     return __wrap_subinvoke("plugin/datetime", "now", clean(undefined)).value;
   }
 
-  static parse(date) {
+  static parse(date: any) {
     return __wrap_subinvoke("plugin/datetime", "parse", clean({ date })).value;
   }
 
-  static UTC(year, month, day, hour, minute, second, millisecond) {
+  static UTC(year: any, month: any, day: any, hour: any, minute: any, second: any, millisecond: any) {
     const args = clean({ year, month, day, hour, minute, second, millisecond });
     return __wrap_subinvoke("plugin/datetime", "UTC", args).value;
   }
@@ -100,77 +109,77 @@ export const dateShim = `class Date {
     return __wrap_subinvoke("plugin/datetime", "getUTCSeconds", clean({ timestamp: this._timestamp })).value;
   }
 
-  setDate(day) {
+  setDate(day: any) {
     this._timestamp = __wrap_subinvoke("plugin/datetime", "setDate", clean({ timestamp: this._timestamp, day })).value;
     return this._timestamp;
   }
 
-  setFullYear(year) {
+  setFullYear(year: any) {
     this._timestamp = __wrap_subinvoke("plugin/datetime", "setFullYear", clean({ timestamp: this._timestamp, year })).value;
     return this._timestamp;
   }
 
-  setHours(hour) {
+  setHours(hour: any) {
     this._timestamp = __wrap_subinvoke("plugin/datetime", "setHours", clean({ timestamp: this._timestamp, hour })).value;
     return this._timestamp;
   }
 
-  setMilliseconds(millisecond) {
+  setMilliseconds(millisecond: any) {
     this._timestamp = __wrap_subinvoke("plugin/datetime", "setMilliseconds", clean({ timestamp: this._timestamp, millisecond })).value;
     return this._timestamp;
   }
 
-  setMinutes(minute) {
+  setMinutes(minute: any) {
     this._timestamp = __wrap_subinvoke("plugin/datetime", "setMinutes", clean({ timestamp: this._timestamp, minute })).value;
     return this._timestamp;
   }
 
-  setMonth(month) {
+  setMonth(month: any) {
     this._timestamp = __wrap_subinvoke("plugin/datetime", "setMonth", clean({ timestamp: this._timestamp, month })).value;
     return this._timestamp;
   }
 
-  setSeconds(second) {
+  setSeconds(second: any) {
     this._timestamp = __wrap_subinvoke("plugin/datetime", "setSeconds", clean({ timestamp: this._timestamp, second })).value;
     return this._timestamp;
   }
 
-  setTime(time) {
+  setTime(time: any) {
     this._timestamp = __wrap_subinvoke("plugin/datetime", "setTime", clean({ timestamp: this._timestamp, time })).value;
     return this._timestamp;
   }
 
-  setUTCDate(day) {
+  setUTCDate(day: any) {
     this._timestamp = __wrap_subinvoke("plugin/datetime", "setUTCDate", clean({ timestamp: this._timestamp, day })).value;
     return this._timestamp;
   }
 
-  setUTCFullYear(year) {
+  setUTCFullYear(year: any) {
     this._timestamp = __wrap_subinvoke("plugin/datetime", "setUTCFullYear", clean({ timestamp: this._timestamp, year })).value;
     return this._timestamp;
   }
 
-  setUTCHours(hour) {
+  setUTCHours(hour: any) {
     this._timestamp = __wrap_subinvoke("plugin/datetime", "setUTCHours", clean({ timestamp: this._timestamp, hour })).value;
     return this._timestamp;
   }
 
-  setUTCMilliseconds(millisecond) {
+  setUTCMilliseconds(millisecond: any) {
     this._timestamp = __wrap_subinvoke("plugin/datetime", "setUTCMilliseconds", clean({ timestamp: this._timestamp, millisecond })).value;
     return this._timestamp;
   }
 
-  setUTCMinutes(minute) {
+  setUTCMinutes(minute: any) {
     this._timestamp = __wrap_subinvoke("plugin/datetime", "setUTCMinutes", clean({ timestamp: this._timestamp, minute })).value;
     return this._timestamp;
   }
 
-  setUTCMonth(month) {
+  setUTCMonth(month: any) {
     this._timestamp = __wrap_subinvoke("plugin/datetime", "setUTCMonth", clean({ timestamp: this._timestamp, month })).value;
     return this._timestamp;
   }
 
-  setUTCSeconds(second) {
+  setUTCSeconds(second: any) {
     this._timestamp = __wrap_subinvoke("plugin/datetime", "setUTCSeconds", clean({ timestamp: this._timestamp, second })).value;
     return this._timestamp;
   }
@@ -215,4 +224,3 @@ export const dateShim = `class Date {
     return this._timestamp
   }
 }
-`

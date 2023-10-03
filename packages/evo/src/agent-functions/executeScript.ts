@@ -157,6 +157,7 @@ export const executeScript: AgentFunction<AgentContext> = {
           );
 
         const jsEngine = new JsEngine(context.client);
+
         const result = await jsEngine.evalWithGlobals({
           src: shimCode(script.code),
           globals
