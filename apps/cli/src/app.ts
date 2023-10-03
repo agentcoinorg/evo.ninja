@@ -114,6 +114,7 @@ export function createApp(config?: AppConfig): App {
     logger,
     userWorkspace,
     scripts,
+    env,
     config?.timeout
   );
 

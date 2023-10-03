@@ -18,7 +18,9 @@ export class Chat {
     private _tokenizer: Tokenizer,
     private _contextWindow?: ContextWindow,
     private _logger?: Logger,
-  ) { }
+  ) { 
+    this._chatLogs = new ChatLogs()
+  }
 
   get chatLogs(): ChatLogs {
     return this._chatLogs;

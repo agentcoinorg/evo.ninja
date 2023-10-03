@@ -1,4 +1,4 @@
-import { Logger, Workspace } from "../../";
+import { Env, Logger, Workspace } from "../../";
 
 import {
   PolywrapClient,
@@ -21,7 +21,8 @@ export class WrapClient extends PolywrapClient {
   constructor(
     workspace: Workspace,
     logger: Logger,
-    agentPlugin: IWrapPackage | undefined = undefined,
+    agentPlugin?: IWrapPackage,
+    env?: Env
   ) {
     const builder = new PolywrapClientConfigBuilder()
       .addBundle("web3")
@@ -179,7 +180,54 @@ export class WrapClient extends PolywrapClient {
         "extname": (args: any) => path.extname(args.path),
         "format": (args: any) => path.format(args.pathObject),
         "parse": (args: any) => path.parse(args.path)
-      })));
+      })))
+      .setPackage("plugin/websearch", PluginPackage.from(module => ({
+        "search": async (args: { query: string }) => {
+          const axiosClient =  axios.create({ baseURL: 'https://api.search.brave.com/res/v1/web' });
+
+          const apiKey = env?.BRAVE_API_KEY
+
+          if (!apiKey) {
+            throw new Error('BRAVE_API_KEY environment variable is required to use the websearch plugin. See env.template for help')
+          }
+
+          const searchQuery = encodeURI(args.query)
+          const urlParams = new URLSearchParams({
+            q: searchQuery
+          })
+          
+          const { data } = await axiosClient.get<{
+            web: {
+              results: {
+                title: string;
+                url: string;
+                description: string;
+              }[]
+            }
+          }>(`/search?${urlParams.toString()}`, {
+            headers: {
+              'X-Subscription-Token': apiKey,
+              'Accept': 'application/json'
+            }
+          })
+
+          let result: {
+            title: string;
+            url: string;
+            description: string;
+          }[] = [];
+
+          if (data && data.web && Array.isArray(data.web.results)) {
+            result = data.web.results.map((result: any) => ({
+              title: result.title || '',
+              url: result.url || '',
+              description: result.description || ''
+            }));
+          }
+
+          return JSON.stringify(result)
+        }
+      })))
 
     if (agentPlugin) {
       builder

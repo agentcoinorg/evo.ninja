@@ -5,12 +5,14 @@ import { defaultModel, supportedModels } from "../../supportedModels";
 
 export interface DojoConfigProps {
   apiKey: string | null;
+  braveApiKey: string | null;
   model: string | null;
   onConfigSaved: (apiKey: string, model: string) => void;
 }
 
 function DojoConfig(props: DojoConfigProps) {
   const [apiKey, setApiKey] = useState<string>(props.apiKey || "");
+  const [braveApiKey, setBraveApiKey] = useState<string>(props.braveApiKey || "");
   const [model, setModel] = useState<string>(props.model || defaultModel);
   const { onConfigSaved } = props;
 
@@ -34,6 +36,13 @@ function DojoConfig(props: DojoConfigProps) {
             <option value={m}>{m}</option>
           ))}
         </select>
+        <h3>Please enter your Brave API key</h3>
+        <input
+          className="DojoConfig__Input"
+          type="text"
+          value={braveApiKey}
+          onChange={(e) => setBraveApiKey(e.target.value)}
+        />
         <button
           className="DojoConfig__Btn"
           onClick={() => onConfigSaved(apiKey, model)}
