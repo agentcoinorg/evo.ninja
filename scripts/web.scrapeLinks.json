@@ -1,6 +1,6 @@
 {
-  "name": "webScraper.getLinks",
+  "name": "web.scrapeLinks",
   "description": "Open a web page and scrape all links found in the html",
   "arguments": "{ url: string }",
-  "code": "./webScraper.getLinks.js"
+  "code": "./web.scrapeLinks.js"
 }

@@ -1,7 +1,7 @@
 {
-  "name": "webScraper.search",
+  "name": "web.search",
   "description": "Searches the web for a given query, scrapes the results and returns them as a JSON string",
   "arguments": "{ query: string }",
-  "code": "./webScraper.search.js"
+  "code": "./web.search.js"
 }
 
