@@ -4,10 +4,12 @@ import {
   Module,
   manifest
 } from "./types";
-import { AGENT_PLUGIN_SPEAK_RESPONSE } from "../prompts";
+import { Logger } from "../../";
 
-import { Logger } from "@evo-ninja/agent-utils";
 import { PluginFactory, PluginPackage } from "@polywrap/plugin-js";
+
+export const AGENT_PLUGIN_SPEAK_RESPONSE =
+  "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.\nIf you think you've failed, execute onGoalFailed.";
 
 export interface AgentPluginConfig {
   logger: Logger;

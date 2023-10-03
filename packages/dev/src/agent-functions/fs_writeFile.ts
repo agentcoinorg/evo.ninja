@@ -1,6 +1,13 @@
-import { Result, ResultOk } from "@polywrap/result";
-import { AgentFunction, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, trimText } from "@evo-ninja/agent-utils";
+import { createScriptExecutor } from "./util";
 import { AgentContext } from "../AgentContext";
+
+import {
+  AgentFunction,
+  AgentFunctionResult,
+  AgentOutputType,
+  ChatMessageBuilder,
+  trimText,
+} from "@evo-ninja/agent-utils";
 
 const FN_NAME = "fs_writeFile";
 
@@ -25,7 +32,7 @@ const SUCCESS = (params: FuncParameters): AgentFunctionResult => ({
   ]
 });
 
-export const writeFile: AgentFunction<AgentContext> = {
+export const fs_writeFile: AgentFunction<AgentContext> = {
   definition: {
     name: FN_NAME,
     description: "Writes data to a file, replacing the file if it already exists.",
@@ -47,9 +54,11 @@ export const writeFile: AgentFunction<AgentContext> = {
     },
   },
   buildExecutor(context: AgentContext) {
-    return async (params: FuncParameters): Promise<Result<AgentFunctionResult, string>> => {
-      // TODO: executeScript(FN_Name, params)
-      return ResultOk(SUCCESS(params));
-    };
+    return createScriptExecutor(
+      context.scripts,
+      context.client,
+      "fs.writeFile",
+      (params) => SUCCESS(params)
+    );
   }
 };

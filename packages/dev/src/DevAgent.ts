@@ -10,6 +10,9 @@ import {
   LlmApi,
   Scripts,
   Logger,
+  Workspace,
+  WrapClient,
+  agentPlugin,
   basicFunctionCallLoop,
   ExecuteAgentFunctionCalled
 } from "@evo-ninja/agent-utils";
@@ -21,14 +24,25 @@ export class DevAgent implements Agent {
   constructor(
     llm: LlmApi,
     chat: Chat,
+    workspace: Workspace,
     scripts: Scripts,
     private readonly logger: Logger
   ) {
     this.context = {
       llm,
       chat,
-      scripts
+      scripts,
+      workspace,
+      client: new WrapClient(
+        workspace,
+        this.logger,
+        agentPlugin({ logger: this.logger })
+      ),
     };
+  }
+
+  public get workspace(): Workspace {
+    return this.context.workspace;
   }
 
   public async* run(
@@ -36,7 +50,7 @@ export class DevAgent implements Agent {
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
     try {
-      chat.persistent("system", INITIAL_PROMP);
+      chat.persistent("system", INITIAL_PROMP(agentFunctions.map((func) => func.definition)));
       chat.persistent("user", GOAL_PROMPT(goal));
 
       return yield* basicFunctionCallLoop(
@@ -44,8 +58,8 @@ export class DevAgent implements Agent {
         agentFunctions,
         (functionCalled: ExecuteAgentFunctionCalled) => {
           const terminationFunctions = [
-            `agent_onGoalAchieved`,
-            `agent_onGoalFailed`
+            "agent_onGoalAchieved",
+            "agent_onGoalFailed"
           ];
           return terminationFunctions.includes(functionCalled.name);
         },

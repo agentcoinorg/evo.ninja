@@ -6,7 +6,8 @@ import {
   ContextWindow,
   LlmApi,
   ConsoleLogger,
-  Logger
+  Logger,
+  InMemoryWorkspace
 } from "@evo-ninja/agent-utils";
 import {
   FileSystemWorkspace
@@ -52,9 +53,12 @@ describe('Dev Agent Test Suite', () => {
     );
     const scripts = new Scripts(scriptsWorkspace, "./");
 
+    const workspace = new InMemoryWorkspace();
+
     return new DevAgent(
       llm,
       chat,
+      workspace,
       scripts,
       logger
     );
@@ -76,7 +80,8 @@ describe('Dev Agent Test Suite', () => {
     const dev = createDevAgent();
     const response = await runDevAgent(dev, "Build a tick-tack-toe game in python");
 
+    console.log(response);
     expect(response.value.ok).toBe(true);
-    console.log("look for the files")
+    console.log(dev.workspace.readdirSync("./"))
   });
 });

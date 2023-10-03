@@ -1,10 +1,11 @@
-export const INITIAL_PROMP = `You are a software developer. You have access to a file-system directory where your code will go.`;
+import { AgentFunctionDefinition } from "@evo-ninja/agent-utils";
+
+export const INITIAL_PROMP = (functions: AgentFunctionDefinition[]) =>
+  `You are an expert software engineer named "dev". You have access to the following functions to accomplish your goal:\n` +
+  functions.map((def) => (`${def.name}: ${def.description}`)).join("\n");
 
 export const GOAL_PROMPT = (goal: string) =>
-  `Your task is to write software to solve the following goal: ${goal}\n\n` +
-  `Call fs_writeFile to write source code files to disk.\n` +
-  `Once you have achieved the goal, call agent_onGoalAchieved.\n` +
-  `If you can not achieve the goal, call agent_onGoalFailed.`;
+  `You have been asked by the user to achieve the following goal: ${goal}`;
 
 export const LOOP_PREVENTION_PROMPT = 
-  "Assistant, try executing fs_writeFile, agent_onGoalAchieved, or agent_onGoalFailed.";
+  "Assistant, you appear to be in a loop, try executing a different function.";

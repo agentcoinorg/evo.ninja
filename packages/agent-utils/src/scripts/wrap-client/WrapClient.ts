@@ -1,3 +1,5 @@
+import { Logger, Workspace } from "../../";
+
 import {
   PolywrapClient,
   PolywrapClientConfigBuilder,
@@ -6,13 +8,11 @@ import {
   IWrapPackage,
   Result
 } from "@polywrap/client-js";
-import { PluginPackage } from "@polywrap/plugin-js";
-import axios from "axios";
-
 import { InvokerOptions } from "@polywrap/client-js/build/types";
+import { PluginPackage } from "@polywrap/plugin-js";
 import { ResultErr, ResultOk } from "@polywrap/result";
-import { Logger, Workspace } from "@evo-ninja/agent-utils";
 import * as  path from "path-browserify"
+import axios from "axios";
 
 export class WrapClient extends PolywrapClient {
 

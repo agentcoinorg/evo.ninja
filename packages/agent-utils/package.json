@@ -8,6 +8,8 @@
     "codegen:js-engine": "polywrap codegen -m ./src/scripts/js-engine/polywrap.yaml --codegen-dir ./src/scripts/js-engine/types"
   },
   "dependencies": {
+    "@polywrap/client-js": "~0.12.0",
+    "@polywrap/plugin-js": "~0.12.0",
     "@polywrap/result": "~0.12.0",
     "axios": "^0.26.0",
     "figlet": "~1.6.0",
