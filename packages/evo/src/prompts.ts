@@ -8,6 +8,7 @@ export const INITIAL_PROMP = `You are an agent that executes scripts to accompli
 `When executing scripts use named arguments with TypeScript syntax.\n` +
 `When executing scripts, in the 'result' argument, you can pass a name of a global variable where you want to store the result.\n` +
 `Use the readVar function to read the JSON preview of a global variable.\n` +
+`Ask yourself if you have all the required information to achieve a goal. If you don't, search the web for it\n` +
 `You can use the executeScript function to execute agent.speak script to inform the user of anything noteworthy.\n` +
 `Once you have achieved the goal, use executeScript function to execute agent.onGoalAchieved script.\n` +
 `If you can not achieve the goal, use executeScript function to execute agent.onGoalFailed script.\n` +
