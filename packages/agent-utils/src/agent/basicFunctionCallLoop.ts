@@ -45,12 +45,12 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
 
       result.value.messages.forEach(x => chat.temporary(x));
 
+      const terminate = functionCalled && shouldTerminate(functionCalled, result);
+
       for (let i = 0; i < result.value.outputs.length; i++) {
         const output = result.value.outputs[i];
 
-        if (i === result.value.outputs.length - 1 &&
-          functionCalled && shouldTerminate(functionCalled, result)
-        ) {
+        if (i === result.value.outputs.length - 1 && terminate) {
           return ResultOk(output);
         }
 

@@ -1,5 +1,3 @@
-import { DebugLog, DebugLlmApi } from "./diagnostic";
-
 import { Evo } from "@evo-ninja/evo-agent";
 import {
   Env,
@@ -13,6 +11,7 @@ import {
   LlmApi,
   ContextWindow,
 } from "@evo-ninja/agent-utils";
+import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
 import { FileSystemWorkspace, FileLogger } from "@evo-ninja/agent-utils-fs";
 import dotenv from "dotenv";
 import readline from "readline";

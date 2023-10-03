@@ -17,9 +17,10 @@
     "start": "yarn workspace evo-ninja run start",
     "start:browser": "yarn workspace @evo-ninja/ui run start",
     "start:api": "yarn workspace evo-ninja run start:api",
-    "build": "yarn build:agent-utils && yarn build:agents && yarn build:cli && yarn build:browser",
+    "build": "yarn build:agent-utils && yarn build:agent-debug && yarn build:agents && yarn build:cli && yarn build:browser",
     "build:agent-utils": "yarn workspace @evo-ninja/agent-utils run build && yarn build:agent-utils-fs",
     "build:agent-utils-fs": "yarn workspace @evo-ninja/agent-utils-fs run build",
+    "build:agent-debug": "yarn workspace @evo-ninja/agent-debug run build",
     "build:agents": "yarn build:script-writer && yarn build:dev && yarn build:evo",
     "build:evo": "yarn workspace @evo-ninja/evo-agent run build",
     "build:dev": "yarn workspace @evo-ninja/dev-agent run build",
@@ -28,6 +29,6 @@
     "build:browser": "yarn workspace @evo-ninja/ui run build"
   },
   "devDependencies": {
-    "rimraf": "5.0.1"
+    "rimraf": "~5.0.1"
   }
 }
