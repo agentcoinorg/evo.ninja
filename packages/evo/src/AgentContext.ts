@@ -1,5 +1,4 @@
-import { Workspace, LlmApi, Scripts, Chat, Logger } from "@evo-ninja/agent-utils";
-import { WrapClient } from "./wrap";
+import { Workspace, WrapClient, LlmApi, Scripts, Chat, Logger } from "@evo-ninja/agent-utils";
 
 export interface AgentContext {
   globals: Record<string, string>;

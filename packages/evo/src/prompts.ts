@@ -32,6 +32,3 @@ export const FUNCTION_CALL_FAILED = (params: any, name: string, error: string) =
       ? trimText(error, 300)
       : trimText(JSON.stringify(error, null, 2), 300)
     }\n\`\`\`\n\nArguments:\n\`\`\`\n${JSON.stringify(params, null, 2)}\n\`\`\``;
-
-export const AGENT_PLUGIN_SPEAK_RESPONSE =
-  "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.\nIf you think you've failed, execute onGoalFailed.";

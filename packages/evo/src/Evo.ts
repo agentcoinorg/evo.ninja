@@ -1,7 +1,5 @@
 import { agentFunctions } from "./agent-functions";
-import { agentPlugin } from "./agent-plugin";
 import { AgentContext } from "./AgentContext";
-import { WrapClient } from "./wrap";
 import {
   INITIAL_PROMP,
   LOOP_PREVENTION_PROMPT
@@ -20,6 +18,8 @@ import {
   InMemoryWorkspace,
   basicFunctionCallLoop,
   ContextWindow,
+  WrapClient,
+  agentPlugin,
   Env
 } from "@evo-ninja/agent-utils";
 import { ScriptWriter } from "@evo-ninja/js-script-writer-agent";

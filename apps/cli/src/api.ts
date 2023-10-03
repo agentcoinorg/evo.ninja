@@ -1,4 +1,4 @@
-import { AgentProtocolWorkspace } from "./sys/AgentProtocolWorkspace";
+import { AgentProtocolWorkspace } from "./agent-protocol";
 import { createApp } from "./app";
 
 import Agent, {
