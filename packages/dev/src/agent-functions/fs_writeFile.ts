@@ -49,7 +49,7 @@ export const fs_writeFile: AgentFunction<AgentContext> = {
           type: "string"
         },
       },
-      required: ["thoughts"],
+      required: ["path", "data", "encoding"],
       additionalProperties: false
     },
   },

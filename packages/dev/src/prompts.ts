@@ -1,6 +1,4 @@
-import { AgentFunctionDefinition } from "@evo-ninja/agent-utils";
-
-export const INITIAL_PROMP = (functions: AgentFunctionDefinition[]) =>
+export const INITIAL_PROMP = () =>
   `You are an expert software engineer named "dev".`;
 
 export const GOAL_PROMPT = (goal: string) =>

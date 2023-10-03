@@ -50,7 +50,7 @@ export class DevAgent implements Agent {
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
     try {
-      chat.persistent("system", INITIAL_PROMP(agentFunctions.map((func) => func.definition)));
+      chat.persistent("system", INITIAL_PROMP());
       chat.persistent("user", GOAL_PROMPT(goal));
 
       return yield* basicFunctionCallLoop(
