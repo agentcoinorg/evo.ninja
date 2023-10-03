@@ -28,6 +28,9 @@ function Dojo() {
   const [model, setModel] = useState<string | null>(
     localStorage.getItem("openai-model")
   );
+  const [braveApiKey, setBraveApiKey] = useState<string | null>(
+    localStorage.getItem("brave-api-key")
+  );
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [configOpen, setConfigOpen] = useState(false);
@@ -115,6 +118,16 @@ function Dojo() {
       setModel(model);
       setConfigOpen(false);
     }
+
+    if (!braveApiKey) {
+      localStorage.removeItem("brave-api-key");
+      setBraveApiKey(null);
+      setConfigOpen(true);
+    } else {
+      localStorage.setItem("brave-api-key", braveApiKey);
+      setConfigOpen(false);
+      setBraveApiKey(braveApiKey);
+    }
   }
 
   useEffect(() => {
@@ -158,7 +171,8 @@ function Dojo() {
           "OPENAI_API_KEY": apiKey,
           "GPT_MODEL": model,
           "CONTEXT_WINDOW_TOKENS": "8000",
-          "MAX_RESPONSE_TOKENS": "2000"
+          "MAX_RESPONSE_TOKENS": "2000",
+          "BRAVE_API_KEY": braveApiKey || undefined,
         }
       );
 
@@ -185,11 +199,12 @@ function Dojo() {
         logger,
         userWorkspace,
         scripts,
+        env
       ));
     } catch (err) {
       setDojoError(err);
     }
-  }, [apiKey, model])
+  }, [apiKey, model, braveApiKey])
 
   const sidebarContainerClassNames = clsx(["w-full lg:w-auto lg:max-w-md relative", {
     "hidden": !sidebarOpen
@@ -205,6 +220,7 @@ function Dojo() {
         <DojoConfig
           apiKey={apiKey}
           model={model}
+          braveApiKey={braveApiKey}
           onConfigSaved={onConfigSaved}
         />
       }
