@@ -25,7 +25,7 @@ const TASK_SUCCESS = (
   messages: [
     ChatMessageBuilder.functionCall(`delegate${name}`, params),
     ChatMessageBuilder.system(
-      `"${name}" successfully accomplished the task "${params.task}".`
+      `"${name}" successfully accomplished the task.`
     )
   ]
 });

@@ -5,7 +5,7 @@ import { findScript } from "./findScript";
 import { readVar } from "./readVar";
 import { AgentContext } from "../AgentContext";
 
-import { AgentFunction } from "@evo-ninja/agent-utils";
+import { AgentFunction, Chat } from "@evo-ninja/agent-utils";
 import { ScriptWriter } from "@evo-ninja/js-script-writer-agent";
 import {
   DevAgent,
@@ -23,7 +23,7 @@ export function agentFunctions(createScriptWriter: () => ScriptWriter): AgentFun
       "developing software",
       (context: AgentContext) => new DevAgent(
         context.llm,
-        context.chat,
+        new Chat(context.chat.tokenizer, context.chat.contextWindow),
         context.workspace,
         context.scripts,
         context.logger,
@@ -35,7 +35,7 @@ export function agentFunctions(createScriptWriter: () => ScriptWriter): AgentFun
       "researching information online",
       (context: AgentContext) => new ResearchAgent(
         context.llm,
-        context.chat,
+        new Chat(context.chat.tokenizer, context.chat.contextWindow),
         context.workspace,
         context.scripts,
         context.logger,

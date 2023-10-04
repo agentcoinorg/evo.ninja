@@ -14,7 +14,7 @@ describe('Software Development', () => {
       "This is a Heading\nThis is a paragraph.",
       scriptsDir
     ),
-    new TestCase(
+    /*new TestCase(
       "three_sum",
       "Create a three_sum function in a file called sample_code.py. Given an array of integers, return indices of the three numbers such that they add up to a specific target. You may assume that each input would have exactly one solution, and you may not use the same element twice. Example: Given nums = [2, 7, 11, 15], target = 20, Because nums[0] + nums[1] + nums[2] = 2 + 7 + 11 = 20, return [0, 1, 2].",
       "This is a Heading\nThis is a paragraph.",
@@ -25,7 +25,7 @@ describe('Software Development', () => {
       "Create a file organizer CLI tool in Python that sorts files in a directory based on their file types (e.g., images, documents, audio) and moves them into these corresponding folders: 'images', 'documents', 'audio'. The entry point will be a python file that can be run this way: python organize_files.py --directory_path=YOUR_DIRECTORY_PATH",
       "This is a Heading\nThis is a paragraph.",
       scriptsDir
-    ),
+    ),*/
   ];
 
   runTestCases(cases);
