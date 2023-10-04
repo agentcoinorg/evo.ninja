@@ -41,6 +41,15 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
           }
         ],
         messages: []
+      }),
+      fail: (agentName: string, functionName: string, _: any, error: string) => ({
+        outputs: [
+          {
+            type: AgentOutputType.Error,
+            title: `[${agentName}] Error in ${functionName}: ${error}`
+          }
+        ],
+        messages: []
       })
     },
     agent_onGoalFailed: {
@@ -58,6 +67,15 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
           }
         ],
         messages: []
+      }),
+      fail: (agentName: string, functionName: string, _: any, error: string) => ({
+        outputs: [
+          {
+            type: AgentOutputType.Error,
+            title: `[${agentName}] Error in ${functionName}: ${error}`
+          }
+        ],
+        messages: []
       })
     },
     web_search: {
@@ -72,7 +90,7 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
         required: ["query"],
         additionalProperties: false
       },
-      success: (agentName: string, functionName: string, params: { query: string }) => ({
+      success: (agentName: string, functionName: string, params: { query: string }, result: string) => ({
         outputs: [
           {
             type: AgentOutputType.Success,
@@ -81,7 +99,18 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
           }
         ],
         messages: [
-          ChatMessageBuilder.functionCall(functionName, params),
+          ChatMessageBuilder.functionCall(functionName, params, result),
+        ]
+      }),
+      fail: (agentName: string, functionName: string, params: any, error: string) => ({
+        outputs: [
+          {
+            type: AgentOutputType.Error,
+            title: `[${agentName}] Error in ${functionName}: ${error}`
+          }
+        ],
+        messages: [
+          ChatMessageBuilder.functionCall(functionName, params, error),
         ]
       }),
       isTermination: false,
@@ -110,6 +139,17 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
           ChatMessageBuilder.functionCall(functionName, params, result),
         ]
       }),
+      fail: (agentName: string, functionName: string, params: any, error: string) => ({
+        outputs: [
+          {
+            type: AgentOutputType.Error,
+            title: `[${agentName}] Error in ${functionName}: ${error}`
+          }
+        ],
+        messages: [
+          ChatMessageBuilder.functionCall(functionName, params, error),
+        ]
+      }),
       isTermination: false,
     },
     web_scrapeLinks: {
@@ -134,6 +174,17 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
         ],
         messages: [
           ChatMessageBuilder.functionCall(functionName, params, result),
+        ]
+      }),
+      fail: (agentName: string, functionName: string, params: any, error: string) => ({
+        outputs: [
+          {
+            type: AgentOutputType.Error,
+            title: `[${agentName}] Error in ${functionName}: ${error}`
+          }
+        ],
+        messages: [
+          ChatMessageBuilder.functionCall(functionName, params, error),
         ]
       }),
       isTermination: false,
@@ -172,6 +223,17 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
         ],
         messages: [
           ChatMessageBuilder.functionCall(functionName, params, result),
+        ]
+      }),
+      fail: (agentName: string, functionName: string, params: any, error: string) => ({
+        outputs: [
+          {
+            type: AgentOutputType.Error,
+            title: `[${agentName}] Error in ${functionName}: ${error}`
+          }
+        ],
+        messages: [
+          ChatMessageBuilder.functionCall(functionName, params, error),
         ]
       }),
       isTermination: false,

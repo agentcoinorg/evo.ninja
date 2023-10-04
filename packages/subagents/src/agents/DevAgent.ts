@@ -40,6 +40,15 @@ const AGENT_CONFIG: AgentConfig<DevAgentRunArgs> = {
           }
         ],
         messages: []
+      }),
+      fail: (agentName: string, functionName: string, _: any, error: string) => ({
+        outputs: [
+          {
+            type: AgentOutputType.Error,
+            title: `[${agentName}] Error onGoalAchieved: ${error}`
+          }
+        ],
+        messages: []
       })
     },
     agent_onGoalFailed: {
@@ -54,6 +63,15 @@ const AGENT_CONFIG: AgentConfig<DevAgentRunArgs> = {
           {
             type: AgentOutputType.Error,
             title: `[${agentName}] ${functionName}`
+          }
+        ],
+        messages: []
+      }),
+      fail: (agentName: string, functionName: string, _: any, error: string) => ({
+        outputs: [
+          {
+            type: AgentOutputType.Error,
+            title: `[${agentName}] Error onGoalFailed: ${error}`
           }
         ],
         messages: []
@@ -93,6 +111,20 @@ const AGENT_CONFIG: AgentConfig<DevAgentRunArgs> = {
         ],
         messages: [
           ChatMessageBuilder.functionCall(functionName, params, result),
+        ]
+      }),
+      fail: (agentName: string, functionName: string, params: any, error: string) => ({
+        outputs: [
+          {
+            type: AgentOutputType.Error,
+            title: `[${agentName}] ${functionName}`,
+            content:`${params.path}\n` +
+            `${params.encoding}\n` +
+            `${trimText(error, 200)}`
+          }
+        ],
+        messages: [
+          ChatMessageBuilder.functionCall(functionName, params, error),
         ]
       }),
       isTermination: false,

@@ -29,6 +29,7 @@ interface SubAgentContext {
 
 interface AgentFunction {
   success: (agentName: string, functionName: string, params: Record<string, any>, result?: string) => AgentFunctionResult;
+  fail: (agentName: string, functionName: string, params: Record<string, any>, error?: string) => AgentFunctionResult;
   description: string;
   parameters: Record<string, any>;
   isTermination: boolean;
@@ -50,6 +51,7 @@ interface ScriptExecutorArgs<TAgentContext> {
   context: TAgentContext
   scriptName: string;
   onSuccess: (params: any, result?: string) => AgentFunctionResult;
+  onFailure: (params: any, error: string) => AgentFunctionResult
 }
 
 export class SubAgent<TRunArgs, TAgentContext extends SubAgentContext = SubAgentContext> implements Agent<TRunArgs> {
@@ -81,7 +83,8 @@ export class SubAgent<TRunArgs, TAgentContext extends SubAgentContext = SubAgent
         buildExecutor: (context: TAgentContext) => this.scriptExecutor({
           context,
           scriptName: name.split("_").join("."),
-          onSuccess: (params, result) => definition.success(this.config.name, name, params, result)
+          onSuccess: (params, result) => definition.success(this.config.name, name, params, result),
+          onFailure: (params, error) => definition.fail(this.config.name, name, params, error)
         })
       }))
 
@@ -101,7 +104,7 @@ export class SubAgent<TRunArgs, TAgentContext extends SubAgentContext = SubAgent
 
   protected scriptExecutor(args: ScriptExecutorArgs<TAgentContext>) {
     return async (params: any): Promise<Result<AgentFunctionResult, string>> => {
-      const { context, scriptName, onSuccess } = args;
+      const { context, scriptName, onSuccess, onFailure } = args;
       const script = context.scripts.getScriptByName(scriptName);
 
       if (!script) {
@@ -127,13 +130,13 @@ export class SubAgent<TRunArgs, TAgentContext extends SubAgentContext = SubAgent
               onSuccess(params, context.client.jsPromiseOutput.value)
             );
           } else {
-            return ResultErr(context.client.jsPromiseOutput.error.toString());
+            return ResultOk(onFailure(params, context.client.jsPromiseOutput.error.toString()));
           }
         } else {
-          return ResultErr(result.value.error.toString());
+          return ResultOk(onFailure(params, result.value.error.toString()));
         }
       } else {
-        return ResultErr(result.error?.toString());
+        return ResultOk(onFailure(params, result.error?.toString() ?? "Unknown error"));
       }
     };
   }
