@@ -1,11 +1,17 @@
 import {
   AgentOutputType,
+  Chat,
   ChatMessageBuilder,
+  Env,
+  LlmApi,
+  Logger,
+  Scripts,
+  Workspace,
   trimText,
 } from "@evo-ninja/agent-utils";
-import { AgentConfig } from "../SubAgent";
+import { AgentConfig, SubAgent } from "../SubAgent";
 
-export const DEV_AGENT_CONFIG: AgentConfig = {
+const DEV_AGENT_CONFIG: AgentConfig = {
   name: "dev",
   prompts: {
     initialPrompt: (name: string) => `You are an expert software engineer named "${name}".`,
@@ -85,5 +91,18 @@ export const DEV_AGENT_CONFIG: AgentConfig = {
       }),
       isTermination: false,
     }
+  }
+}
+
+export class DevAgent extends SubAgent {
+  constructor(
+    llm: LlmApi,
+    chat: Chat,
+    workspace: Workspace,
+    scripts: Scripts,
+    logger: Logger,
+    env: Env
+    ) {
+    super(DEV_AGENT_CONFIG, llm, chat, workspace, scripts, logger, env);
   }
 }

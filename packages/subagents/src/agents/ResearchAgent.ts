@@ -1,9 +1,15 @@
 import {
   AgentOutputType,
+  Chat,
   ChatMessageBuilder,
+  Env,
+  LlmApi,
+  Logger,
+  Scripts,
+  Workspace,
   trimText,
 } from "@evo-ninja/agent-utils";
-import { AgentConfig } from "../SubAgent";
+import { AgentConfig, SubAgent } from "../SubAgent";
 
 export const RESEARCH_AGENT_CONFIG: AgentConfig = {
   name: "researcher",
@@ -164,5 +170,18 @@ export const RESEARCH_AGENT_CONFIG: AgentConfig = {
       }),
       isTermination: false,
     }
+  }
+}
+
+export class ResearchAgent extends SubAgent {
+  constructor(
+    llm: LlmApi,
+    chat: Chat,
+    workspace: Workspace,
+    scripts: Scripts,
+    logger: Logger,
+    env: Env
+    ) {
+    super(RESEARCH_AGENT_CONFIG, llm, chat, workspace, scripts, logger, env);
   }
 }

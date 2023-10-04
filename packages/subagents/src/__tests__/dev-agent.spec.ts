@@ -14,8 +14,7 @@ import * as rimraf from "rimraf";
 import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
-import { DEV_AGENT_CONFIG } from "../agents/DevAgent";
-import { SubAgent } from "../SubAgent";
+import { DevAgent } from "../agents/DevAgent";
 
 dotenv.config({
   path: path.join(__dirname, "../../../../.env")
@@ -26,7 +25,7 @@ jest.setTimeout(120000);
 describe('Dev Agent Test Suite', () => {
 
   function createDevAgent(testName: string): {
-    agent: SubAgent;
+    agent: DevAgent;
     debugLog: DebugLog;
   } {
     const testCaseDir = path.join(__dirname, "test-cases", testName);
@@ -69,8 +68,7 @@ describe('Dev Agent Test Suite', () => {
     const workspace = new FileSystemWorkspace(testCaseDir);
 
     return {
-      agent: new SubAgent(
-        DEV_AGENT_CONFIG,
+      agent: new DevAgent(
         debugLlm,
         chat,
         workspace,
@@ -82,7 +80,7 @@ describe('Dev Agent Test Suite', () => {
     };
   }
 
-  async function runDevAgent(agent: SubAgent, goal: string, debugLog: DebugLog) {
+  async function runDevAgent(agent: DevAgent, goal: string, debugLog: DebugLog) {
     debugLog.goalStart(goal);
     const iterator = agent.run(goal);
 
