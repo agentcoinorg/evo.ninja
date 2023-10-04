@@ -5,7 +5,6 @@ import {
   Logger,
   Env,
   ChatRole,
-  ChatMessage,
   ContextWindow
 } from "@evo-ninja/agent-utils";
 import dotenv from "dotenv";

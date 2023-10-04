@@ -1,6 +1,6 @@
 {
   "name": "web.search",
-  "description": "Searches the web for a given query, scrapes the results and returns them as a JSON string",
+  "description": "Searches the web for a given query, scrapes the results and returns them as a JSON string (tags: http, google)",
   "arguments": "{ query: string }",
   "code": "./web.search.js"
 }
