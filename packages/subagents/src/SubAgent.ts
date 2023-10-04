@@ -34,7 +34,10 @@ interface AgentFunction {
   isTermination: boolean;
 }
 
-type AgentFunctions = Record<string, AgentFunction>;
+interface AgentFunctions extends Record<string, AgentFunction> {
+  agent_onGoalAchieved: AgentFunction;
+  agent_onGoalFailed: AgentFunction;
+};
 
 export interface AgentConfig<TRunArgs> {
   name: string;
