@@ -4,12 +4,9 @@ import {
   Module,
   manifest
 } from "./types";
-import { Logger } from "../../";
+import { AGENT_SPEAK_RESPONSE, Logger } from "../../";
 
 import { PluginFactory, PluginPackage } from "@polywrap/plugin-js";
-
-export const AGENT_PLUGIN_SPEAK_RESPONSE =
-  "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.\nIf you think you've failed, execute onGoalFailed.";
 
 export interface AgentPluginConfig {
   logger: Logger;
@@ -25,7 +22,7 @@ export class AgentPlugin extends Module<AgentPluginConfig> {
 
   public speak(args: Args_speak): string {
     this._logger.success(args.message);
-    return AGENT_PLUGIN_SPEAK_RESPONSE;
+    return AGENT_SPEAK_RESPONSE;
   }
 
   public async ask(args: Args_ask): Promise<string> {

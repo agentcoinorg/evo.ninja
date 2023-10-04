@@ -20,6 +20,7 @@ export class Scripts {
     const fuse = new Fuse(scripts, {
       ignoreLocation: true,
       threshold: 0.4,
+      isCaseSensitive: false,
       shouldSort: true,
       keys: [
         "name",
@@ -27,7 +28,12 @@ export class Scripts {
       ]
     });
 
-    return fuse.search(query).map((x) => x.item);
+    return Array.from(new Set(
+      query.split(" ")
+      .map((q) => fuse.search(q))
+      .flat()
+      .map((x) => x.item)
+    ));
   }
 
   searchAllScripts(query: string): Script[] {

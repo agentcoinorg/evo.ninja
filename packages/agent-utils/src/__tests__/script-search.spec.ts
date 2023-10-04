@@ -54,5 +54,14 @@ describe('Script search', () => {
         description: "Calculates the perimeter of a square given the length of one side."
       }
     ]).length).toBe(0);
+
+    expect(Scripts.searchScripts("fs.readFile Reads a file", [
+      {
+        name: "fs.readFile",
+        arguments: "",
+        code: "",
+        description: "Reads data from a file"
+      }
+    ]).length).toBe(1);
   });
 });
