@@ -14,7 +14,7 @@ import * as rimraf from "rimraf";
 import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
-import { DevAgent } from "../agents/DevAgent";
+import { DevAgent } from "./DevAgent";
 
 dotenv.config({
   path: path.join(__dirname, "../../../../.env")

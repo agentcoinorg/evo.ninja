@@ -1,23 +1,7 @@
-import {
-  AgentOutputType,
-  Chat,
-  ChatMessageBuilder,
-  Env,
-  LlmApi,
-  Logger,
-  Scripts,
-  Workspace,
-  WrapClient,
-  agentPlugin,
-  trimText,
-} from "@evo-ninja/agent-utils";
-import { AgentConfig, SubAgent } from "../SubAgent";
+import { AgentOutputType, trimText, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+import { SubAgentConfig } from "../../SubAgent";
 
-export interface DevAgentRunArgs {
-  goal: string;
-}
-
-const AGENT_CONFIG: AgentConfig<DevAgentRunArgs> = {
+export const AGENT_CONFIG: SubAgentConfig = {
   name: "dev",
   initialMessages: (agentName: string, { goal }) => [
     { role: "system", content: `You are an expert software engineer named "${agentName}".`},
@@ -98,30 +82,4 @@ const AGENT_CONFIG: AgentConfig<DevAgentRunArgs> = {
       isTermination: false,
     }
   }
-}
-
-export class DevAgent extends SubAgent<DevAgentRunArgs> {
-  constructor(
-    llm: LlmApi,
-    chat: Chat,
-    workspace: Workspace,
-    scripts: Scripts,
-    logger: Logger,
-    env: Env
-    ) {
-    const agentContext = {
-      llm: llm,
-      chat: chat,
-      scripts: scripts,
-      workspace: workspace,
-      client: new WrapClient(
-        workspace,
-        logger,
-        agentPlugin({ logger: logger }),
-        env
-      ),
-    };
-
-    super(AGENT_CONFIG, agentContext, logger);
-  }
-}
+};

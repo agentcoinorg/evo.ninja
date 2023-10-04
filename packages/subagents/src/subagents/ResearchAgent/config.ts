@@ -1,23 +1,7 @@
-import {
-  AgentOutputType,
-  Chat,
-  ChatMessageBuilder,
-  Env,
-  LlmApi,
-  Logger,
-  Scripts,
-  Workspace,
-  WrapClient,
-  agentPlugin,
-  trimText,
-} from "@evo-ninja/agent-utils";
-import { AgentConfig, SubAgent } from "../SubAgent";
+import { AgentOutputType, ChatMessageBuilder, trimText } from "@evo-ninja/agent-utils";
+import { SubAgentConfig } from "../../SubAgent";
 
-export interface ResearchAgentRunArgs {
-  goal: string;
-}
-
-export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
+export const AGENT_CONFIG: SubAgentConfig = {
   name: "researcher",
   initialMessages: (agentName: string, { goal }) => [
     { role: "system", content: `You are an agent that searches the web for information, called "${agentName}".\n` +
@@ -176,32 +160,5 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
       }),
       isTermination: false,
     }
-  }
-}
-
-export class ResearchAgent extends SubAgent<ResearchAgentRunArgs> {
-  constructor(
-    llm: LlmApi,
-    chat: Chat,
-    workspace: Workspace,
-    scripts: Scripts,
-    logger: Logger,
-    env: Env
-    ) {
-    
-    const agentContext = {
-      llm: llm,
-      chat: chat,
-      scripts: scripts,
-      workspace: workspace,
-      client: new WrapClient(
-        workspace,
-        logger,
-        agentPlugin({ logger: logger }),
-        env
-      ),
-    };
-
-    super(AGENT_CONFIG, agentContext, logger);
   }
 }

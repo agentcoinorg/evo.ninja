@@ -18,6 +18,7 @@ import {
   basicFunctionCallLoop,
   shimCode
 } from "@evo-ninja/agent-utils";
+import { AgentFunction } from "./types";
 
 interface SubAgentContext {
   llm: LlmApi;
@@ -25,23 +26,21 @@ interface SubAgentContext {
   workspace: Workspace;
   scripts: Scripts;
   client: WrapClient;
+  logger: Logger;
 }
 
-interface AgentFunction {
-  success: (agentName: string, functionName: string, params: Record<string, any>) => AgentFunctionResult;
-  description: string;
-  parameters: Record<string, any>;
+interface SubAgentFunction extends AgentFunction {
   isTermination: boolean;
 }
 
-interface AgentFunctions extends Record<string, AgentFunction> {
-  agent_onGoalAchieved: AgentFunction;
-  agent_onGoalFailed: AgentFunction;
+interface AgentFunctions extends Record<string, SubAgentFunction> {
+  agent_onGoalAchieved: SubAgentFunction;
+  agent_onGoalFailed: SubAgentFunction;
 };
 
-export interface AgentConfig<TRunArgs> {
+export interface SubAgentConfig {
   name: string;
-  initialMessages: (agentName: string, runArguments: TRunArgs) => { role: ChatRole; content: string }[];
+  initialMessages: (agentName: string, runArguments: SubAgentRunArgs) => { role: ChatRole; content: string }[];
   loopPreventionPrompt: string;
   functions: AgentFunctions;
 }
@@ -52,11 +51,14 @@ interface CreateScriptExecutorArgs<TAgentContext> {
   onSuccess: (params: any) => AgentFunctionResult;
 }
 
-export class SubAgent<TRunArgs, TAgentContext extends SubAgentContext = SubAgentContext> implements Agent<TRunArgs> {
+interface SubAgentRunArgs {
+  goal: string;
+}
+
+export class SubAgent<TAgentContext extends SubAgentContext = SubAgentContext> implements Agent<SubAgentRunArgs> {
   constructor(
-    private config: AgentConfig<TRunArgs>,
+    private config: SubAgentConfig,
     private context: TAgentContext,
-    private logger: Logger,
   ) {}
 
   public get workspace(): Workspace {
@@ -64,7 +66,7 @@ export class SubAgent<TRunArgs, TAgentContext extends SubAgentContext = SubAgent
   }
 
   public async* run(
-    args: TRunArgs
+    args: SubAgentRunArgs
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
     try {
@@ -94,7 +96,7 @@ export class SubAgent<TRunArgs, TAgentContext extends SubAgentContext = SubAgent
         this.config.loopPreventionPrompt
       );
     } catch (err) {
-      this.logger.error(err);
+      this.context.logger.error(err);
       return ResultErr("Unrecoverable error encountered.");
     }
   }
