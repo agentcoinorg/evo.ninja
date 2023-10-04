@@ -101,7 +101,7 @@ describe('Research Agent Test Suite', () => {
   }
 
   test("revenue-retrieval", async () => {
-    const { agent, debugLog } = createDevAgent("revenue-retrieval");
+    const { agent, debugLog } = createResearchAgent("revenue-retrieval");
     const response = await runResearchAgent(
       agent,
       "Write tesla's exact revenue in 2022 into a .txt file. Use the US notation, with a precision rounded to the nearest million dollars (for instance, $31,578 million).",
