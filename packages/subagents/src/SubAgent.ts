@@ -5,7 +5,7 @@ import {
   AgentFunctionResult,
   AgentOutput,
   Chat,
-  Env,
+  ChatRole,
   ExecuteAgentFunctionCalled,
   JsEngine,
   JsEngine_GlobalVar,
@@ -15,12 +15,11 @@ import {
   Scripts,
   Workspace,
   WrapClient,
-  agentPlugin,
   basicFunctionCallLoop,
   shimCode
 } from "@evo-ninja/agent-utils";
 
-interface AgentContext {
+interface SubAgentContext {
   llm: LlmApi;
   chat: Chat;
   workspace: Workspace;
@@ -38,62 +37,40 @@ interface AgentFunction {
 interface AgentFunctions extends Record<string, AgentFunction> {
   agent_onGoalAchieved: AgentFunction;
   agent_onGoalFailed: AgentFunction;
-}
+};
 
-export interface AgentConfig {
+export interface AgentConfig<TRunArgs> {
   name: string;
-  prompts: {
-    initialPrompt: (name: string) => string;
-    goalPrompt: (goal: string) => string;
-    loopPreventionPrompt: () => string;
-  },
+  initialMessages: (agentName: string, runArguments: TRunArgs) => { role: ChatRole; content: string }[];
+  loopPreventionPrompt: string;
   functions: AgentFunctions;
 }
 
-interface CreateScriptExecutorArgs {
-  scripts: Scripts;
+interface CreateScriptExecutorArgs<TAgentContext> {
+  context: TAgentContext
   scriptName: string;
-  client: WrapClient;
   onSuccess: (params: any) => AgentFunctionResult;
 }
 
-export class SubAgent implements Agent {
-  private readonly context: AgentContext;
-
+export class SubAgent<TRunArgs, TAgentContext extends SubAgentContext = SubAgentContext> implements Agent<TRunArgs> {
   constructor(
-    private config: AgentConfig,
-    llm: LlmApi,
-    chat: Chat,
-    workspace: Workspace,
-    scripts: Scripts,
+    private config: AgentConfig<TRunArgs>,
+    private context: TAgentContext,
     private logger: Logger,
-    private readonly env: Env,
-  ) {
-    this.context = {
-      llm: llm,
-      chat: chat,
-      scripts: scripts,
-      workspace: workspace,
-      client: new WrapClient(
-        workspace,
-        logger,
-        agentPlugin({ logger: logger }),
-        this.env
-      ),
-    };
-  }
+  ) {}
 
   public get workspace(): Workspace {
     return this.context.workspace;
   }
 
   public async* run(
-    goal: string
+    args: TRunArgs
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
     try {
-      chat.persistent("system", this.config.prompts.initialPrompt(this.config.name));
-      chat.persistent("user", this.config.prompts.goalPrompt(goal));
+      this.config.initialMessages(this.config.name, args).forEach((message) => {
+        chat.persistent(message.role, message.content);
+      })
 
       const functionEntries = Object.entries(this.config.functions);
       const functions = functionEntries.map(([name, definition]) => ({
@@ -101,9 +78,8 @@ export class SubAgent implements Agent {
           ...definition,
           name
         },
-        buildExecutor: (context: AgentContext) => this.createScriptExecutor({
-          client: context.client,
-          scripts: context.scripts,
+        buildExecutor: (context: TAgentContext) => this.createScriptExecutor({
+          context,
           scriptName: name.split("_").join("."),
           onSuccess: (params) => definition.success(this.config.name, name, params)
         })
@@ -115,7 +91,7 @@ export class SubAgent implements Agent {
         (functionCalled: ExecuteAgentFunctionCalled) => {
           return this.config.functions[functionCalled.name].isTermination;
         },
-        this.config.prompts.loopPreventionPrompt()
+        this.config.loopPreventionPrompt
       );
     } catch (err) {
       this.logger.error(err);
@@ -123,9 +99,9 @@ export class SubAgent implements Agent {
     }
   }
 
-  private createScriptExecutor(args: CreateScriptExecutorArgs) {
+  protected createScriptExecutor(args: CreateScriptExecutorArgs<TAgentContext>) {
     return async (params: any): Promise<Result<AgentFunctionResult, string>> => {
-      const script = args.scripts.getScriptByName(args.scriptName);
+      const script = args.context.scripts.getScriptByName(args.scriptName);
 
       if (!script) {
         return ResultErr(`Unable to find the script ${name}`);
@@ -137,7 +113,7 @@ export class SubAgent implements Agent {
           value: JSON.stringify(entry[1])
         })
       );
-      const jsEngine = new JsEngine(args.client);
+      const jsEngine = new JsEngine(args.context.client);
       const result = await jsEngine.evalWithGlobals({
         src: shimCode(script.code),
         globals

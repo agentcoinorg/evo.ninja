@@ -82,7 +82,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
       // Create a new iteration thread
       if (!evoItr) {
         const goal = messages.filter((msg) => msg.user === "user")[0].title;
-        setEvoItr(evo.run(goal));
+        setEvoItr(evo.run({ goal }));
         return Promise.resolve();
       }
 
