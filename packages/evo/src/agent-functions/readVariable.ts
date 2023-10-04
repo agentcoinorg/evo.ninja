@@ -3,7 +3,7 @@ import { AgentFunction, AgentFunctionResult, AgentOutputType, ChatMessageBuilder
 import { AgentContext } from "../AgentContext";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../prompts";
 
-const FN_NAME = "readVar";
+const FN_NAME = "readVariable";
 type FuncParameters = { 
   name: string,
   start: number,
@@ -26,7 +26,10 @@ const SUCCESS = (params: FuncParameters, varValue: string): AgentFunctionResult 
   ],
   messages: [
     ChatMessageBuilder.functionCall(FN_NAME, params),
-    ChatMessageBuilder.system(READ_GLOBAL_VAR_MESSAGE(params.name, varValue, params.start, params.count))
+    ChatMessageBuilder.functionCallResult(
+      FN_NAME,
+      READ_GLOBAL_VAR_MESSAGE(params.name, varValue, params.start, params.count)
+    )
   ]
 });
 const VAR_NOT_FOUND_ERROR = (params: FuncParameters): AgentFunctionResult => ({
@@ -39,7 +42,10 @@ const VAR_NOT_FOUND_ERROR = (params: FuncParameters): AgentFunctionResult => ({
   ],
   messages: [
     ChatMessageBuilder.functionCall(FN_NAME, params),
-    ChatMessageBuilder.system(FUNCTION_CALL_FAILED(params, FN_NAME, `Global variable {{${params.name}}} not found.`))
+    ChatMessageBuilder.functionCallResult(
+      FN_NAME,
+      `Error: Global variable {{${params.name}}} not found.`
+    )
   ]
 });
 
@@ -64,9 +70,9 @@ export const READ_GLOBAL_VAR_MESSAGE = (varName: string, value: string | undefin
   }
 };
 
-export const readVar: AgentFunction<AgentContext> = {
+export const readVariable: AgentFunction<AgentContext> = {
   definition: {
-    name: "readVar",
+    name: "readVariable",
     description: `Reads the stored global variable in JSON. If the JSON is longer than ${MAX_VAR_LENGTH} characters, it will be truncated`,
     parameters: {
       type: "object",

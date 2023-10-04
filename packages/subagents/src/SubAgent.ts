@@ -28,7 +28,8 @@ interface SubAgentContext {
 }
 
 interface AgentFunction {
-  success: (agentName: string, functionName: string, params: Record<string, any>) => AgentFunctionResult;
+  success: (agentName: string, functionName: string, params: Record<string, any>, result?: string) => AgentFunctionResult;
+  fail: (agentName: string, functionName: string, params: Record<string, any>, error?: string) => AgentFunctionResult;
   description: string;
   parameters: Record<string, any>;
   isTermination: boolean;
@@ -46,10 +47,11 @@ export interface AgentConfig<TRunArgs> {
   functions: AgentFunctions;
 }
 
-interface CreateScriptExecutorArgs<TAgentContext> {
+interface ScriptExecutorArgs<TAgentContext> {
   context: TAgentContext
   scriptName: string;
-  onSuccess: (params: any) => AgentFunctionResult;
+  onSuccess: (params: any, result?: string) => AgentFunctionResult;
+  onFailure: (params: any, error: string) => AgentFunctionResult
 }
 
 export class SubAgent<TRunArgs, TAgentContext extends SubAgentContext = SubAgentContext> implements Agent<TRunArgs> {
@@ -78,10 +80,11 @@ export class SubAgent<TRunArgs, TAgentContext extends SubAgentContext = SubAgent
           ...definition,
           name
         },
-        buildExecutor: (context: TAgentContext) => this.createScriptExecutor({
+        buildExecutor: (context: TAgentContext) => this.scriptExecutor({
           context,
           scriptName: name.split("_").join("."),
-          onSuccess: (params) => definition.success(this.config.name, name, params)
+          onSuccess: (params, result) => definition.success(this.config.name, name, params, result),
+          onFailure: (params, error) => definition.fail(this.config.name, name, params, error)
         })
       }))
 
@@ -99,9 +102,10 @@ export class SubAgent<TRunArgs, TAgentContext extends SubAgentContext = SubAgent
     }
   }
 
-  protected createScriptExecutor(args: CreateScriptExecutorArgs<TAgentContext>) {
+  protected scriptExecutor(args: ScriptExecutorArgs<TAgentContext>) {
     return async (params: any): Promise<Result<AgentFunctionResult, string>> => {
-      const script = args.context.scripts.getScriptByName(args.scriptName);
+      const { context, scriptName, onSuccess, onFailure } = args;
+      const script = context.scripts.getScriptByName(scriptName);
 
       if (!script) {
         return ResultErr(`Unable to find the script ${name}`);
@@ -113,17 +117,27 @@ export class SubAgent<TRunArgs, TAgentContext extends SubAgentContext = SubAgent
           value: JSON.stringify(entry[1])
         })
       );
-      const jsEngine = new JsEngine(args.context.client);
+      const jsEngine = new JsEngine(context.client);
       const result = await jsEngine.evalWithGlobals({
         src: shimCode(script.code),
         globals
       });
-  
-      if (!result.ok) {
-        return ResultErr(result.error?.toString());
+
+      if (result.ok) {
+        if (result.value.error == null) {
+          if (context.client.jsPromiseOutput.ok) {
+            return ResultOk(
+              onSuccess(params, context.client.jsPromiseOutput.value)
+            );
+          } else {
+            return ResultOk(onFailure(params, context.client.jsPromiseOutput.error.toString()));
+          }
+        } else {
+          return ResultOk(onFailure(params, result.value.error.toString()));
+        }
+      } else {
+        return ResultOk(onFailure(params, result.error?.toString() ?? "Unknown error"));
       }
-  
-      return ResultOk(args.onSuccess(params));
     };
   }
 }

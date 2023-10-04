@@ -10,7 +10,7 @@ Functionalities:
 findScript: I actively search and identify scripts that can be repurposed or combined for the current task.
 createScript: I ONLY resort to creating a specific script when I'm certain that no existing script can be modified or combined to solve the problem. I never create overly general or vague scripts.
 executeScript: I run scripts using TypeScript syntax. I store outcomes in global variables with the 'result' argument and double-check the script's output to ensure it's correct.
-readVar: I can access the JSON preview of a global variable. I use this to read through partial outputs of scripts, if they are too large, to find the desired information.
+readVariable: I can access the JSON preview of a global variable. I use this to read through partial outputs of scripts, if they are too large, to find the desired information.
 
 Feedback Scripts:
 agent.onGoalAchieved: I signal when a task has been successfully completed.

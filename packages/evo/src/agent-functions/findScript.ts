@@ -32,7 +32,8 @@ const SUCCESS = (params: FuncParameters, candidates: Script[]): AgentFunctionRes
   ],
   messages: [
     ChatMessageBuilder.functionCall(FN_NAME, params),
-    ChatMessageBuilder.system(
+    ChatMessageBuilder.functionCallResult(
+      FN_NAME,
       `Found the following results for script '${params.namespace}'\n` + 
       `${candidates.map((c) => `Namespace: ${c.name}\nArguments: ${c.arguments}\nDescription: ${c.description}`).join("\n--------------\n")}\n` +
       `\`\`\``
@@ -53,7 +54,10 @@ const NO_SCRIPTS_FOUND_ERROR = (params: FuncParameters): AgentFunctionResult => 
   ],
   messages: [
     ChatMessageBuilder.functionCall(FN_NAME, params),
-    ChatMessageBuilder.system(`Found no results for script '${params.namespace}'. Try creating the script instead.`),
+    ChatMessageBuilder.functionCallResult(
+      FN_NAME,
+      `Found no results for script '${params.namespace}'. Try creating the script instead.`
+    ),
   ]
 });
 const FIND_SCRIPT_TITLE = (params: FuncParameters) => `Searched for '${params.namespace}' script ("${params.description}")`;
