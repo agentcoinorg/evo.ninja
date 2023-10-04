@@ -7,7 +7,7 @@ import {
   AgentOutputType,
   ChatMessageBuilder
 } from "@evo-ninja/agent-utils";
-import { AgentConfig, SubAgent } from "@evo-ninja/subagents";
+import { SubAgent } from "@evo-ninja/subagents";
 import { Result, ResultOk } from "@polywrap/result";
 
 type FuncParameters = {
@@ -51,7 +51,7 @@ const TASK_FAIL = (
 export function delegateSubAgent(
   name: string,
   expertise: string,
-  config: AgentConfig
+  createSubAgent: (context: AgentContext) => SubAgent<any>
 ): AgentFunction<AgentContext> {
   return {
     definition: {
@@ -69,18 +69,11 @@ export function delegateSubAgent(
     },
     buildExecutor(context: AgentContext) {
       return async (params: FuncParameters): Promise<Result<AgentFunctionResult, string>> => {
-        const subagent = new SubAgent(
-          config,
-          context.llm,
-          // TODO: create a sub-llmchat context
-          context.chat,
-          context.workspace,
-          context.scripts,
-          context.logger,
-          context.env
-        );
+        const subagent = createSubAgent(context);
 
-        let iterator = subagent.run(params.task);
+        let iterator = subagent.run({
+          goal: params.task
+        });
 
         while (true) {
           const response = await iterator.next();

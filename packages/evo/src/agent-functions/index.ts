@@ -4,11 +4,12 @@ import { executeScript } from "./executeScript";
 import { findScript } from "./findScript";
 import { readVar } from "./readVar";
 import { AgentContext } from "../AgentContext";
+
 import { AgentFunction } from "@evo-ninja/agent-utils";
 import { ScriptWriter } from "@evo-ninja/js-script-writer-agent";
 import {
-  DEV_AGENT_CONFIG,
-  RESEARCH_AGENT_CONFIG
+  DevAgent,
+  ResearchAgent
 } from "@evo-ninja/subagents";
 
 export function agentFunctions(createScriptWriter: () => ScriptWriter): AgentFunction<AgentContext>[] {
@@ -20,12 +21,26 @@ export function agentFunctions(createScriptWriter: () => ScriptWriter): AgentFun
     delegateSubAgent(
       "Developer",
       "developing software",
-      DEV_AGENT_CONFIG
+      (context: AgentContext) => new DevAgent(
+        context.llm,
+        context.chat,
+        context.workspace,
+        context.scripts,
+        context.logger,
+        context.env
+      )
     ),
     delegateSubAgent(
       "Researcher",
       "researching information online",
-      RESEARCH_AGENT_CONFIG
+      (context: AgentContext) => new ResearchAgent(
+        context.llm,
+        context.chat,
+        context.workspace,
+        context.scripts,
+        context.logger,
+        context.env
+      )
     )
   ];
 }
