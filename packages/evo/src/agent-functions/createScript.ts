@@ -86,7 +86,11 @@ export function createScript(createScriptWriter: () => ScriptWriter): AgentFunct
 
         context.logger.notice(`Creating script '${params.namespace}'...`);
 
-        let iterator = writer.run(params.namespace, params.description, params.arguments);
+        let iterator = writer.run({
+          namespace: params.namespace,
+          description: params.description,
+          args: params.arguments
+        });
 
         while(true) {
           const response = await iterator.next();

@@ -1,4 +1,4 @@
-import { AgentProtocolWorkspace } from "./sys/AgentProtocolWorkspace";
+import { AgentProtocolWorkspace } from "./agent-protocol";
 import { createApp } from "./app";
 
 import Agent, {
@@ -54,7 +54,7 @@ async function taskHandler(
   logger.info(`Trying to achieve goal: ${input}\nTask with ID: ${id}`);
   debugLog?.goalStart(input);
 
-  let iterator = app.evo.run(input);
+  let iterator = app.evo.run({ goal: input });
 
   async function stepHandler(stepInput: StepInput | null): Promise<StepResult> {
     logger.info(`Running step....`);

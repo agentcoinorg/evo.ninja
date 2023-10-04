@@ -22,8 +22,6 @@ export class DebugLlmApi implements LlmApi {
     functionDefinitions: any[],
     options?: LlmOptions | undefined
   ): Promise<ChatMessage | undefined> {
-    console.log(this.getModel());
-
     const time = new Timer();
     time.start();
 

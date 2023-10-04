@@ -8,6 +8,7 @@ export const INITIAL_PROMP = `You are an agent that executes scripts to accompli
 `When executing scripts use named arguments with TypeScript syntax.\n` +
 `When executing scripts, in the 'result' argument, you can pass a name of a global variable where you want to store the result.\n` +
 `Use the readVar function to read the JSON preview of a global variable.\n` +
+`Ask yourself if you have all the required information to achieve a goal. If you don't, search the web for it\n` +
 `You can use the executeScript function to execute agent.speak script to inform the user of anything noteworthy.\n` +
 `Once you have achieved the goal, use executeScript function to execute agent.onGoalAchieved script.\n` +
 `If you can not achieve the goal, use executeScript function to execute agent.onGoalFailed script.\n` +
@@ -31,6 +32,3 @@ export const FUNCTION_CALL_FAILED = (params: any, name: string, error: string) =
       ? trimText(error, 300)
       : trimText(JSON.stringify(error, null, 2), 300)
     }\n\`\`\`\n\nArguments:\n\`\`\`\n${JSON.stringify(params, null, 2)}\n\`\`\``;
-
-export const AGENT_PLUGIN_SPEAK_RESPONSE =
-  "User has been informed! If you think you've achieved the goal, execute onGoalAchieved.\nIf you think you've failed, execute onGoalFailed.";
