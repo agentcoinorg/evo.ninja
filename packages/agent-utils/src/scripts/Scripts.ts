@@ -16,19 +16,22 @@ export class Scripts {
     private _directory?: string
   ) { }
 
-  searchScripts(query: string): Script[] {
-    const scripts = this.getAllScripts();
-
-    const options = {
+  static searchScripts(query: string, scripts: Script[]): Script[] {
+    const fuse = new Fuse(scripts, {
+      ignoreLocation: true,
+      threshold: 0.4,
+      shouldSort: true,
       keys: [
         "name",
         "description"
       ]
-    };
+    });
 
-    const fuse = new Fuse(Object.values(scripts), options);
+    return fuse.search(query).map((x) => x.item);
+  }
 
-    return fuse.search(query).map((r) => r.item);
+  searchAllScripts(query: string): Script[] {
+    return Scripts.searchScripts(query, this.getAllScripts());
   }
 
   getAllScripts(): Script[] {

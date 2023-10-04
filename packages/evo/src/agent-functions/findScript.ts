@@ -80,7 +80,7 @@ export const findScript: AgentFunction<AgentContext> = {
   },
   buildExecutor(context: AgentContext) {
     return async (params: FuncParameters): Promise<Result<AgentFunctionResult, string>> => {
-      const candidates = context.scripts.searchScripts(
+      const candidates = context.scripts.searchAllScripts(
         `${params.namespace} ${params.description}`
       ).slice(0, 5);
 
