@@ -37,7 +37,7 @@ export async function cli(): Promise<void> {
 
   app.debugLog?.goalStart(goal);
 
-  let iterator = app.evo.run(goal);
+  let iterator = app.evo.run({ goal });
 
   while(true) {
     app.debugLog?.stepStart();
