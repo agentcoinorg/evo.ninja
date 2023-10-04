@@ -9,6 +9,7 @@ import {
 import { Chat, ChatMessage, LlmApi } from "../llm";
 
 import { ResultErr, ResultOk } from "@polywrap/result";
+import { AGENT_SPEAK_RESPONSE } from "./prompts";
 
 export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, chat: Chat }>(
   context: TContext,
@@ -73,6 +74,7 @@ async function* _preventLoopAndSaveMsg(chat: Chat, response: ChatMessage, loopPr
       } as AgentOutput;
   } else {
     chat.temporary(response);
+    chat.temporary("system", AGENT_SPEAK_RESPONSE);
     yield {
       type: AgentOutputType.Success,
       title: "Agent response",
