@@ -18,4 +18,12 @@ export class ChatMessageBuilder {
       }
     };
   }
+
+  static functionCallResponse(funcName: string, content: string): ChatMessage {
+    return {
+      role: "function",
+      content,
+      name: funcName
+    }
+  }
 }

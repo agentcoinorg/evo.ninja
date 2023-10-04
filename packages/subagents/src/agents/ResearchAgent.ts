@@ -99,7 +99,8 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
           }
         ],
         messages: [
-          ChatMessageBuilder.functionCall(functionName, params, result),
+          ChatMessageBuilder.functionCall(functionName, params),
+          ChatMessageBuilder.functionCallResponse(functionName, result)
         ]
       }),
       fail: (agentName: string, functionName: string, params: any, error: string) => ({
@@ -110,7 +111,8 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
           }
         ],
         messages: [
-          ChatMessageBuilder.functionCall(functionName, params, error),
+          ChatMessageBuilder.functionCall(functionName, params),
+          ChatMessageBuilder.functionCallResponse(functionName, error)
         ]
       }),
       isTermination: false,
@@ -127,7 +129,7 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
         required: ["query"],
         additionalProperties: false
       },
-      success: (agentName: string, functionName: string, params: { url: string }, result?: string) => ({
+      success: (agentName: string, functionName: string, params: { url: string }, result: string) => ({
         outputs: [
           {
             type: AgentOutputType.Success,
@@ -137,6 +139,7 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
         ],
         messages: [
           ChatMessageBuilder.functionCall(functionName, params, result),
+          ChatMessageBuilder.functionCallResponse(functionName, result)
         ]
       }),
       fail: (agentName: string, functionName: string, params: any, error: string) => ({
@@ -147,7 +150,8 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
           }
         ],
         messages: [
-          ChatMessageBuilder.functionCall(functionName, params, error),
+          ChatMessageBuilder.functionCall(functionName, params),
+          ChatMessageBuilder.functionCallResponse(functionName, error)
         ]
       }),
       isTermination: false,
@@ -164,7 +168,7 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
         required: ["query"],
         additionalProperties: false
       },
-      success: (agentName: string, functionName: string, params: { url: string }, result?: string) => ({
+      success: (agentName: string, functionName: string, params: { url: string }, result: string) => ({
         outputs: [
           {
             type: AgentOutputType.Success,
@@ -173,7 +177,8 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
           }
         ],
         messages: [
-          ChatMessageBuilder.functionCall(functionName, params, result),
+          ChatMessageBuilder.functionCall(functionName, params),
+          ChatMessageBuilder.functionCallResponse(functionName, result)
         ]
       }),
       fail: (agentName: string, functionName: string, params: any, error: string) => ({
@@ -184,7 +189,8 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
           }
         ],
         messages: [
-          ChatMessageBuilder.functionCall(functionName, params, error),
+          ChatMessageBuilder.functionCall(functionName, params),
+          ChatMessageBuilder.functionCallResponse(functionName, error)
         ]
       }),
       isTermination: false,
@@ -211,7 +217,7 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
         path: string;
         data: string;
         encoding: string;
-      }, result) => ({
+      }, result: string) => ({
         outputs: [
           {
             type: AgentOutputType.Success,
@@ -223,6 +229,7 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
         ],
         messages: [
           ChatMessageBuilder.functionCall(functionName, params, result),
+          ChatMessageBuilder.functionCallResponse(functionName, result),
         ]
       }),
       fail: (agentName: string, functionName: string, params: any, error: string) => ({
@@ -233,7 +240,8 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
           }
         ],
         messages: [
-          ChatMessageBuilder.functionCall(functionName, params, error),
+          ChatMessageBuilder.functionCall(functionName, params),
+          ChatMessageBuilder.functionCallResponse(functionName, error)
         ]
       }),
       isTermination: false,

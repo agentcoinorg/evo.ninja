@@ -20,7 +20,7 @@ dotenv.config({
   path: path.join(__dirname, "../../../../.env")
 });
 
-jest.setTimeout(120000);
+jest.setTimeout(300000);
 
 describe('Research Agent Test Suite', () => {
 
@@ -115,5 +115,17 @@ describe('Research Agent Test Suite', () => {
     const teslasRevenue = agent.workspace.readFileSync(generatedFiles[0]);
     expect(teslasRevenue).toBeTruthy();
     expect(teslasRevenue).toContain("81,462");
+  });
+
+  test.skip("revenue-retrieval-2", async () => {
+    const { agent, debugLog } = createResearchAgent("revenue-retrieval-2");
+    const response = await runResearchAgent(
+      agent,
+      "Write tesla's revenue every year since its creation into a .txt file. Use the US notation, with a precision rounded to the nearest million dollars (for instance, $31,578 million)..",
+      debugLog
+    );
+
+    expect(response.value.ok).toBe(true);
+    console.log(response)
   });
 });
