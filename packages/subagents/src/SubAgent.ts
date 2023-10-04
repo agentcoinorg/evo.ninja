@@ -5,6 +5,7 @@ import {
   AgentFunctionResult,
   AgentOutput,
   Chat,
+  ChatRole,
   Env,
   ExecuteAgentFunctionCalled,
   JsEngine,
@@ -42,11 +43,8 @@ interface AgentFunctions extends Record<string, AgentFunction> {
 
 export interface AgentConfig {
   name: string;
-  prompts: {
-    initialPrompt: (name: string) => string;
-    goalPrompt: (goal: string) => string;
-    loopPreventionPrompt: () => string;
-  },
+  initialMessages: (agentName: string, goal: string) => { role: ChatRole; content: string }[];
+  loopPreventionPrompt: string;
   functions: AgentFunctions;
 }
 
@@ -92,8 +90,9 @@ export class SubAgent implements Agent {
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
     try {
-      chat.persistent("system", this.config.prompts.initialPrompt(this.config.name));
-      chat.persistent("user", this.config.prompts.goalPrompt(goal));
+      this.config.initialMessages(this.config.name, goal).forEach((message) => {
+        chat.persistent(message.role, message.content);
+      })
 
       const functionEntries = Object.entries(this.config.functions);
       const functions = functionEntries.map(([name, definition]) => ({
@@ -115,7 +114,7 @@ export class SubAgent implements Agent {
         (functionCalled: ExecuteAgentFunctionCalled) => {
           return this.config.functions[functionCalled.name].isTermination;
         },
-        this.config.prompts.loopPreventionPrompt()
+        this.config.loopPreventionPrompt
       );
     } catch (err) {
       this.logger.error(err);

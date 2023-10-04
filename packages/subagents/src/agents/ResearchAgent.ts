@@ -13,12 +13,12 @@ import { AgentConfig, SubAgent } from "../SubAgent";
 
 export const RESEARCH_AGENT_CONFIG: AgentConfig = {
   name: "researcher",
-  prompts: {
-    initialPrompt: (name: string) => `You are an agent that searches the web for information, called "${name}".\n` +
-    `Only scrape if you're certain the information you're looking for isn't available in the result of search.\n`,
-    goalPrompt: (goal: string) => `You have been asked by the user to achieve the following goal: ${goal}`,
-    loopPreventionPrompt: () => "Assistant, you appear to be in a loop, try executing a different function.",
-  },
+  initialMessages: (agentName: string, goal: string) => [
+    { role: "system", content: `You are an agent that searches the web for information, called "${agentName}".\n` +
+    `Only scrape if you're certain the information you're looking for isn't available in the result of search.\n`},
+    { role: "user", content: `You have been asked by the user to achieve the following goal: ${goal}`},
+  ],
+  loopPreventionPrompt: "Assistant, you appear to be in a loop, try executing a different function.",
   functions: {
     agent_onGoalAchieved: {
       description: "Informs the user that the goal has been achieved.",

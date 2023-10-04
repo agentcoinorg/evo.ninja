@@ -13,11 +13,11 @@ import { AgentConfig, SubAgent } from "../SubAgent";
 
 const DEV_AGENT_CONFIG: AgentConfig = {
   name: "dev",
-  prompts: {
-    initialPrompt: (name: string) => `You are an expert software engineer named "${name}".`,
-    goalPrompt: (goal: string) => `You have been asked by the user to achieve the following goal: ${goal}`,
-    loopPreventionPrompt: () => "Assistant, you appear to be in a loop, try executing a different function.",
-  },
+  initialMessages: (agentName: string, goal: string) => [
+    { role: "system", content: `You are an expert software engineer named "${agentName}".`},
+    { role: "user", content: `You have been asked by the user to achieve the following goal: ${goal}`},
+  ],
+  loopPreventionPrompt: "Assistant, you appear to be in a loop, try executing a different function.",
   functions: {
     agent_onGoalAchieved: {
       description: "Informs the user that the goal has been achieved.",
