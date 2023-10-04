@@ -24,7 +24,7 @@ jest.setTimeout(120000);
 
 describe('Research Agent Test Suite', () => {
 
-  function createDevAgent(testName: string): {
+  function createResearchAgent(testName: string): {
     agent: ResearchAgent;
     debugLog: DebugLog;
   } {
