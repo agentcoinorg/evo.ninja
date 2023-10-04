@@ -1,5 +1,3 @@
-import { DevAgent } from "../DevAgent";
-
 import {
   Env,
   Scripts,
@@ -8,7 +6,7 @@ import {
   ContextWindow,
   LlmApi,
   ConsoleLogger,
-  Logger
+  Logger,
 } from "@evo-ninja/agent-utils";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
@@ -16,6 +14,7 @@ import * as rimraf from "rimraf";
 import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
+import { DevAgent } from "../agents/DevAgent";
 
 dotenv.config({
   path: path.join(__dirname, "../../../../.env")
@@ -74,7 +73,8 @@ describe('Dev Agent Test Suite', () => {
         chat,
         workspace,
         scripts,
-        logger
+        logger,
+        env
       ),
       debugLog
     };
@@ -82,7 +82,7 @@ describe('Dev Agent Test Suite', () => {
 
   async function runDevAgent(agent: DevAgent, goal: string, debugLog: DebugLog) {
     debugLog.goalStart(goal);
-    const iterator = agent.run(goal);
+    const iterator = agent.run({ goal });
 
     while (true) {
       debugLog.stepStart();
