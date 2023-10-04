@@ -82,7 +82,7 @@ describe('Dev Agent Test Suite', () => {
 
   async function runDevAgent(agent: DevAgent, goal: string, debugLog: DebugLog) {
     debugLog.goalStart(goal);
-    const iterator = agent.run(goal);
+    const iterator = agent.run({ goal });
 
     while (true) {
       debugLog.stepStart();

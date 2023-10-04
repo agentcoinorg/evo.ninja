@@ -7,13 +7,19 @@ import {
   Logger,
   Scripts,
   Workspace,
+  WrapClient,
+  agentPlugin,
   trimText,
 } from "@evo-ninja/agent-utils";
 import { AgentConfig, SubAgent } from "../SubAgent";
 
-const DEV_AGENT_CONFIG: AgentConfig = {
+export interface DevAgentRunArgs {
+  goal: string;
+}
+
+const DEV_AGENT_CONFIG: AgentConfig<DevAgentRunArgs> = {
   name: "dev",
-  initialMessages: (agentName: string, goal: string) => [
+  initialMessages: (agentName: string, { goal }) => [
     { role: "system", content: `You are an expert software engineer named "${agentName}".`},
     { role: "user", content: `You have been asked by the user to achieve the following goal: ${goal}`},
   ],
@@ -94,7 +100,7 @@ const DEV_AGENT_CONFIG: AgentConfig = {
   }
 }
 
-export class DevAgent extends SubAgent {
+export class DevAgent extends SubAgent<DevAgentRunArgs> {
   constructor(
     llm: LlmApi,
     chat: Chat,
@@ -103,6 +109,19 @@ export class DevAgent extends SubAgent {
     logger: Logger,
     env: Env
     ) {
-    super(DEV_AGENT_CONFIG, llm, chat, workspace, scripts, logger, env);
+    const agentContext = {
+      llm: llm,
+      chat: chat,
+      scripts: scripts,
+      workspace: workspace,
+      client: new WrapClient(
+        workspace,
+        logger,
+        agentPlugin({ logger: logger }),
+        env
+      ),
+    };
+
+    super(DEV_AGENT_CONFIG, agentContext, logger);
   }
 }

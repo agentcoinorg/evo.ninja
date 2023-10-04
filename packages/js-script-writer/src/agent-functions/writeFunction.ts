@@ -96,7 +96,7 @@ export const writeFunction: AgentFunction<AgentContext> = {
       additionalProperties: false
     },
   },
-  buildExecutor(context: AgentContext) {
+  buildExecutor(context) {
     return async (params: FuncParameters): Promise<Result<AgentFunctionResult, string>> => {
       if (params.namespace.startsWith("agent.")) {
         return ResultOk(CANNOT_CREATE_IN_AGENT_NAMESPACE_ERROR(params));
