@@ -1,1 +1,2 @@
-export * from "./DevAgent"
+export * from "./DevAgent";
+export * from "./ResearchAgent";

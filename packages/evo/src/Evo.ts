@@ -43,6 +43,7 @@ export class Evo implements Agent {
       workspace,
       scripts,
       logger,
+      env,
       globals: {},
       client: new WrapClient(
         this.workspace,
