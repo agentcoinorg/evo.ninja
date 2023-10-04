@@ -17,7 +17,7 @@ export interface DevAgentRunArgs {
   goal: string;
 }
 
-const DEV_AGENT_CONFIG: AgentConfig<DevAgentRunArgs> = {
+const AGENT_CONFIG: AgentConfig<DevAgentRunArgs> = {
   name: "dev",
   initialMessages: (agentName: string, { goal }) => [
     { role: "system", content: `You are an expert software engineer named "${agentName}".`},
@@ -122,6 +122,6 @@ export class DevAgent extends SubAgent<DevAgentRunArgs> {
       ),
     };
 
-    super(DEV_AGENT_CONFIG, agentContext, logger);
+    super(AGENT_CONFIG, agentContext, logger);
   }
 }

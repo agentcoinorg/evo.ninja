@@ -17,7 +17,7 @@ export interface ResearchAgentRunArgs {
   goal: string;
 }
 
-export const RESEARCH_AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
+export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
   name: "researcher",
   initialMessages: (agentName: string, { goal }) => [
     { role: "system", content: `You are an agent that searches the web for information, called "${agentName}".\n` +
@@ -202,6 +202,6 @@ export class ResearchAgent extends SubAgent<ResearchAgentRunArgs> {
       ),
     };
 
-    super(RESEARCH_AGENT_CONFIG, agentContext, logger);
+    super(AGENT_CONFIG, agentContext, logger);
   }
 }
