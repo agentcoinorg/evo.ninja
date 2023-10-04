@@ -1,8 +1,8 @@
 import { LlmApi, Chat, Workspace, Env, agentPlugin, WrapClient, Logger } from "@evo-ninja/agent-utils";
-import { BaseAgent } from "../../BaseAgent";
+import { AgentBase } from "../../AgentBase";
 import { SCRIPTWRITER_AGENT_CONFIG, ScriptWriterContext, ScriptWriterRunArgs } from "./config";
 
-export class ScriptWriter extends BaseAgent<ScriptWriterRunArgs, ScriptWriterContext> {
+export class ScriptWriter extends AgentBase<ScriptWriterRunArgs, ScriptWriterContext> {
   constructor(
     llm: LlmApi,
     chat: Chat,

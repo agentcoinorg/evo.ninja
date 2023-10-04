@@ -1,8 +1,8 @@
-import { Agent, AgentFunctionResult, AgentOutput, Chat, ChatRole, Env, ExecuteAgentFunctionCalled, LlmApi, Logger, RunResult, Workspace, basicFunctionCallLoop } from "@evo-ninja/agent-utils";
+import { Agent, AgentFunctionResult, AgentOutput, Chat, ChatRole, Env, ExecuteAgentFunctionCalled, LlmApi, Logger, RunResult, Timeout, Workspace, basicFunctionCallLoop } from "@evo-ninja/agent-utils";
 import { AgentFunction } from "./types";
 import { Result, ResultErr } from "@polywrap/result";
 
-export interface BaseAgentContext {
+export interface AgentBaseContext {
   llm: LlmApi;
   chat: Chat;
   logger: Logger;
@@ -10,20 +10,21 @@ export interface BaseAgentContext {
   env: Env;
 }
 
-export interface BaseAgentConfig<TRunArgs, TBaseAgentContext> {
+export interface AgentBaseConfig<TRunArgs, TAgentBaseContext> {
   initialMessages: (runArguments: TRunArgs) => { role: ChatRole; content: string }[];
   loopPreventionPrompt: string;
   functions: Record<string, {
     definition: AgentFunction;
-    buildExecutor: (context: TBaseAgentContext) => (params: any) => Promise<Result<AgentFunctionResult, string>>;
+    buildExecutor: (context: TAgentBaseContext) => (params: any) => Promise<Result<AgentFunctionResult, string>>;
   }>;
   shouldTerminate: (functionCalled: ExecuteAgentFunctionCalled) => boolean;
+  timeout?: Timeout;
 }
 
-export abstract class BaseAgent<TRunArgs, TBaseAgentContext extends BaseAgentContext> implements Agent<TRunArgs> {
+export abstract class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> implements Agent<TRunArgs> {
   constructor(
-    protected config: BaseAgentConfig<TRunArgs, TBaseAgentContext>,
-    protected context: TBaseAgentContext
+    protected config: AgentBaseConfig<TRunArgs, TAgentBaseContext>,
+    protected context: TAgentBaseContext
   ) {}
   
   public get workspace(): Workspace {
@@ -38,6 +39,10 @@ export abstract class BaseAgent<TRunArgs, TBaseAgentContext extends BaseAgentCon
       this.config.initialMessages(args).forEach((message) => {
         chat.persistent(message.role, message.content);
       })
+
+      if (this.config.timeout) {
+        setTimeout(this.config.timeout.callback, this.config.timeout.milliseconds);
+      }
 
       const functionEntries = Object.entries(this.config.functions);
       const functions = functionEntries.map(([name, { definition, buildExecutor }]) => ({

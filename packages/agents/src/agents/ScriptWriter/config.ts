@@ -1,6 +1,6 @@
 import { Result, ResultOk } from "@polywrap/result";
 import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
-import { BaseAgentConfig, BaseAgentContext } from "../../BaseAgent";
+import { AgentBaseConfig, AgentBaseContext } from "../../AgentBase";
 import { ALLOWED_LIBS, CANNOT_CREATE_IN_AGENT_NAMESPACE_ERROR, CANNOT_REQUIRE_LIB_ERROR, ThinkFuncParameters, WriteFuncParameters, extractRequires, formatSupportedLibraries } from "./utils";
 
 export interface ScriptWriterRunArgs {
@@ -9,7 +9,7 @@ export interface ScriptWriterRunArgs {
   args: string;
 }
 
-export interface ScriptWriterContext extends BaseAgentContext {}
+export interface ScriptWriterContext extends AgentBaseContext {}
 
 const WRITE_FN_NAME = "writeFunction";
 const WRITE_SUCCESS = (params: WriteFuncParameters) => ({
@@ -44,7 +44,7 @@ const THINK_SUCCESS = (params: ThinkFuncParameters) => ({
   ]
 })
 
-export const SCRIPTWRITER_AGENT_CONFIG: BaseAgentConfig<ScriptWriterRunArgs, ScriptWriterContext> = {
+export const SCRIPTWRITER_AGENT_CONFIG: AgentBaseConfig<ScriptWriterRunArgs, ScriptWriterContext> = {
   initialMessages: ({
     namespace,
     description,
@@ -87,7 +87,6 @@ export const SCRIPTWRITER_AGENT_CONFIG: BaseAgentConfig<ScriptWriterRunArgs, Scr
           required: ["thoughts"],
           additionalProperties: false
         },
-        success: (params) => THINK_SUCCESS(params as ThinkFuncParameters),
       },
       buildExecutor: (_) => {
         return async (params: ThinkFuncParameters): Promise<Result<AgentFunctionResult, string>> => {
@@ -121,7 +120,6 @@ export const SCRIPTWRITER_AGENT_CONFIG: BaseAgentConfig<ScriptWriterRunArgs, Scr
           required: ["namespace", "description", "arguments", "code"],
           additionalProperties: false
         },
-        success: (params) => WRITE_SUCCESS(params as WriteFuncParameters),
       },
       buildExecutor: (context) => {
         return async (params: { 
