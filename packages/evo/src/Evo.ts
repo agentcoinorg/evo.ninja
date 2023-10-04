@@ -63,7 +63,7 @@ export class Evo implements Agent<EvoRunArgs> {
       const workspace = new InMemoryWorkspace();
       const contextWindow = new ContextWindow(this.llm);
       const chat = new Chat(this.chat.tokenizer, contextWindow, this.logger);
-      return new ScriptWriter(this.llm, chat, this.logger, workspace);
+      return new ScriptWriter(this.llm, chat, workspace, this.logger, this.env);
     };
 
     if (this.timeout) {
