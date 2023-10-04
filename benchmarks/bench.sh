@@ -9,5 +9,9 @@ fi
 # Get the number of jobs from the command line argument (default to 1 if not provided)
 NUM_JOBS="${1:-1}"
 
+# Delete the .logs directory and recreate it
+rm -rf .logs/
+mkdir -p .logs/
+
 # Run each command in parallel and log its output to a corresponding log file
-parallel --jobs "$NUM_JOBS" --results logs/ "{}" :::: commands.txt
+parallel --jobs "$NUM_JOBS" --results .logs/ "{}" :::: commands.txt
