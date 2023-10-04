@@ -98,7 +98,7 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
         required: ["query"],
         additionalProperties: false
       },
-      success: (agentName: string, functionName: string, params: { url: string }) => ({
+      success: (agentName: string, functionName: string, params: { url: string }, result?: string) => ({
         outputs: [
           {
             type: AgentOutputType.Success,
@@ -107,7 +107,7 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
           }
         ],
         messages: [
-          ChatMessageBuilder.functionCall(functionName, params),
+          ChatMessageBuilder.functionCall(functionName, params, result),
         ]
       }),
       isTermination: false,
@@ -124,7 +124,7 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
         required: ["query"],
         additionalProperties: false
       },
-      success: (agentName: string, functionName: string, params: { url: string }) => ({
+      success: (agentName: string, functionName: string, params: { url: string }, result?: string) => ({
         outputs: [
           {
             type: AgentOutputType.Success,
@@ -133,7 +133,7 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
           }
         ],
         messages: [
-          ChatMessageBuilder.functionCall(functionName, params),
+          ChatMessageBuilder.functionCall(functionName, params, result),
         ]
       }),
       isTermination: false,
@@ -160,7 +160,7 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
         path: string;
         data: string;
         encoding: string;
-      }) => ({
+      }, result) => ({
         outputs: [
           {
             type: AgentOutputType.Success,
@@ -171,7 +171,7 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
           }
         ],
         messages: [
-          ChatMessageBuilder.functionCall(functionName, params),
+          ChatMessageBuilder.functionCall(functionName, params, result),
         ]
       }),
       isTermination: false,

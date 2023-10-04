@@ -81,7 +81,7 @@ const AGENT_CONFIG: AgentConfig<DevAgentRunArgs> = {
         path: string;
         data: string;
         encoding: string;
-      }) => ({
+      }, result?: string) => ({
         outputs: [
           {
             type: AgentOutputType.Success,
@@ -92,7 +92,7 @@ const AGENT_CONFIG: AgentConfig<DevAgentRunArgs> = {
           }
         ],
         messages: [
-          ChatMessageBuilder.functionCall(functionName, params),
+          ChatMessageBuilder.functionCall(functionName, params, result),
         ]
       }),
       isTermination: false,
