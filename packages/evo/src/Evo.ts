@@ -25,7 +25,7 @@ import {
 import { ScriptWriter } from "@evo-ninja/js-script-writer-agent";
 import { ResultErr } from "@polywrap/result";
 
-export class Evo implements Agent {
+export class Evo implements Agent<{ goal: string;}> {
   private readonly context: AgentContext;
 
   constructor(
@@ -53,7 +53,7 @@ export class Evo implements Agent {
     };
   }
 
-  public async* run(goal: string): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
+  public async* run({ goal }: { goal: string }): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
     const createScriptWriter = (): ScriptWriter => {
       const workspace = new InMemoryWorkspace();

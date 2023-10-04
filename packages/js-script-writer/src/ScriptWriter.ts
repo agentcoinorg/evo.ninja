@@ -7,7 +7,11 @@ import { ResultErr } from "@polywrap/result";
 import { Agent, Workspace } from "@evo-ninja/agent-utils";
 import { LlmApi, Chat, Logger, AgentOutput, RunResult, basicFunctionCallLoop } from "@evo-ninja/agent-utils";
 
-export class ScriptWriter implements Agent {
+export class ScriptWriter implements Agent<{
+  namespace: string;
+  description: string;
+  args: string;
+}> {
   private readonly context: AgentContext;
 
   constructor(
@@ -24,9 +28,15 @@ export class ScriptWriter implements Agent {
   }
 
   public async* run(
-    namespace: string, 
-    description: string,
-    args: string,
+    {
+      namespace,
+      description,
+      args,
+    }: {
+      namespace: string;
+      description: string;
+      args: string;
+    }
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
     try {
