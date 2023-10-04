@@ -14,7 +14,7 @@ import * as rimraf from "rimraf";
 import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
-import { ResearchAgent } from "../agents/ResearchAgent";
+import { ResearchAgent } from "./ResearchAgent";
 
 dotenv.config({
   path: path.join(__dirname, "../../../../.env")
@@ -24,7 +24,7 @@ jest.setTimeout(120000);
 
 describe('Research Agent Test Suite', () => {
 
-  function createResearchAgent(testName: string): {
+  function createDevAgent(testName: string): {
     agent: ResearchAgent;
     debugLog: DebugLog;
   } {
@@ -101,7 +101,7 @@ describe('Research Agent Test Suite', () => {
   }
 
   test("revenue-retrieval", async () => {
-    const { agent, debugLog } = createResearchAgent("revenue-retrieval");
+    const { agent, debugLog } = createDevAgent("revenue-retrieval");
     const response = await runResearchAgent(
       agent,
       "Write tesla's exact revenue in 2022 into a .txt file. Use the US notation, with a precision rounded to the nearest million dollars (for instance, $31,578 million).",

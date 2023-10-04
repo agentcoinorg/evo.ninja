@@ -3,13 +3,13 @@ import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-n
 import { BaseAgentConfig, BaseAgentContext } from "../../BaseAgent";
 import { ALLOWED_LIBS, CANNOT_CREATE_IN_AGENT_NAMESPACE_ERROR, CANNOT_REQUIRE_LIB_ERROR, ThinkFuncParameters, WriteFuncParameters, extractRequires, formatSupportedLibraries } from "./utils";
 
-interface ScriptWriterRunArgs {
+export interface ScriptWriterRunArgs {
   namespace: string;
   description: string;
   args: string;
 }
 
-interface ScriptWriterContext extends BaseAgentContext {}
+export interface ScriptWriterContext extends BaseAgentContext {}
 
 const WRITE_FN_NAME = "writeFunction";
 const WRITE_SUCCESS = (params: WriteFuncParameters) => ({
@@ -44,7 +44,7 @@ const THINK_SUCCESS = (params: ThinkFuncParameters) => ({
   ]
 })
 
-export const AGENT_CONFIG: BaseAgentConfig<ScriptWriterRunArgs, ScriptWriterContext> = {
+export const SCRIPTWRITER_AGENT_CONFIG: BaseAgentConfig<ScriptWriterRunArgs, ScriptWriterContext> = {
   name: 'ScriptWriter',
   initialMessages: (_, {
     namespace,

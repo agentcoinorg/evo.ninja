@@ -8,8 +8,8 @@ import {
   WrapClient,
   agentPlugin,
 } from "@evo-ninja/agent-utils";
-import { SubAgent } from "../../SubAgent";
-import { AGENT_CONFIG } from "./config";
+import { SubAgent } from "../SubAgent";
+import { RESEARCH_AGENT_CONFIG } from "./config";
 
 export class ResearchAgent extends SubAgent {
   constructor(
@@ -33,8 +33,9 @@ export class ResearchAgent extends SubAgent {
         agentPlugin({ logger: logger }),
         env
       ),
+      env
     };
 
-    super(AGENT_CONFIG, agentContext);
+    super(RESEARCH_AGENT_CONFIG, agentContext);
   }
 }

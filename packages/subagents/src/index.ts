@@ -1,2 +1,4 @@
 export * from "./subagents"
-export * from "./SubAgent"
+export * from "./subagents/SubAgent"
+export * from "./types"
+export * from "./agents"

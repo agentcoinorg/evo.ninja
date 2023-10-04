@@ -11,8 +11,7 @@ export interface BaseAgentContext {
 }
 
 export interface BaseAgentConfig<TRunArgs, TBaseAgentContext> {
-  name: string;
-  initialMessages: (agentName: string, runArguments: TRunArgs) => { role: ChatRole; content: string }[];
+  initialMessages: (runArguments: TRunArgs) => { role: ChatRole; content: string }[];
   loopPreventionPrompt: string;
   functions: Record<string, {
     definition: AgentFunction;
@@ -23,8 +22,8 @@ export interface BaseAgentConfig<TRunArgs, TBaseAgentContext> {
 
 export abstract class BaseAgent<TRunArgs, TBaseAgentContext extends BaseAgentContext> implements Agent<TRunArgs> {
   constructor(
-    private config: BaseAgentConfig<TRunArgs, TBaseAgentContext>,
-    private context: TBaseAgentContext
+    protected config: BaseAgentConfig<TRunArgs, TBaseAgentContext>,
+    protected context: TBaseAgentContext
   ) {}
   
   public get workspace(): Workspace {
@@ -36,12 +35,9 @@ export abstract class BaseAgent<TRunArgs, TBaseAgentContext extends BaseAgentCon
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
     try {
-      this.config.initialMessages(this.config.name, args).forEach((message) => {
+      this.config.initialMessages(args).forEach((message) => {
         chat.persistent(message.role, message.content);
       })
-
-      // chat.persistent("system", INITIAL_PROMP);
-      // chat.persistent("user", GOAL_PROMPT(namespace, description, args));
 
       const functionEntries = Object.entries(this.config.functions);
       const functions = functionEntries.map(([name, { definition, buildExecutor }]) => ({

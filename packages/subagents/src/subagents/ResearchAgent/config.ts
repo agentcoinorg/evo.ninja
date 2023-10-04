@@ -1,50 +1,54 @@
 import { AgentOutputType, ChatMessageBuilder, trimText } from "@evo-ninja/agent-utils";
-import { SubAgentConfig } from "../../SubAgent";
+import { ON_GOAL_ACHIEVED_FN_NAME, ON_GOAL_FAILED_FN_NAME } from "../constants";
+import { SubAgentConfig } from "../SubAgent";
 
-export const AGENT_CONFIG: SubAgentConfig = {
-  name: "researcher",
-  initialMessages: (agentName: string, { goal }) => [
-    { role: "system", content: `You are an agent that searches the web for information, called "${agentName}".\n` +
+const AGENT_NAME = "researcher";
+const SEARCH_FN_NAME = "web_search";
+const SCRAPE_TEXT_FN_NAME = "web_scrapeText";
+const SCRAPE_LINKS_FN_NAME = "web_scrapeLinks";
+const WRITE_FILE_FN_NAME = "fs_writeFile";
+
+export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
+  initialMessages: ({ goal }) => [
+    { role: "system", content: `You are an agent that searches the web for information, called "${AGENT_NAME}".\n` +
     `Only scrape if you're certain the information you're looking for isn't available in the result of search.\n`},
     { role: "user", content: `You have been asked by the user to achieve the following goal: ${goal}`},
   ],
   loopPreventionPrompt: "Assistant, you appear to be in a loop, try executing a different function.",
   functions: {
-    agent_onGoalAchieved: {
+    [ON_GOAL_ACHIEVED_FN_NAME]: {
       description: "Informs the user that the goal has been achieved.",
       parameters: {
         type: "object",
         properties: { },
       },
-      isTermination: true,
-      success: (agentName: string, functionName: string) => ({
+      success: () => ({
         outputs: [
           {
             type: AgentOutputType.Success,
-            title: `[${agentName}] ${functionName}`
+            title: `[${AGENT_NAME}] ${ON_GOAL_ACHIEVED_FN_NAME}`
           }
         ],
         messages: []
       })
     },
-    agent_onGoalFailed: {
+    [ON_GOAL_FAILED_FN_NAME]: {
       description: "Informs the user that the agent could not achieve the goal.",
       parameters: {
         type: "object",
         properties: { },
       },
-      isTermination: true,
-      success: (agentName: string, functionName: string) => ({
+      success: () => ({
         outputs: [
           {
             type: AgentOutputType.Error,
-            title: `[${agentName}] ${functionName}`
+            title: `[${AGENT_NAME}] ${ON_GOAL_FAILED_FN_NAME}`
           }
         ],
         messages: []
       })
     },
-    web_search: {
+    [SEARCH_FN_NAME]: {
       description: "Searches the web for a given query, using a search engine, and returns search results an array of { title, url, description } objects, ordered by relevance",
       parameters: {
         type: "object",
@@ -56,21 +60,20 @@ export const AGENT_CONFIG: SubAgentConfig = {
         required: ["query"],
         additionalProperties: false
       },
-      success: (agentName: string, functionName: string, params: { query: string }) => ({
+      success: (params: { query: string }) => ({
         outputs: [
           {
             type: AgentOutputType.Success,
-            title: `[${agentName}] ${functionName}`,
+            title: `[${AGENT_NAME}] ${SEARCH_FN_NAME}`,
             content: `${params.query}`
           }
         ],
         messages: [
-          ChatMessageBuilder.functionCall(functionName, params),
+          ChatMessageBuilder.functionCall(SEARCH_FN_NAME, params),
         ]
       }),
-      isTermination: false,
     },
-    web_scrapeText: {
+    [SCRAPE_TEXT_FN_NAME]: {
       description: "Open a web page and scrape all text found in the html",
       parameters: {
         type: "object",
@@ -82,21 +85,20 @@ export const AGENT_CONFIG: SubAgentConfig = {
         required: ["query"],
         additionalProperties: false
       },
-      success: (agentName: string, functionName: string, params: { url: string }) => ({
+      success: (params: { url: string }) => ({
         outputs: [
           {
             type: AgentOutputType.Success,
-            title: `[${agentName}] ${functionName}`,
+            title: `[${AGENT_NAME}] ${SCRAPE_TEXT_FN_NAME}`,
             content: `${params.url}`
           }
         ],
         messages: [
-          ChatMessageBuilder.functionCall(functionName, params),
+          ChatMessageBuilder.functionCall(SCRAPE_TEXT_FN_NAME, params),
         ]
       }),
-      isTermination: false,
     },
-    web_scrapeLinks: {
+    [SCRAPE_LINKS_FN_NAME]: {
       description: "Open a web page and scrape all links found in the html",
       parameters: {
         type: "object",
@@ -108,21 +110,20 @@ export const AGENT_CONFIG: SubAgentConfig = {
         required: ["query"],
         additionalProperties: false
       },
-      success: (agentName: string, functionName: string, params: { url: string }) => ({
+      success: (params: { url: string }) => ({
         outputs: [
           {
             type: AgentOutputType.Success,
-            title: `[${agentName}] ${functionName}`,
+            title: `[${AGENT_NAME}] ${SCRAPE_LINKS_FN_NAME}`,
             content: `${params.url}`
           }
         ],
         messages: [
-          ChatMessageBuilder.functionCall(functionName, params),
+          ChatMessageBuilder.functionCall(SCRAPE_LINKS_FN_NAME, params),
         ]
       }),
-      isTermination: false,
     },
-    fs_writeFile: {
+    [WRITE_FILE_FN_NAME]: {
       description: "Writes data to a file, replacing the file if it already exists.",
       parameters: {
         type: "object",
@@ -140,7 +141,7 @@ export const AGENT_CONFIG: SubAgentConfig = {
         required: ["path", "data", "encoding"],
         additionalProperties: false
       },
-      success: (agentName: string, functionName: string, params: {
+      success: (params: {
         path: string;
         data: string;
         encoding: string;
@@ -148,17 +149,16 @@ export const AGENT_CONFIG: SubAgentConfig = {
         outputs: [
           {
             type: AgentOutputType.Success,
-            title: `[${agentName}] ${functionName}`,
+            title: `[${AGENT_NAME}] ${WRITE_FILE_FN_NAME}`,
             content: `${params.path}\n` +
               `${params.encoding}\n` +
               `${trimText(params.data, 200)}`
           }
         ],
         messages: [
-          ChatMessageBuilder.functionCall(functionName, params),
+          ChatMessageBuilder.functionCall(WRITE_FILE_FN_NAME, params),
         ]
       }),
-      isTermination: false,
     }
   }
 }

@@ -1,10 +1,13 @@
 import { AgentOutputType, trimText, ChatMessageBuilder } from "@evo-ninja/agent-utils";
-import { SubAgentConfig } from "../../SubAgent";
+import { ON_GOAL_ACHIEVED_FN_NAME, ON_GOAL_FAILED_FN_NAME } from "../constants";
+import { SubAgentConfig } from "../SubAgent";
 
-export const AGENT_CONFIG: SubAgentConfig = {
-  name: "dev",
-  initialMessages: (agentName: string, { goal }) => [
-    { role: "system", content: `You are an expert software engineer named "${agentName}".`},
+const AGENT_NAME = "dev";
+const WRITE_FILE_FN_NAME = "fs_writeFile";
+
+export const DEV_AGENT_CONFIG: SubAgentConfig = {
+  initialMessages: ({ goal }) => [
+    { role: "system", content: `You are an expert software engineer named "${AGENT_NAME}".`},
     { role: "user", content: `You have been asked by the user to achieve the following goal: ${goal}`},
   ],
   loopPreventionPrompt: "Assistant, you appear to be in a loop, try executing a different function.",
@@ -15,12 +18,11 @@ export const AGENT_CONFIG: SubAgentConfig = {
         type: "object",
         properties: { },
       },
-      isTermination: true,
-      success: (agentName: string, functionName: string) => ({
+      success: () => ({
         outputs: [
           {
             type: AgentOutputType.Success,
-            title: `[${agentName}] ${functionName}`
+            title: `[${AGENT_NAME}] ${ON_GOAL_ACHIEVED_FN_NAME}`
           }
         ],
         messages: []
@@ -32,18 +34,17 @@ export const AGENT_CONFIG: SubAgentConfig = {
         type: "object",
         properties: { },
       },
-      isTermination: true,
-      success: (agentName: string, functionName: string) => ({
+      success: () => ({
         outputs: [
           {
             type: AgentOutputType.Error,
-            title: `[${agentName}] ${functionName}`
+            title: `[${AGENT_NAME}] ${ON_GOAL_FAILED_FN_NAME}`
           }
         ],
         messages: []
       })
     },
-    fs_writeFile: {
+    [WRITE_FILE_FN_NAME]: {
       description: "Writes data to a file, replacing the file if it already exists.",
       parameters: {
         type: "object",
@@ -61,7 +62,7 @@ export const AGENT_CONFIG: SubAgentConfig = {
         required: ["path", "data", "encoding"],
         additionalProperties: false
       },
-      success: (agentName: string, functionName: string, params: {
+      success: (params: {
         path: string;
         data: string;
         encoding: string;
@@ -69,17 +70,16 @@ export const AGENT_CONFIG: SubAgentConfig = {
         outputs: [
           {
             type: AgentOutputType.Success,
-            title: `[${agentName}] ${functionName}`,
+            title: `[${AGENT_NAME}] ${WRITE_FILE_FN_NAME}`,
             content: `${params.path}\n` +
               `${params.encoding}\n` +
               `${trimText(params.data, 200)}`
           }
         ],
         messages: [
-          ChatMessageBuilder.functionCall(functionName, params),
+          ChatMessageBuilder.functionCall(WRITE_FILE_FN_NAME, params),
         ]
       }),
-      isTermination: false,
     }
   }
 };
