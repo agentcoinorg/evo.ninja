@@ -21,6 +21,7 @@ const SUCCESS = (params: FuncParameters): AgentFunctionResult => ({
   ],
   messages: [
     ChatMessageBuilder.functionCall(FN_NAME, params),
+    ChatMessageBuilder.functionCallResult(FN_NAME, "Assistant, please respond."),
   ]
 });
 

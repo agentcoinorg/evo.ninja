@@ -8,10 +8,10 @@ export class ChatMessageBuilder {
     };
   }
 
-  static functionCall<TFuncParams>(funcName: string, params: TFuncParams, content: string = ""): ChatMessage {
+  static functionCall<TFuncParams>(funcName: string, params: TFuncParams): ChatMessage {
     return {
       role: "assistant",
-      content,
+      content: "",
       function_call: {
         name: funcName,
         arguments: JSON.stringify(params)
@@ -19,11 +19,11 @@ export class ChatMessageBuilder {
     };
   }
 
-  static functionCallResponse(funcName: string, content: string): ChatMessage {
+  static functionCallResult(funcName: string, result: string): ChatMessage {
     return {
       role: "function",
-      content,
-      name: funcName
-    }
+      name: funcName,
+      content: result
+    };
   }
 }

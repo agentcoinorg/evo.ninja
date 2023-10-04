@@ -100,7 +100,7 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
         ],
         messages: [
           ChatMessageBuilder.functionCall(functionName, params),
-          ChatMessageBuilder.functionCallResponse(functionName, result)
+          ChatMessageBuilder.functionCallResult(functionName, result)
         ]
       }),
       fail: (agentName: string, functionName: string, params: any, error: string) => ({
@@ -112,7 +112,7 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
         ],
         messages: [
           ChatMessageBuilder.functionCall(functionName, params),
-          ChatMessageBuilder.functionCallResponse(functionName, error)
+          ChatMessageBuilder.functionCallResult(functionName, `Error: ${error}`)
         ]
       }),
       isTermination: false,
@@ -138,8 +138,8 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
           }
         ],
         messages: [
-          ChatMessageBuilder.functionCall(functionName, params, result),
-          ChatMessageBuilder.functionCallResponse(functionName, result)
+          ChatMessageBuilder.functionCall(functionName, params),
+          ChatMessageBuilder.functionCallResult(functionName, result)
         ]
       }),
       fail: (agentName: string, functionName: string, params: any, error: string) => ({
@@ -151,7 +151,7 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
         ],
         messages: [
           ChatMessageBuilder.functionCall(functionName, params),
-          ChatMessageBuilder.functionCallResponse(functionName, error)
+          ChatMessageBuilder.functionCallResult(functionName, `Error: ${error}`)
         ]
       }),
       isTermination: false,
@@ -178,7 +178,7 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
         ],
         messages: [
           ChatMessageBuilder.functionCall(functionName, params),
-          ChatMessageBuilder.functionCallResponse(functionName, result)
+          ChatMessageBuilder.functionCallResult(functionName, result)
         ]
       }),
       fail: (agentName: string, functionName: string, params: any, error: string) => ({
@@ -190,7 +190,7 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
         ],
         messages: [
           ChatMessageBuilder.functionCall(functionName, params),
-          ChatMessageBuilder.functionCallResponse(functionName, error)
+          ChatMessageBuilder.functionCallResult(functionName, `Error: ${error}`)
         ]
       }),
       isTermination: false,
@@ -228,8 +228,8 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
           }
         ],
         messages: [
-          ChatMessageBuilder.functionCall(functionName, params, result),
-          ChatMessageBuilder.functionCallResponse(functionName, result),
+          ChatMessageBuilder.functionCall(functionName, params),
+          ChatMessageBuilder.functionCallResult(functionName, result)
         ]
       }),
       fail: (agentName: string, functionName: string, params: any, error: string) => ({
@@ -241,7 +241,7 @@ export const AGENT_CONFIG: AgentConfig<ResearchAgentRunArgs> = {
         ],
         messages: [
           ChatMessageBuilder.functionCall(functionName, params),
-          ChatMessageBuilder.functionCallResponse(functionName, error)
+          ChatMessageBuilder.functionCallResult(functionName, `Error: ${error}`)
         ]
       }),
       isTermination: false,

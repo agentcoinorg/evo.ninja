@@ -14,11 +14,11 @@ import { AgentContext } from "../AgentContext";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../prompts";
 
 const FN_NAME = "executeScript";
-type FuncParameters = { 
-  namespace: string, 
-  description: string, 
+type FuncParameters = {
+  namespace: string,
+  description: string,
   arguments: string,
-  result: string
+  variable?: string
 };
 
 const SUCCESS = (scriptName: string, result: any, params: FuncParameters): AgentFunctionResult => ({
@@ -29,13 +29,16 @@ const SUCCESS = (scriptName: string, result: any, params: FuncParameters): Agent
       content: FUNCTION_CALL_SUCCESS_CONTENT(
         FN_NAME,
         params,
-        EXECUTE_SCRIPT_OUTPUT(params.result, result),
+        EXECUTE_SCRIPT_OUTPUT(params.variable, result),
       )
     }
   ],
   messages: [
     ChatMessageBuilder.functionCall(FN_NAME, params),
-    ChatMessageBuilder.system(EXECUTE_SCRIPT_OUTPUT(params.result, result)),
+    ChatMessageBuilder.functionCallResult(
+      FN_NAME,
+      EXECUTE_SCRIPT_OUTPUT(params.variable, result)
+    ),
   ]
 });
 
@@ -49,7 +52,8 @@ const EXECUTE_SCRIPT_ERROR_RESULT = (scriptName: string, error: string | undefin
   ],
   messages: [
     ChatMessageBuilder.functionCall(FN_NAME, params),
-    ChatMessageBuilder.system(
+    ChatMessageBuilder.functionCallResult(
+      FN_NAME,
       `Error executing script '${scriptName}'\n` + 
       `\`\`\`\n` +
       `${
@@ -104,9 +108,9 @@ export const executeScript: AgentFunction<AgentContext> = {
           type: "string",
           description: "JSON-formatted arguments to pass into the script being executed. You can replace a value with a global variable by using {{varName}} syntax.",
         },
-        result: {
+        variable: {
           type: "string",
-          description: "The name of the variable to store the result of the script"
+          description: "The name of a variable to store the script's result in"
         }
       },
       required: ["namespace", "arguments", "result"],
@@ -163,8 +167,8 @@ export const executeScript: AgentFunction<AgentContext> = {
           globals
         });
 
-        if (result.ok && context.client.jsPromiseOutput.ok) {
-          context.globals[params.result] =
+        if (params.variable && result.ok && context.client.jsPromiseOutput.ok) {
+          context.globals[params.variable] =
             JSON.stringify(context.client.jsPromiseOutput.value);
         }
 

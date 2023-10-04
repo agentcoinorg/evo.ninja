@@ -35,7 +35,7 @@ const SUCCESS = (params: FuncParameters): AgentFunctionResult => ({
   ],
   messages: [
     ChatMessageBuilder.functionCall(FN_NAME, params),
-    ChatMessageBuilder.system(`Success.`),
+    ChatMessageBuilder.functionCallResult(FN_NAME, "Success."),
   ]
 });
 const CANNOT_CREATE_IN_AGENT_NAMESPACE_ERROR = (params: FuncParameters): AgentFunctionResult => ({
@@ -48,8 +48,9 @@ const CANNOT_CREATE_IN_AGENT_NAMESPACE_ERROR = (params: FuncParameters): AgentFu
   ],
   messages: [
     ChatMessageBuilder.functionCall(FN_NAME, params),
-    ChatMessageBuilder.system(
-      `Failed writing the function.\n` +
+    ChatMessageBuilder.functionCallResult(
+      FN_NAME,
+      `Error: Failed writing the function.\n` +
       `Namespaces starting with 'agent.' are reserved.`
     ),
   ]
@@ -64,7 +65,9 @@ const CANNOT_REQUIRE_LIB_ERROR = (params: FuncParameters): AgentFunctionResult =
   ],
   messages: [
     ChatMessageBuilder.functionCall(FN_NAME, params),
-    ChatMessageBuilder.system(`Cannot require libraries other than ${allowedLibs.join(", ")}.`),
+    ChatMessageBuilder.functionCallResult(
+      FN_NAME, `Error: Cannot require libraries other than ${allowedLibs.join(", ")}.`
+    ),
   ]
 });
 

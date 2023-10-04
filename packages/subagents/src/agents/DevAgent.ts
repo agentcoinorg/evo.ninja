@@ -111,7 +111,7 @@ const AGENT_CONFIG: AgentConfig<DevAgentRunArgs> = {
         ],
         messages: [
           ChatMessageBuilder.functionCall(functionName, params),
-          ChatMessageBuilder.functionCallResponse(functionName, result)
+          ChatMessageBuilder.functionCallResult(functionName, result)
         ]
       }),
       fail: (agentName: string, functionName: string, params: any, error: string) => ({
@@ -126,8 +126,7 @@ const AGENT_CONFIG: AgentConfig<DevAgentRunArgs> = {
         ],
         messages: [
           ChatMessageBuilder.functionCall(functionName, params),
-          ChatMessageBuilder.functionCallResponse(functionName, error),
-          
+          ChatMessageBuilder.functionCallResult(functionName, `Error: ${error}`)
         ]
       }),
       isTermination: false,
