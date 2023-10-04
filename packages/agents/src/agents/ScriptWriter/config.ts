@@ -45,8 +45,7 @@ const THINK_SUCCESS = (params: ThinkFuncParameters) => ({
 })
 
 export const SCRIPTWRITER_AGENT_CONFIG: BaseAgentConfig<ScriptWriterRunArgs, ScriptWriterContext> = {
-  name: 'ScriptWriter',
-  initialMessages: (_, {
+  initialMessages: ({
     namespace,
     description,
     args
@@ -88,7 +87,7 @@ export const SCRIPTWRITER_AGENT_CONFIG: BaseAgentConfig<ScriptWriterRunArgs, Scr
           required: ["thoughts"],
           additionalProperties: false
         },
-        success: (_, __, params) => THINK_SUCCESS(params as ThinkFuncParameters),
+        success: (params) => THINK_SUCCESS(params as ThinkFuncParameters),
       },
       buildExecutor: (_) => {
         return async (params: ThinkFuncParameters): Promise<Result<AgentFunctionResult, string>> => {
@@ -122,7 +121,7 @@ export const SCRIPTWRITER_AGENT_CONFIG: BaseAgentConfig<ScriptWriterRunArgs, Scr
           required: ["namespace", "description", "arguments", "code"],
           additionalProperties: false
         },
-        success: (_, __, params) => WRITE_SUCCESS(params as WriteFuncParameters),
+        success: (params) => WRITE_SUCCESS(params as WriteFuncParameters),
       },
       buildExecutor: (context) => {
         return async (params: { 
