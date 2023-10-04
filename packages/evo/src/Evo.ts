@@ -22,7 +22,7 @@ import {
   agentPlugin,
   Env
 } from "@evo-ninja/agent-utils";
-import { ScriptWriter } from "@evo-ninja/js-script-writer-agent";
+import { ScriptWriter } from "@evo-ninja/agents";
 import { ResultErr } from "@polywrap/result";
 
 export interface EvoRunArgs {

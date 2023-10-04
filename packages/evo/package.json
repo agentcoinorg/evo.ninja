@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@evo-ninja/agent-utils": "~0.1.0",
-    "@evo-ninja/js-script-writer-agent": "~0.1.0",
+    "@evo-ninja/agents": "~0.1.0",
     "@polywrap/client-js": "~0.12.0",
     "@polywrap/result": "~0.12.0",
     "@polywrap/sys-config-bundle-js": "~0.12.0",
