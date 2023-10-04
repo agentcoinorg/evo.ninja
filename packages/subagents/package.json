@@ -1,5 +1,5 @@
 {
-  "name": "@evo-ninja/dev-agent",
+  "name": "@evo-ninja/subagents",
   "version": "0.1.0",
   "license": "MIT",
   "main": "./build/index.js",

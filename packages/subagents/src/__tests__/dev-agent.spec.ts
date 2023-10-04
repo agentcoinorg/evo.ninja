@@ -1,5 +1,3 @@
-import { DevAgent } from "../DevAgent";
-
 import {
   Env,
   Scripts,
@@ -8,7 +6,7 @@ import {
   ContextWindow,
   LlmApi,
   ConsoleLogger,
-  Logger
+  Logger,
 } from "@evo-ninja/agent-utils";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
@@ -16,6 +14,8 @@ import * as rimraf from "rimraf";
 import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
+import { DEV_AGENT_CONFIG } from "../agents/DevAgent";
+import { SubAgent } from "../SubAgent";
 
 dotenv.config({
   path: path.join(__dirname, "../../../../.env")
@@ -26,7 +26,7 @@ jest.setTimeout(120000);
 describe('Dev Agent Test Suite', () => {
 
   function createDevAgent(testName: string): {
-    agent: DevAgent;
+    agent: SubAgent;
     debugLog: DebugLog;
   } {
     const testCaseDir = path.join(__dirname, "test-cases", testName);
@@ -69,18 +69,20 @@ describe('Dev Agent Test Suite', () => {
     const workspace = new FileSystemWorkspace(testCaseDir);
 
     return {
-      agent: new DevAgent(
+      agent: new SubAgent(
+        DEV_AGENT_CONFIG,
         debugLlm,
         chat,
         workspace,
         scripts,
-        logger
+        logger,
+        env
       ),
       debugLog
     };
   }
 
-  async function runDevAgent(agent: DevAgent, goal: string, debugLog: DebugLog) {
+  async function runDevAgent(agent: SubAgent, goal: string, debugLog: DebugLog) {
     debugLog.goalStart(goal);
     const iterator = agent.run(goal);
 
