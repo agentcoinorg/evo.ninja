@@ -1,6 +1,6 @@
 {
   "name": "web.scrapeText",
-  "description": "Open a web page and scrape all text found in the html",
+  "description": "Open a web page and scrape all text found in the html (tags: http, fetch, request)",
   "arguments": "{ url: string }",
   "code": "./web.scrapeText.js"
 }

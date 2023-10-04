@@ -1,7 +1,7 @@
 import { agentFunctions } from "./agent-functions";
 import { writeFunction } from "./agent-functions/writeFunction";
 import { AgentContext } from "./AgentContext";
-import { GOAL_PROMPT, INITIAL_PROMP, LOOP_PREVENTION_PROMPT } from "./prompts";
+import { GOAL_PROMPT, INITIAL_PROMPT, LOOP_PREVENTION_PROMPT } from "./prompts";
 
 import { ResultErr } from "@polywrap/result";
 import { Agent, Workspace } from "@evo-ninja/agent-utils";
@@ -38,7 +38,7 @@ export class ScriptWriter implements Agent<ScriptWriterRunArgs> {
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
     try {
-      chat.persistent("system", INITIAL_PROMP);
+      chat.persistent("system", INITIAL_PROMPT);
       chat.persistent("user", GOAL_PROMPT(namespace, description, args));
 
       return yield* basicFunctionCallLoop(

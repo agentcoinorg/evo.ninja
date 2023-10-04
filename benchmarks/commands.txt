@@ -1,0 +1,2 @@
+agbenchmark --nc --test=Search
+agbenchmark --nc --test=BasicRetrieval

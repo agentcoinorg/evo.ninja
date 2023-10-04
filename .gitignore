@@ -5,6 +5,7 @@ debug
 coverage
 workspace
 chats
+.logs
 
 !/benchmarks/agbenchmark_config/config.json
 /benchmarks/agbenchmark_config
