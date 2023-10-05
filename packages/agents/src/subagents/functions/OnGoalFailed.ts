@@ -1,11 +1,10 @@
 import { AgentOutputType } from "@evo-ninja/agent-utils"
 import { SubAgentFunctionBase } from "../SubAgentFunction"
-import { ON_GOAL_FAILED_FN_NAME } from "../constants"
 import { SubAgent } from "../SubAgent"
 
 export class OnGoalFailedFunction extends SubAgentFunctionBase<{}> {
   get name() {
-    return ON_GOAL_FAILED_FN_NAME
+    return "agent_onGoalFailed"
   }
 
   get description() {

@@ -1,8 +1,7 @@
 import { AgentBase } from "../AgentBase";
-import { ON_GOAL_ACHIEVED_FN_NAME, ON_GOAL_FAILED_FN_NAME } from "./constants";
 import { AgentBaseContext } from "../AgentBase";
 
-import { Scripts, WrapClient, ChatRole, agentPlugin } from "@evo-ninja/agent-utils";
+import { Scripts, WrapClient, ChatRole, agentPlugin, ExecuteAgentFunctionCalled } from "@evo-ninja/agent-utils";
 import { SubAgentFunctionBase } from "./SubAgentFunction";
 
 export interface SubAgentContext extends AgentBaseContext {
@@ -15,6 +14,7 @@ export interface SubAgentConfig {
   expertise: string;
   initialMessages: (runArguments: SubAgentRunArgs) => { role: ChatRole; content: string }[];
   loopPreventionPrompt: string;
+  shouldTerminate: (functionCalled: ExecuteAgentFunctionCalled) => boolean;
   functions: SubAgentFunctionBase<unknown>[];
 }
 
@@ -30,16 +30,7 @@ export class SubAgent extends AgentBase<SubAgentRunArgs, SubAgentContext> {
     context: SubAgentContext,
   ) {
 
-    super({
-      ...config,
-      shouldTerminate: (functionCalled) => {
-        return [
-          ON_GOAL_ACHIEVED_FN_NAME,
-          ON_GOAL_FAILED_FN_NAME
-        ].includes(functionCalled.name);
-      },
-    }, context);
-
+    super(config, context);
     this.name = config.name;
   }
 

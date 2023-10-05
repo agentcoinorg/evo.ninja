@@ -1,9 +1,10 @@
-import { ON_GOAL_ACHIEVED_FN_NAME, ON_GOAL_FAILED_FN_NAME, AgentBaseConfig, SubAgentContext, SubAgentConfig } from "../..";
+import { AgentBaseConfig, SubAgentContext, SubAgentConfig } from "../..";
 import { DelegateSubAgentFunction } from "./functions/DelegateSubAgent";
 import { ReadVariableFunction } from "./functions/ReadVariable";
 import { FindScriptFunction } from "./functions/FindScript";
 import { ExecuteScriptFunction } from "./functions/ExecuteScript";
 import { CreateScriptFunction } from "./functions/CreateScript";
+import { OnGoalAchievedFunction } from "../../subagents/functions/OnGoalAchieved";
 
 export interface EvoRunArgs {
   goal: string
@@ -12,6 +13,9 @@ export interface EvoRunArgs {
 export interface EvoContext extends SubAgentContext {
   globals: Record<string, string>;
 }
+
+const onGoalAchievedFn = new OnGoalAchievedFunction();
+const onGoalFailedFn = new OnGoalAchievedFunction();
 
 export const EVO_AGENT_CONFIG = (subagents?: SubAgentConfig[]): AgentBaseConfig<EvoRunArgs, EvoContext> => {
   const config: AgentBaseConfig<EvoRunArgs, EvoContext> = {
@@ -55,11 +59,13 @@ I do not communicate with the user. I execute goals to the best of my abilities 
       new ExecuteScriptFunction(),
       new FindScriptFunction(),
       new ReadVariableFunction(),
+      onGoalAchievedFn,
+      onGoalFailedFn,
     ],
     shouldTerminate: (functionCalled) => {
       return [
-        ON_GOAL_ACHIEVED_FN_NAME,
-        ON_GOAL_FAILED_FN_NAME
+        onGoalAchievedFn.name,
+        onGoalFailedFn.name
       ].includes(functionCalled.name);
     },
   };

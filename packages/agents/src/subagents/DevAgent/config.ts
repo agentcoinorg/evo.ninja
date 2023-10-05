@@ -5,6 +5,9 @@ import { OnGoalFailedFunction } from "../functions/OnGoalFailed";
 
 const AGENT_NAME = "dev";
 
+const onGoalAchievedFn = new OnGoalAchievedFunction();
+const onGoalFailedFn = new OnGoalAchievedFunction();
+
 export const DEV_AGENT_CONFIG: SubAgentConfig = {
   name: "Developer",
   expertise: "developing software",
@@ -17,5 +20,11 @@ export const DEV_AGENT_CONFIG: SubAgentConfig = {
     new OnGoalAchievedFunction(),
     new OnGoalFailedFunction(),
     new WriteFileFunction(),
-  ]
+  ],
+  shouldTerminate: (functionCalled) => {
+    return [
+      onGoalAchievedFn.name,
+      onGoalFailedFn.name
+    ].includes(functionCalled.name);
+  },
 };

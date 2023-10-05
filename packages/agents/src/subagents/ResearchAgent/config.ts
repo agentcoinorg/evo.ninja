@@ -1,12 +1,14 @@
 import { SubAgentConfig } from "../SubAgent";
 import { OnGoalAchievedFunction } from "../functions/OnGoalAchieved";
 import { WriteFileFunction } from "../../functions/WriteFile";
-import { OnGoalFailedFunction } from "../functions/OnGoalFailed";
 import { ScrapeLinksFunction } from "../functions/ScrapeLinks";
 import { ScrapeTextFunction } from "../functions/ScrapeText";
 import { SearchFunction } from "../functions/Search";
 
 const AGENT_NAME = "researcher";
+
+const onGoalAchievedFn = new OnGoalAchievedFunction();
+const onGoalFailedFn = new OnGoalAchievedFunction();
 
 export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
   name: "Researcher",
@@ -19,11 +21,17 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
   loopPreventionPrompt: "Assistant, you appear to be in a loop, try executing a different function.",
   functions:
     [
-      new OnGoalAchievedFunction(),
-      new OnGoalFailedFunction(),
+      onGoalAchievedFn,
+      onGoalFailedFn,
       new SearchFunction(),
       new ScrapeTextFunction(),
       new ScrapeLinksFunction(),
       new WriteFileFunction()
-  ]
+  ],
+  shouldTerminate: (functionCalled) => {
+    return [
+      onGoalAchievedFn.name,
+      onGoalFailedFn.name
+    ].includes(functionCalled.name);
+  },
 }

@@ -1,10 +1,10 @@
 import { AgentOutputType } from "@evo-ninja/agent-utils"
-import { ON_GOAL_ACHIEVED_FN_NAME, SubAgent } from ".."
+import { SubAgent } from ".."
 import { SubAgentFunctionBase } from "../SubAgentFunction"
 
 export class OnGoalAchievedFunction extends SubAgentFunctionBase<{}> {
   get name() {
-    return ON_GOAL_ACHIEVED_FN_NAME
+    return "agent_onGoalAchieved"
   }
 
   get description() {
