@@ -54,7 +54,7 @@ export const SCRIPTWRITER_AGENT_CONFIG: AgentBaseConfig<ScriptWriterRunArgs, Scr
     {
       role: "assistant",
       content:
-`You are an agent designed to write JavaScript functions. 
+`I am an agent designed to write JavaScript functions. 
 1. Always think through the implementation step-by-step before coding.
 2. Submit your code using the writeFunction function.
 3. Don't get disheartened by initial failures. Retry until success.
@@ -89,6 +89,7 @@ return fs.readFileSync(path, encoding);
   functions: {
     [THINK_FN_NAME]: {
       definition: {
+        name: THINK_FN_NAME,
         description: `Think.`,
         parameters: {
           type: "object",
@@ -110,6 +111,7 @@ return fs.readFileSync(path, encoding);
     },
     [WRITE_FN_NAME]: {
       definition: {
+        name: WRITE_FN_NAME,
         description: `Writes the function.`,
         parameters: {
           type: "object",
