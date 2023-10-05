@@ -6,13 +6,16 @@ const AGENT_NAME = "dev";
 const WRITE_FILE_FN_NAME = "fs_writeFile";
 
 export const DEV_AGENT_CONFIG: SubAgentConfig = {
+  name: "Developer",
+  expertise: "developing software",
   initialMessages: ({ goal }) => [
-    { role: "assistant", content: `You are an expert software engineer named "${AGENT_NAME}".`},
-    { role: "user", content: `You have been asked by the user to achieve the following goal: ${goal}`},
+    { role: "assistant", content: `I am an expert software engineer named "${AGENT_NAME}".`},
+    { role: "user", content: goal},
   ],
   loopPreventionPrompt: "Assistant, you appear to be in a loop, try executing a different function.",
   functions: {
-    agent_onGoalAchieved: {
+    [ON_GOAL_ACHIEVED_FN_NAME]: {
+      name: ON_GOAL_ACHIEVED_FN_NAME,
       description: "Informs the user that the goal has been achieved.",
       parameters: {
         type: "object",
@@ -37,7 +40,8 @@ export const DEV_AGENT_CONFIG: SubAgentConfig = {
         messages: []
       })
     },
-    agent_onGoalFailed: {
+    [ON_GOAL_FAILED_FN_NAME]: {
+      name: ON_GOAL_FAILED_FN_NAME,
       description: "Informs the user that the agent could not achieve the goal.",
       parameters: {
         type: "object",
@@ -63,6 +67,7 @@ export const DEV_AGENT_CONFIG: SubAgentConfig = {
       })
     },
     [WRITE_FILE_FN_NAME]: {
+      name: WRITE_FILE_FN_NAME,
       description: "Writes data to a file, replacing the file if it already exists.",
       parameters: {
         type: "object",
@@ -84,7 +89,7 @@ export const DEV_AGENT_CONFIG: SubAgentConfig = {
         path: string;
         data: string;
         encoding: string;
-      }, result: string) => ({
+      }) => ({
         outputs: [
           {
             type: AgentOutputType.Success,
@@ -96,7 +101,7 @@ export const DEV_AGENT_CONFIG: SubAgentConfig = {
         ],
         messages: [
           ChatMessageBuilder.functionCall(WRITE_FILE_FN_NAME, params),
-          ChatMessageBuilder.functionCallResult(WRITE_FILE_FN_NAME, result)
+          ChatMessageBuilder.functionCallResult(WRITE_FILE_FN_NAME, "Successfully wrote file.")
         ]
       }),
       failure: (params: any, error: string) => ({

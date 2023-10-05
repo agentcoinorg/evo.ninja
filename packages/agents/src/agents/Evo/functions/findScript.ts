@@ -1,6 +1,5 @@
-import { Script, AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+import { Script, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, AgentFunctionDefinition } from "@evo-ninja/agent-utils";
 import { FUNCTION_CALL_SUCCESS_CONTENT } from "../utils";
-import { AgentFunction } from "../../..";
 import { EvoContext } from "../config";
 
 export const FIND_SCRIPT_FN_NAME = "findScript";
@@ -35,10 +34,11 @@ const FIND_SCRIPT_SUCCESS = (params: FIND_SCRIPT_FN_PARAMS, candidates: Script[]
 });
 
 export const findScriptFunction: {
-  definition: AgentFunction;
+  definition: AgentFunctionDefinition;
   buildExecutor: (context: EvoContext) => (params: FIND_SCRIPT_FN_PARAMS) => Promise<AgentFunctionResult>;
 } = {
   definition: {
+    name: FIND_SCRIPT_FN_NAME,
     description: `Search for an script.`,
     parameters: {
       type: "object",

@@ -1,6 +1,5 @@
-import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder, AgentFunctionDefinition } from "@evo-ninja/agent-utils";
 import { FUNCTION_CALL_SUCCESS_CONTENT, FUNCTION_CALL_FAILED } from "../utils";
-import { AgentFunction } from "../../..";
 import { EvoContext } from "../config";
 
 export const READ_VAR_FN_NAME = "readVariable";
@@ -33,10 +32,11 @@ const READ_VAR_SUCCESS = (params: READ_VAR_FN_PARAMS, varValue: string): AgentFu
 const MAX_VAR_LENGTH = 3000;
 
 export const readVariableFunction: {
-  definition: AgentFunction;
+  definition: AgentFunctionDefinition;
   buildExecutor: (context: EvoContext) => (params: READ_VAR_FN_PARAMS) => Promise<AgentFunctionResult>;
 } = {
   definition: {
+    name: READ_VAR_FN_NAME,
     description: `Reads the stored global variable in JSON. If the JSON is longer than ${MAX_VAR_LENGTH} characters, it will be truncated`,
     parameters: {
       type: "object",

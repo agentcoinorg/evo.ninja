@@ -1,1 +1,1 @@
-export * from "./DevAgent";
+export * from "./config";
