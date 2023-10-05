@@ -19,7 +19,7 @@ export class ChatMessageBuilder {
     };
   }
 
-  static functionCallResult(funcName: string, result?: string): ChatMessage {
+  static functionCallResult(funcName: string, result: string): ChatMessage {
     return {
       role: "function",
       name: funcName,
