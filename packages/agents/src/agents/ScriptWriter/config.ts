@@ -1,7 +1,10 @@
+<<<<<<< Updated upstream
 import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+=======
+>>>>>>> Stashed changes
 import { AgentBaseConfig, AgentBaseContext } from "../../AgentBase";
-import { ALLOWED_LIBS, CANNOT_CREATE_IN_AGENT_NAMESPACE_ERROR, CANNOT_REQUIRE_LIB_ERROR, ThinkFuncParameters, WriteFuncParameters, extractRequires, formatSupportedLibraries } from "./utils";
-import { EvoContext } from "../Evo/config";
+import { ThinkFunction } from "../../functions/Think";
+import { WriteFunctionFunction } from "../../functions/WriteFunction";
 
 export interface ScriptWriterRunArgs {
   namespace: string;
@@ -10,40 +13,6 @@ export interface ScriptWriterRunArgs {
 }
 
 export interface ScriptWriterContext extends AgentBaseContext {}
-
-const WRITE_FN_NAME = "writeFunction";
-const WRITE_SUCCESS = (params: WriteFuncParameters) => ({
-  outputs: [
-    {
-      type: AgentOutputType.Success,
-      title: `Wrote function '${params.namespace}'.`,
-      content: `Wrote the function ${params.namespace} to the workspace.`
-    }
-  ],
-  messages: [
-    ChatMessageBuilder.functionCall(WRITE_FN_NAME, params),
-    ChatMessageBuilder.functionCallResult(WRITE_FN_NAME, "Success."),
-  ]
-})
-
-const THINK_FN_NAME = "think";
-const THINK_SUCCESS = (params: ThinkFuncParameters) => ({
-  outputs: [
-    {
-      type: AgentOutputType.Success,
-      title: `Thinking...`,
-      content: 
-        `## Thoughts:\n` +
-        `\`\`\`\n` +
-        `${params.thoughts}\n` +
-        `\`\`\``
-    }
-  ],
-  messages: [
-    ChatMessageBuilder.functionCall(THINK_FN_NAME, params),
-    ChatMessageBuilder.functionCallResult(THINK_FN_NAME, "Assistant, please respond."),
-  ]
-})
 
 export const SCRIPTWRITER_AGENT_CONFIG: AgentBaseConfig<ScriptWriterRunArgs, ScriptWriterContext> = {
   initialMessages: ({
@@ -74,7 +43,7 @@ Guidelines:
 2. Limit yourself to the provided arguments. Don't introduce new ones.
 3. If the function needs to return a value, use the return keyword.
 4. For libraries, utilize the require function for imports.
-5. Stick to the following libraries: ${formatSupportedLibraries()}.
+5. Stick to the following libraries: ${WriteFunctionFunction.formatSupportedLibraries()}.
 6. Avoid using external APIs that mandate authentication or API keys.
 7. Refrain from recursive calls to the "${namespace}" function.
 
@@ -87,6 +56,7 @@ return fs.readFileSync(path, encoding);
   ],
   loopPreventionPrompt: "Assistant, try executing the writeFunction.",
   functions: [
+<<<<<<< Updated upstream
     {
       definition: {
         name: THINK_FN_NAME,
@@ -158,6 +128,10 @@ return fs.readFileSync(path, encoding);
         };
       }
     }
+=======
+    new ThinkFunction(),
+    new WriteFunctionFunction()
+>>>>>>> Stashed changes
   ],
   shouldTerminate: (functionCalled) => functionCalled.name === "writeFunction"
 }

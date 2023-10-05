@@ -1,11 +1,9 @@
 import { ON_GOAL_ACHIEVED_FN_NAME, ON_GOAL_FAILED_FN_NAME, AgentBaseConfig, SubAgentContext, SubAgentConfig } from "../..";
-import { createScriptFunction } from "./functions/createScript";
-import { executeScriptFunction } from "./functions/executeScript";
-import { findScriptFunction } from "./functions/findScript";
-import { readVariableFunction } from "./functions/readVariable";
-import { delegateSubAgent } from "./functions/delegateSubAgent";
-import { createOnGoalAchievedFunction, createOnGoalFailedFunction } from "../../subagents/utils";
-import { buildScriptExecutor } from "../../subagents/buildScriptExecutor";
+import { DelegateSubAgentFunction } from "./functions/DelegateSubAgent";
+import { ReadVariableFunction } from "./functions/ReadVariable";
+import { FindScriptFunction } from "./functions/FindScript";
+import { ExecuteScriptFunction } from "./functions/ExecuteScript";
+import { CreateScriptFunction } from "./functions/CreateScript";
 
 export interface EvoRunArgs {
   goal: string
@@ -56,30 +54,10 @@ I do not communicate with the user. I execute goals to the best of my abilities 
     ],
     loopPreventionPrompt: "Assistant, are you trying to inform the user? If so, Try calling findScript with the agent namespace.",
     functions: [
-      createScriptFunction,
-      executeScriptFunction,
-      findScriptFunction,
-      readVariableFunction,
-      {
-        definition: onGoalAchievedFunction,
-        buildExecutor: (context: EvoContext) =>
-          buildScriptExecutor({
-            context,
-            scriptName: "agent.onGoalAchieved",
-            onSuccess: onGoalAchievedFunction.success,
-            onFailure: onGoalAchievedFunction.failure
-          })
-      },
-      {
-        definition: onGoalFailedFunction,
-        buildExecutor: (context: EvoContext) =>
-          buildScriptExecutor({
-            context,
-            scriptName: "agent.onGoalFailed",
-            onSuccess: onGoalFailedFunction.success,
-            onFailure: onGoalFailedFunction.failure
-          })
-      }
+      new CreateScriptFunction(),
+      new ExecuteScriptFunction(),
+      new FindScriptFunction(),
+      new ReadVariableFunction(),
     ],
     shouldTerminate: (functionCalled) => {
       return [
@@ -90,7 +68,7 @@ I do not communicate with the user. I execute goals to the best of my abilities 
   };
 
   for (const subagent of subagents || []) {
-    config.functions.push(delegateSubAgent(
+    config.functions.push(new DelegateSubAgentFunction(
       subagent
     ));
   }

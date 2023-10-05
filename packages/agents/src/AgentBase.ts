@@ -1,5 +1,6 @@
-import { Agent, AgentFunctionResult, AgentFunctionDefinition, AgentOutput, Chat, ChatRole, Env, ExecuteAgentFunctionCalled, LlmApi, Logger, RunResult, Timeout, Workspace, basicFunctionCallLoop } from "@evo-ninja/agent-utils";
+import { Agent, AgentOutput, Chat, ChatRole, Env, ExecuteAgentFunctionCalled, LlmApi, Logger, RunResult, Timeout, Workspace, basicFunctionCallLoop } from "@evo-ninja/agent-utils";
 import { ResultErr } from "@polywrap/result";
+import { AgentFunctionBase } from "./AgentFunctionBase";
 
 export interface AgentBaseContext {
   llm: LlmApi;
@@ -12,10 +13,7 @@ export interface AgentBaseContext {
 export interface AgentBaseConfig<TRunArgs, TAgentBaseContext> {
   initialMessages: (runArguments: TRunArgs) => { role: ChatRole; content: string }[];
   loopPreventionPrompt: string;
-  functions: {
-    definition: AgentFunctionDefinition;
-    buildExecutor: (context: TAgentBaseContext) => (params: any) => Promise<AgentFunctionResult>;
-  }[];
+  functions: AgentFunctionBase<TAgentBaseContext, unknown>[];
   shouldTerminate: (functionCalled: ExecuteAgentFunctionCalled) => boolean;
   timeout?: Timeout;
 }
@@ -45,7 +43,14 @@ export abstract class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseCon
 
       return yield* basicFunctionCallLoop(
         this.context,
-        this.config.functions,
+        this.config.functions.map((fn) => {
+          return {
+            definition: fn,
+            buildExecutor: (context: TAgentBaseContext) => {
+              return fn.buildExecutor(this, context);
+            }
+          }
+        }),
         (functionCalled) => {
           return this.config.shouldTerminate(functionCalled);
         },
