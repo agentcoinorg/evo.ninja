@@ -2,7 +2,6 @@ import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, trimTe
 import { Result, ResultOk } from "@polywrap/result";
 import { AgentFunctionBase, HandlerResult } from "../AgentFunctionBase";
 import { AgentBaseContext } from "../AgentBase";
-import { extractRequires } from "../utils";
 
 interface WriteFunctionFuncParameters { 
   namespace: string, 
@@ -63,7 +62,7 @@ export class WriteFunctionFunction extends AgentFunctionBase<AgentBaseContext, W
         return ResultOk(this.cannotCreateInAgentNamespaceError(this.name, params));
       }
 
-      if (extractRequires(params.code).some(x => !WriteFunctionFunction.allowedLibs.includes(x))) {
+      if (this.extractRequires(params.code).some(x => !WriteFunctionFunction.allowedLibs.includes(x))) {
         return ResultOk(this.cannotRequireLibError(this.name, params));
       }
 
@@ -95,6 +94,23 @@ export class WriteFunctionFunction extends AgentFunctionBase<AgentBaseContext, W
         ? trimText(error, 300)
         : "Unknown error."
       }\n\`\`\`\n\nArguments:\n\`\`\`\n${JSON.stringify(args, null, 2)}\n\`\`\``;
+  }
+
+  private extractRequires = (code: string) => {
+    // This regex specifically matches the 'require' keyword by using word boundaries (\b)
+    // It also accounts for possible whitespaces before or after the quotes.
+    const regex = /\brequire\b\s*\(\s*["']([^"']+)["']\s*\)/g;
+  
+    let match;
+    const libraries = [];
+  
+    // Use exec() in a loop to capture all occurrences
+    while ((match = regex.exec(code)) !== null) {
+      // match[1] contains the captured group with the library name
+      libraries.push(match[1]);
+    }
+  
+    return libraries;
   }
 
   private cannotCreateInAgentNamespaceError(functionName: string, params: WriteFunctionFuncParameters) {
