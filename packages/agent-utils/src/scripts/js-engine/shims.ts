@@ -5,6 +5,7 @@ const requireShim = require("./shims/globals/require");
 const mathShim = require("./shims/globals/math");
 const dateShim = require("./shims/globals/date");
 const consoleShim = require("./shims/globals/console");
+const processShim = require("./shims/globals/process");
 
 export const packagesShim = 
 `'use strict';
@@ -19,21 +20,12 @@ ${dateShim}
 
 ${consoleShim}
 
-var processShim = {
-  "cwd": () =>  __wrap_subinvoke("plugin/process", "cwd", {}).value,
-};
-
-var globalToShimVarNameMap = {
-    require: "requireShim",
-    Math: "mathShim",
-    Date: "dateShim",
-    console: "consoleShim",
-    process: "processShim",
-};`;
+${processShim}`;
 
 export const shimCode = (code: string) => `
   ${packagesShim}
 
+  var globalToShimVarNameMap = ${JSON.stringify(globalToShimVarNameMap, null, 2)};
   ${Object.entries(globalToShimVarNameMap).map(([global, shim]) => `var ${global} = ${shim};`).join("\n")}
 
   const __temp = (async function () { 
