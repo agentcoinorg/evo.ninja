@@ -23,7 +23,7 @@ export class ChatMessageBuilder {
     return {
       role: "function",
       name: funcName,
-      content: result || "undefined"
+      content: result
     };
   }
 }
