@@ -1,8 +1,8 @@
 import { AgentOutputType } from "@evo-ninja/agent-utils"
-import { SubAgentFunctionBase } from "../SubAgentFunction"
-import { SubAgent } from "../SubAgent"
+import { ScriptFunction } from "../ScriptFunction"
+import { ScriptedAgent } from "../ScriptedAgent"
 
-export class OnGoalFailedFunction extends SubAgentFunctionBase<{}> {
+export class OnGoalFailedFunction extends ScriptFunction<{}> {
   get name() {
     return "agent_onGoalFailed"
   }
@@ -18,24 +18,24 @@ export class OnGoalFailedFunction extends SubAgentFunctionBase<{}> {
     }
   }
 
-  onSuccess(subAgent: SubAgent, params: any, result: string) {
+  onSuccess(scriptedAgent: ScriptedAgent, params: any, result: string) {
     return {
       outputs: [
         {
           type: AgentOutputType.Success,
-          title: `[${subAgent.name}] ${this.name}`
+          title: `[${scriptedAgent.name}] ${this.name}`
         }
       ],
       messages: []
     }
   }
 
-  onFailure(subAgent: SubAgent, params: any, error: string) {
+  onFailure(scriptedAgent: ScriptedAgent, params: any, error: string) {
     return {
       outputs: [
         {
           type: AgentOutputType.Error,
-          title: `[${subAgent.name}] Error in ${this.name}: ${error}`
+          title: `[${scriptedAgent.name}] Error in ${this.name}: ${error}`
         }
       ],
       messages: []

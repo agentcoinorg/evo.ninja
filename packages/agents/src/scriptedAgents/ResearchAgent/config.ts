@@ -1,4 +1,4 @@
-import { SubAgentConfig } from "../SubAgent";
+import { ScriptedAgentConfig } from "../ScriptedAgent";
 import { OnGoalAchievedFunction } from "../functions/OnGoalAchieved";
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { ScrapeLinksFunction } from "../functions/ScrapeLinks";
@@ -10,7 +10,7 @@ const AGENT_NAME = "researcher";
 const onGoalAchievedFn = new OnGoalAchievedFunction();
 const onGoalFailedFn = new OnGoalAchievedFunction();
 
-export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
+export const RESEARCH_AGENT_CONFIG: ScriptedAgentConfig = {
   name: "Researcher",
   expertise: "researching information online",
   initialMessages: ({ goal }) => [

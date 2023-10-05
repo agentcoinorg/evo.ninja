@@ -1,15 +1,15 @@
 import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder, JsEngine, JsEngine_GlobalVar, shimCode } from "@evo-ninja/agent-utils"
-import { SubAgent, SubAgentContext } from "./SubAgent"
+import { ScriptedAgent, ScriptedAgentContext } from "./ScriptedAgent"
 import { AgentFunctionBase, HandlerResult } from "../AgentFunctionBase";
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
 
-export abstract class SubAgentFunctionBase<TParams> extends AgentFunctionBase<SubAgentContext, TParams> {
-  onSuccess(subAgent: SubAgent, params: any, result: string): HandlerResult {
+export abstract class ScriptFunction<TParams> extends AgentFunctionBase<ScriptedAgentContext, TParams> {
+  onSuccess(scriptedAgent: ScriptedAgent, params: any, result: string): HandlerResult {
     return {
       outputs: [
         {
           type: AgentOutputType.Success,
-          title: `[${subAgent.name}] ${this.name}`,
+          title: `[${scriptedAgent.name}] ${this.name}`,
           content: `${params.query}`
         }
       ],
@@ -19,12 +19,12 @@ export abstract class SubAgentFunctionBase<TParams> extends AgentFunctionBase<Su
       ]
     }
   };
-  onFailure(subAgent: SubAgent, params: any, error: string): HandlerResult {
+  onFailure(scriptedAgent: ScriptedAgent, params: any, error: string): HandlerResult {
     return {
       outputs: [
         {
           type: AgentOutputType.Error,
-          title: `[${subAgent.name}] Error in ${this.name}: ${error}`
+          title: `[${scriptedAgent.name}] Error in ${this.name}: ${error}`
         }
       ],
       messages: [
@@ -34,7 +34,7 @@ export abstract class SubAgentFunctionBase<TParams> extends AgentFunctionBase<Su
     }
   };
   
-  buildExecutor(subAgent: SubAgent, context: SubAgentContext): (params: TParams) => Promise<Result<AgentFunctionResult, string>> {
+  buildExecutor(scriptedAgent: ScriptedAgent, context: ScriptedAgentContext): (params: TParams) => Promise<Result<AgentFunctionResult, string>> {
     return async (params: any): Promise<Result<AgentFunctionResult, string>> => {
       const scriptName = this.name.split("_").join(".");
       const script = context.scripts.getScriptByName(scriptName);
@@ -60,16 +60,16 @@ export abstract class SubAgentFunctionBase<TParams> extends AgentFunctionBase<Su
           const jsPromiseOutput = context.client.jsPromiseOutput;
           if (jsPromiseOutput.ok) {
             return ResultOk(
-              this.onSuccess(subAgent, params, JSON.stringify(jsPromiseOutput.value))
+              this.onSuccess(scriptedAgent, params, JSON.stringify(jsPromiseOutput.value))
             );
           } else {
-            return ResultOk(this.onFailure(subAgent, params, jsPromiseOutput.error.toString()));
+            return ResultOk(this.onFailure(scriptedAgent, params, jsPromiseOutput.error.toString()));
           }
         } else {
-          return ResultOk(this.onFailure(subAgent, params, result.value.error.toString()));
+          return ResultOk(this.onFailure(scriptedAgent, params, result.value.error.toString()));
         }
       } else {
-        return ResultOk(this.onFailure(subAgent, params, result.error?.toString() ?? "Unknown error"));
+        return ResultOk(this.onFailure(scriptedAgent, params, result.error?.toString() ?? "Unknown error"));
       }
     };
   }

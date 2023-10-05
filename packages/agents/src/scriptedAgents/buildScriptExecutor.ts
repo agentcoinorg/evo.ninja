@@ -5,7 +5,7 @@ import {
   JsEngine_GlobalVar,
   shimCode
 } from "@evo-ninja/agent-utils";
-import { SubAgentContext } from "./SubAgent";
+import { ScriptedAgentContext } from "./ScriptedAgent";
 
 interface BuildScriptExecutorArgs<TAgentContext> {
   context: TAgentContext
@@ -14,7 +14,7 @@ interface BuildScriptExecutorArgs<TAgentContext> {
   onFailure: (params: any, error: string) => AgentFunctionResult;
 }
 
-export const buildScriptExecutor = <TAgentContext extends SubAgentContext = SubAgentContext>(
+export const buildScriptExecutor = <TAgentContext extends ScriptedAgentContext = ScriptedAgentContext>(
   args: BuildScriptExecutorArgs<TAgentContext>
 ) => {
   return async (params: any): Promise<AgentFunctionResult> => {

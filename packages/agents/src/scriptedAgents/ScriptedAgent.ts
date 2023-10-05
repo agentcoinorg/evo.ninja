@@ -2,32 +2,32 @@ import { AgentBase } from "../AgentBase";
 import { AgentBaseContext } from "../AgentBase";
 
 import { Scripts, WrapClient, ChatRole, agentPlugin, ExecuteAgentFunctionCalled } from "@evo-ninja/agent-utils";
-import { SubAgentFunctionBase } from "./SubAgentFunction";
+import { ScriptFunction } from "./ScriptFunction";
 
-export interface SubAgentContext extends AgentBaseContext {
+export interface ScriptedAgentContext extends AgentBaseContext {
   scripts: Scripts;
   client: WrapClient;
 }
 
-export interface SubAgentConfig {
+export interface ScriptedAgentConfig {
   name: string;
   expertise: string;
-  initialMessages: (runArguments: SubAgentRunArgs) => { role: ChatRole; content: string }[];
+  initialMessages: (runArguments: ScriptedAgentRunArgs) => { role: ChatRole; content: string }[];
   loopPreventionPrompt: string;
   shouldTerminate: (functionCalled: ExecuteAgentFunctionCalled) => boolean;
-  functions: SubAgentFunctionBase<unknown>[];
+  functions: ScriptFunction<unknown>[];
 }
 
-export interface SubAgentRunArgs {
+export interface ScriptedAgentRunArgs {
   goal: string;
 }
 
-export class SubAgent extends AgentBase<SubAgentRunArgs, SubAgentContext> {
+export class ScriptedAgent extends AgentBase<ScriptedAgentRunArgs, ScriptedAgentContext> {
   public readonly name: string;
 
   constructor(
-    config: SubAgentConfig,
-    context: SubAgentContext,
+    config: ScriptedAgentConfig,
+    context: ScriptedAgentContext,
   ) {
 
     super(config, context);
@@ -35,10 +35,10 @@ export class SubAgent extends AgentBase<SubAgentRunArgs, SubAgentContext> {
   }
 
   public static create(
-    config: SubAgentConfig,
-    context: Omit<SubAgentContext, "client">
-  ): SubAgent {
-    return new SubAgent(config, {
+    config: ScriptedAgentConfig,
+    context: Omit<ScriptedAgentContext, "client">
+  ): ScriptedAgent {
+    return new ScriptedAgent(config, {
       ...context,
       client: new WrapClient(
         context.workspace,

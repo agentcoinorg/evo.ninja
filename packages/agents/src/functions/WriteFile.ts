@@ -1,9 +1,9 @@
 import { AgentOutputType, trimText, ChatMessageBuilder } from "@evo-ninja/agent-utils"
-import { SubAgent } from "../subagents"
-import { SubAgentFunctionBase } from "../subagents/SubAgentFunction"
+import { ScriptedAgent } from "../scriptedAgents"
+import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 import { HandlerResult } from "../AgentFunctionBase";
 
-export class WriteFileFunction extends SubAgentFunctionBase<{
+export class WriteFileFunction extends ScriptFunction<{
   path: string;
   data: string;
   encoding: string;
@@ -35,12 +35,12 @@ export class WriteFileFunction extends SubAgentFunctionBase<{
     }
   }
 
-  onSuccess(subAgent: SubAgent, params: any, result: string): HandlerResult {
+  onSuccess(scriptedAgent: ScriptedAgent, params: any, result: string): HandlerResult {
     return {
       outputs: [
         {
           type: AgentOutputType.Success,
-          title: `[${subAgent.name}] ${this.name}`,
+          title: `[${scriptedAgent.name}] ${this.name}`,
           content: `${params.path}\n` +
             `${params.encoding}\n` +
             `${trimText(params.data, 200)}`

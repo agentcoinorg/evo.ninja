@@ -1,6 +1,6 @@
-import { SubAgentFunctionBase } from "../SubAgentFunction"
+import { ScriptFunction } from "../ScriptFunction"
 
-export class ScrapeTextFunction extends SubAgentFunctionBase<{ url: string }> {
+export class ScrapeTextFunction extends ScriptFunction<{ url: string }> {
   get name() {
     return "web_scrapeText"
   }

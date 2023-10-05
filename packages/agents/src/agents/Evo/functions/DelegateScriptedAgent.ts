@@ -1,23 +1,23 @@
 import { AgentOutputType, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, Chat } from "@evo-ninja/agent-utils"
-import { SubAgent, SubAgentConfig, SubAgentContext } from "../../../subagents"
+import { ScriptedAgent, ScriptedAgentConfig, ScriptedAgentContext } from "../../../scriptedAgents"
 import { AgentFunctionBase, HandlerResult } from "../../../AgentFunctionBase";
 import { Result, ResultOk } from "@polywrap/result";
 
-interface DelegateSubAgentParams {
+interface DelegateScriptedAgentParams {
   task: string;
 }
 
-export class DelegateSubAgentFunction<TAgentContext extends SubAgentContext> extends AgentFunctionBase<TAgentContext, DelegateSubAgentParams> {
-  constructor(private subAgentConfig: SubAgentConfig) {
+export class DelegateScriptedAgentFunction<TAgentContext extends ScriptedAgentContext> extends AgentFunctionBase<TAgentContext, DelegateScriptedAgentParams> {
+  constructor(private scriptedAgentConfig: ScriptedAgentConfig) {
     super();
   }
 
   get name() {
-    return this.delegateSubAgentFnName(this.subAgentConfig.name)
+    return this.delegateScriptedAgentFnName(this.scriptedAgentConfig.name)
   }
 
   get description() {
-    return `Delegate a task to "${this.subAgentConfig.name}" with expertise in "${this.subAgentConfig.expertise}"`
+    return `Delegate a task to "${this.scriptedAgentConfig.name}" with expertise in "${this.scriptedAgentConfig.expertise}"`
   }
 
   get parameters() {
@@ -38,9 +38,9 @@ export class DelegateSubAgentFunction<TAgentContext extends SubAgentContext> ext
         result
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.delegateSubAgentFnName(name), params),
+        ChatMessageBuilder.functionCall(this.delegateScriptedAgentFnName(name), params),
         ChatMessageBuilder.functionCallResult(
-          this.delegateSubAgentFnName(name),
+          this.delegateScriptedAgentFnName(name),
           `Successfully accomplished the task.`
         )
       ]
@@ -57,9 +57,9 @@ export class DelegateSubAgentFunction<TAgentContext extends SubAgentContext> ext
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.delegateSubAgentFnName(name), params),
+        ChatMessageBuilder.functionCall(this.delegateScriptedAgentFnName(name), params),
         ChatMessageBuilder.functionCallResult(
-          this.delegateSubAgentFnName(name),
+          this.delegateScriptedAgentFnName(name),
           `Error: ${error}`
         )
       ]
@@ -67,15 +67,15 @@ export class DelegateSubAgentFunction<TAgentContext extends SubAgentContext> ext
   }
 
   buildExecutor(agent: Agent<unknown>, context: TAgentContext) {
-    return async (params: DelegateSubAgentParams): Promise<Result<AgentFunctionResult, string>> => {
-      const subagent = new SubAgent(
-        this.subAgentConfig, {
+    return async (params: DelegateScriptedAgentParams): Promise<Result<AgentFunctionResult, string>> => {
+      const scriptedAgent = new ScriptedAgent(
+        this.scriptedAgentConfig, {
           ...context,
           chat: new Chat(context.chat.tokenizer, context.chat.contextWindow)
         }
       );
 
-      let iterator = subagent.run({
+      let iterator = scriptedAgent.run({
         goal: params.task
       });
 
@@ -85,14 +85,14 @@ export class DelegateSubAgentFunction<TAgentContext extends SubAgentContext> ext
         if (response.done) {
           if (!response.value.ok) {
             return ResultOk(this.onFailure(
-              this.subAgentConfig.name,
+              this.scriptedAgentConfig.name,
               params,
               response.value.error
             ));
           }
           response.value.value
           return ResultOk(this.onSuccess(
-            this.subAgentConfig.name,
+            this.scriptedAgentConfig.name,
             params,
             response.value.value
           ));
@@ -103,5 +103,5 @@ export class DelegateSubAgentFunction<TAgentContext extends SubAgentContext> ext
     }
   }
 
-  private delegateSubAgentFnName(agent: string) { return `delegate${agent}` }
+  private delegateScriptedAgentFnName(agent: string) { return `delegate${agent}` }
 }

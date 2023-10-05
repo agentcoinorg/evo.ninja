@@ -1,4 +1,4 @@
-import { SubAgentConfig } from "../SubAgent";
+import { ScriptedAgentConfig } from "../ScriptedAgent";
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { OnGoalAchievedFunction } from "../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../functions/OnGoalFailed";
@@ -8,7 +8,7 @@ const AGENT_NAME = "dev";
 const onGoalAchievedFn = new OnGoalAchievedFunction();
 const onGoalFailedFn = new OnGoalAchievedFunction();
 
-export const DEV_AGENT_CONFIG: SubAgentConfig = {
+export const DEV_AGENT_CONFIG: ScriptedAgentConfig = {
   name: "Developer",
   expertise: "developing software",
   initialMessages: ({ goal }) => [
