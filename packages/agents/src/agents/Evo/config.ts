@@ -13,9 +13,6 @@ export interface EvoContext extends SubAgentContext {
   globals: Record<string, string>;
 }
 
-const onGoalAchievedFunction = createOnGoalAchievedFunction("Evo");
-const onGoalFailedFunction = createOnGoalFailedFunction("Evo");
-
 export const EVO_AGENT_CONFIG = (subagents?: SubAgentConfig[]): AgentBaseConfig<EvoRunArgs, EvoContext> => {
   const config: AgentBaseConfig<EvoRunArgs, EvoContext> = {
     initialMessages: ({ goal }) => [

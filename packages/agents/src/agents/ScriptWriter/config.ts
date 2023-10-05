@@ -1,7 +1,3 @@
-<<<<<<< Updated upstream
-import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
-=======
->>>>>>> Stashed changes
 import { AgentBaseConfig, AgentBaseContext } from "../../AgentBase";
 import { ThinkFunction } from "../../functions/Think";
 import { WriteFunctionFunction } from "../../functions/WriteFunction";
@@ -56,82 +52,8 @@ return fs.readFileSync(path, encoding);
   ],
   loopPreventionPrompt: "Assistant, try executing the writeFunction.",
   functions: [
-<<<<<<< Updated upstream
-    {
-      definition: {
-        name: THINK_FN_NAME,
-        description: `Think.`,
-        parameters: {
-          type: "object",
-          properties: {
-            thoughts: {
-              type: "string",
-              description: "Your current thoughts about the topic."
-            },
-          },
-          required: ["thoughts"],
-          additionalProperties: false
-        },
-      },
-      buildExecutor: (_) => {
-        return async (params: ThinkFuncParameters): Promise<AgentFunctionResult> => {
-          return THINK_SUCCESS(params);
-        };
-      }
-    },
-    {
-      definition: {
-        name: WRITE_FN_NAME,
-        description: `Writes the function.`,
-        parameters: {
-          type: "object",
-          properties: {
-            namespace: {
-              type: "string",
-              description: "The namespace of the function, e.g. fs.readFile"
-            },
-            description: {
-              type: "string",
-              description: "The detailed description of the function."
-            },
-            arguments: {
-              type: "string",
-              description: "The arguments of the function. E.g. '{ path: string, encoding: string }'"
-            },
-            code: {
-              type: "string",
-              description: "The code of the function."
-            }
-          },
-          required: ["namespace", "description", "arguments", "code"],
-          additionalProperties: false
-        },
-      },
-      buildExecutor: (context: EvoContext) => {
-        return async (params: { 
-          namespace: string, 
-          description: string, 
-          arguments: string, 
-          code: string 
-        }): Promise<AgentFunctionResult> => {
-          if (params.namespace.startsWith("agent.")) {
-            return CANNOT_CREATE_IN_AGENT_NAMESPACE_ERROR(WRITE_FN_NAME, params);
-          }
-    
-          if (extractRequires(params.code).some(x => !ALLOWED_LIBS.includes(x))) {
-            return CANNOT_REQUIRE_LIB_ERROR(WRITE_FN_NAME, params);
-          }
-    
-          context.workspace.writeFileSync("index.js", params.code);
-    
-          return WRITE_SUCCESS(params);
-        };
-      }
-    }
-=======
     new ThinkFunction(),
     new WriteFunctionFunction()
->>>>>>> Stashed changes
   ],
   shouldTerminate: (functionCalled) => functionCalled.name === "writeFunction"
 }
