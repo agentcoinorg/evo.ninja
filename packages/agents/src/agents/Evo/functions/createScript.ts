@@ -58,7 +58,7 @@ const ERROR_ON_CREATE_SCRIPT = (params: CREATE_SCRIPT_FN_PARAMS, error: string):
       content: FUNCTION_CALL_FAILED(
         params, 
         CREATE_SCRIPT_FN_NAME, 
-        `Scripts in the 'agent' namespace cannot be created. Try searching for an existing script instead.`
+        `Error trying to create the script: ${error}.`
       )
     }
   ],
