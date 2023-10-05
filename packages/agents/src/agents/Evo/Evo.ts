@@ -1,4 +1,4 @@
-import { LlmApi, Chat, Workspace, Scripts, Env, WrapClient, agentPlugin, Logger } from "@evo-ninja/agent-utils";
+import { LlmApi, Chat, Workspace, Scripts, Env, WrapClient, agentPlugin, Logger, Timeout } from "@evo-ninja/agent-utils";
 import { EVO_AGENT_CONFIG, EvoContext, EvoRunArgs } from "./config";
 import { AgentBase } from "../../AgentBase";
 
@@ -10,6 +10,7 @@ export class Evo extends AgentBase<EvoRunArgs, EvoContext> {
     workspace: Workspace,
     scripts: Scripts,
     env: Env,
+    timeout?: Timeout
   ) {
     const context = {
       llm,
@@ -27,6 +28,9 @@ export class Evo extends AgentBase<EvoRunArgs, EvoContext> {
       env
     };
 
-    super(EVO_AGENT_CONFIG, context);
+    super({
+      ...EVO_AGENT_CONFIG,
+      timeout
+    }, context);
   }
 }
