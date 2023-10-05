@@ -78,7 +78,7 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
         required: ["query"],
         additionalProperties: false
       },
-      success: (params: { query: string }, result?: string) => ({
+      success: (params: { query: string }, result: string) => ({
         outputs: [
           {
             type: AgentOutputType.Success,
@@ -116,7 +116,7 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
         required: ["query"],
         additionalProperties: false
       },
-      success: (params: { url: string }, result?: string) => ({
+      success: (params: { url: string }, result: string) => ({
         outputs: [
           {
             type: AgentOutputType.Success,
@@ -154,7 +154,7 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
         required: ["query"],
         additionalProperties: false
       },
-      success: (params: { url: string }, result?: string) => ({
+      success: (params: { url: string }, result: string) => ({
         outputs: [
           {
             type: AgentOutputType.Success,

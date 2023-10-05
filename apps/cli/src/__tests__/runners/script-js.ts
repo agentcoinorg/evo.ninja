@@ -5,7 +5,7 @@ import {
   Logger,
   ConsoleLogger
 } from "@evo-ninja/agent-utils";
-import { JsEngine_GlobalVar, JsEngine, Scripts, WrapClient, shimCode } from "@evo-ninja/evo-agent";
+import { JsEngine_GlobalVar, JsEngine, Scripts, WrapClient, shimCode } from "@evo-ninja/agents";
 import fs from "fs";
 import path from "path-browserify";
 

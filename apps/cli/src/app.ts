@@ -1,4 +1,4 @@
-import { Evo } from "@evo-ninja/evo-agent";
+import { Evo } from "@evo-ninja/agents";
 import {
   Env,
   OpenAI,
