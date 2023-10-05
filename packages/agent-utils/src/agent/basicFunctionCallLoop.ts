@@ -4,6 +4,7 @@ import { AgentFunction } from "./AgentFunction";
 import {
   ExecuteAgentFunctionCalled,
   ExecuteAgentFunctionResult,
+  executeAgentFunction,
   processFunctionAndArgs
 } from "./processFunctionArgs";
 import { Chat, ChatMessage, LlmApi } from "../llm";
@@ -39,19 +40,14 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
       if (!sanitizedFunctionAndArgs.ok) {
         chat.temporary(response);
         chat.temporary("system", sanitizedFunctionAndArgs.error);
+        yield { type: AgentOutputType.Error, title: `Failed to sanitize function ${name}!`, content: sanitizedFunctionAndArgs.error } as AgentOutput;
         continue;
       }
 
-      const [ funcArgs, func ] = sanitizedFunctionAndArgs.value
-      const executor = func.buildExecutor(context);
-      const result = await executor(funcArgs);
-      const functionCalled = func.definition.name
+      const { result, functionCalled } = await executeAgentFunction(sanitizedFunctionAndArgs.value, context)
 
       result.messages.forEach(x => chat.temporary(x));
-
-      const terminate = functionCalled && shouldTerminate({
-        name: functionCalled, args
-      }, result);
+      const terminate = functionCalled && shouldTerminate(functionCalled, result);
 
       for (let i = 0; i < result.outputs.length; i++) {
         const output = result.outputs[i];
