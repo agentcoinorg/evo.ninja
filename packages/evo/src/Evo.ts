@@ -71,7 +71,7 @@ export class Evo implements Agent<EvoRunArgs> {
     }
 
     try {
-      chat.persistent("user", INITIAL_PROMP);
+      chat.persistent("assistant", INITIAL_PROMP);
       chat.persistent("user", goal);
 
       return yield* basicFunctionCallLoop(

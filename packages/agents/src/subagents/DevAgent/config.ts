@@ -7,7 +7,7 @@ const WRITE_FILE_FN_NAME = "fs_writeFile";
 
 export const DEV_AGENT_CONFIG: SubAgentConfig = {
   initialMessages: ({ goal }) => [
-    { role: "system", content: `You are an expert software engineer named "${AGENT_NAME}".`},
+    { role: "assistant", content: `You are an expert software engineer named "${AGENT_NAME}".`},
     { role: "user", content: `You have been asked by the user to achieve the following goal: ${goal}`},
   ],
   loopPreventionPrompt: "Assistant, you appear to be in a loop, try executing a different function.",
@@ -26,6 +26,15 @@ export const DEV_AGENT_CONFIG: SubAgentConfig = {
           }
         ],
         messages: []
+      }),
+      failure: (_: any, error: string) => ({
+        outputs: [
+          {
+            type: AgentOutputType.Error,
+            title: `[${AGENT_NAME}] ${ON_GOAL_ACHIEVED_FN_NAME} Error: ${error}`
+          }
+        ],
+        messages: []
       })
     },
     agent_onGoalFailed: {
@@ -39,6 +48,15 @@ export const DEV_AGENT_CONFIG: SubAgentConfig = {
           {
             type: AgentOutputType.Error,
             title: `[${AGENT_NAME}] ${ON_GOAL_FAILED_FN_NAME}`
+          }
+        ],
+        messages: []
+      }),
+      failure: (_: any, error: string) => ({
+        outputs: [
+          {
+            type: AgentOutputType.Error,
+            title: `[${AGENT_NAME}] ${ON_GOAL_FAILED_FN_NAME} Error: ${error}`
           }
         ],
         messages: []
@@ -66,7 +84,7 @@ export const DEV_AGENT_CONFIG: SubAgentConfig = {
         path: string;
         data: string;
         encoding: string;
-      }) => ({
+      }, result: string) => ({
         outputs: [
           {
             type: AgentOutputType.Success,
@@ -78,6 +96,22 @@ export const DEV_AGENT_CONFIG: SubAgentConfig = {
         ],
         messages: [
           ChatMessageBuilder.functionCall(WRITE_FILE_FN_NAME, params),
+          ChatMessageBuilder.functionCallResult(WRITE_FILE_FN_NAME, result)
+        ]
+      }),
+      failure: (params: any, error: string) => ({
+        outputs: [
+          {
+            type: AgentOutputType.Error,
+            title: `[${AGENT_NAME}] ${WRITE_FILE_FN_NAME}`,
+            content:`${params.path}\n` +
+            `${params.encoding}\n` +
+            `${trimText(error, 200)}`
+          }
+        ],
+        messages: [
+          ChatMessageBuilder.functionCall(WRITE_FILE_FN_NAME, params),
+          ChatMessageBuilder.functionCallResult(WRITE_FILE_FN_NAME, `Error: ${error}`)
         ]
       }),
     }

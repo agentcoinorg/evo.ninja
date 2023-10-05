@@ -4,7 +4,7 @@ import { FUNCTION_CALL_SUCCESS_CONTENT, FUNCTION_CALL_FAILED } from "../utils";
 import { AgentFunction } from "../../..";
 import { EvoContext } from "../config";
 
-export const READ_VAR_FN_NAME = "readVar";
+export const READ_VAR_FN_NAME = "readVariable";
 type READ_VAR_FN_PARAMS = { 
   name: string,
   start: number,
@@ -24,13 +24,16 @@ const READ_VAR_SUCCESS = (params: READ_VAR_FN_PARAMS, varValue: string): AgentFu
   ],
   messages: [
     ChatMessageBuilder.functionCall(READ_VAR_FN_NAME, params),
-    ChatMessageBuilder.system(READ_GLOBAL_VAR_MESSAGE(params.name, varValue, params.start, params.count))
+    ChatMessageBuilder.functionCallResult(
+      READ_VAR_FN_NAME,
+      READ_GLOBAL_VAR_MESSAGE(params.name, varValue, params.start, params.count)
+    )
   ]
 });
 
 const MAX_VAR_LENGTH = 3000;
 
-export const createScriptFunction: {
+export const readVariableFunction: {
   definition: AgentFunction;
   buildExecutor: (context: EvoContext) => (params: READ_VAR_FN_PARAMS) => Promise<Result<AgentFunctionResult, string>>;
 } = {
@@ -77,7 +80,10 @@ const VAR_NOT_FOUND_ERROR = (params: READ_VAR_FN_PARAMS): AgentFunctionResult =>
   ],
   messages: [
     ChatMessageBuilder.functionCall(READ_VAR_FN_NAME, params),
-    ChatMessageBuilder.system(FUNCTION_CALL_FAILED(params, READ_VAR_FN_NAME, `Global variable {{${params.name}}} not found.`))
+    ChatMessageBuilder.functionCallResult(
+      READ_VAR_FN_NAME,
+      `Error: Global variable {{${params.name}}} not found.`
+    )
   ]
 });
 

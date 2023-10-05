@@ -10,7 +10,7 @@ const WRITE_FILE_FN_NAME = "fs_writeFile";
 
 export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
   initialMessages: ({ goal }) => [
-    { role: "system", content: `You are an agent that searches the web for information, called "${AGENT_NAME}".\n` +
+    { role: "assistant", content: `You are an agent that searches the web for information, called "${AGENT_NAME}".\n` +
     `Only scrape if you're certain the information you're looking for isn't available in the result of search.\n`},
     { role: "user", content: `You have been asked by the user to achieve the following goal: ${goal}`},
   ],
@@ -30,6 +30,15 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
           }
         ],
         messages: []
+      }),
+      failure: (_: any, error: string) => ({
+        outputs: [
+          {
+            type: AgentOutputType.Error,
+            title: `[${AGENT_NAME}] Error in ${ON_GOAL_ACHIEVED_FN_NAME}: ${error}`
+          }
+        ],
+        messages: []
       })
     },
     [ON_GOAL_FAILED_FN_NAME]: {
@@ -43,6 +52,15 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
           {
             type: AgentOutputType.Error,
             title: `[${AGENT_NAME}] ${ON_GOAL_FAILED_FN_NAME}`
+          }
+        ],
+        messages: []
+      }),
+      failure: (_: any, error: string) => ({
+        outputs: [
+          {
+            type: AgentOutputType.Error,
+            title: `[${AGENT_NAME}] Error in ${ON_GOAL_FAILED_FN_NAME}: ${error}`
           }
         ],
         messages: []
@@ -60,7 +78,7 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
         required: ["query"],
         additionalProperties: false
       },
-      success: (params: { query: string }) => ({
+      success: (params: { query: string }, result?: string) => ({
         outputs: [
           {
             type: AgentOutputType.Success,
@@ -70,6 +88,19 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
         ],
         messages: [
           ChatMessageBuilder.functionCall(SEARCH_FN_NAME, params),
+          ChatMessageBuilder.functionCallResult(SEARCH_FN_NAME, result)
+        ]
+      }),
+      failure: (params: any, error: string) => ({
+        outputs: [
+          {
+            type: AgentOutputType.Error,
+            title: `[${AGENT_NAME}] Error in ${SEARCH_FN_NAME}: ${error}`
+          }
+        ],
+        messages: [
+          ChatMessageBuilder.functionCall(SEARCH_FN_NAME, params),
+          ChatMessageBuilder.functionCallResult(SEARCH_FN_NAME, `Error: ${error}`)
         ]
       }),
     },
@@ -85,7 +116,7 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
         required: ["query"],
         additionalProperties: false
       },
-      success: (params: { url: string }) => ({
+      success: (params: { url: string }, result?: string) => ({
         outputs: [
           {
             type: AgentOutputType.Success,
@@ -95,6 +126,19 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
         ],
         messages: [
           ChatMessageBuilder.functionCall(SCRAPE_TEXT_FN_NAME, params),
+          ChatMessageBuilder.functionCallResult(SCRAPE_TEXT_FN_NAME, result)
+        ]
+      }),
+      failure: (params: any, error: string) => ({
+        outputs: [
+          {
+            type: AgentOutputType.Error,
+            title: `[${AGENT_NAME}] Error in ${SCRAPE_TEXT_FN_NAME}: ${error}`
+          }
+        ],
+        messages: [
+          ChatMessageBuilder.functionCall(SCRAPE_TEXT_FN_NAME, params),
+          ChatMessageBuilder.functionCallResult(SCRAPE_TEXT_FN_NAME, `Error: ${error}`)
         ]
       }),
     },
@@ -110,7 +154,7 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
         required: ["query"],
         additionalProperties: false
       },
-      success: (params: { url: string }) => ({
+      success: (params: { url: string }, result?: string) => ({
         outputs: [
           {
             type: AgentOutputType.Success,
@@ -120,6 +164,19 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
         ],
         messages: [
           ChatMessageBuilder.functionCall(SCRAPE_LINKS_FN_NAME, params),
+          ChatMessageBuilder.functionCallResult(SCRAPE_LINKS_FN_NAME, result)
+        ]
+      }),
+      failure: (params: any, error: string) => ({
+        outputs: [
+          {
+            type: AgentOutputType.Error,
+            title: `[${AGENT_NAME}] Error in ${SCRAPE_LINKS_FN_NAME}: ${error}`
+          }
+        ],
+        messages: [
+          ChatMessageBuilder.functionCall(SCRAPE_LINKS_FN_NAME, params),
+          ChatMessageBuilder.functionCallResult(SCRAPE_LINKS_FN_NAME, `Error: ${error}`)
         ]
       }),
     },
@@ -145,7 +202,7 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
         path: string;
         data: string;
         encoding: string;
-      }) => ({
+      }, result: string) => ({
         outputs: [
           {
             type: AgentOutputType.Success,
@@ -157,6 +214,19 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
         ],
         messages: [
           ChatMessageBuilder.functionCall(WRITE_FILE_FN_NAME, params),
+          ChatMessageBuilder.functionCallResult(WRITE_FILE_FN_NAME, result)
+        ]
+      }),
+      failure: (params: any, error: string) => ({
+        outputs: [
+          {
+            type: AgentOutputType.Error,
+            title: `[${AGENT_NAME}] Error in ${WRITE_FILE_FN_NAME}: ${error}`
+          }
+        ],
+        messages: [
+          ChatMessageBuilder.functionCall(WRITE_FILE_FN_NAME, params),
+          ChatMessageBuilder.functionCallResult(WRITE_FILE_FN_NAME, `Error: ${error}`)
         ]
       }),
     }

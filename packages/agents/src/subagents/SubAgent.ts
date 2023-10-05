@@ -11,7 +11,8 @@ export interface SubAgentContext extends AgentBaseContext {
 }
 
 export interface SubAgentFunction extends AgentFunction {
-  success: (params: Record<string, any>) => AgentFunctionResult;
+  success: (params: Record<string, any>, result?: string) => AgentFunctionResult;
+  failure: (params: Record<string, any>, error: string) => AgentFunctionResult;
 }
 
 export interface SubAgentFunctions extends Record<string, SubAgentFunction> {
@@ -44,7 +45,8 @@ export class SubAgent<TAgentContext extends SubAgentContext = SubAgentContext> e
           return createScriptExecutor({
             context,
             scriptName: name.split("_").join("."),
-            onSuccess: definition.success
+            onSuccess: definition.success,
+            onFailure: definition.failure
           });
         }
       }]

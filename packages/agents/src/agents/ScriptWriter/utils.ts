@@ -58,7 +58,8 @@ export const CANNOT_CREATE_IN_AGENT_NAMESPACE_ERROR = (functionName: string, par
   ],
   messages: [
     ChatMessageBuilder.functionCall(functionName, params),
-    ChatMessageBuilder.system(
+    ChatMessageBuilder.functionCallResult(
+      functionName,
       `Failed writing the function.\n` +
       `Namespaces starting with 'agent.' are reserved.`
     ),
@@ -74,6 +75,9 @@ export const CANNOT_REQUIRE_LIB_ERROR = (functionName: string, params: WriteFunc
   ],
   messages: [
     ChatMessageBuilder.functionCall(functionName, params),
-    ChatMessageBuilder.system(`Cannot require libraries other than ${ALLOWED_LIBS.join(", ")}.`),
+    ChatMessageBuilder.functionCallResult(
+      functionName,
+      `Cannot require libraries other than ${ALLOWED_LIBS.join(", ")}.`
+    ),
   ]
 });

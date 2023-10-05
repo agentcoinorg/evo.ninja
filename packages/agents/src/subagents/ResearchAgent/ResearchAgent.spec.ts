@@ -16,19 +16,21 @@ import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import { ResearchAgent } from "./ResearchAgent";
 
+const rootDir = path.join(__dirname, "../../../../../");
+
 dotenv.config({
-  path: path.join(__dirname, "../../../../.env")
+  path: path.join(rootDir, ".env")
 });
 
-jest.setTimeout(120000);
+jest.setTimeout(300000);
 
 describe('Research Agent Test Suite', () => {
 
-  function createDevAgent(testName: string): {
+  function createResearchAgent(testName: string): {
     agent: ResearchAgent;
     debugLog: DebugLog;
   } {
-    const testCaseDir = path.join(__dirname, "test-cases", testName);
+    const testCaseDir = path.join(__dirname, ".tests", testName);
 
     // reset the dir
     rimraf.sync(testCaseDir);
@@ -59,7 +61,7 @@ describe('Research Agent Test Suite', () => {
     const contextWindow = new ContextWindow(llm);
     const chat = new Chat(cl100k_base, contextWindow, logger);
 
-    const scriptsDir = path.join(__dirname, "../../../../scripts");
+    const scriptsDir = path.join(rootDir, "scripts");
     const scriptsWorkspace = new FileSystemWorkspace(
       scriptsDir
     );
@@ -101,7 +103,7 @@ describe('Research Agent Test Suite', () => {
   }
 
   test("revenue-retrieval", async () => {
-    const { agent, debugLog } = createDevAgent("revenue-retrieval");
+    const { agent, debugLog } = createResearchAgent("revenue-retrieval");
     const response = await runResearchAgent(
       agent,
       "Write tesla's exact revenue in 2022 into a .txt file. Use the US notation, with a precision rounded to the nearest million dollars (for instance, $31,578 million).",
@@ -115,5 +117,17 @@ describe('Research Agent Test Suite', () => {
     const teslasRevenue = agent.workspace.readFileSync(generatedFiles[0]);
     expect(teslasRevenue).toBeTruthy();
     expect(teslasRevenue).toContain("81,462");
+  });
+
+  test.skip("revenue-retrieval-2", async () => {
+    const { agent, debugLog } = createResearchAgent("revenue-retrieval-2");
+    const response = await runResearchAgent(
+      agent,
+      "Write tesla's revenue every year since its creation into a .txt file. Use the US notation, with a precision rounded to the nearest million dollars (for instance, $31,578 million)..",
+      debugLog
+    );
+
+    expect(response.value.ok).toBe(true);
+    console.log(response)
   });
 });

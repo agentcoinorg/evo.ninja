@@ -28,7 +28,7 @@ const SUCCESS = (script: Script, params: FuncParameters): AgentFunctionResult =>
   ],
   messages: [
     ChatMessageBuilder.functionCall(FN_NAME, params),
-    ChatMessageBuilder.system(`Script '${script.name}' created.`)
+    ChatMessageBuilder.functionCallResult(FN_NAME, `Script '${script.name}' created.`)
   ]
 });
 
@@ -46,7 +46,10 @@ const CANNOT_CREATE_SCRIPTS_ON_AGENT_NAMESPACE = (params: FuncParameters): Agent
   ],
   messages: [
     ChatMessageBuilder.functionCall(FN_NAME, params),
-    ChatMessageBuilder.system(`Scripts in the 'agent' namespace cannot be created. Try searching for an existing script instead.`)
+    ChatMessageBuilder.functionCallResult(
+      FN_NAME,
+      `Error: Scripts in the 'agent' namespace cannot be created. Try searching for an existing script instead.`
+    )
   ]
 });
 

@@ -10,7 +10,7 @@ type EXECUTE_SCRIPT_FN_PARAMS = {
   namespace: string, 
   description: string, 
   arguments: string,
-  result: string
+  variable?: string
 }
 const EXECUTE_SCRIPT_SUCCESS = (scriptName: string, result: any, params: EXECUTE_SCRIPT_FN_PARAMS): AgentFunctionResult => ({
   outputs: [
@@ -20,13 +20,16 @@ const EXECUTE_SCRIPT_SUCCESS = (scriptName: string, result: any, params: EXECUTE
       content: FUNCTION_CALL_SUCCESS_CONTENT(
         EXECUTE_SCRIPT_FN_NAME,
         params,
-        EXECUTE_SCRIPT_OUTPUT(params.result, result),
+        EXECUTE_SCRIPT_OUTPUT(params.variable, result),
       )
     }
   ],
   messages: [
     ChatMessageBuilder.functionCall(EXECUTE_SCRIPT_FN_NAME, params),
-    ChatMessageBuilder.system(EXECUTE_SCRIPT_OUTPUT(params.result, result)),
+    ChatMessageBuilder.functionCallResult(
+      EXECUTE_SCRIPT_FN_NAME,
+      EXECUTE_SCRIPT_OUTPUT(params.variable, result)
+    ),
   ]
 });
 
@@ -47,9 +50,9 @@ export const executeScriptFunction: {
           type: "string",
           description: "JSON-formatted arguments to pass into the script being executed. You can replace a value with a global variable by using {{varName}} syntax.",
         },
-        result: {
+        variable: {
           type: "string",
-          description: "The name of the variable to store the result of the script"
+          description: "The name of a variable to store the script's result in"
         }
       },
       required: ["namespace", "arguments", "result"],
@@ -106,8 +109,8 @@ export const executeScriptFunction: {
           globals
         });
 
-        if (result.ok && context.client.jsPromiseOutput.ok) {
-          context.globals[params.result] =
+        if (params.variable && result.ok && context.client.jsPromiseOutput.ok) {
+          context.globals[params.variable] =
             JSON.stringify(context.client.jsPromiseOutput.value);
         }
 
@@ -136,7 +139,8 @@ const EXECUTE_SCRIPT_ERROR_RESULT = (scriptName: string, error: string | undefin
   ],
   messages: [
     ChatMessageBuilder.functionCall(EXECUTE_SCRIPT_FN_NAME, params),
-    ChatMessageBuilder.system(
+    ChatMessageBuilder.functionCallResult(
+      EXECUTE_SCRIPT_FN_NAME,
       `Error executing script '${scriptName}'\n` + 
       `\`\`\`\n` +
       `${

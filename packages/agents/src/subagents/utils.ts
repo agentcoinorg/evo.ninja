@@ -11,14 +11,16 @@ import { SubAgentContext } from "./SubAgent";
 interface CreateScriptExecutorArgs<TAgentContext> {
   context: TAgentContext
   scriptName: string;
-  onSuccess: (params: any) => AgentFunctionResult;
+  onSuccess: (params: any, result?: string) => AgentFunctionResult;
+  onFailure: (params: any, error: string) => AgentFunctionResult;
 }
 
 export const createScriptExecutor = <TAgentContext extends SubAgentContext = SubAgentContext>(
   args: CreateScriptExecutorArgs<TAgentContext>
 ) => {
   return async (params: any): Promise<Result<AgentFunctionResult, string>> => {
-    const script = args.context.scripts.getScriptByName(args.scriptName);
+    const { context, scriptName, onSuccess, onFailure } = args;
+    const script = context.scripts.getScriptByName(scriptName);
 
     if (!script) {
       return ResultErr(`Unable to find the script ${name}`);
@@ -36,10 +38,21 @@ export const createScriptExecutor = <TAgentContext extends SubAgentContext = Sub
       globals
     });
 
-    if (!result.ok) {
-      return ResultErr(result.error?.toString());
+    if (result.ok) {
+      if (result.value.error == null) {
+        const jsPromiseOutput = context.client.jsPromiseOutput;
+        if (jsPromiseOutput.ok) {
+          return ResultOk(
+            onSuccess(params, JSON.stringify(jsPromiseOutput.value))
+          );
+        } else {
+          return ResultOk(onFailure(params, jsPromiseOutput.error.toString()));
+        }
+      } else {
+        return ResultOk(onFailure(params, result.value.error.toString()));
+      }
+    } else {
+      return ResultOk(onFailure(params, result.error?.toString() ?? "Unknown error"));
     }
-
-    return ResultOk(args.onSuccess(params));
   };
 }

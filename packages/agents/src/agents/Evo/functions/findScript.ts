@@ -26,7 +26,8 @@ const FIND_SCRIPT_SUCCESS = (params: FIND_SCRIPT_FN_PARAMS, candidates: Script[]
   ],
   messages: [
     ChatMessageBuilder.functionCall(FIND_SCRIPT_FN_NAME, params),
-    ChatMessageBuilder.system(
+    ChatMessageBuilder.functionCallResult(
+      FIND_SCRIPT_FN_NAME,
       `Found the following results for script '${params.namespace}'\n` + 
       `${candidates.map((c) => `Namespace: ${c.name}\nArguments: ${c.arguments}\nDescription: ${c.description}`).join("\n--------------\n")}\n` +
       `\`\`\``
@@ -58,7 +59,7 @@ export const findScriptFunction: {
   },
   buildExecutor(context: EvoContext) {
     return async (params: FIND_SCRIPT_FN_PARAMS): Promise<Result<AgentFunctionResult, string>> => {
-      const candidates = context.scripts.searchScripts(
+      const candidates = context.scripts.searchAllScripts(
         `${params.namespace} ${params.description}`
       ).slice(0, 5);
 
@@ -85,7 +86,10 @@ const NO_SCRIPTS_FOUND_ERROR = (params: FIND_SCRIPT_FN_PARAMS): AgentFunctionRes
   ],
   messages: [
     ChatMessageBuilder.functionCall(FIND_SCRIPT_FN_NAME, params),
-    ChatMessageBuilder.system(`Found no results for script '${params.namespace}'. Try creating the script instead.`),
+    ChatMessageBuilder.functionCallResult(
+      FIND_SCRIPT_FN_NAME,
+      `Found no results for script '${params.namespace}'. Try creating the script instead.`
+    ),
   ]
 });
 const FIND_SCRIPT_TITLE = (params: FIND_SCRIPT_FN_PARAMS) => `Searched for '${params.namespace}' script ("${params.description}")`;
