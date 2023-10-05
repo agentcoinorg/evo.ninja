@@ -1,6 +1,7 @@
 import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { AgentBaseConfig, AgentBaseContext } from "../../AgentBase";
 import { ALLOWED_LIBS, CANNOT_CREATE_IN_AGENT_NAMESPACE_ERROR, CANNOT_REQUIRE_LIB_ERROR, ThinkFuncParameters, WriteFuncParameters, extractRequires, formatSupportedLibraries } from "./utils";
+import { EvoContext } from "../Evo/config";
 
 export interface ScriptWriterRunArgs {
   namespace: string;
@@ -85,8 +86,8 @@ return fs.readFileSync(path, encoding);
     }
   ],
   loopPreventionPrompt: "Assistant, try executing the writeFunction.",
-  functions: {
-    [THINK_FN_NAME]: {
+  functions: [
+    {
       definition: {
         name: THINK_FN_NAME,
         description: `Think.`,
@@ -108,7 +109,7 @@ return fs.readFileSync(path, encoding);
         };
       }
     },
-    [WRITE_FN_NAME]: {
+    {
       definition: {
         name: WRITE_FN_NAME,
         description: `Writes the function.`,
@@ -136,7 +137,7 @@ return fs.readFileSync(path, encoding);
           additionalProperties: false
         },
       },
-      buildExecutor: (context) => {
+      buildExecutor: (context: EvoContext) => {
         return async (params: { 
           namespace: string, 
           description: string, 
@@ -157,6 +158,6 @@ return fs.readFileSync(path, encoding);
         };
       }
     }
-  },
+  ],
   shouldTerminate: (functionCalled) => functionCalled.name === "writeFunction"
 }

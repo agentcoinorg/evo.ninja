@@ -12,10 +12,10 @@ export interface AgentBaseContext {
 export interface AgentBaseConfig<TRunArgs, TAgentBaseContext> {
   initialMessages: (runArguments: TRunArgs) => { role: ChatRole; content: string }[];
   loopPreventionPrompt: string;
-  functions: Record<string, {
+  functions: {
     definition: AgentFunctionDefinition;
     buildExecutor: (context: TAgentBaseContext) => (params: any) => Promise<AgentFunctionResult>;
-  }>;
+  }[];
   shouldTerminate: (functionCalled: ExecuteAgentFunctionCalled) => boolean;
   timeout?: Timeout;
 }
@@ -43,18 +43,9 @@ export abstract class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseCon
         setTimeout(this.config.timeout.callback, this.config.timeout.milliseconds);
       }
 
-      const functionEntries = Object.entries(this.config.functions);
-      const functions = functionEntries.map(([name, { definition, buildExecutor }]) => ({
-        definition: {
-          ...definition,
-          name
-        },
-        buildExecutor
-      }))
-
       return yield* basicFunctionCallLoop(
         this.context,
-        functions,
+        this.config.functions,
         (functionCalled) => {
           return this.config.shouldTerminate(functionCalled);
         },

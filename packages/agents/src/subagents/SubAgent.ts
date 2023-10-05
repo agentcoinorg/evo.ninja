@@ -25,7 +25,7 @@ export interface SubAgentConfig {
   expertise: string;
   initialMessages: (runArguments: SubAgentRunArgs) => { role: ChatRole; content: string }[];
   loopPreventionPrompt: string;
-  functions: SubAgentFunctions;
+  functions: SubAgentFunction[];
 }
 
 export interface SubAgentRunArgs {
@@ -37,22 +37,18 @@ export class SubAgent extends AgentBase<SubAgentRunArgs, SubAgentContext> {
     config: SubAgentConfig,
     context: SubAgentContext,
   ) {
-    // Constructing LLM Functions
-    const functionsEntries = Object.entries(config.functions).map(([name, definition]) => {
-      return [name, {
-        definition: {
-          ...definition,
-          name
-        },
+    const functions = config.functions.map((definition) => {
+      return {
+        definition,
         buildExecutor: (context: SubAgentContext) => {
           return buildScriptExecutor({
             context,
-            scriptName: name.split("_").join("."),
+            scriptName: definition.name.split("_").join("."),
             onSuccess: definition.success,
             onFailure: definition.failure
           });
         }
-      }]
+      }
     })
 
     super({
@@ -63,7 +59,7 @@ export class SubAgent extends AgentBase<SubAgentRunArgs, SubAgentContext> {
           ON_GOAL_FAILED_FN_NAME
         ].includes(functionCalled.name);
       },
-      functions: Object.fromEntries(functionsEntries),
+      functions,
     }, context);
   }
 
