@@ -22,7 +22,7 @@ import {
   agentPlugin,
   Env
 } from "@evo-ninja/agent-utils";
-import { ScriptWriter } from "@evo-ninja/js-script-writer-agent";
+import { ScriptWriter } from "@evo-ninja/agents";
 import { ResultErr } from "@polywrap/result";
 
 export interface EvoRunArgs {
@@ -63,7 +63,7 @@ export class Evo implements Agent<EvoRunArgs> {
       const workspace = new InMemoryWorkspace();
       const contextWindow = new ContextWindow(this.llm);
       const chat = new Chat(this.chat.tokenizer, contextWindow, this.logger);
-      return new ScriptWriter(this.llm, chat, this.logger, workspace);
+      return new ScriptWriter(this.llm, chat, workspace, this.logger, this.env);
     };
 
     if (this.timeout) {

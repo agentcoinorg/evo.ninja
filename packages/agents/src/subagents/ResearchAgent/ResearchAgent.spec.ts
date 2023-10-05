@@ -14,10 +14,12 @@ import * as rimraf from "rimraf";
 import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
-import { ResearchAgent } from "../agents/ResearchAgent";
+import { ResearchAgent } from "./ResearchAgent";
+
+const rootDir = path.join(__dirname, "../../../../../");
 
 dotenv.config({
-  path: path.join(__dirname, "../../../../.env")
+  path: path.join(rootDir, ".env")
 });
 
 jest.setTimeout(300000);
@@ -28,7 +30,7 @@ describe('Research Agent Test Suite', () => {
     agent: ResearchAgent;
     debugLog: DebugLog;
   } {
-    const testCaseDir = path.join(__dirname, "test-cases", testName);
+    const testCaseDir = path.join(__dirname, ".tests", testName);
 
     // reset the dir
     rimraf.sync(testCaseDir);
@@ -59,7 +61,7 @@ describe('Research Agent Test Suite', () => {
     const contextWindow = new ContextWindow(llm);
     const chat = new Chat(cl100k_base, contextWindow, logger);
 
-    const scriptsDir = path.join(__dirname, "../../../../scripts");
+    const scriptsDir = path.join(rootDir, "scripts");
     const scriptsWorkspace = new FileSystemWorkspace(
       scriptsDir
     );
