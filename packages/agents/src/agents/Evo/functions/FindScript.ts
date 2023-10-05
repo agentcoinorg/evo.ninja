@@ -1,5 +1,4 @@
 import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, Script } from "@evo-ninja/agent-utils";
-import { Result, ResultOk } from "@polywrap/result";
 import { AgentFunctionBase } from "../../../AgentFunctionBase";
 import { EvoContext } from "../config";
 import { FUNCTION_CALL_SUCCESS_CONTENT } from "../utils";
@@ -37,17 +36,17 @@ export class FindScriptFunction extends AgentFunctionBase<EvoContext, FindScript
     }
   }
 
-  buildExecutor(agent: Agent<unknown>, context: EvoContext): (params: FindScriptFuncParameters) => Promise<Result<AgentFunctionResult, string>> {
-    return async (params: FindScriptFuncParameters): Promise<Result<AgentFunctionResult, string>> => {
+  buildExecutor(agent: Agent<unknown>, context: EvoContext): (params: FindScriptFuncParameters) => Promise<AgentFunctionResult> {
+    return async (params: FindScriptFuncParameters): Promise<AgentFunctionResult> => {
       const candidates = context.scripts.searchAllScripts(
         `${params.namespace} ${params.description}`
       ).slice(0, 5);
 
       if (candidates.length === 0) {
-        return ResultOk(this.onNoScriptsFoundError(params))
+        return this.onError(params)
       }
     
-      return ResultOk(this.onSuccess(params, candidates));
+      return this.onSuccess(params, candidates);
     };
   }
 
@@ -79,9 +78,7 @@ export class FindScriptFunction extends AgentFunctionBase<EvoContext, FindScript
     }
   }
 
-
-
-  private onNoScriptsFoundError(params: FindScriptFuncParameters) {
+  private onError(params: FindScriptFuncParameters) {
     return {
       outputs: [
         {

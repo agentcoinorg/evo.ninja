@@ -1,5 +1,4 @@
 import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, Script } from "@evo-ninja/agent-utils";
-import { Result, ResultErr, ResultOk } from "@polywrap/result";
 import { AgentFunctionBase } from "../../../AgentFunctionBase";
 import { EvoContext } from "../config";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT, createScriptWriter } from "../utils";
@@ -40,10 +39,10 @@ export class CreateScriptFunction extends AgentFunctionBase<EvoContext, CreateSc
     }
   }
 
-  buildExecutor(agent: Agent<unknown>, context: EvoContext): (params: CreateScriptFuncParameters) => Promise<Result<AgentFunctionResult, string>> {
-    return async (params: CreateScriptFuncParameters): Promise<Result<AgentFunctionResult, string>> => {
+  buildExecutor(agent: Agent<unknown>, context: EvoContext): (params: CreateScriptFuncParameters) => Promise<AgentFunctionResult> {
+    return async (params: CreateScriptFuncParameters): Promise<AgentFunctionResult> => {
       if (params.namespace.startsWith("agent.")) {
-        return ResultOk(this.onError(params));
+        return this.onErrorCannotCreateScriptsOnAgentNamespace(params);
       }
 
       // Create a fresh ScriptWriter agent
@@ -67,7 +66,7 @@ export class CreateScriptFunction extends AgentFunctionBase<EvoContext, CreateSc
 
         if (response.done) {
           if (!response.value.ok) {
-            return ResultErr(response.value.error);
+            return this.onErrorCreateScript(params, response.value.error?.toString() || "Unknown error");
           }
           break;
         }
@@ -91,7 +90,7 @@ export class CreateScriptFunction extends AgentFunctionBase<EvoContext, CreateSc
       };
       context.scripts.addScript(params.namespace, script);
       
-      return ResultOk(this.onSuccess(script, params));
+      return this.onSuccess(script, params);
     };
   }
 
@@ -118,7 +117,7 @@ export class CreateScriptFunction extends AgentFunctionBase<EvoContext, CreateSc
     }
   }
 
-  private onError(params: CreateScriptFuncParameters) {
+  private onErrorCannotCreateScriptsOnAgentNamespace(params: CreateScriptFuncParameters) {
     return {
       outputs: [
         {
@@ -136,6 +135,29 @@ export class CreateScriptFunction extends AgentFunctionBase<EvoContext, CreateSc
         ChatMessageBuilder.functionCallResult(
           this.name,
           `Error: Scripts in the 'agent' namespace cannot be created. Try searching for an existing script instead.`
+        )
+      ]
+    }
+  }
+
+  private onErrorCreateScript(params: CreateScriptFuncParameters, error: string) {
+    return {
+      outputs: [
+        {
+          type: AgentOutputType.Error,
+          title: `Failed to create '${params.namespace}' script!`,
+          content: FUNCTION_CALL_FAILED(
+            params, 
+            this.name, 
+            `Error trying to create the script: ${error}.`
+          )
+        }
+      ],
+      messages: [
+        ChatMessageBuilder.functionCall(this.name, params),
+        ChatMessageBuilder.functionCallResult(
+          this.name,
+          `Error trying to create the script: ${error}.`
         )
       ]
     }

@@ -1,7 +1,6 @@
 import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder, JsEngine, JsEngine_GlobalVar, shimCode } from "@evo-ninja/agent-utils"
 import { ScriptedAgent, ScriptedAgentContext } from "./ScriptedAgent"
 import { AgentFunctionBase } from "../AgentFunctionBase";
-import { Result, ResultErr, ResultOk } from "@polywrap/result";
 
 export abstract class ScriptFunction<TParams> extends AgentFunctionBase<ScriptedAgentContext, TParams> {
   onSuccess(scriptedAgent: ScriptedAgent, params: any, result: string): AgentFunctionResult {
@@ -34,13 +33,13 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<Scripted
     }
   };
   
-  buildExecutor(scriptedAgent: ScriptedAgent, context: ScriptedAgentContext): (params: TParams) => Promise<Result<AgentFunctionResult, string>> {
-    return async (params: any): Promise<Result<AgentFunctionResult, string>> => {
+  buildExecutor(scriptedAgent: ScriptedAgent, context: ScriptedAgentContext): (params: TParams) => Promise<AgentFunctionResult> {
+    return async (params: any): Promise<AgentFunctionResult> => {
       const scriptName = this.name.split("_").join(".");
       const script = context.scripts.getScriptByName(scriptName);
   
       if (!script) {
-        return ResultErr(`Unable to find the script ${scriptName}`);
+        return this.onFailure(scriptedAgent, params, `Unable to find the script ${scriptName}`);
       }
   
       const globals: JsEngine_GlobalVar[] = Object.entries(params).map(
@@ -59,17 +58,16 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<Scripted
         if (result.value.error == null) {
           const jsPromiseOutput = context.client.jsPromiseOutput;
           if (jsPromiseOutput.ok) {
-            return ResultOk(
-              this.onSuccess(scriptedAgent, params, JSON.stringify(jsPromiseOutput.value))
+            return this.onSuccess(scriptedAgent, params, JSON.stringify(jsPromiseOutput.value)
             );
           } else {
-            return ResultOk(this.onFailure(scriptedAgent, params, jsPromiseOutput.error.toString()));
+            return this.onFailure(scriptedAgent, params, jsPromiseOutput.error.toString());
           }
         } else {
-          return ResultOk(this.onFailure(scriptedAgent, params, result.value.error.toString()));
+          return this.onFailure(scriptedAgent, params, result.value.error.toString());
         }
       } else {
-        return ResultOk(this.onFailure(scriptedAgent, params, result.error?.toString() ?? "Unknown error"));
+        return this.onFailure(scriptedAgent, params, result.error?.toString() ?? "Unknown error");
       }
     };
   }

@@ -1,5 +1,4 @@
 import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
-import { Result, ResultOk } from "@polywrap/result";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 
 interface ThinkFuncParameters { 
@@ -17,9 +16,9 @@ export class ThinkFunction extends AgentFunctionBase<unknown, ThinkFuncParameter
     throw new Error("Method not implemented.");
   }
 
-  buildExecutor(agent: Agent<unknown>, context: unknown): (params: ThinkFuncParameters) => Promise<Result<AgentFunctionResult, string>> {
-    return async (params: ThinkFuncParameters): Promise<Result<AgentFunctionResult, string>> => {
-      return ResultOk(this.onSuccess(params));
+  buildExecutor(agent: Agent<unknown>, context: unknown): (params: ThinkFuncParameters) => Promise<AgentFunctionResult> {
+    return async (params: ThinkFuncParameters): Promise<AgentFunctionResult> => {
+      return this.onSuccess(params);
     };
   }
 

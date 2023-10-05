@@ -1,7 +1,6 @@
 import { AgentOutputType, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, Chat } from "@evo-ninja/agent-utils"
 import { ScriptedAgent, ScriptedAgentConfig, ScriptedAgentContext } from "../../../scriptedAgents"
 import { AgentFunctionBase } from "../../../AgentFunctionBase";
-import { Result, ResultOk } from "@polywrap/result";
 
 interface DelegateScriptedAgentParams {
   task: string;
@@ -67,7 +66,7 @@ export class DelegateScriptedAgentFunction<TAgentContext extends ScriptedAgentCo
   }
 
   buildExecutor(agent: Agent<unknown>, context: TAgentContext) {
-    return async (params: DelegateScriptedAgentParams): Promise<Result<AgentFunctionResult, string>> => {
+    return async (params: DelegateScriptedAgentParams): Promise<AgentFunctionResult> => {
       const scriptedAgent = new ScriptedAgent(
         this.scriptedAgentConfig, {
           ...context,
@@ -84,18 +83,18 @@ export class DelegateScriptedAgentFunction<TAgentContext extends ScriptedAgentCo
 
         if (response.done) {
           if (!response.value.ok) {
-            return ResultOk(this.onFailure(
+            return this.onFailure(
               this.scriptedAgentConfig.name,
               params,
               response.value.error
-            ));
+            );
           }
           response.value.value
-          return ResultOk(this.onSuccess(
+          return this.onSuccess(
             this.scriptedAgentConfig.name,
             params,
             response.value.value
-          ));
+          );
         }
 
         response.value && context.logger.info(response.value.title);

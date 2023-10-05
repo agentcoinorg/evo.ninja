@@ -1,5 +1,4 @@
 import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, trimText } from "@evo-ninja/agent-utils";
-import { Result, ResultOk } from "@polywrap/result";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { AgentBaseContext } from "../AgentBase";
 
@@ -51,24 +50,24 @@ export class WriteScriptFunction extends AgentFunctionBase<AgentBaseContext, Wri
     }
   }
 
-  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: WriteScriptFuncParameters) => Promise<Result<AgentFunctionResult, string>> {
+  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: WriteScriptFuncParameters) => Promise<AgentFunctionResult> {
     return async (params: { 
       namespace: string, 
       description: string, 
       arguments: string, 
       code: string 
-    }): Promise<Result<AgentFunctionResult, string>> => {
+    }): Promise<AgentFunctionResult> => {
       if (params.namespace.startsWith("agent.")) {
-        return ResultOk(this.cannotCreateInAgentNamespaceError(this.name, params));
+        return this.onErrorCannotCreateInAgentNamespace(this.name, params);
       }
 
       if (this.extractRequires(params.code).some(x => !WriteScriptFunction.allowedLibs.includes(x))) {
-        return ResultOk(this.cannotRequireLibError(this.name, params));
+        return this.onErrorCannotRequireLib(this.name, params);
       }
 
       context.workspace.writeFileSync("index.js", params.code);
 
-      return ResultOk(this.onSuccess(params));
+      return this.onSuccess(params);
     };
   }
 
@@ -113,7 +112,7 @@ export class WriteScriptFunction extends AgentFunctionBase<AgentBaseContext, Wri
     return libraries;
   }
 
-  private cannotCreateInAgentNamespaceError(functionName: string, params: WriteScriptFuncParameters) {
+  private onErrorCannotCreateInAgentNamespace(functionName: string, params: WriteScriptFuncParameters) {
     return {
       outputs: [
         {
@@ -133,7 +132,7 @@ export class WriteScriptFunction extends AgentFunctionBase<AgentBaseContext, Wri
     }
   }
 
-  private cannotRequireLibError(functionName: string, params: WriteScriptFuncParameters) {
+  private onErrorCannotRequireLib(functionName: string, params: WriteScriptFuncParameters) {
     return {
       outputs: [
         {

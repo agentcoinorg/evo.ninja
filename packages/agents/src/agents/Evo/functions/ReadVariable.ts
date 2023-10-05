@@ -1,5 +1,4 @@
 import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
-import { Result, ResultOk } from "@polywrap/result";
 import { AgentFunctionBase } from "../../../AgentFunctionBase";
 import { EvoContext } from "../config";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../utils";
@@ -47,13 +46,13 @@ export class ReadVariableFunction<TContext extends EvoContext> extends AgentFunc
     }
   }
 
-  buildExecutor(agent: Agent<unknown>, context: TContext): (params: ReadVarFuncParameters) => Promise<Result<AgentFunctionResult, string>> {
-    return async (params: ReadVarFuncParameters): Promise<Result<AgentFunctionResult, string>> => {
+  buildExecutor(agent: Agent<unknown>, context: TContext): (params: ReadVarFuncParameters) => Promise<AgentFunctionResult> {
+    return async (params: ReadVarFuncParameters): Promise<AgentFunctionResult> => {
       if (!context.globals[params.name]) {
-        return ResultOk(this.onVarNotFound(params));
+        return this.onError(params);
       } 
 
-      return ResultOk(this.onSuccess(params, context.globals[params.name]));
+      return this.onSuccess(params, context.globals[params.name]);
     };
   }
 
@@ -80,7 +79,7 @@ export class ReadVariableFunction<TContext extends EvoContext> extends AgentFunc
     }
   }
 
-  private onVarNotFound(params: ReadVarFuncParameters): AgentFunctionResult {
+  private onError(params: ReadVarFuncParameters): AgentFunctionResult {
     return {
       outputs: [
         {
