@@ -1,7 +1,6 @@
 import { AgentOutputType, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, Chat } from "@evo-ninja/agent-utils"
 import { SubAgent, SubAgentConfig, SubAgentContext } from "../../../subagents"
-import { HandlerResult } from "../../../subagents/SubAgentFunction"
-import { AgentFunctionBase } from "../../../AgentFunctionBase";
+import { AgentFunctionBase, HandlerResult } from "../../../AgentFunctionBase";
 import { Result, ResultOk } from "@polywrap/result";
 
 interface DelegateSubAgentParams {

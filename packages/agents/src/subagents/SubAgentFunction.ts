@@ -1,17 +1,7 @@
 import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder, JsEngine, JsEngine_GlobalVar, shimCode } from "@evo-ninja/agent-utils"
 import { SubAgent, SubAgentContext } from "./SubAgent"
-import { ChatCompletionRequestMessage } from "openai";
-import { AgentFunctionBase } from "../AgentFunctionBase";
+import { AgentFunctionBase, HandlerResult } from "../AgentFunctionBase";
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
-
-export interface HandlerResult {
-  outputs: {
-    type: AgentOutputType;
-    title: string;
-    content?: string;
-  }[];
-  messages: ChatCompletionRequestMessage[];
-}
 
 export abstract class SubAgentFunctionBase<TParams> extends AgentFunctionBase<SubAgentContext, TParams> {
   onSuccess(subAgent: SubAgent, params: any, result: string): HandlerResult {

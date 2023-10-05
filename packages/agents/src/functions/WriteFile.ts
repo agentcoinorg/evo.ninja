@@ -1,6 +1,7 @@
 import { AgentOutputType, trimText, ChatMessageBuilder } from "@evo-ninja/agent-utils"
 import { SubAgent } from "../subagents"
-import { HandlerResult, SubAgentFunctionBase } from "../subagents/SubAgentFunction"
+import { SubAgentFunctionBase } from "../subagents/SubAgentFunction"
+import { HandlerResult } from "../AgentFunctionBase";
 
 export class WriteFileFunction extends SubAgentFunctionBase<{
   path: string;
