@@ -12,9 +12,9 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
   name: "Researcher",
   expertise: "researching information online",
   initialMessages: ({ goal }) => [
-    { role: "assistant", content: `You are an agent that searches the web for information, called "${AGENT_NAME}".\n` +
+    { role: "assistant", content: `I am an agent that searches the web for information, called "${AGENT_NAME}".\n` +
     `Only scrape if you're certain the information you're looking for isn't available in the result of search.\n`},
-    { role: "user", content: `You have been asked by the user to achieve the following goal: ${goal}`},
+    { role: "user", content: goal },
   ],
   loopPreventionPrompt: "Assistant, you appear to be in a loop, try executing a different function.",
   functions: {
@@ -222,7 +222,7 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
         ],
         messages: [
           ChatMessageBuilder.functionCall(WRITE_FILE_FN_NAME, params),
-          ChatMessageBuilder.functionCallResult(WRITE_FILE_FN_NAME, result)
+          ChatMessageBuilder.functionCallResult(WRITE_FILE_FN_NAME, "Successfully wrote file.")
         ]
       }),
       failure: (params: any, error: string) => ({

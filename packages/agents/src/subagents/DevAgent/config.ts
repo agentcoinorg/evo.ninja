@@ -9,8 +9,8 @@ export const DEV_AGENT_CONFIG: SubAgentConfig = {
   name: "Developer",
   expertise: "developing software",
   initialMessages: ({ goal }) => [
-    { role: "assistant", content: `You are an expert software engineer named "${AGENT_NAME}".`},
-    { role: "user", content: `You have been asked by the user to achieve the following goal: ${goal}`},
+    { role: "assistant", content: `I am an expert software engineer named "${AGENT_NAME}".`},
+    { role: "user", content: goal},
   ],
   loopPreventionPrompt: "Assistant, you appear to be in a loop, try executing a different function.",
   functions: {
@@ -89,7 +89,7 @@ export const DEV_AGENT_CONFIG: SubAgentConfig = {
         path: string;
         data: string;
         encoding: string;
-      }, result: string) => ({
+      }) => ({
         outputs: [
           {
             type: AgentOutputType.Success,
@@ -101,7 +101,7 @@ export const DEV_AGENT_CONFIG: SubAgentConfig = {
         ],
         messages: [
           ChatMessageBuilder.functionCall(WRITE_FILE_FN_NAME, params),
-          ChatMessageBuilder.functionCallResult(WRITE_FILE_FN_NAME, result)
+          ChatMessageBuilder.functionCallResult(WRITE_FILE_FN_NAME, "Successfully wrote file.")
         ]
       }),
       failure: (params: any, error: string) => ({

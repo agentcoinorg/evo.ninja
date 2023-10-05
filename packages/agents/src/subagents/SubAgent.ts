@@ -1,6 +1,6 @@
 import { AgentBase } from "../AgentBase";
 import { ON_GOAL_ACHIEVED_FN_NAME, ON_GOAL_FAILED_FN_NAME } from "./constants";
-import { createScriptExecutor } from "./utils";
+import { createScriptExecutor } from "./createScriptExecutor";
 import { AgentBaseContext } from "../AgentBase";
 
 import { Scripts, WrapClient, ChatRole, AgentFunctionDefinition, AgentFunctionResult, agentPlugin } from "@evo-ninja/agent-utils";

@@ -6,7 +6,8 @@ import {
   AgentFunctionResult,
   AgentOutput,
   AgentOutputType,
-  ChatMessageBuilder
+  ChatMessageBuilder,
+  Chat
 } from "@evo-ninja/agent-utils";
 import { Result, ResultOk } from "@polywrap/result";
 
@@ -74,8 +75,10 @@ export function delegateSubAgent(
     buildExecutor(context: EvoContext) {
       return async (params: DELEGATE_SUBAGENT_FN_PARAMS): Promise<Result<AgentFunctionResult, string>> => {
         const subagent = new SubAgent(
-          config,
-          context
+          config, {
+            ...context,
+            chat: new Chat(context.chat.tokenizer, context.chat.contextWindow)
+          }
         );
 
         let iterator = subagent.run({
