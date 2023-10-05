@@ -1,6 +1,6 @@
 import { Agent, AgentFunctionResult, AgentOutput, Chat, ChatRole, Env, ExecuteAgentFunctionCalled, LlmApi, Logger, RunResult, Timeout, Workspace, basicFunctionCallLoop } from "@evo-ninja/agent-utils";
 import { AgentFunction } from "./types";
-import { Result, ResultErr } from "@polywrap/result";
+import { ResultErr } from "@polywrap/result";
 
 export interface AgentBaseContext {
   llm: LlmApi;
@@ -15,7 +15,7 @@ export interface AgentBaseConfig<TRunArgs, TAgentBaseContext> {
   loopPreventionPrompt: string;
   functions: Record<string, {
     definition: AgentFunction;
-    buildExecutor: (context: TAgentBaseContext) => (params: any) => Promise<Result<AgentFunctionResult, string>>;
+    buildExecutor: (context: TAgentBaseContext) => (params: any) => Promise<AgentFunctionResult>;
   }>;
   shouldTerminate: (functionCalled: ExecuteAgentFunctionCalled) => boolean;
   timeout?: Timeout;

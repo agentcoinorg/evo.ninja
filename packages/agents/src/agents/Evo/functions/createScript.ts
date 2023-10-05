@@ -1,5 +1,4 @@
 import { Script, AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
-import { Result, ResultOk, ResultErr } from "@polywrap/result";
 import { FUNCTION_CALL_SUCCESS_CONTENT, FUNCTION_CALL_FAILED, createScriptWriter } from "../utils";
 import { AgentFunction } from "../../..";
 import { EvoContext } from "../config";
@@ -52,9 +51,30 @@ const CANNOT_CREATE_SCRIPTS_ON_AGENT_NAMESPACE = (params: CREATE_SCRIPT_FN_PARAM
   ]
 });
 
+const ERROR_ON_CREATE_SCRIPT = (params: CREATE_SCRIPT_FN_PARAMS, error: string): AgentFunctionResult => ({
+  outputs: [
+    {
+      type: AgentOutputType.Error,
+      title: `Failed to create '${params.namespace}' script!`,
+      content: FUNCTION_CALL_FAILED(
+        params, 
+        CREATE_SCRIPT_FN_NAME, 
+        `Scripts in the 'agent' namespace cannot be created. Try searching for an existing script instead.`
+      )
+    }
+  ],
+  messages: [
+    ChatMessageBuilder.functionCall(CREATE_SCRIPT_FN_NAME, params),
+    ChatMessageBuilder.functionCallResult(
+      CREATE_SCRIPT_FN_NAME,
+      `Error trying to create the script: ${error}.`
+    )
+  ]
+});
+
 export const createScriptFunction: {
   definition: AgentFunction;
-  buildExecutor: (context: EvoContext) => (params: CREATE_SCRIPT_FN_PARAMS) => Promise<Result<AgentFunctionResult, string>>;
+  buildExecutor: (context: EvoContext) => (params: CREATE_SCRIPT_FN_PARAMS) => Promise<AgentFunctionResult>;
 } = {
   definition: {
     description: `Create a script using JavaScript.`,
@@ -79,9 +99,9 @@ export const createScriptFunction: {
     },
   },
   buildExecutor(context: EvoContext) {
-    return async (params: CREATE_SCRIPT_FN_PARAMS): Promise<Result<AgentFunctionResult, string>> => {
+    return async (params: CREATE_SCRIPT_FN_PARAMS): Promise<AgentFunctionResult> => {
       if (params.namespace.startsWith("agent.")) {
-        return ResultOk(CANNOT_CREATE_SCRIPTS_ON_AGENT_NAMESPACE(params));
+        return CANNOT_CREATE_SCRIPTS_ON_AGENT_NAMESPACE(params);
       }
 
       // Create a fresh ScriptWriter agent
@@ -105,7 +125,7 @@ export const createScriptFunction: {
 
         if (response.done) {
           if (!response.value.ok) {
-            return ResultErr(response.value.error);
+            return ERROR_ON_CREATE_SCRIPT(params, response.value.error?.toString() || "Unknown error");
           }
           break;
         }
@@ -129,7 +149,7 @@ export const createScriptFunction: {
       };
       context.scripts.addScript(params.namespace, script);
       
-      return ResultOk(CREATE_SCRIPT_SUCCESS(script, params));
+      return CREATE_SCRIPT_SUCCESS(script, params);
     };
   }
 }

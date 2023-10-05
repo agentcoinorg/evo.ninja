@@ -2,7 +2,7 @@ export const UNDEFINED_FUNCTION_NAME =
   "Function call name was undefined.";
 
 export const FUNCTION_NOT_FOUND = (name: string) =>
-  `Function ${name} does not exist. Try calling executeScript instead`;
+  `Function ${name} does not exist. Only use the functions you have been provided with`;
 
 export const UNPARSABLE_FUNCTION_ARGS = (name: string, args: string, err: any) =>
   `Could not parse JSON arguments for function: ${name}. Error: ${err.toString()}\nJSON Arguments:\n\`\`\`\n${args}\n\`\`\`\nTry using different arguments instead.`;
