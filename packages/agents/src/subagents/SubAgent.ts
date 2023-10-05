@@ -1,6 +1,6 @@
 import { AgentBase } from "../AgentBase";
 import { ON_GOAL_ACHIEVED_FN_NAME, ON_GOAL_FAILED_FN_NAME } from "./constants";
-import { createScriptExecutor } from "./utils";
+import { buildScriptExecutor } from "./buildScriptExecutor";
 import { AgentBaseContext } from "../AgentBase";
 
 import { Scripts, WrapClient, ChatRole, AgentFunctionDefinition, AgentFunctionResult, agentPlugin, AgentOutputType } from "@evo-ninja/agent-utils";
@@ -101,7 +101,7 @@ export class SubAgent extends AgentBase<SubAgentRunArgs, SubAgentContext> {
       return {
         definition,
         buildExecutor: (context: SubAgentContext) => {
-          return createScriptExecutor({
+          return buildScriptExecutor({
             context,
             scriptName: definition.name.split("_").join("."),
             onSuccess: definition.success,

@@ -1,0 +1,6 @@
+{
+  "name": "path.resolve",
+  "description": "resolve the path to a file or directory to an absolute path",
+  "arguments": "{ path: string }",
+  "code": "./path.resolve.js"
+}
