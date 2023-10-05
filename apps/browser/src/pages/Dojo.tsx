@@ -13,7 +13,7 @@ import Chat, { ChatMessage } from "../components/Chat/Chat";
 import { MarkdownLogger } from '../sys/logger';
 import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
 import { onGoalAchievedScript, onGoalFailedScript, speakScript } from '../scripts';
-import { Evo } from '@evo-ninja/evo-agent';
+import { Evo } from '@evo-ninja/agents';
 import clsx from 'clsx';
 
 function addScript(script: {name: string, definition: string, code: string}, scriptsWorkspace: EvoCore.Workspace) {

@@ -1,0 +1,6 @@
+{
+  "name": "csv.join",
+  "description": "Reads two CSV files, merges them based on a common column, and writes the resulting data table to a new CSV file. The merged table retains all columns from both original tables.",
+  "arguments": "{ csv1Path: string, csv2Path: string, commonColumn: string, outputPath: string }",
+  "code": "./csv.join.js"
+}

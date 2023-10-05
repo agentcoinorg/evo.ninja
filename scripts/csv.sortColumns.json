@@ -1,0 +1,6 @@
+{
+  "name": "csv.sortColumns",
+  "description": "Sorts the columns of a CSV file alphabetically and writes the sorted data to a new CSV file.",
+  "arguments": "{ inputPath: string, outputPath: string }",
+  "code": "./csv.sortColumns.js"
+}
