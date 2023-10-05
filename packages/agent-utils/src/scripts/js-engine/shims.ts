@@ -479,11 +479,16 @@ var consoleShim = {
     },
 };
 
+var processShim = {
+  "cwd": () =>  __wrap_subinvoke("plugin/process", "cwd", {}).value,
+};
+
 var globalToShimVarNameMap = {
     require: "requireShim",
     Math: "mathShim",
     Date: "dateShim",
     console: "consoleShim",
+    process: "processShim",
 };`;
 
 export const shimCode = (code: string) => `
