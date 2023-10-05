@@ -1,6 +1,6 @@
 import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, trimText } from "@evo-ninja/agent-utils";
 import { Result, ResultOk } from "@polywrap/result";
-import { AgentFunctionBase, HandlerResult } from "../AgentFunctionBase";
+import { AgentFunctionBase } from "../AgentFunctionBase";
 import { AgentBaseContext } from "../AgentBase";
 
 interface WriteScriptFuncParameters { 
@@ -72,7 +72,7 @@ export class WriteScriptFunction extends AgentFunctionBase<AgentBaseContext, Wri
     };
   }
 
-  private onSuccess(params: WriteScriptFuncParameters): HandlerResult {
+  private onSuccess(params: WriteScriptFuncParameters): AgentFunctionResult {
     return {
       outputs: [
         {

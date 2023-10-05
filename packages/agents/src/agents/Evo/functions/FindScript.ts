@@ -1,6 +1,6 @@
 import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, Script } from "@evo-ninja/agent-utils";
 import { Result, ResultOk } from "@polywrap/result";
-import { AgentFunctionBase, HandlerResult } from "../../../AgentFunctionBase";
+import { AgentFunctionBase } from "../../../AgentFunctionBase";
 import { EvoContext } from "../config";
 import { FUNCTION_CALL_SUCCESS_CONTENT } from "../utils";
 ;
@@ -51,7 +51,7 @@ export class FindScriptFunction extends AgentFunctionBase<EvoContext, FindScript
     };
   }
 
-  private onSuccess(params: FindScriptFuncParameters, candidates: Script[]): HandlerResult {
+  private onSuccess(params: FindScriptFuncParameters, candidates: Script[]): AgentFunctionResult {
     return {
       outputs: [
         {

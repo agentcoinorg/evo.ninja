@@ -1,7 +1,7 @@
 import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, JsEngine, JsEngine_GlobalVar, shimCode, trimText } from "@evo-ninja/agent-utils";
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
 import JSON5 from "json5";
-import { AgentFunctionBase, HandlerResult } from "../../../AgentFunctionBase";
+import { AgentFunctionBase } from "../../../AgentFunctionBase";
 import { EvoContext } from "../config";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../utils";
 ;
@@ -111,7 +111,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<EvoContext, Execute
     };
   }
 
-  private onSuccess(scriptName: string, result: any, params: ExecuteScriptFuncParameters): HandlerResult {
+  private onSuccess(scriptName: string, result: any, params: ExecuteScriptFuncParameters): AgentFunctionResult {
     return {
       outputs: [
         {

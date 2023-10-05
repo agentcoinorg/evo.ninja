@@ -1,6 +1,6 @@
 import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { Result, ResultOk } from "@polywrap/result";
-import { AgentFunctionBase, HandlerResult } from "../AgentFunctionBase";
+import { AgentFunctionBase } from "../AgentFunctionBase";
 
 interface ThinkFuncParameters { 
   thoughts: string
@@ -23,7 +23,7 @@ export class ThinkFunction extends AgentFunctionBase<unknown, ThinkFuncParameter
     };
   }
 
-  private onSuccess(params: ThinkFuncParameters): HandlerResult {
+  private onSuccess(params: ThinkFuncParameters): AgentFunctionResult {
     return {
       outputs: [
         {

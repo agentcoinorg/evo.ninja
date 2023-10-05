@@ -1,6 +1,6 @@
 import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { Result, ResultOk } from "@polywrap/result";
-import { AgentFunctionBase, HandlerResult } from "../../../AgentFunctionBase";
+import { AgentFunctionBase } from "../../../AgentFunctionBase";
 import { EvoContext } from "../config";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../utils";
 
@@ -57,7 +57,7 @@ export class ReadVariableFunction<TContext extends EvoContext> extends AgentFunc
     };
   }
 
-  private onSuccess(params: ReadVarFuncParameters, varValue: string): HandlerResult {
+  private onSuccess(params: ReadVarFuncParameters, varValue: string): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -80,7 +80,7 @@ export class ReadVariableFunction<TContext extends EvoContext> extends AgentFunc
     }
   }
 
-  private onVarNotFound(params: ReadVarFuncParameters): HandlerResult {
+  private onVarNotFound(params: ReadVarFuncParameters): AgentFunctionResult {
     return {
       outputs: [
         {

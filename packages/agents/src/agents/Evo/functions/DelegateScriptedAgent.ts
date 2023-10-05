@@ -1,6 +1,6 @@
 import { AgentOutputType, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, Chat } from "@evo-ninja/agent-utils"
 import { ScriptedAgent, ScriptedAgentConfig, ScriptedAgentContext } from "../../../scriptedAgents"
-import { AgentFunctionBase, HandlerResult } from "../../../AgentFunctionBase";
+import { AgentFunctionBase } from "../../../AgentFunctionBase";
 import { Result, ResultOk } from "@polywrap/result";
 
 interface DelegateScriptedAgentParams {
@@ -32,7 +32,7 @@ export class DelegateScriptedAgentFunction<TAgentContext extends ScriptedAgentCo
     }
   }
 
-  onSuccess(name: string, params: any, result: AgentOutput): HandlerResult {
+  onSuccess(name: string, params: any, result: AgentOutput): AgentFunctionResult {
     return {
       outputs: [
         result
@@ -47,7 +47,7 @@ export class DelegateScriptedAgentFunction<TAgentContext extends ScriptedAgentCo
     }
   }
 
-  onFailure(name: string, params: any, error: string | undefined): HandlerResult {
+  onFailure(name: string, params: any, error: string | undefined): AgentFunctionResult {
     return {
       outputs: [
         {

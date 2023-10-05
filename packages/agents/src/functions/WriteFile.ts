@@ -1,7 +1,6 @@
-import { AgentOutputType, trimText, ChatMessageBuilder } from "@evo-ninja/agent-utils"
+import { AgentOutputType, trimText, ChatMessageBuilder, AgentFunctionResult } from "@evo-ninja/agent-utils"
 import { ScriptedAgent } from "../scriptedAgents"
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
-import { HandlerResult } from "../AgentFunctionBase";
 
 export class WriteFileFunction extends ScriptFunction<{
   path: string;
@@ -35,7 +34,7 @@ export class WriteFileFunction extends ScriptFunction<{
     }
   }
 
-  onSuccess(scriptedAgent: ScriptedAgent, params: any, result: string): HandlerResult {
+  onSuccess(scriptedAgent: ScriptedAgent, params: any, result: string): AgentFunctionResult {
     return {
       outputs: [
         {

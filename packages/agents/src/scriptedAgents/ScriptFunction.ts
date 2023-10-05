@@ -1,10 +1,10 @@
 import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder, JsEngine, JsEngine_GlobalVar, shimCode } from "@evo-ninja/agent-utils"
 import { ScriptedAgent, ScriptedAgentContext } from "./ScriptedAgent"
-import { AgentFunctionBase, HandlerResult } from "../AgentFunctionBase";
+import { AgentFunctionBase } from "../AgentFunctionBase";
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
 
 export abstract class ScriptFunction<TParams> extends AgentFunctionBase<ScriptedAgentContext, TParams> {
-  onSuccess(scriptedAgent: ScriptedAgent, params: any, result: string): HandlerResult {
+  onSuccess(scriptedAgent: ScriptedAgent, params: any, result: string): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -19,7 +19,7 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<Scripted
       ]
     }
   };
-  onFailure(scriptedAgent: ScriptedAgent, params: any, error: string): HandlerResult {
+  onFailure(scriptedAgent: ScriptedAgent, params: any, error: string): AgentFunctionResult {
     return {
       outputs: [
         {
