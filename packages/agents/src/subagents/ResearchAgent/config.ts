@@ -1,5 +1,4 @@
 import { AgentOutputType, ChatMessageBuilder, trimText } from "@evo-ninja/agent-utils";
-import { ON_GOAL_ACHIEVED_FN_NAME, ON_GOAL_FAILED_FN_NAME } from "../constants";
 import { SubAgentConfig } from "../SubAgent";
 
 const AGENT_NAME = "researcher";
@@ -17,60 +16,8 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
     { role: "user", content: `You have been asked by the user to achieve the following goal: ${goal}`},
   ],
   loopPreventionPrompt: "Assistant, you appear to be in a loop, try executing a different function.",
-  functions: {
-    [ON_GOAL_ACHIEVED_FN_NAME]: {
-      name: ON_GOAL_ACHIEVED_FN_NAME,
-      description: "Informs the user that the goal has been achieved.",
-      parameters: {
-        type: "object",
-        properties: { },
-      },
-      success: () => ({
-        outputs: [
-          {
-            type: AgentOutputType.Success,
-            title: `[${AGENT_NAME}] ${ON_GOAL_ACHIEVED_FN_NAME}`
-          }
-        ],
-        messages: []
-      }),
-      failure: (_: any, error: string) => ({
-        outputs: [
-          {
-            type: AgentOutputType.Error,
-            title: `[${AGENT_NAME}] Error in ${ON_GOAL_ACHIEVED_FN_NAME}: ${error}`
-          }
-        ],
-        messages: []
-      })
-    },
-    [ON_GOAL_FAILED_FN_NAME]: {
-      name: ON_GOAL_FAILED_FN_NAME,
-      description: "Informs the user that the agent could not achieve the goal.",
-      parameters: {
-        type: "object",
-        properties: { },
-      },
-      success: () => ({
-        outputs: [
-          {
-            type: AgentOutputType.Error,
-            title: `[${AGENT_NAME}] ${ON_GOAL_FAILED_FN_NAME}`
-          }
-        ],
-        messages: []
-      }),
-      failure: (_: any, error: string) => ({
-        outputs: [
-          {
-            type: AgentOutputType.Error,
-            title: `[${AGENT_NAME}] Error in ${ON_GOAL_FAILED_FN_NAME}: ${error}`
-          }
-        ],
-        messages: []
-      })
-    },
-    [SEARCH_FN_NAME]: {
+  functions:
+    [{
       name: SEARCH_FN_NAME,
       description: "Searches the web for a given query, using a search engine, and returns search results an array of { title, url, description } objects, ordered by relevance",
       parameters: {
@@ -109,7 +56,7 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
         ]
       }),
     },
-    [SCRAPE_TEXT_FN_NAME]: {
+    {
       name: SCRAPE_TEXT_FN_NAME,
       description: "Open a web page and scrape all text found in the html",
       parameters: {
@@ -148,7 +95,7 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
         ]
       }),
     },
-    [SCRAPE_LINKS_FN_NAME]: {
+    {
       name: SCRAPE_LINKS_FN_NAME,
       description: "Open a web page and scrape all links found in the html",
       parameters: {
@@ -187,7 +134,7 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
         ]
       }),
     },
-    [WRITE_FILE_FN_NAME]: {
+    {
       name: WRITE_FILE_FN_NAME,
       description: "Writes data to a file, replacing the file if it already exists.",
       parameters: {
@@ -237,6 +184,5 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
           ChatMessageBuilder.functionCallResult(WRITE_FILE_FN_NAME, `Error: ${error}`)
         ]
       }),
-    }
-  }
+    }]
 }

@@ -1,9 +1,9 @@
 import { ON_GOAL_ACHIEVED_FN_NAME, ON_GOAL_FAILED_FN_NAME, AgentBaseConfig, SubAgentContext, SubAgentConfig } from "../..";
-import { CREATE_SCRIPT_FN_NAME, createScriptFunction } from "./functions/createScript";
-import { EXECUTE_SCRIPT_FN_NAME, executeScriptFunction } from "./functions/executeScript";
-import { FIND_SCRIPT_FN_NAME, findScriptFunction } from "./functions/findScript";
-import { READ_VAR_FN_NAME, readVariableFunction } from "./functions/readVariable";
-import { DELEGATE_SUBAGENT_FN_NAME, delegateSubAgent } from "./functions/delegateSubAgent";
+import { createScriptFunction } from "./functions/createScript";
+import { executeScriptFunction } from "./functions/executeScript";
+import { findScriptFunction } from "./functions/findScript";
+import { readVariableFunction } from "./functions/readVariable";
+import { delegateSubAgent } from "./functions/delegateSubAgent";
 
 export interface EvoRunArgs {
   goal: string
@@ -52,12 +52,12 @@ I do not communicate with the user. I execute goals to the best of my abilities 
       }
     ],
     loopPreventionPrompt: "Assistant, are you trying to inform the user? If so, Try calling findScript with the agent namespace.",
-    functions: {
-      [CREATE_SCRIPT_FN_NAME]: createScriptFunction,
-      [EXECUTE_SCRIPT_FN_NAME]: executeScriptFunction,
-      [FIND_SCRIPT_FN_NAME]: findScriptFunction,
-      [READ_VAR_FN_NAME]: readVariableFunction,
-    },
+    functions: [
+      createScriptFunction,
+      executeScriptFunction,
+      findScriptFunction,
+      readVariableFunction,
+    ],
     shouldTerminate: (functionCalled) => {
       return [
         ON_GOAL_ACHIEVED_FN_NAME,
@@ -67,9 +67,9 @@ I do not communicate with the user. I execute goals to the best of my abilities 
   };
 
   for (const subagent of subagents || []) {
-    config.functions[DELEGATE_SUBAGENT_FN_NAME(subagent.name)] = delegateSubAgent(
+    config.functions.push(delegateSubAgent(
       subagent
-    );
+    ));
   }
 
   return config;

@@ -3,7 +3,7 @@ import { ON_GOAL_ACHIEVED_FN_NAME, ON_GOAL_FAILED_FN_NAME } from "./constants";
 import { createScriptExecutor } from "./utils";
 import { AgentBaseContext } from "../AgentBase";
 
-import { Scripts, WrapClient, ChatRole, AgentFunctionDefinition, AgentFunctionResult, agentPlugin } from "@evo-ninja/agent-utils";
+import { Scripts, WrapClient, ChatRole, AgentFunctionDefinition, AgentFunctionResult, agentPlugin, AgentOutputType } from "@evo-ninja/agent-utils";
 
 export interface SubAgentContext extends AgentBaseContext {
   scripts: Scripts;
@@ -25,11 +25,60 @@ export interface SubAgentConfig {
   expertise: string;
   initialMessages: (runArguments: SubAgentRunArgs) => { role: ChatRole; content: string }[];
   loopPreventionPrompt: string;
-  functions: SubAgentFunctions;
+  functions: SubAgentFunction[];
 }
 
 export interface SubAgentRunArgs {
   goal: string;
+}
+
+const createOnGoalAchievedFunction = (agentName: string) => {
+  return {
+    ...getDefaultFunctionBase(agentName),
+    name: ON_GOAL_ACHIEVED_FN_NAME,
+    description: "Informs the user that the goal has been achieved.",
+  }
+}
+
+const createOnGoalFailedFunction = (agentName: string) => {
+  return {
+    ...getDefaultFunctionBase(agentName),
+    name: ON_GOAL_FAILED_FN_NAME,
+    description: "Informs the user that the agent could not achieve the goal.",
+  }
+}
+
+const getDefaultFunctionBase = (agentName: string) => {
+  const parameters = {
+    type: "object",
+    properties: { },
+  };
+
+  const success = () => ({
+    outputs: [
+      {
+        type: AgentOutputType.Success,
+        title: `[${agentName}] ${ON_GOAL_ACHIEVED_FN_NAME}`
+      }
+    ],
+    messages: []
+  })
+
+  const failure = (_: any, error: string) => ({
+    outputs: [
+      {
+        type: AgentOutputType.Error,
+        title: `[${agentName}] Error in ${ON_GOAL_ACHIEVED_FN_NAME}: ${error}`
+      }
+    ],
+    messages: []
+  })
+
+  return {
+    parameters,
+    success,
+    failure
+  }
 }
 
 export class SubAgent extends AgentBase<SubAgentRunArgs, SubAgentContext> {
@@ -37,22 +86,29 @@ export class SubAgent extends AgentBase<SubAgentRunArgs, SubAgentContext> {
     config: SubAgentConfig,
     context: SubAgentContext,
   ) {
-    // Constructing LLM Functions
-    const functionsEntries = Object.entries(config.functions).map(([name, definition]) => {
-      return [name, {
-        definition: {
-          ...definition,
-          name
-        },
+    
+    if (!config.functions.find((fn) => fn.name === ON_GOAL_ACHIEVED_FN_NAME)) {
+      const onGoalAchievedFn = createOnGoalAchievedFunction(config.name);
+      config.functions.push(onGoalAchievedFn)
+    }
+
+    if (!config.functions.find((fn) => fn.name === ON_GOAL_FAILED_FN_NAME)) {
+      const onGoalFailedFn = createOnGoalFailedFunction(config.name);
+      config.functions.push(onGoalFailedFn)
+    }
+
+    const functions = config.functions.map((definition) => {
+      return {
+        definition,
         buildExecutor: (context: SubAgentContext) => {
           return createScriptExecutor({
             context,
-            scriptName: name.split("_").join("."),
+            scriptName: definition.name.split("_").join("."),
             onSuccess: definition.success,
             onFailure: definition.failure
           });
         }
-      }]
+      }
     })
 
     super({
@@ -63,7 +119,7 @@ export class SubAgent extends AgentBase<SubAgentRunArgs, SubAgentContext> {
           ON_GOAL_FAILED_FN_NAME
         ].includes(functionCalled.name);
       },
-      functions: Object.fromEntries(functionsEntries),
+      functions,
     }, context);
   }
 
