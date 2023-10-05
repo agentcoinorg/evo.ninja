@@ -2,7 +2,6 @@ import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, Script
 import { AgentFunctionBase } from "../../../AgentFunctionBase";
 import { EvoContext } from "../config";
 import { FUNCTION_CALL_SUCCESS_CONTENT } from "../utils";
-;
 
 interface FindScriptFuncParameters { 
   namespace: string, 
