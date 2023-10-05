@@ -1,5 +1,4 @@
 import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder, AgentFunctionDefinition } from "@evo-ninja/agent-utils";
-import { Result, ResultOk } from "@polywrap/result";
 import { FUNCTION_CALL_SUCCESS_CONTENT, FUNCTION_CALL_FAILED } from "../utils";
 import { EvoContext } from "../config";
 
@@ -34,7 +33,7 @@ const MAX_VAR_LENGTH = 3000;
 
 export const readVariableFunction: {
   definition: AgentFunctionDefinition;
-  buildExecutor: (context: EvoContext) => (params: READ_VAR_FN_PARAMS) => Promise<Result<AgentFunctionResult, string>>;
+  buildExecutor: (context: EvoContext) => (params: READ_VAR_FN_PARAMS) => Promise<AgentFunctionResult>;
 } = {
   definition: {
     name: READ_VAR_FN_NAME,
@@ -60,12 +59,12 @@ export const readVariableFunction: {
     },
   },
   buildExecutor(context: EvoContext) {
-    return async (params: READ_VAR_FN_PARAMS): Promise<Result<AgentFunctionResult, string>> => {
+    return async (params: READ_VAR_FN_PARAMS): Promise<AgentFunctionResult> => {
       if (!context.globals[params.name]) {
-        return ResultOk(VAR_NOT_FOUND_ERROR(params));
+        return VAR_NOT_FOUND_ERROR(params);
       } 
 
-      return ResultOk(READ_VAR_SUCCESS(params, context.globals[params.name]));
+      return READ_VAR_SUCCESS(params, context.globals[params.name]);
     };
   }
 }

@@ -2,10 +2,11 @@ import { RunResult } from "./Agent";
 import { AgentOutput, AgentOutputType } from "./AgentOutput";
 import { AgentFunction } from "./AgentFunction";
 import {
-  executeAgentFunction,
   ExecuteAgentFunctionCalled,
-  ExecuteAgentFunctionResult
-} from "./executeAgentFunction";
+  ExecuteAgentFunctionResult,
+  executeAgentFunction,
+  processFunctionAndArgs
+} from "./processFunctionArgs";
 import { Chat, ChatMessage, LlmApi } from "../llm";
 
 import { ResultErr, ResultOk } from "@polywrap/result";
@@ -35,23 +36,23 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
 
     if (response.function_call) {
       const { name, arguments: args } = response.function_call;
-      const { result, functionCalled } = await executeAgentFunction(name, args, context, agentFunctions);
-
-      if (!result.ok) {
+      const sanitizedFunctionAndArgs = processFunctionAndArgs(name, args, agentFunctions)
+      if (!sanitizedFunctionAndArgs.ok) {
         chat.temporary(response);
-        chat.temporary("system", result.error);
-        yield { type: AgentOutputType.Error, title: `Failed to execute ${name}!`, content: result.error } as AgentOutput;
+        chat.temporary("system", sanitizedFunctionAndArgs.error);
+        yield { type: AgentOutputType.Error, title: `Failed to sanitize function ${name}!`, content: sanitizedFunctionAndArgs.error } as AgentOutput;
         continue;
       }
 
-      result.value.messages.forEach(x => chat.temporary(x));
+      const { result, functionCalled } = await executeAgentFunction(sanitizedFunctionAndArgs.value, context)
 
+      result.messages.forEach(x => chat.temporary(x));
       const terminate = functionCalled && shouldTerminate(functionCalled, result);
 
-      for (let i = 0; i < result.value.outputs.length; i++) {
-        const output = result.value.outputs[i];
+      for (let i = 0; i < result.outputs.length; i++) {
+        const output = result.outputs[i];
 
-        if (i === result.value.outputs.length - 1 && terminate) {
+        if (i === result.outputs.length - 1 && terminate) {
           return ResultOk(output);
         }
 

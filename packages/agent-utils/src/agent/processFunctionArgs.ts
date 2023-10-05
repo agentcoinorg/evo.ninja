@@ -16,49 +16,22 @@ export interface ExecuteAgentFunctionCalled {
 
 export interface ExecuteAgentFunctionResult {
   functionCalled?: ExecuteAgentFunctionCalled;
-  result: Result<AgentFunctionResult, string>;
+  result: AgentFunctionResult;
 }
 
 export type ExecuteAgentFunction = <TContext>(
-  name: string | undefined,
-  args: string | undefined,
+  func: AgentFunction<TContext>,
+  args: unknown,
   context: TContext,
   agentFunctions: AgentFunction<TContext>[],
 ) => Promise<ExecuteAgentFunctionResult>;
 
-export const executeAgentFunction: ExecuteAgentFunction = async <TContext>(
-  name: string | undefined,
-  args: string | undefined,
-  context: TContext,
-  agentFunctions: AgentFunction<TContext>[],
-): Promise<ExecuteAgentFunctionResult> => {
-  const parseResult = processFunctionAndArgs(name, args, agentFunctions);
 
-  if (!parseResult.ok) {
-    return {
-      result: ResultErr(parseResult.error)
-    };
-  }
-
-  const [fnArgs, func] = parseResult.value;
-
-  const executor = func.buildExecutor(context);
-  const result = await executor(fnArgs);
-
-  return {
-    result,
-    functionCalled: {
-      name: func.definition.name,
-      args: fnArgs
-    },
-  };
-}
-
-function processFunctionAndArgs<TContext>(
+export function processFunctionAndArgs<TContext>(
   name: string | undefined,
   args: string | undefined,
   agentFunctions: AgentFunction<TContext>[],
-): Result<[any, AgentFunction<TContext>], string> {
+): Result<[unknown, AgentFunction<TContext>], string> {
   if (!name) {
     return ResultErr(UNDEFINED_FUNCTION_NAME);
   }
@@ -83,3 +56,17 @@ function processFunctionAndArgs<TContext>(
 
   return ResultOk([fnArgs, func]);
 }
+
+export const executeAgentFunction = async <TContext>(
+  [args, func]: [unknown, AgentFunction<TContext>],
+  context: TContext
+): Promise<ExecuteAgentFunctionResult> => {
+  const executor = func.buildExecutor(context);
+  return {
+    result: await executor(args),
+    functionCalled: {
+      name: func.definition.name,
+      args,
+    },
+  };
+};

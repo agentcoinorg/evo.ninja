@@ -1,4 +1,3 @@
-import { Result, ResultOk } from "@polywrap/result";
 import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { AgentBaseConfig, AgentBaseContext } from "../../AgentBase";
 import { ALLOWED_LIBS, CANNOT_CREATE_IN_AGENT_NAMESPACE_ERROR, CANNOT_REQUIRE_LIB_ERROR, ThinkFuncParameters, WriteFuncParameters, extractRequires, formatSupportedLibraries } from "./utils";
@@ -105,8 +104,8 @@ return fs.readFileSync(path, encoding);
         },
       },
       buildExecutor: (_) => {
-        return async (params: ThinkFuncParameters): Promise<Result<AgentFunctionResult, string>> => {
-          return ResultOk(THINK_SUCCESS(params));
+        return async (params: ThinkFuncParameters): Promise<AgentFunctionResult> => {
+          return THINK_SUCCESS(params);
         };
       }
     },
@@ -144,18 +143,18 @@ return fs.readFileSync(path, encoding);
           description: string, 
           arguments: string, 
           code: string 
-        }): Promise<Result<AgentFunctionResult, string>> => {
+        }): Promise<AgentFunctionResult> => {
           if (params.namespace.startsWith("agent.")) {
-            return ResultOk(CANNOT_CREATE_IN_AGENT_NAMESPACE_ERROR(WRITE_FN_NAME, params));
+            return CANNOT_CREATE_IN_AGENT_NAMESPACE_ERROR(WRITE_FN_NAME, params);
           }
     
           if (extractRequires(params.code).some(x => !ALLOWED_LIBS.includes(x))) {
-            return ResultOk(CANNOT_REQUIRE_LIB_ERROR(WRITE_FN_NAME, params));
+            return CANNOT_REQUIRE_LIB_ERROR(WRITE_FN_NAME, params);
           }
     
           context.workspace.writeFileSync("index.js", params.code);
     
-          return ResultOk(WRITE_SUCCESS(params));
+          return WRITE_SUCCESS(params);
         };
       }
     }

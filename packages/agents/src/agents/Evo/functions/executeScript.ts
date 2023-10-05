@@ -1,6 +1,5 @@
 import { AgentFunctionResult, AgentFunctionDefinition, AgentOutputType, ChatMessageBuilder, JsEngine, JsEngine_GlobalVar, shimCode, trimText } from "@evo-ninja/agent-utils";
 import JSON5 from "json5";
-import { Result, ResultOk, ResultErr } from "@polywrap/result";
 import { FUNCTION_CALL_SUCCESS_CONTENT, FUNCTION_CALL_FAILED } from "../utils";
 import { EvoContext } from "../config";
 
@@ -34,7 +33,7 @@ const EXECUTE_SCRIPT_SUCCESS = (scriptName: string, result: any, params: EXECUTE
 
 export const executeScriptFunction: {
   definition: AgentFunctionDefinition;
-  buildExecutor: (context: EvoContext) => (params: EXECUTE_SCRIPT_FN_PARAMS) => Promise<Result<AgentFunctionResult, string>>;
+  buildExecutor: (context: EvoContext) => (params: EXECUTE_SCRIPT_FN_PARAMS) => Promise<AgentFunctionResult>;
 } = {
   definition: {
     name: EXECUTE_SCRIPT_FN_NAME,
@@ -60,12 +59,12 @@ export const executeScriptFunction: {
     },
   },
   buildExecutor(context: EvoContext) {
-    return async (params: EXECUTE_SCRIPT_FN_PARAMS): Promise<Result<AgentFunctionResult, string>> => {
+    return async (params: EXECUTE_SCRIPT_FN_PARAMS): Promise<AgentFunctionResult> => {
       try {
         const script = context.scripts.getScriptByName(params.namespace);
 
         if (!script) {
-          return ResultOk(EXECUTE_SCRIPT_ERROR_RESULT(params.namespace, SCRIPT_NOT_FOUND(params), params));
+          return EXECUTE_SCRIPT_ERROR_RESULT(params.namespace, SCRIPT_NOT_FOUND(params), params);
         }
 
         let args: any = undefined;
@@ -92,7 +91,7 @@ export const executeScriptFunction: {
             }
           }
         } catch {
-          return ResultOk(EXECUTE_SCRIPT_ERROR_RESULT(params.namespace, INVALID_EXECUTE_SCRIPT_ARGS(params), params));
+          return EXECUTE_SCRIPT_ERROR_RESULT(params.namespace, INVALID_EXECUTE_SCRIPT_ARGS(params), params);
         }
 
         const globals: JsEngine_GlobalVar[] =
@@ -117,13 +116,13 @@ export const executeScriptFunction: {
         return result.ok
           ? result.value.error == null
             ? context.client.jsPromiseOutput.ok
-              ? ResultOk(EXECUTE_SCRIPT_SUCCESS(params.namespace, context.client.jsPromiseOutput.value, params))
-              : ResultOk(EXECUTE_SCRIPT_ERROR_RESULT(params.namespace, JSON.stringify(context.client.jsPromiseOutput.error), params))
-            : ResultOk(EXECUTE_SCRIPT_ERROR_RESULT(params.namespace, result.value.error, params))
-          : ResultOk(EXECUTE_SCRIPT_ERROR_RESULT(params.namespace, result.error?.toString(), params));
+              ? EXECUTE_SCRIPT_SUCCESS(params.namespace, context.client.jsPromiseOutput.value, params)
+              : EXECUTE_SCRIPT_ERROR_RESULT(params.namespace, JSON.stringify(context.client.jsPromiseOutput.error), params)
+            : EXECUTE_SCRIPT_ERROR_RESULT(params.namespace, result.value.error, params)
+          : EXECUTE_SCRIPT_ERROR_RESULT(params.namespace, result.error?.toString(), params)
       
       } catch (e: any) {
-        return ResultErr(e);
+        return EXECUTE_SCRIPT_ERROR_RESULT(params.namespace, e.toString(), params)
       }
     };
   }

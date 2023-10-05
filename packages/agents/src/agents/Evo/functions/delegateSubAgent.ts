@@ -9,7 +9,6 @@ import {
   ChatMessageBuilder,
   Chat
 } from "@evo-ninja/agent-utils";
-import { Result, ResultOk } from "@polywrap/result";
 
 export const DELEGATE_SUBAGENT_FN_NAME = (agent: string) => `delegate${agent}`;
 
@@ -73,7 +72,7 @@ export function delegateSubAgent(
       }
     },
     buildExecutor(context: EvoContext) {
-      return async (params: DELEGATE_SUBAGENT_FN_PARAMS): Promise<Result<AgentFunctionResult, string>> => {
+      return async (params: DELEGATE_SUBAGENT_FN_PARAMS): Promise<AgentFunctionResult> => {
         const subagent = new SubAgent(
           config, {
             ...context,
@@ -90,18 +89,18 @@ export function delegateSubAgent(
 
           if (response.done) {
             if (!response.value.ok) {
-              return ResultOk(DELEGATE_SUBAGENT_FAIL(
+              return DELEGATE_SUBAGENT_FAIL(
                 config.name,
                 params,
                 response.value.error
-              ));
+              );
             }
             response.value.value
-            return ResultOk(DELEGATE_SUBAGENT_SUCCESS(
+            return DELEGATE_SUBAGENT_SUCCESS(
               config.name,
               params,
               response.value.value
-            ));
+            );
           }
 
           response.value && context.logger.info(response.value.title);
