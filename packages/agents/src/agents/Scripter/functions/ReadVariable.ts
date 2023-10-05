@@ -1,6 +1,6 @@
 import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../../../AgentFunctionBase";
-import { EvoContext } from "../config";
+import { ScripterContext } from "../config";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../utils";
 
 interface ReadVarFuncParameters { 
@@ -9,7 +9,7 @@ interface ReadVarFuncParameters {
   count: number
 };
 
-export class ReadVariableFunction<TContext extends EvoContext> extends AgentFunctionBase<TContext, ReadVarFuncParameters> {
+export class ReadVariableFunction<TContext extends ScripterContext> extends AgentFunctionBase<TContext, ReadVarFuncParameters> {
   constructor(private maxVarLength: number = 3000) {
     super();
   }

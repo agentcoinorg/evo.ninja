@@ -14,7 +14,7 @@ import * as rimraf from "rimraf";
 import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
-import { ScriptedAgent, DEV_AGENT_CONFIG } from "../";
+import { ScriptedAgent, DEVELOPER_AGENT_CONFIG } from "..";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -71,7 +71,7 @@ describe('Dev Agent Test Suite', () => {
 
     return {
       agent: ScriptedAgent.create(
-        DEV_AGENT_CONFIG, {
+        DEVELOPER_AGENT_CONFIG, {
           llm: debugLlm,
           chat,
           workspace,

@@ -1,6 +1,6 @@
 import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, Script } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../../../AgentFunctionBase";
-import { EvoContext } from "../config";
+import { ScripterContext } from "../config";
 import { FUNCTION_CALL_SUCCESS_CONTENT } from "../utils";
 
 interface FindScriptFuncParameters { 
@@ -10,7 +10,7 @@ interface FindScriptFuncParameters {
   code: string 
 };
 
-export class FindScriptFunction extends AgentFunctionBase<EvoContext, FindScriptFuncParameters> {
+export class FindScriptFunction extends AgentFunctionBase<ScripterContext, FindScriptFuncParameters> {
   get name(): string {
     return "findScript";
   }
@@ -35,7 +35,7 @@ export class FindScriptFunction extends AgentFunctionBase<EvoContext, FindScript
     }
   }
 
-  buildExecutor(agent: Agent<unknown>, context: EvoContext): (params: FindScriptFuncParameters) => Promise<AgentFunctionResult> {
+  buildExecutor(agent: Agent<unknown>, context: ScripterContext): (params: FindScriptFuncParameters) => Promise<AgentFunctionResult> {
     return async (params: FindScriptFuncParameters): Promise<AgentFunctionResult> => {
       const candidates = context.scripts.searchAllScripts(
         `${params.namespace} ${params.description}`

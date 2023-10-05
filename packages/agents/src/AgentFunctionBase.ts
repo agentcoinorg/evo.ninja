@@ -7,4 +7,3 @@ export abstract class AgentFunctionBase<TContext, TParams> {
 
   abstract buildExecutor(agent: Agent<unknown>, context: TContext): (params: TParams) => Promise<AgentFunctionResult>;
 }
-

@@ -1,22 +1,33 @@
-import { AgentOutputType, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, Chat } from "@evo-ninja/agent-utils"
-import { ScriptedAgent, ScriptedAgentConfig, ScriptedAgentContext } from "../../../scriptedAgents"
+import { AgentOutputType, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult } from "@evo-ninja/agent-utils"
 import { AgentFunctionBase } from "../../../AgentFunctionBase";
+import { AgentBaseConfig } from "../../../AgentBase";
+import { AgentBase, AgentBaseContext } from "../../../AgentBase";
 
-interface DelegateScriptedAgentParams {
+interface DelegateAgentParams {
   task: string;
 }
 
-export class DelegateScriptedAgentFunction<TAgentContext extends ScriptedAgentContext> extends AgentFunctionBase<TAgentContext, DelegateScriptedAgentParams> {
-  constructor(private scriptedAgentConfig: ScriptedAgentConfig) {
+interface AgentRunArgs {
+  goal: string
+}
+
+export class DelegateAgentFunction<
+  TAgentContext extends AgentBaseContext,
+  TAgent extends AgentBase<AgentRunArgs, TAgentContext>
+> extends AgentFunctionBase<TAgentContext, DelegateAgentParams> {
+  constructor(
+    private config: AgentBaseConfig<AgentRunArgs, TAgentContext>,
+    private factory: (context: TAgentContext) => TAgent
+  ) {
     super();
   }
 
   get name() {
-    return this.delegateScriptedAgentFnName(this.scriptedAgentConfig.name)
+    return this.delegateScriptedAgentFnName(this.config.name)
   }
 
   get description() {
-    return `Delegate a task to "${this.scriptedAgentConfig.name}" with expertise in "${this.scriptedAgentConfig.expertise}"`
+    return `Delegate a task to "${this.config.name}" with expertise in "${this.config.expertise}"`
   }
 
   get parameters() {
@@ -66,13 +77,8 @@ export class DelegateScriptedAgentFunction<TAgentContext extends ScriptedAgentCo
   }
 
   buildExecutor(agent: Agent<unknown>, context: TAgentContext) {
-    return async (params: DelegateScriptedAgentParams): Promise<AgentFunctionResult> => {
-      const scriptedAgent = new ScriptedAgent(
-        this.scriptedAgentConfig, {
-          ...context,
-          chat: new Chat(context.chat.tokenizer, context.chat.contextWindow)
-        }
-      );
+    return async (params: DelegateAgentParams): Promise<AgentFunctionResult> => {
+      const scriptedAgent = this.factory(context);
 
       let iterator = scriptedAgent.run({
         goal: params.task
@@ -84,14 +90,14 @@ export class DelegateScriptedAgentFunction<TAgentContext extends ScriptedAgentCo
         if (response.done) {
           if (!response.value.ok) {
             return this.onFailure(
-              this.scriptedAgentConfig.name,
+              this.config.name,
               params,
               response.value.error
             );
           }
           response.value.value
           return this.onSuccess(
-            this.scriptedAgentConfig.name,
+            this.config.name,
             params,
             response.value.value
           );
