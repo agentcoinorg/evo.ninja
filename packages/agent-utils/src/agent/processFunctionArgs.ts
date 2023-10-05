@@ -26,23 +26,6 @@ export type ExecuteAgentFunction = <TContext>(
   agentFunctions: AgentFunction<TContext>[],
 ) => Promise<ExecuteAgentFunctionResult>;
 
-// export const executeAgentFunction: ExecuteAgentFunction = async <TContext>(
-//   func: AgentFunction<TContext>,
-//   args: unknown,
-//   context: TContext,
-// ): Promise<ExecuteAgentFunctionResult> => {
-
-//   const executor = func.buildExecutor(context);
-//   const result = await executor(args);
-
-//   return {
-//     result,
-//     functionCalled: {
-//       name: func.definition.name,
-//       args
-//     },
-//   };
-// }
 
 export function processFunctionAndArgs<TContext>(
   name: string | undefined,

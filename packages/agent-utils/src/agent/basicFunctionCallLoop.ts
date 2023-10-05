@@ -5,7 +5,7 @@ import {
   ExecuteAgentFunctionCalled,
   ExecuteAgentFunctionResult,
   processFunctionAndArgs
-} from "./executeAgentFunction";
+} from "./processFunctionArgs";
 import { Chat, ChatMessage, LlmApi } from "../llm";
 
 import { ResultErr, ResultOk } from "@polywrap/result";
@@ -39,7 +39,6 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
       if (!sanitizedFunctionAndArgs.ok) {
         chat.temporary(response);
         chat.temporary("system", sanitizedFunctionAndArgs.error);
-        // yield { type: AgentOutputType.Error, title: `Failed to execute ${name}!`, content: sanitizedFunctionAndArgs.error } as AgentOutput;
         continue;
       }
 
@@ -47,16 +46,6 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
       const executor = func.buildExecutor(context);
       const result = await executor(funcArgs);
       const functionCalled = func.definition.name
-      // const { result, functionCalled } = await executeAgentFunction(name, args, context, agentFunctions);
-
-
-
-      // if (!result.ok) {
-      //   chat.temporary(response);
-      //   chat.temporary("system", result.error);
-      //   yield { type: AgentOutputType.Error, title: `Failed to execute ${name}!`, content: result.error } as AgentOutput;
-      //   continue;
-      // }
 
       result.messages.forEach(x => chat.temporary(x));
 
