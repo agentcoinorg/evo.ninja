@@ -1,5 +1,6 @@
 import { AgentOutputType, trimText, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { SubAgentConfig } from "../SubAgent";
+import { createOnGoalAchievedFunction, createOnGoalFailedFunction } from "../utils";
 
 const AGENT_NAME = "dev";
 const WRITE_FILE_FN_NAME = "fs_writeFile";
@@ -12,7 +13,10 @@ export const DEV_AGENT_CONFIG: SubAgentConfig = {
     { role: "user", content: goal},
   ],
   loopPreventionPrompt: "Assistant, you appear to be in a loop, try executing a different function.",
-  functions: [{
+  functions: [
+    createOnGoalAchievedFunction(AGENT_NAME),
+    createOnGoalFailedFunction(AGENT_NAME),
+    {
     name: WRITE_FILE_FN_NAME,
     description: "Writes data to a file, replacing the file if it already exists.",
     parameters: {

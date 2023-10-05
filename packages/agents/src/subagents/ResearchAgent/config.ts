@@ -1,5 +1,6 @@
 import { AgentOutputType, ChatMessageBuilder, trimText } from "@evo-ninja/agent-utils";
 import { SubAgentConfig } from "../SubAgent";
+import { createOnGoalAchievedFunction, createOnGoalFailedFunction } from "../utils";
 
 const AGENT_NAME = "researcher";
 const SEARCH_FN_NAME = "web_search";
@@ -17,7 +18,10 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
   ],
   loopPreventionPrompt: "Assistant, you appear to be in a loop, try executing a different function.",
   functions:
-    [{
+    [
+      createOnGoalAchievedFunction(AGENT_NAME),
+      createOnGoalFailedFunction(AGENT_NAME),
+    {
       name: SEARCH_FN_NAME,
       description: "Searches the web for a given query, using a search engine, and returns search results an array of { title, url, description } objects, ordered by relevance",
       parameters: {
