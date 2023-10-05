@@ -1,0 +1,6 @@
+{
+  "name": "fs.getAbsPath",
+  "description": "Gets the absolute path of a file or directory",
+  "arguments": "{ fileOrDirectoryPath: string }",
+  "code": "./fs.getAbsPath.js"
+}
