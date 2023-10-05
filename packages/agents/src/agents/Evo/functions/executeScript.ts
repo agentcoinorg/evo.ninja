@@ -1,8 +1,7 @@
-import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder, JsEngine, JsEngine_GlobalVar, shimCode, trimText } from "@evo-ninja/agent-utils";
+import { AgentFunctionResult, AgentFunctionDefinition, AgentOutputType, ChatMessageBuilder, JsEngine, JsEngine_GlobalVar, shimCode, trimText } from "@evo-ninja/agent-utils";
 import JSON5 from "json5";
 import { Result, ResultOk, ResultErr } from "@polywrap/result";
 import { FUNCTION_CALL_SUCCESS_CONTENT, FUNCTION_CALL_FAILED } from "../utils";
-import { AgentFunction } from "../../..";
 import { EvoContext } from "../config";
 
 export const EXECUTE_SCRIPT_FN_NAME = "executeScript";
@@ -34,10 +33,11 @@ const EXECUTE_SCRIPT_SUCCESS = (scriptName: string, result: any, params: EXECUTE
 });
 
 export const executeScriptFunction: {
-  definition: AgentFunction;
+  definition: AgentFunctionDefinition;
   buildExecutor: (context: EvoContext) => (params: EXECUTE_SCRIPT_FN_PARAMS) => Promise<Result<AgentFunctionResult, string>>;
 } = {
   definition: {
+    name: EXECUTE_SCRIPT_FN_NAME,
     description: `Execute an script.`,
     parameters: {
       type: "object",

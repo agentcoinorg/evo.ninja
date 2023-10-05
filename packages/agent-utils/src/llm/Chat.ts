@@ -34,6 +34,10 @@ export class Chat {
     return this._tokenizer;
   }
 
+  get contextWindow(): ContextWindow | undefined {
+    return this._contextWindow;
+  }
+
   get messages(): ChatMessage[] {
     return this._chatLogs.messages;
   }

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 
+import { Evo, DEV_AGENT_CONFIG, RESEARCH_AGENT_CONFIG } from '@evo-ninja/agents';
 import * as EvoCore from "@evo-ninja/agent-utils";
 import { InMemoryFile } from '@nerfzael/memory-fs';
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
+import clsx from 'clsx';
 
 import './Dojo.css';
 
@@ -13,8 +15,7 @@ import Chat, { ChatMessage } from "../components/Chat/Chat";
 import { MarkdownLogger } from '../sys/logger';
 import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
 import { onGoalAchievedScript, onGoalFailedScript, speakScript } from '../scripts';
-import { Evo } from '@evo-ninja/agents';
-import clsx from 'clsx';
+
 
 function addScript(script: {name: string, definition: string, code: string}, scriptsWorkspace: EvoCore.Workspace) {
   scriptsWorkspace.writeFileSync(`${script.name}.json`, script.definition);
@@ -199,7 +200,8 @@ function Dojo() {
         logger,
         userWorkspace,
         scripts,
-        env
+        env,
+        [DEV_AGENT_CONFIG, RESEARCH_AGENT_CONFIG]
       ));
     } catch (err) {
       setDojoError(err);

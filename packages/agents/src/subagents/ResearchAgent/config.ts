@@ -9,6 +9,8 @@ const SCRAPE_LINKS_FN_NAME = "web_scrapeLinks";
 const WRITE_FILE_FN_NAME = "fs_writeFile";
 
 export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
+  name: "Researcher",
+  expertise: "researching information online",
   initialMessages: ({ goal }) => [
     { role: "assistant", content: `You are an agent that searches the web for information, called "${AGENT_NAME}".\n` +
     `Only scrape if you're certain the information you're looking for isn't available in the result of search.\n`},
@@ -17,6 +19,7 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
   loopPreventionPrompt: "Assistant, you appear to be in a loop, try executing a different function.",
   functions: {
     [ON_GOAL_ACHIEVED_FN_NAME]: {
+      name: ON_GOAL_ACHIEVED_FN_NAME,
       description: "Informs the user that the goal has been achieved.",
       parameters: {
         type: "object",
@@ -42,6 +45,7 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
       })
     },
     [ON_GOAL_FAILED_FN_NAME]: {
+      name: ON_GOAL_FAILED_FN_NAME,
       description: "Informs the user that the agent could not achieve the goal.",
       parameters: {
         type: "object",
@@ -67,6 +71,7 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
       })
     },
     [SEARCH_FN_NAME]: {
+      name: SEARCH_FN_NAME,
       description: "Searches the web for a given query, using a search engine, and returns search results an array of { title, url, description } objects, ordered by relevance",
       parameters: {
         type: "object",
@@ -105,6 +110,7 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
       }),
     },
     [SCRAPE_TEXT_FN_NAME]: {
+      name: SCRAPE_TEXT_FN_NAME,
       description: "Open a web page and scrape all text found in the html",
       parameters: {
         type: "object",
@@ -143,6 +149,7 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
       }),
     },
     [SCRAPE_LINKS_FN_NAME]: {
+      name: SCRAPE_LINKS_FN_NAME,
       description: "Open a web page and scrape all links found in the html",
       parameters: {
         type: "object",
@@ -181,6 +188,7 @@ export const RESEARCH_AGENT_CONFIG: SubAgentConfig = {
       }),
     },
     [WRITE_FILE_FN_NAME]: {
+      name: WRITE_FILE_FN_NAME,
       description: "Writes data to a file, replacing the file if it already exists.",
       parameters: {
         type: "object",

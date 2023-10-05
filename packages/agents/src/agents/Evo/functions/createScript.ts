@@ -1,7 +1,6 @@
-import { Script, AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+import { Script, AgentFunctionResult, AgentFunctionDefinition, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { Result, ResultOk, ResultErr } from "@polywrap/result";
 import { FUNCTION_CALL_SUCCESS_CONTENT, FUNCTION_CALL_FAILED, createScriptWriter } from "../utils";
-import { AgentFunction } from "../../..";
 import { EvoContext } from "../config";
 
 export const CREATE_SCRIPT_FN_NAME = "createScript";
@@ -53,10 +52,11 @@ const CANNOT_CREATE_SCRIPTS_ON_AGENT_NAMESPACE = (params: CREATE_SCRIPT_FN_PARAM
 });
 
 export const createScriptFunction: {
-  definition: AgentFunction;
+  definition: AgentFunctionDefinition;
   buildExecutor: (context: EvoContext) => (params: CREATE_SCRIPT_FN_PARAMS) => Promise<Result<AgentFunctionResult, string>>;
 } = {
   definition: {
+    name: CREATE_SCRIPT_FN_NAME,
     description: `Create a script using JavaScript.`,
     parameters: {
       type: "object",

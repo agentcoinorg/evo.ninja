@@ -1,4 +1,4 @@
-import { Evo } from "@evo-ninja/agents";
+import { Evo, DEV_AGENT_CONFIG, RESEARCH_AGENT_CONFIG } from "@evo-ninja/agents";
 import {
   Env,
   OpenAI,
@@ -114,6 +114,7 @@ export function createApp(config?: AppConfig): App {
     userWorkspace,
     scripts,
     env,
+    [DEV_AGENT_CONFIG, RESEARCH_AGENT_CONFIG],
     config?.timeout
   );
 

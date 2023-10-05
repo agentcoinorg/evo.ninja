@@ -89,6 +89,7 @@ return fs.readFileSync(path, encoding);
   functions: {
     [THINK_FN_NAME]: {
       definition: {
+        name: THINK_FN_NAME,
         description: `Think.`,
         parameters: {
           type: "object",
@@ -110,6 +111,7 @@ return fs.readFileSync(path, encoding);
     },
     [WRITE_FN_NAME]: {
       definition: {
+        name: WRITE_FN_NAME,
         description: `Writes the function.`,
         parameters: {
           type: "object",

@@ -1,1 +1,1 @@
-export * from "./ResearchAgent"
+export * from "./config"
