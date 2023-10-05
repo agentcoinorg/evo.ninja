@@ -8,15 +8,15 @@ import {
 } from "@evo-ninja/agent-utils";
 import { SubAgentContext } from "./SubAgent";
 
-interface ScriptExecutorArgs<TAgentContext> {
+interface BuildScriptExecutorArgs<TAgentContext> {
   context: TAgentContext
   scriptName: string;
   onSuccess: (params: any, result?: string) => AgentFunctionResult;
   onFailure: (params: any, error: string) => AgentFunctionResult;
 }
 
-export const scriptExecutor = <TAgentContext extends SubAgentContext = SubAgentContext>(
-  args: ScriptExecutorArgs<TAgentContext>
+export const buildScriptExecutor = <TAgentContext extends SubAgentContext = SubAgentContext>(
+  args: BuildScriptExecutorArgs<TAgentContext>
 ) => {
   return async (params: any): Promise<Result<AgentFunctionResult, string>> => {
     const { context, scriptName, onSuccess, onFailure } = args;
