@@ -1,6 +1,6 @@
 import { AgentBaseConfig, AgentBaseContext } from "../../AgentBase";
 import { ThinkFunction } from "../../functions/Think";
-import { WriteFunctionFunction } from "../../functions/WriteFunction";
+import { WriteScriptFunction } from "../../functions/WriteScript";
 
 export interface ScriptWriterRunArgs {
   namespace: string;
@@ -9,6 +9,8 @@ export interface ScriptWriterRunArgs {
 }
 
 export interface ScriptWriterContext extends AgentBaseContext {}
+
+const writeScriptFn = new WriteScriptFunction();
 
 export const SCRIPTWRITER_AGENT_CONFIG: AgentBaseConfig<ScriptWriterRunArgs, ScriptWriterContext> = {
   initialMessages: ({
@@ -21,7 +23,7 @@ export const SCRIPTWRITER_AGENT_CONFIG: AgentBaseConfig<ScriptWriterRunArgs, Scr
       content:
 `I am an agent designed to write JavaScript functions. 
 1. Always think through the implementation step-by-step before coding.
-2. Submit your code using the writeFunction function.
+2. Submit your code using the writeScript function.
 3. Don't get disheartened by initial failures. Retry until success.
 4. Ensure authenticity; avoid creating mock functionality.`
     },
@@ -39,7 +41,7 @@ Guidelines:
 2. Limit yourself to the provided arguments. Don't introduce new ones.
 3. If the function needs to return a value, use the return keyword.
 4. For libraries, utilize the require function for imports.
-5. Stick to the following libraries: ${WriteFunctionFunction.formatSupportedLibraries()}.
+5. Stick to the following libraries: ${WriteScriptFunction.formatSupportedLibraries()}.
 6. Avoid using external APIs that mandate authentication or API keys.
 7. Refrain from recursive calls to the "${namespace}" function.
 
@@ -50,10 +52,10 @@ return fs.readFileSync(path, encoding);
 \`\`\``
     }
   ],
-  loopPreventionPrompt: "Assistant, try executing the writeFunction.",
+  loopPreventionPrompt: "Assistant, try executing the writeScript.",
   functions: [
     new ThinkFunction(),
-    new WriteFunctionFunction()
+    writeScriptFn
   ],
-  shouldTerminate: (functionCalled) => functionCalled.name === "writeFunction"
+  shouldTerminate: (functionCalled) => functionCalled.name === writeScriptFn.name
 }

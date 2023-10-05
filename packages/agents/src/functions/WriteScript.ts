@@ -3,14 +3,14 @@ import { Result, ResultOk } from "@polywrap/result";
 import { AgentFunctionBase, HandlerResult } from "../AgentFunctionBase";
 import { AgentBaseContext } from "../AgentBase";
 
-interface WriteFunctionFuncParameters { 
+interface WriteScriptFuncParameters { 
   namespace: string, 
   description: string, 
   arguments: string, 
   code: string 
 };
 
-export class WriteFunctionFunction extends AgentFunctionBase<AgentBaseContext, WriteFunctionFuncParameters> {
+export class WriteScriptFunction extends AgentFunctionBase<AgentBaseContext, WriteScriptFuncParameters> {
   static allowedLibs =
     [
       "fs",
@@ -20,7 +20,7 @@ export class WriteFunctionFunction extends AgentFunctionBase<AgentBaseContext, W
     ]
 
   get name(): string {
-    return "writeFunction";
+    return "writeScript";
   }
   get description(): string {
     return `Writes the function.`;
@@ -51,7 +51,7 @@ export class WriteFunctionFunction extends AgentFunctionBase<AgentBaseContext, W
     }
   }
 
-  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: WriteFunctionFuncParameters) => Promise<Result<AgentFunctionResult, string>> {
+  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: WriteScriptFuncParameters) => Promise<Result<AgentFunctionResult, string>> {
     return async (params: { 
       namespace: string, 
       description: string, 
@@ -62,7 +62,7 @@ export class WriteFunctionFunction extends AgentFunctionBase<AgentBaseContext, W
         return ResultOk(this.cannotCreateInAgentNamespaceError(this.name, params));
       }
 
-      if (this.extractRequires(params.code).some(x => !WriteFunctionFunction.allowedLibs.includes(x))) {
+      if (this.extractRequires(params.code).some(x => !WriteScriptFunction.allowedLibs.includes(x))) {
         return ResultOk(this.cannotRequireLibError(this.name, params));
       }
 
@@ -72,7 +72,7 @@ export class WriteFunctionFunction extends AgentFunctionBase<AgentBaseContext, W
     };
   }
 
-  private onSuccess(params: WriteFunctionFuncParameters): HandlerResult {
+  private onSuccess(params: WriteScriptFuncParameters): HandlerResult {
     return {
       outputs: [
         {
@@ -113,7 +113,7 @@ export class WriteFunctionFunction extends AgentFunctionBase<AgentBaseContext, W
     return libraries;
   }
 
-  private cannotCreateInAgentNamespaceError(functionName: string, params: WriteFunctionFuncParameters) {
+  private cannotCreateInAgentNamespaceError(functionName: string, params: WriteScriptFuncParameters) {
     return {
       outputs: [
         {
@@ -133,20 +133,20 @@ export class WriteFunctionFunction extends AgentFunctionBase<AgentBaseContext, W
     }
   }
 
-  private cannotRequireLibError(functionName: string, params: WriteFunctionFuncParameters) {
+  private cannotRequireLibError(functionName: string, params: WriteScriptFuncParameters) {
     return {
       outputs: [
         {
           type: AgentOutputType.Error,
           title:`Failed to write function '${params.namespace}'!`,
-          content: this.onError(functionName,  `Cannot require libraries other than ${WriteFunctionFunction.allowedLibs.join(", ")}.`, params)
+          content: this.onError(functionName,  `Cannot require libraries other than ${WriteScriptFunction.allowedLibs.join(", ")}.`, params)
         }
       ],
       messages: [
         ChatMessageBuilder.functionCall(functionName, params),
         ChatMessageBuilder.functionCallResult(
           functionName,
-          `Cannot require libraries other than ${WriteFunctionFunction.allowedLibs.join(", ")}.`
+          `Cannot require libraries other than ${WriteScriptFunction.allowedLibs.join(", ")}.`
         ),
       ]
     }
