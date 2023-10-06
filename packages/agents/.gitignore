@@ -1,1 +1,2 @@
 src/__tests__/test-cases/
+/src/scriptedAgents/DataAnalyst/.tests/*/debug/*

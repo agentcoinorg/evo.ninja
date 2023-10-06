@@ -4,7 +4,7 @@ import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
 export class ReadFileFunction extends ScriptFunction<{
   path: string;
-  data: string;
+  encoding: string;
 }> {
   get name() {
     return "fs_readFile"
@@ -21,11 +21,11 @@ export class ReadFileFunction extends ScriptFunction<{
         path: {
           type: "string",
         },
-        data: {
+        encoding: {
           type: "string"
-        },
+        }
       },
-      required: ["path", "data"],
+      required: ["path", "encoding"],
       additionalProperties: false
     }
   }

@@ -14,7 +14,7 @@ import * as rimraf from "rimraf";
 import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
-import { ScriptedAgent } from "../";
+import { ScriptedAgent } from "..";
 import { DATA_ANALYST_AGENT } from "./config";
 
 const rootDir = path.join(__dirname, "../../../../../");
@@ -25,7 +25,7 @@ dotenv.config({
 
 jest.setTimeout(120000);
 
-describe("Dev Agent Test Suite", () => {
+describe("Data Analyst Agent Test Suite", () => {
   function createDataAnalystAgent(testName: string): {
     agent: ScriptedAgent;
     debugLog: DebugLog;
@@ -33,7 +33,9 @@ describe("Dev Agent Test Suite", () => {
     const testCaseDir = path.join(__dirname, ".tests", testName);
 
     // reset the dir
-    rimraf.sync(testCaseDir);
+    rimraf.sync(testCaseDir, {
+      filter: (path: string, _: any) => !path.includes("input.csv"),
+    });
 
     const env = new Env(process.env as Record<string, string>);
     const logger = new Logger([new ConsoleLogger()], {
@@ -111,9 +113,54 @@ describe("Dev Agent Test Suite", () => {
       "Sort the input.csv by the 'timestamp' column and write the new csv in the output.csv file. The order of the columns should be preserved.",
       debugLog
     );
-    console.log(response);
-    // expect(response.value.ok).toBe(true);
-    // const sourceCode = agent.workspace.readFileSync("organize_files.py");
-    // expect(sourceCode).toBeTruthy();
+    expect(response.value.ok).toBe(true);
+    const outputCsv = agent.workspace.readFileSync("output.csv");
+    expect(outputCsv).toBeTruthy();
+    expect(outputCsv).toBe(`id,name,timestamp
+1,Bob,2023-09-24 12:05:00
+2,Charlie,2023-09-24 12:10:00
+3,Alice,2023-09-25 14:10:00
+4,David,2023-09-26 16:20:00
+`);
+  });
+
+  test("label-csv", async () => {
+    const { agent, debugLog } = createDataAnalystAgent("label-csv");
+    const response = await runDataAnalystAgent(
+      agent,
+      "The csv 'input.csv' has many items. create a 'Color' column for these items and classify them as either 'blue', 'green', or 'yellow' depending on what the most likely color is. Preserve the order of the rows. The color column should be the second column. Write the output in output.csv",
+      debugLog
+    );
+    expect(response.value.ok).toBe(true);
+    const outputCsv = agent.workspace.readFileSync("output.csv");
+    expect(outputCsv).toBeTruthy();
+    console.log(outputCsv);
+    expect(outputCsv).toContain(`Item,Color
+Banana,Yellow
+Leaf,Green
+Sky,Blue
+Sunflower,Yellow
+Grass,Green
+Jeans,Blue
+Lemon,Yellow
+Tree,Green
+Ocean,Blue
+Daisy,Yellow
+Fern,Green
+`);
+  });
+
+  test.only("combine-csv", async () => {
+    const { agent, debugLog } = createDataAnalystAgent("combine-csv");
+    const response = await runDataAnalystAgent(
+      agent,
+      `The csvs 'file1.csv' and 'file2.csv' both have a column 'ID'. Combine these 2 csvs using the 'ID' column. Sort the rows by ID in ascending order and the columns alphabetically. Write the output in output.csv`,
+      debugLog
+    );
+    expect(response.value.ok).toBe(true);
+    const outputCsv = agent.workspace.readFileSync("output.csv");
+    expect(outputCsv).toBeTruthy();
+    console.log(outputCsv);
+    // expect(outputCsv).toContain();
   });
 });
