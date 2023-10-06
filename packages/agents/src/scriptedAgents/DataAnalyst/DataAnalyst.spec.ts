@@ -124,7 +124,7 @@ describe("Data Analyst Agent Test Suite", () => {
 `);
   });
 
-  test("label-csv", async () => {
+  test.only("label-csv", async () => {
     const { agent, debugLog } = createDataAnalystAgent("label-csv");
     const response = await runDataAnalystAgent(
       agent,
@@ -150,7 +150,7 @@ Fern,Green
 `);
   });
 
-  test("combine-csv", async () => {
+  test.only("combine-csv", async () => {
     const { agent, debugLog } = createDataAnalystAgent("combine-csv");
     const response = await runDataAnalystAgent(
       agent,
@@ -163,7 +163,7 @@ Fern,Green
     expect(outputCsv).toContain(`Age,ID,Name,Occupation,Salary
 28,101,John,Engineer,80000
 34,102,Alice,Doctor,120000
-45,103,Bob,Lawyer,95000
-`);
+45,103,Bob,Lawyer,95000`
+    );
   });
 });

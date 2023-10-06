@@ -2,7 +2,7 @@ import { ScriptFunction } from "../ScriptFunction"
 
 export class AddCsvColumnFunction extends ScriptFunction<{ inputPath: string, outputPath: string, column: string, values: string[] }> {
   get name() {
-    return "csv_addColumns"
+    return "csv_addColumn"
   }
 
   get description() {
