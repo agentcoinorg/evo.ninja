@@ -16,7 +16,7 @@ export const RESEARCHER_AGENT_CONFIG: ScriptedAgentConfig = {
   name: AGENT_NAME,
   expertise: "researching information online",
   initialMessages: ({ goal }) => [
-    { role: "assistant", content: `I am an agent that searches the web for information, called "${AGENT_NAME}".\n` +
+    { role: "system", content: `You are an agent that searches the web for information, called "${AGENT_NAME}".\n` +
     `Only scrape if you're certain the information you're looking for isn't available in the result of search.\n`},
     { role: "user", content: goal },
   ],

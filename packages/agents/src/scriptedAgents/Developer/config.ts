@@ -8,16 +8,17 @@ const AGENT_NAME = "Developer";
 
 const onGoalAchievedFn = new OnGoalAchievedFunction();
 const onGoalFailedFn = new OnGoalFailedFunction();
+const writeFileFn = new WriteFileFunction();
 
 export const DEVELOPER_AGENT_CONFIG: ScriptedAgentConfig = {
   name: AGENT_NAME,
   expertise: "Building software projects with one or more files.",
   initialMessages: ({ goal }) => [
     { 
-      role: "assistant", 
+      role: "system", 
       content: `Purpose:
-I am an expert developer assistant that excels at coding related tasks.
-I plan and write clean and effective code to files using the ${new WriteFileFunction().name} function.`
+You are an expert developer assistant that excels at coding related tasks.
+You plan and write clean and effective code to files using the ${writeFileFn.name} function.`
     },
     { role: "user", content: goal},
   ],
