@@ -10,9 +10,14 @@ const onGoalFailedFn = new OnGoalFailedFunction();
 
 export const DEVELOPER_AGENT_CONFIG: ScriptedAgentConfig = {
   name: AGENT_NAME,
-  expertise: "Building software projects of one or more files.",
+  expertise: "Building software projects with one or more files.",
   initialMessages: ({ goal }) => [
-    { role: "assistant", content: `I am an expert software engineer named "${AGENT_NAME}".`},
+    { 
+      role: "assistant", 
+      content: `Purpose:
+I am an expert developer assistant that excels at coding related tasks.
+I plan and write clean and effective code to files using the ${new WriteFileFunction().name} function.`
+    },
     { role: "user", content: goal},
   ],
   loopPreventionPrompt: "Assistant, you appear to be in a loop, try executing a different function.",
