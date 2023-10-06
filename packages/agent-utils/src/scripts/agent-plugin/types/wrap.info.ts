@@ -75,6 +75,20 @@ export const manifest: WrapManifest = {
         "type": "Method"
       },
       {
+        "arguments": [
+          {
+            "kind": 34,
+            "name": "message",
+            "required": true,
+            "scalar": {
+              "kind": 4,
+              "name": "message",
+              "required": true,
+              "type": "String"
+            },
+            "type": "String"
+          }
+        ],
         "kind": 64,
         "name": "onGoalAchieved",
         "required": true,
@@ -93,6 +107,20 @@ export const manifest: WrapManifest = {
         "type": "Method"
       },
       {
+        "arguments": [
+          {
+            "kind": 34,
+            "name": "message",
+            "required": true,
+            "scalar": {
+              "kind": 4,
+              "name": "message",
+              "required": true,
+              "type": "String"
+            },
+            "type": "String"
+          }
+        ],
         "kind": 64,
         "name": "onGoalFailed",
         "required": true,

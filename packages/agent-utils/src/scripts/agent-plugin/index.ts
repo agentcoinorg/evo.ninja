@@ -1,5 +1,7 @@
 import {
   Args_ask,
+  Args_onGoalAchieved,
+  Args_onGoalFailed,
   Args_speak,
   Module,
   manifest
@@ -30,13 +32,13 @@ export class AgentPlugin extends Module<AgentPluginConfig> {
     return "User: " + response;
   }
 
-  public onGoalAchieved(): boolean {
-    this._logger.success("Goal has been achieved!");
+  public onGoalAchieved(args: Args_onGoalAchieved): boolean {
+    this._logger.success(`Goal has been achieved: ${args.message}`);
     return true;
   }
 
-  public onGoalFailed(): boolean {
-    this._logger.error("Goal could not be achieved!");
+  public onGoalFailed(args: Args_onGoalFailed): boolean {
+    this._logger.error(`Goal could not be achieved: ${args.message}`);
     return true;
   }
 }

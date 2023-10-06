@@ -51,7 +51,7 @@ export class DelegateAgentFunction<
         ChatMessageBuilder.functionCall(this.delegateScriptedAgentFnName(name), params),
         ChatMessageBuilder.functionCallResult(
           this.delegateScriptedAgentFnName(name),
-          `Successfully accomplished the task.`
+          result.content || "Successfully accomplished the task."
         )
       ]
     }
