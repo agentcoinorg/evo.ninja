@@ -25,7 +25,7 @@ export const EVO_AGENT_CONFIG = (scriptedAgents?: ScriptedAgentConfig[]): AgentB
     expertise: "an expert evolving assistant that achieves user goals",
     initialMessages: ({ goal }) => [
       {
-        role: "system",
+        role: "user",
         content:
 `Purpose:
 You are an expert assistant designed to achieve user goals.

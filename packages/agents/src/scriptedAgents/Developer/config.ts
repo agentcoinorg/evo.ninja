@@ -15,7 +15,7 @@ export const DEVELOPER_AGENT_CONFIG: ScriptedAgentConfig = {
   expertise: "Building software projects with one or more files.",
   initialMessages: ({ goal }) => [
     { 
-      role: "system", 
+      role: "user", 
       content: `Purpose:
 You are an expert developer assistant that excels at coding related tasks.
 You plan and write clean and effective code to files using the ${writeFileFn.name} function.`

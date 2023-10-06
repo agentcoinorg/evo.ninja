@@ -9,7 +9,7 @@ export const PLANNER_AGENT_CONFIG: ScriptedAgentConfig = {
   name: AGENT_NAME,
   expertise: "I provide a plan that tells you how to achieve any goal",
   initialMessages: ({ goal }) => [
-    { role: "system", content: `You are an expert planner named "${AGENT_NAME}". 
+    { role: "user", content: `You are an expert planner named "${AGENT_NAME}". 
 The user will tell you their goal. You must create a concise plan for this goal.
 
 RESPONSE:

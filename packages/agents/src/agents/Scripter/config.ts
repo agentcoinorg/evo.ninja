@@ -24,7 +24,7 @@ export const SCRIPTER_AGENT_CONFIG: AgentBaseConfig<ScripterRunArgs, ScripterCon
   expertise: "executing and creating scripts to solve basic tasks",
   initialMessages: ({ goal }) => [
     {
-      role: "system",
+      role: "user",
       content:
 `Purpose:
 You are an expert assistant designed to achieve goals through the use of scripts. You prioritize the use of existing scripts, and only create new scripts as a last-resort.

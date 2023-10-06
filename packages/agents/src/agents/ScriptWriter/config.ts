@@ -23,7 +23,7 @@ export const SCRIPTWRITER_AGENT_CONFIG: AgentBaseConfig<ScriptWriterRunArgs, Scr
     args
   }) => [
     {
-      role: "system",
+      role: "user",
       content:
 `You are an agent designed to write JavaScript functions. 
 1. Always think through the implementation step-by-step before coding.
