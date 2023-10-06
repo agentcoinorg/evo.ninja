@@ -113,7 +113,7 @@ describe('Evo Test Suite', () => {
     }
   }
 
-  test.skip("tic-tac-toe", async () => {
+  test("tic-tac-toe", async () => {
     const { agent, debugLog } = createEvo("tic-tac-toe");
     const response = await runEvo(
       agent,
