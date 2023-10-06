@@ -13,6 +13,8 @@ import { PluginPackage } from "@polywrap/plugin-js";
 import { ResultErr, ResultOk } from "@polywrap/result";
 import * as  path from "path-browserify"
 import axios from "axios";
+import * as fuzzysort from "fuzzysort";
+import cheerio from "cheerio";
 
 export class WrapClient extends PolywrapClient {
 
@@ -226,6 +228,54 @@ export class WrapClient extends PolywrapClient {
           }
 
           return JSON.stringify(result)
+        }
+      })))
+      .setPackage("plugin/findinpage", PluginPackage.from(module => ({
+        "find": async (args: { url: string, queryKeywords: string[] }) => {
+          const response = await axios.get(args.url, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:107.0) Gecko/20100101 Firefox/107.0'
+            }
+          });
+          const html = response.data;
+
+          const $ = cheerio.load(html);
+          $('script').remove();
+
+          const results: string[] = [];
+
+          $('*').each((index, element) => {
+              const text = $(element).text().trim();
+
+              let context = text;
+
+              if ($(element).prev().length > 0) {
+                  context = $(element).prev().text().trim() + " " + context;
+              }
+
+              if ($(element).next().length > 0) {
+                  context += " " + $(element).next().text().trim();
+              }
+
+              if ($(element).children().length > 0) {
+                  context += " " + $(element).children().map((i, el) => $(el).text().trim()).get().join(" ");
+              }
+
+              results.push(context);
+          });
+
+          const cleanResults = Array.from(new Set(results.map(result => {
+            return result
+              .replaceAll("\t", '')
+              .replaceAll("\\\\t", '')
+              .replaceAll("\g", ' ')
+              .replaceAll("\\\\g", ' ')
+              .trim();
+          })))
+
+          const sortedResults = fuzzysort.go(args.queryKeywords.join(" "), cleanResults).map(result => result.target);
+          console.log(JSON.stringify(sortedResults.slice(0, 15)));
+          return JSON.stringify(sortedResults.slice(0, 15));
         }
       })))
 
