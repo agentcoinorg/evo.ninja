@@ -17,7 +17,7 @@ export class ScrapeTextFunction extends ScriptFunction<{ url: string }> {
           type: "string",
         },
       },
-      required: ["query"],
+      required: ["url"],
       additionalProperties: false
     }
   }

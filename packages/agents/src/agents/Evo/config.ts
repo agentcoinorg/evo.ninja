@@ -1,8 +1,8 @@
 import { AgentBaseConfig, ScriptedAgentContext, ScriptedAgentConfig, ScriptedAgent } from "../..";
-import { OnGoalAchievedFunction } from "../../scriptedAgents/functions/OnGoalAchieved";
-import { OnGoalFailedFunction } from "../../scriptedAgents/functions/OnGoalFailed";
 import { DelegateAgentFunction } from "./functions/DelegateScriptedAgent";
 import { SCRIPTER_AGENT_CONFIG, Scripter } from "../Scripter";
+import { OnGoalAchievedFunction } from "../../scriptedAgents/functions/OnGoalAchieved";
+import { OnGoalFailedFunction } from "../../scriptedAgents/functions/OnGoalFailed";
 
 import { Chat } from "@evo-ninja/agent-utils";
 

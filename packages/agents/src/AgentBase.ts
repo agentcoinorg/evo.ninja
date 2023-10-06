@@ -35,13 +35,19 @@ export abstract class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseCon
   }
 
   public async* run(
-    args: TRunArgs
+    args: TRunArgs,
+    context?: string
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
     try {
       this.config.initialMessages(args).forEach((message) => {
         chat.persistent(message.role, message.content);
       })
+
+      // If additional context is needed
+      if (context) {
+        chat.persistent("user", context);
+      }
 
       if (this.config.timeout) {
         setTimeout(this.config.timeout.callback, this.config.timeout.milliseconds);
