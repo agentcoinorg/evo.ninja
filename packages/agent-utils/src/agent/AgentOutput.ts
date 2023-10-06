@@ -2,7 +2,8 @@ export const AgentOutputType = {
   Success: "success",
   Error: "error",
   Info: "info",
-  Warning: "warning"
+  Warning: "warning",
+  Message: "message",
 } as const;
 
 export type AgentOutputType = typeof AgentOutputType[keyof typeof AgentOutputType];
