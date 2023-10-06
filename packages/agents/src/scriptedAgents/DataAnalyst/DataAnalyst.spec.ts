@@ -16,6 +16,7 @@ import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import { ScriptedAgent } from "..";
 import { DATA_ANALYST_AGENT } from "./config";
+import fs from "fs";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -26,16 +27,17 @@ dotenv.config({
 jest.setTimeout(120000);
 
 describe("Data Analyst Agent Test Suite", () => {
-  function createDataAnalystAgent(testName: string): {
+  function createDataAnalystAgent(
+    testName: string,
+    pathsForFilesToInclude?: string[]
+  ): {
     agent: ScriptedAgent;
     debugLog: DebugLog;
   } {
     const testCaseDir = path.join(__dirname, ".tests", testName);
 
     // reset the dir
-    rimraf.sync(testCaseDir, {
-      filter: (path: string, _: any) => !path.includes(".csv"),
-    });
+    rimraf.sync(testCaseDir);
 
     const env = new Env(process.env as Record<string, string>);
     const logger = new Logger([new ConsoleLogger()], {
@@ -68,6 +70,17 @@ describe("Data Analyst Agent Test Suite", () => {
     const scripts = new Scripts(scriptsWorkspace, "./");
 
     const workspace = new FileSystemWorkspace(testCaseDir);
+
+    if (pathsForFilesToInclude) {
+      for (const filePath of pathsForFilesToInclude) {
+        if (!fs.existsSync(filePath)) {
+          throw Error(`Input file does not exist: ${filePath}`);
+        }
+        const fileName = path.basename(filePath);
+        const fileContents = fs.readFileSync(filePath, "utf-8");
+        workspace.writeFileSync(fileName, fileContents);
+      }
+    }
 
     return {
       agent: ScriptedAgent.create(DATA_ANALYST_AGENT, {
@@ -107,7 +120,9 @@ describe("Data Analyst Agent Test Suite", () => {
   }
 
   test("sort-csv", async () => {
-    const { agent, debugLog } = createDataAnalystAgent("sort-csv");
+    const { agent, debugLog } = createDataAnalystAgent("sort-csv", [
+      path.join(__dirname, "testInputs/sortCsv/input.csv"),
+    ]);
     const response = await runDataAnalystAgent(
       agent,
       "Sort the input.csv by the 'timestamp' column and write the new csv in the output.csv file. The order of the columns should be preserved.",
@@ -125,7 +140,9 @@ describe("Data Analyst Agent Test Suite", () => {
   });
 
   test("label-csv", async () => {
-    const { agent, debugLog } = createDataAnalystAgent("label-csv");
+    const { agent, debugLog } = createDataAnalystAgent("label-csv", [
+      path.join(__dirname, "testInputs/labelCsv/input.csv"),
+    ]);
     const response = await runDataAnalystAgent(
       agent,
       "The csv 'input.csv' has many items. create a 'Color' column for these items and classify them as either 'blue', 'green', or 'yellow' depending on what the most likely color is. Preserve the order of the rows. The color column should be the second column. Write the output in output.csv",
@@ -151,7 +168,10 @@ Fern,Green
   });
 
   test.only("combine-csv", async () => {
-    const { agent, debugLog } = createDataAnalystAgent("combine-csv");
+    const { agent, debugLog } = createDataAnalystAgent("combine-csv", [
+      path.join(__dirname, "testInputs/combineCsv/file1.csv"),
+      path.join(__dirname, "testInputs/combineCsv/file2.csv"),
+    ]);
     const response = await runDataAnalystAgent(
       agent,
       `The csvs 'file1.csv' and 'file2.csv' both have a column 'ID'. Combine these 2 csvs using the 'ID' column. Sort the rows by ID in ascending order and the columns alphabetically. Write the output in output.csv`,
@@ -163,7 +183,6 @@ Fern,Green
     expect(outputCsv).toContain(`Age,ID,Name,Occupation,Salary
 28,101,John,Engineer,80000
 34,102,Alice,Doctor,120000
-45,103,Bob,Lawyer,95000`
-    );
+45,103,Bob,Lawyer,95000`);
   });
 });
