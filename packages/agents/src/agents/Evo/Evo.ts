@@ -1,13 +1,19 @@
 import { LlmApi, Chat, Workspace, Scripts, Env, WrapClient, agentPlugin, Logger, Timeout } from "@evo-ninja/agent-utils";
 import { EVO_AGENT_CONFIG, EvoContext, EvoRunArgs } from "./config";
 import { AgentBase } from "../../AgentBase";
-import { ScriptedAgentConfig, DEVELOPER_AGENT_CONFIG, RESEARCHER_AGENT_CONFIG } from "../../scriptedAgents";
-import { DATA_ANALYST_AGENT } from "../../scriptedAgents/DataAnalyst";
+import {
+  ScriptedAgentConfig,
+  DEVELOPER_AGENT_CONFIG,
+  RESEARCHER_AGENT_CONFIG,
+  PLANNER_AGENT_CONFIG,
+  DATA_ANALYST_AGENT
+} from "../../scriptedAgents";
 
 export const defaultScriptedAgents = [
   DEVELOPER_AGENT_CONFIG,
   RESEARCHER_AGENT_CONFIG,
-  DATA_ANALYST_AGENT
+  DATA_ANALYST_AGENT,
+  PLANNER_AGENT_CONFIG
 ];
 
 export class Evo extends AgentBase<EvoRunArgs, EvoContext> {
