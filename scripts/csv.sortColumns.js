@@ -1,5 +1,4 @@
 const fs = require('fs');
-const util = require('util');
 
 // Read the CSV file
 const data = fs.readFileSync(inputPath, 'utf8');
