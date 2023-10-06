@@ -11,4 +11,4 @@ export const UNDEFINED_FUNCTION_ARGS = (name: string) =>
   `Function call argument for '${name}' were undefined.`;
 
 export const AGENT_SPEAK_RESPONSE =
-  "User has been informed! If you think you've achieved the goal, execute the agent.onGoalAchieved script.\nIf you think you've failed, execute agent.onGoalFailed script.";
+  "If you think you've achieved the goal, execute the agent.onGoalAchieved script.\nIf you think you've failed, execute agent.onGoalFailed script.";
