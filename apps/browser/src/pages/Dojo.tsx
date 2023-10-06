@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { Evo, DEVELOPER_AGENT_CONFIG, RESEARCHER_AGENT_CONFIG } from '@evo-ninja/agents';
+import { Evo } from '@evo-ninja/agents';
 import * as EvoCore from "@evo-ninja/agent-utils";
 import { InMemoryFile } from '@nerfzael/memory-fs';
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
@@ -201,7 +201,6 @@ function Dojo() {
         userWorkspace,
         scripts,
         env,
-        [DEVELOPER_AGENT_CONFIG, RESEARCHER_AGENT_CONFIG]
       ));
     } catch (err) {
       setDojoError(err);

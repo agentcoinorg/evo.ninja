@@ -2,16 +2,18 @@ import { AgentOutputType, trimText, ChatMessageBuilder, AgentFunctionResult } fr
 import { ScriptedAgent } from "../scriptedAgents"
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
-export class ReadFileFunction extends ScriptFunction<{
+interface ReadFileFuncParameters { 
   path: string;
   encoding: string;
-}> {
+};
+
+export class ReadFileFunction extends ScriptFunction<ReadFileFuncParameters> {
   get name() {
     return "fs_readFile"
   }
 
   get description() {
-    return "Read data from a file"
+    return "Reads data from a file."
   }
 
   get parameters() {
@@ -23,14 +25,14 @@ export class ReadFileFunction extends ScriptFunction<{
         },
         encoding: {
           type: "string"
-        }
+        },
       },
       required: ["path", "encoding"],
       additionalProperties: false
     }
   }
 
-  onSuccess(scriptedAgent: ScriptedAgent, params: any, result: string): AgentFunctionResult {
+  onSuccess(scriptedAgent: ScriptedAgent, params: ReadFileFuncParameters, result: string): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -38,7 +40,7 @@ export class ReadFileFunction extends ScriptFunction<{
           title: `[${scriptedAgent.name}] ${this.name}`,
           content: `${params.path}\n` +
             `${params.encoding}\n` +
-            `${trimText(params.data, 200)}`
+            `${trimText(result, 200)}`
         }
       ],
       messages: [

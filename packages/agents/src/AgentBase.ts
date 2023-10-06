@@ -51,11 +51,7 @@ export abstract class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseCon
         this.context,
         this.config.functions.map((fn) => {
           return {
-            definition: {
-              name: fn.name,
-              description: fn.description,
-              parameters: fn.parameters
-            },
+            definition: fn.getDefinition(),
             buildExecutor: (context: TAgentBaseContext) => {
               return fn.buildExecutor(this, context);
             }
