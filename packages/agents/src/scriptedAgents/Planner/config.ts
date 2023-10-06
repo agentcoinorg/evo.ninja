@@ -10,7 +10,7 @@ const onGoalFailedFn = new OnGoalAchievedFunction();
 
 export const PLANNER_AGENT_CONFIG: ScriptedAgentConfig = {
   name: AGENT_NAME,
-  expertise: "Producing a plan to achieve a goal.",
+  expertise: "I provide a plan that tells you how to achieve any goal",
   initialMessages: ({ goal }) => [
     { role: "assistant", content: `I am an expert planner named "${AGENT_NAME}".
 The user tells me the goal. I do not achieve the goal. I produce a plan to achieve the goal.

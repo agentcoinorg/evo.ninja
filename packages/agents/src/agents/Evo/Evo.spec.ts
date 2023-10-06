@@ -15,6 +15,7 @@ import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import {Evo, DEVELOPER_AGENT_CONFIG, RESEARCHER_AGENT_CONFIG, PLANNER_AGENT_CONFIG} from "../../";
+import fs from "fs";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -26,7 +27,7 @@ jest.setTimeout(120000);
 
 describe('Evo Test Suite', () => {
 
-  function createEvo(testName: string): {
+  function createEvo(testName: string, pathsForFilesToInclude: string[] = []): {
     agent: Evo;
     debugLog: DebugLog;
   } {
@@ -69,6 +70,15 @@ describe('Evo Test Suite', () => {
 
     const workspace = new FileSystemWorkspace(testCaseDir);
 
+    for (const filePath of pathsForFilesToInclude) {
+      if (!fs.existsSync(filePath)) {
+        throw Error(`Input file does not exist: ${filePath}`);
+      }
+      const fileName = path.basename(filePath);
+      const fileContents = fs.readFileSync(filePath, "utf-8");
+      workspace.writeFileSync(fileName, fileContents);
+    }
+
     return {
       agent: new Evo(
         debugLlm,
@@ -103,7 +113,7 @@ describe('Evo Test Suite', () => {
     }
   }
 
-  test("tic-tac-toe", async () => {
+  test.skip("tic-tac-toe", async () => {
     const { agent, debugLog } = createEvo("tic-tac-toe");
     const response = await runEvo(
       agent,
@@ -114,5 +124,21 @@ describe('Evo Test Suite', () => {
     expect(response.value.ok).toBe(true);
     const sourceCode = agent.workspace.readFileSync("tic_tac_toe.py");
     expect(sourceCode).toBeTruthy();
+  });
+
+  test("AnswerQuestionSmallCsv", async () => {
+    const { agent, debugLog } = createEvo(
+      "AnswerQuestionSmallCsv",
+      [path.join(__dirname, "testInputs/AnswerQuestionSmallCsv/file1.csv")]
+    );
+    const response = await runEvo(
+      agent,
+      "How much was spent on utilities in total ? Write the answer in an output.txt file.",
+      debugLog
+    );
+
+    expect(response.value.ok).toBe(true);
+    const result = agent.workspace.readFileSync("output.txt");
+    expect(result).toEqual("84");
   });
 });

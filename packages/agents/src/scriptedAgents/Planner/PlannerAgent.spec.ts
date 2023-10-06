@@ -72,7 +72,7 @@ describe('Planner Agent Test Suite', () => {
 
     for (const filePath of pathsForFilesToInclude) {
       if (!fs.existsSync(filePath)) {
-        throw Error(`File does not exist: ${filePath}`);
+        throw Error(`Input file does not exist: ${filePath}`);
       }
       const fileName = path.basename(filePath);
       const fileContents = fs.readFileSync(filePath, "utf-8");
