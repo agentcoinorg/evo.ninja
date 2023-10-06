@@ -28,7 +28,7 @@ export class DelegateAgentFunction<
   }
 
   get description() {
-    return `Delegate a task to "${this.config.name}" with expertise in "${this.config.expertise}"`
+    return `Delegate a task to "${this.config.name}" with expertise in "${this.config.expertise}". Provide all the required information to fully complete the task.`
   }
 
   get parameters() {
@@ -41,7 +41,7 @@ export class DelegateAgentFunction<
         },
         context: {
           type: "string",
-          description: "Necessary information required to completed the task."
+          description: "Necessary information required to fully completed the task."
         }
       },
       required: ["task"],
