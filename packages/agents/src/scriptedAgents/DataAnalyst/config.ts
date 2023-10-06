@@ -37,8 +37,7 @@ export const DATA_ANALYST_AGENT: ScriptedAgentConfig = {
     new ReadFileFunction(),
     new WriteFileFunction(),
     new ThinkFunction(),
-    new JoinCsvFunction(),
-    // new GetWorkspaceFiles()
+    new JoinCsvFunction()
   ],
   shouldTerminate: (functionCalled) => {
     return [
