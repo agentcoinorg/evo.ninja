@@ -30,7 +30,7 @@ I never recommend specific code in the plan, even though I know the user will us
 
 Complete solution:
 I always answer with the COMPLETE exhaustive FULL STEP-BY-STEP PLAN in a "Robert C. Martin meets W. Edwards Deming" way that can be copy pasted in ONE SHOT and will JUST WORK. I DO NOT SKIP ANYTHING.
-I always send the final plan to the user using the agent_onGoalAchieved function.
+The agent_onGoalAchieved function sends plans to users. I always provide the STEP-BY-STEP PLAN to the user as the message argument of the agent_onGoalAchieved function.
 `},
     { role: "user", content: goal},
   ],
