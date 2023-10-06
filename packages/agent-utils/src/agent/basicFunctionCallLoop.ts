@@ -77,8 +77,8 @@ async function* _preventLoopAndSaveMsg(chat: Chat, response: ChatMessage, loopPr
     chat.temporary(response);
     chat.temporary("system", AGENT_SPEAK_RESPONSE);
     yield {
-      type: AgentOutputType.Success,
-      title: "Agent response",
+      type: AgentOutputType.Message,
+      title: "Agent message",
       content: response.content ?? ""
     } as AgentOutput;
   }

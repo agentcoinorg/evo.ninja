@@ -1,4 +1,4 @@
-import { AgentOutputType, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult } from "@evo-ninja/agent-utils"
+import { AgentOutputType, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, ChatMessage } from "@evo-ninja/agent-utils"
 import { AgentFunctionBase } from "../../../AgentFunctionBase";
 import { AgentBaseConfig } from "../../../AgentBase";
 import { AgentBase, AgentBaseContext } from "../../../AgentBase";
@@ -42,13 +42,17 @@ export class DelegateAgentFunction<
     }
   }
 
-  onSuccess(name: string, params: any, result: AgentOutput): AgentFunctionResult {
+  onSuccess(name: string, params: any, messages: string[], result: AgentOutput): AgentFunctionResult {
     return {
       outputs: [
         result
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.delegateScriptedAgentFnName(name), params),
+        ...messages.map(x => ({
+          role: "assistant",
+          content: x,
+        }) as ChatMessage),
         ChatMessageBuilder.functionCallResult(
           this.delegateScriptedAgentFnName(name),
           result.content || "Successfully accomplished the task."
@@ -84,6 +88,8 @@ export class DelegateAgentFunction<
         goal: params.task
       });
 
+      const messages = [];
+
       while (true) {
         const response = await iterator.next();
 
@@ -95,12 +101,17 @@ export class DelegateAgentFunction<
               response.value.error
             );
           }
-          response.value.value
+        
           return this.onSuccess(
             this.config.name,
             params,
+            messages,
             response.value.value
           );
+        } else {
+          if (response.value.type === "message" && response.value.content) {
+            messages.push(response.value.content);
+          }
         }
 
         response.value && context.logger.info(response.value.title);
