@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { Evo, DEV_AGENT_CONFIG, RESEARCH_AGENT_CONFIG } from '@evo-ninja/agents';
+import { Evo } from '@evo-ninja/agents';
 import * as EvoCore from "@evo-ninja/agent-utils";
 import { InMemoryFile } from '@nerfzael/memory-fs';
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
@@ -164,7 +164,7 @@ function Dojo() {
       const scripts = new EvoCore.Scripts(
         scriptsWorkspace
       );
-      
+
       setScriptsWorkspace(scriptsWorkspace);
 
       const env = new EvoCore.Env(
@@ -201,7 +201,6 @@ function Dojo() {
         userWorkspace,
         scripts,
         env,
-        [DEV_AGENT_CONFIG, RESEARCH_AGENT_CONFIG]
       ));
     } catch (err) {
       setDojoError(err);

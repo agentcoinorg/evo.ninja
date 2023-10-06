@@ -17,9 +17,11 @@ export interface Args_ask {
 }
 
 export interface Args_onGoalAchieved {
+  message: Types.String;
 }
 
 export interface Args_onGoalFailed {
+  message: Types.String;
 }
 
 export abstract class Module<TConfig> extends PluginModule<TConfig> {

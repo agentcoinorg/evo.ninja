@@ -87,7 +87,7 @@ agbenchmark --cutoff=300
 **Note: If you have an existing environment and you have updated the git submodule its recommended that you delete the environment and create a new one by doing:**
 
 ```shell
-$ poetry env list                                                                                                                        
+$ poetry env list
 myenv-dL2uBROB-py3.10 (Activated)
 
 $ poetry env remove myenv-dL2uBROB-py3.10

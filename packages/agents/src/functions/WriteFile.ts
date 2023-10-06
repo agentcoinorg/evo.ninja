@@ -2,11 +2,13 @@ import { AgentOutputType, trimText, ChatMessageBuilder, AgentFunctionResult } fr
 import { ScriptedAgent } from "../scriptedAgents"
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
-export class WriteFileFunction extends ScriptFunction<{
+interface WriteFileFuncParameters { 
   path: string;
   data: string;
   encoding: string;
-}> {
+};
+
+export class WriteFileFunction extends ScriptFunction<WriteFileFuncParameters> {
   get name() {
     return "fs_writeFile"
   }
@@ -34,7 +36,7 @@ export class WriteFileFunction extends ScriptFunction<{
     }
   }
 
-  onSuccess(scriptedAgent: ScriptedAgent, params: any, result: string): AgentFunctionResult {
+  onSuccess(scriptedAgent: ScriptedAgent, params: WriteFileFuncParameters, result: string): AgentFunctionResult {
     return {
       outputs: [
         {

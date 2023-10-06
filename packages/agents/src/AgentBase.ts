@@ -11,6 +11,8 @@ export interface AgentBaseContext {
 }
 
 export interface AgentBaseConfig<TRunArgs, TAgentBaseContext> {
+  name: string;
+  expertise: string;
   initialMessages: (runArguments: TRunArgs) => { role: ChatRole; content: string }[];
   loopPreventionPrompt: string;
   functions: AgentFunctionBase<TAgentBaseContext, unknown>[];
@@ -19,10 +21,14 @@ export interface AgentBaseConfig<TRunArgs, TAgentBaseContext> {
 }
 
 export abstract class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> implements Agent<TRunArgs> {
+  public readonly name: string;
+
   constructor(
     protected config: AgentBaseConfig<TRunArgs, TAgentBaseContext>,
     protected context: TAgentBaseContext
-  ) {}
+  ) {
+    this.name = config.name;
+  }
 
   public get workspace(): Workspace {
     return this.context.workspace;
@@ -45,7 +51,7 @@ export abstract class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseCon
         this.context,
         this.config.functions.map((fn) => {
           return {
-            definition: fn,
+            definition: fn.getDefinition(),
             buildExecutor: (context: TAgentBaseContext) => {
               return fn.buildExecutor(this, context);
             }

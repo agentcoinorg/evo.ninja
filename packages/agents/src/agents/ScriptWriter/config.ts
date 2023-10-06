@@ -12,7 +12,11 @@ export interface ScriptWriterContext extends AgentBaseContext {}
 
 const writeScriptFn = new WriteScriptFunction();
 
+const AGENT_NAME = "ScriptWriter";
+
 export const SCRIPTWRITER_AGENT_CONFIG: AgentBaseConfig<ScriptWriterRunArgs, ScriptWriterContext> = {
+  name: AGENT_NAME,
+  expertise: "writing single-purpose scripts",
   initialMessages: ({
     namespace,
     description,

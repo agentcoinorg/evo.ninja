@@ -9,11 +9,23 @@ export class ThinkFunction extends AgentFunctionBase<unknown, ThinkFuncParameter
   get name(): string {
     return "think";
   }
+
   get description(): string {
-    throw new Error("Method not implemented.");
+    return "Your current thoughts about the topic.";
   }
-  get parameters(): any {
-    throw new Error("Method not implemented.");
+
+  get parameters() {
+    return {
+      type: "object",
+      properties: {
+        thoughts: {
+          type: "string",
+          description: "Your current thoughts about the topic."
+        },
+      },
+      required: ["thoughts"],
+      additionalProperties: false
+    };
   }
 
   buildExecutor(agent: Agent<unknown>, context: unknown): (params: ThinkFuncParameters) => Promise<AgentFunctionResult> {

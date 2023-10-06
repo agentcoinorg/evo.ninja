@@ -14,7 +14,7 @@ import * as rimraf from "rimraf";
 import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
-import { ScriptedAgent, RESEARCH_AGENT_CONFIG } from "../../";
+import { Scripter } from ".";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -22,12 +22,12 @@ dotenv.config({
   path: path.join(rootDir, ".env")
 });
 
-jest.setTimeout(300000);
+jest.setTimeout(120000);
 
-describe('Research Agent Test Suite', () => {
+describe('Dev Agent Test Suite', () => {
 
-  function createResearchAgent(testName: string): {
-    agent: ScriptedAgent;
+  function createAgent(testName: string): {
+    agent: Scripter;
     debugLog: DebugLog;
   } {
     const testCaseDir = path.join(__dirname, ".tests", testName);
@@ -70,21 +70,19 @@ describe('Research Agent Test Suite', () => {
     const workspace = new FileSystemWorkspace(testCaseDir);
 
     return {
-      agent: ScriptedAgent.create(
-        RESEARCH_AGENT_CONFIG, {
-          llm: debugLlm,
-          chat,
-          workspace,
-          scripts,
-          logger,
-          env,
-        }
+      agent: new Scripter(
+        debugLlm,
+        chat,
+        logger,
+        workspace,
+        scripts,
+        env
       ),
       debugLog
     };
   }
 
-  async function runResearchAgent(agent: ScriptedAgent, goal: string, debugLog: DebugLog) {
+  async function runAgent(agent: Scripter, goal: string, debugLog: DebugLog) {
     debugLog.goalStart(goal);
     const iterator = agent.run({ goal });
 
@@ -104,32 +102,16 @@ describe('Research Agent Test Suite', () => {
     }
   }
 
-  test("revenue-retrieval", async () => {
-    const { agent, debugLog } = createResearchAgent("revenue-retrieval");
-    const response = await runResearchAgent(
+  test("csv-test", async () => {
+    const { agent, debugLog } = createAgent("csv-test");
+    const response = await runAgent(
       agent,
-      "Write tesla's exact revenue in 2022 into a .txt file. Use the US notation, with a precision rounded to the nearest million dollars (for instance, $31,578 million).",
+      "write 5 numbers of your choosing to a csv file named output.csv and sort them numerically and output that to sorted.csv",
       debugLog
     );
 
     expect(response.value.ok).toBe(true);
-    const generatedFiles = agent.workspace.readdirSync("./")
-      .filter(f => f.toLowerCase().includes("tesla") || f.toLowerCase().includes("revenue"));
-    expect(generatedFiles).toHaveLength(1);
-    const teslasRevenue = agent.workspace.readFileSync(generatedFiles[0]);
-    expect(teslasRevenue).toBeTruthy();
-    expect(teslasRevenue).toContain("81,462");
-  });
-
-  test.skip("revenue-retrieval-2", async () => {
-    const { agent, debugLog } = createResearchAgent("revenue-retrieval-2");
-    const response = await runResearchAgent(
-      agent,
-      "Write tesla's revenue every year since its creation into a .txt file. Use the US notation, with a precision rounded to the nearest million dollars (for instance, $31,578 million)..",
-      debugLog
-    );
-
-    expect(response.value.ok).toBe(true);
-    console.log(response)
+    const sourceCode = agent.workspace.readFileSync("output.csv");
+    expect(sourceCode).toBeTruthy();
   });
 });

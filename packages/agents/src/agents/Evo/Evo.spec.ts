@@ -14,7 +14,7 @@ import * as rimraf from "rimraf";
 import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
-import { Evo, DEV_AGENT_CONFIG, RESEARCH_AGENT_CONFIG } from "../../";
+import { Evo } from "../../";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -77,7 +77,6 @@ describe('Evo Test Suite', () => {
         workspace,
         scripts,
         env,
-        [DEV_AGENT_CONFIG, RESEARCH_AGENT_CONFIG]
       ),
       debugLog
     };

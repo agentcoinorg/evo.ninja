@@ -1,17 +1,18 @@
 import { ScriptedAgentConfig } from "../ScriptedAgent";
 import { OnGoalAchievedFunction } from "../functions/OnGoalAchieved";
+import { OnGoalFailedFunction } from "../functions/OnGoalFailed";
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { ScrapeLinksFunction } from "../functions/ScrapeLinks";
 import { ScrapeTextFunction } from "../functions/ScrapeText";
 import { SearchFunction } from "../functions/Search";
 
-const AGENT_NAME = "researcher";
+const AGENT_NAME = "Researcher";
 
 const onGoalAchievedFn = new OnGoalAchievedFunction();
-const onGoalFailedFn = new OnGoalAchievedFunction();
+const onGoalFailedFn = new OnGoalFailedFunction();
 
-export const RESEARCH_AGENT_CONFIG: ScriptedAgentConfig = {
-  name: "Researcher",
+export const RESEARCHER_AGENT_CONFIG: ScriptedAgentConfig = {
+  name: AGENT_NAME,
   expertise: "researching information online",
   initialMessages: ({ goal }) => [
     { role: "assistant", content: `I am an agent that searches the web for information, called "${AGENT_NAME}".\n` +

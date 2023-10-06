@@ -23,15 +23,12 @@ export interface ScriptedAgentRunArgs {
 }
 
 export class ScriptedAgent extends AgentBase<ScriptedAgentRunArgs, ScriptedAgentContext> {
-  public readonly name: string;
 
   constructor(
     config: ScriptedAgentConfig,
     context: ScriptedAgentContext,
   ) {
-
     super(config, context);
-    this.name = config.name;
   }
 
   public static create(

@@ -4,6 +4,6 @@ type Module {
   ask(message: String!): String!
 
   # Completion Callbacks
-  onGoalAchieved: Boolean!
-  onGoalFailed: Boolean!
+  onGoalAchieved(message: String!): Boolean!
+  onGoalFailed(message: String!): Boolean!
 }

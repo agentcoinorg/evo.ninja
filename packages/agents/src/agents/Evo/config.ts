@@ -1,10 +1,10 @@
-import { AgentBaseConfig, ScriptedAgentContext, ScriptedAgentConfig } from "../..";
-import { ReadVariableFunction } from "./functions/ReadVariable";
-import { FindScriptFunction } from "./functions/FindScript";
-import { ExecuteScriptFunction } from "./functions/ExecuteScript";
-import { CreateScriptFunction } from "./functions/CreateScript";
+import { AgentBaseConfig, ScriptedAgentContext, ScriptedAgentConfig, ScriptedAgent } from "../..";
 import { OnGoalAchievedFunction } from "../../scriptedAgents/functions/OnGoalAchieved";
-import { DelegateScriptedAgentFunction } from "./functions/DelegateScriptedAgent";
+import { OnGoalFailedFunction } from "../../scriptedAgents/functions/OnGoalFailed";
+import { DelegateAgentFunction } from "./functions/DelegateScriptedAgent";
+import { SCRIPTER_AGENT_CONFIG, Scripter } from "../Scripter";
+
+import { Chat } from "@evo-ninja/agent-utils";
 
 export interface EvoRunArgs {
   goal: string
@@ -15,35 +15,29 @@ export interface EvoContext extends ScriptedAgentContext {
 }
 
 const onGoalAchievedFn = new OnGoalAchievedFunction();
-const onGoalFailedFn = new OnGoalAchievedFunction();
+const onGoalFailedFn = new OnGoalFailedFunction();
+
+const AGENT_NAME = "Evo";
 
 export const EVO_AGENT_CONFIG = (scriptedAgents?: ScriptedAgentConfig[]): AgentBaseConfig<EvoRunArgs, EvoContext> => {
   const config: AgentBaseConfig<EvoRunArgs, EvoContext> = {
+    name: AGENT_NAME,
+    expertise: "an expert evolving assistant that achieves user goals",
     initialMessages: ({ goal }) => [
       {
         role: "assistant",
         content:
 `Purpose:
-I am an expert assistant designed to achieve users' goals. I prioritize using available scriptedAgents and scripts efficiently and always give preference to existing resources.
-
-Core Principle:
-I always attempt to adapt and use existing scriptedAgents and scripts to achieve the goal. I can create new scripts as a last-resort if existing resources do not suffice. Once the user's goal has been achieved, I will call the agent_onGoalAchieved function.
+I am an expert assistant designed to achieve user goals.
 
 Functionalities:
-delegate{ScriptedAgent}: I delegate tasks to {ScriptedAgent}s when they have an expertise that fits the current task.
-findScript: I actively search and identify scripts that can be repurposed or combined for the current task.
-createScript: I ONLY resort to creating a specific script when I'm certain that no existing script can be modified or combined to solve the problem. I never create overly general or vague scripts.
-executeScript: I run scripts using TypeScript syntax. I store outcomes in global variables with the 'result' argument and double-check the script's output to ensure it's correct.
-readVariable: I can access the JSON preview of a global variable. I use this to read through partial outputs of scripts, if they are too large, to find the desired information.
-agent_onGoalAchieved: I call this when a task has been successfully completed.
-agent_onGoalFailed: I call this when a task cannot be accomplished.
+I have multiple agents I can delegate a task to by calling the relevant delegate{Agent} functions.
 
 Decision-making Process:
-I first evaluate the goal and see if it can be achieved without using scriptedAgents or scripts.
-Then, I see if I can delegate the task to a scriptedAgent if they have a relevant expertise.
-If no relevant scriptedAgents exist, then I use findScript to search for any script that can be adapted, combined, or slightly modified to fit the task. It's vital for me to exhaust all possibilities here.
-Only when all existing script avenues have been explored and found lacking, I cautiously consider createScript. I ensure any new script I create is specific, actionable, and not general.
-If a goal has been achieved or failed, I will call agent_onGoalAchieved or agent_onGoalFailed.
+I first evaluate the goal and see if it can be achieved without delegating to an agent.
+Then, I see which agent has the most relevant expertise to the user's goal.
+I then delegate tasks to the relevant agents until I feel the goal has been achieved.
+If a goal has been achieved or failed, I will call the agent_onGoalAchieved or agent_onGoalFailed function.
 
 User Engagement:
 I do not communicate with the user. I execute goals to the best of my abilities without any user input. I terminate when a goal has been achieved or failed.`
@@ -53,26 +47,39 @@ I do not communicate with the user. I execute goals to the best of my abilities 
         content: goal
       }
     ],
-    loopPreventionPrompt: "Assistant, are you trying to inform the user? If so, Try calling findScript with the agent namespace.",
+    loopPreventionPrompt: "Assistant, you seem to be looping. Try delegating a task or calling agent_onGoalAchieved or agent_onGoalFailed",
     functions: [
-      new CreateScriptFunction(),
-      new ExecuteScriptFunction(),
-      new FindScriptFunction(),
-      new ReadVariableFunction(),
       onGoalAchievedFn,
       onGoalFailedFn,
+      new DelegateAgentFunction(
+        SCRIPTER_AGENT_CONFIG,
+        (context) => new Scripter(
+          context.llm,
+          new Chat(context.chat.tokenizer, context.chat.contextWindow),
+          context.logger,
+          context.workspace,
+          context.scripts,
+          context.env
+        )
+      )
     ],
     shouldTerminate: (functionCalled) => {
       return [
         onGoalAchievedFn.name,
-        onGoalFailedFn.name
+        onGoalFailedFn.name,
       ].includes(functionCalled.name);
     },
   };
 
   for (const scriptedAgent of scriptedAgents || []) {
-    config.functions.push(new DelegateScriptedAgentFunction(
-      scriptedAgent
+    config.functions.push(new DelegateAgentFunction(
+      scriptedAgent,
+      (context) => new ScriptedAgent(
+        scriptedAgent, {
+          ...context,
+          chat: new Chat(context.chat.tokenizer, context.chat.contextWindow)
+        }
+      )
     ));
   }
 

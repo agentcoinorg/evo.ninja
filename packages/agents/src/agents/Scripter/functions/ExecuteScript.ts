@@ -1,9 +1,8 @@
 import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, JsEngine, JsEngine_GlobalVar, shimCode, trimText } from "@evo-ninja/agent-utils";
 import JSON5 from "json5";
 import { AgentFunctionBase } from "../../../AgentFunctionBase";
-import { EvoContext } from "../config";
+import { ScripterContext } from "../config";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../utils";
-;
 
 interface ExecuteScriptFuncParameters { 
   namespace: string, 
@@ -12,13 +11,15 @@ interface ExecuteScriptFuncParameters {
   variable?: string
 };
 
-export class ExecuteScriptFunction extends AgentFunctionBase<EvoContext, ExecuteScriptFuncParameters> {
+export class ExecuteScriptFunction extends AgentFunctionBase<ScripterContext, ExecuteScriptFuncParameters> {
   get name(): string {
     return "executeScript";
   }
+
   get description(): string {
     return `Execute an script.`;
   }
+
   get parameters() {
     return {
       type: "object",
@@ -41,7 +42,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<EvoContext, Execute
     }
   }
 
-  buildExecutor(agent: Agent<unknown>, context: EvoContext): (params: ExecuteScriptFuncParameters) => Promise<AgentFunctionResult> {
+  buildExecutor(agent: Agent<unknown>, context: ScripterContext): (params: ExecuteScriptFuncParameters) => Promise<AgentFunctionResult> {
     return async (params: ExecuteScriptFuncParameters): Promise<AgentFunctionResult> => {
       try {
         const script = context.scripts.getScriptByName(params.namespace);
