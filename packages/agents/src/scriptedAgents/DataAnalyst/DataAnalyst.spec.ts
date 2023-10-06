@@ -124,7 +124,7 @@ describe("Data Analyst Agent Test Suite", () => {
 `);
   });
 
-  test.only("label-csv", async () => {
+  test("label-csv", async () => {
     const { agent, debugLog } = createDataAnalystAgent("label-csv");
     const response = await runDataAnalystAgent(
       agent,

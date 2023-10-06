@@ -25,6 +25,10 @@ export class AgentProtocolWorkspace implements Workspace {
       data,
     };
     this._artifactLog.set(subpath, artifact);
+    const artifactPath = path.join(this.directoryPath, subpath)
+    if (!fs.existsSync(artifactPath)) {
+      fs.writeFileSync(artifactPath, artifact.data);
+    }
   }
 
   readFileSync(subpath: string): string {
