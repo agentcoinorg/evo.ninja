@@ -2,6 +2,7 @@ import { ScriptedAgentConfig } from "../ScriptedAgent";
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { OnGoalAchievedFunction } from "../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../functions/OnGoalFailed";
+import { ReadFileFunction } from "../../functions/ReadFile";
 
 const AGENT_NAME = "Developer";
 
@@ -25,6 +26,7 @@ I plan and write clean and effective code to files using the ${new WriteFileFunc
     new OnGoalAchievedFunction(),
     new OnGoalFailedFunction(),
     new WriteFileFunction(),
+    new ReadFileFunction(),
   ],
   shouldTerminate: (functionCalled) => {
     return [
