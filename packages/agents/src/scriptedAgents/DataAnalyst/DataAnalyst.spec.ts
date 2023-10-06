@@ -34,7 +34,7 @@ describe("Data Analyst Agent Test Suite", () => {
 
     // reset the dir
     rimraf.sync(testCaseDir, {
-      filter: (path: string, _: any) => !path.includes("input.csv"),
+      filter: (path: string, _: any) => !path.includes(".csv"),
     });
 
     const env = new Env(process.env as Record<string, string>);
@@ -150,7 +150,7 @@ Fern,Green
 `);
   });
 
-  test.only("combine-csv", async () => {
+  test("combine-csv", async () => {
     const { agent, debugLog } = createDataAnalystAgent("combine-csv");
     const response = await runDataAnalystAgent(
       agent,
@@ -160,7 +160,10 @@ Fern,Green
     expect(response.value.ok).toBe(true);
     const outputCsv = agent.workspace.readFileSync("output.csv");
     expect(outputCsv).toBeTruthy();
-    console.log(outputCsv);
-    // expect(outputCsv).toContain();
+    expect(outputCsv).toContain(`Age,ID,Name,Occupation,Salary
+28,101,John,Engineer,80000
+34,102,Alice,Doctor,120000
+45,103,Bob,Lawyer,95000
+`);
   });
 });

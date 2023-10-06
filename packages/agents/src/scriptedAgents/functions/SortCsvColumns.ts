@@ -1,8 +1,8 @@
 import { ScriptFunction } from "../ScriptFunction"
 
-export class SortCsvColumnFunction extends ScriptFunction<{ inputPath: string, outputPath: string }> {
+export class SortCsvColumnsFunction extends ScriptFunction<{ inputPath: string, outputPath: string }> {
   get name() {
-    return "csv_sortColumn"
+    return "csv_sortColumns"
   }
 
   get description() {

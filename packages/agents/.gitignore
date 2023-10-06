@@ -1,2 +1,4 @@
 src/__tests__/test-cases/
-/src/scriptedAgents/DataAnalyst/.tests/*/debug/*
+!/src/scriptedAgents/DataAnalyst/.tests/*/input.csv
+!/src/scriptedAgents/DataAnalyst/.tests/combine-csv/file1.csv
+!/src/scriptedAgents/DataAnalyst/.tests/combine-csv/file2.csv

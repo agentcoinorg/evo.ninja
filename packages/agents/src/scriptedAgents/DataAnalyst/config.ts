@@ -2,7 +2,7 @@ import { ScriptedAgentConfig } from "../ScriptedAgent";
 import { OnGoalAchievedFunction } from "../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../functions/OnGoalFailed";
 import { SortCsvFunction } from "../functions/SortCsv";
-import { SortCsvColumnFunction } from "../functions/SortCsvColumn";
+import { SortCsvColumnsFunction } from "../functions/SortCsvColumns";
 import { ThinkFunction } from "../../functions/Think";
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { ReadFileFunction } from "../../functions/ReadFile";
@@ -30,7 +30,7 @@ export const DATA_ANALYST_AGENT: ScriptedAgentConfig = {
     new OnGoalAchievedFunction(),
     new OnGoalFailedFunction(),
     new SortCsvFunction(),
-    new SortCsvColumnFunction(),
+    new SortCsvColumnsFunction(),
     new AddCsvColumnFunction(),
     new ReadFileFunction(),
     new WriteFileFunction(),
