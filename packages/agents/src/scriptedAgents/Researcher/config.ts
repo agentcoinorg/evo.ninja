@@ -5,6 +5,7 @@ import { WriteFileFunction } from "../../functions/WriteFile";
 import { ScrapeLinksFunction } from "../functions/ScrapeLinks";
 // import { ScrapeTextFunction } from "../functions/ScrapeText";
 import { SearchFunction } from "../functions/Search";
+import { ReadFileFunction } from "../../functions/ReadFile";
 import { FindInPageFunction } from "../functions/FindInPage";
 
 const AGENT_NAME = "Researcher";
@@ -29,8 +30,9 @@ export const RESEARCHER_AGENT_CONFIG: ScriptedAgentConfig = {
       new SearchFunction(),
       // new ScrapeTextFunction(),
       new ScrapeLinksFunction(),
+      new WriteFileFunction(),
+      new ReadFileFunction(),
       new FindInPageFunction(),
-      new WriteFileFunction()
   ],
   shouldTerminate: (functionCalled) => {
     return [
