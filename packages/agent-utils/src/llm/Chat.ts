@@ -98,6 +98,14 @@ export class Chat {
     }
   }
 
+  public constraint(
+    role: ChatRole,
+    content: string
+  ): string {
+    this.add("constraint", { role, content });
+    return content;
+  }
+
   public cloneChatLogs(): ChatLogs {
     return this._chatLogs.clone();
   }

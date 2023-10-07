@@ -23,7 +23,7 @@ export class FuzzySearchFunction extends ScriptFunction<{ url: string; queryKeyw
           },
         },
       },
-      required: ["url", "query"],
+      required: ["url", "queryKeywords"],
       additionalProperties: false
     }
   }

@@ -23,7 +23,7 @@ export const EVO_AGENT_CONFIG = (scriptedAgents?: ScriptedAgentConfig[]): AgentB
   const config: AgentBaseConfig<EvoRunArgs, EvoContext> = {
     name: AGENT_NAME,
     expertise: "an expert evolving assistant that achieves user goals",
-    initialMessages: ({ goal }) => [
+    constraintMessages: () => [
       {
         role: "user",
         content:
@@ -44,6 +44,8 @@ Decision-making Process:
 REMEMBER:
 If info is missing, you assume the info is somewhere on the user's computer like the filesystem, unless you have a logical reason to think otherwise.`
       },
+    ],
+    persistentMessages: ({ goal }) => [
       {
         role: "user",
         content: goal

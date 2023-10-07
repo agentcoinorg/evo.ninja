@@ -20,7 +20,7 @@ const onGoalFailedFn = new OnGoalFailedFunction();
 export const DATA_ANALYST_AGENT: ScriptedAgentConfig = {
   name: AGENT_NAME,
   expertise: "adept at processing CSV files, extracting key data points, and performing calculations to derive insights from the information.",
-  initialMessages: ({ goal }) => [
+  constraintMessages: () => [
     {
       role: "user",
       content:
@@ -32,7 +32,9 @@ Formatting is very important. If a user defines how they want data to be formatt
 
 You do not communicate with the user. If you have insufficient information, it may exist somewhere in the user's filesystem.
 Use the "fs_readDirectory" function to try and discover this missing information.`
-    },
+    }
+  ],
+  persistentMessages: ({ goal }) => [
     { role: "user", content: goal },
   ],
   loopPreventionPrompt: "Assistant, you appear to be in a loop, try executing a different function.",

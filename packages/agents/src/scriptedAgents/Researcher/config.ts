@@ -15,9 +15,10 @@ const onGoalFailedFn = new OnGoalFailedFunction();
 export const RESEARCHER_AGENT_CONFIG: ScriptedAgentConfig = {
   name: AGENT_NAME,
   expertise: "excels at parsing text, comprehending details, and synthesized insights tailored to user specifications.",
-  initialMessages: ({ goal }) => [
-    { role: "user", content: `
-You are an agent that searches the web for information, called "${AGENT_NAME}".
+  constraintMessages: () => [
+    {
+      role: "user",
+      content: `You are an agent that searches the web for information, called "${AGENT_NAME}".
 
 If the information that you need to search is vague or depends on other unknown information, you will break the search
 down into smaller search steps and do them sequentially.
@@ -52,8 +53,10 @@ Example: "Find the cheapest product in someonlinestore.com"
 you would use keywords: ['$', 'usd', 'price', 'cost']
 
 REMEMBER:
-If info is missing, you assume the info is somewhere on the user's computer like the filesystem, unless you have a logical reason to think otherwise.
-`},
+If info is missing, you assume the info is somewhere on the user's computer like the filesystem, unless you have a logical reason to think otherwise.`
+    }
+  ],
+  persistentMessages: ({ goal }) => [
     { role: "user", content: goal },
   ],
   loopPreventionPrompt: "Assistant, you appear to be in a loop, try executing a different function.",

@@ -12,7 +12,8 @@ export interface ScriptedAgentContext extends AgentBaseContext {
 export interface ScriptedAgentConfig {
   name: string;
   expertise: string;
-  initialMessages: (runArguments: ScriptedAgentRunArgs) => { role: ChatRole; content: string }[];
+  constraintMessages: (runArguments: ScriptedAgentRunArgs) => { role: ChatRole; content: string }[];
+  persistentMessages: (runArguments: ScriptedAgentRunArgs) => { role: ChatRole; content: string }[];
   loopPreventionPrompt: string;
   agentSpeakPrompt?: string;
   shouldTerminate: (functionCalled: ExecuteAgentFunctionCalled) => boolean;

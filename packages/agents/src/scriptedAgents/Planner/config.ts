@@ -8,8 +8,10 @@ const onGoalAchievedFn = new OnGoalAchievedFunction();
 export const PLANNER_AGENT_CONFIG: ScriptedAgentConfig = {
   name: AGENT_NAME,
   expertise: "I provide a plan that tells you how to achieve any goal",
-  initialMessages: ({ goal }) => [
-    { role: "user", content: `You are an expert planner named "${AGENT_NAME}". 
+  constraintMessages: () => [
+    {
+      role: "user",
+      content: `You are an expert planner named "${AGENT_NAME}". 
 The user will tell you their goal. You must create a concise plan for this goal.
 
 RESPONSE:
@@ -22,8 +24,10 @@ If info is missing, the plan will say where to search for it. You assume the inf
 You never write code in the plan, but the goal can be achieved with code.
 
 RESULT:
-You use the ${onGoalAchievedFn.name} function to send plans. You ONLY send the STEP-BY-STEP PLAN text in the message arg of ${onGoalAchievedFn.name}.
-`},
+You use the ${onGoalAchievedFn.name} function to send plans. You ONLY send the STEP-BY-STEP PLAN text in the message arg of ${onGoalAchievedFn.name}.`
+    }
+  ],
+  persistentMessages: ({ goal }) => [
     { role: "user", content: goal},
   ],
   loopPreventionPrompt: "Assistant, you appear to be in a loop, try executing a different function.",

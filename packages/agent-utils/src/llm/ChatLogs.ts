@@ -4,7 +4,8 @@ export { ChatMessage };
 
 export type ChatLogType =
   | "persistent"
-  | "temporary";
+  | "temporary"
+  | "constraint";
 
 export interface ChatLog {
   tokens: number;
@@ -21,6 +22,10 @@ export class ChatLogs {
       tokens: 0,
       msgs: [],
     },
+    "constraint": {
+      tokens: 0,
+      msgs: [],
+    }
   };
 
   constructor(logs?: Record<ChatLogType, ChatLog>) {
@@ -31,13 +36,15 @@ export class ChatLogs {
 
   get tokens(): number {
     return this._logs["persistent"].tokens +
-      this._logs["temporary"].tokens;
+      this._logs["temporary"].tokens +
+      this._logs["constraint"].tokens;
   }
 
   get messages(): ChatMessage[] {
     return [
       ...this._logs["persistent"].msgs,
-      ...this._logs["temporary"].msgs
+      ...this._logs["temporary"].msgs,
+      ...this._logs["constraint"].msgs
     ];
   }
 

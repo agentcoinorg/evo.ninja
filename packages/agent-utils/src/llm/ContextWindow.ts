@@ -78,7 +78,8 @@ export class ContextWindow {
 
     let newChatLogs = new ChatLogs({
       "persistent": chatLogs.get("persistent"),
-      "temporary": sumTemporary
+      "temporary": sumTemporary,
+      "constraint": chatLogs.get("constraint")
     });
 
     if (newChatLogs.tokens < this._maxContextTokens) {
@@ -93,7 +94,8 @@ export class ContextWindow {
 
     return new ChatLogs({
       "persistent": sumPersistent,
-      "temporary": sumTemporary
+      "temporary": sumTemporary,
+      "constraint": chatLogs.get("constraint")
     });
   }
 

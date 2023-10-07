@@ -44,6 +44,10 @@ describe('LLM Test Suite', () => {
             content: "# Function Call:\n```javascript\nfindFunction({\n  \"namespace\": \"fs_writeFile\",\n  \"description\": \"Write data to a file\"\n})\n```\n## Result\n```\nFound the following candidates for function: fs_writeFile:\n--------------\nNamespace: fs_writeFile\nArguments: { path: { type: 'string' }, data: { type: 'string' } }\nDescription: This function writes data to a file. If the file does not exist, it is created. If it does exist, it is replaced.\n--------------\n\n```"
           },
         ]
+      },
+      constraint: {
+        tokens: 0,
+        msgs: []
       }
     };
     const functions: AgentFunctionDefinition[] = [];

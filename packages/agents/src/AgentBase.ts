@@ -13,7 +13,8 @@ export interface AgentBaseContext {
 export interface AgentBaseConfig<TRunArgs, TAgentBaseContext> {
   name: string;
   expertise: string;
-  initialMessages: (runArguments: TRunArgs) => { role: ChatRole; content: string }[];
+  persistentMessages: (runArguments: TRunArgs) => { role: ChatRole; content: string }[];
+  constraintMessages: (runArguments: TRunArgs) => { role: ChatRole; content: string }[];
   loopPreventionPrompt: string;
   agentSpeakPrompt?: string;
   functions: AgentFunctionBase<TAgentBaseContext, unknown>[];
@@ -41,9 +42,13 @@ export abstract class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseCon
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
     try {
-      this.config.initialMessages(args).forEach((message) => {
+      this.config.persistentMessages(args).forEach((message) => {
         chat.persistent(message.role, message.content);
-      })
+      });
+
+      this.config.constraintMessages(args).forEach((message) => {
+        chat.constraint(message.role, message.content);
+      });
 
       // If additional context is needed
       if (context) {

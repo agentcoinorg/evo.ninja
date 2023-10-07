@@ -17,11 +17,7 @@ const AGENT_NAME = "ScriptWriter";
 export const SCRIPTWRITER_AGENT_CONFIG: AgentBaseConfig<ScriptWriterRunArgs, ScriptWriterContext> = {
   name: AGENT_NAME,
   expertise: "writing single-purpose scripts",
-  initialMessages: ({
-    namespace,
-    description,
-    args
-  }) => [
+  constraintMessages: () => [
     {
       role: "user",
       content:
@@ -31,6 +27,12 @@ export const SCRIPTWRITER_AGENT_CONFIG: AgentBaseConfig<ScriptWriterRunArgs, Scr
 3. Don't get disheartened by initial failures. Retry until success.
 4. Ensure authenticity; avoid creating mock functionality.`
     },
+  ],
+  persistentMessages: ({
+    namespace,
+    description,
+    args
+  }) => [
     {
       role: "user", content:
 `Your goal is to compose the body of an async JavaScript function.

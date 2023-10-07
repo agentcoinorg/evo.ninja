@@ -25,7 +25,7 @@ const AGENT_NAME = "Scripter";
 export const SCRIPTER_AGENT_CONFIG: AgentBaseConfig<ScripterRunArgs, ScripterContext> = {
   name: AGENT_NAME,
   expertise: "executing and creating scripts to solve basic tasks",
-  initialMessages: ({ goal }) => [
+  constraintMessages: () => [
     {
       role: "user",
       content:
@@ -45,6 +45,8 @@ When suitable scripts are found, you run them to solve the problem.
 If no scripts have been found, you cautiously consider createScript. You ensure any new script you create is specific, actionable, and not general.
 If a goal has been achieved or failed, you will call the agent_onGoalAchieved or agent_onGoalFailed function.`
     },
+  ],
+  persistentMessages: ({ goal }) => [
     {
       role: "user",
       content: goal
