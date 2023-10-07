@@ -103,6 +103,8 @@ async function taskHandler(
   return stepHandler;
 }
 
+throw Error("HEY");
+
 Agent.handleTask(taskHandler, {
   workspace: workspaceDir
 }).start();
