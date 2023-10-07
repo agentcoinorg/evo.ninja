@@ -20,3 +20,4 @@ const mergedData = csv1.slice(1).map(row1 => {
 const mergedCSV = [headers1.concat(headers2.slice(1)).join(','), ...mergedData].join('\n');
 
 fs.writeFileSync(outputPath, mergedCSV);
+return "Successfully merged CSV into new file."

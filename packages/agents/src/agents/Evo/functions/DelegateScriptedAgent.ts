@@ -5,6 +5,7 @@ import { AgentBase, AgentBaseContext } from "../../../AgentBase";
 
 interface DelegateAgentParams {
   task: string;
+  context?: string;
 }
 
 interface AgentRunArgs {
@@ -27,7 +28,7 @@ export class DelegateAgentFunction<
   }
 
   get description() {
-    return `Delegate a task to "${this.config.name}" with expertise in "${this.config.expertise}"`
+    return `Delegate a task to "${this.config.name}" with expertise in "${this.config.expertise}". Provide all the required information to fully complete the task.`
   }
 
   get parameters() {
@@ -37,8 +38,14 @@ export class DelegateAgentFunction<
         task: {
           type: "string",
           description: "The task to be delegated"
+        },
+        context: {
+          type: "string",
+          description: "Necessary information required to fully completed the task."
         }
-      }
+      },
+      required: ["task"],
+      additionalProperties: false
     }
   }
 
@@ -85,8 +92,8 @@ export class DelegateAgentFunction<
       const scriptedAgent = this.factory(context);
 
       let iterator = scriptedAgent.run({
-        goal: params.task
-      });
+        goal: params.task,
+      }, params.context);
 
       const messages = [];
 

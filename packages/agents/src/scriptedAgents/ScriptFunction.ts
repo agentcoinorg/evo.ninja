@@ -58,10 +58,9 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<Scripted
         if (result.value.error == null) {
           const jsPromiseOutput = context.client.jsPromiseOutput;
           if (jsPromiseOutput.ok) {
-            return this.onSuccess(scriptedAgent, params, JSON.stringify(jsPromiseOutput.value)
-            );
+            return this.onSuccess(scriptedAgent, params, JSON.stringify(jsPromiseOutput.value));
           } else {
-            return this.onFailure(scriptedAgent, params, jsPromiseOutput.error.toString());
+            return this.onFailure(scriptedAgent, params, jsPromiseOutput.error.message);
           }
         } else {
           return this.onFailure(scriptedAgent, params, result.value.error.toString());

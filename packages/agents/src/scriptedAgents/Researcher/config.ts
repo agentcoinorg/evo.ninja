@@ -1,10 +1,10 @@
 import { ScriptedAgentConfig } from "../ScriptedAgent";
 import { OnGoalAchievedFunction } from "../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../functions/OnGoalFailed";
-import { WriteFileFunction } from "../../functions/WriteFile";
 import { SearchFunction } from "../functions/Search";
-import { ReadFileFunction } from "../../functions/ReadFile";
 import { SearchTextFunction } from "../functions/SearchText";
+import { ReadFileFunction } from "../../functions/ReadFile";
+import { WriteFileFunction } from "../../functions/WriteFile";
 
 const AGENT_NAME = "Researcher";
 
@@ -13,7 +13,7 @@ const onGoalFailedFn = new OnGoalFailedFunction();
 
 export const RESEARCHER_AGENT_CONFIG: ScriptedAgentConfig = {
   name: AGENT_NAME,
-  expertise: "researching information online",
+  expertise: "excels at parsing text, comprehending details, and synthesized insights tailored to user specifications.",
   initialMessages: ({ goal }) => [
     { role: "user", content: `
 You are an agent that searches the web for information, called "${AGENT_NAME}".

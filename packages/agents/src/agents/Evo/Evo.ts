@@ -5,13 +5,13 @@ import {
   ScriptedAgentConfig,
   DEVELOPER_AGENT_CONFIG,
   RESEARCHER_AGENT_CONFIG,
-  PLANNER_AGENT_CONFIG
+  DATA_ANALYST_AGENT
 } from "../../scriptedAgents";
 
 export const defaultScriptedAgents = [
   DEVELOPER_AGENT_CONFIG,
   RESEARCHER_AGENT_CONFIG,
-  PLANNER_AGENT_CONFIG
+  DATA_ANALYST_AGENT
 ];
 
 export class Evo extends AgentBase<EvoRunArgs, EvoContext> {

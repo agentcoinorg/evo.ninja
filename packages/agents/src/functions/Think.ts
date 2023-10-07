@@ -1,5 +1,6 @@
 import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
+import { ScriptedAgent } from "../scriptedAgents";
 
 interface ThinkFuncParameters { 
   thoughts: string
@@ -11,7 +12,7 @@ export class ThinkFunction extends AgentFunctionBase<unknown, ThinkFuncParameter
   }
 
   get description(): string {
-    return "Your current thoughts about the topic.";
+    return "Helps me to think what I should do if I don't know how to achieve the goal";
   }
 
   get parameters() {
@@ -30,11 +31,11 @@ export class ThinkFunction extends AgentFunctionBase<unknown, ThinkFuncParameter
 
   buildExecutor(agent: Agent<unknown>, context: unknown): (params: ThinkFuncParameters) => Promise<AgentFunctionResult> {
     return async (params: ThinkFuncParameters): Promise<AgentFunctionResult> => {
-      return this.onSuccess(params);
+      return this.onSuccess(agent as ScriptedAgent, params, params.thoughts);
     };
   }
 
-  private onSuccess(params: ThinkFuncParameters): AgentFunctionResult {
+  public onSuccess(scriptedAgent: ScriptedAgent, params: any, result: string) {
     return {
       outputs: [
         {
@@ -49,7 +50,22 @@ export class ThinkFunction extends AgentFunctionBase<unknown, ThinkFuncParameter
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, params),
-        ChatMessageBuilder.functionCallResult(this.name, "Assistant, please respond."),
+        ChatMessageBuilder.functionCallResult(this.name, result),
+      ]
+    }
+  }
+
+  public onFailure(scriptedAgent: ScriptedAgent,  params: any, error: string): AgentFunctionResult {
+    return {
+      outputs: [
+        {
+          type: AgentOutputType.Error,
+          title: `[${scriptedAgent.name}] Error in ${this.name}: ${error}`,
+        }
+      ],
+      messages: [
+        ChatMessageBuilder.functionCall(this.name, params),
+        ChatMessageBuilder.functionCallResult(this.name, error)
       ]
     }
   }

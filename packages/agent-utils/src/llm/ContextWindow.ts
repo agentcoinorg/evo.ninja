@@ -148,7 +148,7 @@ export class ContextWindow {
       });
       const message = await this._llm.getResponse(
         toSummarizeLogs,
-        [],
+        undefined,
         {
           temperature: 0,
           max_tokens: this._summaryTokens

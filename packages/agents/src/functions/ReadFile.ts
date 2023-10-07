@@ -4,7 +4,6 @@ import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
 interface ReadFileFuncParameters { 
   path: string;
-  data: string;
   encoding: string;
 };
 
@@ -41,7 +40,7 @@ export class ReadFileFunction extends ScriptFunction<ReadFileFuncParameters> {
           title: `[${scriptedAgent.name}] ${this.name}`,
           content: `${params.path}\n` +
             `${params.encoding}\n` +
-            `${trimText(params.data, 200)}`
+            `${trimText(result, 200)}`
         }
       ],
       messages: [
