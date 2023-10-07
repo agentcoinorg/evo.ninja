@@ -70,17 +70,14 @@ jobs:
           })
 
     - name: Get test name if provided
-      id: get-name
-      run: |
-        TEST_NAME=$(echo "${{ github.event.comment.body }}" | grep -oP '(?<=/workflows/benchmarks\s)\w+')
-        echo "TEST_NAME=$TEST_NAME" >> "$GITHUB_OUTPUT"
+      run: echo TEST_NAME=$(echo "${{ github.event.comment.body }}" | grep -oP '(?<=/workflows/benchmarks\s)\w+') >> $GITHUB_ENV
 
     - name: Run benchmarks
       working-directory: './evo/benchmarks'
       run: |
-        if [ -n "${{ steps.get-name.outputs.TEST_NAME }}" ]; then
-          echo "Running benchmarks for test: ${{ steps.get-name.outputs.TEST_NAME }}"
-          poetry run agbenchmark --cutoff 300 --test=${{ steps.get-name.outputs.TEST_NAME }}
+        if [ -n "${{ env.TEST_NAME }}" ]; then
+          echo "Running benchmarks for test: ${{ env.TEST_NAME }}"
+          poetry run agbenchmark --cutoff 300 --test=${{ env.TEST_NAME }}
         else
           echo "Running benchmarks with default settings"
           poetry run agbenchmark --cutoff 300
