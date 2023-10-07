@@ -5,6 +5,7 @@ import {
   ChatLogType,
   ContextWindow
 } from ".";
+import { AgentFunctionDefinition } from "../agent";
 import { Logger } from "../sys";
 
 import { ChatCompletionRequestMessageRoleEnum } from "openai";
@@ -18,8 +19,8 @@ export class Chat {
     private _tokenizer: Tokenizer,
     private _contextWindow?: ContextWindow,
     private _logger?: Logger,
-  ) { 
-    this._chatLogs = new ChatLogs()
+  ) {
+    this._chatLogs = new ChatLogs();
   }
 
   get chatLogs(): ChatLogs {
@@ -49,7 +50,7 @@ export class Chat {
     let msgs = Array.isArray(msg) ? msg : [msg];
 
     for (const msg of msgs) {
-      const tokens = this._tokenizer.encode(msg.content || "").length;
+      const tokens = this._tokenizer.encode(JSON.stringify(msg)).length;
 
       // If the message is larger than the context window
       if (this._contextWindow?.shouldChunk(tokens)) {
@@ -96,6 +97,11 @@ export class Chat {
       default:
         throw new Error(`Invalid type for roleOrMsg: ${typeof roleOrMsg}`);
     }
+  }
+
+  public addFunction(fn: AgentFunctionDefinition): void {
+    const tokens = this._tokenizer.encode(JSON.stringify(fn)).length;
+    this._chatLogs.addFunction(fn, tokens);
   }
 
   public cloneChatLogs(): ChatLogs {

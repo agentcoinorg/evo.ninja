@@ -1,4 +1,5 @@
 import { ChatCompletionRequestMessage as ChatMessage } from "openai";
+import { AgentFunctionDefinition } from "../agent";
 
 export { ChatMessage };
 
@@ -9,6 +10,11 @@ export type ChatLogType =
 export interface ChatLog {
   tokens: number;
   msgs: ChatMessage[];
+}
+
+export interface ChatFunctions {
+  tokens: number;
+  definitions: AgentFunctionDefinition[];
 }
 
 export class ChatLogs {
@@ -22,16 +28,24 @@ export class ChatLogs {
       msgs: [],
     },
   };
+  private _functions: ChatFunctions = {
+    tokens: 0,
+    definitions: []
+  };
 
-  constructor(logs?: Record<ChatLogType, ChatLog>) {
+  constructor(logs?: Record<ChatLogType, ChatLog>, functions?: ChatFunctions) {
     if (logs) {
       this._logs = logs;
+    }
+    if (functions) {
+      this._functions = functions;
     }
   }
 
   get tokens(): number {
     return this._logs["persistent"].tokens +
-      this._logs["temporary"].tokens;
+      this._logs["temporary"].tokens +
+      this._functions.tokens;
   }
 
   get messages(): ChatMessage[] {
@@ -50,9 +64,15 @@ export class ChatLogs {
     this._logs[type].msgs.push(...log.msgs);
   }
 
+  public addFunction(fn: AgentFunctionDefinition, tokens: number): void {
+    this._functions.tokens += tokens;
+    this._functions.definitions.push(fn);
+  }
+
   public clone(): ChatLogs {
     return new ChatLogs(
-      JSON.parse(JSON.stringify(this._logs))
+      JSON.parse(JSON.stringify(this._logs)),
+      JSON.parse(JSON.stringify(this._functions))
     );
   }
 
@@ -60,7 +80,19 @@ export class ChatLogs {
     return JSON.stringify(this, null, 2);
   }
 
-  public toJSON(): Record<ChatLogType, ChatLog> {
-    return this._logs;
+  public toJSON(): {
+    msgs: Record<ChatLogType, ChatLog>;
+    functions: {
+      tokens: number;
+      names: string[];
+    };
+  } {
+    return {
+      msgs: this._logs,
+      functions: {
+        tokens: this._functions.tokens,
+        names: this._functions.definitions.map((d) => d.name)
+      }
+    };
   }
 }
