@@ -20,6 +20,7 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
     result: ExecuteAgentFunctionResult["result"]
   ) => boolean,
   loopPreventionPrompt: string,
+  agentSpeakPrompt: string = AGENT_SPEAK_RESPONSE
 ): AsyncGenerator<AgentOutput, RunResult, string | undefined>
 {
   const { llm, chat } = context;
@@ -59,12 +60,12 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
         yield output;
       }
     } else {
-      yield* _preventLoopAndSaveMsg(chat, response, loopPreventionPrompt);
+      yield* _preventLoopAndSaveMsg(chat, response, loopPreventionPrompt, agentSpeakPrompt);
     }
   }
 }
 
-async function* _preventLoopAndSaveMsg(chat: Chat, response: ChatMessage, loopPreventionPrompt: string): AsyncGenerator<AgentOutput, void, string | undefined> {
+async function* _preventLoopAndSaveMsg(chat: Chat, response: ChatMessage, loopPreventionPrompt: string, agentSpeakPrompt: string): AsyncGenerator<AgentOutput, void, string | undefined> {
   if (chat.messages[chat.messages.length - 1].content === response.content &&
     chat.messages[chat.messages.length - 2].content === response.content) {
       chat.temporary("system", loopPreventionPrompt);
@@ -75,7 +76,7 @@ async function* _preventLoopAndSaveMsg(chat: Chat, response: ChatMessage, loopPr
       } as AgentOutput;
   } else {
     chat.temporary(response);
-    chat.temporary("system", AGENT_SPEAK_RESPONSE);
+    chat.temporary("system", agentSpeakPrompt);
     yield {
       type: AgentOutputType.Message,
       title: "Agent message",

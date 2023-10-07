@@ -1,12 +1,12 @@
 import { ScriptFunction } from "../ScriptFunction"
 
-export class CsvSumColumnFunction extends ScriptFunction<{ inputPath: string, outputPath: string, column: string }> {
+export class CsvFilterRowsFunction extends ScriptFunction<{ inputPath: string, outputPath: string, column: string }> {
   get name() {
-    return "csv_sumColumn"
+    return "csv_filterRows"
   }
 
   get description() {
-    return "Sum a column of a CSV file."
+    return "Filters and returns rows from a parsed CSV dataset based on a specified column index and a search string."
   }
 
   get parameters() {
@@ -22,11 +22,11 @@ export class CsvSumColumnFunction extends ScriptFunction<{ inputPath: string, ou
         columnIndex: {
             type: "number"
         },
-        hasHeader: {
-            type: "boolean"
+        searchString: {
+            type: "string"
         }
       },
-      required: ["csvData", "delimiter", "columnIndex", "hasHeader"],
+      required: ["csvData", "delimiter", "columnIndex", "searchString"],
       additionalProperties: false
     }
   }
