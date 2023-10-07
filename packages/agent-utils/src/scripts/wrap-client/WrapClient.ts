@@ -8,12 +8,16 @@ import {
   IWrapPackage,
   Result
 } from "@polywrap/client-js";
+
 import { InvokerOptions } from "@polywrap/client-js/build/types";
 import { PluginPackage } from "@polywrap/plugin-js";
 import { ResultErr, ResultOk } from "@polywrap/result";
 import * as  path from "path-browserify"
 import axios from "axios";
+import * as fuzzysort from "fuzzysort";
+import { load } from "cheerio";
 
+const stringSimilarity = require("string-similarity");
 export class WrapClient extends PolywrapClient {
 
   public jsPromiseOutput: Result<any, any>
@@ -193,7 +197,8 @@ export class WrapClient extends PolywrapClient {
 
           const searchQuery = encodeURI(args.query)
           const urlParams = new URLSearchParams({
-            q: searchQuery
+            q: searchQuery,
+            count: "3"
           })
           
           const { data } = await axiosClient.get<{
@@ -226,6 +231,66 @@ export class WrapClient extends PolywrapClient {
           }
 
           return JSON.stringify(result)
+        }
+      })))
+      .setPackage("plugin/fuzzySearch", PluginPackage.from(module => ({
+        "search": async (args: { url: string, queryKeywords: string[] }) => {
+          const response = await axios.get(args.url, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:107.0) Gecko/20100101 Firefox/107.0'
+            }
+          });
+          const html = response.data;
+          const $ = load(html);
+
+          $('script').remove();
+
+          const results: string[] = [];
+
+          $('*').each((_, element) => {
+              const text = $(element).text().trim();
+              let context = text;
+
+              if ($(element).prev().length > 0) {
+                  context = $(element).prev().text().trim() + " " + context;
+              }
+
+              if ($(element).next().length > 0) {
+                  context += " " + $(element).next().text().trim();
+              }
+
+              if ($(element).children().length > 0) {
+                  context += " " + $(element).children().map((i, el) => $(el).text().trim()).get().join(" ");
+              }
+
+              results.push(context);
+          });
+
+          let cleanResults = Array.from(new Set(
+            results.map(result => {
+              return result
+                .replaceAll("\t", '')
+                .replaceAll("\\\\t", '')
+                .replaceAll("\n", ' ')
+                .replaceAll("\\\\n", ' ')
+                .replace(/ +(?= )/g,'')
+                .trim();
+            })
+          ))
+          cleanResults = cleanResults
+            .filter((result, i) => {
+              if (i === 0) {
+                return true;
+              }
+
+              const previousResult = results[i - 1];
+              const similarity = stringSimilarity.compareTwoStrings(result, previousResult)
+
+              return similarity < 0.8;
+            })
+
+          const sortedResults = fuzzysort.go(args.queryKeywords.join(" "), cleanResults).map(result => result.target.substring(0, 3000));
+          return JSON.stringify(sortedResults.slice(0, 5));
         }
       })))
 
