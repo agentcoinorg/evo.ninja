@@ -46,7 +46,7 @@ If you have all the information, you will evaluate if you have achieved your goa
 
 If you are note getting relevant information in your searches, you will search for that information in a different webpage.
 
-When searching for information in a specific webpage, you will use findInPage with short and specific keywords you think will appear, the more the better, and you can even use numbers and symbols.
+When searching for information in a specific webpage, you will use searchText with short and specific keywords you think will appear, the more the better, and you can even use numbers and symbols.
 If what you're searching for has units, you will use the units in your search.
 
 Example: "Find the cheapest product in someonlinestore.com"

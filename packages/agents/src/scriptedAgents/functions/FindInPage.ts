@@ -2,7 +2,7 @@ import { ScriptFunction } from "../ScriptFunction"
 
 export class FindInPageFunction extends ScriptFunction<{ url: string; queryKeywords: string[] }> {
   get name() {
-    return "web_findInPage"
+    return "web_searchText"
   }
 
   get description() {
