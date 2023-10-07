@@ -7,16 +7,27 @@ on:
 jobs:
   run:
     if: |
-      github.event.issue.pull_request != null &&
+      github.event.issue.pull_request &&
       contains(github.event.comment.body, '/workflows/benchmarks')
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./evo
     steps:
-    - name: Clone evo.ninja repository
-      uses: actions/checkout@v3
+
+    - name: Get PR information
+        id: pr-info
+        run: |
+          PR_API_URL="${{ github.event.issue.pull_request.url }}"
+          PR_DATA=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -X GET "$PR_API_URL")
+          PR_REF=$(echo "$PR_DATA" | jq -r .head.ref)
+          echo "PR branch is $PR_REF"
+          echo "::set-output name=branch::${PR_REF}"
+
+    - name: Checkout PR branch
+      uses: actions/checkout@v2
       with:
+        ref: ${{ steps.pr-info.outputs.branch }}
         path: evo
         submodules: 'recursive'
 
@@ -46,8 +57,9 @@ jobs:
         AGENT_WORKSPACE: "../../workspace"
         OPENAI_API_KEY: ${{ secrets.BENCHMARK_CI_OPENAI_API_KEY }}
         GPT_MODEL: "gpt-4-0613"
-        CONTEXT_WINDOW_TOKENS: 16000
+        CONTEXT_WINDOW_TOKENS: 8000
         MAX_RESPONSE_TOKENS: 2000
+        BRAVE_API_KEY: ${{ secrets.BENCHMARK_CI_BRAVE_API_KEY }}
 
     - name: Set up Python 3.10
       uses: actions/setup-python@v4
@@ -82,6 +94,8 @@ jobs:
           echo "Running benchmarks with default settings"
           poetry run agbenchmark --cutoff 300
         fi
+      env:
+        OPENAI_API_KEY: ${{ secrets.BENCHMARK_CI_OPENAI_API_KEY }}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
