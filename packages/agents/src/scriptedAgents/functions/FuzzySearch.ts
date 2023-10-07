@@ -1,8 +1,8 @@
 import { ScriptFunction } from "../ScriptFunction"
 
-export class SearchTextFunction extends ScriptFunction<{ url: string; queryKeywords: string[] }> {
+export class FuzzySearchFunction extends ScriptFunction<{ url: string; queryKeywords: string[] }> {
   get name() {
-    return "web_searchText"
+    return "web_fuzzySearch"
   }
 
   get description() {

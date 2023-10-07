@@ -1,5 +1,5 @@
 const result = __wrap_subinvoke(
-  "plugin/searchText",
+  "plugin/fuzzySearch",
   "search",
   { url, queryKeywords }
 )

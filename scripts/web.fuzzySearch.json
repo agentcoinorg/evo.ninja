@@ -1,7 +1,7 @@
 {
-  "name": "web.searchText",
+  "name": "web.fuzzySearch",
   "description": "Fuzzy searches for specific information given a text query in a web page. Query should be keywords for the fuzzy search",
   "arguments": "{ url: string, queryKeywords: string[] }",
-  "code": "./web.searchText.js"
+  "code": "./web.fuzzySearch.js"
 }
 
