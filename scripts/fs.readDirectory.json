@@ -1,0 +1,6 @@
+{
+  "name": "fs.readDirectory",
+  "description": "Reads the contents of the directory",
+  "arguments": "{ path: string }",
+  "code": "./fs.readDirectory.js"
+}

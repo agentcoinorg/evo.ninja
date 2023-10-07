@@ -6,6 +6,7 @@ import { ScrapeTextFunction } from "../functions/ScrapeText";
 import { SearchFunction } from "../functions/Search";
 import { ReadFileFunction } from "../../functions/ReadFile";
 import { WriteFileFunction } from "../../functions/WriteFile";
+import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
 
 const AGENT_NAME = "Researcher";
 
@@ -35,6 +36,7 @@ simply respond back to the user with your insights. Only access the internet whe
     new ScrapeLinksFunction(),
     new WriteFileFunction(),
     new ReadFileFunction(),
+    new ReadDirectoryFunction()
   ],
   shouldTerminate: (functionCalled) => {
     return [

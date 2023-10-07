@@ -5,6 +5,9 @@ import { ExecuteScriptFunction } from "./functions/ExecuteScript";
 import { CreateScriptFunction } from "./functions/CreateScript";
 import { OnGoalAchievedFunction } from "../../scriptedAgents/functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../../scriptedAgents/functions/OnGoalFailed";
+import { ReadFileFunction } from "../../functions/ReadFile";
+import { WriteFileFunction } from "../../functions/WriteFile";
+import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
 
 export interface ScripterRunArgs {
   goal: string
@@ -53,6 +56,9 @@ If a goal has been achieved or failed, you will call the agent_onGoalAchieved or
     new ExecuteScriptFunction(),
     new FindScriptFunction(),
     new ReadVariableFunction(),
+    new ReadFileFunction(),
+    new WriteFileFunction(),
+    new ReadDirectoryFunction(),
     onGoalAchievedFn,
     onGoalFailedFn,
   ],

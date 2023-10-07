@@ -6,6 +6,7 @@ import { SortCsvColumnsFunction } from "../functions/SortCsvColumns";
 import { ThinkFunction } from "../../functions/Think";
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { ReadFileFunction } from "../../functions/ReadFile";
+import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
 import { AddCsvColumnFunction } from "../functions/AddCsvColumn";
 import { JoinCsvFunction } from "../functions/JoinCsv";
 
@@ -36,6 +37,7 @@ export const DATA_ANALYST_AGENT: ScriptedAgentConfig = {
     new AddCsvColumnFunction(),
     new ReadFileFunction(),
     new WriteFileFunction(),
+    new ReadDirectoryFunction(),
     new ThinkFunction(),
     new JoinCsvFunction()
   ],
