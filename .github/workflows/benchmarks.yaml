@@ -15,6 +15,9 @@ jobs:
         working-directory: ./evo
     steps:
 
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
     - name: Get PR information
       id: pr-info
       run: |
