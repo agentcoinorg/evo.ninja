@@ -43,7 +43,11 @@ export abstract class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseCon
     try {
       this.config.initialMessages(args).forEach((message) => {
         chat.persistent(message.role, message.content);
-      })
+      });
+
+      this.config.functions.forEach((fn) => {
+        chat.addFunction(fn.getDefinition());
+      });
 
       // If additional context is needed
       if (context) {

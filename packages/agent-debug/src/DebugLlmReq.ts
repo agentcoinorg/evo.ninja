@@ -20,14 +20,14 @@ export class DebugLlmReq {
   toJSON(): {
     time: Timer;
     tokens: number;
-    chat: ChatLogs;
     response?: ChatMessage;
+    chat: ChatLogs;
   } {
     return {
       time: this.time,
       tokens: this.tokens,
+      response: this.response,
       chat: this.chatLogs,
-      response: this.response
     };
   }
 }
