@@ -8,6 +8,8 @@ import {
   IWrapPackage,
   Result
 } from "@polywrap/client-js";
+// import { StringUtils } from 'turbocommons-ts';
+const stringSimilarity = require("string-similarity");
 import { InvokerOptions } from "@polywrap/client-js/build/types";
 import { PluginPackage } from "@polywrap/plugin-js";
 import { ResultErr, ResultOk } from "@polywrap/result";
@@ -195,7 +197,8 @@ export class WrapClient extends PolywrapClient {
 
           const searchQuery = encodeURI(args.query)
           const urlParams = new URLSearchParams({
-            q: searchQuery
+            q: searchQuery,
+            count: "3"
           })
           
           const { data } = await axiosClient.get<{
@@ -264,18 +267,42 @@ export class WrapClient extends PolywrapClient {
               results.push(context);
           });
 
-          const cleanResults = Array.from(new Set(results.map(result => {
-            return result
-              .replaceAll("\t", '')
-              .replaceAll("\\\\t", '')
-              .replaceAll("\g", ' ')
-              .replaceAll("\\\\g", ' ')
-              .trim();
-          })))
+          let cleanResults = Array.from(new Set(
+            results.map(result => {
+              return result
+                .replaceAll("\t", '')
+                .replaceAll("\\\\t", '')
+                .replaceAll("\n", ' ')
+                .replaceAll("\\\\n", ' ')
+                .replace(/ +(?= )/g,'')
+                .trim();
+            })
+            // .filter((result, i) => {
+            //   if (i === 0) {
+            //     return true;
+            //   }
 
-          const sortedResults = fuzzysort.go(args.queryKeywords.join(" "), cleanResults).map(result => result.target);
-          console.log(JSON.stringify(sortedResults.slice(0, 15)));
-          return JSON.stringify(sortedResults.slice(0, 15));
+            //   const previousResult = results[i - 1];
+            //   const similarity = StringUtils.compareSimilarityPercent(result, previousResult)
+
+            //   return similarity < 0.8;
+            // })
+          ))
+          cleanResults = cleanResults
+            .filter((result, i) => {
+              if (i === 0) {
+                return true;
+              }
+
+              const previousResult = results[i - 1];
+              const similarity = stringSimilarity.compareTwoStrings(result, previousResult)
+
+              return similarity < 0.8;
+            })
+
+          const sortedResults = fuzzysort.go(args.queryKeywords.join(" "), cleanResults).map(result => result.target.substring(0, 3000));
+          console.log(JSON.stringify(sortedResults.slice(0, 5)));
+          return JSON.stringify(sortedResults.slice(0, 5));
         }
       })))
 
