@@ -1,6 +1,6 @@
 import { ScriptFunction } from "../ScriptFunction"
 
-export class CsvSumColumnFunction extends ScriptFunction<{ inputPath: string, outputPath: string, column: string }> {
+export class CsvSumColumnFunction extends ScriptFunction<{ csvData: string, delimiter: string, columnIndex: number, hasHeader: boolean }> {
   get name() {
     return "csv_sumColumn"
   }
