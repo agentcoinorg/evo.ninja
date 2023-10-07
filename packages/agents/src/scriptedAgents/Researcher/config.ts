@@ -6,6 +6,7 @@ import { FuzzySearchFunction } from "../functions/FuzzySearch";
 import { ReadFileFunction } from "../../functions/ReadFile";
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
+import { ScrapeTextFunction } from "../functions/ScrapeText";
 
 const AGENT_NAME = "Researcher";
 
@@ -66,6 +67,7 @@ If info is missing, you assume the info is somewhere on the user's computer like
       new ReadFileFunction(),
       new ReadDirectoryFunction(),
       new FuzzySearchFunction(),
+      new ScrapeTextFunction()
   ],
   shouldTerminate: (functionCalled) => {
     return [
