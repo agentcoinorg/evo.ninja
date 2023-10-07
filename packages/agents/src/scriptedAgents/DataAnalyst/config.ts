@@ -3,6 +3,7 @@ import { OnGoalAchievedFunction } from "../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../functions/OnGoalFailed";
 import { SortCsvFunction } from "../functions/SortCsv";
 import { SortCsvColumnsFunction } from "../functions/SortCsvColumns";
+import { CsvSumColumnFunction } from "../functions/CsvSumColumn";
 import { ThinkFunction } from "../../functions/Think";
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { ReadFileFunction } from "../../functions/ReadFile";
@@ -10,22 +11,25 @@ import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
 import { AddCsvColumnFunction } from "../functions/AddCsvColumn";
 import { JoinCsvFunction } from "../functions/JoinCsv";
 
-const AGENT_NAME = "data_analyst";
+const AGENT_NAME = "DataAnalyst";
 
 const onGoalAchievedFn = new OnGoalAchievedFunction();
-const onGoalFailedFn = new OnGoalAchievedFunction();
+const onGoalFailedFn = new OnGoalFailedFunction();
 
 export const DATA_ANALYST_AGENT: ScriptedAgentConfig = {
-  name: "DataAnalyst",
-  expertise: "handles CSV files to analyze data and retrieve conclusions from it",
+  name: AGENT_NAME,
+  expertise: "adept at processing CSV files, extracting key data points, and performing calculations to derive insights from the information.",
   initialMessages: ({ goal }) => [
-    { role: "system", content: `You are an agent that analyzes data, called "${AGENT_NAME}".\n` +
-    `You have a workspace from which you can read and write files, which you will use to store, retrieve,
-    and manipulate data - If you're asked to execute any task and you don't know how to get some information, 
-    is very likely that some files from the workspace are useful. \n
-    You also possess a wide range of general knowledge about various objects and their common properties
-    so you can come up with an answer when needed.\n
-    You can't interact with user`},
+    {
+      role: "system",
+      content:
+`You are the Data Analyst Agent, a digital expert in handling CSV datasets. Your primary skill set revolves around extracting, analyzing,
+and interpreting data to provide meaningful conclusions. Approach every dataset with a keen eye for detail, ensuring accuracy and relevance
+in all your calculations.
+
+REMEMBER:
+If info is missing, you assume the info is somewhere on the user's computer like the filesystem, unless you have a logical reason to think otherwise.`
+    },
     { role: "user", content: goal },
   ],
   loopPreventionPrompt: "Assistant, you appear to be in a loop, try executing a different function.",
@@ -35,11 +39,12 @@ export const DATA_ANALYST_AGENT: ScriptedAgentConfig = {
     new SortCsvFunction(),
     new SortCsvColumnsFunction(),
     new AddCsvColumnFunction(),
+    new CsvSumColumnFunction(),
+    new JoinCsvFunction(),
+    new ThinkFunction(),
     new ReadFileFunction(),
     new WriteFileFunction(),
-    new ReadDirectoryFunction(),
-    new ThinkFunction(),
-    new JoinCsvFunction()
+    new ReadDirectoryFunction()
   ],
   shouldTerminate: (functionCalled) => {
     return [
