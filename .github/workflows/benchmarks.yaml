@@ -14,13 +14,41 @@ jobs:
       run:
         working-directory: ./evo
     steps:
-
     - name: Checkout Repository
       uses: actions/checkout@v3
       with:
         path: evo
 
-    - name: Get PR information
+    - name: Is maintainer?
+      run: |
+        exists=$(echo $(grep -Fxcs ${CREATOR} .github/MAINTAINERS))
+        if [ "$exists" == "1" ] ; then
+          echo IS_MAINTAINER=true >> $GITHUB_ENV
+        else
+          echo IS_MAINTAINER=false >> $GITHUB_ENV
+        fi
+      env:
+        CREATOR: ${{github.event.comment.user.login}}
+
+    - name: Is not maintainer...
+      if: env.IS_MAINTAINER == 'false'
+      uses: actions/github-script@0.8.0
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          github.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '${{github.event.comment.user.login}} is not a MAINTAINER. Please see the .github/MAINTAINERS file...'
+          })
+
+    - name: Fail if conditions aren't met...
+      if: |
+        env.IS_MAINTAINER != 'true'
+      run: exit 1
+
+    - name: Get PR branch
       id: pr-info
       run: |
         PR_API_URL="${{ github.event.issue.pull_request.url }}"
