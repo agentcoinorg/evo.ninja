@@ -23,7 +23,7 @@
     "json5": "^2.2.3",
     "openai": "~3.3.0",
     "path-browserify": "1.0.1",
-    "string-similarity": "^4.0.4",
+    "string-similarity": "^4.0.4"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.4",
