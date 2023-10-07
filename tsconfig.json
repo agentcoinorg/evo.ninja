@@ -3,7 +3,7 @@
     "outDir": "build",
     "esModuleInterop": true,
     "lib": [
-      "es2015",
+      "es2021",
       "es5",
       "dom"
     ],
