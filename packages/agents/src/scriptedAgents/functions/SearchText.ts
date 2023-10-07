@@ -1,6 +1,6 @@
 import { ScriptFunction } from "../ScriptFunction"
 
-export class FindInPageFunction extends ScriptFunction<{ url: string; queryKeywords: string[] }> {
+export class SearchTextFunction extends ScriptFunction<{ url: string; queryKeywords: string[] }> {
   get name() {
     return "web_searchText"
   }

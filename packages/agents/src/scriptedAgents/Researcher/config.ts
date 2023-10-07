@@ -2,11 +2,9 @@ import { ScriptedAgentConfig } from "../ScriptedAgent";
 import { OnGoalAchievedFunction } from "../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../functions/OnGoalFailed";
 import { WriteFileFunction } from "../../functions/WriteFile";
-import { ScrapeLinksFunction } from "../functions/ScrapeLinks";
-// import { ScrapeTextFunction } from "../functions/ScrapeText";
 import { SearchFunction } from "../functions/Search";
 import { ReadFileFunction } from "../../functions/ReadFile";
-import { FindInPageFunction } from "../functions/FindInPage";
+import { SearchTextFunction } from "../functions/SearchText";
 
 const AGENT_NAME = "Researcher";
 
@@ -17,7 +15,7 @@ export const RESEARCHER_AGENT_CONFIG: ScriptedAgentConfig = {
   name: AGENT_NAME,
   expertise: "researching information online",
   initialMessages: ({ goal }) => [
-    { role: "system", content: `
+    { role: "user", content: `
 You are an agent that searches the web for information, called "${AGENT_NAME}".
 
 If the information that you need to search is vague or depends on other unknown information, you will break the search
@@ -60,11 +58,9 @@ you would use keywords: ['$', 'usd', 'price', 'cost']
       onGoalAchievedFn,
       onGoalFailedFn,
       new SearchFunction(),
-      // new ScrapeTextFunction(),
-      new ScrapeLinksFunction(),
       new WriteFileFunction(),
       new ReadFileFunction(),
-      new FindInPageFunction(),
+      new SearchTextFunction(),
   ],
   shouldTerminate: (functionCalled) => {
     return [
