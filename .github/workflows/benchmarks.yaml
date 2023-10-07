@@ -15,8 +15,10 @@ jobs:
         working-directory: ./evo
     steps:
 
-    - name: Checkout repository
-      uses: actions/checkout@v2
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+      with:
+        path: evo
 
     - name: Get PR information
       id: pr-info
@@ -28,10 +30,10 @@ jobs:
         echo "::set-output name=branch::${PR_REF}"
 
     - name: Checkout PR branch
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
-        ref: ${{ steps.pr-info.outputs.branch }}
         path: evo
+        ref: ${{ steps.pr-info.outputs.branch }}
         submodules: 'recursive'
 
     - name: Get test name if provided
