@@ -14,14 +14,14 @@ jobs:
       run:
         working-directory: ./evo
     steps:
-    - name: Get test name if provided
-      run: echo TEST_NAME=$(echo "${{ github.event.comment.body }}" | grep -oP '(?<=/workflows/benchmarks\s)\w+') >> $GITHUB_ENV
-
     - name: Clone evo.ninja repository
       uses: actions/checkout@v3
       with:
         path: evo
         submodules: 'recursive'
+
+    - name: Get test name if provided
+      run: echo TEST_NAME=$(echo "${{ github.event.comment.body }}" | grep -oP '(?<=/workflows/benchmarks\s)\w+') >> $GITHUB_ENV
 
     - name: Read .nvmrc into outputs.NVMRC
       run: echo NVMRC=$(cat .nvmrc) >> "$GITHUB_OUTPUT"
