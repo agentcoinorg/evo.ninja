@@ -36,6 +36,13 @@ export function processFunctionAndArgs<TContext>(
     return ResultErr(UNDEFINED_FUNCTION_NAME);
   }
 
+  // This is a common error that's been observed,
+  // where the LLM responds with an invalid name
+  // starting with "functions."
+  if (name.startsWith("functions.")) {
+    name = name.replace("functions.", "");
+  }
+
   const func = agentFunctions.find((f) => f.definition.name === name);
   if (!func) {
     return ResultErr(FUNCTION_NOT_FOUND(name));

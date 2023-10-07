@@ -3,6 +3,7 @@ import { WriteFileFunction } from "../../functions/WriteFile";
 import { OnGoalAchievedFunction } from "../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../functions/OnGoalFailed";
 import { ReadFileFunction } from "../../functions/ReadFile";
+import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
 
 const AGENT_NAME = "Developer";
 
@@ -31,6 +32,7 @@ You must not interact with the user or ask question for clarification. Solve the
     new OnGoalFailedFunction(),
     new WriteFileFunction(),
     new ReadFileFunction(),
+    new ReadDirectoryFunction()
   ],
   shouldTerminate: (functionCalled) => {
     return [

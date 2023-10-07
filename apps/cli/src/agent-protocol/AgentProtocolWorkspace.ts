@@ -1,7 +1,8 @@
 import { Workspace } from "@evo-ninja/agent-utils";
+import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import { type Artifact, v4 as uuid } from "forked-agent-protocol";
-import fs from "fs";
 import path from "path";
+import fs from "fs";
 
 interface ArtifactLog extends Artifact {
   data: string;
@@ -9,9 +10,11 @@ interface ArtifactLog extends Artifact {
 
 export class AgentProtocolWorkspace implements Workspace {
   private _artifactLog: Map<string, ArtifactLog>;
+  private _fsWorkspace: FileSystemWorkspace;
 
   constructor(private directoryPath: string) {
     this._artifactLog = new Map();
+    this._fsWorkspace = new FileSystemWorkspace(directoryPath);
   }
 
   writeFileSync(subpath: string, data: string): void {
@@ -25,17 +28,11 @@ export class AgentProtocolWorkspace implements Workspace {
       data,
     };
     this._artifactLog.set(subpath, artifact);
-    const artifactPath = path.join(this.directoryPath, subpath)
-    if (!fs.existsSync(artifactPath)) {
-      fs.writeFileSync(artifactPath, artifact.data);
-    }
+    this._fsWorkspace.writeFileSync(subpath, data);
   }
 
   readFileSync(subpath: string): string {
-    const text = fs.readFileSync(
-      path.join(this.directoryPath, subpath),
-      "utf-8"
-    );
+    const text = this._fsWorkspace.readFileSync(subpath);
     const artifact: ArtifactLog = {
       file_name: path.basename(subpath),
       agent_created: true,
@@ -50,7 +47,7 @@ export class AgentProtocolWorkspace implements Workspace {
   }
 
   existsSync(subpath: string): boolean {
-    return this._artifactLog.has(subpath);
+    return this._fsWorkspace.existsSync(subpath);
   }
 
   renameSync(oldPath: string, newPath: string): void {
@@ -61,18 +58,15 @@ export class AgentProtocolWorkspace implements Workspace {
     this._artifactLog.delete(oldPath);
     artifact.file_name = newPath; // Update the filename in the artifact itself
     this._artifactLog.set(newPath, artifact);
+    this._fsWorkspace.renameSync(oldPath, newPath);
   }
 
-  mkdirSync(_: string): void {
-    // Since this is an in-memory representation, we don't need to create "directories" per se.
-    // However, if you want to maintain a list of directories, you can use another Map or Set.
-    // For now, this method can be left as a no-op.
+  mkdirSync(subpath: string): void {
+    this._fsWorkspace.mkdirSync(subpath);
   }
 
-  readdirSync(_: string): string[] {
-    // This can be implemented by iterating through the Map's keys and filtering by those
-    // that start with the given subpath. However, for this example, it's just a placeholder.
-    throw Error("Not implemented");
+  readdirSync(subpath: string): string[] {
+    return this._fsWorkspace.readdirSync(subpath);
   }
 
   appendFileSync(subpath: string, data: string): void {
@@ -81,17 +75,7 @@ export class AgentProtocolWorkspace implements Workspace {
       throw new Error(`Artifact with subpath: ${subpath} not found`);
     }
     artifact.data += data;
-  }
-
-  private processArtifacts(
-    callback: (artifact: ArtifactLog, filePath: string) => void
-  ): void {
-    this._artifactLog.forEach((artifact) => {
-      let artifactDirectoryPath = this.directoryPath;
-
-      const filePath = path.join(artifactDirectoryPath, artifact.file_name);
-      callback(artifact, filePath);
-    });
+    this._fsWorkspace.appendFileSync(subpath, data);
   }
 
   getArtifacts(): Artifact[] {
@@ -118,5 +102,16 @@ export class AgentProtocolWorkspace implements Workspace {
 
   cleanArtifacts(): void {
     this._artifactLog = new Map();
+  }
+
+  private processArtifacts(
+    callback: (artifact: ArtifactLog, filePath: string) => void
+  ): void {
+    this._artifactLog.forEach((artifact) => {
+      let artifactDirectoryPath = this.directoryPath;
+
+      const filePath = path.join(artifactDirectoryPath, artifact.file_name);
+      callback(artifact, filePath);
+    });
   }
 }

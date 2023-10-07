@@ -2,9 +2,10 @@ import { ScriptedAgentConfig } from "../ScriptedAgent";
 import { OnGoalAchievedFunction } from "../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../functions/OnGoalFailed";
 import { SearchFunction } from "../functions/Search";
+import { FuzzySearchFunction } from "../functions/FuzzySearch";
 import { ReadFileFunction } from "../../functions/ReadFile";
 import { WriteFileFunction } from "../../functions/WriteFile";
-import { FuzzySearchFunction } from "../functions/FuzzySearch";
+import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
 
 const AGENT_NAME = "Researcher";
 
@@ -49,6 +50,9 @@ If what you're searching for has units, you will use the units in your search.
 
 Example: "Find the cheapest product in someonlinestore.com"
 you would use keywords: ['$', 'usd', 'price', 'cost']
+
+REMEMBER:
+If info is missing, you assume the info is somewhere on the user's computer like the filesystem, unless you have a logical reason to think otherwise.
 `},
     { role: "user", content: goal },
   ],
@@ -60,6 +64,7 @@ you would use keywords: ['$', 'usd', 'price', 'cost']
       new SearchFunction(),
       new WriteFileFunction(),
       new ReadFileFunction(),
+      new ReadDirectoryFunction(),
       new FuzzySearchFunction(),
   ],
   shouldTerminate: (functionCalled) => {

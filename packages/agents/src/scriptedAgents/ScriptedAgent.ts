@@ -14,6 +14,7 @@ export interface ScriptedAgentConfig {
   expertise: string;
   initialMessages: (runArguments: ScriptedAgentRunArgs) => { role: ChatRole; content: string }[];
   loopPreventionPrompt: string;
+  agentSpeakPrompt?: string;
   shouldTerminate: (functionCalled: ExecuteAgentFunctionCalled) => boolean;
   functions: ScriptFunction<unknown>[];
 }

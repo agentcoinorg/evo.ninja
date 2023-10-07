@@ -15,6 +15,7 @@ export interface AgentBaseConfig<TRunArgs, TAgentBaseContext> {
   expertise: string;
   initialMessages: (runArguments: TRunArgs) => { role: ChatRole; content: string }[];
   loopPreventionPrompt: string;
+  agentSpeakPrompt?: string;
   functions: AgentFunctionBase<TAgentBaseContext, unknown>[];
   shouldTerminate: (functionCalled: ExecuteAgentFunctionCalled) => boolean;
   timeout?: Timeout;
@@ -66,7 +67,8 @@ export abstract class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseCon
         (functionCalled) => {
           return this.config.shouldTerminate(functionCalled);
         },
-        this.config.loopPreventionPrompt
+        this.config.loopPreventionPrompt,
+        this.config.agentSpeakPrompt
       );
     } catch (err) {
       this.context.logger.error(err);
