@@ -233,7 +233,7 @@ export class WrapClient extends PolywrapClient {
           return JSON.stringify(result)
         }
       })))
-      .setPackage("plugin/searchText", PluginPackage.from(module => ({
+      .setPackage("plugin/fuzzySearch", PluginPackage.from(module => ({
         "search": async (args: { url: string, queryKeywords: string[] }) => {
           const response = await axios.get(args.url, {
             headers: {
