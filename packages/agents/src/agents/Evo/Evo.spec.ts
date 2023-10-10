@@ -110,7 +110,7 @@ describe("Evo Test Suite", () => {
     }
   }
 
-  test.only("evo selects correct agent", async () => {
+  test("evo selects correct agent", async () => {
     const goal =
       "How much was spent on utilities in total ? Write the answer in an output.txt file.";
     const { llm, chat } = createEvo("selects-agent-correctly");
