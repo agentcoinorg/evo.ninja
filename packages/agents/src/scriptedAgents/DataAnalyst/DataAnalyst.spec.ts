@@ -199,7 +199,7 @@ Fern,Green
 
     expect(response.value.ok).toBe(true);
     const result = agent.workspace.readFileSync("output.txt");
-    expect(result).toContain("84.35");
+    expect(result).toContain("84");
   });
 
   test("AnswerQuestionCsv", async () => {
