@@ -110,7 +110,7 @@ describe("Evo Test Suite", () => {
     }
   }
 
-  test.only("evo selects correct agent", async () => {
+  test("evo selects correct agent", async () => {
     const goal =
       "How much was spent on utilities in total ? Write the answer in an output.txt file.";
     const { llm, chat } = createEvo("selects-agent-correctly");
@@ -126,7 +126,12 @@ describe("Evo Test Suite", () => {
 
     const functionDefinitions = evoConfig.functions.slice(2).map((fn) => fn.getDefinition());
     for (let i = 0; i<20; i++) {
-      const response = await llm.getResponse(chat.chatLogs, functionDefinitions);
+      const response = await llm.getResponse(
+        chat.chatLogs,
+        functionDefinitions
+      );
+      const writeTo = path.resolve(__dirname, `./.tests/selects-agent-correctly/debug/response-${i}.json`);
+      fs.writeFileSync(writeTo, JSON.stringify(response, null, 2));
       console.log(response);
     }
   });

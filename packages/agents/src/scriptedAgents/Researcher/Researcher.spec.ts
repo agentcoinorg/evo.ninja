@@ -155,7 +155,7 @@ describe("Research Agent Test Suite", () => {
     expect(teslasRevenue).toContain("81,462");
   });
 
-  test.only("revenue-retrieval-2", async () => {
+  test("revenue-retrieval-2", async () => {
     const { agent, debugLog } = createResearchAgent("revenue-retrieval-2");
     const response = await runResearchAgent(
       agent,
