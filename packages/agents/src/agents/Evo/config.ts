@@ -5,6 +5,7 @@ import { OnGoalAchievedFunction } from "../../scriptedAgents/functions/OnGoalAch
 import { OnGoalFailedFunction } from "../../scriptedAgents/functions/OnGoalFailed";
 
 import { Chat } from "@evo-ninja/agent-utils";
+import { VerifyGoalAchievedFunction } from "./functions/VerifyGoalAchieved";
 
 export interface EvoRunArgs {
   goal: string
@@ -16,6 +17,7 @@ export interface EvoContext extends ScriptedAgentContext {
 
 const onGoalAchievedFn = new OnGoalAchievedFunction();
 const onGoalFailedFn = new OnGoalFailedFunction();
+const verifyGoalAchieved = new VerifyGoalAchievedFunction();
 
 const AGENT_NAME = "Evo";
 
@@ -37,7 +39,7 @@ Since the agents do not see user messages, it is cruical you pass all the requir
 Decision-making Process:
 1. Evaluate the goal, see if it can be achieved without delegating to another agent.
 2. Sub-tasks are delegated to agents that have the most relevant expertise.
-3. When you are certain a goal and its sub-tasks have been achieved, you will call ${onGoalAchievedFn.name}.
+3. When you are certain a goal and its sub-tasks have been achieved, you will call ${verifyGoalAchieved.name}.
 4. If you get stuck or encounter an error, think carefully and create a new plan considering the problems you've encountered.
 5. A goal is only failed if you have exhausted all options and you are certain it cannot be achieved. Call ${onGoalFailedFn.name} with information as to what happened.
 
@@ -53,6 +55,7 @@ If info is missing, you assume the info is somewhere on the user's computer like
     functions: [
       onGoalAchievedFn,
       onGoalFailedFn,
+      verifyGoalAchieved,
       new DelegateAgentFunction(
         SCRIPTER_AGENT_CONFIG,
         (context) => new Scripter(
