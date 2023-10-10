@@ -10,6 +10,9 @@ import {
   Workspace,
   LlmApi,
   ContextWindow,
+  ChatLogType,
+  ChatMessage,
+  ChatLog,
 } from "@evo-ninja/agent-utils";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
 import { FileSystemWorkspace, FileLogger } from "@evo-ninja/agent-utils-fs";
@@ -17,6 +20,7 @@ import dotenv from "dotenv";
 import readline from "readline";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
+import { readFileSync } from "fs-extra";
 
 dotenv.config({
   path: path.join(__dirname, "../../../.env"),
@@ -36,6 +40,7 @@ export interface App {
   fileLogger: FileLogger;
   consoleLogger: ConsoleLogger;
   debugLog?: DebugLog;
+  chat: Chat
 }
 
 export interface AppConfig {
@@ -44,6 +49,16 @@ export interface AppConfig {
   userWorkspace?: Workspace;
   debug?: boolean;
   taskId?: string;
+  messagesPath?: string;
+}
+
+const getMessagesFromPath = (path: string): { type: ChatLogType, msgs: ChatMessage[]}[] => {
+  const messagesString = readFileSync(path, "utf-8")
+  const messages: Record<ChatLogType, ChatLog> = JSON.parse(messagesString)
+  return Object.entries(messages).map(([type, { msgs }]) => ({
+    type: type as ChatLogType,
+    msgs
+  }))
 }
 
 export function createApp(config?: AppConfig): App {
@@ -94,6 +109,14 @@ export function createApp(config?: AppConfig): App {
   const contextWindow = new ContextWindow(llm);
   const chat = new Chat(cl100k_base, contextWindow, logger);
 
+  if (config?.messagesPath) {
+    const msgPath = path.join(rootDir, config.messagesPath)
+    const messages = getMessagesFromPath(msgPath)
+    for (let { type, msgs } of messages) {
+      chat.add(type, msgs)
+    }
+  }
+
   // Debug Logging
   let debugLog: DebugLog | undefined;
 
@@ -123,5 +146,6 @@ export function createApp(config?: AppConfig): App {
     fileLogger,
     consoleLogger,
     debugLog,
+    chat
   };
 }

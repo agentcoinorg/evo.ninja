@@ -9,6 +9,7 @@ export async function cli(): Promise<void> {
     .option("-t, --timeout <seconds>")
     .option("-r, --root <path>")
     .option("-d, --debug")
+    .option("-m, --messages <path>")
     .parse();
 
   const options = program.opts();
@@ -24,20 +25,21 @@ export async function cli(): Promise<void> {
   const app = createApp({
     timeout,
     rootDir: options.root,
-    debug: options.debug
+    debug: options.debug,
+    messagesPath: options.messages
   });
 
   await app.logger.logHeader();
 
   let goal: string | undefined = program.args[0]
 
-  if (!goal) {
+  if (!goal && !options.messages) {
     goal = await app.logger.prompt("Enter your goal: ");
   }
 
   app.debugLog?.goalStart(goal);
 
-  let iterator = app.evo.run({ goal });
+  let iterator = options.messages ? app.evo.runWithChat({ chat: app.chat }) : app.evo.run({ goal });
 
   while(true) {
     app.debugLog?.stepStart();
