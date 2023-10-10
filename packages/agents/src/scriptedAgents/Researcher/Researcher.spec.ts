@@ -167,5 +167,15 @@ describe("Research Agent Test Suite", () => {
     console.log(response);
   });
 
-  test("get information", async () => {});
+  test("get information", async () => {
+    const { agent, debugLog } = createResearchAgent("get information");
+    const response = await runResearchAgent(
+      agent,
+      "Write the twitter handle of the two hosts of Latent Space to a file called output.txt",
+      debugLog
+    );
+
+    expect(response.value.ok).toBe(true);
+    console.log(response);
+  });
 });

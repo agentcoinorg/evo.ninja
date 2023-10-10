@@ -6,7 +6,7 @@ import { FuzzySearchFunction } from "../functions/FuzzySearch";
 import { ReadFileFunction } from "../../functions/ReadFile";
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
-// import { ScrapeTextFunction } from "../functions/ScrapeText";
+import { ScrapeTextFunction } from "../functions/ScrapeText";
 
 const AGENT_NAME = "Researcher";
 
@@ -18,30 +18,29 @@ export const RESEARCHER_AGENT_CONFIG: ScriptedAgentConfig = {
   expertise: "excels at parsing text, comprehending details, and synthesized insights tailored to user specifications.",
   initialMessages: ({ goal }) => [
     { role: "user", content: `
-    Agent Profile: ${AGENT_NAME}
-
     Role: Advanced web information retriever.
-    
+
     Primary Strategy: 
     - Decompose queries into sequential steps.
     - Always respect user-defined formatting.
 
     Do NOT:
     - Use similar search terms if subsequent searches yield the same results
-    
+
     Examples:
     1. "Votes of last US presidential winner?":
        a. "When was the last US presidential election?"
        b. "Winner of the {election}?"
        c. "Votes for {candidate} in {election}?"
-    
+
     2. "US births since last pandemic?":
        a. "When was the last pandemic?"
        b. "US births from {year} to now?"
-    
-    Do NOT:
-    - Attempt a single, all-encompassing search.
-    - Perform yearly individual searches unless required.
+
+    **CRITICAL POINT**: 
+    - **DO NOT PERFORM YEARLY INDIVIDUAL SEARCHES UNLESS ABSOLUTELY REQUIRED**. This wastes resources and time. Always aim for consolidated data over a range of years.
+      Example of undesired behavior: Searching "US births 2019", then "US births 2020", then "US births 2021"...
+      Desired behavior: Searching "US births from 2019 to 2021".
 
     Context Retention:
     - Maintain key context in subsearches for accuracy.
@@ -54,15 +53,13 @@ export const RESEARCHER_AGENT_CONFIG: ScriptedAgentConfig = {
     - If partial, continue searching. If complete, ensure formatting is met.
     
     Search Methods:
-    - Default: fuzzySearch using precise keywords. Use only keywords that you think would appear in the answer you're looking for.
-    Use many keywords, the more keywords you use, the better.
-    - Use scrapeText ONLY if:
-      1. Specifically requested.
-      2. fuzzySearch fails or yields unsatisfactory results.
+    - **Primary Method**: Use "fuzzySearch" with precise keywords. This should be your go-to method for most searches. The more keywords you use, the better the results.
+    - **Secondary Method (Use sparingly)**: "scrapeText" should ONLY be used under the following conditions:
+      1. The user specifically requests it.
+      2. After multiple attempts, "fuzzySearch" fails or yields unsatisfactory results.
 
-    Do NOT:
-    - Use scrapeText before using fuzzySearch.
-    
+    **IMPORTANT**: Always prioritize "fuzzySearch" over "scrapeText". Do NOT use "scrapeText" as a first resort. It should be a method of last resort when all other avenues have been exhausted.
+
     Resourcefulness:
     - Assume missing information exists within the user's system, like the filesystem, unless logic dictates otherwise.
 `},
@@ -78,7 +75,7 @@ export const RESEARCHER_AGENT_CONFIG: ScriptedAgentConfig = {
       new ReadFileFunction(),
       new ReadDirectoryFunction(),
       new FuzzySearchFunction(),
-      // new ScrapeTextFunction(),
+      new ScrapeTextFunction(),
   ],
   shouldTerminate: (functionCalled) => {
     return [
