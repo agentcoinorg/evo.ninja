@@ -6,7 +6,7 @@ import { FuzzySearchFunction } from "../functions/FuzzySearch";
 import { ReadFileFunction } from "../../functions/ReadFile";
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
-import { ScrapeTextFunction } from "../functions/ScrapeText";
+// import { ScrapeTextFunction } from "../functions/ScrapeText";
 
 const AGENT_NAME = "Researcher";
 
@@ -55,6 +55,7 @@ export const RESEARCHER_AGENT_CONFIG: ScriptedAgentConfig = {
     
     Search Methods:
     - Default: fuzzySearch using precise keywords. Use only keywords that you think would appear in the answer you're looking for.
+    Use many keywords, the more keywords you use, the better.
     - Use scrapeText ONLY if:
       1. Specifically requested.
       2. fuzzySearch fails or yields unsatisfactory results.
@@ -77,7 +78,7 @@ export const RESEARCHER_AGENT_CONFIG: ScriptedAgentConfig = {
       new ReadFileFunction(),
       new ReadDirectoryFunction(),
       new FuzzySearchFunction(),
-      new ScrapeTextFunction()
+      // new ScrapeTextFunction(),
   ],
   shouldTerminate: (functionCalled) => {
     return [
