@@ -1,7 +1,7 @@
-import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, Script } from "@evo-ninja/agent-utils";
-import { AgentFunctionBase } from "../../../AgentFunctionBase";
-import { ScripterContext } from "../config";
-import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT, createScriptWriter } from "../utils";
+import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, Script, Scripts } from "@evo-ninja/agent-utils";
+import { AgentFunctionBase } from "../AgentFunctionBase";
+import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT, createScriptWriter } from "../agents/Scripter/utils";
+import { AgentBaseContext } from "../AgentBase";
 
 interface CreateScriptFuncParameters { 
   namespace: string, 
@@ -9,7 +9,11 @@ interface CreateScriptFuncParameters {
   arguments: string 
 }
 
-export class CreateScriptFunction extends AgentFunctionBase<ScripterContext, CreateScriptFuncParameters> {
+export class CreateScriptFunction extends AgentFunctionBase<CreateScriptFuncParameters> {
+  constructor(private scripts: Scripts) {
+    super();
+  }
+
   get name(): string {
     return "createScript";
   }
@@ -38,7 +42,7 @@ export class CreateScriptFunction extends AgentFunctionBase<ScripterContext, Cre
     }
   }
 
-  buildExecutor(agent: Agent<unknown>, context: ScripterContext): (params: CreateScriptFuncParameters) => Promise<AgentFunctionResult> {
+  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: CreateScriptFuncParameters) => Promise<AgentFunctionResult> {
     return async (params: CreateScriptFuncParameters): Promise<AgentFunctionResult> => {
       if (params.namespace.startsWith("agent.")) {
         return this.onErrorCannotCreateScriptsOnAgentNamespace(params);
@@ -87,7 +91,7 @@ export class CreateScriptFunction extends AgentFunctionBase<ScripterContext, Cre
         arguments: params.arguments,
         code: index
       };
-      context.scripts.addScript(params.namespace, script);
+      this.scripts.addScript(params.namespace, script);
       
       return this.onSuccess(script, params);
     };

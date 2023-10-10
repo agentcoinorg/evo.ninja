@@ -1,13 +1,8 @@
 import { AgentBase } from "../AgentBase";
 import { AgentBaseContext } from "../AgentBase";
 
-import { Scripts, WrapClient, ChatRole, agentPlugin, ExecuteAgentFunctionCalled } from "@evo-ninja/agent-utils";
-import { ScriptFunction } from "./ScriptFunction";
-
-export interface ScriptedAgentContext extends AgentBaseContext {
-  scripts: Scripts;
-  client: WrapClient;
-}
+import { ChatRole, ExecuteAgentFunctionCalled, Scripts, WrapClient } from "@evo-ninja/agent-utils";
+import { AgentFunctionBase } from "../AgentFunctionBase";
 
 export interface ScriptedAgentConfig {
   name: string;
@@ -16,7 +11,12 @@ export interface ScriptedAgentConfig {
   loopPreventionPrompt: string;
   agentSpeakPrompt?: string;
   shouldTerminate: (functionCalled: ExecuteAgentFunctionCalled) => boolean;
-  functions: ScriptFunction<unknown>[];
+  functions: AgentFunctionBase<unknown>[];
+}
+
+export interface ScriptedAgentContext extends AgentBaseContext {
+  scripts: Scripts;
+  client: WrapClient;
 }
 
 export interface ScriptedAgentRunArgs {
@@ -24,7 +24,6 @@ export interface ScriptedAgentRunArgs {
 }
 
 export class ScriptedAgent extends AgentBase<ScriptedAgentRunArgs, ScriptedAgentContext> {
-
   constructor(
     config: ScriptedAgentConfig,
     context: ScriptedAgentContext,
@@ -34,16 +33,8 @@ export class ScriptedAgent extends AgentBase<ScriptedAgentRunArgs, ScriptedAgent
 
   public static create(
     config: ScriptedAgentConfig,
-    context: Omit<ScriptedAgentContext, "client">
+    context: ScriptedAgentContext
   ): ScriptedAgent {
-    return new ScriptedAgent(config, {
-      ...context,
-      client: new WrapClient(
-        context.workspace,
-        context.logger,
-        agentPlugin({ logger: context.logger }),
-        context.env
-      )
-    });
+    return new ScriptedAgent(config, context);
   }
 }

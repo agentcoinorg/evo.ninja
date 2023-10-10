@@ -10,25 +10,27 @@ export interface AgentBaseContext {
   env: Env;
 }
 
-export interface AgentBaseConfig<TRunArgs, TAgentBaseContext> {
+export interface AgentBaseConfig<TRunArgs> {
   name: string;
   expertise: string;
   initialMessages: (runArguments: TRunArgs) => { role: ChatRole; content: string }[];
   loopPreventionPrompt: string;
   agentSpeakPrompt?: string;
-  functions: AgentFunctionBase<TAgentBaseContext, unknown>[];
+  functions: AgentFunctionBase<unknown>[];
   shouldTerminate: (functionCalled: ExecuteAgentFunctionCalled) => boolean;
   timeout?: Timeout;
 }
 
 export abstract class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> implements Agent<TRunArgs> {
   public readonly name: string;
+  public readonly expertise: string;
 
   constructor(
-    protected config: AgentBaseConfig<TRunArgs, TAgentBaseContext>,
+    protected config: AgentBaseConfig<TRunArgs>,
     protected context: TAgentBaseContext
   ) {
     this.name = config.name;
+    this.expertise = config.expertise;
   }
 
   public get workspace(): Workspace {

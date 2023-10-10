@@ -1,7 +1,6 @@
 import { AgentOutputType, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, ChatMessage } from "@evo-ninja/agent-utils"
-import { AgentFunctionBase } from "../../../AgentFunctionBase";
-import { AgentBaseConfig } from "../../../AgentBase";
-import { AgentBase, AgentBaseContext } from "../../../AgentBase";
+import { AgentFunctionBase } from "../AgentFunctionBase";
+import { AgentBase, AgentBaseContext } from "../AgentBase";
 
 interface DelegateAgentParams {
   task: string;
@@ -13,22 +12,20 @@ interface AgentRunArgs {
 }
 
 export class DelegateAgentFunction<
-  TAgentContext extends AgentBaseContext,
-  TAgent extends AgentBase<AgentRunArgs, TAgentContext>
-> extends AgentFunctionBase<TAgentContext, DelegateAgentParams> {
+  TAgent extends AgentBase<AgentRunArgs, AgentBaseContext>
+> extends AgentFunctionBase<DelegateAgentParams> {
   constructor(
-    private config: AgentBaseConfig<AgentRunArgs, TAgentContext>,
-    private factory: (context: TAgentContext) => TAgent
+    private delegatedAgent: TAgent,
   ) {
     super();
   }
 
   get name() {
-    return this.delegateScriptedAgentFnName(this.config.name)
+    return this.delegateScriptedAgentFnName(this.delegatedAgent.name)
   }
 
   get description() {
-    return `Delegate a task to "${this.config.name}" with expertise in "${this.config.expertise}". Provide all the required information to fully complete the task.`
+    return `Delegate a task to "${this.delegatedAgent.name}" with expertise in "${this.delegatedAgent.expertise}". Provide all the required information to fully complete the task.`
   }
 
   get parameters() {
@@ -87,13 +84,13 @@ export class DelegateAgentFunction<
     }
   }
 
-  buildExecutor(agent: Agent<unknown>, context: TAgentContext) {
+  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext) {
     return async (params: DelegateAgentParams): Promise<AgentFunctionResult> => {
-      const scriptedAgent = this.factory(context);
+      const scriptedAgent = this.delegatedAgent;
 
       let iterator = scriptedAgent.run({
         goal: params.task,
-      }, params.context);
+      });
 
       const messages = [];
 
@@ -103,14 +100,14 @@ export class DelegateAgentFunction<
         if (response.done) {
           if (!response.value.ok) {
             return this.onFailure(
-              this.config.name,
+              this.delegatedAgent.name,
               params,
               response.value.error
             );
           }
         
           return this.onSuccess(
-            this.config.name,
+            this.delegatedAgent.name,
             params,
             messages,
             response.value.value

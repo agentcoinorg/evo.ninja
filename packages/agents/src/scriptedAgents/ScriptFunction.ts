@@ -1,8 +1,13 @@
-import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder, JsEngine, JsEngine_GlobalVar, shimCode } from "@evo-ninja/agent-utils"
-import { ScriptedAgent, ScriptedAgentContext } from "./ScriptedAgent"
+import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder, JsEngine, JsEngine_GlobalVar, Scripts, WrapClient, shimCode } from "@evo-ninja/agent-utils"
+import { ScriptedAgent } from "./ScriptedAgent"
 import { AgentFunctionBase } from "../AgentFunctionBase";
+import { AgentBaseContext } from "../AgentBase";
 
-export abstract class ScriptFunction<TParams> extends AgentFunctionBase<ScriptedAgentContext, TParams> {
+export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams> {
+  constructor(private client: WrapClient, private scripts: Scripts) {
+    super();
+  }
+
   onSuccess(scriptedAgent: ScriptedAgent, params: any, result: string): AgentFunctionResult {
     return {
       outputs: [
@@ -33,10 +38,10 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<Scripted
     }
   };
   
-  buildExecutor(scriptedAgent: ScriptedAgent, context: ScriptedAgentContext): (params: TParams) => Promise<AgentFunctionResult> {
+  buildExecutor(scriptedAgent: ScriptedAgent, _: AgentBaseContext): (params: TParams) => Promise<AgentFunctionResult> {
     return async (params: any): Promise<AgentFunctionResult> => {
       const scriptName = this.name.split("_").join(".");
-      const script = context.scripts.getScriptByName(scriptName);
+      const script = this.scripts.getScriptByName(scriptName);
   
       if (!script) {
         return this.onFailure(scriptedAgent, params, `Unable to find the script ${scriptName}`);
@@ -48,7 +53,7 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<Scripted
           value: JSON.stringify(entry[1])
         })
       );
-      const jsEngine = new JsEngine(context.client);
+      const jsEngine = new JsEngine(this.client);
       const result = await jsEngine.evalWithGlobals({
         src: shimCode(script.code),
         globals
@@ -56,7 +61,7 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<Scripted
   
       if (result.ok) {
         if (result.value.error == null) {
-          const jsPromiseOutput = context.client.jsPromiseOutput;
+          const jsPromiseOutput = this.client.jsPromiseOutput;
           if (jsPromiseOutput.ok) {
             return this.onSuccess(scriptedAgent, params, JSON.stringify(jsPromiseOutput.value));
           } else {

@@ -1,4 +1,4 @@
-import { ScriptFunction } from "../ScriptFunction"
+import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
 export class CsvSumColumnFunction extends ScriptFunction<{ csvData: string, delimiter: string, columnIndex: number, hasHeader: boolean }> {
   get name() {

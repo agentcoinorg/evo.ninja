@@ -6,7 +6,7 @@ interface ThinkFuncParameters {
   thoughts: string
 };
 
-export class ThinkFunction extends AgentFunctionBase<unknown, ThinkFuncParameters> {
+export class ThinkFunction extends AgentFunctionBase<ThinkFuncParameters> {
   get name(): string {
     return "think";
   }
