@@ -1,13 +1,13 @@
 import { AgentBase } from "../AgentBase";
 import { AgentBaseContext } from "../AgentBase";
 
-import { ChatRole, ExecuteAgentFunctionCalled, Scripts, WrapClient } from "@evo-ninja/agent-utils";
+import { ChatMessage, ExecuteAgentFunctionCalled, Scripts, WrapClient } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 
 export interface ScriptedAgentConfig {
   name: string;
   expertise: string;
-  initialMessages: (runArguments: ScriptedAgentRunArgs) => { role: ChatRole; content: string }[];
+  initialMessages: (runArguments: ScriptedAgentRunArgs) => ChatMessage[];
   loopPreventionPrompt: string;
   agentSpeakPrompt?: string;
   shouldTerminate: (functionCalled: ExecuteAgentFunctionCalled) => boolean;
@@ -21,6 +21,7 @@ export interface ScriptedAgentContext extends AgentBaseContext {
 
 export interface ScriptedAgentRunArgs {
   goal: string;
+  initialMessages?: ChatMessage[]
 }
 
 export class ScriptedAgent extends AgentBase<ScriptedAgentRunArgs, ScriptedAgentContext> {

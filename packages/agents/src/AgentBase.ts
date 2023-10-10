@@ -2,7 +2,7 @@ import {
   Agent,
   AgentOutput,
   Chat,
-  ChatRole,
+  ChatMessage,
   Env,
   ExecuteAgentFunctionCalled,
   LlmApi,
@@ -26,7 +26,7 @@ export interface AgentBaseContext {
 export interface AgentBaseConfig<TRunArgs> {
   name: string;
   expertise: string;
-  initialMessages: (runArguments: TRunArgs) => { role: ChatRole; content: string }[];
+  initialMessages: (runArguments: TRunArgs) => ChatMessage[];
   loopPreventionPrompt: string;
   agentSpeakPrompt?: string;
   functions: AgentFunctionBase<unknown>[];
@@ -51,7 +51,7 @@ export abstract class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseCon
     const { chat } = this.context;
     try {
       this.config.initialMessages(args).forEach((message) => {
-        chat.persistent(message.role, message.content);
+        chat.persistent(message);
       });
 
       this.config.functions.forEach((fn) => {

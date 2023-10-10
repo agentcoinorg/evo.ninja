@@ -116,7 +116,7 @@ describe("Evo Test Suite", () => {
 
     const messages = evo.config.initialMessages({ goal });
     messages.forEach((message) => {
-      chat.persistent(message.role, message.content);
+      chat.persistent(message.role, message.content as string);
     });
 
     const functionDefinitions = evo.config.functions.slice(2).map((fn) => fn.getDefinition());

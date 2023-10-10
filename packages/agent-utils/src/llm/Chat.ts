@@ -71,9 +71,24 @@ export class Chat {
   public persistent(
     role: ChatRole,
     content: string
-  ): string {
-    this.add("persistent", { role, content });
-    return content;
+  ): string | undefined 
+  public persistent(
+    msg: ChatMessage
+  ): string | undefined 
+  public persistent(
+    roleOrMsg: ChatRole | ChatMessage,
+    content?: string
+  ): string | undefined {
+    switch(typeof roleOrMsg) {
+      case "string": 
+        this.add("persistent", { role: roleOrMsg as ChatRole, content });
+        return content;
+      case "object":
+        this.add("persistent", roleOrMsg as ChatMessage);
+        return roleOrMsg.content;
+      default:
+        throw new Error(`Invalid type for roleOrMsg: ${typeof roleOrMsg}`);
+    }
   }
 
   public temporary(
