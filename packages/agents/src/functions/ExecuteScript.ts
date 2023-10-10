@@ -1,8 +1,8 @@
-import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, JsEngine, JsEngine_GlobalVar, shimCode, trimText } from "@evo-ninja/agent-utils";
+import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, JsEngine, JsEngine_GlobalVar, Scripts, WrapClient, shimCode, trimText } from "@evo-ninja/agent-utils";
 import JSON5 from "json5";
-import { AgentFunctionBase } from "../../../AgentFunctionBase";
-import { ScripterContext } from "../config";
-import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../utils";
+import { AgentFunctionBase } from "../AgentFunctionBase";
+import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
+import { AgentBaseContext } from "../AgentBase";
 
 interface ExecuteScriptFuncParameters { 
   namespace: string, 
@@ -11,7 +11,11 @@ interface ExecuteScriptFuncParameters {
   variable?: string
 };
 
-export class ExecuteScriptFunction extends AgentFunctionBase<ScripterContext, ExecuteScriptFuncParameters> {
+export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncParameters> {
+  constructor(private client: WrapClient, private scripts: Scripts, private globals: Record<string, string>) {
+    super();
+  }
+
   get name(): string {
     return "executeScript";
   }
@@ -42,10 +46,10 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ScripterContext, Ex
     }
   }
 
-  buildExecutor(agent: Agent<unknown>, context: ScripterContext): (params: ExecuteScriptFuncParameters) => Promise<AgentFunctionResult> {
+  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: ExecuteScriptFuncParameters) => Promise<AgentFunctionResult> {
     return async (params: ExecuteScriptFuncParameters): Promise<AgentFunctionResult> => {
       try {
-        const script = context.scripts.getScriptByName(params.namespace);
+        const script = this.scripts.getScriptByName(params.namespace);
 
         if (!script) {
           return this.onError(params.namespace, this.scriptNotFound(params), params);
@@ -67,8 +71,8 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ScripterContext, Ex
               if (typeof args[key] === "string") {
                 args[key] = replaceVars(
                   args[key],
-                  Object.keys(context.globals).reduce(
-                    (a, b) => ({ [b]: JSON.parse(context.globals[b]), ...a}), {}
+                  Object.keys(this.globals).reduce(
+                    (a, b) => ({ [b]: JSON.parse(this.globals[b]), ...a}), {}
                   )
                 );
               }
@@ -85,23 +89,23 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ScripterContext, Ex
             })
           );
 
-        const jsEngine = new JsEngine(context.client);
+        const jsEngine = new JsEngine(this.client);
 
         const result = await jsEngine.evalWithGlobals({
           src: shimCode(script.code),
           globals
         });
 
-        if (params.variable && result.ok && context.client.jsPromiseOutput.ok) {
-          context.globals[params.variable] =
-            JSON.stringify(context.client.jsPromiseOutput.value);
+        if (params.variable && result.ok && this.client.jsPromiseOutput.ok) {
+          this.globals[params.variable] =
+            JSON.stringify(this.client.jsPromiseOutput.value);
         }
 
         return result.ok
           ? result.value.error == null
-            ? context.client.jsPromiseOutput.ok
-              ? this.onSuccess(params.namespace, context.client.jsPromiseOutput.value, params)
-              : this.onError(params.namespace, JSON.stringify(context.client.jsPromiseOutput.error), params)
+            ? this.client.jsPromiseOutput.ok
+              ? this.onSuccess(params.namespace, this.client.jsPromiseOutput.value, params)
+              : this.onError(params.namespace, JSON.stringify(this.client.jsPromiseOutput.error), params)
             : this.onError(params.namespace, result.value.error, params)
           : this.onError(params.namespace, result.error?.toString(), params);
       

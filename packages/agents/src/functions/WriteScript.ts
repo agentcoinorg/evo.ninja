@@ -9,7 +9,7 @@ interface WriteScriptFuncParameters {
   code: string 
 };
 
-export class WriteScriptFunction extends AgentFunctionBase<AgentBaseContext, WriteScriptFuncParameters> {
+export class WriteScriptFunction extends AgentFunctionBase<WriteScriptFuncParameters> {
   static allowedLibs =
     [
       "fs",
