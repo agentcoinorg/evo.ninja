@@ -21,13 +21,12 @@ import { ResearcherAgent, ScriptedAgent } from "../..";
 const rootDir = path.join(__dirname, "../../../../../");
 
 dotenv.config({
-  path: path.join(rootDir, ".env")
+  path: path.join(rootDir, ".env"),
 });
 
 jest.setTimeout(300000);
 
-describe('Research Agent Test Suite', () => {
-
+describe("Research Agent Test Suite", () => {
   function createResearchAgent(testName: string): {
     agent: ScriptedAgent;
     debugLog: DebugLog;
@@ -44,7 +43,7 @@ describe('Research Agent Test Suite', () => {
       },
       logUserPrompt: () => {
         throw Error("logUserPrompt not supported.");
-      }
+      },
     });
 
     const llm: LlmApi = new OpenAI(
@@ -64,9 +63,7 @@ describe('Research Agent Test Suite', () => {
     const chat = new Chat(cl100k_base, contextWindow, logger);
 
     const scriptsDir = path.join(rootDir, "scripts");
-    const scriptsWorkspace = new FileSystemWorkspace(
-      scriptsDir
-    );
+    const scriptsWorkspace = new FileSystemWorkspace(scriptsDir);
     const scripts = new Scripts(scriptsWorkspace, "./");
 
     const workspace = new FileSystemWorkspace(testCaseDir);
@@ -92,7 +89,11 @@ describe('Research Agent Test Suite', () => {
     };
   }
 
-  async function runResearchAgent(agent: ScriptedAgent, goal: string, debugLog: DebugLog) {
+  async function runResearchAgent(
+    agent: ScriptedAgent,
+    goal: string,
+    debugLog: DebugLog
+  ) {
     debugLog.goalStart(goal);
     const iterator = agent.run({ goal });
 
@@ -112,6 +113,36 @@ describe('Research Agent Test Suite', () => {
     }
   }
 
+  test("search", async () => {
+    const { agent, debugLog } = createResearchAgent("search");
+    await runResearchAgent(
+      agent,
+      "Open 'https://silennaihin.com/random/plain.html' and paste all of the text on the page in a .txt file",
+      debugLog
+    );
+    const generatedFiles = agent.workspace
+      .readdirSync("./")
+      .filter((f) => f.toLowerCase().includes(".txt"));
+    const scrapedText = agent.workspace.readFileSync(generatedFiles[0]);
+    expect(scrapedText).toBeTruthy();
+    expect(scrapedText).toContain("This is a Heading");
+  });
+
+  test("basic-retrieval", async () => {
+    const { agent, debugLog } = createResearchAgent("basic-retrieval");
+    await runResearchAgent(
+      agent,
+      "Write the price of the book in this url 'http://books.toscrape.com/catalogue/meditations_33/index.html' to a .txt file.",
+      debugLog
+    );
+    const generatedFiles = agent.workspace
+      .readdirSync("./")
+      .filter((f) => f.toLowerCase().includes(".txt"));
+    const scrapedText = agent.workspace.readFileSync(generatedFiles[0]);
+    expect(scrapedText).toBeTruthy();
+    expect(scrapedText).toContain("25.89");
+  });
+
   test("revenue-retrieval", async () => {
     const { agent, debugLog } = createResearchAgent("revenue-retrieval");
     const response = await runResearchAgent(
@@ -121,15 +152,20 @@ describe('Research Agent Test Suite', () => {
     );
 
     expect(response.value.ok).toBe(true);
-    const generatedFiles = agent.workspace.readdirSync("./")
-      .filter(f => f.toLowerCase().includes("tesla") || f.toLowerCase().includes("revenue"));
+    const generatedFiles = agent.workspace
+      .readdirSync("./")
+      .filter(
+        (f) =>
+          f.toLowerCase().includes("tesla") ||
+          f.toLowerCase().includes("revenue")
+      );
     expect(generatedFiles).toHaveLength(1);
     const teslasRevenue = agent.workspace.readFileSync(generatedFiles[0]);
     expect(teslasRevenue).toBeTruthy();
     expect(teslasRevenue).toContain("81,462");
   });
 
-  test.skip("revenue-retrieval-2", async () => {
+  test("revenue-retrieval-2", async () => {
     const { agent, debugLog } = createResearchAgent("revenue-retrieval-2");
     const response = await runResearchAgent(
       agent,
@@ -138,6 +174,8 @@ describe('Research Agent Test Suite', () => {
     );
 
     expect(response.value.ok).toBe(true);
-    console.log(response)
+    console.log(response);
   });
+
+  test("get information", async () => {});
 });

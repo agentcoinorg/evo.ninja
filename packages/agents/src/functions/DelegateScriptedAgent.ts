@@ -21,11 +21,11 @@ export class DelegateAgentFunction<
   }
 
   get name() {
-    return this.delegateScriptedAgentFnName(this.delegatedAgent.name)
+    return this.delegateScriptedAgentFnName(this.delegatedAgent.config.name)
   }
 
   get description() {
-    return `Delegate a task to "${this.delegatedAgent.name}" with expertise in "${this.delegatedAgent.expertise}". Provide all the required information to fully complete the task.`
+    return `Delegate a task to "${this.delegatedAgent.config.name}" with expertise in "${this.delegatedAgent.config.expertise}". Provide all the required information to fully complete the task.`
   }
 
   get parameters() {
@@ -100,14 +100,14 @@ export class DelegateAgentFunction<
         if (response.done) {
           if (!response.value.ok) {
             return this.onFailure(
-              this.delegatedAgent.name,
+              this.delegatedAgent.config.name,
               params,
               response.value.error
             );
           }
         
           return this.onSuccess(
-            this.delegatedAgent.name,
+            this.delegatedAgent.config.name,
             params,
             messages,
             response.value.value

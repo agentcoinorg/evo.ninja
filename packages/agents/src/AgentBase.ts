@@ -1,4 +1,17 @@
-import { Agent, AgentOutput, Chat, ChatRole, Env, ExecuteAgentFunctionCalled, LlmApi, Logger, RunResult, Timeout, Workspace, basicFunctionCallLoop } from "@evo-ninja/agent-utils";
+import {
+  Agent,
+  AgentOutput,
+  Chat,
+  ChatRole,
+  Env,
+  ExecuteAgentFunctionCalled,
+  LlmApi,
+  Logger,
+  RunResult,
+  Timeout,
+  Workspace,
+  basicFunctionCallLoop
+} from "@evo-ninja/agent-utils";
 import { ResultErr } from "@polywrap/result";
 import { AgentFunctionBase } from "./AgentFunctionBase";
 
@@ -22,16 +35,10 @@ export interface AgentBaseConfig<TRunArgs> {
 }
 
 export abstract class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> implements Agent<TRunArgs> {
-  public readonly name: string;
-  public readonly expertise: string;
-
   constructor(
-    protected config: AgentBaseConfig<TRunArgs>,
+    public readonly config: AgentBaseConfig<TRunArgs>,
     protected context: TAgentBaseContext
-  ) {
-    this.name = config.name;
-    this.expertise = config.expertise;
-  }
+  ) {}
 
   public get workspace(): Workspace {
     return this.context.workspace;

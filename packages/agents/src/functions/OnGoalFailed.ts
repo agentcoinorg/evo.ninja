@@ -34,7 +34,7 @@ export class OnGoalFailedFunction extends ScriptFunction<{}> {
       outputs: [
         {
           type: AgentOutputType.Success,
-          title: `[${scriptedAgent.name}] ${this.name}`,
+          title: `[${scriptedAgent.config.name}] ${this.name}`,
           content: params.message
         }
       ],
@@ -47,7 +47,7 @@ export class OnGoalFailedFunction extends ScriptFunction<{}> {
       outputs: [
         {
           type: AgentOutputType.Error,
-          title: `[${scriptedAgent.name}] Error in ${this.name}: ${error}`,
+          title: `[${scriptedAgent.config.name}] Error in ${this.name}: ${error}`,
           content: params.message
         }
       ],

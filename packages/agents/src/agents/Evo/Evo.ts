@@ -8,6 +8,9 @@ import {
   agentPlugin,
   Logger,
   Timeout,
+  basicFunctionCallLoop,
+  AgentOutput,
+  RunResult,
 } from "@evo-ninja/agent-utils";
 import { AgentBase, AgentBaseConfig } from "../../AgentBase";
 import {
@@ -21,6 +24,7 @@ import { DelegateAgentFunction } from "../../functions/DelegateScriptedAgent";
 import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
 import { Scripter } from "../Scripter";
+import { ResultErr } from "@polywrap/result";
 
 export interface EvoRunArgs {
   goal: string
@@ -88,21 +92,22 @@ export class Evo extends AgentBase<EvoRunArgs, EvoContext> {
         {
           role: "user",
           content: `Purpose:
-  You are an expert assistant designed to achieve user goals.
-  
-  Functionalities:
-  You have multiple agents you can delegate a task to by calling the relevant delegate{Agent} functions.
-  Since the agents do not see user messages, it is cruical you pass all the required information to the agents. Do not leave out relevant context from the user.
-  
-  Decision-making Process:
-  1. Evaluate the goal, see if it can be achieved without delegating to another agent.
-  2. Sub-tasks are delegated to agents that have the most relevant expertise.
-  3. When you are certain a goal and its sub-tasks have been achieved, you will call ${onGoalAchievedFn.name}.
-  4. If you get stuck or encounter an error, think carefully and create a new plan considering the problems you've encountered.
-  5. A goal is only failed if you have exhausted all options and you are certain it cannot be achieved. Call ${onGoalFailedFn.name} with information as to what happened.
-  
-  REMEMBER:
-  If info is missing, you assume the info is somewhere on the user's computer like the filesystem, unless you have a logical reason to think otherwise.`,
+          You are an expert assistant designed to achieve user goals.
+          
+          Functionalities:
+          You have multiple agents you can delegate a task to by calling the relevant delegate{Agent} functions.
+          Since the agents do not see user messages, it is cruical you pass all the required information to the agents. Do not leave out relevant context from the user.
+          
+          Decision-making Process:
+          1. Evaluate the goal, see if it can be achieved without delegating to another agent.
+          2. Sub-tasks are delegated to agents that have the most relevant expertise.
+          3. When you are certain a goal and its sub-tasks have been achieved, you will call ${onGoalAchievedFn.name}.
+          4. If you get stuck or encounter an error, think carefully and create a new plan considering the problems you've encountered.
+          5. A goal is only failed if you have exhausted all options and you are certain it cannot be achieved. Call ${onGoalFailedFn.name} with information as to what happened.
+          
+          REMEMBER:
+          If info is missing, you assume the info is somewhere on the user's computer like the filesystem, unless you have a logical reason to think otherwise.
+          Do not communicate with the user.`,
         },
         {
           role: "user",
@@ -147,5 +152,38 @@ export class Evo extends AgentBase<EvoRunArgs, EvoContext> {
       },
       context
     );
+  }
+
+  public async *runWithChat(args: {
+    chat: Chat;
+  }): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
+    this.context.chat = args.chat;
+    if (this.config.timeout) {
+      setTimeout(
+        this.config.timeout.callback,
+        this.config.timeout.milliseconds
+      );
+    }
+    try {
+      return yield* basicFunctionCallLoop(
+        this.context,
+        this.config.functions.map((fn) => {
+          return {
+            definition: fn.getDefinition(),
+            buildExecutor: (context: EvoContext) => {
+              return fn.buildExecutor(this, context);
+            },
+          };
+        }),
+        (functionCalled) => {
+          return this.config.shouldTerminate(functionCalled);
+        },
+        this.config.loopPreventionPrompt,
+        this.config.agentSpeakPrompt
+      );
+    } catch (err) {
+      this.context.logger.error(err);
+      return ResultErr("Unrecoverable error encountered.");
+    }
   }
 }

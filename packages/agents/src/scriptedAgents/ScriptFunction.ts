@@ -1,4 +1,13 @@
-import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder, JsEngine, JsEngine_GlobalVar, Scripts, WrapClient, shimCode } from "@evo-ninja/agent-utils"
+import {
+  AgentFunctionResult,
+  AgentOutputType,
+  ChatMessageBuilder,
+  JsEngine,
+  JsEngine_GlobalVar,
+  Scripts,
+  WrapClient,
+  shimCode
+} from "@evo-ninja/agent-utils"
 import { ScriptedAgent } from "./ScriptedAgent"
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { AgentBaseContext } from "../AgentBase";
@@ -13,7 +22,7 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
       outputs: [
         {
           type: AgentOutputType.Success,
-          title: `[${scriptedAgent.name}] ${this.name}`,
+          title: `[${scriptedAgent.config.name}] ${this.name}`,
           content: `${params.query}`
         }
       ],
@@ -28,7 +37,7 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
       outputs: [
         {
           type: AgentOutputType.Error,
-          title: `[${scriptedAgent.name}] Error in ${this.name}: ${error}`
+          title: `[${scriptedAgent.config.name}] Error in ${this.name}: ${error}`
         }
       ],
       messages: [

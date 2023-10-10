@@ -60,7 +60,7 @@ export class ThinkFunction extends AgentFunctionBase<ThinkFuncParameters> {
       outputs: [
         {
           type: AgentOutputType.Error,
-          title: `[${scriptedAgent.name}] Error in ${this.name}: ${error}`,
+          title: `[${scriptedAgent.config.name}] Error in ${this.name}: ${error}`,
         }
       ],
       messages: [

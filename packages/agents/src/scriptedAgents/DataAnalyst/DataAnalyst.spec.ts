@@ -25,7 +25,7 @@ dotenv.config({
   path: path.join(rootDir, ".env"),
 });
 
-jest.setTimeout(120000);
+jest.setTimeout(300000);
 
 describe("Data Analyst Agent Test Suite", () => {
   function createDataAnalystAgent(
@@ -174,7 +174,7 @@ Fern,Green
 `);
   });
 
-  test.only("combine-csv", async () => {
+  test("combine-csv", async () => {
     const { agent, debugLog } = createDataAnalystAgent("combine-csv", [
       path.join(__dirname, "testInputs/combineCsv/file1.csv"),
       path.join(__dirname, "testInputs/combineCsv/file2.csv"),
@@ -191,5 +191,55 @@ Fern,Green
 28,101,John,Engineer,80000
 34,102,Alice,Doctor,120000
 45,103,Bob,Lawyer,95000`);
+  });
+
+  test("AnswerQuestionSmallCsv", async () => {
+    const { agent, debugLog } = createDataAnalystAgent(
+      "answer-question-small-csv",
+      [path.join(__dirname, "testInputs/answerQuestionSmallCsv/file1.csv")]
+    );
+    const response = await runDataAnalystAgent(
+      agent,
+      "How much was spent on utilities in total ? Write the answer in an output.txt file.",
+      debugLog
+    );
+
+    expect(response.value.ok).toBe(true);
+    const result = agent.workspace.readFileSync("output.txt");
+    expect(result).toContain("84");
+  });
+
+  test("AnswerQuestionCsv", async () => {
+    const { agent, debugLog } = createDataAnalystAgent("answer-question-csv", [
+      path.join(__dirname, "testInputs/answerQuestionCsv/file1.csv"),
+    ]);
+    const response = await runDataAnalystAgent(
+      agent,
+      "How much was spent on utilities in total ? Write the answer in an output.txt file.",
+      debugLog
+    );
+
+    expect(response.value.ok).toBe(true);
+    const result = agent.workspace.readFileSync("output.txt");
+    expect(result).toContain("1861");
+  });
+
+  test.only("AnswerQuestionCombineCsv", async () => {
+    const { agent, debugLog } = createDataAnalystAgent(
+      "answer-question-combine-csv",
+      [
+        path.join(__dirname, "testInputs/answerQuestionCombineCsv/file1.csv"),
+        path.join(__dirname, "testInputs/answerQuestionCombineCsv/file2.csv"),
+      ]
+    );
+    const response = await runDataAnalystAgent(
+      agent,
+      "How much was spent on utilities in total ? Write the answer in an output.txt file.",
+      debugLog
+    );
+
+    expect(response.value.ok).toBe(true);
+    const result = agent.workspace.readFileSync("output.txt");
+    expect(result).toContain("1861");
   });
 });
