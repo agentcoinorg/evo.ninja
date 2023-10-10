@@ -6,7 +6,7 @@ export class FuzzySearchFunction extends ScriptFunction<{ url: string; queryKeyw
   }
 
   get description() {
-    return "Fuzzy searches for specific information given a text query in a web page. Query should be keywords for the fuzzy search"
+    return "The fuzzy search function conducts a targeted search on a web page, using a text query comprised of specific keywords. Unlike broad or naive search methods, this function employs advanced algorithms to find close matches, even if they're not exact. This ensures a higher likelihood of retrieving relevant and precise information. When crafting your query, prioritize using distinct keywords to optimize the accuracy of the search results."
   }
 
   get parameters() {

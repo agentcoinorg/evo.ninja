@@ -76,8 +76,13 @@ Search Methods:
 
 **IMPORTANT**: Always prioritize "fuzzySearch" over "scrapeText". Do NOT use "scrapeText" as a first resort. It should be a method of last resort when all other avenues have been exhausted.
 
+Accuracy and Relevance:
+- Prioritize Accuracy: Do not settle for the first piece of information found if there are more precise results available
+E.g., if searching for "population of New York in 2020" and you get the following results: ["1.5 million",  "nearly 1.600.000", "1,611,989"], you will take "1,611,989".
+
 Resourcefulness:
-- Assume missing information exists within the user's system, like the filesystem, unless logic dictates otherwise.If info is missing, you assume the info is somewhere on the user's computer like the filesystem, unless you have a logical reason to think otherwise.`,
+- Assume missing information exists within the user's system, like the filesystem, unless logic dictates otherwise.If info is missing, you assume the info is
+somewhere on the user's computer like the filesystem, unless you have a logical reason to think otherwise.`,
         },
         { role: "user", content: goal },
       ],
