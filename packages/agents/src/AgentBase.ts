@@ -1,4 +1,4 @@
-import { Agent, AgentOutput, Chat, ChatRole, Env, ExecuteAgentFunctionCalled, LlmApi, Logger, RunResult, Timeout, Workspace, basicFunctionCallLoop } from "@evo-ninja/agent-utils";
+import { Agent, AgentOutput, Chat, ChatMessage, Env, ExecuteAgentFunctionCalled, LlmApi, Logger, RunResult, Timeout, Workspace, basicFunctionCallLoop } from "@evo-ninja/agent-utils";
 import { ResultErr } from "@polywrap/result";
 import { AgentFunctionBase } from "./AgentFunctionBase";
 
@@ -13,7 +13,7 @@ export interface AgentBaseContext {
 export interface AgentBaseConfig<TRunArgs, TAgentBaseContext> {
   name: string;
   expertise: string;
-  initialMessages: (runArguments: TRunArgs) => { role: ChatRole; content: string }[];
+  initialMessages: (runArguments: TRunArgs) => ChatMessage[];
   loopPreventionPrompt: string;
   agentSpeakPrompt?: string;
   functions: AgentFunctionBase<TAgentBaseContext, unknown>[];
@@ -42,7 +42,7 @@ export abstract class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseCon
     const { chat } = this.context;
     try {
       this.config.initialMessages(args).forEach((message) => {
-        chat.persistent(message.role, message.content);
+        chat.persistent(message);
       });
 
       this.config.functions.forEach((fn) => {
