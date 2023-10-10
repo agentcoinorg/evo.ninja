@@ -3,7 +3,7 @@ export class Env {
   public readonly GPT_MODEL: string;
   public readonly CONTEXT_WINDOW_TOKENS: number;
   public readonly MAX_RESPONSE_TOKENS: number;
-  public readonly BRAVE_API_KEY?: string;
+  public readonly SERP_API_KEY?: string;
 
   constructor(envVars: Record<string, string | undefined>) {
     const {
@@ -11,7 +11,7 @@ export class Env {
       GPT_MODEL,
       CONTEXT_WINDOW_TOKENS,
       MAX_RESPONSE_TOKENS,
-      BRAVE_API_KEY
+      SERP_API_KEY
     } = envVars;
 
     if (!OPENAI_API_KEY) {
@@ -33,7 +33,7 @@ export class Env {
       GPT_MODEL,
       CONTEXT_WINDOW_TOKENS: Number(CONTEXT_WINDOW_TOKENS),
       MAX_RESPONSE_TOKENS: Number(MAX_RESPONSE_TOKENS),
-      BRAVE_API_KEY
+      SERP_API_KEY
     };
   }
 }
