@@ -90,7 +90,7 @@ export class DelegateAgentFunction<
 
       let iterator = scriptedAgent.run({
         goal: params.task,
-      });
+      }, params.context);
 
       const messages = [];
 
