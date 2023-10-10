@@ -1,4 +1,17 @@
-import { Agent, AgentOutput, Chat, ChatMessage, Env, ExecuteAgentFunctionCalled, LlmApi, Logger, RunResult, Timeout, Workspace, basicFunctionCallLoop } from "@evo-ninja/agent-utils";
+import {
+  Agent,
+  AgentOutput,
+  Chat,
+  ChatMessage,
+  Env,
+  ExecuteAgentFunctionCalled,
+  LlmApi,
+  Logger,
+  RunResult,
+  Timeout,
+  Workspace,
+  basicFunctionCallLoop
+} from "@evo-ninja/agent-utils";
 import { ResultErr } from "@polywrap/result";
 import { AgentFunctionBase } from "./AgentFunctionBase";
 
@@ -10,26 +23,22 @@ export interface AgentBaseContext {
   env: Env;
 }
 
-export interface AgentBaseConfig<TRunArgs, TAgentBaseContext> {
+export interface AgentBaseConfig<TRunArgs> {
   name: string;
   expertise: string;
   initialMessages: (runArguments: TRunArgs) => ChatMessage[];
   loopPreventionPrompt: string;
   agentSpeakPrompt?: string;
-  functions: AgentFunctionBase<TAgentBaseContext, unknown>[];
+  functions: AgentFunctionBase<unknown>[];
   shouldTerminate: (functionCalled: ExecuteAgentFunctionCalled) => boolean;
   timeout?: Timeout;
 }
 
 export abstract class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> implements Agent<TRunArgs> {
-  public readonly name: string;
-
   constructor(
-    protected config: AgentBaseConfig<TRunArgs, TAgentBaseContext>,
+    public readonly config: AgentBaseConfig<TRunArgs>,
     protected context: TAgentBaseContext
-  ) {
-    this.name = config.name;
-  }
+  ) {}
 
   public get workspace(): Workspace {
     return this.context.workspace;

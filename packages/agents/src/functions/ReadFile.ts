@@ -37,7 +37,7 @@ export class ReadFileFunction extends ScriptFunction<ReadFileFuncParameters> {
       outputs: [
         {
           type: AgentOutputType.Success,
-          title: `[${scriptedAgent.name}] ${this.name}`,
+          title: `[${scriptedAgent.config.name}] ${this.name}`,
           content: `${params.path}\n` +
             `${params.encoding}\n` +
             `${trimText(result, 200)}`

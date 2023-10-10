@@ -7,6 +7,8 @@ import {
   LlmApi,
   ConsoleLogger,
   Logger,
+  agentPlugin,
+  WrapClient,
 } from "@evo-ninja/agent-utils";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
@@ -14,7 +16,7 @@ import * as rimraf from "rimraf";
 import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
-import { ScriptedAgent, DEVELOPER_AGENT_CONFIG } from "..";
+import { ScriptedAgent, DeveloperAgent } from "..";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -70,8 +72,14 @@ describe('Dev Agent Test Suite', () => {
     const workspace = new FileSystemWorkspace(testCaseDir);
 
     return {
-      agent: ScriptedAgent.create(
-        DEVELOPER_AGENT_CONFIG, {
+      agent: new DeveloperAgent(
+        {
+          client: new WrapClient(
+            workspace,
+            logger,
+            agentPlugin({ logger }),
+            env
+          ),
           llm: debugLlm,
           chat,
           workspace,

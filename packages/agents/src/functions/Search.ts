@@ -1,4 +1,4 @@
-import { ScriptFunction } from "../ScriptFunction"
+import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
 export class SearchFunction extends ScriptFunction<{ query: string }> {
   get name() {

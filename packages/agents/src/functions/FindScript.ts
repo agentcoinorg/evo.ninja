@@ -1,7 +1,7 @@
-import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, Script } from "@evo-ninja/agent-utils";
-import { AgentFunctionBase } from "../../../AgentFunctionBase";
-import { ScripterContext } from "../config";
-import { FUNCTION_CALL_SUCCESS_CONTENT } from "../utils";
+import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, Script, Scripts } from "@evo-ninja/agent-utils";
+import { AgentFunctionBase } from "../AgentFunctionBase";
+import { FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
+import { AgentBaseContext } from "../AgentBase";
 
 interface FindScriptFuncParameters { 
   namespace: string, 
@@ -10,7 +10,11 @@ interface FindScriptFuncParameters {
   code: string 
 };
 
-export class FindScriptFunction extends AgentFunctionBase<ScripterContext, FindScriptFuncParameters> {
+export class FindScriptFunction extends AgentFunctionBase<FindScriptFuncParameters> {
+  constructor(private scripts: Scripts) {
+    super();
+  }
+
   get name(): string {
     return "findScript";
   }
@@ -35,9 +39,9 @@ export class FindScriptFunction extends AgentFunctionBase<ScripterContext, FindS
     }
   }
 
-  buildExecutor(agent: Agent<unknown>, context: ScripterContext): (params: FindScriptFuncParameters) => Promise<AgentFunctionResult> {
+  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: FindScriptFuncParameters) => Promise<AgentFunctionResult> {
     return async (params: FindScriptFuncParameters): Promise<AgentFunctionResult> => {
-      const candidates = context.scripts.searchAllScripts(
+      const candidates = this.scripts.searchAllScripts(
         `${params.namespace} ${params.description}`
       ).slice(0, 5);
 

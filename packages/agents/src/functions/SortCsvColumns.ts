@@ -1,4 +1,4 @@
-import { ScriptFunction } from "../ScriptFunction"
+import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
 export class SortCsvColumnsFunction extends ScriptFunction<{ inputPath: string, outputPath: string }> {
   get name() {

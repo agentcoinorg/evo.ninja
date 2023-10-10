@@ -1,34 +1,47 @@
-import { AgentOutputType, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, ChatMessage, Chat } from "@evo-ninja/agent-utils"
-import { AgentFunctionBase } from "../../../AgentFunctionBase";
-import { GOAL_VERIFIER_AGENT_CONFIG, ScriptedAgent, ScriptedAgentContext } from "../../../scriptedAgents";
+import { AgentOutputType, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, ChatMessage } from "@evo-ninja/agent-utils"
+import { AgentFunctionBase } from "../AgentFunctionBase";
+import { AgentBase, AgentBaseContext } from "../AgentBase";
 
-interface FunctionParams {
+interface DelegateAgentParams {
   task: string;
   context?: string;
 }
 
-export class VerifyGoalAchievedFunction<
-  TAgentContext extends ScriptedAgentContext,
-> extends AgentFunctionBase<TAgentContext, FunctionParams> {
+interface AgentRunArgs {
+  goal: string
+}
+
+export class DelegateAgentFunction<
+  TAgent extends AgentBase<AgentRunArgs, AgentBaseContext>
+> extends AgentFunctionBase<DelegateAgentParams> {
   constructor(
+    private delegatedAgent: TAgent,
   ) {
     super();
   }
 
   get name() {
-    return "verifyGoalAchieved";
+    return this.delegateScriptedAgentFnName(this.delegatedAgent.config.name)
   }
 
   get description() {
-    return `Verifies that the goal has been achieved.`
+    return `Delegate a task to "${this.delegatedAgent.config.name}" with expertise in "${this.delegatedAgent.config.expertise}". Provide all the required information to fully complete the task.`
   }
 
   get parameters() {
     return {
       type: "object",
       properties: {
+        task: {
+          type: "string",
+          description: "The task to be delegated"
+        },
+        context: {
+          type: "string",
+          description: "Necessary information required to fully completed the task."
+        }
       },
-      required: [],
+      required: ["task"],
       additionalProperties: false
     }
   }
@@ -39,13 +52,13 @@ export class VerifyGoalAchievedFunction<
         result
       ],
       messages: [
-        ChatMessageBuilder.functionCall(name, params),
+        ChatMessageBuilder.functionCall(this.delegateScriptedAgentFnName(name), params),
         ...messages.map(x => ({
           role: "assistant",
           content: x,
         }) as ChatMessage),
         ChatMessageBuilder.functionCallResult(
-          name,
+          this.delegateScriptedAgentFnName(name),
           result.content || "Successfully accomplished the task."
         )
       ]
@@ -62,33 +75,22 @@ export class VerifyGoalAchievedFunction<
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(name, params),
+        ChatMessageBuilder.functionCall(this.delegateScriptedAgentFnName(name), params),
         ChatMessageBuilder.functionCallResult(
-          name,
+          this.delegateScriptedAgentFnName(name),
           `Error: ${error}`
         )
       ]
     }
   }
 
-  buildExecutor(agent: Agent<unknown>, context: TAgentContext) {
-    return async (params: FunctionParams): Promise<AgentFunctionResult> => {
-      const scriptedAgent = ScriptedAgent.create(
-        GOAL_VERIFIER_AGENT_CONFIG,
-        {
-          chat: new Chat(context.chat.tokenizer),
-          env: context.env,
-          llm: context.llm,
-          logger: context.logger,
-          workspace: context.workspace,
-          scripts: context.scripts
-        }
-      );
+  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext) {
+    return async (params: DelegateAgentParams): Promise<AgentFunctionResult> => {
+      const scriptedAgent = this.delegatedAgent;
 
       let iterator = scriptedAgent.run({
-        goal: "",
-        initialMessages: context.chat.messages
-      }, params.context);
+        goal: params.task,
+      });
 
       const messages = [];
 
@@ -98,14 +100,14 @@ export class VerifyGoalAchievedFunction<
         if (response.done) {
           if (!response.value.ok) {
             return this.onFailure(
-              this.name,
+              this.delegatedAgent.config.name,
               params,
               response.value.error
             );
           }
         
           return this.onSuccess(
-            this.name,
+            this.delegatedAgent.config.name,
             params,
             messages,
             response.value.value
@@ -120,4 +122,6 @@ export class VerifyGoalAchievedFunction<
       }
     }
   }
+
+  private delegateScriptedAgentFnName(agent: string) { return `delegate${agent}` }
 }

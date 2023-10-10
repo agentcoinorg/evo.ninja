@@ -1,4 +1,4 @@
-import { ScriptFunction } from "../ScriptFunction"
+import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
 export class FuzzySearchFunction extends ScriptFunction<{ url: string; queryKeywords: string[] }> {
   get name() {

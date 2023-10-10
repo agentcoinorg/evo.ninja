@@ -6,7 +6,7 @@ interface ThinkFuncParameters {
   thoughts: string
 };
 
-export class ThinkFunction extends AgentFunctionBase<unknown, ThinkFuncParameters> {
+export class ThinkFunction extends AgentFunctionBase<ThinkFuncParameters> {
   get name(): string {
     return "think";
   }
@@ -60,7 +60,7 @@ export class ThinkFunction extends AgentFunctionBase<unknown, ThinkFuncParameter
       outputs: [
         {
           type: AgentOutputType.Error,
-          title: `[${scriptedAgent.name}] Error in ${this.name}: ${error}`,
+          title: `[${scriptedAgent.config.name}] Error in ${this.name}: ${error}`,
         }
       ],
       messages: [

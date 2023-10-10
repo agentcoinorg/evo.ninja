@@ -1,7 +1,7 @@
 import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
-import { AgentFunctionBase } from "../../../AgentFunctionBase";
-import { ScripterContext } from "../config";
-import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../utils";
+import { AgentFunctionBase } from "../AgentFunctionBase";
+import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
+import { AgentBaseContext } from "../AgentBase";
 
 interface ReadVarFuncParameters { 
   name: string,
@@ -9,8 +9,8 @@ interface ReadVarFuncParameters {
   count: number
 };
 
-export class ReadVariableFunction<TContext extends ScripterContext> extends AgentFunctionBase<TContext, ReadVarFuncParameters> {
-  constructor(private maxVarLength: number = 3000) {
+export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameters> {
+  constructor(private globals: Record<string, string>, private maxVarLength: number = 3000) {
     super();
   }
   
@@ -46,13 +46,13 @@ export class ReadVariableFunction<TContext extends ScripterContext> extends Agen
     }
   }
 
-  buildExecutor(agent: Agent<unknown>, context: TContext): (params: ReadVarFuncParameters) => Promise<AgentFunctionResult> {
+  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: ReadVarFuncParameters) => Promise<AgentFunctionResult> {
     return async (params: ReadVarFuncParameters): Promise<AgentFunctionResult> => {
-      if (!context.globals[params.name]) {
+      if (!this.globals[params.name]) {
         return this.onError(params);
       } 
 
-      return this.onSuccess(params, context.globals[params.name]);
+      return this.onSuccess(params, this.globals[params.name]);
     };
   }
 
