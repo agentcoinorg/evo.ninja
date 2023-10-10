@@ -128,8 +128,7 @@ describe("Evo Test Suite", () => {
     for (let i = 0; i<20; i++) {
       const response = await llm.getResponse(
         chat.chatLogs,
-        functionDefinitions,
-        { temperature: 0.5 }
+        functionDefinitions
       );
       const writeTo = path.resolve(__dirname, `./.tests/selects-agent-correctly/debug/response-${i}.json`);
       fs.writeFileSync(writeTo, JSON.stringify(response, null, 2));
