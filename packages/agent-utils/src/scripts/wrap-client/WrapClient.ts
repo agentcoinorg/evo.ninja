@@ -225,7 +225,6 @@ export class WrapClient extends PolywrapClient {
             title: string;
             url: string;
             description: string;
-            highlightedWords: string[];
           }[] = [];
 
           if (data && Array.isArray(data.organic_results)) {
@@ -233,7 +232,6 @@ export class WrapClient extends PolywrapClient {
               title: result.title ?? '',
               url: result.link ?? '',
               description: result.snippet ?? '',
-              highlightedWords: [] ?? result.snippet_highlighted_words,
             })).slice(0, 4);
           }
 
