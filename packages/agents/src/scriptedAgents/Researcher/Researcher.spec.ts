@@ -83,6 +83,7 @@ describe("Research Agent Test Suite", () => {
           scripts,
           logger,
           env,
+          variables: {}
         }
       ),
       debugLog

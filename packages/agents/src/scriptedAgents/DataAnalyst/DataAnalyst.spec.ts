@@ -97,6 +97,7 @@ describe("Data Analyst Agent Test Suite", () => {
         scripts,
         logger,
         env,
+        variables: {}
       }),
       debugLog,
     };

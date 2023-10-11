@@ -39,6 +39,7 @@ export class ScriptWriter extends AgentBase<
         agentPlugin({ logger: logger }),
         env
       ),
+      variables: {},
       env,
     };
 

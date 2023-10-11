@@ -80,6 +80,7 @@ export class VerifyGoalAchievedFunction extends AgentFunctionBase<FunctionParams
           workspace: context.workspace,
           scripts: this.scripts,
           client: this.client,
+          variables: context.variables
         }
       );
 

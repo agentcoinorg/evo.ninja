@@ -10,10 +10,10 @@ interface ReadVarFuncParameters {
 };
 
 export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameters> {
-  constructor(private globals: Record<string, string>, private maxVarLength: number = 3000) {
+  constructor(private maxVarLength: number = 3000) {
     super();
   }
-  
+
   get name(): string {
     return "readVariable";
   }
@@ -48,11 +48,11 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: ReadVarFuncParameters) => Promise<AgentFunctionResult> {
     return async (params: ReadVarFuncParameters): Promise<AgentFunctionResult> => {
-      if (!this.globals[params.name]) {
+      if (!context.variables[params.name]) {
         return this.onError(params);
       } 
 
-      return this.onSuccess(params, this.globals[params.name]);
+      return this.onSuccess(params, context.variables[params.name]);
     };
   }
 

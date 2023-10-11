@@ -31,11 +31,7 @@ export interface EvoRunArgs {
   goal: string
 }
 
-export interface EvoContext extends ScriptedAgentContext {
-  globals: Record<string, string>;
-}
-
-export class Evo extends AgentBase<EvoRunArgs, EvoContext> {
+export class Evo extends AgentBase<EvoRunArgs, ScriptedAgentContext> {
   constructor(
     llm: LlmApi,
     chat: Chat,
@@ -52,7 +48,7 @@ export class Evo extends AgentBase<EvoRunArgs, EvoContext> {
       workspace,
       scripts,
       logger,
-      globals: {},
+      variables: {},
       client: new WrapClient(workspace, logger, agentPlugin({ logger }), env),
       env,
     };
@@ -173,7 +169,7 @@ export class Evo extends AgentBase<EvoRunArgs, EvoContext> {
         this.config.functions.map((fn) => {
           return {
             definition: fn.getDefinition(),
-            buildExecutor: (context: EvoContext) => {
+            buildExecutor: (context: ScriptedAgentContext) => {
               return fn.buildExecutor(this, context);
             },
           };

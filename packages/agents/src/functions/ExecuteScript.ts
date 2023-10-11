@@ -12,7 +12,7 @@ interface ExecuteScriptFuncParameters {
 };
 
 export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncParameters> {
-  constructor(private client: WrapClient, private scripts: Scripts, private globals: Record<string, string>) {
+  constructor(private client: WrapClient, private scripts: Scripts) {
     super();
   }
 
@@ -71,8 +71,8 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
               if (typeof args[key] === "string") {
                 args[key] = replaceVars(
                   args[key],
-                  Object.keys(this.globals).reduce(
-                    (a, b) => ({ [b]: JSON.parse(this.globals[b]), ...a}), {}
+                  Object.keys(context.variables).reduce(
+                    (a, b) => ({ [b]: JSON.parse(context.variables[b]), ...a}), {}
                   )
                 );
               }
@@ -97,7 +97,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
         });
 
         if (params.variable && result.ok && this.client.jsPromiseOutput.ok) {
-          this.globals[params.variable] =
+          context.variables[params.variable] =
             JSON.stringify(this.client.jsPromiseOutput.value);
         }
 

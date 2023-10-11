@@ -10,6 +10,7 @@ import {
   RunResult,
   Timeout,
   Workspace,
+  AgentVariables,
   basicFunctionCallLoop
 } from "@evo-ninja/agent-utils";
 import { ResultErr } from "@polywrap/result";
@@ -21,6 +22,7 @@ export interface AgentBaseContext {
   logger: Logger;
   workspace: Workspace;
   env: Env;
+  variables: AgentVariables;
 }
 
 export interface AgentBaseConfig<TRunArgs> {

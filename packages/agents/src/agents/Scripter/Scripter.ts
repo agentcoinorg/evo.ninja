@@ -7,6 +7,7 @@ import {
   agentPlugin,
   WrapClient,
   Logger,
+  AgentVariables
 } from "@evo-ninja/agent-utils";
 import { AgentBase, AgentBaseConfig } from "../../AgentBase";
 import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
@@ -24,18 +25,15 @@ export interface ScripterRunArgs {
   goal: string
 }
 
-export interface ScripterContext extends ScriptedAgentContext {
-  globals: Record<string, string>;
-}
-
-export class Scripter extends AgentBase<ScripterRunArgs, ScripterContext> {
+export class Scripter extends AgentBase<ScripterRunArgs, ScriptedAgentContext> {
   constructor(
     llm: LlmApi,
     chat: Chat,
     logger: Logger,
     workspace: Workspace,
     scripts: Scripts,
-    env: Env
+    env: Env,
+    variables: AgentVariables = {}
   ) {
     const agentContext = {
       llm,
@@ -43,7 +41,7 @@ export class Scripter extends AgentBase<ScripterRunArgs, ScripterContext> {
       workspace,
       scripts,
       logger,
-      globals: {},
+      variables,
       client: new WrapClient(workspace, logger, agentPlugin({ logger }), env),
       env,
     };
@@ -84,9 +82,9 @@ If a goal has been achieved or failed, you will call the agent_onGoalAchieved or
         "Assistant, you seem to be looping. Try calling findScript, or exiting by calling agent_onGoalAchieved or agent_onGoalFailed.",
       functions: [
         new CreateScriptFunction(agentContext.scripts),
-        new ExecuteScriptFunction(agentContext.client, agentContext.scripts, agentContext.globals),
+        new ExecuteScriptFunction(agentContext.client, agentContext.scripts),
         new FindScriptFunction(agentContext.scripts),
-        new ReadVariableFunction(agentContext.globals),
+        new ReadVariableFunction(),
         new ReadFileFunction(agentContext.client, agentContext.scripts),
         new WriteFileFunction(agentContext.client, agentContext.scripts),
         new ReadDirectoryFunction(agentContext.client, agentContext.scripts),

@@ -96,6 +96,7 @@ describe('Planner Agent Test Suite', () => {
           scripts,
           logger,
           env,
+          variables: {}
         }
       ),
       debugLog

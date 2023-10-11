@@ -8,7 +8,7 @@ export type AgentFunctionDefinition = ChatCompletionFunctions;
 export type AgentFunctionResult = {
   outputs: AgentOutput[];
   messages: ChatMessage[];
-}; 
+};
 
 export interface AgentFunction<TContext> {
   definition: AgentFunctionDefinition;
