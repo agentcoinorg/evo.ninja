@@ -11,6 +11,7 @@ import {
   basicFunctionCallLoop,
   AgentOutput,
   RunResult,
+  AgentVariables,
 } from "@evo-ninja/agent-utils";
 import { AgentBase, AgentBaseConfig } from "../../AgentBase";
 import {
@@ -42,13 +43,13 @@ export class Evo extends AgentBase<EvoRunArgs, ScriptedAgentContext> {
     timeout?: Timeout,
     scriptedAgents?: ScriptedAgent[]
   ) {
-    const context = {
+    const context: ScriptedAgentContext = {
       llm,
       chat,
       workspace,
       scripts,
       logger,
-      variables: {},
+      variables: new AgentVariables(),
       client: new WrapClient(workspace, logger, agentPlugin({ logger }), env),
       env,
     };

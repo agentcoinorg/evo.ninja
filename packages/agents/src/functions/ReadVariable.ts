@@ -46,11 +46,12 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: ReadVarFuncParameters) => Promise<AgentFunctionResult> {
     return async (params: ReadVarFuncParameters): Promise<AgentFunctionResult> => {
-      if (!context.variables[params.name]) {
+      const variable = context.variables.get(params.name);
+      if (!variable) {
         return this.onError(params);
       } 
 
-      return this.onSuccess(params, context.variables[params.name]);
+      return this.onSuccess(params, variable);
     };
   }
 

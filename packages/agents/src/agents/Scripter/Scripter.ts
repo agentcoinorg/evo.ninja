@@ -33,9 +33,9 @@ export class Scripter extends AgentBase<ScripterRunArgs, ScriptedAgentContext> {
     workspace: Workspace,
     scripts: Scripts,
     env: Env,
-    variables: AgentVariables = {}
+    variables: AgentVariables = new AgentVariables()
   ) {
-    const agentContext = {
+    const agentContext: ScriptedAgentContext = {
       llm,
       chat,
       workspace,

@@ -1,4 +1,4 @@
-import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, JsEngine, JsEngine_GlobalVar, Scripts, WrapClient, shimCode, trimText } from "@evo-ninja/agent-utils";
+import { Agent, AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder, JsEngine, JsEngine_GlobalVar, Scripts, WrapClient, shimCode, trimText } from "@evo-ninja/agent-utils";
 import JSON5 from "json5";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
@@ -62,19 +62,9 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
           args = JSON5.parse(params.arguments);
 
           if (args) {
-            const replaceVars = (str: string, vars: any) => {
-              return str.replace(/\${(.*?)}/g, (match, key) => {
-                return vars[key.trim()] || match;  // if the key doesn't exist in vars, keep the original match
-              });
-            }
             for (const key of Object.keys(args)) {
-              if (typeof args[key] === "string") {
-                args[key] = replaceVars(
-                  args[key],
-                  Object.keys(context.variables).reduce(
-                    (a, b) => ({ [b]: JSON.parse(context.variables[b]), ...a}), {}
-                  )
-                );
+              if (typeof args[key] === "string" && AgentVariables.hasSyntax(args[key])) {
+                args[key] = context.variables.get(args[key]);
               }
             }
           }
@@ -97,8 +87,10 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
         });
 
         if (params.variable && result.ok && this.client.jsPromiseOutput.ok) {
-          context.variables[params.variable] =
-            JSON.stringify(this.client.jsPromiseOutput.value);
+          context.variables.set(
+            params.variable,
+            JSON.stringify(this.client.jsPromiseOutput.value)
+          );
         }
 
         return result.ok
