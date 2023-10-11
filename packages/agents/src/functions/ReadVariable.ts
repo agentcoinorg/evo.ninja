@@ -17,31 +17,29 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
   get name(): string {
     return "readVariable";
   }
+
   get description(): string {
-    return `Writes the function.`;
+    return "Read a ${variable}";
   }
+
   get parameters(): any {
     return {
       type: "object",
       properties: {
-        namespace: {
+        name: {
           type: "string",
-          description: "The namespace of the function, e.g. fs.readFile"
+          description: "${name} of a variable"
         },
-        description: {
-          type: "string",
-          description: "The detailed description of the function."
+        start: {
+          type: "number",
+          description: "Index to start reading at"
         },
-        arguments: {
-          type: "string",
-          description: "The arguments of the function. E.g. '{ path: string, encoding: string }'"
-        },
-        code: {
-          type: "string",
-          description: "The code of the function."
+        count: {
+          type: "number",
+          description: "Number of bytes to read"
         }
       },
-      required: ["namespace", "description", "arguments", "code"],
+      required: ["name", "start", "count"],
       additionalProperties: false
     }
   }
@@ -85,14 +83,14 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
         {
           type: AgentOutputType.Error,
           title: `Failed to read '${params.name}' variable.`, 
-          content: FUNCTION_CALL_FAILED(params, this.name, `Global variable {{${params.name}}} not found.`)
+          content: FUNCTION_CALL_FAILED(params, this.name, `Variable \${${params.name}} not found.`)
         }
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, params),
         ChatMessageBuilder.functionCallResult(
           this.name,
-          `Error: Global variable {{${params.name}}} not found.`
+          `Error: Variable \${${params.name}} not found.`
         )
       ]
     }
@@ -100,23 +98,23 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
 
   private readGlobalVarOutput(varName: string, value: string | undefined, start: number, count: number) {
     if (!value || value === "\"undefined\"") {
-      return `## Variable {{${varName}}} is undefined`;
+      return `## Variable \${${varName}} is undefined`;
     } else if (value.length > this.maxVarLength) {
       const val = value.substring(start, start + Math.min(count, this.maxVarLength));
-      return `## Read variable {{${varName}}}, but it is too large, JSON preview (start: ${start}, count: ${Math.min(count, this.maxVarLength)}):\n\`\`\`\n${val}...\n\`\`\``;
+      return `## Read variable \${${varName}}, but it is too large, JSON preview (start: ${start}, count: ${Math.min(count, this.maxVarLength)}):\n\`\`\`\n${val}...\n\`\`\``;
     } else {
-      return `## Read variable {{${varName}}}, JSON:\n\`\`\`\n${value}\n\`\`\``;
+      return `## Read variable \${${varName}}, JSON:\n\`\`\`\n${value}\n\`\`\``;
     }
   }
 
   private readGlobalVarMessage(varName: string, value: string | undefined, start: number, count: number) {
     if (!value || value === "\"undefined\"") {
-      return `Variable {{${varName}}} is undefined`;
+      return `Variable \${${varName}} is undefined`;
     } else if (value.length > this.maxVarLength) {
       const val = value.substring(start, start + Math.min(count, this.maxVarLength));
-      return `Read variable {{${varName}}}, but it is too large, JSON preview (start: ${start}, count: ${Math.min(count, this.maxVarLength)}):\n\`\`\`\n${val}...\n\`\`\``;
+      return `Read variable \${${varName}}, but it is too large, JSON preview (start: ${start}, count: ${Math.min(count, this.maxVarLength)}):\n\`\`\`\n${val}...\n\`\`\``;
     } else {
-      return `Read variable {{${varName}}}, JSON:\n\`\`\`\n${value}\n\`\`\``;
+      return `Read variable \${${varName}}, JSON:\n\`\`\`\n${value}\n\`\`\``;
     }
   }
 }

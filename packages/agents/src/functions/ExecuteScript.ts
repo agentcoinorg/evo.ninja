@@ -34,7 +34,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
         },
         arguments: {
           type: "string",
-          description: "JSON-formatted arguments to pass into the script being executed. You can replace a value with a global variable by using {{varName}} syntax.",
+          description: "JSON-formatted arguments to pass into the script being executed.",
         },
         variable: {
           type: "string",
@@ -63,7 +63,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
 
           if (args) {
             const replaceVars = (str: string, vars: any) => {
-              return str.replace(/{{(.*?)}}/g, (match, key) => {
+              return str.replace(/\${(.*?)}/g, (match, key) => {
                 return vars[key.trim()] || match;  // if the key doesn't exist in vars, keep the original match
               });
             }
@@ -190,7 +190,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
 
   private storedResultInVar(varName: string | undefined) {
     if (varName && varName.length > 0) {
-      return `Result stored in variable: {{${varName}}}`;
+      return `Result stored in variable: \${${varName}}`;
     } else {
       return "";
     }
