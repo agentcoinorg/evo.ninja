@@ -29,8 +29,8 @@ function Dojo() {
   const [model, setModel] = useState<string | null>(
     localStorage.getItem("openai-model")
   );
-  const [braveApiKey, setBraveApiKey] = useState<string | null>(
-    localStorage.getItem("brave-api-key")
+  const [serpApiKey, setSerpApiKey] = useState<string | null>(
+    localStorage.getItem("serp-api-key")
   );
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -120,14 +120,14 @@ function Dojo() {
       setConfigOpen(false);
     }
 
-    if (!braveApiKey) {
-      localStorage.removeItem("brave-api-key");
-      setBraveApiKey(null);
+    if (!serpApiKey) {
+      localStorage.removeItem("serp-api-key");
+      setSerpApiKey(null);
       setConfigOpen(true);
     } else {
-      localStorage.setItem("brave-api-key", braveApiKey);
+      localStorage.setItem("serp-api-key", serpApiKey);
       setConfigOpen(false);
-      setBraveApiKey(braveApiKey);
+      setSerpApiKey(serpApiKey);
     }
   }
 
@@ -173,7 +173,7 @@ function Dojo() {
           "GPT_MODEL": model,
           "CONTEXT_WINDOW_TOKENS": "8000",
           "MAX_RESPONSE_TOKENS": "2000",
-          "BRAVE_API_KEY": braveApiKey || undefined,
+          "SERP_API_KEY": serpApiKey || undefined,
         }
       );
 
@@ -205,7 +205,7 @@ function Dojo() {
     } catch (err) {
       setDojoError(err);
     }
-  }, [apiKey, model, braveApiKey])
+  }, [apiKey, model, serpApiKey])
 
   const sidebarContainerClassNames = clsx(["w-full lg:w-auto lg:max-w-md relative", {
     "hidden": !sidebarOpen
@@ -221,7 +221,7 @@ function Dojo() {
         <DojoConfig
           apiKey={apiKey}
           model={model}
-          braveApiKey={braveApiKey}
+          serpApiKey={serpApiKey}
           onConfigSaved={onConfigSaved}
         />
       }

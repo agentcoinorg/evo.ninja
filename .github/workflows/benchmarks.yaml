@@ -92,7 +92,7 @@ jobs:
         GPT_MODEL: "gpt-4-0613"
         CONTEXT_WINDOW_TOKENS: 8000
         MAX_RESPONSE_TOKENS: 2000
-        BRAVE_API_KEY: ${{ secrets.BENCHMARK_CI_BRAVE_API_KEY }}
+        SERP_API_KEY: ${{ secrets.BENCHMARK_CI_SERP_API_KEY }}
 
     - name: Set up Python 3.10
       uses: actions/setup-python@v4
