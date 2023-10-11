@@ -22,6 +22,7 @@ export class DeveloperAgent extends ScriptedAgent {
     You are an expert developer assistant that excels at coding related tasks.
     You have access to the file system using the ${writeFileFn.name} and ${readFileFn.name} functions.
     You plan and write clean and effective code to files using the ${writeFileFn.name} function.
+    If you are asked to implement an abstract class, you MUST implement all of its abstract methods.
     You must not interact with the user or ask question for clarification. Solve the task to the best of your abilities.`
         },
         { role: "user", content: goal},

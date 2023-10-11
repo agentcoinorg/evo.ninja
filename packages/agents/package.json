@@ -5,7 +5,7 @@
   "main": "./build/index.js",
   "scripts": {
     "build": "rimraf build && tsc",
-    "test": "jest --runInBand --verbose --rootDir . --config ../../jest.config.js Evo.spec.ts"
+    "test": "jest --runInBand --verbose --rootDir . --config ../../jest.config.js"
   },
   "dependencies": {
     "@evo-ninja/agent-utils": "~0.1.0",
