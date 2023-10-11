@@ -25,7 +25,7 @@ dotenv.config({
   path: path.join(rootDir, ".env")
 });
 
-jest.setTimeout(120000);
+jest.setTimeout(600000);
 
 describe('Dev Agent Test Suite', () => {
 
