@@ -61,6 +61,9 @@ Examples:
 If you need the amount of votes cast in the last 4 US elections, DO NOT SETTLE for the votes of the last 3 elections; keep looking for the missing one.
 - **FORMAT IS VERY IMPORTANT**: provide results in the requested format. If requested result in thousands, DO NOT say 500, but 0.5 thousand.
 
+After each "fuzzySearch" you will state if the information is completely answers the query and why, if it doesn't, you
+will search for the missing information.
+
 Context Retention:
 - Maintain key context in subsearches for accuracy.
   E.g., for "Email of CTO of 'XYZ Tech'?":
