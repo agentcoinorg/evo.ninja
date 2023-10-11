@@ -1,6 +1,7 @@
-import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+import { Agent, AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { ScriptedAgent } from "../scriptedAgents";
+import { AgentBaseContext } from "../AgentBase";
 
 interface ThinkFuncParameters { 
   thoughts: string
@@ -29,13 +30,13 @@ export class ThinkFunction extends AgentFunctionBase<ThinkFuncParameters> {
     };
   }
 
-  buildExecutor(agent: Agent<unknown>, context: unknown): (params: ThinkFuncParameters) => Promise<AgentFunctionResult> {
+  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: ThinkFuncParameters) => Promise<AgentFunctionResult> {
     return async (params: ThinkFuncParameters): Promise<AgentFunctionResult> => {
-      return this.onSuccess(agent as ScriptedAgent, params, params.thoughts);
+      return this.onSuccess(agent as ScriptedAgent, params, params.thoughts, context.variables);
     };
   }
 
-  public onSuccess(scriptedAgent: ScriptedAgent, params: any, result: string) {
+  public onSuccess(scriptedAgent: ScriptedAgent, params: any, result: string, variables: AgentVariables) {
     return {
       outputs: [
         {
@@ -50,12 +51,12 @@ export class ThinkFunction extends AgentFunctionBase<ThinkFuncParameters> {
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, params),
-        ChatMessageBuilder.functionCallResult(this.name, result),
+        ChatMessageBuilder.functionCallResult(this.name, result, variables),
       ]
     }
   }
 
-  public onFailure(scriptedAgent: ScriptedAgent,  params: any, error: string): AgentFunctionResult {
+  public onFailure(scriptedAgent: ScriptedAgent, params: any, error: string, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -65,7 +66,7 @@ export class ThinkFunction extends AgentFunctionBase<ThinkFuncParameters> {
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, params),
-        ChatMessageBuilder.functionCallResult(this.name, error)
+        ChatMessageBuilder.functionCallResult(this.name, error, variables)
       ]
     }
   }

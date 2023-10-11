@@ -1,3 +1,4 @@
+import { AgentVariables } from "./AgentVariables";
 import { ChatMessage } from "../llm";
 
 export class ChatMessageBuilder {
@@ -19,7 +20,14 @@ export class ChatMessageBuilder {
     };
   }
 
-  static functionCallResult(funcName: string, result: string): ChatMessage {
+  static functionCallResult(funcName: string, result: string, variables: AgentVariables): ChatMessage {
+    if (variables.shouldSave(result)) {
+      const varName = variables.save(funcName, result);
+      result = `Result stored in variable named \${${varName}}.\nreadVariable("\${${varName}}", 0, ${variables.saveThreshold})\n${
+        result.substring(0, variables.saveThreshold)
+      }`;
+    }
+
     return {
       role: "function",
       name: funcName,

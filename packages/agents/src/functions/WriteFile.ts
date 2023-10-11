@@ -1,4 +1,4 @@
-import { AgentOutputType, trimText, ChatMessageBuilder, AgentFunctionResult } from "@evo-ninja/agent-utils"
+import { AgentOutputType, trimText, ChatMessageBuilder, AgentFunctionResult, AgentVariables } from "@evo-ninja/agent-utils"
 import { ScriptedAgent } from "../scriptedAgents"
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
@@ -36,7 +36,7 @@ export class WriteFileFunction extends ScriptFunction<WriteFileFuncParameters> {
     }
   }
 
-  onSuccess(scriptedAgent: ScriptedAgent, params: WriteFileFuncParameters, result: string): AgentFunctionResult {
+  onSuccess(scriptedAgent: ScriptedAgent, params: WriteFileFuncParameters, result: string, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -49,7 +49,7 @@ export class WriteFileFunction extends ScriptFunction<WriteFileFuncParameters> {
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, params),
-        ChatMessageBuilder.functionCallResult(this.name, "Successfully wrote file.")
+        ChatMessageBuilder.functionCallResult(this.name, "Successfully wrote file.", variables)
       ]
     }
   }

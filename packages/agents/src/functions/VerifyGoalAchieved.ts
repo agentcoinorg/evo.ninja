@@ -1,4 +1,4 @@
-import { AgentOutputType, Scripts, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, ChatMessage, Chat, WrapClient } from "@evo-ninja/agent-utils"
+import { AgentOutputType, Scripts, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, ChatMessage, Chat, WrapClient, AgentVariables } from "@evo-ninja/agent-utils"
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { GoalVerifierAgent } from "../scriptedAgents";
 import { AgentBaseContext } from "../AgentBase";
@@ -31,7 +31,7 @@ export class VerifyGoalAchievedFunction extends AgentFunctionBase<FunctionParams
     }
   }
 
-  onSuccess(name: string, params: any, messages: string[], result: AgentOutput): AgentFunctionResult {
+  onSuccess(name: string, params: any, messages: string[], result: AgentOutput, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         result
@@ -44,13 +44,14 @@ export class VerifyGoalAchievedFunction extends AgentFunctionBase<FunctionParams
         }) as ChatMessage),
         ChatMessageBuilder.functionCallResult(
           name,
-          result.content || "Successfully accomplished the task."
+          result.content || "Successfully accomplished the task.",
+          variables
         )
       ]
     }
   }
 
-  onFailure(name: string, params: any, error: string | undefined): AgentFunctionResult {
+  onFailure(name: string, params: any, error: string | undefined, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -63,7 +64,8 @@ export class VerifyGoalAchievedFunction extends AgentFunctionBase<FunctionParams
         ChatMessageBuilder.functionCall(name, params),
         ChatMessageBuilder.functionCallResult(
           name,
-          `Error: ${error}`
+          `Error: ${error}`,
+          variables
         )
       ]
     }
@@ -99,7 +101,8 @@ export class VerifyGoalAchievedFunction extends AgentFunctionBase<FunctionParams
             return this.onFailure(
               this.name,
               params,
-              response.value.error
+              response.value.error,
+              context.variables
             );
           }
         
@@ -107,7 +110,8 @@ export class VerifyGoalAchievedFunction extends AgentFunctionBase<FunctionParams
             this.name,
             params,
             messages,
-            response.value.value
+            response.value.value,
+            context.variables
           );
         } else {
           if (response.value.type === "message" && response.value.content) {

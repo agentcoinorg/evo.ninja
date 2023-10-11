@@ -1,4 +1,4 @@
-import { AgentOutputType, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, ChatMessage } from "@evo-ninja/agent-utils"
+import { AgentOutputType, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, ChatMessage, AgentVariables } from "@evo-ninja/agent-utils"
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { AgentBase, AgentBaseContext } from "../AgentBase";
 
@@ -46,7 +46,7 @@ export class DelegateAgentFunction<
     }
   }
 
-  onSuccess(name: string, params: any, messages: string[], result: AgentOutput): AgentFunctionResult {
+  onSuccess(name: string, params: any, messages: string[], result: AgentOutput, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         result
@@ -59,13 +59,14 @@ export class DelegateAgentFunction<
         }) as ChatMessage),
         ChatMessageBuilder.functionCallResult(
           this.delegateScriptedAgentFnName(name),
-          result.content || "Successfully accomplished the task."
+          result.content || "Successfully accomplished the task.",
+          variables
         )
       ]
     }
   }
 
-  onFailure(name: string, params: any, error: string | undefined): AgentFunctionResult {
+  onFailure(name: string, params: any, error: string | undefined, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -78,7 +79,8 @@ export class DelegateAgentFunction<
         ChatMessageBuilder.functionCall(this.delegateScriptedAgentFnName(name), params),
         ChatMessageBuilder.functionCallResult(
           this.delegateScriptedAgentFnName(name),
-          `Error: ${error}`
+          `Error: ${error}`,
+          variables
         )
       ]
     }
@@ -102,7 +104,8 @@ export class DelegateAgentFunction<
             return this.onFailure(
               this.delegatedAgent.config.name,
               params,
-              response.value.error
+              response.value.error,
+              context.variables
             );
           }
         
@@ -110,7 +113,8 @@ export class DelegateAgentFunction<
             this.delegatedAgent.config.name,
             params,
             messages,
-            response.value.value
+            response.value.value,
+            context.variables
           );
         } else {
           if (response.value.type === "message" && response.value.content) {

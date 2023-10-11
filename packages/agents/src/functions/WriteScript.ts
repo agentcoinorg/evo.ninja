@@ -1,4 +1,4 @@
-import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, trimText } from "@evo-ninja/agent-utils";
+import { Agent, AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder, trimText } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { AgentBaseContext } from "../AgentBase";
 
@@ -58,20 +58,20 @@ export class WriteScriptFunction extends AgentFunctionBase<WriteScriptFuncParame
       code: string 
     }): Promise<AgentFunctionResult> => {
       if (params.namespace.startsWith("agent.")) {
-        return this.onErrorCannotCreateInAgentNamespace(this.name, params);
+        return this.onErrorCannotCreateInAgentNamespace(this.name, params, context.variables);
       }
 
       if (this.extractRequires(params.code).some(x => !WriteScriptFunction.allowedLibs.includes(x))) {
-        return this.onErrorCannotRequireLib(this.name, params);
+        return this.onErrorCannotRequireLib(this.name, params, context.variables);
       }
 
       context.workspace.writeFileSync("index.js", params.code);
 
-      return this.onSuccess(params);
+      return this.onSuccess(params, context.variables);
     };
   }
 
-  private onSuccess(params: WriteScriptFuncParameters): AgentFunctionResult {
+  private onSuccess(params: WriteScriptFuncParameters, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -82,7 +82,7 @@ export class WriteScriptFunction extends AgentFunctionBase<WriteScriptFuncParame
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, params),
-        ChatMessageBuilder.functionCallResult(this.name, "Success."),
+        ChatMessageBuilder.functionCallResult(this.name, "Success.", variables),
       ]
     }
   }
@@ -112,7 +112,7 @@ export class WriteScriptFunction extends AgentFunctionBase<WriteScriptFuncParame
     return libraries;
   }
 
-  private onErrorCannotCreateInAgentNamespace(functionName: string, params: WriteScriptFuncParameters) {
+  private onErrorCannotCreateInAgentNamespace(functionName: string, params: WriteScriptFuncParameters, variables: AgentVariables) {
     return {
       outputs: [
         {
@@ -126,13 +126,14 @@ export class WriteScriptFunction extends AgentFunctionBase<WriteScriptFuncParame
         ChatMessageBuilder.functionCallResult(
           functionName,
           `Failed writing the function.\n` +
-          `Namespaces starting with 'agent.' are reserved.`
+          `Namespaces starting with 'agent.' are reserved.`,
+          variables
         ),
       ]
     }
   }
 
-  private onErrorCannotRequireLib(functionName: string, params: WriteScriptFuncParameters) {
+  private onErrorCannotRequireLib(functionName: string, params: WriteScriptFuncParameters, variables: AgentVariables) {
     return {
       outputs: [
         {
@@ -145,7 +146,8 @@ export class WriteScriptFunction extends AgentFunctionBase<WriteScriptFuncParame
         ChatMessageBuilder.functionCall(functionName, params),
         ChatMessageBuilder.functionCallResult(
           functionName,
-          `Cannot require libraries other than ${WriteScriptFunction.allowedLibs.join(", ")}.`
+          `Cannot require libraries other than ${WriteScriptFunction.allowedLibs.join(", ")}.`,
+          variables
         ),
       ]
     }

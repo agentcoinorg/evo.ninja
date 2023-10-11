@@ -1,4 +1,4 @@
-import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+import { Agent, AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { AgentBaseContext } from "../AgentBase";
@@ -9,6 +9,7 @@ interface ReadVarFuncParameters {
   count: number
 };
 
+// TODO: need to visit this implementation
 export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameters> {
   constructor(private maxVarLength: number = 3000) {
     super();

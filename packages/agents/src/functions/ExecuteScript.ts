@@ -52,7 +52,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
         const script = this.scripts.getScriptByName(params.namespace);
 
         if (!script) {
-          return this.onError(params.namespace, this.scriptNotFound(params), params);
+          return this.onError(params.namespace, this.scriptNotFound(params), params, context.variables);
         }
 
         let args: any = undefined;
@@ -69,7 +69,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
             }
           }
         } catch {
-          return this.onError(params.namespace, this.invalidExecuteScriptArgs(params), params);
+          return this.onError(params.namespace, this.invalidExecuteScriptArgs(params), params, context.variables);
         }
 
         const globals: JsEngine_GlobalVar[] =
@@ -96,18 +96,17 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
         return result.ok
           ? result.value.error == null
             ? this.client.jsPromiseOutput.ok
-              ? this.onSuccess(params.namespace, this.client.jsPromiseOutput.value, params)
-              : this.onError(params.namespace, JSON.stringify(this.client.jsPromiseOutput.error), params)
-            : this.onError(params.namespace, result.value.error, params)
-          : this.onError(params.namespace, result.error?.toString(), params);
-      
+              ? this.onSuccess(params.namespace, this.client.jsPromiseOutput.value, params, context.variables)
+              : this.onError(params.namespace, JSON.stringify(this.client.jsPromiseOutput.error), params, context.variables)
+            : this.onError(params.namespace, result.value.error, params, context.variables)
+          : this.onError(params.namespace, result.error?.toString(), params, context.variables);
       } catch (e: any) {
-        return this.onError(params.namespace, e.toString(), params);
+        return this.onError(params.namespace, e.toString(), params, context.variables);
       }
     };
   }
 
-  private onSuccess(scriptName: string, result: any, params: ExecuteScriptFuncParameters): AgentFunctionResult {
+  private onSuccess(scriptName: string, result: any, params: ExecuteScriptFuncParameters, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -124,13 +123,14 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
         ChatMessageBuilder.functionCall(this.name, params),
         ChatMessageBuilder.functionCallResult(
           this.name,
-          this.executeScriptOutput(params.variable, result)
+          this.executeScriptOutput(params.variable, result),
+          variables
         ),
       ]
     }
   }
 
-  private onError(scriptName: string, error: string | undefined, params: ExecuteScriptFuncParameters) {
+  private onError(scriptName: string, error: string | undefined, params: ExecuteScriptFuncParameters, variables: AgentVariables) {
     return {
       outputs: [
         {
@@ -152,7 +152,8 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
                 ? trimText(JSON.stringify(error, null, 2), 300)
                 : "Unknown error"
             }\n` +
-          `\`\`\``
+          `\`\`\``,
+          variables
         ),
       ]
     }
