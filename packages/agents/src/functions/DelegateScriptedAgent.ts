@@ -46,7 +46,7 @@ export class DelegateAgentFunction<
     }
   }
 
-  onSuccess(name: string, params: any, rawParams: string | undefined, messages: string[], result: AgentOutput, variables: AgentVariables): AgentFunctionResult {
+  onSuccess(name: string, rawParams: string | undefined, messages: string[], result: AgentOutput, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         result
@@ -112,7 +112,6 @@ export class DelegateAgentFunction<
         
           return this.onSuccess(
             this.delegatedAgent.config.name,
-            params,
             rawParams,
             messages,
             response.value.value,

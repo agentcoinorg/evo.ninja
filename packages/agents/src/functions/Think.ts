@@ -1,6 +1,5 @@
 import { Agent, AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
-import { ScriptedAgent } from "../scriptedAgents";
 import { AgentBaseContext } from "../AgentBase";
 
 interface ThinkFuncParameters { 
@@ -30,13 +29,13 @@ export class ThinkFunction extends AgentFunctionBase<ThinkFuncParameters> {
     };
   }
 
-  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: ThinkFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
+  buildExecutor(_: Agent<unknown>, context: AgentBaseContext): (params: ThinkFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (params: ThinkFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
-      return this.onSuccess(agent as ScriptedAgent, params, rawParams, params.thoughts, context.variables);
+      return this.onSuccess(params, rawParams, params.thoughts, context.variables);
     };
   }
 
-  public onSuccess(scriptedAgent: ScriptedAgent, params: any, rawParams: string | undefined, result: string, variables: AgentVariables) {
+  public onSuccess(params: any, rawParams: string | undefined, result: string, variables: AgentVariables) {
     return {
       outputs: [
         {
@@ -52,21 +51,6 @@ export class ThinkFunction extends AgentFunctionBase<ThinkFuncParameters> {
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(this.name, result, variables),
-      ]
-    }
-  }
-
-  public onFailure(scriptedAgent: ScriptedAgent, params: any, rawParams: string | undefined, error: string, variables: AgentVariables): AgentFunctionResult {
-    return {
-      outputs: [
-        {
-          type: AgentOutputType.Error,
-          title: `[${scriptedAgent.config.name}] Error in ${this.name}: ${error}`,
-        }
-      ],
-      messages: [
-        ChatMessageBuilder.functionCall(this.name, rawParams),
-        ChatMessageBuilder.functionCallResult(this.name, error, variables)
       ]
     }
   }

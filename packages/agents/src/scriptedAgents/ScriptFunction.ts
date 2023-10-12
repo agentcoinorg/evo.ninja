@@ -87,4 +87,3 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
     };
   }
 }
-

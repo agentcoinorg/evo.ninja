@@ -15,7 +15,7 @@ export class ChatMessageBuilder {
       content: "",
       function_call: {
         name: funcName,
-        arguments: JSON.stringify(params)
+        arguments: typeof params === "string" ? params : JSON.stringify(params)
       }
     };
   }

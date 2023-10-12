@@ -31,7 +31,7 @@ export class VerifyGoalAchievedFunction extends AgentFunctionBase<FunctionParams
     }
   }
 
-  onSuccess(name: string, params: any, rawParams: string | undefined, messages: string[], result: AgentOutput, variables: AgentVariables): AgentFunctionResult {
+  onSuccess(name: string, rawParams: string | undefined, messages: string[], result: AgentOutput, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         result
@@ -109,7 +109,6 @@ export class VerifyGoalAchievedFunction extends AgentFunctionBase<FunctionParams
         
           return this.onSuccess(
             this.name,
-            params,
             rawParams,
             messages,
             response.value.value,
