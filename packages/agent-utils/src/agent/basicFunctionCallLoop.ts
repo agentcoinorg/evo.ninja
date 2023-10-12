@@ -11,8 +11,9 @@ import { Chat, ChatMessage, LlmApi } from "../llm";
 
 import { ResultErr, ResultOk } from "@polywrap/result";
 import { AGENT_SPEAK_RESPONSE } from "./prompts";
+import {AgentVariables} from "./AgentVariables";
 
-export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, chat: Chat }>(
+export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, chat: Chat, variables: AgentVariables }>(
   context: TContext,
   agentFunctions: AgentFunction<TContext>[],
   shouldTerminate: (
@@ -37,6 +38,19 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
 
     if (response.function_call) {
       const { name, arguments: args } = response.function_call;
+
+      if (args) {
+        let i = 0;
+        while ((i = args.indexOf(AgentVariables.Prefix)) !== -1) {
+          const endIdx = args.indexOf(AgentVariables.Suffix, i);
+          const varWithSyntax = args.substring(i, endIdx + 1);
+          const varContents = context.variables.get(varWithSyntax);
+          if (varContents) {
+            args.replace(varWithSyntax, varContents);
+          }
+        }
+      }
+
       const sanitizedFunctionAndArgs = processFunctionAndArgs(name, args, agentFunctions)
       if (!sanitizedFunctionAndArgs.ok) {
         chat.temporary(response);
