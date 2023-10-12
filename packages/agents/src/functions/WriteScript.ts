@@ -50,7 +50,7 @@ export class WriteScriptFunction extends AgentFunctionBase<WriteScriptFuncParame
     }
   }
 
-  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: WriteScriptFuncParameters, rawParams: string | undefined) => Promise<AgentFunctionResult> {
+  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: WriteScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (
       params: {
         namespace: string,
@@ -58,7 +58,7 @@ export class WriteScriptFunction extends AgentFunctionBase<WriteScriptFuncParame
         arguments: string,
         code: string
       },
-      rawParams: string | undefined
+      rawParams?: string
     ): Promise<AgentFunctionResult> => {
       if (params.namespace.startsWith("agent.")) {
         return this.onErrorCannotCreateInAgentNamespace(this.name, params, rawParams, context.variables);

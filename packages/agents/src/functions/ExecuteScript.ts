@@ -45,8 +45,8 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
     }
   }
 
-  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: ExecuteScriptFuncParameters, rawParams: string | undefined) => Promise<AgentFunctionResult> {
-    return async (params: ExecuteScriptFuncParameters, rawParams: string | undefined): Promise<AgentFunctionResult> => {
+  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: ExecuteScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
+    return async (params: ExecuteScriptFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       try {
         const script = this.scripts.getScriptByName(params.namespace);
 

@@ -45,8 +45,8 @@ export class CreateScriptFunction extends AgentFunctionBase<CreateScriptFuncPara
     }
   }
 
-  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: CreateScriptFuncParameters, rawParams: string | undefined) => Promise<AgentFunctionResult> {
-    return async (params: CreateScriptFuncParameters, rawParams: string | undefined): Promise<AgentFunctionResult> => {
+  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: CreateScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
+    return async (params: CreateScriptFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       if (params.namespace.startsWith("agent.")) {
         return this.onErrorCannotCreateScriptsOnAgentNamespace(params, rawParams, context.variables);
       }

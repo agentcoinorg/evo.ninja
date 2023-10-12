@@ -49,8 +49,8 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
     }
   }
 
-  buildExecutor(scriptedAgent: ScriptedAgent, context: AgentBaseContext): (params: TParams, rawParams: string | undefined) => Promise<AgentFunctionResult> {
-    return async (params: any, rawParams: string | undefined): Promise<AgentFunctionResult> => {
+  buildExecutor(scriptedAgent: ScriptedAgent, context: AgentBaseContext): (params: TParams, rawParams?: string) => Promise<AgentFunctionResult> {
+    return async (params: any, rawParams?: string): Promise<AgentFunctionResult> => {
       const scriptName = this.name.split("_").join(".");
       const script = this.scripts.getScriptByName(scriptName);
   

@@ -72,7 +72,7 @@ export class VerifyGoalAchievedFunction extends AgentFunctionBase<FunctionParams
   }
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext) {
-    return async (params: FunctionParams, rawParams: string | undefined): Promise<AgentFunctionResult> => {
+    return async (params: FunctionParams, rawParams?: string): Promise<AgentFunctionResult> => {
       const scriptedAgent = new GoalVerifierAgent(
         {
           chat: new Chat(context.chat.tokenizer),

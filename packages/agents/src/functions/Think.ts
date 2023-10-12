@@ -30,8 +30,8 @@ export class ThinkFunction extends AgentFunctionBase<ThinkFuncParameters> {
     };
   }
 
-  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: ThinkFuncParameters, rawParams: string | undefined) => Promise<AgentFunctionResult> {
-    return async (params: ThinkFuncParameters, rawParams: string | undefined): Promise<AgentFunctionResult> => {
+  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: ThinkFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
+    return async (params: ThinkFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       return this.onSuccess(agent as ScriptedAgent, params, rawParams, params.thoughts, context.variables);
     };
   }

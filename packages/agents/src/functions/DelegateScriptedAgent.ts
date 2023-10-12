@@ -87,7 +87,7 @@ export class DelegateAgentFunction<
   }
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext) {
-    return async (params: DelegateAgentParams, rawParams: string | undefined): Promise<AgentFunctionResult> => {
+    return async (params: DelegateAgentParams, rawParams?: string): Promise<AgentFunctionResult> => {
       const scriptedAgent = this.delegatedAgent;
 
       let iterator = scriptedAgent.run({
