@@ -5,7 +5,7 @@ import { AgentBaseContext } from "../AgentBase";
 
 interface ThinkFuncParameters { 
   thoughts: string
-};
+}
 
 export class ThinkFunction extends AgentFunctionBase<ThinkFuncParameters> {
   get name(): string {
@@ -30,13 +30,13 @@ export class ThinkFunction extends AgentFunctionBase<ThinkFuncParameters> {
     };
   }
 
-  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: ThinkFuncParameters) => Promise<AgentFunctionResult> {
-    return async (params: ThinkFuncParameters): Promise<AgentFunctionResult> => {
-      return this.onSuccess(agent as ScriptedAgent, params, params.thoughts, context.variables);
+  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: ThinkFuncParameters, rawParams: string | undefined) => Promise<AgentFunctionResult> {
+    return async (params: ThinkFuncParameters, rawParams: string | undefined): Promise<AgentFunctionResult> => {
+      return this.onSuccess(agent as ScriptedAgent, params, rawParams, params.thoughts, context.variables);
     };
   }
 
-  public onSuccess(scriptedAgent: ScriptedAgent, params: any, result: string, variables: AgentVariables) {
+  public onSuccess(scriptedAgent: ScriptedAgent, params: any, rawParams: string | undefined, result: string, variables: AgentVariables) {
     return {
       outputs: [
         {
@@ -50,13 +50,13 @@ export class ThinkFunction extends AgentFunctionBase<ThinkFuncParameters> {
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, params),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(this.name, result, variables),
       ]
     }
   }
 
-  public onFailure(scriptedAgent: ScriptedAgent, params: any, error: string, variables: AgentVariables): AgentFunctionResult {
+  public onFailure(scriptedAgent: ScriptedAgent, params: any, rawParams: string | undefined, error: string, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -65,7 +65,7 @@ export class ThinkFunction extends AgentFunctionBase<ThinkFuncParameters> {
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, params),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(this.name, error, variables)
       ]
     }

@@ -32,7 +32,7 @@ export class ReadFileFunction extends ScriptFunction<ReadFileFuncParameters> {
     }
   }
 
-  onSuccess(scriptedAgent: ScriptedAgent, params: ReadFileFuncParameters, result: string, variables: AgentVariables): AgentFunctionResult {
+  onSuccess(scriptedAgent: ScriptedAgent, params: ReadFileFuncParameters, rawParams: string | undefined, result: string, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -44,7 +44,7 @@ export class ReadFileFunction extends ScriptFunction<ReadFileFuncParameters> {
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, params),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(this.name, result, variables)
       ]
     }
