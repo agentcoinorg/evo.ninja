@@ -1,4 +1,4 @@
-import { AgentOutputType, trimText, ChatMessageBuilder, AgentFunctionResult } from "@evo-ninja/agent-utils"
+import { AgentOutputType, trimText, ChatMessageBuilder, AgentFunctionResult, AgentVariables } from "@evo-ninja/agent-utils"
 import { ScriptedAgent } from "../scriptedAgents"
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
@@ -32,7 +32,7 @@ export class ReadFileFunction extends ScriptFunction<ReadFileFuncParameters> {
     }
   }
 
-  onSuccess(scriptedAgent: ScriptedAgent, params: ReadFileFuncParameters, result: string): AgentFunctionResult {
+  onSuccess(scriptedAgent: ScriptedAgent, params: ReadFileFuncParameters, rawParams: string | undefined, result: string, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -44,8 +44,8 @@ export class ReadFileFunction extends ScriptFunction<ReadFileFuncParameters> {
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, params),
-        ChatMessageBuilder.functionCallResult(this.name, result)
+        ChatMessageBuilder.functionCall(this.name, rawParams),
+        ChatMessageBuilder.functionCallResult(this.name, result, variables)
       ]
     }
   }

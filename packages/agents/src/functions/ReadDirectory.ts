@@ -1,4 +1,4 @@
-import { AgentOutputType, trimText, ChatMessageBuilder, AgentFunctionResult } from "@evo-ninja/agent-utils"
+import { AgentOutputType, trimText, ChatMessageBuilder, AgentFunctionResult, AgentVariables } from "@evo-ninja/agent-utils"
 import { ScriptedAgent } from "../scriptedAgents"
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
@@ -29,7 +29,7 @@ export class ReadDirectoryFunction extends ScriptFunction<ReadDirectoryFuncParam
     }
   }
 
-  onSuccess(scriptedAgent: ScriptedAgent, params: ReadDirectoryFuncParameters, result: string): AgentFunctionResult {
+  onSuccess(scriptedAgent: ScriptedAgent, params: ReadDirectoryFuncParameters, rawParams: string | undefined, result: string, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -41,8 +41,8 @@ export class ReadDirectoryFunction extends ScriptFunction<ReadDirectoryFuncParam
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, params),
-        ChatMessageBuilder.functionCallResult(this.name, result)
+        ChatMessageBuilder.functionCall(this.name, rawParams),
+        ChatMessageBuilder.functionCallResult(this.name, result, variables)
       ]
     }
   }
