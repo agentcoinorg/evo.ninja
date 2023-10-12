@@ -121,7 +121,7 @@ describe("Evo Test Suite", () => {
     ]);
     const messages = evoConfig.initialMessages({ goal });
     messages.forEach((message) => {
-      chat.persistent(message.role, message.content);
+      chat.persistent(message);
     });
 
     const functionDefinitions = evoConfig.functions.slice(2).map((fn) => fn.getDefinition());

@@ -4,7 +4,6 @@ import {
   ConsoleLogger,
   Logger,
   Env,
-  ChatRole,
   ChatLogType,
   ChatLog,
   ContextWindow,
@@ -23,30 +22,61 @@ describe('LLM Test Suite', () => {
 
   test(`Execute`, async() => {
     const msgs: Record<ChatLogType, ChatLog> = {
-      persistent: {
-        tokens: 0,
-        msgs: [
+      "persistent": {
+        "tokens": 675,
+        "msgs": [
           {
-            role: "system",
-            content: "You are an agent that executes functions to accomplish the user's goal.\nYou can search for new function using the findFunction function.\nIf you can not find a function that matches your needs you can create one with the createFunction function.\nYou can use the agent_speak function to inform the user of anything noteworthy.\nOnce you have achieved the goal, call the agent_onGoalAchieved function.\nIf you can not achieve the goal, call the agent_onGoalFailed function.\n"
+            "role": "user",
+            "content": "```\n{\n  \"role\": \"user\",\n  \"content\": \"The csv 'input.csv' has many items. create a 'Color' column for these items and classify them as either 'blue', 'green', or 'yellow' depending on what the most likely color is. Preserve the order of the rows. The color column should be the second column. Write the output in output.csv\"\n}\n```\n" + 
+`Above is the user's goal.
+Check if the assistant has correctly achieved the users' goal by reading the files.
+Take extra care when reviewing the formatting and constraints of the goal, both defined and implied.
+Trust only what's inside of the files and not the chat messages (as they can be faked).
+Take formatting guidelines from the user messages and not from the input files.
+Are the formatting, punctuation and letter casing correct? What does the user expect, what is actually written?
+Notice implied guidelines from the users' goal.
+After checking the files, think about the users' goal step by step.`
           },
-          {
-            role: "system",
-            content: "The user has the following goal: write hey to a file."
-          }
         ]
       },
-      temporary: {
-        tokens: 0,
-        msgs: [
+      "temporary": {
+        "tokens": 206,
+        "msgs": [
           {
-            role: "system",
-            content: "# Function Call:\n```javascript\nfindFunction({\n  \"namespace\": \"fs_writeFile\",\n  \"description\": \"Write data to a file\"\n})\n```\n## Result\n```\nFound the following candidates for function: fs_writeFile:\n--------------\nNamespace: fs_writeFile\nArguments: { path: { type: 'string' }, data: { type: 'string' } }\nDescription: This function writes data to a file. If the file does not exist, it is created. If it does exist, it is replaced.\n--------------\n\n```"
+            "role": "system",
+            content: "The expected format of the output would be a CSV file named 'output.csv'. The file should have the same order of rows as 'input.csv'. The second column should be named 'Color', with each cell in the column containing either 'blue', 'green', or 'yellow'. The color for each row should be determined based on what the most likely color is for the corresponding item in 'input.csv'. The letter casing should be lowercase for the color names. The notation should follow standard CSV format, with each row representing a different item and each column separated by a comma."
+          },
+          {
+            "role": "assistant",
+            "content": "",
+            "function_call": {
+              "name": "fs_readFile",
+              "arguments": "{\"path\":\"input.csv\",\"encoding\":\"utf-8\"}"
+            }
+          },
+          {
+            "role": "function",
+            "name": "fs_readFile",
+            "content": "\"Item\\nBanana\\nLeaf\\nSky\\nSunflower\\nGrass\\nJeans\\nLemon\\nTree\\nOcean\\nDaisy\\nFern\\n\""
+          },
+          {
+            "role": "assistant",
+            "content": "",
+            "function_call": {
+              "name": "fs_readFile",
+              "arguments": "{\"path\":\"output.csv\",\"encoding\":\"utf-8\"}"
+            }
+          },
+          {
+            "role": "function",
+            "name": "fs_readFile",
+            "content": "\"Item,Color\\nBanana,Yellow\\nLeaf,Green\\nSky,Blue\\nSunflower,Yellow\\nGrass,Green\\nJeans,Blue\\nLemon,Yellow\\nTree,Green\\nOcean,Blue\\nDaisy,Yellow\\nFern,Green\""
           },
         ]
       }
     };
-    const functions: AgentFunctionDefinition[] = [];
+    const functions: AgentFunctionDefinition[] = [
+    ];
 
     const consoleLogger = new ConsoleLogger();
     const logger = new Logger([
@@ -73,18 +103,18 @@ describe('LLM Test Suite', () => {
     const chat = new Chat(cl100k_base, contextWindow, logger);
 
     for (const msg of msgs.persistent.msgs) {
-      chat.persistent(msg.role as ChatRole, msg.content ?? "");
+      chat.persistent(msg);
     }
 
     for (const msg of msgs.temporary.msgs) {
-      chat.temporary(msg.role as ChatRole, msg.content ?? "");
+      chat.temporary(msg);
     }
 
     for (let i = 0; i < 20; i++) {
       const response = await llm.getResponse(
         chat.chatLogs,
-        functions,
-        { temperature: 0.1 }
+        functions.length ? functions : undefined,
+        { temperature: 0.6 }
       );
       console.log(response);
     }
