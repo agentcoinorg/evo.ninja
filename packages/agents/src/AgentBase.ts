@@ -37,8 +37,8 @@ export interface AgentBaseConfig<TRunArgs> {
   timeout?: Timeout;
 }
 
-export abstract class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> implements Agent<TRunArgs> {
-  private _functions: AgentFunctionBase<unknown>[] = [];
+export class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> implements Agent<TRunArgs> {
+  private _functions: AgentFunctionBase<unknown>[];
 
   constructor(
     public readonly config: AgentBaseConfig<TRunArgs>,
