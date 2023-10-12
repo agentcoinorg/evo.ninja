@@ -26,7 +26,6 @@ export type ExecuteAgentFunction = <TContext>(
   agentFunctions: AgentFunction<TContext>[],
 ) => Promise<ExecuteAgentFunctionResult>;
 
-
 export function processFunctionAndArgs<TContext>(
   name: string | undefined,
   args: string | undefined,
@@ -52,6 +51,7 @@ export function processFunctionAndArgs<TContext>(
     return ResultErr(UNDEFINED_FUNCTION_ARGS(name));
   }
 
+  // TODO: insert variables here
   let fnArgs;
   try {
     fnArgs = args

@@ -45,6 +45,7 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
         continue;
       }
 
+      // TODO: pass down un-processed args + use then for all `ChatMessageBuilder.functionCall()` usages
       const { result, functionCalled } = await executeAgentFunction(sanitizedFunctionAndArgs.value, context)
 
       result.messages.forEach(x => chat.temporary(x));
