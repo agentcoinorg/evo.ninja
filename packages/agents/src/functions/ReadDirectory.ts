@@ -29,7 +29,7 @@ export class ReadDirectoryFunction extends ScriptFunction<ReadDirectoryFuncParam
     }
   }
 
-  onSuccess(scriptedAgent: ScriptedAgent, params: ReadDirectoryFuncParameters, result: string, variables: AgentVariables): AgentFunctionResult {
+  onSuccess(scriptedAgent: ScriptedAgent, params: ReadDirectoryFuncParameters, rawParams: string | undefined, result: string, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -41,7 +41,7 @@ export class ReadDirectoryFunction extends ScriptFunction<ReadDirectoryFuncParam
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, params),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(this.name, result, variables)
       ]
     }

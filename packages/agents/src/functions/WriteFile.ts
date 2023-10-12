@@ -36,7 +36,7 @@ export class WriteFileFunction extends ScriptFunction<WriteFileFuncParameters> {
     }
   }
 
-  onSuccess(scriptedAgent: ScriptedAgent, params: WriteFileFuncParameters, result: string, variables: AgentVariables): AgentFunctionResult {
+  onSuccess(scriptedAgent: ScriptedAgent, params: WriteFileFuncParameters, rawParams: string | undefined, result: string, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -48,7 +48,7 @@ export class WriteFileFunction extends ScriptFunction<WriteFileFuncParameters> {
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, params),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(this.name, "Successfully wrote file.", variables)
       ]
     }
