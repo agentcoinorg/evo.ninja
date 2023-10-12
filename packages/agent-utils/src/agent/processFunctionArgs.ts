@@ -8,6 +8,7 @@ import { AgentFunction, AgentFunctionResult } from "./AgentFunction";
 
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
 import JSON5 from "json5";
+import {AgentVariables} from "./AgentVariables";
 
 export interface ExecuteAgentFunctionCalled {
   name: string;
@@ -30,6 +31,7 @@ export function processFunctionAndArgs<TContext>(
   name: string | undefined,
   args: string | undefined,
   agentFunctions: AgentFunction<TContext>[],
+  variables: AgentVariables
 ): Result<[unknown, AgentFunction<TContext>], string> {
   if (!name) {
     return ResultErr(UNDEFINED_FUNCTION_NAME);
@@ -51,14 +53,22 @@ export function processFunctionAndArgs<TContext>(
     return ResultErr(UNDEFINED_FUNCTION_ARGS(name));
   }
 
-  // TODO: insert variables here
-  let fnArgs;
+  let fnArgs = args;
+  let i = 0;
+  while ((i = fnArgs.indexOf(AgentVariables.Prefix, i)) !== -1) {
+    const endIdx = fnArgs.indexOf(AgentVariables.Suffix, i);
+    const varWithSyntax = fnArgs.substring(i, endIdx + 1);
+    const varContents = variables.get(varWithSyntax);
+    if (varContents) {
+      fnArgs = fnArgs.replace(varWithSyntax, varContents);
+      i += varContents.length;
+    }
+  }
+
   try {
-    fnArgs = args
-      ? JSON5.parse(args)
-      : undefined;
+    fnArgs = JSON5.parse(fnArgs);
   } catch(err: any) {
-    return ResultErr(UNPARSABLE_FUNCTION_ARGS(name, args, err));
+    return ResultErr(UNPARSABLE_FUNCTION_ARGS(name, fnArgs, err));
   }
 
   return ResultOk([fnArgs, func]);
