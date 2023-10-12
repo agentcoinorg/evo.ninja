@@ -17,9 +17,11 @@ export class CreateScriptFunction extends AgentFunctionBase<CreateScriptFuncPara
   get name(): string {
     return "createScript";
   }
+
   get description(): string {
     return `Create a script using JavaScript.`;
   }
+
   get parameters() {
     return {
       type: "object",
