@@ -39,6 +39,20 @@ export class AgentVariables {
     this._variables.set(name, value);
   }
 
+  read(name: string, index: number, count: number): string {
+    if (AgentVariables.hasSyntax(name)) {
+      name = AgentVariables.stripSyntax(name);
+    }
+
+    const variable = this._variables.get(name);
+
+    if (variable) {
+      return variable.substring(index, count);
+    } else {
+      return "";
+    }
+  }
+
   save(funcName: string, result: string): string {
     const count = (this._funcCounters.get(funcName) || 0) + 1;
     const varName = `${funcName}_${count}`;

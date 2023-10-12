@@ -3,13 +3,12 @@ import { AgentFunctionBase } from "../AgentFunctionBase";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { AgentBaseContext } from "../AgentBase";
 
-interface ReadVarFuncParameters { 
+interface ReadVarFuncParameters {
   name: string,
   start: number,
   count: number
 };
 
-// TODO: need to visit this implementation
 export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameters> {
   constructor(private maxVarLength: number = 3000) {
     super();
@@ -49,14 +48,14 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
     return async (params: ReadVarFuncParameters): Promise<AgentFunctionResult> => {
       const variable = context.variables.get(params.name);
       if (!variable) {
-        return this.onError(params);
-      } 
+        return this.onError(params, context.variables);
+      }
 
       return this.onSuccess(params, variable);
     };
   }
 
-  private onSuccess(params: ReadVarFuncParameters, varValue: string): AgentFunctionResult {
+  private onSuccess(params: ReadVarFuncParameters, varValue: string | undefined): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -71,15 +70,16 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, params),
-        ChatMessageBuilder.functionCallResult(
-          this.name,
-          this.readGlobalVarMessage(params.name, varValue, params.start, params.count)
-        )
+        {
+          role: "function",
+          name: this.name,
+          content: this.readGlobalVarMessage(params.name, varValue, params.start, params.count)
+        }
       ]
     }
   }
 
-  private onError(params: ReadVarFuncParameters): AgentFunctionResult {
+  private onError(params: ReadVarFuncParameters, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -92,7 +92,8 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
         ChatMessageBuilder.functionCall(this.name, params),
         ChatMessageBuilder.functionCallResult(
           this.name,
-          `Error: Variable \${${params.name}} not found.`
+          `Error: Variable \${${params.name}} not found.`,
+          variables
         )
       ]
     }

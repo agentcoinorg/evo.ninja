@@ -5,10 +5,9 @@ import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/S
 import { AgentBaseContext } from "../AgentBase";
 
 interface ExecuteScriptFuncParameters { 
-  namespace: string, 
-  description: string, 
-  arguments: string,
-  variable?: string
+  namespace: string;
+  arguments: string;
+  variable?: string;
 };
 
 export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncParameters> {
@@ -41,7 +40,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
           description: "The name of a variable to store the script's result in"
         }
       },
-      required: ["namespace", "arguments", "result"],
+      required: ["namespace", "arguments", "variable"],
       additionalProperties: false
     }
   }
