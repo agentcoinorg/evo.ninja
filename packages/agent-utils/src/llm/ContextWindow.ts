@@ -63,7 +63,7 @@ export class ContextWindow {
   }
 
   public shouldSummarize(tokens: number): boolean {
-    return tokens >= this._maxContextTokens;
+    return (tokens + this._llm.getMaxResponseTokens()) >= this._maxContextTokens;
   }
 
   public async summarizeChat(
@@ -102,6 +102,10 @@ export class ContextWindow {
     tokenizer: Tokenizer
   ): Promise<ChatLog> {
     const message = await this._summarizeMessages(chatLog, tokenizer);
+
+    if (message?.content) {
+      message.content = `Summarization: ${message?.content || ""}`
+    }
 
     const tokens = tokenizer.encode(message?.content || "").length;
 

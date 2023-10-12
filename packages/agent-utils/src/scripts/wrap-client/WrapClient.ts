@@ -16,6 +16,7 @@ import * as  path from "path-browserify"
 import axios from "axios";
 import * as fuzzysort from "fuzzysort";
 import { load } from "cheerio";
+import { Configuration, OpenAIApi } from "openai";
 
 const stringSimilarity = require("string-similarity");
 export class WrapClient extends PolywrapClient {
@@ -248,10 +249,96 @@ export class WrapClient extends PolywrapClient {
           }
         }
       })))
+      .setPackage("plugin/openai", PluginPackage.from(module => ({
+        "search": async (args: { url: string; query: string }) => {
+          const configuration = new Configuration({
+            apiKey: env?.OPENAI_API_KEY,
+          })
+          const api = new OpenAIApi(configuration)
+      
+          const response = await axios.get(args.url, {
+            headers: {
+              "User-Agent":
+                "Mozilla/5.0 (X11; Linux x86_64; rv:107.0) Gecko/20100101 Firefox/107.0",
+            },
+          });
+      
+          const clean = (text: string) => {
+            return text.replaceAll("\t", "")
+                  .replaceAll("\\\\t", "")
+                  .replaceAll("\n", " ")
+                  .replaceAll("\\\\n", " ")
+                  .replace(/ +(?= )/g, "")
+                  .trim()
+          }
+      
+          const html = response.data;
+          const $ = load(html);
+      
+          $("script").remove();
+          $("style").remove();
+      
+          let siteText: string = "";
+          $("*").each((_, element) => {
+            siteText += $(element).text().trim() + " ";
+          })
+      
+          const siteTextClean = clean(siteText);
+          const getResponse = async (text: string, cursor = 0, messages: string[] = []): Promise<string[]> => {
+            const cursorEnd = cursor + 16000;
+            console.log(`Cursor: ${cursor} - ${cursorEnd}`);
+            const chunk = text.substring(cursor, cursorEnd);
+      
+            if (chunk.length < 1) {
+              return messages;
+            }
+      
+            const completion = await api.createChatCompletion({
+              messages: [
+                {
+                  role: "user",
+                  content: `I want to get ${args.query} from the following text: ${chunk}.
+                  Respond "NULL" if you cannot find it.
+                  Specify if the information is incomplete but still return it`,
+                },
+              ],
+              model: "gpt-3.5-turbo-16k",
+              temperature: 0,
+            })
+      
+            console.log(completion.statusText);
+      
+            if (completion.status === 429) {
+              console.log("Rate limited, waiting 10 seconds...");
+              await new Promise((resolve) => setTimeout(resolve, 20000));
+              return await getResponse(text, cursor);
+            }
+      
+            if (completion.data.choices.length < 1) {
+              throw Error("Chat completion choices length was 0...");
+            }
+      
+            const choice = completion.data.choices[0];
+      
+            if (!choice.message) {
+              throw Error(
+                `Chat completion message was undefined: ${JSON.stringify(choice, null, 2)}`
+              );
+            }
+      
+            return await getResponse(text, cursorEnd, [...messages, choice.message.content ?? ""]);
+          }
+      
+          const messages = await getResponse(siteTextClean);
+          const filteredMessages = messages.filter((message) => message !== "NULL");
+      
+          return JSON.stringify(filteredMessages);
+        }
+      })))
       .setPackage("plugin/fuzzySearch", PluginPackage.from(module => ({
         "search": async (args: { url: string, queryKeywords: string[] }) => {
           try {
-            const MAX_RESULT_SIZE = 6000;
+            const MAX_RESULT_SIZE = 5000;
 
             const response = await axios.get(args.url, {
               headers: {
