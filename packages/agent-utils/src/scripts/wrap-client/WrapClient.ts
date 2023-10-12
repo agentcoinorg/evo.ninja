@@ -251,18 +251,42 @@ export class WrapClient extends PolywrapClient {
       .setPackage("plugin/fuzzySearch", PluginPackage.from(module => ({
         "search": async (args: { url: string, queryKeywords: string[] }) => {
           try {
+            const MAX_RESULT_SIZE = 6000;
+
             const response = await axios.get(args.url, {
               headers: {
                 "User-Agent":
                   "Mozilla/5.0 (X11; Linux x86_64; rv:107.0) Gecko/20100101 Firefox/107.0",
               },
             });
+
+            const clean = (text: string) => {
+              return text.replaceAll("\t", "")
+                    .replaceAll("\\\\t", "")
+                    .replaceAll("\n", " ")
+                    .replaceAll("\\\\n", " ")
+                    .replace(/ +(?= )/g, "")
+                    .trim()
+            }
+
             const html = response.data;
             const $ = load(html);
 
             $("script").remove();
+            $("style").remove();
 
-            const results: string[] = [];
+            let siteText: string = "";
+            $("*").each((_, element) => {
+              siteText += $(element).text().trim() + " ";
+            })
+
+            const siteTextClean = clean(siteText);
+
+            if (siteTextClean.length < MAX_RESULT_SIZE) {
+              return siteTextClean;
+            }
+
+            const chunks: string[] = [];
 
             $("*").each((_, element) => {
               const text = $(element).text().trim();
@@ -286,40 +310,52 @@ export class WrapClient extends PolywrapClient {
                     .join(" ");
               }
 
-              results.push(context);
+              chunks.push(context);
             });
 
-            let cleanResults = Array.from(
+            const cleanChunks = Array.from(
               new Set(
-                results.map((result) => {
-                  return result
-                    .replaceAll("\t", "")
-                    .replaceAll("\\\\t", "")
-                    .replaceAll("\n", " ")
-                    .replaceAll("\\\\n", " ")
-                    .replace(/ +(?= )/g, "")
-                    .trim();
-                })
+                chunks.map((result) => clean(result))
               )
             );
-            cleanResults = cleanResults.filter((result, i) => {
+
+            const fileteredChunks = cleanChunks.filter((chunk, i) => {
               if (i === 0) {
                 return true;
               }
 
-              const previousResult = results[i - 1];
+              const previousResult = cleanChunks[i - 1];
               const similarity = stringSimilarity.compareTwoStrings(
-                result,
+                chunk,
                 previousResult
               );
 
-              return similarity < 0.8;
+              return similarity < 0.9;
             });
 
-            const sortedResults = fuzzysort
-              .go(args.queryKeywords.join(" "), cleanResults)
-              .map((result) => result.target.substring(0, 3000));
-            return JSON.stringify(sortedResults.slice(0, 5));
+            const sortedChunks = fuzzysort
+              .go(args.queryKeywords.join(" "), fileteredChunks)
+              .map((result) => result.target);
+
+            const resultingChunks: string[] = [];
+
+            sortedChunks.forEach((chunk) => {
+              const resultString = resultingChunks.join(" ");
+              const charactersLeft = MAX_RESULT_SIZE - resultString.length;
+        
+              if (charactersLeft <= 0) {
+                return;
+              }
+        
+              if (chunk.length <= charactersLeft) {
+                resultingChunks.push(chunk);
+                return;
+              }
+        
+              resultingChunks.push(chunk.substring(0, charactersLeft));
+            })
+        
+            return resultingChunks.join(" ");
           } catch (e) {
             throw new Error("Error in fuzzy search: " + e.message.toString());
           }
