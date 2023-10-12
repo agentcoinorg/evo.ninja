@@ -23,9 +23,9 @@ export class ChatMessageBuilder {
   static functionCallResult(funcName: string, result: string, variables: AgentVariables): ChatMessage {
     if (variables.shouldSave(result)) {
       const varName = variables.save(funcName, result);
-      result = `Result stored in variable named \${${varName}}.\nreadVariable("\${${varName}}", 0, ${variables.saveThreshold})\n${
+      result = `Result is too large, stored in variable named \${${varName}}.\nResult Preview readVariable("\${${varName}}", 0, ${variables.saveThreshold}):\n${
         result.substring(0, variables.saveThreshold)
-      }`;
+      }...${result.length - variables.saveThreshold} more bytes...`;
     }
 
     return {

@@ -5,10 +5,10 @@ import {
   UNPARSABLE_FUNCTION_ARGS,
 } from "./prompts";
 import { AgentFunction, AgentFunctionResult } from "./AgentFunction";
+import { AgentVariables } from "./AgentVariables";
 
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
 import JSON5 from "json5";
-import {AgentVariables} from "./AgentVariables";
 
 export interface ExecuteAgentFunctionCalled {
   name: string;
@@ -44,34 +44,34 @@ export function processFunctionAndArgs<TContext>(
     name = name.replace("functions.", "");
   }
 
+  // Find the agent function
   const func = agentFunctions.find((f) => f.definition.name === name);
   if (!func) {
     return ResultErr(FUNCTION_NOT_FOUND(name));
   }
 
+  // Error if args are undefined
   if (!args) {
     return ResultErr(UNDEFINED_FUNCTION_ARGS(name));
   }
 
-  let fnArgs = args;
-  let i = 0;
-  while ((i = fnArgs.indexOf(AgentVariables.Prefix, i)) !== -1) {
-    const endIdx = fnArgs.indexOf(AgentVariables.Suffix, i);
-    const varWithSyntax = fnArgs.substring(i, endIdx + 1);
-    const varContents = variables.get(varWithSyntax);
-    if (varContents) {
-      fnArgs = fnArgs.replace(varWithSyntax, varContents);
-      i += varContents.length;
-    }
-  }
-
   try {
-    fnArgs = JSON5.parse(fnArgs);
-  } catch(err: any) {
-    return ResultErr(UNPARSABLE_FUNCTION_ARGS(name, fnArgs, err));
-  }
+    const parsedArgs = args ? JSON5.parse(args) : undefined;
 
-  return ResultOk([fnArgs, func]);
+    if (typeof parsedArgs === "object") {
+      // For each object entry
+      for (const [key, value] of Object.entries(parsedArgs)) {
+        // Check if the value is a variable
+        if (typeof value === "string" && AgentVariables.hasSyntax(value)) {
+          // Replace it in-place with its true value
+          parsedArgs[key] = variables.get(value);
+        }
+      }
+    }
+    return ResultOk([parsedArgs, func]);
+  } catch(err: any) {
+    return ResultErr(UNPARSABLE_FUNCTION_ARGS(name, args, err));
+  }
 }
 
 export const executeAgentFunction = async <TContext>(

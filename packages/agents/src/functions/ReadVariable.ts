@@ -100,24 +100,19 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
   }
 
   private readGlobalVarOutput(varName: string, value: string | undefined, start: number, count: number) {
-    if (!value || value === "\"undefined\"") {
-      return `## Variable \${${varName}} is undefined`;
-    } else if (value.length > this.maxVarLength) {
-      const val = value.substring(start, start + Math.min(count, this.maxVarLength));
-      return `## Read variable \${${varName}}, but it is too large, JSON preview (start: ${start}, count: ${Math.min(count, this.maxVarLength)}):\n\`\`\`\n${val}...\n\`\`\``;
-    } else {
-      return `## Read variable \${${varName}}, JSON:\n\`\`\`\n${value}\n\`\`\``;
-    }
+    return `## ${this.readGlobalVarMessage(varName, value, start, count)}`;
   }
 
   private readGlobalVarMessage(varName: string, value: string | undefined, start: number, count: number) {
     if (!value || value === "\"undefined\"") {
       return `Variable \${${varName}} is undefined`;
-    } else if (value.length > this.maxVarLength) {
-      const val = value.substring(start, start + Math.min(count, this.maxVarLength));
-      return `Read variable \${${varName}}, but it is too large, JSON preview (start: ${start}, count: ${Math.min(count, this.maxVarLength)}):\n\`\`\`\n${val}...\n\`\`\``;
+    } else if (count > this.maxVarLength) {
+      const cnt = Math.min(count, this.maxVarLength);
+      const val = value.substring(start, start + cnt);
+      const warn = `Warning: maximum read length is ${this.maxVarLength} bytes, result will be shortened.`;
+      return `${warn}\nReading ${start}-${start + cnt} bytes of variable \${${varName}} (length ${value.length}):\n\`\`\`\n${val}...\n\`\`\``;
     } else {
-      return `Read variable \${${varName}}, JSON:\n\`\`\`\n${value}\n\`\`\``;
+      return `Reading ${start}-${start + count} bytes of variable \${${varName}} (length ${value.length}):\n\`\`\`\n${value}\n\`\`\``;
     }
   }
 }

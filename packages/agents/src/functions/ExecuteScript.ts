@@ -54,16 +54,19 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
           return this.onError(params.namespace, this.scriptNotFound(params), params, rawParams, context.variables);
         }
 
-        let args: any;
+        let args: unknown;
         args = params.arguments ? params.arguments.replace(/\{\{/g, "\\{\\{").replace(/\}\}/g, "\\}\\}") : "{}";
         try {
-
           args = JSON5.parse(params.arguments);
 
+          if (typeof args !== "object") {
+            throw "Args must be an object.";
+          }
+
           if (args) {
-            for (const key of Object.keys(args)) {
-              if (typeof args[key] === "string" && AgentVariables.hasSyntax(args[key])) {
-                args[key] = context.variables.get(args[key]);
+            for (const [key, value] of Object.entries(args)) {
+              if (typeof value === "string" && AgentVariables.hasSyntax(value)) {
+                (args as Record<string, unknown>)[key] = context.variables.get(value);
               }
             }
           }
@@ -72,7 +75,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
         }
 
         const globals: JsEngine_GlobalVar[] =
-          Object.entries(args).map((entry) => ({
+          Object.entries(args as Record<string, unknown>).map((entry) => ({
               name: entry[0],
               value: JSON.stringify(entry[1]),
             })

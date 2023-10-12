@@ -53,28 +53,30 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
     return async (params: any, rawParams?: string): Promise<AgentFunctionResult> => {
       const scriptName = this.name.split("_").join(".");
       const script = this.scripts.getScriptByName(scriptName);
-  
+
       if (!script) {
         return this.onFailure(scriptedAgent, params, rawParams, `Unable to find the script ${scriptName}`, context.variables);
       }
-  
+
       const globals: JsEngine_GlobalVar[] = Object.entries(params).map(
         (entry) => ({
           name: entry[0],
           value: JSON.stringify(entry[1])
         })
       );
+
       const jsEngine = new JsEngine(this.client);
       const result = await jsEngine.evalWithGlobals({
         src: shimCode(script.code),
         globals
       });
-  
+
       if (result.ok) {
         if (result.value.error == null) {
           const jsPromiseOutput = this.client.jsPromiseOutput;
           if (jsPromiseOutput.ok) {
-            return this.onSuccess(scriptedAgent, params, rawParams, JSON.stringify(jsPromiseOutput.value), context.variables);
+            const result = typeof jsPromiseOutput.value !== "string" ? JSON.stringify(jsPromiseOutput.value) : jsPromiseOutput.value;
+            return this.onSuccess(scriptedAgent, params, rawParams, result, context.variables);
           } else {
             return this.onFailure(scriptedAgent, params, rawParams, jsPromiseOutput.error.message, context.variables);
           }
