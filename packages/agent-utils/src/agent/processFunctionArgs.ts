@@ -12,7 +12,7 @@ import {AgentVariables} from "./AgentVariables";
 
 export interface ExecuteAgentFunctionCalled {
   name: string;
-  args: any;
+  params: any;
 }
 
 export interface ExecuteAgentFunctionResult {
@@ -75,16 +75,16 @@ export function processFunctionAndArgs<TContext>(
 }
 
 export const executeAgentFunction = async <TContext>(
-  [args, func]: [unknown, AgentFunction<TContext>],
-  rawArgs: string | undefined,
+  [params, func]: [unknown, AgentFunction<TContext>],
+  rawParams: string | undefined,
   context: TContext
 ): Promise<ExecuteAgentFunctionResult> => {
   const executor = func.buildExecutor(context);
   return {
-    result: await executor(args, rawArgs),
+    result: await executor(params, rawParams),
     functionCalled: {
       name: func.definition.name,
-      args,
+      params: rawParams,
     },
   };
 };
