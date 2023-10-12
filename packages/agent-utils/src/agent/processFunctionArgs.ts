@@ -66,11 +66,12 @@ export function processFunctionAndArgs<TContext>(
 
 export const executeAgentFunction = async <TContext>(
   [args, func]: [unknown, AgentFunction<TContext>],
+  rawArgs: string | undefined,
   context: TContext
 ): Promise<ExecuteAgentFunctionResult> => {
   const executor = func.buildExecutor(context);
   return {
-    result: await executor(args),
+    result: await executor(args, rawArgs),
     functionCalled: {
       name: func.definition.name,
       args,

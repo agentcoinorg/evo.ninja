@@ -31,13 +31,13 @@ export class VerifyGoalAchievedFunction extends AgentFunctionBase<FunctionParams
     }
   }
 
-  onSuccess(name: string, params: any, messages: string[], result: AgentOutput, variables: AgentVariables): AgentFunctionResult {
+  onSuccess(name: string, params: any, rawParams: string | undefined, messages: string[], result: AgentOutput, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         result
       ],
       messages: [
-        ChatMessageBuilder.functionCall(name, params),
+        ChatMessageBuilder.functionCall(name, rawParams),
         ...messages.map(x => ({
           role: "assistant",
           content: x,
@@ -51,7 +51,7 @@ export class VerifyGoalAchievedFunction extends AgentFunctionBase<FunctionParams
     }
   }
 
-  onFailure(name: string, params: any, error: string | undefined, variables: AgentVariables): AgentFunctionResult {
+  onFailure(name: string, params: any, rawParams: string | undefined, error: string | undefined, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -61,7 +61,7 @@ export class VerifyGoalAchievedFunction extends AgentFunctionBase<FunctionParams
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(name, params),
+        ChatMessageBuilder.functionCall(name, rawParams),
         ChatMessageBuilder.functionCallResult(
           name,
           `Error: ${error}`,
@@ -72,7 +72,7 @@ export class VerifyGoalAchievedFunction extends AgentFunctionBase<FunctionParams
   }
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext) {
-    return async (params: FunctionParams): Promise<AgentFunctionResult> => {
+    return async (params: FunctionParams, rawParams: string | undefined): Promise<AgentFunctionResult> => {
       const scriptedAgent = new GoalVerifierAgent(
         {
           chat: new Chat(context.chat.tokenizer),
@@ -101,6 +101,7 @@ export class VerifyGoalAchievedFunction extends AgentFunctionBase<FunctionParams
             return this.onFailure(
               this.name,
               params,
+              rawParams,
               response.value.error,
               context.variables
             );
@@ -109,6 +110,7 @@ export class VerifyGoalAchievedFunction extends AgentFunctionBase<FunctionParams
           return this.onSuccess(
             this.name,
             params,
+            rawParams,
             messages,
             response.value.value,
             context.variables

@@ -14,5 +14,5 @@ export interface AgentFunction<TContext> {
   definition: AgentFunctionDefinition;
   buildExecutor(
     context: TContext
-  ): (args: any) => Promise<AgentFunctionResult>;
+  ): (args: any, rawParams: string | undefined) => Promise<AgentFunctionResult>;
 }

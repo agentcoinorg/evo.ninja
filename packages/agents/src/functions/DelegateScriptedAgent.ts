@@ -46,13 +46,13 @@ export class DelegateAgentFunction<
     }
   }
 
-  onSuccess(name: string, params: any, messages: string[], result: AgentOutput, variables: AgentVariables): AgentFunctionResult {
+  onSuccess(name: string, params: any, rawParams: string | undefined, messages: string[], result: AgentOutput, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         result
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.delegateScriptedAgentFnName(name), params),
+        ChatMessageBuilder.functionCall(this.delegateScriptedAgentFnName(name), rawParams),
         ...messages.map(x => ({
           role: "assistant",
           content: x,
@@ -66,7 +66,7 @@ export class DelegateAgentFunction<
     }
   }
 
-  onFailure(name: string, params: any, error: string | undefined, variables: AgentVariables): AgentFunctionResult {
+  onFailure(name: string, params: any, rawParams: string | undefined, error: string | undefined, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -76,7 +76,7 @@ export class DelegateAgentFunction<
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.delegateScriptedAgentFnName(name), params),
+        ChatMessageBuilder.functionCall(this.delegateScriptedAgentFnName(name), rawParams),
         ChatMessageBuilder.functionCallResult(
           this.delegateScriptedAgentFnName(name),
           `Error: ${error}`,
@@ -87,7 +87,7 @@ export class DelegateAgentFunction<
   }
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext) {
-    return async (params: DelegateAgentParams): Promise<AgentFunctionResult> => {
+    return async (params: DelegateAgentParams, rawParams: string | undefined): Promise<AgentFunctionResult> => {
       const scriptedAgent = this.delegatedAgent;
 
       let iterator = scriptedAgent.run({
@@ -104,6 +104,7 @@ export class DelegateAgentFunction<
             return this.onFailure(
               this.delegatedAgent.config.name,
               params,
+              rawParams,
               response.value.error,
               context.variables
             );
@@ -112,6 +113,7 @@ export class DelegateAgentFunction<
           return this.onSuccess(
             this.delegatedAgent.config.name,
             params,
+            rawParams,
             messages,
             response.value.value,
             context.variables

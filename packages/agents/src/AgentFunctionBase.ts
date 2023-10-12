@@ -6,7 +6,7 @@ export abstract class AgentFunctionBase<TParams> {
   abstract get description(): string;
   abstract get parameters(): any;
 
-  abstract buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: TParams) => Promise<AgentFunctionResult>;
+  abstract buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: TParams, rawParams: string | undefined) => Promise<AgentFunctionResult>;
 
   getDefinition(): AgentFunctionDefinition {
     return {

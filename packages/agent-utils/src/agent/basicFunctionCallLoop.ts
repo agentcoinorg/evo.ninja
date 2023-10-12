@@ -39,6 +39,7 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
     if (response.function_call) {
       const { name, arguments: args } = response.function_call;
 
+      // replace AgentVariable names with their values
       if (args) {
         let i = 0;
         while ((i = args.indexOf(AgentVariables.Prefix)) !== -1) {
@@ -60,7 +61,7 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
       }
 
       // TODO: pass down un-processed args + use then for all `ChatMessageBuilder.functionCall()` usages
-      const { result, functionCalled } = await executeAgentFunction(sanitizedFunctionAndArgs.value, context)
+      const { result, functionCalled } = await executeAgentFunction(sanitizedFunctionAndArgs.value, args, context)
 
       result.messages.forEach(x => chat.temporary(x));
       const terminate = functionCalled && shouldTerminate(functionCalled, result);

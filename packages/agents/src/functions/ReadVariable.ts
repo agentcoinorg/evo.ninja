@@ -7,7 +7,7 @@ interface ReadVarFuncParameters {
   name: string,
   start: number,
   count: number
-};
+}
 
 export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameters> {
   constructor(private maxVarLength: number = 3000) {
@@ -44,18 +44,18 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
     }
   }
 
-  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: ReadVarFuncParameters) => Promise<AgentFunctionResult> {
-    return async (params: ReadVarFuncParameters): Promise<AgentFunctionResult> => {
+  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: ReadVarFuncParameters, rawParams: string | undefined) => Promise<AgentFunctionResult> {
+    return async (params: ReadVarFuncParameters, rawParams: string | undefined): Promise<AgentFunctionResult> => {
       const variable = context.variables.get(params.name);
       if (!variable) {
-        return this.onError(params, context.variables);
+        return this.onError(params, rawParams, context.variables);
       }
 
-      return this.onSuccess(params, variable);
+      return this.onSuccess(params, rawParams, variable);
     };
   }
 
-  private onSuccess(params: ReadVarFuncParameters, varValue: string | undefined): AgentFunctionResult {
+  private onSuccess(params: ReadVarFuncParameters, rawParams: string | undefined, varValue: string | undefined): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -69,7 +69,7 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, params),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         {
           role: "function",
           name: this.name,
@@ -79,7 +79,7 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
     }
   }
 
-  private onError(params: ReadVarFuncParameters, variables: AgentVariables): AgentFunctionResult {
+  private onError(params: ReadVarFuncParameters, rawParams: string | undefined, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -89,7 +89,7 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, params),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
           `Error: Variable \${${params.name}} not found.`,
