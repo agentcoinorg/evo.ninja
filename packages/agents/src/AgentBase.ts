@@ -38,14 +38,10 @@ export interface AgentBaseConfig<TRunArgs> {
 }
 
 export class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> implements Agent<TRunArgs> {
-  private _functions: AgentFunctionBase<unknown>[];
-
   constructor(
     public readonly config: AgentBaseConfig<TRunArgs>,
     protected context: TAgentBaseContext
   ) {
-    this._functions = [...this.config.functions];
-
     // Default functions that are added to every agent
     const defaultFunctions = [
       new ReadVariableFunction()
@@ -56,7 +52,7 @@ export class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> imp
       defaultFunctions.map((x) => ([x.name, x]))
     );
 
-    this._functions.forEach((fn) => {
+    this.config.functions.forEach((fn) => {
       if (shouldAddDefault.has(fn.name)) {
         shouldAddDefault.set(fn.name, undefined);
       }
@@ -65,7 +61,7 @@ export class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> imp
     // Add defaults
     shouldAddDefault.forEach((value) => {
       if (value) {
-        this._functions.push(value);
+        this.config.functions.push(value);
       }
     });
   }
@@ -91,7 +87,7 @@ export class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> imp
       });
 
       // Add functions to chat
-      this._functions.forEach((fn) => {
+      this.config.functions.forEach((fn) => {
         chat.addFunction(fn.getDefinition());
       });
 
@@ -106,7 +102,7 @@ export class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> imp
 
       return yield* basicFunctionCallLoop(
         this.context,
-        this._functions.map((fn) => {
+        this.config.functions.map((fn) => {
           return {
             definition: fn.getDefinition(),
             buildExecutor: (context: TAgentBaseContext) => {

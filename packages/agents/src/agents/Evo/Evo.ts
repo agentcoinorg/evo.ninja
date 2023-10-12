@@ -154,7 +154,6 @@ export class Evo extends AgentBase<EvoRunArgs, ScriptedAgentContext> {
     );
   }
 
-  // TODO: this uses this.config.functions, whereas AgentBase uses this._functions
   public async *runWithChat(args: {
     chat: Chat;
   }): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
