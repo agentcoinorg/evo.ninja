@@ -1,7 +1,9 @@
 import fs from "fs";
 import path from "path-browserify";
+import { Workspace } from "@evo-ninja/agent-utils";
+import spawn from "spawn-command";
 
-export class FileSystemWorkspace {
+export class FileSystemWorkspace implements Workspace {
   constructor(
     private _workspacePath: string
   ) {
@@ -69,4 +71,46 @@ export class FileSystemWorkspace {
     const absPath = this.toWorkspacePath(subpath);
     fs.appendFileSync(absPath, data);
   }
+
+  async shellExec(command: string, args: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
+    return await new Promise((resolve, reject) => {
+      const toExec = `${command} ${args.join(" ")}`;
+      const child = spawn(toExec, { cwd: this._workspacePath });
+
+      let stdout = "";
+      let stderr = "";
+
+      child.on("error", (error: Error) => {
+        reject(error);
+      });
+
+      child.stdout?.on("data", (data: string) => {
+        stdout += data.toString();
+      });
+
+      child.stderr?.on("data", (data: string) => {
+        stderr += data.toString();
+      });
+
+      child.on("exit", (exitCode: number) => {
+        resolve({ exitCode, stdout, stderr });
+      });
+    });
+  }
+
+  // runCommandSync(
+  //   command: string,
+  //   args: string[],
+  // ): { stdout: string; stderr: string } {
+  //   try {
+  //     const stdout = execSync(`${command} ${args.join(" ")}`, {
+  //       cwd: this._workspacePath,
+  //       env: { ...process.env },
+  //       encoding: "utf-8",
+  //     });
+  //     return { stdout: stdout, stderr: "" };
+  //   } catch (e) {
+  //     return { stderr: e, stdout: "" };
+  //   }
+  // }
 }

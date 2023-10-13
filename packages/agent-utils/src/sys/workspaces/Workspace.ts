@@ -6,4 +6,5 @@ export interface Workspace {
   mkdirSync(subpath: string): void;
   readdirSync(subpath: string): string[];
   appendFileSync(subpath: string, data: string): void;
+  shellExec(command: string, args: string[]): Promise<{ exitCode: number, stdout: string; stderr: string }>;
 }

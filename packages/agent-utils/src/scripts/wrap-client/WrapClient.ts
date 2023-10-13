@@ -361,6 +361,12 @@ export class WrapClient extends PolywrapClient {
           }
         },
       })))
+      .setPackage("plugin/cmd", PluginPackage.from(module => ({
+        "shellExec": async (params: { command: string, args: string[] }) => {
+          logger.notice("CMD.EXEC = " + `${params.command} ${params.args}`);
+          return await workspace.shellExec(params.command, params.args);
+        }
+      })))
 
     if (agentPlugin) {
       builder

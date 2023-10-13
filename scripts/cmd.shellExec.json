@@ -1,0 +1,7 @@
+{
+  "name": "cmd.shellExec",
+  "description": "Execute a terminal command",
+  "arguments": "{ command: string, args: string[] }",
+  "code": "./cmd.shellExec.js"
+}
+
