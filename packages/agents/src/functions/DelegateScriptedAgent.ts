@@ -14,18 +14,30 @@ interface AgentRunArgs {
 export class DelegateAgentFunction<
   TAgent extends AgentBase<AgentRunArgs, AgentBaseContext>
 > extends AgentFunctionBase<DelegateAgentParams> {
+  private _name: string;
+  private _expertise: string;
+
   constructor(
-    private delegatedAgent: TAgent,
+    private delegatedAgent: TAgent | (() => TAgent),
   ) {
     super();
+
+    // TODO: we need a better way of handling agent lifetimes
+    //       and static values associated with them (config + factory)
+    const config = typeof this.delegatedAgent === "function" ?
+      this.delegatedAgent().config :
+      this.delegatedAgent.config;
+
+    this._expertise = config.expertise;
+    this._name = config.name;
   }
 
   get name() {
-    return this.delegateScriptedAgentFnName(this.delegatedAgent.config.name)
+    return this.delegateScriptedAgentFnName(this._name)
   }
 
   get description() {
-    return `Delegate a task to "${this.delegatedAgent.config.name}" with expertise in "${this.delegatedAgent.config.expertise}". Provide all the required information to fully complete the task.`
+    return `Delegate a task to "${this._name}" with expertise in "${this._expertise}". Provide all the required information to fully complete the task.`
   }
 
   get parameters() {
@@ -88,7 +100,9 @@ export class DelegateAgentFunction<
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext) {
     return async (params: DelegateAgentParams, rawParams?: string): Promise<AgentFunctionResult> => {
-      const scriptedAgent = this.delegatedAgent;
+      const scriptedAgent = typeof this.delegatedAgent === "function" ?
+        this.delegatedAgent() :
+        this.delegatedAgent;
 
       let iterator = scriptedAgent.run({
         goal: params.task,
@@ -102,7 +116,7 @@ export class DelegateAgentFunction<
         if (response.done) {
           if (!response.value.ok) {
             return this.onFailure(
-              this.delegatedAgent.config.name,
+              scriptedAgent.config.name,
               params,
               rawParams,
               response.value.error,
@@ -111,7 +125,7 @@ export class DelegateAgentFunction<
           }
         
           return this.onSuccess(
-            this.delegatedAgent.config.name,
+            scriptedAgent.config.name,
             rawParams,
             messages,
             response.value.value,
@@ -128,5 +142,7 @@ export class DelegateAgentFunction<
     }
   }
 
-  private delegateScriptedAgentFnName(agent: string) { return `delegate${agent}` }
+  private delegateScriptedAgentFnName(agent: string) {
+    return `delegate${agent}`;
+  }
 }

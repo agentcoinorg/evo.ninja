@@ -39,3 +39,5 @@ export class ScriptedAgent extends AgentBase<ScriptedAgentRunArgs, ScriptedAgent
     return new ScriptedAgent(config, context);
   }
 }
+
+export type ScriptedAgentOrFactory = (ScriptedAgent | (() => ScriptedAgent));
