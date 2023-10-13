@@ -47,23 +47,15 @@ export class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> imp
       new ReadVariableFunction()
     ];
 
-    // See which functions don't need to be added
-    const shouldAddDefault: Map<string, AgentFunctionBase<unknown> | undefined> = new Map(
-      defaultFunctions.map((x) => ([x.name, x]))
+    // See which functions already exist
+    const existingFunctions = new Map(
+      this.config.functions.map((x) => ([x.name, x]))
     );
 
-    this.config.functions.forEach((fn) => {
-      if (shouldAddDefault.has(fn.name)) {
-        shouldAddDefault.set(fn.name, undefined);
-      }
-    });
-
-    // Add defaults
-    shouldAddDefault.forEach((value) => {
-      if (value) {
-        this.config.functions.push(value);
-      }
-    });
+    // Add defaults if they don't already exist
+    this.config.functions.push(
+      ...defaultFunctions.filter(x => !existingFunctions.has(x.name))
+    );
   }
 
   public get workspace(): Workspace {
