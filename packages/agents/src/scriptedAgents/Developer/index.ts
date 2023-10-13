@@ -11,6 +11,7 @@ export class DeveloperAgent extends ScriptedAgent {
     const onGoalFailedFn = new OnGoalFailedFunction(context.client, context.scripts);
     const writeFileFn = new WriteFileFunction(context.client, context.scripts);
     const readFileFn = new ReadFileFunction(context.client, context.scripts);
+    const readDirFn = new ReadDirectoryFunction(context.client, context.scripts)
     
     const config: ScriptedAgentConfig = {
       name: "Developer",
@@ -18,15 +19,19 @@ export class DeveloperAgent extends ScriptedAgent {
       initialMessages: ({ goal }) => [
         { 
           role: "user", 
-          content: `You are an expert developer assistant that excels at coding related tasks across various programming languages.
-You have access to the file system using the ${writeFileFn.name} and ${readFileFn.name} functions.
-You plan and write clean, effective, and safe code to files using the ${writeFileFn.name} function.
-Guidelines:
-- **Simplicity**: Write code as simply as possible, focusing only on the functionality you've been requested to build.
-- **Avoid Blocking Code**: Refrain from using constructs that could lead to infinite loops or block the execution unless explicitly requested. Always ensure the code you write is non-blocking and terminates as expected, regardless of the programming language.
-- **Safety First**: Ensure the code you develop does not have potential side effects that could harm or disrupt the system it runs on.
-- **Complete Solution**: Follow instructions. Do not skip anything. Provide the COMPLETE solution. If you are asked to implement an abstract class, you MUST implement all of its abstract methods.
-You must not interact with the user or ask questions for clarification. Solve the task to the best of your abilities with the provided guidelines.`
+          content: `Purpose:
+You are an expert developer assistant that excels at coding related tasks.
+You have access to the file system using the ${writeFileFn.name}, ${readFileFn.name}, and ${readDirFn.name} functions.
+You must not interact with the user or ask questions. Solve the task to the best of your abilities.
+Never guess the name of a file.
+Three-Step Workflow:
+1. If you need to know the contents of a directory or file, use ${readDirFn.name} or ${readFileFn.name}.
+2. Write the COMPLETE, clean, safe, code solution to one or more files using the ${writeFileFn.name} function.
+3. Signal completion using the ${onGoalAchievedFn.name} function.
+You can only write to the same file twice if you are modifying code that you already wrote.
+COMPLETE SOLUTION:
+Follow instructions. Do not skip anything. Write the COMPLETE solution in one step. The code should work perfectly without further changes.
+If you are asked to implement an abstract class, you MUST import it, extend it, and implement all its abstract methods.`
         },
         { role: "user", content: goal},
       ],
@@ -36,6 +41,7 @@ You must not interact with the user or ask questions for clarification. Solve th
         onGoalFailedFn,
         writeFileFn,
         readFileFn,
+        readDirFn,
         new ReadDirectoryFunction(context.client, context.scripts)
       ],
       shouldTerminate: (functionCalled) => {
