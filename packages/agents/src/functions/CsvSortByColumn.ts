@@ -1,12 +1,12 @@
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
-export class CsvSumColumnFunction extends ScriptFunction<{ csvData: string, delimiter: string, columnIndex: number, hasHeader: boolean }> {
+export class CsvSortByColumnFunction extends ScriptFunction<{ csvData: string, delimiter: string, columnIndex: string }> {
   get name() {
-    return "csv_sumColumn"
+    return "csv_sortByColumn"
   }
 
   get description() {
-    return "Sum a column of a CSV"
+    return "Sort a column in a CSV"
   }
 
   get parameters() {
@@ -17,16 +17,13 @@ export class CsvSumColumnFunction extends ScriptFunction<{ csvData: string, deli
             type: "string"
         },
         delimiter: {
-          type: "string"
+            type: "string"
         },
         columnIndex: {
             type: "number"
-        },
-        hasHeader: {
-            type: "boolean"
         }
       },
-      required: ["csvData", "delimiter", "columnIndex", "hasHeader"],
+      required: ["csvData", "delimiter", "columnIndex"],
       additionalProperties: false
     }
   }

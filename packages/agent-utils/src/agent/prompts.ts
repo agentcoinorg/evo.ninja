@@ -10,5 +10,8 @@ export const UNPARSABLE_FUNCTION_ARGS = (name: string, args: string, err: any) =
 export const UNDEFINED_FUNCTION_ARGS = (name: string) =>
   `Function call argument for '${name}' were undefined.`;
 
+export const UNKNOWN_VARIABLE_NAME = (variable: string) =>
+  `The variable named ${variable} does not exist.`;
+
 export const AGENT_SPEAK_RESPONSE =
   "If you think you've achieved the goal, call agent_onGoalAchieved.\nIf you think you've failed, call agent_onGoalFailed.";
