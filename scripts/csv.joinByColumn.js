@@ -1,4 +1,12 @@
 function parseCSV(data, delimiter) {
+  const supportedDelimiters = [",", ";", "\t", "|", ":"];
+
+  if (!supportedDelimiters.includes(delimiter)) {
+    throw new Error(`Delimiter "${delimiter}" not supported. Supported delimiters: ${
+      supportedDelimiters.map((x) => `"${x}"`).join(", ")
+    }`);
+  }
+
   const rows = data.trim().split('\n');
   return rows.map(row => row.split(delimiter));
 }

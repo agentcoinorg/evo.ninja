@@ -1,4 +1,12 @@
 function parseCSV(data, delimiter) {
+  const supportedDelimiters = [",", ";", "\t", "|", ":"];
+
+  if (!supportedDelimiters.includes(delimiter)) {
+    throw new Error(`Delimiter "${delimiter}" not supported. Supported delimiters: ${
+      supportedDelimiters.map((x) => `"${x}"`).join(", ")
+    }`);
+  }
+
   const rows = data.trim().split('\n');
   return rows.map(row => row.split(delimiter));
 }
@@ -8,8 +16,7 @@ function serializeCSV(rows, delimiter) {
 }
 
 function addColumnToCSVRows(rows, column, values) {
-  // Subtract 1 to exclude header row from count
-  if (values.length !== rows.length - 1) {
+  if (values.length + 1 !== rows.length) {
     throw new Error('Mismatch in number of rows and provided values');
   }
 
