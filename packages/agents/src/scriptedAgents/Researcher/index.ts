@@ -41,6 +41,7 @@ You are an advanced web information retriever. You will receive a query and need
 3. Before calling the ${onGoalAchievedFn.name} function, verify the result with the ResearchVerifier, giving it the information you think is complete.
 If the research verifier says the data is incomplete, search for the missing data. If you have already used the verifier once and found new information, even if incomplete,
 DO NOT FAIL, call the ${onGoalAchievedFn.name} function with what you have.
+Use the verifier ONLY ONCE
 `,
         },
         { role: "user", content: goal },
