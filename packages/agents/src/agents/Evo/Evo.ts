@@ -18,7 +18,7 @@ import {
   DataAnalystAgent,
   DeveloperAgent,
   ResearcherAgent,
-  ScriptedAgent,
+  ScriptedAgentOrFactory,
   ScriptedAgentContext,
 } from "../../scriptedAgents";
 import { DelegateAgentFunction } from "../../functions/DelegateScriptedAgent";
@@ -41,7 +41,7 @@ export class Evo extends AgentBase<EvoRunArgs, ScriptedAgentContext> {
     scripts: Scripts,
     env: Env,
     timeout?: Timeout,
-    scriptedAgents?: ScriptedAgent[]
+    scriptedAgents?: ScriptedAgentOrFactory[]
   ) {
     const context: ScriptedAgentContext = {
       llm,
@@ -54,17 +54,17 @@ export class Evo extends AgentBase<EvoRunArgs, ScriptedAgentContext> {
       env,
     };
 
-    const defaultScriptedAgents = [
-      new DeveloperAgent({
+    const defaultScriptedAgents: ScriptedAgentOrFactory[] = [
+      () => new DeveloperAgent({
         ...context,
         chat: new Chat(context.chat.tokenizer, context.chat.contextWindow),
       }),
-      new ResearcherAgent({
+      () => new ResearcherAgent({
         ...context,
         chat: new Chat(context.chat.tokenizer, context.chat.contextWindow),
       }
       ),
-      new DataAnalystAgent({
+      () => new DataAnalystAgent({
         ...context,
         chat: new Chat(context.chat.tokenizer, context.chat.contextWindow),
       }),
@@ -123,7 +123,7 @@ Do not communicate with the user.`,
         onGoalAchievedFn,
         onGoalFailedFn,
         verifyGoalAchieved,
-        new DelegateAgentFunction(
+        new DelegateAgentFunction(() =>
           new Scripter(
             context.llm,
             new Chat(context.chat.tokenizer, context.chat.contextWindow),

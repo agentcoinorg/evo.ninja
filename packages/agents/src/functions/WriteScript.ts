@@ -21,9 +21,11 @@ export class WriteScriptFunction extends AgentFunctionBase<WriteScriptFuncParame
   get name(): string {
     return "writeScript";
   }
+
   get description(): string {
     return `Writes the function.`;
   }
+
   get parameters(): any {
     return {
       type: "object",
