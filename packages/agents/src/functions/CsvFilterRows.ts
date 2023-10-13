@@ -14,19 +14,22 @@ export class CsvFilterRowsFunction extends ScriptFunction<{ csvData: string, del
       type: "object",
       properties: { 
         csvData: {
-            type: "string"
+          type: "string"
         },
         delimiter: {
           type: "string"
         },
         columnIndex: {
-            type: "number"
+          type: "number"
         },
         searchString: {
-            type: "string"
+          type: "string"
+        },
+        withHeader: {
+          type: "boolean"
         }
       },
-      required: ["csvData", "delimiter", "columnIndex", "searchString"],
+      required: ["csvData", "delimiter", "columnIndex", "searchString", "withHeader"],
       additionalProperties: false
     }
   }

@@ -9,8 +9,22 @@ function serializeCSV(rows, delimiter) {
 
 const rows = parseCSV(csvData, delimiter);
 
-const filteredRows = rows.filter(row =>
-  row[columnIndex].includes(searchString)
-);
+// Separate header from the rest of the rows
+let resultRows = [];
 
-return serializeCSV(filteredRows, delimiter);
+if (withHeader) {
+  const [header, ...otherRows] = rows;
+
+  const filteredRows = otherRows.filter(row =>
+    row[columnIndex].includes(searchString)
+  );
+
+  // Add the header back to the top
+  resultRows = [header].concat(filteredRows);
+} else {
+  resultRows = rows.filter(row =>
+    row[columnIndex].includes(searchString)
+  );
+}
+
+return serializeCSV(resultRows, delimiter);

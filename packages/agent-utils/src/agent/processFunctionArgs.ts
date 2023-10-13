@@ -3,6 +3,7 @@ import {
   UNDEFINED_FUNCTION_ARGS,
   UNDEFINED_FUNCTION_NAME,
   UNPARSABLE_FUNCTION_ARGS,
+  UNKNOWN_VARIABLE_NAME
 } from "./prompts";
 import { AgentFunction, AgentFunctionResult } from "./AgentFunction";
 import { AgentVariables } from "./AgentVariables";
@@ -65,6 +66,10 @@ export function processFunctionAndArgs<TContext>(
         if (typeof value === "string" && AgentVariables.hasSyntax(value)) {
           // Replace it in-place with its true value
           parsedArgs[key] = variables.get(value);
+
+          if (parsedArgs[key] === undefined) {
+            return ResultErr(UNKNOWN_VARIABLE_NAME(value));
+          }
         }
       }
     }
