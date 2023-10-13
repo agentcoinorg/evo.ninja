@@ -118,7 +118,7 @@ export class CreateScriptFunction extends AgentFunctionBase<CreateScriptFuncPara
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ChatMessageBuilder.functionCallResult(this.name, `Script '${script.name}' created.`, variables)
+        ...ChatMessageBuilder.functionCallResult(this.name, `Script '${script.name}' created.`, variables)
       ]
     }
   }
@@ -138,7 +138,7 @@ export class CreateScriptFunction extends AgentFunctionBase<CreateScriptFuncPara
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ChatMessageBuilder.functionCallResult(
+        ...ChatMessageBuilder.functionCallResult(
           this.name,
           `Error: Scripts in the 'agent' namespace cannot be created. Try searching for an existing script instead.`,
           variables
@@ -162,7 +162,7 @@ export class CreateScriptFunction extends AgentFunctionBase<CreateScriptFuncPara
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ChatMessageBuilder.functionCallResult(
+        ...ChatMessageBuilder.functionCallResult(
           this.name,
           `Error trying to create the script: ${error}.`,
           variables

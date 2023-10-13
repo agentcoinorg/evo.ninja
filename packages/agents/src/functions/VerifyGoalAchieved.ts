@@ -42,7 +42,7 @@ export class VerifyGoalAchievedFunction extends AgentFunctionBase<FunctionParams
           role: "assistant",
           content: x,
         }) as ChatMessage),
-        ChatMessageBuilder.functionCallResult(
+        ...ChatMessageBuilder.functionCallResult(
           name,
           result.content || "Successfully accomplished the task.",
           variables
@@ -62,7 +62,7 @@ export class VerifyGoalAchievedFunction extends AgentFunctionBase<FunctionParams
       ],
       messages: [
         ChatMessageBuilder.functionCall(name, rawParams),
-        ChatMessageBuilder.functionCallResult(
+        ...ChatMessageBuilder.functionCallResult(
           name,
           `Error: ${error}`,
           variables
