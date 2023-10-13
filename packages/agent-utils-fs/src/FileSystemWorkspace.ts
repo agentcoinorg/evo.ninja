@@ -72,9 +72,9 @@ export class FileSystemWorkspace implements Workspace {
     fs.appendFileSync(absPath, data);
   }
 
-  async shellExec(command: string, args: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
+  async shellExec(command: string, args?: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
     return await new Promise((resolve, reject) => {
-      const toExec = `${command} ${args.join(" ")}`;
+      const toExec = args ? `poetry run ${command} ${args.join(" ")}` : command;
       const child = spawn(toExec, { cwd: this._workspacePath });
 
       let stdout = "";

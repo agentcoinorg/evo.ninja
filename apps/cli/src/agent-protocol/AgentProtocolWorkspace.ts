@@ -78,7 +78,7 @@ export class AgentProtocolWorkspace implements Workspace {
     this._fsWorkspace.appendFileSync(subpath, data);
   }
 
-  async shellExec(command: string, args: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
+  async shellExec(command: string, args?: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
     return await this._fsWorkspace.shellExec(command, args);
   }
 

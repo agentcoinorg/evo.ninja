@@ -29,7 +29,7 @@ export class ShellExecFunction extends ScriptFunction<ShellExecFuncParameters> {
           }
         },
       },
-      required: ["command"],
+      required: ["command", "args"],
       additionalProperties: false
     }
   }

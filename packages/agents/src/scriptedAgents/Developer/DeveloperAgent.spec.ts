@@ -161,7 +161,7 @@ describe('Dev Agent Test Suite', () => {
     expect(sourceCode).toBeTruthy();
   });
 
-  test("Battleship", async () => {
+  test.only("Battleship", async () => {
     const { agent, debugLog } = createDevAgent(
       "Battleship",
       [

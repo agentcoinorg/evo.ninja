@@ -36,7 +36,7 @@ export class InMemoryWorkspace implements Workspace {
     this.fs.appendFileSync(subpath, data);
   }
 
-  async shellExec(command: string, args: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
+  async shellExec(command: string, args?: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
     throw new Error("Not implemented.");
   }
 }
