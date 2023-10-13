@@ -338,7 +338,7 @@ export class WrapClient extends PolywrapClient {
       .setPackage("plugin/fuzzySearch", PluginPackage.from(module => ({
         "search": async (args: { url: string, queryKeywords: string[] }) => {
           try {
-            const MAX_RESULT_SIZE = 5000;
+            const MAX_RESULT_SIZE = 4500;
 
             const response = await axios.get(args.url, {
               headers: {

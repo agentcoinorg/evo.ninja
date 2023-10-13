@@ -18,7 +18,7 @@ import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import { ScriptedAgent } from "../..";
-import { ResearchPlannerAgent } from ".";
+import { ScraperAgent } from ".";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -29,7 +29,7 @@ dotenv.config({
 jest.setTimeout(300000);
 
 describe("ResearchPlanner Agent Test Suite", () => {
-  function createResearchPlannerAgent(testName: string): {
+  function createScraperAgent(testName: string): {
     agent: ScriptedAgent;
     debugLog: DebugLog;
   } {
@@ -71,7 +71,7 @@ describe("ResearchPlanner Agent Test Suite", () => {
     const workspace = new FileSystemWorkspace(testCaseDir);
 
     return {
-      agent: new ResearchPlannerAgent(
+      agent: new ScraperAgent(
         {
           client: new WrapClient(
             workspace,
@@ -92,7 +92,7 @@ describe("ResearchPlanner Agent Test Suite", () => {
     };
   }
 
-  async function runResearchPlannerAgent(
+  async function runScraperAgent(
     agent: ScriptedAgent,
     goal: string,
     debugLog: DebugLog
@@ -117,10 +117,10 @@ describe("ResearchPlanner Agent Test Suite", () => {
   }
 
   test("plan", async () => {
-    const { agent, debugLog } = createResearchPlannerAgent("plan");
-    await runResearchPlannerAgent(
+    const { agent, debugLog } = createScraperAgent("plan");
+    await runScraperAgent(
       agent,
-      "Tesla's revenue every year since its creation",
+      "Tesla's yearly revenue from 2003 to 2023",
       debugLog
     );
   });

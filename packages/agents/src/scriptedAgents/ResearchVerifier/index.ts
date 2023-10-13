@@ -38,7 +38,8 @@ export class ResearchVerifierAgent extends ScriptedAgent {
 
           2. Be very critical, don't assume that the user is correct if he says that the results are correct or complete, or fully provided.
           
-          3. Always provide reasoning, and then use the ${onGoalAchievedFn.name} function to send the verification results back to the user`,
+          3. Always provide reasoning, and then use the ${onGoalAchievedFn.name} function to send the verification results back to the user
+          `
         },
         { role: "user", content: goal },
       ],
