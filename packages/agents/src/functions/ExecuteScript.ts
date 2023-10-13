@@ -7,7 +7,6 @@ import { AgentBaseContext } from "../AgentBase";
 interface ExecuteScriptFuncParameters { 
   namespace: string;
   arguments: string;
-  variable?: string;
 }
 
 export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncParameters> {
@@ -34,13 +33,9 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
         arguments: {
           type: "string",
           description: "JSON-formatted arguments to pass into the script being executed.",
-        },
-        variable: {
-          type: "string",
-          description: "The name of a variable to store the script's result in"
         }
       },
-      required: ["namespace", "arguments", "variable"],
+      required: ["namespace", "arguments"],
       additionalProperties: false
     }
   }
@@ -88,13 +83,6 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
           globals
         });
 
-        if (params.variable && result.ok && this.client.jsPromiseOutput.ok) {
-          context.variables.set(
-            params.variable,
-            JSON.stringify(this.client.jsPromiseOutput.value)
-          );
-        }
-
         return result.ok
           ? result.value.error == null
             ? this.client.jsPromiseOutput.ok
@@ -117,7 +105,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
           content: FUNCTION_CALL_SUCCESS_CONTENT(
             this.name,
             params,
-            this.executeScriptOutput(params.variable, result),
+            result,
           )
         }
       ],
@@ -125,7 +113,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
         ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
-          this.executeScriptOutput(params.variable, result),
+          result,
           variables
         ),
       ]
@@ -167,27 +155,5 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
 
   private scriptNotFound(params: ExecuteScriptFuncParameters) {
     return `Script '${params.namespace}' not found!`;
-  }
-
-  private executeScriptOutput(varName: string | undefined, result: string | undefined) {
-    if (!result || result === "undefined" || result === "\"undefined\"") {
-      return `No result returned.`;
-    } else if (result.length > 3000) {
-      return `Preview of JSON result:\n` + 
-            `\`\`\`\n` + 
-            `${trimText(result, 3000)}\n` + 
-            `\`\`\`\n` + 
-            `${this.storedResultInVar(varName)}`;
-    } else {
-      return `JSON result: \n\`\`\`\n${result}\n\`\`\`\n${this.storedResultInVar(varName)}`;
-    }
-  }
-
-  private storedResultInVar(varName: string | undefined) {
-    if (varName && varName.length > 0) {
-      return `Result stored in variable: \${${varName}}`;
-    } else {
-      return "";
-    }
   }
 }

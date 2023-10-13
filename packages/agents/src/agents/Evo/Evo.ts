@@ -54,7 +54,7 @@ export class Evo extends AgentBase<EvoRunArgs, ScriptedAgentContext> {
       env,
     };
 
-    const defaultScriptedAgents = [
+    const defaultScriptedAgents: ScriptedAgentOrFactory[] = [
       () => new DeveloperAgent({
         ...context,
         chat: new Chat(context.chat.tokenizer, context.chat.contextWindow),

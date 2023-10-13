@@ -5,9 +5,9 @@ import { createScriptWriter } from "../agents/ScriptWriter/utils";
 import { AgentBaseContext } from "../AgentBase";
 
 interface CreateScriptFuncParameters { 
-  namespace: string, 
-  description: string, 
-  arguments: string 
+  namespace: string;
+  description: string;
+  arguments: string;
 }
 
 export class CreateScriptFunction extends AgentFunctionBase<CreateScriptFuncParameters> {
