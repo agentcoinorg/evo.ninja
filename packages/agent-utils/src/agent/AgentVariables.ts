@@ -5,7 +5,7 @@ export class AgentVariables {
   public static Prefix = "${";
   public static Suffix = "}";
 
-  constructor(private _saveThreshold: number = 500) { }
+  constructor(private _saveThreshold: number = 2000) { }
 
   static hasSyntax(name: string): boolean {
     return name.startsWith(AgentVariables.Prefix) &&
@@ -61,12 +61,14 @@ export class AgentVariables {
     return varName;
   }
 
-  shouldSave(value: string): boolean {
+  shouldSave(value: string, saveThreshold?: number): boolean {
+    const threshold = saveThreshold || this._saveThreshold;
+
     // infinite
-    if (this._saveThreshold < 0) {
+    if (threshold < 0) {
       return false;
     }
 
-    return value.length >= this._saveThreshold;
+    return value.length >= threshold;
   }
 }

@@ -20,12 +20,14 @@ export class ChatMessageBuilder {
     };
   }
 
-  static functionCallResult(funcName: string, result: string, variables: AgentVariables): ChatMessage {
-    if (variables.shouldSave(result)) {
+  static functionCallResult(funcName: string, result: string, variables: AgentVariables, saveThreshold?: number): ChatMessage {
+    const threshold = saveThreshold || variables.saveThreshold;
+
+    if (variables.shouldSave(result, threshold)) {
       const varName = variables.save(funcName, result);
-      result = `Result is too large, stored in variable named \${${varName}}.\nResult Preview readVariable("\${${varName}}", 0, ${variables.saveThreshold}):\n${
-        result.substring(0, variables.saveThreshold)
-      }...${result.length - variables.saveThreshold} more bytes...`;
+      result = `Result is too large, stored in variable named \${${varName}}.\nResult Preview readVariable("\${${varName}}", 0, ${threshold}):\n${
+        result.substring(0, threshold)
+      }...${result.length - threshold} more bytes...`;
     }
 
     return {

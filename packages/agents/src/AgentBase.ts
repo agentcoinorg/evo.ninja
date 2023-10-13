@@ -75,7 +75,7 @@ export class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> imp
       // Add an extra prompt informing agent about variable usage
       chat.persistent({
         role: "system",
-        content: "You can replace any function argument with a variable by using the \${variable-name} syntax"
+        content: `Variables are annotated using the \${variable-name} syntax. Variables can be used as function argument using the \${variable-name} syntax. Variables are created as needed, and do not exist unless otherwise stated.`
       });
 
       // Add functions to chat

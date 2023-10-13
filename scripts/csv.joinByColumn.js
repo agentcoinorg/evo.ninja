@@ -1,23 +1,30 @@
-function parseCSV(data, delimiter) {
+function detectDelimiter(row) {
   const supportedDelimiters = [",", ";", "\t", "|", ":"];
 
-  if (!supportedDelimiters.includes(delimiter)) {
-    throw new Error(`Delimiter "${delimiter}" not supported. Supported delimiters: ${
-      supportedDelimiters.map((x) => `"${x}"`).join(", ")
-    }`);
+  for (let delimiter of supportedDelimiters) {
+      if (row.includes(delimiter)) {
+          return delimiter;
+      }
   }
 
+  throw new Error(`No known delimiter found. Supported delimiters: ${
+    supportedDelimiters.map((x) => `"${x}"`).join(", ")
+  }`);
+}
+
+function parseCSV(data) {
   const rows = data.trim().split('\n');
-  return rows.map(row => row.split(delimiter));
+  const delimiter = detectDelimiter(rows[0]);
+  return { rows: rows.map(row => row.split(delimiter)), delimiter };
 }
 
 function serializeCSV(rows, delimiter) {
   return rows.map(row => row.join(delimiter)).join("\n");
 }
 
-function joinCSVs(csv1, csv2, delimiter, columnName) {
-  const rows1 = parseCSV(csv1, delimiter);
-  const rows2 = parseCSV(csv2, delimiter);
+function joinCSVs(csv1, csv2, columnName) {
+  const { rows: rows1, delimiter } = parseCSV(csv1);
+  const { rows: rows2 } = parseCSV(csv2);
 
   // Extract the index of the join column for each CSV
   const joinIndex1 = rows1[0].indexOf(columnName);
@@ -64,4 +71,4 @@ function joinCSVs(csv1, csv2, delimiter, columnName) {
   return `${serializedHeaders}\n${serializedDataRows}`;
 }
 
-return joinCSVs(csvData1, csvData2, delimiter, joinColumnName);
+return joinCSVs(csvData1, csvData2, joinColumnName);
