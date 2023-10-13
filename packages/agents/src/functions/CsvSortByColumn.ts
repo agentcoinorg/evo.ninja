@@ -1,29 +1,29 @@
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
-export class SortCsvFunction extends ScriptFunction<{ inputPath: string, outputPath: string, column: string }> {
+export class CsvSortByColumnFunction extends ScriptFunction<{ inputPath: string, outputPath: string, column: string }> {
   get name() {
-    return "csv_sort"
+    return "csv_sortByColumn"
   }
 
   get description() {
-    return "Sorts a CSV file by a specific column and writes the sorted data to a new CSV file"
+    return "Sort a column in a CSV"
   }
 
   get parameters() {
     return {
       type: "object",
       properties: { 
-        inputPath: {
+        csvData: {
             type: "string"
         },
-        outputPath: {
+        delimiter: {
             type: "string"
         },
-        column: {
+        columnIndex: {
             type: "string"
         }
       },
-      required: ["inputPath", "outputPath", "column"],
+      required: ["inputPath", "outputPath", "columnIndex"],
       additionalProperties: false
     }
   }

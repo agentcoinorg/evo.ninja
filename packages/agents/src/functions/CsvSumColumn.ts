@@ -6,7 +6,7 @@ export class CsvSumColumnFunction extends ScriptFunction<{ csvData: string, deli
   }
 
   get description() {
-    return "Sum a column of a CSV file."
+    return "Sum a column of a CSV"
   }
 
   get parameters() {

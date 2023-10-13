@@ -5,16 +5,17 @@ import {
 } from "../ScriptedAgent";
 import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
-import { SortCsvFunction } from "../../functions/SortCsv";
-import { SortCsvColumnsFunction } from "../../functions/SortCsvColumns";
-import { CsvSumColumnFunction } from "../../functions/CsvSumColumn";
+import { CsvAddColumnFunction } from "../../functions/CsvAddColumn";
 import { CsvFilterRowsFunction } from "../../functions/CsvFilterRows";
+import { CsvJoinByColumnFunction } from "../../functions/CsvJoinByColumn";
+import { CsvOrderColumnsFunction } from "../../functions/CsvOrderColumns";
+import { CsvSortByColumnFunction } from "../../functions/CsvSortByColumn";
+import { CsvSumColumnFunction } from "../../functions/CsvSumColumn";
+import { CsvTo2DArrayFunction } from "../../functions/CsvTo2DArray";
 import { ThinkFunction } from "../../functions/Think";
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { ReadFileFunction } from "../../functions/ReadFile";
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
-import { AddCsvColumnFunction } from "../../functions/AddCsvColumn";
-import { JoinCsvFunction } from "../../functions/JoinCsv";
 
 export class DataAnalystAgent extends ScriptedAgent {
   constructor(context: ScriptedAgentContext) {
@@ -53,12 +54,13 @@ export class DataAnalystAgent extends ScriptedAgent {
       functions: [
         onGoalAchievedFn,
         onGoalFailedFn,
-        new SortCsvFunction(context.client, context.scripts),
-        new SortCsvColumnsFunction(context.client, context.scripts),
-        new AddCsvColumnFunction(context.client, context.scripts),
-        new CsvSumColumnFunction(context.client, context.scripts),
+        new CsvAddColumnFunction(context.client, context.scripts),
         new CsvFilterRowsFunction(context.client, context.scripts),
-        new JoinCsvFunction(context.client, context.scripts),
+        new CsvJoinByColumnFunction(context.client, context.scripts),
+        new CsvOrderColumnsFunction(context.client, context.scripts),
+        new CsvSortByColumnFunction(context.client, context.scripts),
+        new CsvSumColumnFunction(context.client, context.scripts),
+        new CsvTo2DArrayFunction(context.client, context.scripts),
         new ThinkFunction(),
         new ReadFileFunction(context.client, context.scripts),
         new WriteFileFunction(context.client, context.scripts),
