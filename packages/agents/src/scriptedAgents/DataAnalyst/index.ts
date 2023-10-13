@@ -11,7 +11,6 @@ import { CsvJoinByColumnFunction } from "../../functions/CsvJoinByColumn";
 import { CsvOrderColumnsFunction } from "../../functions/CsvOrderColumns";
 import { CsvSortByColumnFunction } from "../../functions/CsvSortByColumn";
 import { CsvSumColumnFunction } from "../../functions/CsvSumColumn";
-import { CsvTo2DArrayFunction } from "../../functions/CsvTo2DArray";
 import { ThinkFunction } from "../../functions/Think";
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { ReadFileFunction } from "../../functions/ReadFile";
@@ -60,7 +59,6 @@ export class DataAnalystAgent extends ScriptedAgent {
         new CsvOrderColumnsFunction(context.client, context.scripts),
         new CsvSortByColumnFunction(context.client, context.scripts),
         new CsvSumColumnFunction(context.client, context.scripts),
-        new CsvTo2DArrayFunction(context.client, context.scripts),
         new ThinkFunction(),
         new ReadFileFunction(context.client, context.scripts),
         new WriteFileFunction(context.client, context.scripts),

@@ -20,7 +20,7 @@ export class CsvSortByColumnFunction extends ScriptFunction<{ inputPath: string,
             type: "string"
         },
         columnIndex: {
-            type: "string"
+            type: "number"
         }
       },
       required: ["inputPath", "outputPath", "columnIndex"],

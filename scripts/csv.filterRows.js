@@ -9,7 +9,7 @@ function serializeCSV(rows, delimiter) {
 
 const rows = parseCSV(csvData, delimiter);
 
-const filteredRows = parsedData.filter(row =>
+const filteredRows = rows.filter(row =>
   row[columnIndex].includes(searchString)
 );
 
