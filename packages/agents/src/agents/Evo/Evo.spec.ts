@@ -14,9 +14,8 @@ import * as rimraf from "rimraf";
 import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
-import { DATA_ANALYST_AGENT, DEVELOPER_AGENT_CONFIG, Evo, RESEARCHER_AGENT_CONFIG } from "../../";
 import fs from "fs";
-import { EVO_AGENT_CONFIG } from "./config";
+import { Evo } from "./Evo";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -113,18 +112,14 @@ describe("Evo Test Suite", () => {
   test("evo selects correct agent", async () => {
     const goal =
       "How much was spent on utilities in total ? Write the answer in an output.txt file.";
-    const { llm, chat } = createEvo("selects-agent-correctly");
-    const evoConfig = EVO_AGENT_CONFIG([
-      DEVELOPER_AGENT_CONFIG,
-      RESEARCHER_AGENT_CONFIG,
-      DATA_ANALYST_AGENT,
-    ]);
-    const messages = evoConfig.initialMessages({ goal });
+    const { agent: evo, chat, llm } = createEvo("selects-agent-correctly");
+
+    const messages = evo.config.initialMessages({ goal });
     messages.forEach((message) => {
-      chat.persistent(message);
+      chat.persistent(message.role, message.content as string);
     });
 
-    const functionDefinitions = evoConfig.functions.slice(2).map((fn) => fn.getDefinition());
+    const functionDefinitions = evo.config.functions.slice(2).map((fn) => fn.getDefinition());
     for (let i = 0; i<20; i++) {
       const response = await llm.getResponse(
         chat.chatLogs,

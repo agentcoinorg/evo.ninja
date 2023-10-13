@@ -7,6 +7,9 @@ import {
   LlmApi,
   ConsoleLogger,
   Logger,
+  WrapClient,
+  agentPlugin,
+  AgentVariables,
 } from "@evo-ninja/agent-utils";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
@@ -14,8 +17,7 @@ import * as rimraf from "rimraf";
 import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
-import { ScriptedAgent } from "..";
-import { DATA_ANALYST_AGENT } from "./config";
+import { DataAnalystAgent, ScriptedAgent } from "..";
 import fs from "fs";
 
 const rootDir = path.join(__dirname, "../../../../../");
@@ -83,13 +85,20 @@ describe("Data Analyst Agent Test Suite", () => {
     }
 
     return {
-      agent: ScriptedAgent.create(DATA_ANALYST_AGENT, {
+      agent: new DataAnalystAgent({
+        client: new WrapClient(
+          workspace,
+          logger,
+          agentPlugin({ logger }),
+          env
+        ),
         llm: debugLlm,
         chat,
         workspace,
         scripts,
         logger,
         env,
+        variables: new AgentVariables()
       }),
       debugLog,
     };

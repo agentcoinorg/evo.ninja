@@ -1,12 +1,12 @@
-import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+import { Agent, AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
-import { ScriptedAgent } from "../scriptedAgents";
+import { AgentBaseContext } from "../AgentBase";
 
 interface ThinkFuncParameters { 
   thoughts: string
-};
+}
 
-export class ThinkFunction extends AgentFunctionBase<unknown, ThinkFuncParameters> {
+export class ThinkFunction extends AgentFunctionBase<ThinkFuncParameters> {
   get name(): string {
     return "think";
   }
@@ -29,13 +29,13 @@ export class ThinkFunction extends AgentFunctionBase<unknown, ThinkFuncParameter
     };
   }
 
-  buildExecutor(agent: Agent<unknown>, context: unknown): (params: ThinkFuncParameters) => Promise<AgentFunctionResult> {
-    return async (params: ThinkFuncParameters): Promise<AgentFunctionResult> => {
-      return this.onSuccess(agent as ScriptedAgent, params, params.thoughts);
+  buildExecutor(_: Agent<unknown>, context: AgentBaseContext): (params: ThinkFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
+    return async (params: ThinkFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
+      return this.onSuccess(params, rawParams, params.thoughts, context.variables);
     };
   }
 
-  public onSuccess(scriptedAgent: ScriptedAgent, params: any, result: string) {
+  public onSuccess(params: any, rawParams: string | undefined, result: string, variables: AgentVariables) {
     return {
       outputs: [
         {
@@ -49,23 +49,8 @@ export class ThinkFunction extends AgentFunctionBase<unknown, ThinkFuncParameter
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, params),
-        ChatMessageBuilder.functionCallResult(this.name, result),
-      ]
-    }
-  }
-
-  public onFailure(scriptedAgent: ScriptedAgent,  params: any, error: string): AgentFunctionResult {
-    return {
-      outputs: [
-        {
-          type: AgentOutputType.Error,
-          title: `[${scriptedAgent.name}] Error in ${this.name}: ${error}`,
-        }
-      ],
-      messages: [
-        ChatMessageBuilder.functionCall(this.name, params),
-        ChatMessageBuilder.functionCallResult(this.name, error)
+        ChatMessageBuilder.functionCall(this.name, rawParams),
+        ChatMessageBuilder.functionCallResult(this.name, result, variables),
       ]
     }
   }

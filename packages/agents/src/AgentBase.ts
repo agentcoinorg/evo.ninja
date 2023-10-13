@@ -1,6 +1,21 @@
-import { Agent, AgentOutput, Chat, ChatMessage, Env, ExecuteAgentFunctionCalled, LlmApi, Logger, RunResult, Timeout, Workspace, basicFunctionCallLoop } from "@evo-ninja/agent-utils";
+import {
+  Agent,
+  AgentOutput,
+  Chat,
+  ChatMessage,
+  Env,
+  ExecuteAgentFunctionCalled,
+  LlmApi,
+  Logger,
+  RunResult,
+  Timeout,
+  Workspace,
+  AgentVariables,
+  basicFunctionCallLoop
+} from "@evo-ninja/agent-utils";
 import { ResultErr } from "@polywrap/result";
 import { AgentFunctionBase } from "./AgentFunctionBase";
+import { ReadVariableFunction } from "./functions/ReadVariable";
 
 export interface AgentBaseContext {
   llm: LlmApi;
@@ -8,27 +23,47 @@ export interface AgentBaseContext {
   logger: Logger;
   workspace: Workspace;
   env: Env;
+  variables: AgentVariables;
 }
 
-export interface AgentBaseConfig<TRunArgs, TAgentBaseContext> {
+export interface AgentBaseConfig<TRunArgs> {
   name: string;
   expertise: string;
   initialMessages: (runArguments: TRunArgs) => ChatMessage[];
   loopPreventionPrompt: string;
   agentSpeakPrompt?: string;
-  functions: AgentFunctionBase<TAgentBaseContext, unknown>[];
+  functions: AgentFunctionBase<unknown>[];
   shouldTerminate: (functionCalled: ExecuteAgentFunctionCalled) => boolean;
   timeout?: Timeout;
 }
 
-export abstract class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> implements Agent<TRunArgs> {
-  public readonly name: string;
-
+export class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> implements Agent<TRunArgs> {
   constructor(
-    protected config: AgentBaseConfig<TRunArgs, TAgentBaseContext>,
+    public readonly config: AgentBaseConfig<TRunArgs>,
     protected context: TAgentBaseContext
   ) {
-    this.name = config.name;
+    // Default functions that are added to every agent
+    const defaultFunctions = [
+      new ReadVariableFunction()
+    ];
+
+    // See which functions don't need to be added
+    const shouldAddDefault: Map<string, AgentFunctionBase<unknown> | undefined> = new Map(
+      defaultFunctions.map((x) => ([x.name, x]))
+    );
+
+    this.config.functions.forEach((fn) => {
+      if (shouldAddDefault.has(fn.name)) {
+        shouldAddDefault.set(fn.name, undefined);
+      }
+    });
+
+    // Add defaults
+    shouldAddDefault.forEach((value) => {
+      if (value) {
+        this.config.functions.push(value);
+      }
+    });
   }
 
   public get workspace(): Workspace {
@@ -45,6 +80,13 @@ export abstract class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseCon
         chat.persistent(message);
       });
 
+      // Add an extra prompt informing agent about variable usage
+      chat.persistent({
+        role: "system",
+        content: "You can replace any function argument with a variable by using the \${variable-name} syntax"
+      });
+
+      // Add functions to chat
       this.config.functions.forEach((fn) => {
         chat.addFunction(fn.getDefinition());
       });

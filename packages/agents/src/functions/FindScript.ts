@@ -1,16 +1,20 @@
-import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, Script } from "@evo-ninja/agent-utils";
-import { AgentFunctionBase } from "../../../AgentFunctionBase";
-import { ScripterContext } from "../config";
-import { FUNCTION_CALL_SUCCESS_CONTENT } from "../utils";
+import { Agent, AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder, Script, Scripts } from "@evo-ninja/agent-utils";
+import { AgentFunctionBase } from "../AgentFunctionBase";
+import { FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
+import { AgentBaseContext } from "../AgentBase";
 
 interface FindScriptFuncParameters { 
   namespace: string, 
   description: string, 
   arguments: string, 
   code: string 
-};
+}
 
-export class FindScriptFunction extends AgentFunctionBase<ScripterContext, FindScriptFuncParameters> {
+export class FindScriptFunction extends AgentFunctionBase<FindScriptFuncParameters> {
+  constructor(private scripts: Scripts) {
+    super();
+  }
+
   get name(): string {
     return "findScript";
   }
@@ -35,21 +39,21 @@ export class FindScriptFunction extends AgentFunctionBase<ScripterContext, FindS
     }
   }
 
-  buildExecutor(agent: Agent<unknown>, context: ScripterContext): (params: FindScriptFuncParameters) => Promise<AgentFunctionResult> {
-    return async (params: FindScriptFuncParameters): Promise<AgentFunctionResult> => {
-      const candidates = context.scripts.searchAllScripts(
+  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: FindScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
+    return async (params: FindScriptFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
+      const candidates = this.scripts.searchAllScripts(
         `${params.namespace} ${params.description}`
       ).slice(0, 5);
 
       if (candidates.length === 0) {
-        return this.onError(params)
+        return this.onError(params, rawParams, context.variables)
       }
     
-      return this.onSuccess(params, candidates);
+      return this.onSuccess(params, rawParams, candidates, context.variables);
     };
   }
 
-  private onSuccess(params: FindScriptFuncParameters, candidates: Script[]): AgentFunctionResult {
+  private onSuccess(params: FindScriptFuncParameters, rawParams: string | undefined, candidates: Script[], variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -66,18 +70,19 @@ export class FindScriptFunction extends AgentFunctionBase<ScripterContext, FindS
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, params),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
           `Found the following results for script '${params.namespace}'\n` + 
           `${candidates.map((c) => `Namespace: ${c.name}\nArguments: ${c.arguments}\nDescription: ${c.description}`).join("\n--------------\n")}\n` +
-          `\`\`\``
+          `\`\`\``,
+          variables
         ),
       ]
     }
   }
 
-  private onError(params: FindScriptFuncParameters) {
+  private onError(params: FindScriptFuncParameters, rawParams: string | undefined, variables: AgentVariables) {
     return {
       outputs: [
         {
@@ -91,10 +96,11 @@ export class FindScriptFunction extends AgentFunctionBase<ScripterContext, FindS
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, params),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
-          `Found no results for script '${params.namespace}'. Try creating the script instead.`
+          `Found no results for script '${params.namespace}'. Try creating the script instead.`,
+          variables
         ),
       ]
     }

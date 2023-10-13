@@ -1,6 +1,6 @@
 import { AgentOutputType } from "@evo-ninja/agent-utils"
-import { ScriptedAgent } from ".."
-import { ScriptFunction } from "../ScriptFunction"
+import { ScriptedAgent } from "../scriptedAgents"
+import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
 interface OnGoalAchievedFuncParameters { 
   message: string
@@ -29,12 +29,12 @@ export class OnGoalAchievedFunction extends ScriptFunction<OnGoalAchievedFuncPar
     }
   }
 
-  onSuccess(scriptedAgent: ScriptedAgent, params: OnGoalAchievedFuncParameters, result: string) {
+  onSuccess(scriptedAgent: ScriptedAgent, params: OnGoalAchievedFuncParameters, rawParams: string | undefined, result: string) {
     return {
       outputs: [
         {
           type: AgentOutputType.Success,
-          title: `[${scriptedAgent.name}] ${this.name}`,
+          title: `[${scriptedAgent.config.name}] ${this.name}`,
           content: params.message
         }
       ],
@@ -42,12 +42,12 @@ export class OnGoalAchievedFunction extends ScriptFunction<OnGoalAchievedFuncPar
     }
   }
 
-  onFailure(scriptedAgent: ScriptedAgent, params: OnGoalAchievedFuncParameters, error: string) {
+  onFailure(scriptedAgent: ScriptedAgent, params: OnGoalAchievedFuncParameters, rawParams: string | undefined, error: string) {
     return {
       outputs: [
         {
           type: AgentOutputType.Error,
-          title: `[${scriptedAgent.name}] Error in ${this.name}: ${error}`,
+          title: `[${scriptedAgent.config.name}] Error in ${this.name}: ${error}`,
           content: params.message
         }
       ],

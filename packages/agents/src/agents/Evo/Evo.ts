@@ -1,21 +1,38 @@
-import { LlmApi, Chat, Workspace, Scripts, Env, WrapClient, agentPlugin, Logger, Timeout, AgentOutput, RunResult, basicFunctionCallLoop } from "@evo-ninja/agent-utils";
-import { EVO_AGENT_CONFIG, EvoContext, EvoRunArgs } from "./config";
-import { AgentBase } from "../../AgentBase";
 import {
-  ScriptedAgentConfig,
-  DEVELOPER_AGENT_CONFIG,
-  RESEARCHER_AGENT_CONFIG,
-  DATA_ANALYST_AGENT
+  LlmApi,
+  Chat,
+  Workspace,
+  Scripts,
+  Env,
+  WrapClient,
+  agentPlugin,
+  Logger,
+  Timeout,
+  basicFunctionCallLoop,
+  AgentOutput,
+  RunResult,
+  AgentVariables,
+} from "@evo-ninja/agent-utils";
+import { AgentBase, AgentBaseConfig } from "../../AgentBase";
+import {
+  DataAnalystAgent,
+  DeveloperAgent,
+  ResearcherAgent,
+  ScriptedAgentOrFactory,
+  ScriptedAgentContext,
 } from "../../scriptedAgents";
+import { DelegateAgentFunction } from "../../functions/DelegateScriptedAgent";
+import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
+import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
+import { Scripter } from "../Scripter";
 import { ResultErr } from "@polywrap/result";
+import { VerifyGoalAchievedFunction } from "../../functions/VerifyGoalAchieved";
 
-export const defaultScriptedAgents = [
-  DEVELOPER_AGENT_CONFIG,
-  RESEARCHER_AGENT_CONFIG,
-  DATA_ANALYST_AGENT
-];
+export interface EvoRunArgs {
+  goal: string
+}
 
-export class Evo extends AgentBase<EvoRunArgs, EvoContext> {
+export class Evo extends AgentBase<EvoRunArgs, ScriptedAgentContext> {
   constructor(
     llm: LlmApi,
     chat: Chat,
@@ -24,28 +41,121 @@ export class Evo extends AgentBase<EvoRunArgs, EvoContext> {
     scripts: Scripts,
     env: Env,
     timeout?: Timeout,
-    scriptedAgents?: ScriptedAgentConfig[],
+    scriptedAgents?: ScriptedAgentOrFactory[]
   ) {
-    const context = {
+    const context: ScriptedAgentContext = {
       llm,
       chat,
       workspace,
       scripts,
       logger,
-      globals: {},
-      client: new WrapClient(
-        workspace,
-        logger,
-        agentPlugin({ logger }),
-        env
-      ),
-      env
+      variables: new AgentVariables(),
+      client: new WrapClient(workspace, logger, agentPlugin({ logger }), env),
+      env,
     };
 
-    super({
-      ...EVO_AGENT_CONFIG(scriptedAgents || defaultScriptedAgents),
-      timeout
-    }, context);
+    const defaultScriptedAgents: ScriptedAgentOrFactory[] = [
+      () => new DeveloperAgent({
+        ...context,
+        chat: new Chat(context.chat.tokenizer, context.chat.contextWindow),
+      }),
+      () => new ResearcherAgent({
+        ...context,
+        chat: new Chat(context.chat.tokenizer, context.chat.contextWindow),
+      }
+      ),
+      () => new DataAnalystAgent({
+        ...context,
+        chat: new Chat(context.chat.tokenizer, context.chat.contextWindow),
+      }),
+    ];
+
+    scriptedAgents = scriptedAgents ?? defaultScriptedAgents;
+
+    const AGENT_NAME = "Evo";
+
+    const onGoalAchievedFn = new OnGoalAchievedFunction(
+      context.client,
+      context.scripts
+    );
+    const onGoalFailedFn = new OnGoalFailedFunction(
+      context.client,
+      context.scripts
+    );
+    const verifyGoalAchieved = new VerifyGoalAchievedFunction(context.client, context.scripts);
+
+    const config: AgentBaseConfig<EvoRunArgs> = {
+      name: AGENT_NAME,
+      expertise: "an expert evolving assistant that achieves user goals",
+      initialMessages: ({ goal }) => [
+        {
+          role: "user",
+          content: `Purpose:
+You are an expert assistant designed to achieve user goals.
+
+Functionalities:
+You have multiple agents you can delegate tasks to by calling the relevant delegate{Agent} functions. Each agent has its own specialization and capabilities.
+
+Key Guidelines:
+- Understand the capabilities of each agent: Before delegating, ensure you are directing the task to the agent best suited for it.
+- Provide Complete Context: When delegating tasks, pass all the required information to the agents. Since the agents do not see user messages, it's crucial to provide them with the full context they need to complete their tasks. Avoid splitting tasks that can be done by a single specialized agent.
+- Avoid Redundancy: Do not delegate a task to one agent to search & write, and then to another agent to write again. Ensure tasks are streamlined and efficient.
+
+Decision-making Process:
+1. Evaluate the goal, see if it can be achieved without delegating to another agent.
+2. Sub-tasks are delegated to agents that have the most relevant expertise.
+3. When you are certain a goal and its sub-tasks have been achieved, you will call ${verifyGoalAchieved.name}.
+4. If you get stuck or encounter an error, think carefully and create a new plan considering the problems you've encountered.
+5. A goal is only failed if you have exhausted all options and you are certain it cannot be achieved. Call ${onGoalFailedFn.name} with information as to what happened.
+
+REMEMBER:
+If info is missing, you assume the info is somewhere on the user's computer like the filesystem, unless you have a logical reason to think otherwise.
+Do not communicate with the user.`,
+        },
+        {
+          role: "user",
+          content: goal,
+        },
+      ],
+      loopPreventionPrompt:
+        "Assistant, you seem to be looping. Try delegating a task or calling agent_onGoalAchieved or agent_onGoalFailed",
+      functions: [
+        onGoalAchievedFn,
+        onGoalFailedFn,
+        verifyGoalAchieved,
+        new DelegateAgentFunction(() =>
+          new Scripter(
+            context.llm,
+            new Chat(context.chat.tokenizer, context.chat.contextWindow),
+            context.logger,
+            context.workspace,
+            context.scripts,
+            context.env
+          )
+        ),
+      ],
+      shouldTerminate: (functionCalled) => {
+        return [onGoalAchievedFn.name, onGoalFailedFn.name].includes(
+          functionCalled.name
+        );
+      },
+    };
+
+    for (const scriptedAgent of scriptedAgents) {
+      config.functions.push(
+        new DelegateAgentFunction(
+          scriptedAgent,
+        )
+      );
+    }
+
+    super(
+      {
+        ...config,
+        timeout
+      },
+      context
+    );
   }
 
   public async *runWithChat(args: {
@@ -64,7 +174,7 @@ export class Evo extends AgentBase<EvoRunArgs, EvoContext> {
         this.config.functions.map((fn) => {
           return {
             definition: fn.getDefinition(),
-            buildExecutor: (context: EvoContext) => {
+            buildExecutor: (context: ScriptedAgentContext) => {
               return fn.buildExecutor(this, context);
             },
           };

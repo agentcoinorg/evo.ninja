@@ -187,111 +187,179 @@ export class WrapClient extends PolywrapClient {
       })))
       .setPackage("plugin/websearch", PluginPackage.from(module => ({
         "search": async (args: { query: string }) => {
-          const axiosClient =  axios.create({ baseURL: 'https://api.search.brave.com/res/v1/web' });
+          try {
+            const axiosClient = axios.create({
+              baseURL: "https://serpapi.com",
+            });
 
-          const apiKey = env?.BRAVE_API_KEY
+            const apiKey = env?.SERP_API_KEY;
+            if (!apiKey) {
+              throw new Error(
+                "SERP_API_KEY environment variable is required to use the websearch plugin. See env.template for help"
+              );
+            }
 
-          if (!apiKey) {
-            throw new Error('BRAVE_API_KEY environment variable is required to use the websearch plugin. See env.template for help')
-          }
+            const searchQuery = encodeURI(args.query);
+            const urlParams = new URLSearchParams({
+              engine: "google",
+              q: searchQuery,
+              location_requested: "United States",
+              location_used: "United States",
+              google_domain: "google.com",
+              hl: "en",
+              gl: "us",
+              device: "desktop",
+              api_key: apiKey,
+            });
 
-          const searchQuery = encodeURI(args.query)
-          const urlParams = new URLSearchParams({
-            q: searchQuery,
-            count: "3"
-          })
-          
-          const { data } = await axiosClient.get<{
-            web: {
-              results: {
+            const { data } = await axiosClient.get<{
+              organic_results: {
                 title: string;
-                url: string;
-                description: string;
-              }[]
-            }
-          }>(`/search?${urlParams.toString()}`, {
-            headers: {
-              'X-Subscription-Token': apiKey,
-              'Accept': 'application/json'
-            }
-          })
+                link: string;
+                snippet: string;
+                snippet_highlighted_words: string[];
+              }[];
+            }>(`/search?${urlParams.toString()}`, {
+              headers: {
+                Accept: "application/json",
+              },
+            });
 
-          let result: {
-            title: string;
-            url: string;
-            description: string;
-          }[] = [];
+            let result: {
+              title: string;
+              url: string;
+              description: string;
+            }[] = [];
 
-          if (data && data.web && Array.isArray(data.web.results)) {
-            result = data.web.results.map((result: any) => ({
-              title: result.title || '',
-              url: result.url || '',
-              description: result.description || ''
-            }));
+            if (data && Array.isArray(data.organic_results)) {
+              result = data.organic_results
+                .map((result) => ({
+                  title: result.title ?? "",
+                  url: result.link ?? "",
+                  description: result.snippet ?? "",
+                }))
+                .slice(0, 4);
+            }
+
+            return JSON.stringify(result);
+          } catch (e: any) {
+            console.log(e)
+            throw new Error("Error in search: " + e.message.toString());
           }
-
-          return JSON.stringify(result)
         }
       })))
       .setPackage("plugin/fuzzySearch", PluginPackage.from(module => ({
         "search": async (args: { url: string, queryKeywords: string[] }) => {
-          const response = await axios.get(args.url, {
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:107.0) Gecko/20100101 Firefox/107.0'
+          try {
+            const MAX_RESULT_SIZE = 6000;
+
+            const response = await axios.get(args.url, {
+              headers: {
+                "User-Agent":
+                  "Mozilla/5.0 (X11; Linux x86_64; rv:107.0) Gecko/20100101 Firefox/107.0",
+              },
+            });
+
+            const clean = (text: string) => {
+              return text.replaceAll("\t", "")
+                    .replaceAll("\\\\t", "")
+                    .replaceAll("\n", " ")
+                    .replaceAll("\\\\n", " ")
+                    .replace(/ +(?= )/g, "")
+                    .trim()
             }
-          });
-          const html = response.data;
-          const $ = load(html);
 
-          $('script').remove();
+            const html = response.data;
+            const $ = load(html);
 
-          const results: string[] = [];
+            $("script").remove();
+            $("style").remove();
 
-          $('*').each((_, element) => {
+            let siteText: string = "";
+            $("*").each((_, element) => {
+              siteText += $(element).text().trim() + " ";
+            })
+
+            const siteTextClean = clean(siteText);
+
+            if (siteTextClean.length < MAX_RESULT_SIZE) {
+              return siteTextClean;
+            }
+
+            const chunks: string[] = [];
+
+            $("*").each((_, element) => {
               const text = $(element).text().trim();
               let context = text;
 
               if ($(element).prev().length > 0) {
-                  context = $(element).prev().text().trim() + " " + context;
+                context = $(element).prev().text().trim() + " " + context;
               }
 
               if ($(element).next().length > 0) {
-                  context += " " + $(element).next().text().trim();
+                context += " " + $(element).next().text().trim();
               }
 
               if ($(element).children().length > 0) {
-                  context += " " + $(element).children().map((i, el) => $(el).text().trim()).get().join(" ");
+                context +=
+                  " " +
+                  $(element)
+                    .children()
+                    .map((i, el) => $(el).text().trim())
+                    .get()
+                    .join(" ");
               }
 
-              results.push(context);
-          });
+              chunks.push(context);
+            });
 
-          let cleanResults = Array.from(new Set(
-            results.map(result => {
-              return result
-                .replaceAll("\t", '')
-                .replaceAll("\\\\t", '')
-                .replaceAll("\n", ' ')
-                .replaceAll("\\\\n", ' ')
-                .replace(/ +(?= )/g,'')
-                .trim();
-            })
-          ))
-          cleanResults = cleanResults
-            .filter((result, i) => {
+            const cleanChunks = Array.from(
+              new Set(
+                chunks.map((result) => clean(result))
+              )
+            );
+
+            const fileteredChunks = cleanChunks.filter((chunk, i) => {
               if (i === 0) {
                 return true;
               }
 
-              const previousResult = results[i - 1];
-              const similarity = stringSimilarity.compareTwoStrings(result, previousResult)
+              const previousResult = cleanChunks[i - 1];
+              const similarity = stringSimilarity.compareTwoStrings(
+                chunk,
+                previousResult
+              );
 
-              return similarity < 0.8;
+              return similarity < 0.9;
+            });
+
+            const sortedChunks = fuzzysort
+              .go(args.queryKeywords.join(" "), fileteredChunks)
+              .map((result) => result.target);
+
+            const resultingChunks: string[] = [];
+
+            sortedChunks.forEach((chunk) => {
+              const resultString = resultingChunks.join(" ");
+              const charactersLeft = MAX_RESULT_SIZE - resultString.length;
+        
+              if (charactersLeft <= 0) {
+                return;
+              }
+        
+              if (chunk.length <= charactersLeft) {
+                resultingChunks.push(chunk);
+                return;
+              }
+        
+              resultingChunks.push(chunk.substring(0, charactersLeft));
             })
-
-          const sortedResults = fuzzysort.go(args.queryKeywords.join(" "), cleanResults).map(result => result.target.substring(0, 3000));
-          return JSON.stringify(sortedResults.slice(0, 5));
-        }
+        
+            return resultingChunks.join(" ");
+          } catch (e) {
+            throw new Error("Error in fuzzy search: " + e.message.toString());
+          }
+        },
       })))
 
     if (agentPlugin) {

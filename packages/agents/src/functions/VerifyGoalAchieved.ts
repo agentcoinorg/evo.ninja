@@ -1,17 +1,15 @@
-import { AgentOutputType, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, ChatMessage, Chat } from "@evo-ninja/agent-utils"
-import { AgentFunctionBase } from "../../../AgentFunctionBase";
-import { GOAL_VERIFIER_AGENT_CONFIG, ScriptedAgent, ScriptedAgentContext } from "../../../scriptedAgents";
+import { AgentOutputType, Scripts, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, ChatMessage, Chat, WrapClient, AgentVariables } from "@evo-ninja/agent-utils"
+import { AgentFunctionBase } from "../AgentFunctionBase";
+import { GoalVerifierAgent } from "../scriptedAgents";
+import { AgentBaseContext } from "../AgentBase";
 
 interface FunctionParams {
   task: string;
   context?: string;
 }
 
-export class VerifyGoalAchievedFunction<
-  TAgentContext extends ScriptedAgentContext,
-> extends AgentFunctionBase<TAgentContext, FunctionParams> {
-  constructor(
-  ) {
+export class VerifyGoalAchievedFunction extends AgentFunctionBase<FunctionParams> {
+  constructor(private client: WrapClient, private scripts: Scripts) {
     super();
   }
 
@@ -33,26 +31,27 @@ export class VerifyGoalAchievedFunction<
     }
   }
 
-  onSuccess(name: string, params: any, messages: string[], result: AgentOutput): AgentFunctionResult {
+  onSuccess(name: string, rawParams: string | undefined, messages: string[], result: AgentOutput, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         result
       ],
       messages: [
-        ChatMessageBuilder.functionCall(name, params),
+        ChatMessageBuilder.functionCall(name, rawParams),
         ...messages.map(x => ({
           role: "assistant",
           content: x,
         }) as ChatMessage),
         ChatMessageBuilder.functionCallResult(
           name,
-          result.content || "Successfully accomplished the task."
+          result.content || "Successfully accomplished the task.",
+          variables
         )
       ]
     }
   }
 
-  onFailure(name: string, params: any, error: string | undefined): AgentFunctionResult {
+  onFailure(name: string, params: any, rawParams: string | undefined, error: string | undefined, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -62,26 +61,28 @@ export class VerifyGoalAchievedFunction<
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(name, params),
+        ChatMessageBuilder.functionCall(name, rawParams),
         ChatMessageBuilder.functionCallResult(
           name,
-          `Error: ${error}`
+          `Error: ${error}`,
+          variables
         )
       ]
     }
   }
 
-  buildExecutor(agent: Agent<unknown>, context: TAgentContext) {
-    return async (params: FunctionParams): Promise<AgentFunctionResult> => {
-      const scriptedAgent = ScriptedAgent.create(
-        GOAL_VERIFIER_AGENT_CONFIG,
+  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext) {
+    return async (params: FunctionParams, rawParams?: string): Promise<AgentFunctionResult> => {
+      const scriptedAgent = new GoalVerifierAgent(
         {
           chat: new Chat(context.chat.tokenizer),
           env: context.env,
           llm: context.llm,
           logger: context.logger,
           workspace: context.workspace,
-          scripts: context.scripts
+          scripts: this.scripts,
+          client: this.client,
+          variables: context.variables
         }
       );
 
@@ -100,15 +101,18 @@ export class VerifyGoalAchievedFunction<
             return this.onFailure(
               this.name,
               params,
-              response.value.error
+              rawParams,
+              response.value.error,
+              context.variables
             );
           }
         
           return this.onSuccess(
             this.name,
-            params,
+            rawParams,
             messages,
-            response.value.value
+            response.value.value,
+            context.variables
           );
         } else {
           if (response.value.type === "message" && response.value.content) {
