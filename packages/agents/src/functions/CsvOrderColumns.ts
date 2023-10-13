@@ -1,6 +1,6 @@
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
-export class CsvOrderColumnsFunction extends ScriptFunction<{ inputPath: string, outputPath: string }> {
+export class CsvOrderColumnsFunction extends ScriptFunction<{ csvData: string, delimiter: string }> {
   get name() {
     return "csv_orderColumns"
   }

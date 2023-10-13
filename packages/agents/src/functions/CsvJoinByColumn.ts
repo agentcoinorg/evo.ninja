@@ -1,6 +1,6 @@
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
-export class CsvJoinByColumnFunction extends ScriptFunction<{ csv1Path: string, csv2Path: string, commonColumn: string, outputPath: string }> {
+export class CsvJoinByColumnFunction extends ScriptFunction<{ csv1Path: string, csv2Path: string, delimiter: string, joinColumnName: string }> {
   get name() {
     return "csv_joinByColumn"
   }

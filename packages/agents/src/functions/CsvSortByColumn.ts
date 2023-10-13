@@ -1,6 +1,6 @@
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
-export class CsvSortByColumnFunction extends ScriptFunction<{ inputPath: string, outputPath: string, column: string }> {
+export class CsvSortByColumnFunction extends ScriptFunction<{ csvData: string, delimiter: string, columnIndex: string }> {
   get name() {
     return "csv_sortByColumn"
   }
@@ -23,7 +23,7 @@ export class CsvSortByColumnFunction extends ScriptFunction<{ inputPath: string,
             type: "number"
         }
       },
-      required: ["inputPath", "outputPath", "columnIndex"],
+      required: ["csvData", "delimiter", "columnIndex"],
       additionalProperties: false
     }
   }
