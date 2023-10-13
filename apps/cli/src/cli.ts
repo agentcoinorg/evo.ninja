@@ -10,6 +10,7 @@ export async function cli(): Promise<void> {
     .option("-r, --root <path>")
     .option("-d, --debug")
     .option("-m, --messages <path>")
+    .option("--task <number>")
     .parse();
 
   const options = program.opts();
@@ -26,7 +27,8 @@ export async function cli(): Promise<void> {
     timeout,
     rootDir: options.root,
     debug: options.debug,
-    messagesPath: options.messages
+    messagesPath: options.messages,
+    taskId: options.task
   });
 
   await app.logger.logHeader();

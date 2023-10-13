@@ -1,62 +1,61 @@
-import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+import { Agent, AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { AgentBaseContext } from "../AgentBase";
 
-interface ReadVarFuncParameters { 
+interface ReadVarFuncParameters {
   name: string,
   start: number,
   count: number
-};
+}
 
 export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameters> {
-  constructor(private globals: Record<string, string>, private maxVarLength: number = 3000) {
+  constructor(private maxVarLength: number = 3000) {
     super();
   }
-  
+
   get name(): string {
     return "readVariable";
   }
+
   get description(): string {
-    return `Writes the function.`;
+    return "Read a ${variable}";
   }
+
   get parameters(): any {
     return {
       type: "object",
       properties: {
-        namespace: {
+        name: {
           type: "string",
-          description: "The namespace of the function, e.g. fs.readFile"
+          description: "${name} of a variable"
         },
-        description: {
-          type: "string",
-          description: "The detailed description of the function."
+        start: {
+          type: "number",
+          description: "Index to start reading at"
         },
-        arguments: {
-          type: "string",
-          description: "The arguments of the function. E.g. '{ path: string, encoding: string }'"
-        },
-        code: {
-          type: "string",
-          description: "The code of the function."
+        count: {
+          type: "number",
+          description: "Number of bytes to read"
         }
       },
-      required: ["namespace", "description", "arguments", "code"],
+      required: ["name", "start", "count"],
       additionalProperties: false
     }
   }
 
-  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: ReadVarFuncParameters) => Promise<AgentFunctionResult> {
-    return async (params: ReadVarFuncParameters): Promise<AgentFunctionResult> => {
-      if (!this.globals[params.name]) {
-        return this.onError(params);
-      } 
+  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: ReadVarFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
+    return async (params: ReadVarFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
+      const variable = context.variables.get(params.name);
+      if (!variable) {
+        return this.onError(params, rawParams, context.variables);
+      }
 
-      return this.onSuccess(params, this.globals[params.name]);
+      return this.onSuccess(params, rawParams, variable);
     };
   }
 
-  private onSuccess(params: ReadVarFuncParameters, varValue: string): AgentFunctionResult {
+  private onSuccess(params: ReadVarFuncParameters, rawParams: string | undefined, varValue: string | undefined): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -70,53 +69,50 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, params),
-        ChatMessageBuilder.functionCallResult(
-          this.name,
-          this.readGlobalVarMessage(params.name, varValue, params.start, params.count)
-        )
+        ChatMessageBuilder.functionCall(this.name, rawParams),
+        {
+          role: "function",
+          name: this.name,
+          content: this.readGlobalVarMessage(params.name, varValue, params.start, params.count)
+        }
       ]
     }
   }
 
-  private onError(params: ReadVarFuncParameters): AgentFunctionResult {
+  private onError(params: ReadVarFuncParameters, rawParams: string | undefined, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
           type: AgentOutputType.Error,
           title: `Failed to read '${params.name}' variable.`, 
-          content: FUNCTION_CALL_FAILED(params, this.name, `Global variable {{${params.name}}} not found.`)
+          content: FUNCTION_CALL_FAILED(params, this.name, `Variable \${${params.name}} not found.`)
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, params),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
-          `Error: Global variable {{${params.name}}} not found.`
+          `Error: Variable \${${params.name}} not found.`,
+          variables
         )
       ]
     }
   }
 
   private readGlobalVarOutput(varName: string, value: string | undefined, start: number, count: number) {
-    if (!value || value === "\"undefined\"") {
-      return `## Variable {{${varName}}} is undefined`;
-    } else if (value.length > this.maxVarLength) {
-      const val = value.substring(start, start + Math.min(count, this.maxVarLength));
-      return `## Read variable {{${varName}}}, but it is too large, JSON preview (start: ${start}, count: ${Math.min(count, this.maxVarLength)}):\n\`\`\`\n${val}...\n\`\`\``;
-    } else {
-      return `## Read variable {{${varName}}}, JSON:\n\`\`\`\n${value}\n\`\`\``;
-    }
+    return `## ${this.readGlobalVarMessage(varName, value, start, count)}`;
   }
 
   private readGlobalVarMessage(varName: string, value: string | undefined, start: number, count: number) {
     if (!value || value === "\"undefined\"") {
-      return `Variable {{${varName}}} is undefined`;
-    } else if (value.length > this.maxVarLength) {
-      const val = value.substring(start, start + Math.min(count, this.maxVarLength));
-      return `Read variable {{${varName}}}, but it is too large, JSON preview (start: ${start}, count: ${Math.min(count, this.maxVarLength)}):\n\`\`\`\n${val}...\n\`\`\``;
+      return `Variable \${${varName}} is undefined`;
+    } else if (count > this.maxVarLength) {
+      const cnt = Math.min(count, this.maxVarLength);
+      const val = value.substring(start, start + cnt);
+      const warn = `Warning: maximum read length is ${this.maxVarLength} bytes, result will be shortened.`;
+      return `${warn}\nReading ${start}-${start + cnt} bytes of variable \${${varName}} (length ${value.length}):\n\`\`\`\n${val}...\n\`\`\``;
     } else {
-      return `Read variable {{${varName}}}, JSON:\n\`\`\`\n${value}\n\`\`\``;
+      return `Reading ${start}-${start + count} bytes of variable \${${varName}} (length ${value.length}):\n\`\`\`\n${value}\n\`\`\``;
     }
   }
 }

@@ -1,18 +1,16 @@
-import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, JsEngine, JsEngine_GlobalVar, Scripts, WrapClient, shimCode, trimText } from "@evo-ninja/agent-utils";
+import { Agent, AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder, JsEngine, JsEngine_GlobalVar, Scripts, WrapClient, shimCode, trimText } from "@evo-ninja/agent-utils";
 import JSON5 from "json5";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { AgentBaseContext } from "../AgentBase";
 
 interface ExecuteScriptFuncParameters { 
-  namespace: string, 
-  description: string, 
-  arguments: string,
-  variable?: string
-};
+  namespace: string;
+  arguments: string;
+}
 
 export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncParameters> {
-  constructor(private client: WrapClient, private scripts: Scripts, private globals: Record<string, string>) {
+  constructor(private client: WrapClient, private scripts: Scripts) {
     super();
   }
 
@@ -34,56 +32,45 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
         },
         arguments: {
           type: "string",
-          description: "JSON-formatted arguments to pass into the script being executed. You can replace a value with a global variable by using {{varName}} syntax.",
-        },
-        variable: {
-          type: "string",
-          description: "The name of a variable to store the script's result in"
+          description: "JSON-formatted arguments to pass into the script being executed.",
         }
       },
-      required: ["namespace", "arguments", "result"],
+      required: ["namespace", "arguments"],
       additionalProperties: false
     }
   }
 
-  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: ExecuteScriptFuncParameters) => Promise<AgentFunctionResult> {
-    return async (params: ExecuteScriptFuncParameters): Promise<AgentFunctionResult> => {
+  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: ExecuteScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
+    return async (params: ExecuteScriptFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       try {
         const script = this.scripts.getScriptByName(params.namespace);
 
         if (!script) {
-          return this.onError(params.namespace, this.scriptNotFound(params), params);
+          return this.onError(params.namespace, this.scriptNotFound(params), params, rawParams, context.variables);
         }
 
-        let args: any = undefined;
+        let args: unknown;
         args = params.arguments ? params.arguments.replace(/\{\{/g, "\\{\\{").replace(/\}\}/g, "\\}\\}") : "{}";
         try {
-
           args = JSON5.parse(params.arguments);
 
+          if (typeof args !== "object") {
+            throw "Args must be an object.";
+          }
+
           if (args) {
-            const replaceVars = (str: string, vars: any) => {
-              return str.replace(/{{(.*?)}}/g, (match, key) => {
-                return vars[key.trim()] || match;  // if the key doesn't exist in vars, keep the original match
-              });
-            }
-            for (const key of Object.keys(args)) {
-              if (typeof args[key] === "string") {
-                args[key] = replaceVars(
-                  args[key],
-                  Object.keys(this.globals).reduce(
-                    (a, b) => ({ [b]: JSON.parse(this.globals[b]), ...a}), {}
-                  )
-                );
+            for (const [key, value] of Object.entries(args)) {
+              if (typeof value === "string" && AgentVariables.hasSyntax(value)) {
+                (args as Record<string, unknown>)[key] = context.variables.get(value);
               }
             }
           }
         } catch {
-          return this.onError(params.namespace, this.invalidExecuteScriptArgs(params), params);
+          return this.onError(params.namespace, this.invalidExecuteScriptArgs(params), params, rawParams, context.variables);
         }
 
         const globals: JsEngine_GlobalVar[] =
-          Object.entries(args).map((entry) => ({
+          Object.entries(args as Record<string, unknown>).map((entry) => ({
               name: entry[0],
               value: JSON.stringify(entry[1]),
             })
@@ -96,26 +83,20 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
           globals
         });
 
-        if (params.variable && result.ok && this.client.jsPromiseOutput.ok) {
-          this.globals[params.variable] =
-            JSON.stringify(this.client.jsPromiseOutput.value);
-        }
-
         return result.ok
           ? result.value.error == null
             ? this.client.jsPromiseOutput.ok
-              ? this.onSuccess(params.namespace, this.client.jsPromiseOutput.value, params)
-              : this.onError(params.namespace, JSON.stringify(this.client.jsPromiseOutput.error), params)
-            : this.onError(params.namespace, result.value.error, params)
-          : this.onError(params.namespace, result.error?.toString(), params);
-      
+              ? this.onSuccess(params.namespace, this.client.jsPromiseOutput.value, params, rawParams, context.variables)
+              : this.onError(params.namespace, JSON.stringify(this.client.jsPromiseOutput.error), params, rawParams, context.variables)
+            : this.onError(params.namespace, result.value.error, params, rawParams, context.variables)
+          : this.onError(params.namespace, result.error?.toString(), params, rawParams, context.variables);
       } catch (e: any) {
-        return this.onError(params.namespace, e.toString(), params);
+        return this.onError(params.namespace, e.toString(), params, rawParams, context.variables);
       }
     };
   }
 
-  private onSuccess(scriptName: string, result: any, params: ExecuteScriptFuncParameters): AgentFunctionResult {
+  private onSuccess(scriptName: string, result: any, params: ExecuteScriptFuncParameters, rawParams: string | undefined, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -124,21 +105,22 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
           content: FUNCTION_CALL_SUCCESS_CONTENT(
             this.name,
             params,
-            this.executeScriptOutput(params.variable, result),
+            result,
           )
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, params),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
-          this.executeScriptOutput(params.variable, result)
+          result,
+          variables
         ),
       ]
     }
   }
 
-  private onError(scriptName: string, error: string | undefined, params: ExecuteScriptFuncParameters) {
+  private onError(scriptName: string, error: string | undefined, params: ExecuteScriptFuncParameters, rawParams: string | undefined, variables: AgentVariables) {
     return {
       outputs: [
         {
@@ -148,7 +130,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, params),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
           `Error executing script '${scriptName}'\n` + 
@@ -160,7 +142,8 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
                 ? trimText(JSON.stringify(error, null, 2), 300)
                 : "Unknown error"
             }\n` +
-          `\`\`\``
+          `\`\`\``,
+          variables
         ),
       ]
     }
@@ -172,27 +155,5 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
 
   private scriptNotFound(params: ExecuteScriptFuncParameters) {
     return `Script '${params.namespace}' not found!`;
-  }
-
-  private executeScriptOutput(varName: string | undefined, result: string | undefined) {
-    if (!result || result === "undefined" || result === "\"undefined\"") {
-      return `No result returned.`;
-    } else if (result.length > 3000) {
-      return `Preview of JSON result:\n` + 
-            `\`\`\`\n` + 
-            `${trimText(result, 3000)}\n` + 
-            `\`\`\`\n` + 
-            `${this.storedResultInVar(varName)}`;
-    } else {
-      return `JSON result: \n\`\`\`\n${result}\n\`\`\`\n${this.storedResultInVar(varName)}`;
-    }
-  }
-
-  private storedResultInVar(varName: string | undefined) {
-    if (varName && varName.length > 0) {
-      return `Result stored in variable: {{${varName}}}`;
-    } else {
-      return "";
-    }
   }
 }
