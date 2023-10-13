@@ -38,7 +38,7 @@ You are an advanced web information retriever. You will receive a query and need
 
 1. Start by delegating planning to the ResearchPlanner agent. You will received a detailed multi-step searching plan.
 2. For each step, you will use the Scraper agent to search the web for results.
-3. Before calling the ${onGoalAchievedFn.name} function, verify the result with the ResearchVerifier, giving it the information you think it's complete.
+3. Before calling the ${onGoalAchievedFn.name} function, verify the result with the ResearchVerifier, giving it the information you think is complete.
 If the research verifier says the data is incomplete, search for the missing data. If you have already used the verifier once and found new information, even if incomplete,
 DO NOT FAIL, call the ${onGoalAchievedFn.name} function with what you have.
 `,

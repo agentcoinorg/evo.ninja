@@ -59,9 +59,11 @@ export class ResearchPlannerAgent extends ScriptedAgent {
           Example of undesired behavior: Searching "US births 2019", then "US births 2020", then "US births 2021"...
           Desired behavior: Searching "US births from 2019 to 2021".
 
-          4. Always provide step by step reasoning for your plan, and then use the ${onGoalAchievedFn.name} function to send the plan to the user
+          4. Always assume ${new Date().getFullYear()} as the present year, in case searches require to find certain information until the present year.
           
-          5. Be precise, and concise`,
+          5. Always provide step by step reasoning for your plan, and then use the ${onGoalAchievedFn.name} function to send the plan to the user
+          
+          6. Be precise, and concise`,
         },
         { role: "user", content: goal },
       ],
