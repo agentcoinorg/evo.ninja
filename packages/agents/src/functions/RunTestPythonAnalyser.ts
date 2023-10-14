@@ -49,7 +49,7 @@ export class RunTestPythonAnalyser extends AgentFunctionBase<FunctionParams> {
   }
 
   buildExecutor(_: Agent<unknown>, context: AgentBaseContext) {
-    return async (params: FunctionParams): Promise<AgentFunctionResult> => {
+    return async (params: FunctionParams, rawParams?: string): Promise<AgentFunctionResult> => {
       const testResult = await this.client.invoke<
         { success: true } | { success: false; error: string }
       >({
@@ -96,7 +96,7 @@ ${testResult.value.error}
           outputs: [],
           messages: [
             ChatMessageBuilder.functionCall(this.name, params),
-            ChatMessageBuilder.functionCallResult(this.name, response?.content || "Error could not be diagnosed. Can you please provide more information")
+            ChatMessageBuilder.functionCallResult(this.name, response?.content || "Error could not be diagnosed. Can you please provide more information", context.variables)
           ]
         };
       } else {
@@ -104,7 +104,7 @@ ${testResult.value.error}
           outputs: [],
           messages: [
             ChatMessageBuilder.functionCall(this.name, params),
-            ChatMessageBuilder.functionCallResult(this.name, "Test ran succesfully")
+            ChatMessageBuilder.functionCallResult(this.name, "Test ran succesfully", context.variables)
           ]
         };
       }
