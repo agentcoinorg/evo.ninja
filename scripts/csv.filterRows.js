@@ -7,9 +7,7 @@ function detectDelimiter(row) {
       }
   }
 
-  throw new Error(`No known delimiter found. Supported delimiters: ${
-    supportedDelimiters.map((x) => `"${x}"`).join(", ")
-  }`);
+  return supportedDelimiters[0];
 }
 
 function parseCSV(data) {

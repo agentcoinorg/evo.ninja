@@ -5,6 +5,7 @@ import {
 } from "../ScriptedAgent";
 import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
+import { AnalyzeFormattingRequirementsFunction } from "../../functions/AnalyzeFormattingRequirements";
 import { AnalyzeDataFunction } from "../../functions/AnalyzeData";
 import { CsvAddColumnFunction } from "../../functions/CsvAddColumn";
 import { CsvFilterRowsFunction } from "../../functions/CsvFilterRows";
@@ -37,16 +38,12 @@ export class DataAnalystAgent extends ScriptedAgent {
         {
           role: "user",
           content:
-`You are the Data Analyst Agent, an expert analyzing and modifying CSV datasets. You must follow the following plan:
+`You are the Data Analyst Agent, an expert analyzing and modifying CSV datasets. You must perform the following steps:
 
+0. Understand Requirements - Understand all requirements of your task by calling the analyzeFormattingRequirements function. These requirements MUST be respected in all future actions.
 1. Read - Read all relevant data files. If no files were provided, try to fs_readDirectory to find relevant files.
 2. Analyze - Data that is too large must be analyzed first. You must know what is contained within the data.
-3. Modify - Modify the data, respecting all file-formatting specifications (ex: delimiters in CSVs).
-
-Additional Guidelines:
-ANALYZE - You MUST analyze large data so you know what you are modifying. Do not blindly modifying it.
-INSPECT DETAILS - Approach every dataset with a keen eye for detail, ensuring accuracy and relevance in all your conclusions.
-OBEY USER GOALS - Respect user-defined goals and formatting specifications. If the user specifies a format, ensure it is adhered to in your outputs.`
+3. Modify - Modify the data based on the requirements AND analysis you've done prior. Each modification you make NEEDS to have justification, stating how it abides by the requirements of the goal.`
         },
         { role: "user", content: goal },
       ],
@@ -57,6 +54,7 @@ OBEY USER GOALS - Respect user-defined goals and formatting specifications. If t
       functions: [
         onGoalAchievedFn,
         onGoalFailedFn,
+        new AnalyzeFormattingRequirementsFunction(context.llm, context.chat.tokenizer),
         new AnalyzeDataFunction(context.llm, context.chat.tokenizer),
         new CsvAddColumnFunction(context.client, context.scripts),
         new CsvFilterRowsFunction(context.client, context.scripts),
