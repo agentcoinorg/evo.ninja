@@ -365,7 +365,39 @@ export class WrapClient extends PolywrapClient {
         "shellExec": async (params: { command: string, args?: string[] }) => {
           logger.notice("CMD.EXEC = " + `${params.command} ${params.args}`);
           return await workspace.shellExec(params.command, params.args);
-        }
+        },
+        "runPythonTest": async (params: { filename: string }) => {
+          const command = `python ${params.filename}`;
+          // const loopGuard = async () =>
+          //   await new Promise(() =>
+          //     setTimeout(() => {
+          //       return {
+          //         success: false,
+          //         error:
+          //           "15 seconds timeout reached on test. Maybe you have an infinite loop?",
+          //       };
+          //     }, 15000)
+          //   );
+          const executeTest = async () => {
+            const response = await workspace.shellExec(command);
+            if (response.exitCode === 0 && response.stderr.endsWith("OK\n")) {
+              return {
+                success: true,
+              };
+            } else {
+              return {
+                success: false,
+                error: response.stderr,
+              };
+            }
+          };
+          return await executeTest()
+          // try {
+          //   return await Promise.any([executeTest, loopGuard]);
+          // } catch (e: any) {
+          //   return new Error("Error executing python test: " + e.message);
+          // }
+        },
       })))
 
     if (agentPlugin) {

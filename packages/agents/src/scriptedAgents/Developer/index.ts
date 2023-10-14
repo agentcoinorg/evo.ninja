@@ -4,7 +4,7 @@ import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
 import { ReadFileFunction } from "../../functions/ReadFile";
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
-import {ShellExecFunction} from "../../functions/ShellExec";
+import { DelegateQualityAssuranceFunction } from "../../functions/DelegateQualityAssurance";
 
 export class DeveloperAgent extends ScriptedAgent {
   constructor(context: ScriptedAgentContext) {
@@ -13,27 +13,53 @@ export class DeveloperAgent extends ScriptedAgent {
     const writeFileFn = new WriteFileFunction(context.client, context.scripts);
     const readFileFn = new ReadFileFunction(context.client, context.scripts);
     const readDirFn = new ReadDirectoryFunction(context.client, context.scripts);
-    const shellExecFn = new ShellExecFunction(context.client, context.scripts);
-    
+    const delegateQualityAsurance = new DelegateQualityAssuranceFunction(context.client, context.scripts);
+
     const config: ScriptedAgentConfig = {
       name: "Developer",
-      expertise: "Building software projects with one or more files.",
+      expertise: "architecting, building and testing software",
       initialMessages: ({ goal }) => [
         { 
           role: "user", 
-          content: `Purpose:
-You are an expert developer assistant that excels at coding related tasks.
-You must not interact with the user or ask questions. Solve the task to the best of your abilities.
-NEVER guess the name of a file. If you need to know the name of a file, use ${readDirFn.name}.
-Four-Step Workflow:
-1. If you need to know the contents of a directory or file, use ${readDirFn.name} or ${readFileFn.name}.
-2. Write the COMPLETE, clean, safe, code solution to one or more files using the ${writeFileFn.name} function.
-3. If you need to execute a terminal command (e.g. "pytest"), use the ${shellExecFn.name} function.
-4. Signal completion using the ${onGoalAchievedFn.name} function.
-You can only write to the same file twice if you are modifying code that you already wrote.
-COMPLETE SOLUTION:
-Follow instructions. Do not skip anything. Write the COMPLETE solution in one step. The code should work perfectly without further changes.
-If you are asked to implement an abstract class, you MUST import it, extend it, and implement all its abstract methods.`
+          content: `
+You are an expert developer assistant that excels at coding related tasks. You are an expert in receiving instructions
+and converting the requirements to software using test driven development.
+
+You are not able to interact with user or ask questions, you must solve the task using the best of your abilities.
+
+Instructions:
+- Think step by step how are you going to execute before taking any actions
+- You have access to a workspace where you can read/write your code
+- After thinking in the game plan, you must write the **complete** code to the needed files
+- You will use the function ${delegateQualityAsurance.name} to delegate the testing and know what to
+iterate if necessary. You must as context the information necessary regarding what's tested.
+
+Guidelines:
+- You must always think in tests first and then do the implementation.
+- Do not test any extra edge cases that you're not asked to
+- You will always run tests after you are sure that the implementation is done.
+**IMPORTANT**:
+- If the test returns an error, you must check what's the message, understand it, and iterate
+  the code to make sure the error is fixed.
+- The goal might contain information about the test. Make sure you're really careful with the instructions so you understand how things can be tested.
+    -- If the goal contains information about the test, you will focus your entire test development around the requests from the user
+    -- You wont use mock in unit tests if you are creating tests from scratch
+They must follow the structure:
+\`\`\`python
+import unittest
+
+from your_code import some_function, another_function
+
+class TestYourTestName(unittest.TestCase):
+  def test_your_function(self):
+    # here you implement your own logic
+    pass
+
+
+if __name__ == "__main__":
+  unittest.main()
+  \`\`\`
+`
         },
         { role: "user", content: goal},
       ],
@@ -44,7 +70,7 @@ If you are asked to implement an abstract class, you MUST import it, extend it, 
         writeFileFn,
         readFileFn,
         readDirFn,
-        shellExecFn
+        delegateQualityAsurance
       ],
       shouldTerminate: (functionCalled) => {
         return [
