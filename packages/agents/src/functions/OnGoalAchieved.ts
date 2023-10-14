@@ -29,7 +29,7 @@ export class OnGoalAchievedFunction extends ScriptFunction<OnGoalAchievedFuncPar
     }
   }
 
-  onSuccess(scriptedAgent: ScriptedAgent, params: OnGoalAchievedFuncParameters, result: string) {
+  onSuccess(scriptedAgent: ScriptedAgent, params: OnGoalAchievedFuncParameters, rawParams: string | undefined, result: string) {
     return {
       outputs: [
         {
@@ -42,7 +42,7 @@ export class OnGoalAchievedFunction extends ScriptFunction<OnGoalAchievedFuncPar
     }
   }
 
-  onFailure(scriptedAgent: ScriptedAgent, params: OnGoalAchievedFuncParameters, error: string) {
+  onFailure(scriptedAgent: ScriptedAgent, params: OnGoalAchievedFuncParameters, rawParams: string | undefined, error: string) {
     return {
       outputs: [
         {

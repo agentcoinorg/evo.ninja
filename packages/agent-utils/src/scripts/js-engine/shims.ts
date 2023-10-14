@@ -449,8 +449,7 @@ const globalToShimVarNameMap = {
     process: "processShim"
 };`;
 
-export const shimCode = (code: string) => `
-  ${packagesShim}
+export const shimCode = (code: string) => `${packagesShim}
 
   ${Object.entries(globalToShimVarNameMap).map(([global, shim]) => `var ${global} = ${shim};`).join("\n")}
 

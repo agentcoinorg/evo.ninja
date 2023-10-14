@@ -7,6 +7,7 @@ import {
   agentPlugin,
   WrapClient,
   Logger,
+  AgentVariables
 } from "@evo-ninja/agent-utils";
 import { AgentBase, AgentBaseConfig } from "../../AgentBase";
 import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
@@ -24,26 +25,23 @@ export interface ScripterRunArgs {
   goal: string
 }
 
-export interface ScripterContext extends ScriptedAgentContext {
-  globals: Record<string, string>;
-}
-
-export class Scripter extends AgentBase<ScripterRunArgs, ScripterContext> {
+export class Scripter extends AgentBase<ScripterRunArgs, ScriptedAgentContext> {
   constructor(
     llm: LlmApi,
     chat: Chat,
     logger: Logger,
     workspace: Workspace,
     scripts: Scripts,
-    env: Env
+    env: Env,
+    variables: AgentVariables = new AgentVariables()
   ) {
-    const agentContext = {
+    const agentContext: ScriptedAgentContext = {
       llm,
       chat,
       workspace,
       scripts,
       logger,
-      globals: {},
+      variables,
       client: new WrapClient(workspace, logger, agentPlugin({ logger }), env),
       env,
     };
@@ -64,8 +62,8 @@ You are an expert assistant designed to achieve goals through the use of scripts
 
 Functionalities:
 findScript: Search and identify scripts that can be repurposed or combined for the current task.
-executeScript: Run scripts using TypeScript syntax. You store outcomes in global variables with the 'variable' argument and double-check the script's output to ensure it's correct.
-readVariable: Access the JSON preview of a global variable. You use this to read through partial outputs of scripts, if they are too large, to find the desired information.
+executeScript: Run scripts using TypeScript syntax. Double-check the script's output to ensure it's correct.
+readVariable: Access the JSON preview of a variable. You use this to read through partial outputs of scripts, if they are too large, to find the desired information.
 createScript: You ONLY resort to creating a specific script when you are certain that no existing script can be modified or combined to solve the problem. You never create overly general or vague scripts.
 
 Decision-making Process:
@@ -84,9 +82,9 @@ If a goal has been achieved or failed, you will call the agent_onGoalAchieved or
         "Assistant, you seem to be looping. Try calling findScript, or exiting by calling agent_onGoalAchieved or agent_onGoalFailed.",
       functions: [
         new CreateScriptFunction(agentContext.scripts),
-        new ExecuteScriptFunction(agentContext.client, agentContext.scripts, agentContext.globals),
+        new ExecuteScriptFunction(agentContext.client, agentContext.scripts),
         new FindScriptFunction(agentContext.scripts),
-        new ReadVariableFunction(agentContext.globals),
+        new ReadVariableFunction(),
         new ReadFileFunction(agentContext.client, agentContext.scripts),
         new WriteFileFunction(agentContext.client, agentContext.scripts),
         new ReadDirectoryFunction(agentContext.client, agentContext.scripts),

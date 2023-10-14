@@ -1,22 +1,19 @@
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
-export class AddCsvColumnFunction extends ScriptFunction<{ inputPath: string, outputPath: string, column: string, values: string[] }> {
+export class CsvAddColumnFunction extends ScriptFunction<{ csvData: string, column: string, values: string[] }> {
   get name() {
     return "csv_addColumn"
   }
 
   get description() {
-    return "Adds a new column to a CSV file and writes the output to a new file"
+    return "Adds a new column to a CSV"
   }
 
   get parameters() {
     return {
       type: "object",
       properties: { 
-        inputPath: {
-            type: "string"
-        },
-        outputPath: {
+        csvData: {
             type: "string"
         },
         column: {
@@ -29,7 +26,7 @@ export class AddCsvColumnFunction extends ScriptFunction<{ inputPath: string, ou
             }
         }
       },
-      required: ["inputPath", "outputPath", "column", "values"],
+      required: ["csvData", "column", "values"],
       additionalProperties: false
     }
   }

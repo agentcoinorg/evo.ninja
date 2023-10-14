@@ -1,4 +1,4 @@
-import { AgentOutputType, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, ChatMessage } from "@evo-ninja/agent-utils"
+import { AgentOutputType, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, ChatMessage, AgentVariables } from "@evo-ninja/agent-utils"
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { AgentBase, AgentBaseContext } from "../AgentBase";
 
@@ -14,18 +14,30 @@ interface AgentRunArgs {
 export class DelegateAgentFunction<
   TAgent extends AgentBase<AgentRunArgs, AgentBaseContext>
 > extends AgentFunctionBase<DelegateAgentParams> {
+  private _name: string;
+  private _expertise: string;
+
   constructor(
-    private delegatedAgent: TAgent,
+    private delegatedAgent: TAgent | (() => TAgent),
   ) {
     super();
+
+    // TODO: we need a better way of handling agent lifetimes
+    //       and static values associated with them (config + factory)
+    const config = typeof this.delegatedAgent === "function" ?
+      this.delegatedAgent().config :
+      this.delegatedAgent.config;
+
+    this._expertise = config.expertise;
+    this._name = config.name;
   }
 
   get name() {
-    return this.delegateScriptedAgentFnName(this.delegatedAgent.config.name)
+    return this.delegateScriptedAgentFnName(this._name)
   }
 
   get description() {
-    return `Delegate a task to "${this.delegatedAgent.config.name}" with expertise in "${this.delegatedAgent.config.expertise}". Provide all the required information to fully complete the task.`
+    return `Delegate a task to "${this._name}" with expertise in "${this._expertise}". Provide all the required information to fully complete the task.`
   }
 
   get parameters() {
@@ -46,26 +58,27 @@ export class DelegateAgentFunction<
     }
   }
 
-  onSuccess(name: string, params: any, messages: string[], result: AgentOutput): AgentFunctionResult {
+  onSuccess(name: string, rawParams: string | undefined, messages: string[], result: AgentOutput, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         result
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.delegateScriptedAgentFnName(name), params),
+        ChatMessageBuilder.functionCall(this.delegateScriptedAgentFnName(name), rawParams),
         ...messages.map(x => ({
           role: "assistant",
           content: x,
         }) as ChatMessage),
         ChatMessageBuilder.functionCallResult(
           this.delegateScriptedAgentFnName(name),
-          result.content || "Successfully accomplished the task."
+          result.content || "Successfully accomplished the task.",
+          variables
         )
       ]
     }
   }
 
-  onFailure(name: string, params: any, error: string | undefined): AgentFunctionResult {
+  onFailure(name: string, params: any, rawParams: string | undefined, error: string | undefined, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -75,18 +88,21 @@ export class DelegateAgentFunction<
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.delegateScriptedAgentFnName(name), params),
+        ChatMessageBuilder.functionCall(this.delegateScriptedAgentFnName(name), rawParams),
         ChatMessageBuilder.functionCallResult(
           this.delegateScriptedAgentFnName(name),
-          `Error: ${error}`
+          `Error: ${error}`,
+          variables
         )
       ]
     }
   }
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext) {
-    return async (params: DelegateAgentParams): Promise<AgentFunctionResult> => {
-      const scriptedAgent = this.delegatedAgent;
+    return async (params: DelegateAgentParams, rawParams?: string): Promise<AgentFunctionResult> => {
+      const scriptedAgent = typeof this.delegatedAgent === "function" ?
+        this.delegatedAgent() :
+        this.delegatedAgent;
 
       let iterator = scriptedAgent.run({
         goal: params.task,
@@ -100,17 +116,20 @@ export class DelegateAgentFunction<
         if (response.done) {
           if (!response.value.ok) {
             return this.onFailure(
-              this.delegatedAgent.config.name,
+              scriptedAgent.config.name,
               params,
-              response.value.error
+              rawParams,
+              response.value.error,
+              context.variables
             );
           }
         
           return this.onSuccess(
-            this.delegatedAgent.config.name,
-            params,
+            scriptedAgent.config.name,
+            rawParams,
             messages,
-            response.value.value
+            response.value.value,
+            context.variables
           );
         } else {
           if (response.value.type === "message" && response.value.content) {
@@ -123,5 +142,7 @@ export class DelegateAgentFunction<
     }
   }
 
-  private delegateScriptedAgentFnName(agent: string) { return `delegate${agent}` }
+  private delegateScriptedAgentFnName(agent: string) {
+    return `delegate${agent}`;
+  }
 }

@@ -10,10 +10,12 @@ import {
   RunResult,
   Timeout,
   Workspace,
+  AgentVariables,
   basicFunctionCallLoop
 } from "@evo-ninja/agent-utils";
 import { ResultErr } from "@polywrap/result";
 import { AgentFunctionBase } from "./AgentFunctionBase";
+import { ReadVariableFunction } from "./functions/ReadVariable";
 
 export interface AgentBaseContext {
   llm: LlmApi;
@@ -21,6 +23,7 @@ export interface AgentBaseContext {
   logger: Logger;
   workspace: Workspace;
   env: Env;
+  variables: AgentVariables;
 }
 
 export interface AgentBaseConfig<TRunArgs> {
@@ -34,11 +37,26 @@ export interface AgentBaseConfig<TRunArgs> {
   timeout?: Timeout;
 }
 
-export abstract class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> implements Agent<TRunArgs> {
+export class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> implements Agent<TRunArgs> {
   constructor(
     public readonly config: AgentBaseConfig<TRunArgs>,
     protected context: TAgentBaseContext
-  ) {}
+  ) {
+    // Default functions that are added to every agent
+    const defaultFunctions = [
+      new ReadVariableFunction()
+    ];
+
+    // See which functions already exist
+    const existingFunctions = new Map(
+      this.config.functions.map((x) => ([x.name, x]))
+    );
+
+    // Add defaults if they don't already exist
+    this.config.functions.push(
+      ...defaultFunctions.filter(x => !existingFunctions.has(x.name))
+    );
+  }
 
   public get workspace(): Workspace {
     return this.context.workspace;
@@ -54,6 +72,13 @@ export abstract class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseCon
         chat.persistent(message);
       });
 
+      // Add an extra prompt informing agent about variable usage
+      chat.persistent({
+        role: "system",
+        content: `Variables are annotated using the \${variable-name} syntax. Variables can be used as function argument using the \${variable-name} syntax. Variables are created as needed, and do not exist unless otherwise stated.`
+      });
+
+      // Add functions to chat
       this.config.functions.forEach((fn) => {
         chat.addFunction(fn.getDefinition());
       });

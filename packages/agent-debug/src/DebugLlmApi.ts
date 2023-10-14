@@ -13,6 +13,10 @@ export class DebugLlmApi implements LlmApi {
     return this.llm.getMaxContextTokens();
   }
 
+  getMaxResponseTokens(): number {
+    return this.llm.getMaxResponseTokens();
+  }
+
   getModel(): string {
     return this.llm.getModel();
   }

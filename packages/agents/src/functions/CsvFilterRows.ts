@@ -1,6 +1,6 @@
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
-export class CsvFilterRowsFunction extends ScriptFunction<{ csvData: string, delimiter: string, columnIndex: number, searchString: string }> {
+export class CsvFilterRowsFunction extends ScriptFunction<{ csvData: string, columnIndex: number, searchString: string, withHeader: boolean }> {
   get name() {
     return "csv_filterRows"
   }
@@ -14,19 +14,19 @@ export class CsvFilterRowsFunction extends ScriptFunction<{ csvData: string, del
       type: "object",
       properties: { 
         csvData: {
-            type: "string"
-        },
-        delimiter: {
           type: "string"
         },
         columnIndex: {
-            type: "number"
+          type: "number"
         },
         searchString: {
-            type: "string"
+          type: "string"
+        },
+        withHeader: {
+          type: "boolean"
         }
       },
-      required: ["csvData", "delimiter", "columnIndex", "searchString"],
+      required: ["csvData", "columnIndex", "searchString", "withHeader"],
       additionalProperties: false
     }
   }

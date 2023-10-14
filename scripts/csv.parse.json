@@ -1,6 +1,0 @@
-{
-  "name": "csv.parse",
-  "description": "Parses a CSV file and returns a JSON string representing its contents. The JSON is an array of objects, each of which represents a table row, with headers as keys and data points as values.",
-  "arguments": "{ inputPath: string }",
-  "code": "./csv.parse.js"
-}

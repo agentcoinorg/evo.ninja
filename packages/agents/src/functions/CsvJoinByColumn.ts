@@ -1,29 +1,29 @@
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
-export class SortCsvFunction extends ScriptFunction<{ inputPath: string, outputPath: string, column: string }> {
+export class CsvJoinByColumnFunction extends ScriptFunction<{ csv1Path: string, csv2Path: string, joinColumnName: string }> {
   get name() {
-    return "csv_sort"
+    return "csv_joinByColumn"
   }
 
   get description() {
-    return "Sorts a CSV file by a specific column and writes the sorted data to a new CSV file"
+    return "Join two CSVs by a shared column name"
   }
 
   get parameters() {
     return {
       type: "object",
       properties: { 
-        inputPath: {
+        csvData1: {
             type: "string"
         },
-        outputPath: {
+        csvData2: {
             type: "string"
         },
-        column: {
+        joinColumnName: {
             type: "string"
         }
       },
-      required: ["inputPath", "outputPath", "column"],
+      required: ["csvData1", "csvData2", "joinColumnName"],
       additionalProperties: false
     }
   }

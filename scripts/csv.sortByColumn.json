@@ -1,0 +1,6 @@
+{
+  "name": "csv.sortByColumn",
+  "description": "Sort a column in a CSV",
+  "arguments": "{ csvData: string, columnIndex: number }",
+  "code": "./csv.sortByColumn.js"
+}
