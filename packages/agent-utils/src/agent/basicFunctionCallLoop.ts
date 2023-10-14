@@ -43,7 +43,7 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
       if (!sanitizedFunctionAndArgs.ok) {
         chat.temporary(response);
         chat.temporary("system", sanitizedFunctionAndArgs.error);
-        yield { type: AgentOutputType.Error, title: `Failed to sanitize function ${name}!`, content: sanitizedFunctionAndArgs.error } as AgentOutput;
+        yield { type: AgentOutputType.Error, title: `Failed to sanitize function ${name} with args ${args}. Error: ${sanitizedFunctionAndArgs.error}`, content: sanitizedFunctionAndArgs.error } as AgentOutput;
         continue;
       }
 

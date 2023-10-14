@@ -1,14 +1,19 @@
-function parseCSV(data, delimiter) {
+function detectDelimiter(row) {
   const supportedDelimiters = [",", ";", "\t", "|", ":"];
 
-  if (!supportedDelimiters.includes(delimiter)) {
-    throw new Error(`Delimiter "${delimiter}" not supported. Supported delimiters: ${
-      supportedDelimiters.map((x) => `"${x}"`).join(", ")
-    }`);
+  for (let delimiter of supportedDelimiters) {
+      if (row.includes(delimiter)) {
+          return delimiter;
+      }
   }
 
+  return supportedDelimiters[0];
+}
+
+function parseCSV(data) {
   const rows = data.trim().split('\n');
-  return rows.map(row => row.split(delimiter));
+  const delimiter = detectDelimiter(rows[0]);
+  return { rows: rows.map(row => row.split(delimiter)), delimiter };
 }
 
 function serializeCSV(rows, delimiter) {
@@ -34,7 +39,7 @@ function orderColumnsAlphabetically(rows) {
   return reorderedRows;
 }
 
-const rows = parseCSV(csvData, delimiter);
+const { rows, delimiter } = parseCSV(csvData);
 
 const reorderedRows = orderColumnsAlphabetically(rows);
 

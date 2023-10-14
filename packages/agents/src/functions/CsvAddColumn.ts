@@ -1,6 +1,6 @@
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
-export class CsvAddColumnFunction extends ScriptFunction<{ csvData: string, delimiter: string, column: string, values: string[] }> {
+export class CsvAddColumnFunction extends ScriptFunction<{ csvData: string, column: string, values: string[] }> {
   get name() {
     return "csv_addColumn"
   }
@@ -16,9 +16,6 @@ export class CsvAddColumnFunction extends ScriptFunction<{ csvData: string, deli
         csvData: {
             type: "string"
         },
-        delimiter: {
-            type: "string"
-        },
         column: {
             type: "string"
         },
@@ -29,7 +26,7 @@ export class CsvAddColumnFunction extends ScriptFunction<{ csvData: string, deli
             }
         }
       },
-      required: ["csvData", "delimiter", "column", "values"],
+      required: ["csvData", "column", "values"],
       additionalProperties: false
     }
   }

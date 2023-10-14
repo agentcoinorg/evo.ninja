@@ -1,6 +1,6 @@
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
-export class CsvSumColumnFunction extends ScriptFunction<{ csvData: string, delimiter: string, columnIndex: number, hasHeader: boolean }> {
+export class CsvSumColumnFunction extends ScriptFunction<{ csvData: string, columnIndex: number, hasHeader: boolean }> {
   get name() {
     return "csv_sumColumn"
   }
@@ -16,9 +16,6 @@ export class CsvSumColumnFunction extends ScriptFunction<{ csvData: string, deli
         csvData: {
             type: "string"
         },
-        delimiter: {
-          type: "string"
-        },
         columnIndex: {
             type: "number"
         },
@@ -26,7 +23,7 @@ export class CsvSumColumnFunction extends ScriptFunction<{ csvData: string, deli
             type: "boolean"
         }
       },
-      required: ["csvData", "delimiter", "columnIndex", "hasHeader"],
+      required: ["csvData", "columnIndex", "hasHeader"],
       additionalProperties: false
     }
   }
