@@ -53,7 +53,6 @@ export class AnalyzeFormattingRequirementsFunction extends AgentFunctionBase<Ana
       });
 
       const resp = await this._llm.getResponse(chatLogs, undefined);
-      console.log(resp?.content);
 
       return {
         outputs: [],
