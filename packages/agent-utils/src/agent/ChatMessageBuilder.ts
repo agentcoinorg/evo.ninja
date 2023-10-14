@@ -1,3 +1,4 @@
+import { AgentVariables } from "./AgentVariables";
 import { ChatMessage } from "../llm";
 
 export class ChatMessageBuilder {
@@ -14,12 +15,21 @@ export class ChatMessageBuilder {
       content: "",
       function_call: {
         name: funcName,
-        arguments: JSON.stringify(params)
+        arguments: typeof params === "string" ? params : JSON.stringify(params)
       }
     };
   }
 
-  static functionCallResult(funcName: string, result: string): ChatMessage {
+  static functionCallResult(funcName: string, result: string, variables: AgentVariables, saveThreshold?: number): ChatMessage {
+    const threshold = saveThreshold || variables.saveThreshold;
+
+    if (variables.shouldSave(result, threshold)) {
+      const varName = variables.save(funcName, result);
+      result = `Result is too large, stored in variable named \${${varName}}.\nResult Preview readVariable("\${${varName}}", 0, ${threshold}):\n${
+        result.substring(0, threshold)
+      }...${result.length - threshold} more bytes...`;
+    }
+
     return {
       role: "function",
       name: funcName,

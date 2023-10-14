@@ -5,16 +5,18 @@ import {
 } from "../ScriptedAgent";
 import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
-import { SortCsvFunction } from "../../functions/SortCsv";
-import { SortCsvColumnsFunction } from "../../functions/SortCsvColumns";
-import { CsvSumColumnFunction } from "../../functions/CsvSumColumn";
+import { AnalyzeFormattingRequirementsFunction } from "../../functions/AnalyzeFormattingRequirements";
+import { AnalyzeDataFunction } from "../../functions/AnalyzeData";
+import { CsvAddColumnFunction } from "../../functions/CsvAddColumn";
 import { CsvFilterRowsFunction } from "../../functions/CsvFilterRows";
-import { ThinkFunction } from "../../functions/Think";
+import { CsvJoinByColumnFunction } from "../../functions/CsvJoinByColumn";
+import { CsvOrderColumnsFunction } from "../../functions/CsvOrderColumns";
+import { CsvSortByColumnFunction } from "../../functions/CsvSortByColumn";
+import { CsvSumColumnFunction } from "../../functions/CsvSumColumn";
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { ReadFileFunction } from "../../functions/ReadFile";
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
-import { AddCsvColumnFunction } from "../../functions/AddCsvColumn";
-import { JoinCsvFunction } from "../../functions/JoinCsv";
+import { ThinkFunction } from "../../functions/Think";
 
 export class DataAnalystAgent extends ScriptedAgent {
   constructor(context: ScriptedAgentContext) {
@@ -36,13 +38,12 @@ export class DataAnalystAgent extends ScriptedAgent {
         {
           role: "user",
           content:
-    `You are the Data Analyst Agent, a digital expert in handling CSV datasets. Your primary skill set revolves around extracting,
-    analyzing, and interpreting data to provide meaningful conclusions. Approach every dataset with a keen eye for detail, ensuring
-    accuracy and relevance in all your calculations.
+`You are the Data Analyst Agent, an expert analyzing and modifying CSV datasets. You must perform the following steps:
 
-    Formatting is very important. If a user defines how they want data to be formatted, respect this always within your outputs.
-    You do not communicate with the user. If you have insufficient information, it may exist somewhere in the user's filesystem.
-    Use the "fs_readDirectory" function to try and discover this missing information.`
+0. Understand Requirements - Understand all requirements of your task by calling the analyzeFormattingRequirements function. These requirements MUST be respected in all future actions.
+1. Read - Read all relevant data files. If no files were provided, try to fs_readDirectory to find relevant files.
+2. Analyze - Data that is too large must be analyzed first. You must know what is contained within the data.
+3. Modify - Modify the data based on the requirements AND analysis you've done prior. Each modification you make NEEDS to have justification, stating how it abides by the requirements of the goal.`
         },
         { role: "user", content: goal },
       ],
@@ -53,16 +54,18 @@ export class DataAnalystAgent extends ScriptedAgent {
       functions: [
         onGoalAchievedFn,
         onGoalFailedFn,
-        new SortCsvFunction(context.client, context.scripts),
-        new SortCsvColumnsFunction(context.client, context.scripts),
-        new AddCsvColumnFunction(context.client, context.scripts),
-        new CsvSumColumnFunction(context.client, context.scripts),
+        new AnalyzeFormattingRequirementsFunction(context.llm, context.chat.tokenizer),
+        new AnalyzeDataFunction(context.llm, context.chat.tokenizer),
+        new CsvAddColumnFunction(context.client, context.scripts),
         new CsvFilterRowsFunction(context.client, context.scripts),
-        new JoinCsvFunction(context.client, context.scripts),
-        new ThinkFunction(),
-        new ReadFileFunction(context.client, context.scripts),
+        new CsvJoinByColumnFunction(context.client, context.scripts),
+        new CsvOrderColumnsFunction(context.client, context.scripts),
+        new CsvSortByColumnFunction(context.client, context.scripts),
+        new CsvSumColumnFunction(context.client, context.scripts),
+        new ReadFileFunction(context.client, context.scripts, 1000),
         new WriteFileFunction(context.client, context.scripts),
         new ReadDirectoryFunction(context.client, context.scripts),
+        new ThinkFunction()
       ],
       shouldTerminate: (functionCalled) => {
         return [onGoalAchievedFn.name, onGoalFailedFn.name].includes(

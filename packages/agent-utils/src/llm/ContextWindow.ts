@@ -63,7 +63,7 @@ export class ContextWindow {
   }
 
   public shouldSummarize(tokens: number): boolean {
-    return tokens >= this._maxContextTokens;
+    return (tokens + this._llm.getMaxResponseTokens()) >= this._maxContextTokens;
   }
 
   public async summarizeChat(

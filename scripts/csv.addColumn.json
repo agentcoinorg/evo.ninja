@@ -1,6 +1,6 @@
 {
   "name": "csv.addColumn",
-  "description": "Adds a new column to a CSV file and writes the output to a new file",
-  "arguments": "{ inputPath: string, outputPath: string, column: string, values: string[] }",
+  "description": "Adds a new column to a CSV",
+  "arguments": "{ csvData: string, column: string, values: string[] }",
   "code": "./csv.addColumn.js"
 }

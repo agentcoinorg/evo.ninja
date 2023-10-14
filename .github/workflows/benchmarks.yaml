@@ -85,9 +85,8 @@ jobs:
         CI: false
 
     - name: Start Agent Protocol HTTP API
-      run: yarn start:api &
+      run: yarn start:api -c &
       env:
-        AGENT_WORKSPACE: "../../workspace"
         OPENAI_API_KEY: ${{ secrets.BENCHMARK_CI_OPENAI_API_KEY }}
         GPT_MODEL: "gpt-4-0613"
         CONTEXT_WINDOW_TOKENS: 8000
@@ -134,4 +133,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: workspaces-debug
-        path: workspace
+        path: ./workspace

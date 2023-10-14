@@ -9,6 +9,7 @@ import {
   Logger,
   agentPlugin,
   WrapClient,
+  AgentVariables,
 } from "@evo-ninja/agent-utils";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
@@ -96,6 +97,7 @@ describe('Dev Agent Test Suite', () => {
           scripts,
           logger,
           env,
+          variables: new AgentVariables()
         }
       ),
       debugLog

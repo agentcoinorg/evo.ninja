@@ -1,12 +1,13 @@
-import { Agent, AgentFunctionResult, AgentOutputType, ChatMessageBuilder, Script, Scripts } from "@evo-ninja/agent-utils";
+import { Agent, AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder, Script, Scripts } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
-import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT, createScriptWriter } from "../agents/Scripter/utils";
+import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
+import { createScriptWriter } from "../agents/ScriptWriter/utils";
 import { AgentBaseContext } from "../AgentBase";
 
 interface CreateScriptFuncParameters { 
-  namespace: string, 
-  description: string, 
-  arguments: string 
+  namespace: string;
+  description: string;
+  arguments: string;
 }
 
 export class CreateScriptFunction extends AgentFunctionBase<CreateScriptFuncParameters> {
@@ -17,9 +18,11 @@ export class CreateScriptFunction extends AgentFunctionBase<CreateScriptFuncPara
   get name(): string {
     return "createScript";
   }
+
   get description(): string {
     return `Create a script using JavaScript.`;
   }
+
   get parameters() {
     return {
       type: "object",
@@ -42,10 +45,10 @@ export class CreateScriptFunction extends AgentFunctionBase<CreateScriptFuncPara
     }
   }
 
-  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: CreateScriptFuncParameters) => Promise<AgentFunctionResult> {
-    return async (params: CreateScriptFuncParameters): Promise<AgentFunctionResult> => {
+  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: CreateScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
+    return async (params: CreateScriptFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       if (params.namespace.startsWith("agent.")) {
-        return this.onErrorCannotCreateScriptsOnAgentNamespace(params);
+        return this.onErrorCannotCreateScriptsOnAgentNamespace(params, rawParams, context.variables);
       }
 
       // Create a fresh ScriptWriter agent
@@ -69,7 +72,7 @@ export class CreateScriptFunction extends AgentFunctionBase<CreateScriptFuncPara
 
         if (response.done) {
           if (!response.value.ok) {
-            return this.onErrorCreateScript(params, response.value.error?.toString() || "Unknown error");
+            return this.onErrorCreateScript(params, rawParams, response.value.error?.toString() || "Unknown error", context.variables);
           }
           break;
         }
@@ -93,11 +96,11 @@ export class CreateScriptFunction extends AgentFunctionBase<CreateScriptFuncPara
       };
       this.scripts.addScript(params.namespace, script);
       
-      return this.onSuccess(script, params);
+      return this.onSuccess(script, params, rawParams, context.variables);
     };
   }
 
-  private onSuccess(script: Script, params: CreateScriptFuncParameters): AgentFunctionResult {
+  private onSuccess(script: Script, params: CreateScriptFuncParameters,  rawParams: string | undefined, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -114,13 +117,13 @@ export class CreateScriptFunction extends AgentFunctionBase<CreateScriptFuncPara
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, params),
-        ChatMessageBuilder.functionCallResult(this.name, `Script '${script.name}' created.`)
+        ChatMessageBuilder.functionCall(this.name, rawParams),
+        ChatMessageBuilder.functionCallResult(this.name, `Script '${script.name}' created.`, variables)
       ]
     }
   }
 
-  private onErrorCannotCreateScriptsOnAgentNamespace(params: CreateScriptFuncParameters) {
+  private onErrorCannotCreateScriptsOnAgentNamespace(params: CreateScriptFuncParameters,  rawParams: string | undefined, variables: AgentVariables) {
     return {
       outputs: [
         {
@@ -134,16 +137,17 @@ export class CreateScriptFunction extends AgentFunctionBase<CreateScriptFuncPara
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, params),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
-          `Error: Scripts in the 'agent' namespace cannot be created. Try searching for an existing script instead.`
+          `Error: Scripts in the 'agent' namespace cannot be created. Try searching for an existing script instead.`,
+          variables
         )
       ]
     }
   }
 
-  private onErrorCreateScript(params: CreateScriptFuncParameters, error: string) {
+  private onErrorCreateScript(params: CreateScriptFuncParameters, rawParams: string | undefined, error: string, variables: AgentVariables) {
     return {
       outputs: [
         {
@@ -157,10 +161,11 @@ export class CreateScriptFunction extends AgentFunctionBase<CreateScriptFuncPara
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, params),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
-          `Error trying to create the script: ${error}.`
+          `Error trying to create the script: ${error}.`,
+          variables
         )
       ]
     }
