@@ -42,7 +42,7 @@ export class ReadDirectoryFunction extends ScriptFunction<ReadDirectoryFuncParam
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ChatMessageBuilder.functionCallResult(this.name, result, variables)
+        ...ChatMessageBuilder.functionCallResultWithVariables(this.name, result, variables)
       ]
     }
   }

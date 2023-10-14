@@ -83,7 +83,7 @@ export class AnalyzeDataFunction extends AgentFunctionBase<AnalyzeDataParameters
         outputs: [],
         messages: [
           ChatMessageBuilder.functionCall(this.name, rawParams),
-          ChatMessageBuilder.functionCallResult(this.name, summary || "", context.variables)
+          ...ChatMessageBuilder.functionCallResultWithVariables(this.name, summary || "", context.variables)
         ]
       };
     }

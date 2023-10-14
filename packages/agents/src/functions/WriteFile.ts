@@ -49,7 +49,7 @@ export class WriteFileFunction extends ScriptFunction<WriteFileFuncParameters> {
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ChatMessageBuilder.functionCallResult(this.name, "Successfully wrote file.", variables)
+        ...ChatMessageBuilder.functionCallResultWithVariables(this.name, "Successfully wrote file.", variables)
       ]
     }
   }

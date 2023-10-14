@@ -29,7 +29,7 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ChatMessageBuilder.functionCallResult(this.name, result, variables)
+        ...ChatMessageBuilder.functionCallResultWithVariables(this.name, result, variables)
       ]
     }
   }
@@ -44,7 +44,7 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ChatMessageBuilder.functionCallResult(this.name, `Error: ${error}`, variables)
+        ...ChatMessageBuilder.functionCallResultWithVariables(this.name, `Error: ${error}`, variables)
       ]
     }
   }

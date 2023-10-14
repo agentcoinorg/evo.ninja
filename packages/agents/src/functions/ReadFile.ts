@@ -49,7 +49,7 @@ export class ReadFileFunction extends ScriptFunction<ReadFileFuncParameters> {
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ChatMessageBuilder.functionCallResult(this.name, result, variables, this._saveThreshold)
+        ...ChatMessageBuilder.functionCallResultWithVariables(this.name, result, variables, this._saveThreshold)
       ]
     }
   }
