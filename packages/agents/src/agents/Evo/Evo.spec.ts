@@ -7,6 +7,7 @@ import {
   LlmApi,
   ConsoleLogger,
   Logger,
+  AgentVariables,
 } from "@evo-ninja/agent-utils";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
@@ -81,7 +82,17 @@ function createEvo(
   }
 
   return {
-    agent: new Evo(debugLlm, chat, logger, workspace, scripts, env),
+    agent: new Evo(
+      {
+        llm: debugLlm, 
+        chat, 
+        logger, 
+        workspace, 
+        env,
+        variables: new AgentVariables(),
+      }, 
+      scripts
+    ),
     debugLog,
     llm,
     chat,
