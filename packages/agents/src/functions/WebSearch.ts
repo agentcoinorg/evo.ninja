@@ -4,27 +4,19 @@ import {
   AgentOutputType,
   AgentVariables,
   ChatMessageBuilder,
-  Chunker,
-  Vectorizer,
   trimText,
 } from "@evo-ninja/agent-utils";
 import axios from "axios";
-import { v4 as uuid } from "forked-agent-protocol";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { AgentBaseContext } from "../AgentBase";
-import { OpenAIApi } from "openai";
 
 interface WebSearchFuncParameters {
   query: string;
 }
 
 export class WebSearchFunction extends AgentFunctionBase<WebSearchFuncParameters> {
-  constructor(
-    private chunker: Chunker,
-    private vectorizer: Vectorizer,
-    private openAIApi: OpenAIApi
-  ) {
+  constructor() {
     super();
   }
 
@@ -60,9 +52,6 @@ export class WebSearchFunction extends AgentFunctionBase<WebSearchFuncParameters
       rawParams?: string
     ): Promise<AgentFunctionResult> => {
       try {
-        const embeddingsMap = new Map<string, number[]>();
-        const chunksMap = new Map<string, string>();
-
         if (!context.env.SERP_API_KEY) {
           throw new Error(
             "SERP_API_KEY environment variable is required to use the websearch plugin. See env.template for help"
@@ -73,71 +62,10 @@ export class WebSearchFunction extends AgentFunctionBase<WebSearchFuncParameters
           params.query,
           context.env.SERP_API_KEY
         );
-        const websitesToChunk = googleResults.map((result) => result.url);
-
-        const chunks = (
-          await Promise.all(
-            websitesToChunk.map(async (url) => {
-              const response = await this.fetchHTML(url);
-              const html = response.data;
-              return this.chunker.chunk(html);
-            })
-          )
-        ).flat();
-
-        await Promise.all(
-          chunks.map(async (chunk) => {
-            const result = await this.vectorizer.createEmbedding(chunk);
-            const id = uuid();
-            embeddingsMap.set(id, result.data[0].embedding);
-            chunksMap.set(id, chunk);
-          })
-        );
-
-        const queryEmbeddingResponse = await this.vectorizer.createEmbedding(
-          params.query
-        );
-        const queryEmbedding = queryEmbeddingResponse.data[0].embedding;
-
-        const embeddingSimilarityScores = Array.from(embeddingsMap.entries())
-          .map(([id, embedding]) => {
-            const similarityScore = this.vectorizer.cosineSimilarity(
-              queryEmbedding,
-              embedding
-            );
-            return { id, similarityScore };
-          })
-          .sort((a, b) => b.similarityScore - a.similarityScore);
-
-        const sortedChunks = embeddingSimilarityScores
-          .map((score) => score.id)
-          .map((id) => chunksMap.get(id) as string);
-        const topChunks = this.limitChunksByCharacterCount(sortedChunks, 10000);
-
-        const completion = await this.openAIApi.createChatCompletion({
-          messages: [
-            {
-              role: "user",
-              content: `I will give you chunks of text from different webpages. 
-              I want to extract ${
-                params.query
-              } from them. Keep in mind some information may not be properly formatted.
-              Do your best to extract as much information as you can.
-              
-              Chunks: ${JSON.stringify(topChunks)}.
-              Specify if the information is incomplete but still return it`,
-            },
-          ],
-          model: "gpt-4",
-          temperature: 0,
-        });
-
-        const llmResponse = completion.data.choices[0].message
-          ?.content as string;
-
+  
         return this.onSuccess(
           params,
-          llmResponse,
+          JSON.stringify(googleResults),
           rawParams,
           context.variables
         );
@@ -218,15 +146,6 @@ export class WebSearchFunction extends AgentFunctionBase<WebSearchFuncParameters
     };
   }
 
-  private fetchHTML(url: string) {
-    return axios.get(url, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (X11; Linux x86_64; rv:107.0) Gecko/20100101 Firefox/107.0",
-      },
-    });
-  }
-
   private async searchOnGoogle(query: string, apiKey: string, maxResults = 4) {
     const axiosClient = axios.create({
       baseURL: "https://serpapi.com",
@@ -265,31 +184,6 @@ export class WebSearchFunction extends AgentFunctionBase<WebSearchFuncParameters
         description: result.snippet ?? "",
       }))
       .slice(0, maxResults);
-
-    return result;
-  }
-
-  private limitChunksByCharacterCount(
-    chunks: string[],
-    maxCharacters: number
-  ): string[] {
-    const result: string[] = [];
-
-    chunks.forEach((chunk) => {
-      const resultCharactersCount = result.join("").length;
-      const charactersLeft = maxCharacters - resultCharactersCount;
-
-      if (charactersLeft <= 0) {
-        return;
-      }
-
-      if (chunk.length <= charactersLeft) {
-        result.push(chunk);
-        return;
-      }
-
-      result.push(chunk.substring(0, charactersLeft));
-    });
 
     return result;
   }
