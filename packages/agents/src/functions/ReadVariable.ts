@@ -10,7 +10,7 @@ interface ReadVarFuncParameters {
 }
 
 export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameters> {
-  constructor(private maxVarLength: number = 3000) {
+  constructor(private maxVarLength: number = 2000) {
     super();
   }
 
