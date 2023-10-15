@@ -6,11 +6,12 @@ import {
 } from "../ScriptedAgent";
 import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
-import { ResearchPlannerAgent } from "../ResearchPlanner";
-import { DelegateAgentFunction } from "../../functions/DelegateScriptedAgent";
-import { Chat } from "@evo-ninja/agent-utils";
-import { ScraperAgent } from "../Scraper";
-import { ResearchVerifierAgent } from "../ResearchVerifier";
+import { HTMLChunker } from "@evo-ninja/agent-utils";
+import { WebSearchFunction } from "../../functions/WebSearch";
+import { SearchInPagesFunction } from "../../functions/SearchInPages";
+import { PlanResearchFunction } from "../../functions/PlanResearch";
+import { VerifyResearchFunction } from "../../functions/VerifyResearch";
+import { Configuration, OpenAIApi } from "openai";
 
 export class ResearcherAgent extends ScriptedAgent {
   constructor(context: ScriptedAgentContext) {
@@ -26,6 +27,12 @@ export class ResearcherAgent extends ScriptedAgent {
       context.scripts
     );
 
+    const openAIApi = new OpenAIApi(
+      new Configuration({
+        apiKey: context.env.OPENAI_API_KEY,
+      })
+    )
+
     const config: ScriptedAgentConfig = {
       name: AGENT_NAME,
       expertise:
@@ -36,10 +43,15 @@ export class ResearcherAgent extends ScriptedAgent {
           content: `
 You are an advanced web information retriever. You will receive a query and need to perform research to answer it.
 
-1. Start by delegating planning to the ResearchPlanner agent. You will received a detailed multi-step searching plan.
-2. For each step, you will use the Scraper agent to search the web for results.
-3. Before calling the ${onGoalAchievedFn.name} function, verify the result with the ResearchVerifier, giving it the information you think is complete.
-If the research verifier says the data is incomplete, search for the missing data. If you have already used the verifier once and found new information, even if incomplete,
+1. Start by planning the research. You will received a detailed multi-step searching plan.
+2. For each step, you will web search for results. If you find the answer to the query in the results, settle for that.
+   If you don't find the answer, choose the URLs (A MAXIMUM OF 3) of the pages you think would contain relevant information and use search_in_pages. NEVER MORE THAN 3 URLs at once.
+
+   Prioritize accuracy. Do not settle for the first piece of information found if there are more precise results available
+   Example: "population of New York in 2020" and you get the following results: ["1.5 million",  "nearly 1.600.000", "1,611,989"], you will take "1,611,989"
+   Make sure to thoroughly examine if you see more than one result, and choose the most accurate one, state it.
+   Verify the research result, giving it the information you think is complete. Always communicate the original query to the verifier.
+If the research verification says the data is incomplete, search for the missing data. If you have already used the verifier once and found new information, even if incomplete,
 DO NOT FAIL, call the ${onGoalAchievedFn.name} function with what you have.
 Use the verifier ONLY ONCE
 `,
@@ -52,24 +64,13 @@ Use the verifier ONLY ONCE
         onGoalAchievedFn,
         onGoalFailedFn,
         new WriteFileFunction(context.client, context.scripts),
-        new DelegateAgentFunction(
-          () => new ResearchPlannerAgent({
-            ...context,
-            chat: new Chat(context.chat.tokenizer, context.chat.contextWindow)
-          }),
+        new PlanResearchFunction(context.llm, context.chat.tokenizer),
+        new VerifyResearchFunction(context.llm, context.chat.tokenizer),
+        new SearchInPagesFunction(
+          new HTMLChunker({ maxChunkSize: 6000 }),
+          openAIApi
         ),
-        new DelegateAgentFunction(
-          () => new ScraperAgent({
-            ...context,
-            chat: new Chat(context.chat.tokenizer, context.chat.contextWindow)
-          })
-        ),
-        new DelegateAgentFunction(
-          () => new ResearchVerifierAgent({
-            ...context,
-            chat: new Chat(context.chat.tokenizer, context.chat.contextWindow)
-          }),
-        ),
+        new WebSearchFunction(),
       ],
       shouldTerminate: (functionCalled) => {
         return [onGoalAchievedFn.name, onGoalFailedFn.name].includes(

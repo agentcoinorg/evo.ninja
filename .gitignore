@@ -8,6 +8,7 @@ chats
 .logs
 .tests
 web.searchInPage.*
+db
 
 !/benchmarks/agbenchmark_config/config.json
 /benchmarks/agbenchmark_config
