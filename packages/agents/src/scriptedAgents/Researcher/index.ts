@@ -52,7 +52,7 @@ export class ResearcherAgent extends ScriptedAgent {
             connect: async () => connect({
               uri:  path.join(process.cwd(), "./db/lance"),
             }),
-            embeddingFunction: (column) => new OpenAIEmbeddingFunction('text', context.env.OPENAI_API_KEY)
+            embeddingFunction: (column) => new OpenAIEmbeddingFunction(column, context.env.OPENAI_API_KEY)
           }
         ),
         new WebSearchFunction(),

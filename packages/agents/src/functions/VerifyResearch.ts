@@ -129,7 +129,7 @@ export class VerifyResearchFunction extends AgentFunctionBase<VerifyResearchFunc
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ChatMessageBuilder.functionCallResult(
+        ...ChatMessageBuilder.functionCallResultWithVariables(
           this.name,
           `Verification: ` +
             `${result}\n` +
@@ -160,7 +160,7 @@ export class VerifyResearchFunction extends AgentFunctionBase<VerifyResearchFunc
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ChatMessageBuilder.functionCallResult(
+        ...ChatMessageBuilder.functionCallResultWithVariables(
           this.name,
           `Error verifying research for '${params.originalQuery}'\n` + 
           `\`\`\`\n` +
@@ -184,9 +184,9 @@ export class VerifyResearchFunction extends AgentFunctionBase<VerifyResearchFunc
     return `You are a Research Results Verifier agent tasked with verifying the results of a research query and making sure they fully satisfy the query.
     
     1. You will check the query and make sure that the results are sufficient and complete for the query, considering the context.
-      If a part of the data is missing, you will consider the result incomplete and communicate what's missing exactly.
+      If a part of the data is missing (strictly relative to the original query), you will consider the result incomplete and communicate what's missing exactly.
 
-    2. Be very critical, don't assume that the user is correct if he says that the results are correct or complete, or that the rest of the data is unavailable, or fully provided.
+    2. Don't assume that the user is correct if he says that the results are correct or complete, or that the rest of the data is unavailable, or fully provided.
     
     Here's what you need to analyze:
     

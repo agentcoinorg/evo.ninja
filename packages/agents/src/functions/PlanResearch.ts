@@ -115,7 +115,7 @@ export class PlanResearchFunction extends AgentFunctionBase<PlanResearchFuncPara
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ChatMessageBuilder.functionCallResult(
+        ...ChatMessageBuilder.functionCallResultWithVariables(
           this.name,
           `Research plan: '${params.query}'` +
             `${result}\n` +
@@ -146,7 +146,7 @@ export class PlanResearchFunction extends AgentFunctionBase<PlanResearchFuncPara
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ChatMessageBuilder.functionCallResult(
+        ...ChatMessageBuilder.functionCallResultWithVariables(
           this.name,
           `Error planning research for '${params.query}'\n` + 
           `\`\`\`\n` +

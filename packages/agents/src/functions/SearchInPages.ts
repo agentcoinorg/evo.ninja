@@ -147,7 +147,7 @@ export class SearchInPagesFunction extends AgentFunctionBase<SearchInPagesFuncPa
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ChatMessageBuilder.functionCallResult(
+        ...ChatMessageBuilder.functionCallResultWithVariables(
           this.name,
           `Found the following result for the search: '${params.query}'` +
             `${result}\n` +
@@ -178,7 +178,7 @@ export class SearchInPagesFunction extends AgentFunctionBase<SearchInPagesFuncPa
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ChatMessageBuilder.functionCallResult(
+        ...ChatMessageBuilder.functionCallResultWithVariables(
           this.name,
           `Error searching in pages for '${params.query}'\n` + 
           `\`\`\`\n` +
