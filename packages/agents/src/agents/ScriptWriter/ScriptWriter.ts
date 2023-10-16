@@ -9,9 +9,7 @@ import {
 import { AgentBase, AgentBaseConfig, AgentBaseContext } from "../../AgentBase";
 import { WriteScriptFunction } from "../../functions/WriteScript";
 import { ThinkFunction } from "../../functions/Think";
-import * as prompts from "./prompts";
-
-const AGENT_NAME = "ScriptWriter";
+import { prompts } from "./prompts";
 
 export interface ScriptWriterRunArgs {
   namespace: string;
@@ -42,13 +40,13 @@ export class ScriptWriter extends AgentBase<
     const writeScriptFn = new WriteScriptFunction();
 
     const config: AgentBaseConfig<ScriptWriterRunArgs> = {
-      name: AGENT_NAME,
-      expertise: prompts.EXPERTISE,
-      initialMessages: prompts.INITIAL_MESSAGES,
-      loopPreventionPrompt: prompts.LOOP_PREVENTION_PROMPT,
-      functions: [new ThinkFunction(), writeScriptFn],
+      functions: [
+        new ThinkFunction(), 
+        writeScriptFn
+      ],
       shouldTerminate: (functionCalled) =>
         functionCalled.name === writeScriptFn.name,
+      prompts,
     };
 
     super(config, agentContext);

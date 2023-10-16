@@ -11,9 +11,7 @@ import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
 import { ScrapeTextFunction } from "../../functions/ScrapeText";
 import { SearchFunction } from "../../functions/Search";
-import * as prompts from "./prompts";
-
-const AGENT_NAME = "Researcher";
+import { prompts } from "./prompts";
 
 export class ResearcherAgent extends ScriptedAgent {
   constructor(context: ScriptedAgentContext) {
@@ -29,10 +27,6 @@ export class ResearcherAgent extends ScriptedAgent {
     );
 
     const config: ScriptedAgentConfig = {
-      name: AGENT_NAME,
-      expertise: prompts.EXPERTISE,
-      initialMessages: prompts.INITIAL_MESSAGES,
-      loopPreventionPrompt: prompts.LOOP_PREVENTION_PROMPT,
       functions: [
         onGoalAchievedFn,
         onGoalFailedFn,
@@ -48,6 +42,7 @@ export class ResearcherAgent extends ScriptedAgent {
           functionCalled.name
         );
       },
+      prompts,
     };
 
     super(config, context);

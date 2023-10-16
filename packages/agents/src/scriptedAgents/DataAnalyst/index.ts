@@ -17,9 +17,7 @@ import { WriteFileFunction } from "../../functions/WriteFile";
 import { ReadFileFunction } from "../../functions/ReadFile";
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
 import { ThinkFunction } from "../../functions/Think";
-import * as prompts from "./prompts";
-
-const AGENT_NAME = "DataAnalyst";
+import { prompts } from "./prompts";
 
 export class DataAnalystAgent extends ScriptedAgent {
   constructor(context: ScriptedAgentContext) {
@@ -32,11 +30,6 @@ export class DataAnalystAgent extends ScriptedAgent {
       context.scripts
     );
     const config: ScriptedAgentConfig = {
-      name: AGENT_NAME,
-      expertise: prompts.EXPERTISE,
-      initialMessages: prompts.INITIAL_MESSAGES,
-      loopPreventionPrompt: prompts.LOOP_PREVENTION_PROMPT,
-      agentSpeakPrompt: prompts.AGENT_SPEAK_PROMPT,
       functions: [
         onGoalAchievedFn,
         onGoalFailedFn,
@@ -58,6 +51,7 @@ export class DataAnalystAgent extends ScriptedAgent {
           functionCalled.name
         );
       },
+      prompts
     };
 
     super(config, context);

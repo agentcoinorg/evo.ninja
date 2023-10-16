@@ -7,9 +7,7 @@ import {
 } from "../ScriptedAgent";
 import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
-import * as prompts from "./prompts";
-
-const AGENT_NAME = "GoalVerifier";
+import { prompts } from "./prompts";
 
 export class GoalVerifierAgent extends ScriptedAgent {
   constructor(context: ScriptedAgentContext) {
@@ -25,10 +23,6 @@ export class GoalVerifierAgent extends ScriptedAgent {
     );
 
     const config: ScriptedAgentConfig = {
-      name: AGENT_NAME,
-      expertise: prompts.EXPERTISE,
-      initialMessages: prompts.INITIAL_MESSAGES(onGoalAchievedFn, onGoalFailedFn),
-      loopPreventionPrompt: prompts.LOOP_PREVENTION_PROMPT,
       functions:
         [
           onGoalAchievedFn,
@@ -42,6 +36,7 @@ export class GoalVerifierAgent extends ScriptedAgent {
           onGoalFailedFn.name
         ].includes(functionCalled.name);
       },
+      prompts: prompts(onGoalAchievedFn, onGoalFailedFn)
     };
 
     super(config, context);

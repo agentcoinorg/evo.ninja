@@ -1,12 +1,14 @@
 import { ChatMessage } from "@evo-ninja/agent-utils";
 import { ScriptedAgentRunArgs } from "../ScriptedAgent";
+import { AgentPrompts } from "../../AgentBase";
 
-export const EXPERTISE = `excels at parsing text, comprehending details, and synthesized insights tailored to user specifications.`;
-
-export const INITIAL_MESSAGES = ({ goal }: ScriptedAgentRunArgs): ChatMessage[] => [
-  {
-    role: "user",
-    content: `
+export const prompts: AgentPrompts<ScriptedAgentRunArgs> = {
+  name: "Researcher",
+  expertise: `excels at parsing text, comprehending details, and synthesized insights tailored to user specifications.`,
+  initialMessages: ({ goal }: ScriptedAgentRunArgs): ChatMessage[] => [
+    {
+      role: "user",
+      content: `
 Role: Advanced web information retriever.
 
 Primary Strategy: 
@@ -57,8 +59,10 @@ E.g., if searching for "population of New York in 2020" and you get the followin
 Resourcefulness:
 - Assume missing information exists within the user's system, like the filesystem, unless logic dictates otherwise.If info is missing, you assume the info is
 somewhere on the user's computer like the filesystem, unless you have a logical reason to think otherwise.`,
-  },
-  { role: "user", content: goal },
-];
-
-export const LOOP_PREVENTION_PROMPT = `Assistant, you appear to be in a loop, try executing a different function.`;
+    },
+    { role: "user", content: goal },
+  ],
+  loopPreventionPrompt: `Assistant, you appear to be in a loop, try executing a different function.`,
+  agentSpeakPrompt: `You do not communicate with the user. If you have insufficient information, it may exist somewhere in the user's filesystem.
+  Use the "fs_readDirectory" function to try and discover this missing information.`
+};
