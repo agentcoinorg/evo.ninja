@@ -69,7 +69,7 @@ export class DelegateAgentFunction<
           role: "assistant",
           content: x,
         }) as ChatMessage),
-        ChatMessageBuilder.functionCallResult(
+        ...ChatMessageBuilder.functionCallResultWithVariables(
           this.delegateScriptedAgentFnName(name),
           result.content || "Successfully accomplished the task.",
           variables
@@ -89,7 +89,7 @@ export class DelegateAgentFunction<
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.delegateScriptedAgentFnName(name), rawParams),
-        ChatMessageBuilder.functionCallResult(
+        ...ChatMessageBuilder.functionCallResultWithVariables(
           this.delegateScriptedAgentFnName(name),
           `Error: ${error}`,
           variables
