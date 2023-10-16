@@ -28,14 +28,15 @@ export class DeveloperAgent extends ScriptedAgent {
 ## Instructions
 - Take a deep breath and work on the problem step by step.
 - The user's request defines the software requirements.
+- The user may provide test files located on the filesystem that you can use to test your code. The user will tell you if these exist.
 - You can access the file system to read files and directories, and to write code.
 - Always write tests before writing the implementation.
 - Always write the **complete** solution. The code should always work as expected on the first try when copy-pasted.
 ## Required Workflow
-1. write tests using ${writeFileFn.name}
-2. write code implementation using ${writeFileFn.name}
+1. If the user did not provide tests, write tests using ${writeFileFn.name}
+2. write code solution using ${writeFileFn.name}
 3. run tests using ${pythonTestAnalyser.name}
-4. if tests failed, fix implementation
+4. if tests did not run correctly, fix tests. If tests ran but failed, fix solution.
 5. repeat steps 3-4 until all tests pass
 ## Important
 - The user's goal might contain information about tests. Always follow the user's instructions.
