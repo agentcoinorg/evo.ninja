@@ -106,6 +106,7 @@ export class WebSearchFunction extends AgentFunctionBase<WebSearchFuncParameters
         ...ChatMessageBuilder.functionCallResultWithVariables(
           this.name,
           `Found the following result for the web search: '${params.query}'` +
+            `\`\`\`\n` +
             `${result}\n` +
             `\`\`\``,
           variables
