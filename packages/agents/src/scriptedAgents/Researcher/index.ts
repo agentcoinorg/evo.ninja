@@ -14,7 +14,6 @@ import { VerifyResearchFunction } from "../../functions/VerifyResearch";
 import { OpenAIEmbeddingFunction, connect } from "vectordb";
 import path from "path";
 import { ScrapeTextFunction } from "../../functions/ScrapeText";
-import { SearchFunction } from "../../functions/Search";
 import * as prompts from "./prompts";
 
 const AGENT_NAME = "Researcher";
