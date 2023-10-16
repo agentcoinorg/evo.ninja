@@ -368,6 +368,7 @@ export class WrapClient extends PolywrapClient {
         },
         "runPythonTest": async (params: { filename: string }) => {
           const command = `python ${params.filename}`;
+          logger.notice("RUN_PYTHON_TEST = " + `${command}`);
           // const loopGuard = async () =>
           //   await new Promise(() =>
           //     setTimeout(() => {

@@ -150,8 +150,11 @@ describe('Dev Agent Test Suite', () => {
     expect(sourceCode).toBeTruthy();
   });
 
-  test("file-organizer", async () => {
-    const { agent, debugLog } = createDevAgent("file-organizer");
+  test("FileOrganizer", async () => {
+    const { agent, debugLog } = createDevAgent(
+      "FileOrganizer",
+      [path.join(__dirname, "testInputs/FileOrganizer/test.py"),]
+    );
     const response = await runDevAgent(
       agent,
       "Create a file organizer CLI tool in Python that sorts files in a directory based on their file types (e.g., images, documents, audio) and moves them into these corresponding folders: 'images', 'documents', 'audio'. The entry point will be a python file that can be run this way: python organize_files.py --directory_path=YOUR_DIRECTORY_PATH",
@@ -163,7 +166,7 @@ describe('Dev Agent Test Suite', () => {
     expect(sourceCode).toBeTruthy();
   });
 
-  test.only("Battleship", async () => {
+  test("Battleship", async () => {
     const { agent, debugLog } = createDevAgent(
       "Battleship",
       [
@@ -184,6 +187,38 @@ describe('Dev Agent Test Suite', () => {
 
     expect(response.value.ok).toBe(true);
     const sourceCode = agent.workspace.readFileSync("battleship.py");
+    expect(sourceCode).toBeTruthy();
+  });
+
+  test("PasswordGenerator", async () => {
+    const { agent, debugLog } = createDevAgent(
+      "PasswordGenerator",
+      [path.join(__dirname, "testInputs/PasswordGenerator/test.py"),]
+      );
+    const response = await runDevAgent(
+      agent,
+      "Create a random password generator. The password should have between 8 and 16 characters and should contain letters, numbers and symbols. The password should be printed to the console. The entry point will be a python file that can be run this way: python password_generator.py [--len x] where x is the length of the password. If no length is specified, the password should be 8 characters long. The password_generator can also be imported as a module and called as password = password_generator.generate_password(len=x). Any invalid input should raise a ValueError.",
+      debugLog
+    );
+
+    expect(response.value.ok).toBe(true);
+    const sourceCode = agent.workspace.readFileSync("password_generator.py");
+    expect(sourceCode).toBeTruthy();
+  });
+
+  test("UrlShortener", async () => {
+    const { agent, debugLog } = createDevAgent(
+      "UrlShortener",
+      [path.join(__dirname, "testInputs/UrlShortener/test.py"),]
+    );
+    const response = await runDevAgent(
+      agent,
+      "Build a basic URL shortener using a python CLI. Here are the specifications.\n\nFunctionality: The program should have two primary functionalities.\n\nShorten a given URL.\nRetrieve the original URL from a shortened URL.\n\nCLI: The command-line interface should accept a URL as its first input. It should be able to determine if the url is a shortened url or not. If the url is not shortened, it will display ONLY the shortened url, otherwise, it will display ONLY the original unshortened URL. Afterwards, it should prompt the user for another URL to process.\n\nTechnical specifications:\nBuild a file called url_shortener.py. This file will be called through command lines.\n\nEdge cases:\nFor the sake of simplicity, there will be no edge cases, you can assume the input is always correct and the user immediately passes the shortened version of the url he just shortened.\n\nYou will be expected to create a python file called url_shortener.py that will run through command lines by using python url_shortener.py.\n\nThe url_shortener.py will be tested this way:\n```\nimport unittest\nfrom url_shortener import shorten_url, retrieve_url\n\nclass TestURLShortener(unittest.TestCase):\n    def test_url_retrieval(self):\n        # Shorten the URL to get its shortened form\n        shortened_url = shorten_url('https://www.example.com')\n\n        # Retrieve the original URL using the shortened URL directly\n        retrieved_url = retrieve_url(shortened_url)\n\n        self.assertEqual(retrieved_url, 'https://www.example.com', \"Retrieved URL does not match the original!\")\n\nif __name__ == \"__main__\":\n    unittest.main()\n```",
+      debugLog
+    );
+
+    expect(response.value.ok).toBe(true);
+    const sourceCode = agent.workspace.readFileSync("url_shortener.py");
     expect(sourceCode).toBeTruthy();
   });
 });
