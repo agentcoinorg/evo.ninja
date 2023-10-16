@@ -1,5 +1,6 @@
 import { AgentVariables } from "./AgentVariables";
 import { ChatMessage } from "../llm";
+import { readVariableResultMessage } from "./readVariableResultMessage";
 
 export class ChatMessageBuilder {
   static system(content: string): ChatMessage {
@@ -20,18 +21,30 @@ export class ChatMessageBuilder {
     };
   }
 
-  static functionCallResult(funcName: string, result: string, variables: AgentVariables): ChatMessage {
-    if (variables.shouldSave(result)) {
-      const varName = variables.save(funcName, result);
-      result = `Result is too large, stored in variable named \${${varName}}.\nResult Preview readVariable("\${${varName}}", 0, ${variables.saveThreshold}):\n${
-        result.substring(0, variables.saveThreshold)
-      }...${result.length - variables.saveThreshold} more bytes...`;
-    }
-
+  static functionCallResult(funcName: string, result: string): ChatMessage {
     return {
       role: "function",
       name: funcName,
       content: result
     };
+  }
+
+  static functionCallResultWithVariables(funcName: string, result: string, variables: AgentVariables, saveThreshold?: number): ChatMessage[] {
+    const threshold = saveThreshold || variables.saveThreshold;
+
+    if (variables.shouldSave(result)) {
+      const varName = variables.save(funcName, result);
+
+      return [
+        ChatMessageBuilder.functionCallResult(funcName, `Due to it's size, the result is stored in variable \${${varName}} (total length: ${result.length}).
+To read different parts of the stored variable, use the function readVariable("\${${varName}}", start, count)`),
+        ChatMessageBuilder.functionCall("readVariable", { name: varName, start: 0, count: threshold}),
+        ChatMessageBuilder.functionCallResult("readVariable", readVariableResultMessage(varName, result, 0, threshold, threshold)),
+      ];
+    } else {
+      return [
+        ChatMessageBuilder.functionCallResult(funcName, result),
+      ];
+    }
   }
 }

@@ -20,9 +20,11 @@ export class FileSystemWorkspace {
   }
 
   toWorkspacePath(subpath: string): string {
-    const absPath = path.isAbsolute(subpath) ?
-      subpath :
-      path.resolve(path.join(this._workspacePath, subpath));
+    const absPath = path.resolve(
+      !subpath.startsWith(this._workspacePath) ?
+        path.join(this._workspacePath, subpath) :
+        subpath
+    );
 
     if (absPath.indexOf(this._workspacePath) !== 0) {
       throw Error(

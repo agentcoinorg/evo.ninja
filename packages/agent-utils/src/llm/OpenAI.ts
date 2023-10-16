@@ -45,7 +45,7 @@ export class OpenAI implements LlmApi {
     return this._defaultMaxTokens;
   }
 
-  getMaxResponseTokens(): number {
+  getMaxResponseTokens() {
     return this._defaultMaxResponseTokens;
   }
 

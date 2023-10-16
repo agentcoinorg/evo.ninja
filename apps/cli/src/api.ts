@@ -9,12 +9,18 @@ import Agent, {
 } from "forked-agent-protocol";
 import { exec } from "child_process";
 import path from "path";
+import { program } from "commander";
 
 const rootDir = path.resolve(
   path.join(__dirname, "../../../")
 );
 
 const workspaceDir = process.env.AGENT_WORKSPACE || path.join(rootDir, "workspace");
+
+const options = program
+  .option("-c, --clean")
+  .parse()
+  .opts();
 
 function removeNewScripts() {
   return new Promise(function (resolve, reject) {
@@ -84,8 +90,11 @@ async function taskHandler(
         logger.info(JSON.stringify(response.value.value) as any);
         debugLog?.stepLog(response.value.value as any);
       }
-      logger.info("Task is done - Removing generated scripts...");
-      await removeNewScripts();
+      logger.info("Task is done");
+      if (options.clean) {
+        logger.info("Removing generated scripts");
+        await removeNewScripts();
+      }
       logger.info("////////////////////////////////////////////\n");
     }
 
@@ -102,7 +111,6 @@ async function taskHandler(
   }
   return stepHandler;
 }
-
 Agent.handleTask(taskHandler, {
   workspace: workspaceDir
 }).start();

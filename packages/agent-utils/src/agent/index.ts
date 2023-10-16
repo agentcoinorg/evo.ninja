@@ -7,3 +7,4 @@ export * from './ChatMessageBuilder';
 export * from './processFunctionArgs';
 export * from './prompts';
 export * from './trimText';
+export * from './readVariableResultMessage';

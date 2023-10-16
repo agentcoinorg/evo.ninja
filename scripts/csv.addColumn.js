@@ -1,21 +1,43 @@
-const fs = require('fs');
+function detectDelimiter(row) {
+  const supportedDelimiters = [",", ";", "\t", "|", ":"];
 
-const data = fs.readFileSync(inputPath, 'utf8');
-const lines = data.split('\n');
-const headers = lines[0].split(',');
+  for (let delimiter of supportedDelimiters) {
+      if (row.includes(delimiter)) {
+          return delimiter;
+      }
+  }
 
-if (headers.includes(column)) {
-  throw new Error('Column already exists');
+  return supportedDelimiters[0];
 }
 
-headers.push(column);
-lines[0] = headers.join(',');
-
-for (let i = 1; i < lines.length; i++) {
-  const row = lines[i].split(',');
-  row.push(values[i - 1] || '');
-  lines[i] = row.join(',');
+function parseCSV(data) {
+  const rows = data.trim().split('\n');
+  const delimiter = detectDelimiter(rows[0]);
+  return { rows: rows.map(row => row.split(delimiter)), delimiter };
 }
 
-const output = lines.join('\n');
-fs.writeFileSync(outputPath, output, 'utf8');
+function serializeCSV(rows, delimiter) {
+  return rows.map(row => row.join(delimiter)).join("\n");
+}
+
+function addColumnToCSVRows(rows, column, values) {
+  if (values.length + 1 !== rows.length) {
+    throw new Error('Mismatch in number of rows and provided values');
+  }
+
+  // Add the column to the header row
+  rows[0].push(column);
+
+  // Add the values to the subsequent rows
+  for (let i = 1; i < rows.length; i++) {
+    rows[i].push(values[i - 1]);
+  }
+
+  return rows;
+}
+
+const { rows, delimiter } = parseCSV(csvData);
+
+const updatedRows = addColumnToCSVRows(rows, column, values);
+
+return serializeCSV(updatedRows, delimiter);

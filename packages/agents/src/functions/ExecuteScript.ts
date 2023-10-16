@@ -111,7 +111,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ChatMessageBuilder.functionCallResult(
+        ...ChatMessageBuilder.functionCallResultWithVariables(
           this.name,
           result,
           variables
@@ -131,7 +131,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ChatMessageBuilder.functionCallResult(
+        ...ChatMessageBuilder.functionCallResultWithVariables(
           this.name,
           `Error executing script '${scriptName}'\n` + 
           `\`\`\`\n` +
