@@ -43,7 +43,8 @@ export class Scripts {
   getAllScripts(): Script[] {
     const ops: Script[] = [];
     this._workspace.readdirSync(this._toSubpath(""))
-      .filter(file => path.extname(file) === ".json")
+      .filter(file => file.type === "file" && path.extname(file.name) === ".json")
+      .map((file) => file.name)
       .forEach((file) => {
         const script = JSON.parse(
           this._workspace.readFileSync(this._toSubpath(file))

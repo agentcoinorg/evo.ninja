@@ -1,54 +1,58 @@
-export class InMemoryFile {
-  private data: string;
+import { DirectoryEntry } from "./Workspace";
 
-  constructor(data: string = "") {
-      this.data = data;
-  }
+export class InMemoryFile implements DirectoryEntry {
+  public readonly type: "file";
+
+  constructor(
+    public readonly name: string,
+    private _data: string
+  ) { }
 
   read(): string {
-    return this.data;
+    return this._data;
   }
 
   write(data: string): void {
-    this.data = data;
+    this._data = data;
   }
 }
 
-export class InMemoryDir {
-  private content: Map<string, InMemoryFile | InMemoryDir>;
+export class InMemoryDir implements DirectoryEntry {
+  public readonly type: "directory";
 
-  constructor() {
-    this.content = new Map();
+  constructor(
+    public readonly name: string,
+    private _entries: Map<string, InMemoryFile | InMemoryDir> = new Map()
+  ) { }
+
+  addEntry(entry: InMemoryFile | InMemoryDir): void {
+    this._entries.set(entry.name, entry);
   }
 
-  setFile(name: string, file: InMemoryFile): void {
-    this.content.set(name, file);
-  }
-
-  setDirectory(name: string, dir: InMemoryDir): void {
-    this.content.set(name, dir);
+  removeEntry(name: string): boolean {
+    return this._entries.delete(name);
   }
 
   getFile(name: string): InMemoryFile | undefined {
-    const item = this.content.get(name);
-    if (item instanceof InMemoryFile) {
-        return item;
+    const item = this._entries.get(name);
+    if (item?.type === "file") {
+      return item;
     }
 
     return undefined;
   }
 
   getDirectory(name: string): InMemoryDir | undefined {
-    const item = this.content.get(name);
-    if (item instanceof InMemoryDir) {
-        return item;
+    const item = this._entries.get(name);
+    if (item?.type === "directory") {
+      return item;
     }
 
     return undefined;
   }
 
-  remove(name: string): boolean {
-      return this.content.delete(name);
+  getEntries(): (InMemoryFile | InMemoryDir)[] {
+    return Array.from(this._entries.values())
   }
 }
 
@@ -56,20 +60,20 @@ export class InMemoryFS {
   private root: InMemoryDir;
 
   constructor() {
-      this.root = new InMemoryDir();
+    this.root = new InMemoryDir("");
   }
 
   private navigateToPath(path: string[]): [InMemoryDir, string] {
       let currentDir = this.root;
       for (let i = 0; i < path.length - 1; i++) {
-          if (path[i] === "." || path[i] === "./") {
-            continue;
-          }
-          const nextDir = currentDir.getDirectory(path[i]);
-          if (!nextDir) {
-              throw new Error(`Path not found: ${path.slice(0, i + 1).join("/")}`);
-          }
-          currentDir = nextDir;
+        if (path[i] === "." || path[i] === "./") {
+          continue;
+        }
+        const nextDir = currentDir.getDirectory(path[i]);
+        if (!nextDir) {
+          throw new Error(`Path not found: ${path.slice(0, i + 1).join("/")}`);
+        }
+        currentDir = nextDir;
       }
       return [currentDir, path[path.length - 1]];
   }
@@ -77,17 +81,17 @@ export class InMemoryFS {
   writeFileSync(filePath: string, data: string): void {
       const path = filePath.split("/");
       const [parentDir, fileName] = this.navigateToPath(path);
-      parentDir.setFile(fileName, new InMemoryFile(data));
+      parentDir.addEntry(new InMemoryFile(fileName, data));
   }
 
   readFileSync(filePath: string): string {
-      const path = filePath.split("/");
-      const [parentDir, fileName] = this.navigateToPath(path);
-      const file = parentDir.getFile(fileName);
-      if (!file) {
-          throw new Error(`File not found: ${filePath}`);
-      }
-      return file.read();
+    const path = filePath.split("/");
+    const [parentDir, fileName] = this.navigateToPath(path);
+    const file = parentDir.getFile(fileName);
+    if (!file) {
+      throw new Error(`File not found: ${filePath}`);
+    }
+    return file.read();
   }
 
   mkdirSync(dirPath: string, opt: { recursive: boolean } = { recursive: false }): void {
@@ -98,7 +102,7 @@ export class InMemoryFS {
 
       for (const segment of path) {
         if (!currentDir.getDirectory(segment)) {
-          currentDir.setDirectory(segment, new InMemoryDir());
+          currentDir.addEntry(new InMemoryDir(segment));
         }
         currentDir = currentDir.getDirectory(segment) as InMemoryDir; // Safe cast since we just created it if it didn't exist
       }
@@ -107,7 +111,7 @@ export class InMemoryFS {
       if (parentDir.getDirectory(dirName)) {
         throw new Error(`Directory already exists: ${dirPath}`);
       }
-      parentDir.setDirectory(dirName, new InMemoryDir());
+      parentDir.addEntry(new InMemoryDir(dirName));
     }
   }
 
@@ -115,41 +119,40 @@ export class InMemoryFS {
       const path = dirPath.split("/");
       const [parentDir, dirName] = this.navigateToPath(path);
       if (!parentDir.getDirectory(dirName)) {
-          throw new Error(`Directory not found: ${dirPath}`);
+        throw new Error(`Directory not found: ${dirPath}`);
       }
-      parentDir.remove(dirName);
+      parentDir.removeEntry(dirName);
   }
 
   existsSync(pathStr: string): boolean {
     try {
-        const path = pathStr.split("/");
-        const [parentDir, name] = this.navigateToPath(path);
-        return parentDir.getFile(name) !== undefined || parentDir.getDirectory(name) !== undefined;
+      const path = pathStr.split("/");
+      const [parentDir, name] = this.navigateToPath(path);
+      return parentDir.getFile(name) !== undefined || parentDir.getDirectory(name) !== undefined;
     } catch (error) {
-        return false;
+      return false;
     }
   }
 
-  readdirSync(dirPath: string): string[] {
-      const path = dirPath.split("/");
-      let currentDir: InMemoryDir;
+  readdirSync(dirPath: string): DirectoryEntry[] {
+    const path = dirPath.split("/");
+    let currentDir: InMemoryDir;
 
-      if (path.length === 1 && path[0] === "") {
-          currentDir = this.root; // Root directory
-      } else {
-          const [parentDir, dirName] = this.navigateToPath(path);
-          const directory = parentDir.getDirectory(dirName);
-          if (!directory) {
-              throw new Error(`Directory not found: ${dirPath}`);
-          }
-          currentDir = directory;
+    if (path.length === 1 && path[0] === "") {
+      currentDir = this.root; // Root directory
+    } else {
+      const [parentDir, dirName] = this.navigateToPath(path);
+      const directory = parentDir.getDirectory(dirName);
+      if (!directory) {
+        throw new Error(`Directory not found: ${dirPath}`);
       }
+      currentDir = directory;
+    }
 
-      const result: string[] = [];
-      for (const [name] of currentDir['content']) {
-          result.push(name);
-      }
-      return result;
+    return currentDir.getEntries().map((x) => ({
+      name: x.name,
+      type: x.type
+    }));
   }
 
   renameSync(oldPath: string, newPath: string): void {
@@ -169,13 +172,8 @@ export class InMemoryFS {
       throw new Error(`Destination path already exists: ${newPath}`);
     }
 
-    if (item instanceof InMemoryFile) {
-      newParentDir.setFile(newName, item);
-    } else {
-      newParentDir.setDirectory(newName, item as InMemoryDir);
-    }
-
-    oldParentDir.remove(oldName);
+    newParentDir.addEntry(item);
+    oldParentDir.removeEntry(oldName);
   }
 
   appendFileSync(subpath: string, data: string): void {
@@ -188,7 +186,7 @@ export class InMemoryFS {
       file.write(file.read() + data);
     } else {
       // If file doesn't exist, create a new one with the data
-      parentDir.setFile(fileName, new InMemoryFile(data));
+      parentDir.addEntry(new InMemoryFile(fileName, data));
     }
   }
 }
