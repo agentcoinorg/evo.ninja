@@ -11,7 +11,6 @@ import { WebSearchFunction } from "../../functions/WebSearch";
 import { SearchInPagesFunction } from "../../functions/SearchInPages";
 import { PlanResearchFunction } from "../../functions/PlanResearch";
 import { VerifyResearchFunction } from "../../functions/VerifyResearch";
-import { Configuration, OpenAIApi } from "openai";
 
 export class ResearcherAgent extends ScriptedAgent {
   constructor(context: ScriptedAgentContext) {
@@ -26,12 +25,6 @@ export class ResearcherAgent extends ScriptedAgent {
       context.client,
       context.scripts
     );
-
-    const openAIApi = new OpenAIApi(
-      new Configuration({
-        apiKey: context.env.OPENAI_API_KEY,
-      })
-    )
 
     const config: ScriptedAgentConfig = {
       name: AGENT_NAME,
@@ -67,8 +60,9 @@ Use the verifier ONLY ONCE
         new PlanResearchFunction(context.llm, context.chat.tokenizer),
         new VerifyResearchFunction(context.llm, context.chat.tokenizer),
         new SearchInPagesFunction(
-          new HTMLChunker({ maxChunkSize: 6000 }),
-          openAIApi
+          new HTMLChunker({ maxChunkSize: 5000 }),
+          context.chat.tokenizer,
+          context.llm
         ),
         new WebSearchFunction(),
       ],

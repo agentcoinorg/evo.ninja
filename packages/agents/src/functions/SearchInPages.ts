@@ -3,8 +3,11 @@ import {
   AgentFunctionResult,
   AgentOutputType,
   AgentVariables,
+  ChatLogs,
   ChatMessageBuilder,
   Chunker,
+  LlmApi,
+  Tokenizer,
   trimText,
 } from "@evo-ninja/agent-utils";
 import axios from "axios";
@@ -14,7 +17,6 @@ import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/S
 import { AgentBaseContext } from "../AgentBase";
 import { OpenAIEmbeddingFunction, connect } from "vectordb"
 import path from "path";
-import { OpenAIApi } from "openai";
 
 interface SearchInPagesFuncParameters {
   query: string;
@@ -24,7 +26,8 @@ interface SearchInPagesFuncParameters {
 export class SearchInPagesFunction extends AgentFunctionBase<SearchInPagesFuncParameters> {
   constructor(
     private chunker: Chunker,
-    private openAIApi: OpenAIApi
+    private tokenizer: Tokenizer,
+    private llm: LlmApi
   ) {
     super();
   }
@@ -101,33 +104,11 @@ export class SearchInPagesFunction extends AgentFunctionBase<SearchInPagesFuncPa
 
         const resultsText = results.map((result) => result.text as string)
 
-        const completion = await this.openAIApi.createChatCompletion({
-          messages: [
-            {
-              role: "user",
-              content: `I will give you chunks of text from different webpages. 
-              I want to extract ${
-                params.query
-              } from them. Keep in mind some information may not be properly formatted.
-              Do your best to extract as much information as you can.
-
-              Prioritize accuracy. Do not settle for the first piece of information found if there are more precise results available
-              Example: "population of New York in 2020" and you get the following results: ["1.5 million",  "nearly 1.600.000", "1,611,989"], you will take "1,611,989"
-              
-              Chunks: ${JSON.stringify(resultsText)}.
-              Specify if the information is incomplete but still return it`,
-            },
-          ],
-          model: "gpt-3.5-turbo-16k",
-          temperature: 0,
-        });
-
-        const llmResponse = completion.data.choices[0].message
-          ?.content as string;
+        const llmAnalysisResponse = await this.analyzeResults(params.query, resultsText)
 
         return this.onSuccess(
           params,
-          llmResponse,
+          llmAnalysisResponse,
           rawParams,
           context.variables
         );
@@ -222,5 +203,41 @@ export class SearchInPagesFunction extends AgentFunctionBase<SearchInPagesFuncPa
     const html = response.data;
     const chunks = this.chunker.chunk(html);
     return chunks;
+  }
+
+  private async analyzeResults(query: string, results: string[]) {
+    const analyzerPrompt = `I will give you chunks of text from different webpages. 
+    I want to extract ${
+      query
+    } from them. Keep in mind some information may not be properly formatted.
+    Do your best to extract as much information as you can.
+
+    Prioritize accuracy. Do not settle for the first piece of information found if there are more precise results available
+    Example: "population of New York in 2020" and you get the following results: ["1.5 million",  "nearly 1.600.000", "1,611,989"], you will take "1,611,989"
+    
+    Chunks: ${JSON.stringify(results)}.
+    Specify if the information is incomplete but still return it`
+
+    const chatLogs = new ChatLogs({
+      "persistent": {
+        tokens: this.tokenizer.encode(analyzerPrompt).length,
+        msgs: [{
+          role: "user",
+          content: analyzerPrompt
+        }]
+      },
+      "temporary": {
+        tokens: 0,
+        msgs: []
+      }
+    });
+
+    const response = await this.llm.getResponse(chatLogs, undefined)
+
+    if (!response || !response.content) {
+      throw new Error("Failed to plan research: No response from LLM");
+    }
+
+    return response.content
   }
 }
