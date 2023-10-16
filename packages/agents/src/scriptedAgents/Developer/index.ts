@@ -4,7 +4,8 @@ import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
 import { ReadFileFunction } from "../../functions/ReadFile";
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
-import {ShellExecFunction} from "../../functions/ShellExec";
+import { RunTestPythonAnalyser } from "../../functions/RunTestPythonAnalyser";
+import { DeveloperPlanner } from "../../functions/DeveloperPlanner";
 
 export class DeveloperAgent extends ScriptedAgent {
   constructor(context: ScriptedAgentContext) {
@@ -13,29 +14,39 @@ export class DeveloperAgent extends ScriptedAgent {
     const writeFileFn = new WriteFileFunction(context.client, context.scripts);
     const readFileFn = new ReadFileFunction(context.client, context.scripts);
     const readDirFn = new ReadDirectoryFunction(context.client, context.scripts);
-    const shellExecFn = new ShellExecFunction(context.client, context.scripts);
-    
+    const pythonTestAnalyser = new RunTestPythonAnalyser(context.llm, context.chat.tokenizer, context.client);
+    const developmentPlanner = new DeveloperPlanner(context.llm, context.chat.tokenizer)
+
     const config: ScriptedAgentConfig = {
       name: "Developer",
-      expertise: "Building software projects with one or more files.",
+      expertise: "architecting, building and testing software",
       initialMessages: ({ goal }) => [
         { 
           role: "user", 
-          content: `Purpose:
+          content: `
 You are an expert developer assistant that excels at coding related tasks.
-You must not interact with the user or ask questions. Solve the task to the best of your abilities.
-NEVER guess the name of a file. If you need to know the name of a file, use ${readDirFn.name}.
-Four-Step Workflow:
-1. If you need to know the contents of a directory or file, use ${readDirFn.name} or ${readFileFn.name}.
-2. Write the COMPLETE, clean, safe, code solution to one or more files using the ${writeFileFn.name} function.
-3. If you need to execute a terminal command (e.g. "pytest"), use the ${shellExecFn.name} function.
-4. Signal completion using the ${onGoalAchievedFn.name} function.
-You can only write to the same file twice if you are modifying code that you already wrote.
-COMPLETE SOLUTION:
-Follow instructions. Do not skip anything. Write the COMPLETE solution in one step. The code should work perfectly without further changes.
-If you are asked to implement an abstract class, you MUST import it, extend it, and implement all its abstract methods.`
+You will ask to the ${developmentPlanner.name} function to write a concise and step-by-step plan. You must give all the information available to achieve the task. 
+You can write the implementation and test code with ${writeFileFn.name}
+You must run tests with ${pythonTestAnalyser.name} function to make sure that you've achieved the goal; you must pass the implementation code being tested
+
+When creating tests from scratch, they must follow this structure:
+\`\`\`python
+import unittest
+
+from your_code import some_function, another_function
+
+class TestYourTestName(unittest.TestCase):
+  def test_your_function(self):
+    # here you implement your own logic
+    pass
+
+
+if __name__ == "__main__":
+  unittest.main()
+\`\`\`
+`
         },
-        { role: "user", content: goal},
+        { role: "user", content: goal },
       ],
       loopPreventionPrompt: "Assistant, you appear to be in a loop, try executing a different function.",
       functions: [
@@ -44,7 +55,8 @@ If you are asked to implement an abstract class, you MUST import it, extend it, 
         writeFileFn,
         readFileFn,
         readDirFn,
-        shellExecFn
+        pythonTestAnalyser,
+        developmentPlanner
       ],
       shouldTerminate: (functionCalled) => {
         return [
