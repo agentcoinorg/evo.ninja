@@ -12,7 +12,7 @@ import { AgentBaseContext } from "../AgentBase";
 
 interface FunctionParams {
   filename: string;
-  context: string;
+  implementationCode: string;
 }
 
 export class RunTestPythonAnalyser extends AgentFunctionBase<FunctionParams> {
@@ -39,11 +39,11 @@ export class RunTestPythonAnalyser extends AgentFunctionBase<FunctionParams> {
         filename: {
           type: "string",
         },
-        context: {
+        implementationCode: {
           type: "string"
         }
       },
-      required: ["filename", "context"],
+      required: ["filename", "implementationCode"],
       additionalProperties: false,
     };
   }
@@ -65,22 +65,33 @@ export class RunTestPythonAnalyser extends AgentFunctionBase<FunctionParams> {
       }
 
       if (!testResult.value.success) {
-        const message = `Analyze this error from python test and find what must be changed:
+        const message = `Modify the following implementation code in order to fix the error given:
+\`\`\`python
+${params.implementationCode}
+\`\`\`
+
+Test failed with following error:
 \`\`\`
 ${testResult.value.error}
 \`\`\`
-        `;
+
+Make sure that you are modifying the necessary code so you have an iterative development process.
+Return the entire implementation file, rather than just a piece of code; with the following format:
+\`\`\`python
+# code...
+\`\`\`
+`;
         const chatLogs = new ChatLogs({
           persistent: {
             tokens: this._tokenizer.encode(message).length,
             msgs: [
               {
                 role: "user",
-                content: message,
+                content: "You are a python software development assistant that helps junior developer to debug problems"
               },
               {
                 role: "user",
-                content: params.context
+                content: message,
               }
             ],
           },
@@ -103,7 +114,7 @@ ${testResult.value.error}
           outputs: [],
           messages: [
             ChatMessageBuilder.functionCall(this.name, params),
-            ChatMessageBuilder.functionCallResult(this.name, "Test ran succesfully", context.variables)
+            ChatMessageBuilder.functionCallResult(this.name, "Succesfully ran test.", context.variables)
           ]
         };
       }

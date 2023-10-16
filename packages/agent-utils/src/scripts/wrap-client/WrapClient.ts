@@ -367,6 +367,7 @@ export class WrapClient extends PolywrapClient {
           return await workspace.shellExec(params.command, params.args);
         },
         "runPythonTest": async (params: { filename: string }) => {
+          logger.notice("CMD.RUN_PYTHON_TEST = " + params.filename);
           const command = `python ${params.filename}`;
           const loopGuard = () =>
             new Promise((_, reject) =>
