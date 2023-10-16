@@ -64,7 +64,7 @@ export class VerifyResearchFunction extends AgentFunctionBase<VerifyResearchFunc
       rawParams?: string
     ): Promise<AgentFunctionResult> => {
       try {
-        const prompt = this.getPlanningPrompt({
+        const prompt = this.getVerificationPrompt({
           query: params.originalQuery,
           context: params.context,
           foundData: params.foundData,
@@ -172,7 +172,7 @@ export class VerifyResearchFunction extends AgentFunctionBase<VerifyResearchFunc
     };
   }
 
-  private getPlanningPrompt({
+  private getVerificationPrompt({
     query,
     context,
     foundData,
