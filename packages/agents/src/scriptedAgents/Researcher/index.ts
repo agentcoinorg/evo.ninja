@@ -12,7 +12,6 @@ import { SearchInPagesFunction } from "../../functions/SearchInPages";
 import { PlanResearchFunction } from "../../functions/PlanResearch";
 import { VerifyResearchFunction } from "../../functions/VerifyResearch";
 import { OpenAIEmbeddingFunction, connect } from "vectordb";
-import path from "path";
 import { ScrapeTextFunction } from "../../functions/ScrapeText";
 import * as prompts from "./prompts";
 
@@ -50,7 +49,7 @@ export class ResearcherAgent extends ScriptedAgent {
           context.llm,
           {
             connect: async () => connect({
-              uri:  path.join(process.cwd(), "./db/lance"),
+              uri:  `./db/lance`,
             }),
             embeddingFunction: (column) => new OpenAIEmbeddingFunction(column, context.env.OPENAI_API_KEY)
           }
