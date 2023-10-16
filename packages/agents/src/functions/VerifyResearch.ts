@@ -186,7 +186,7 @@ export class VerifyResearchFunction extends AgentFunctionBase<VerifyResearchFunc
     1. You will check the query and make sure that the results are sufficient and complete for the query, considering the context.
       If a part of the data is missing, you will consider the result incomplete and communicate what's missing exactly.
 
-    2. Be very critical, don't assume that the user is correct if he says that the results are correct or complete, or fully provided.
+    2. Be very critical, don't assume that the user is correct if he says that the results are correct or complete, or that the rest of the data is unavailable, or fully provided.
     
     Here's what you need to analyze:
     

@@ -76,7 +76,7 @@ export class SearchInPagesFunction extends AgentFunctionBase<SearchInPagesFuncPa
       try {
         const connection = await this.lanceDb.connect()
         const table = await connection.createTable({
-          name: params.query,
+          name: uuid(),
           embeddingFunction: this.lanceDb.embeddingFunction("text"),
           data: [{
             text: " ",
@@ -99,12 +99,13 @@ export class SearchInPagesFunction extends AgentFunctionBase<SearchInPagesFuncPa
 
         const results = await table
           .search(params.query)
-          .limit(5)
+          .limit(25)
           .execute()
 
         const resultsText = results.map((result) => result.text as string)
+        const limitedResults = this.limitResults(resultsText, 6000)
 
-        const llmAnalysisResponse = await this.analyzeResults(params.query, resultsText)
+        const llmAnalysisResponse = await this.analyzeResults(params.query, limitedResults)
 
         return this.onSuccess(
           params,
@@ -195,6 +196,7 @@ export class SearchInPagesFunction extends AgentFunctionBase<SearchInPagesFuncPa
         "User-Agent":
           "Mozilla/5.0 (X11; Linux x86_64; rv:107.0) Gecko/20100101 Firefox/107.0",
       },
+      timeout: 8000
     });
   }
 
@@ -239,5 +241,21 @@ export class SearchInPagesFunction extends AgentFunctionBase<SearchInPagesFuncPa
     }
 
     return response.content
+  }
+
+  private limitResults(results: string[], maxTokens: number): string[] {
+    const resultsTokens = results.map(r => this.tokenizer.encode(r).length)
+    const limitedResults: string[] = [];
+
+    let totalTokens = 0
+
+    for (let i = 0; i < resultsTokens.length; i++) {
+      totalTokens += resultsTokens[i]
+      if (totalTokens <= maxTokens) {
+        limitedResults.push(results[i])
+      }
+    }
+
+    return limitedResults
   }
 }
