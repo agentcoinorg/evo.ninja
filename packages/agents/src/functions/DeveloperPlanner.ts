@@ -93,8 +93,7 @@ Often, it contains explicit details or hints about the testing requirements, whi
             ChatMessageBuilder.functionCall(this.name, params),
             ChatMessageBuilder.functionCallResult(
               this.name,
-              "Error creating a plan. Can you please provide more details",
-              context.variables
+              "Error creating a plan. Can you please provide more details"
             ),
           ],
         };
@@ -106,7 +105,6 @@ Often, it contains explicit details or hints about the testing requirements, whi
           ChatMessageBuilder.functionCallResult(
             this.name,
             response.content,
-            context.variables
           ),
         ],
       };

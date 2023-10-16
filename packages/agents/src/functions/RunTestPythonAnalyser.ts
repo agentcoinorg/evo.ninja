@@ -106,7 +106,7 @@ Return the entire implementation file, rather than just a piece of code; with th
           outputs: [],
           messages: [
             ChatMessageBuilder.functionCall(this.name, params),
-            ChatMessageBuilder.functionCallResult(this.name, response?.content || "Error could not be diagnosed. Can you please provide more information", context.variables)
+            ChatMessageBuilder.functionCallResult(this.name, response?.content || "Error could not be diagnosed. Can you please provide more information")
           ]
         };
       } else {
@@ -114,7 +114,7 @@ Return the entire implementation file, rather than just a piece of code; with th
           outputs: [],
           messages: [
             ChatMessageBuilder.functionCall(this.name, params),
-            ChatMessageBuilder.functionCallResult(this.name, "Succesfully ran test.", context.variables)
+            ChatMessageBuilder.functionCallResult(this.name, "Succesfully ran test.")
           ]
         };
       }
