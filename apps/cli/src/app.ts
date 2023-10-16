@@ -13,6 +13,7 @@ import {
   ChatLogType,
   ChatMessage,
   ChatLog,
+  AgentVariables,
 } from "@evo-ninja/agent-utils";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
 import { FileSystemWorkspace, FileLogger } from "@evo-ninja/agent-utils-fs";
@@ -131,12 +132,15 @@ export function createApp(config?: AppConfig): App {
 
   // Evo
   const evo = new Evo(
-    llm,
-    chat,
-    logger,
-    userWorkspace,
+    {
+      llm,
+      chat,
+      logger,
+      workspace: userWorkspace,
+      env,
+      variables: new AgentVariables(),
+    },
     scripts,
-    env,
     config?.timeout
   );
 

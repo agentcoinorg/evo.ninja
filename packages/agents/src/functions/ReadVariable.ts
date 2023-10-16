@@ -1,4 +1,4 @@
-import { Agent, AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+import { Agent, AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder, readVariableResultMessage } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { AgentBaseContext } from "../AgentBase";
@@ -10,7 +10,7 @@ interface ReadVarFuncParameters {
 }
 
 export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameters> {
-  constructor(private maxVarLength: number = 3000) {
+  constructor(private maxVarLength: number = 2000) {
     super();
   }
 
@@ -73,7 +73,7 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
         {
           role: "function",
           name: this.name,
-          content: this.readGlobalVarMessage(params.name, varValue, params.start, params.count)
+          content: readVariableResultMessage(params.name, varValue, params.start, params.count, this.maxVarLength)
         }
       ]
     }
@@ -90,7 +90,7 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ChatMessageBuilder.functionCallResult(
+        ...ChatMessageBuilder.functionCallResultWithVariables(
           this.name,
           `Error: Variable \${${params.name}} not found.`,
           variables
@@ -100,19 +100,6 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
   }
 
   private readGlobalVarOutput(varName: string, value: string | undefined, start: number, count: number) {
-    return `## ${this.readGlobalVarMessage(varName, value, start, count)}`;
-  }
-
-  private readGlobalVarMessage(varName: string, value: string | undefined, start: number, count: number) {
-    if (!value || value === "\"undefined\"") {
-      return `Variable \${${varName}} is undefined`;
-    } else if (count > this.maxVarLength) {
-      const cnt = Math.min(count, this.maxVarLength);
-      const val = value.substring(start, start + cnt);
-      const warn = `Warning: maximum read length is ${this.maxVarLength} bytes, result will be shortened.`;
-      return `${warn}\nReading ${start}-${start + cnt} bytes of variable \${${varName}} (length ${value.length}):\n\`\`\`\n${val}...\n\`\`\``;
-    } else {
-      return `Reading ${start}-${start + count} bytes of variable \${${varName}} (length ${value.length}):\n\`\`\`\n${value}\n\`\`\``;
-    }
+    return `## ${readVariableResultMessage(varName, value, start, count, this.maxVarLength)}`;
   }
 }

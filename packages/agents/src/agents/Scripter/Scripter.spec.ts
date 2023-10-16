@@ -7,6 +7,7 @@ import {
   LlmApi,
   ConsoleLogger,
   Logger,
+  AgentVariables,
 } from "@evo-ninja/agent-utils";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
@@ -71,12 +72,15 @@ describe('Dev Agent Test Suite', () => {
 
     return {
       agent: new Scripter(
-        debugLlm,
-        chat,
-        logger,
-        workspace,
+        {
+          llm: debugLlm,
+          chat,
+          logger,
+          workspace,
+          env,
+          variables: new AgentVariables(),
+        },
         scripts,
-        env
       ),
       debugLog
     };

@@ -58,7 +58,7 @@ export class AnalyzeFormattingRequirementsFunction extends AgentFunctionBase<Ana
         outputs: [],
         messages: [
           ChatMessageBuilder.functionCall(this.name, rawParams),
-          ChatMessageBuilder.functionCallResult(this.name, resp?.content || "", context.variables)
+          ...ChatMessageBuilder.functionCallResultWithVariables(this.name, resp?.content || "", context.variables)
         ]
       };
     }

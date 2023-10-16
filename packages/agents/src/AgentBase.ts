@@ -72,12 +72,6 @@ export class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> imp
         chat.persistent(message);
       });
 
-      // Add an extra prompt informing agent about variable usage
-      chat.persistent({
-        role: "system",
-        content: `Variables are annotated using the \${variable-name} syntax. Variables can be used as function argument using the \${variable-name} syntax. Variables are created as needed, and do not exist unless otherwise stated.`
-      });
-
       // Add functions to chat
       this.config.functions.forEach((fn) => {
         chat.addFunction(fn.getDefinition());
