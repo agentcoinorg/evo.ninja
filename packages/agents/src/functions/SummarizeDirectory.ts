@@ -4,7 +4,7 @@ import { AgentBaseContext } from "../AgentBase";
 import { DirectoryChunker } from "@evo-ninja/agent-utils";
 
 interface SummarizeDirectoryParameters {
-  directory: string;
+  subDirectory?: string;
 }
 
 export class SummarizeDirectoryFunction extends AgentFunctionBase<SummarizeDirectoryParameters> {
@@ -24,12 +24,12 @@ export class SummarizeDirectoryFunction extends AgentFunctionBase<SummarizeDirec
     return {
       type: "object",
       properties: {
-        directory: {
+        subDirectory: {
           type: "string",
-          description: "The directory to be summaruzed"
+          description: "sub-directory to be summaruzed (default: root directory)"
         }
       },
-      required: ["directory"],
+      required: [],
       additionalProperties: false
     }
   }
@@ -47,7 +47,7 @@ export class SummarizeDirectoryFunction extends AgentFunctionBase<SummarizeDirec
       const chunker = new DirectoryChunker({ maxChunkSize: maxInputTokens })
       const chunks = chunker.chunk({
         workspace: context.workspace,
-        directory: params.directory
+        directory: params.subDirectory
       });
 
       let summary: string | undefined = undefined;

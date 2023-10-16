@@ -3,14 +3,14 @@ import { Workspace } from "../sys";
 
 interface DirectoryChunkerInput {
   workspace: Workspace;
-  directory: string;
+  directory?: string;
 }
 
 export class DirectoryChunker implements Chunker<DirectoryChunkerInput> {
   constructor(private readonly config: { maxChunkSize: number }) { }
 
   chunk(input: DirectoryChunkerInput): string[] {
-    return this.chunkDirectory(input.workspace, input.directory);
+    return this.chunkDirectory(input.workspace, input.directory || "");
   }
 
   private chunkDirectory(workspace: Workspace, directory: string): string[] {
