@@ -27,16 +27,16 @@ export class DeveloperAgent extends ScriptedAgent {
 \\\\ **You are unable to interact with the user.**
 ## Instructions
 - Take a deep breath and work on the problem step by step.
+- The user's request defines the software requirements.
 - You can access the file system to read files and directories, and to write code.
 - Always write tests before writing the implementation.
-- Always write the **complete** solution. The code should always work as expected when copying it to a file and running it.
+- Always write the **complete** solution. The code should always work as expected on the first try when copy-pasted.
 ## Required Workflow
 1. write tests using ${writeFileFn.name}
 2. write code implementation using ${writeFileFn.name}
 3. run tests using ${pythonTestAnalyser.name}
-4. read test results
-5. if tests failed, fix implementation
-6. repeat steps 3-6 until all tests pass
+4. if tests failed, fix implementation
+5. repeat steps 3-4 until all tests pass
 ## Important
 - The user's goal might contain information about tests. Always follow the user's instructions.
 - Never mock functionality in tests unless the user asked you to.
