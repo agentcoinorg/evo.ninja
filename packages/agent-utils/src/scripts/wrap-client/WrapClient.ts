@@ -368,16 +368,17 @@ export class WrapClient extends PolywrapClient {
         },
         "runPythonTest": async (params: { filename: string }) => {
           const command = `python ${params.filename}`;
-          // const loopGuard = async () =>
-          //   await new Promise(() =>
-          //     setTimeout(() => {
-          //       return {
-          //         success: false,
-          //         error:
-          //           "15 seconds timeout reached on test. Maybe you have an infinite loop?",
-          //       };
-          //     }, 15000)
-          //   );
+          const loopGuard = () =>
+            new Promise((_, reject) =>
+              setTimeout(() => {
+                reject(
+                  new Error(
+                    "15 seconds timeout reached on test. Maybe you have an infinite loop?"
+                  )
+                );
+              }, 15000)
+            );
+
           const executeTest = async () => {
             const response = await workspace.shellExec(command);
             if (response.exitCode === 0 && response.stderr.endsWith("OK\n")) {
@@ -391,12 +392,15 @@ export class WrapClient extends PolywrapClient {
               };
             }
           };
-          return await executeTest()
-          // try {
-          //   return await Promise.any([executeTest, loopGuard]);
-          // } catch (e: any) {
-          //   return new Error("Error executing python test: " + e.message);
-          // }
+
+          try {
+            return await Promise.race([executeTest(), loopGuard()]);
+          } catch (e) {
+            return {
+              success: false,
+              error: "Error executing python test: " + e.message,
+            };
+          }
         },
       })))
 
