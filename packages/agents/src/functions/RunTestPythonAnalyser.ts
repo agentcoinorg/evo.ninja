@@ -60,7 +60,6 @@ export class RunTestPythonAnalyser extends AgentFunctionBase<FunctionParams> {
         },
       });
 
-      // @TODO: Revisitate this validation
       if (!testResult.ok) {
         throw new Error(testResult.error?.message);
       }
