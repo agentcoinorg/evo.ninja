@@ -11,6 +11,8 @@ import { WebSearchFunction } from "../../functions/WebSearch";
 import { SearchInPagesFunction } from "../../functions/SearchInPages";
 import { PlanResearchFunction } from "../../functions/PlanResearch";
 import { VerifyResearchFunction } from "../../functions/VerifyResearch";
+import { OpenAIEmbeddingFunction, connect } from "vectordb";
+import path from "path";
 
 export class ResearcherAgent extends ScriptedAgent {
   constructor(context: ScriptedAgentContext) {
@@ -62,7 +64,13 @@ Use the verifier ONLY ONCE
         new SearchInPagesFunction(
           new HTMLChunker({ maxChunkSize: 5000 }),
           context.chat.tokenizer,
-          context.llm
+          context.llm,
+          {
+            connect: async () => connect({
+              uri:  path.join(process.cwd(), "./db/lance"),
+            }),
+            embeddingFunction: (column) => new OpenAIEmbeddingFunction('text', context.env.OPENAI_API_KEY)
+          }
         ),
         new WebSearchFunction(),
       ],

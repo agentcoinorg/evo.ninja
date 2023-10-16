@@ -15,8 +15,7 @@ import { v4 as uuid } from "forked-agent-protocol";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { AgentBaseContext } from "../AgentBase";
-import { OpenAIEmbeddingFunction, connect } from "vectordb"
-import path from "path";
+import { Connection, EmbeddingFunction } from "vectordb";
 
 interface SearchInPagesFuncParameters {
   query: string;
@@ -27,7 +26,11 @@ export class SearchInPagesFunction extends AgentFunctionBase<SearchInPagesFuncPa
   constructor(
     private chunker: Chunker,
     private tokenizer: Tokenizer,
-    private llm: LlmApi
+    private llm: LlmApi,
+    private lanceDb: {
+      connect: () => Promise<Connection>,
+      embeddingFunction: (columnName: string) => EmbeddingFunction<string>
+    }
   ) {
     super();
   }
@@ -71,13 +74,10 @@ export class SearchInPagesFunction extends AgentFunctionBase<SearchInPagesFuncPa
       rawParams?: string
     ): Promise<AgentFunctionResult> => {
       try {
-        const embedding = new OpenAIEmbeddingFunction('text', context.env.OPENAI_API_KEY)
-        const connection = await connect({
-          uri:  path.join(process.cwd(), "./db/lance"),
-        });
+        const connection = await this.lanceDb.connect()
         const table = await connection.createTable({
           name: params.query,
-          embeddingFunction: embedding,
+          embeddingFunction: this.lanceDb.embeddingFunction("text"),
           data: [{
             text: " ",
             id: uuid()
