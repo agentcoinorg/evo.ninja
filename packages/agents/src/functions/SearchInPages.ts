@@ -22,6 +22,10 @@ interface SearchInPagesFuncParameters {
   urls: string[];
 }
 
+const MAX_RESULTS_TOKENS = 6000
+const SEARCH_RESULTS_LIMIT = 25
+const FETCH_WEBPAGE_TIMEOUT = 8000
+
 export class SearchInPagesFunction extends AgentFunctionBase<SearchInPagesFuncParameters> {
   constructor(
     private chunker: Chunker,
@@ -93,17 +97,17 @@ export class SearchInPagesFunction extends AgentFunctionBase<SearchInPagesFuncPa
             }))
             await table.add(data)
           } catch(e) {
-            console.log(`Failed to fetch ${url}`)
+            context.logger.error(`Failed to process ${url}`)
           }
         }
 
         const results = await table
           .search(params.query)
-          .limit(25)
+          .limit(SEARCH_RESULTS_LIMIT)
           .execute()
 
         const resultsText = results.map((result) => result.text as string)
-        const limitedResults = this.limitResults(resultsText, 6000)
+        const limitedResults = this.limitResults(resultsText, MAX_RESULTS_TOKENS)
 
         const llmAnalysisResponse = await this.analyzeResults(params.query, limitedResults)
 
@@ -196,7 +200,7 @@ export class SearchInPagesFunction extends AgentFunctionBase<SearchInPagesFuncPa
         "User-Agent":
           "Mozilla/5.0 (X11; Linux x86_64; rv:107.0) Gecko/20100101 Firefox/107.0",
       },
-      timeout: 8000
+      timeout: FETCH_WEBPAGE_TIMEOUT,
     });
   }
 
