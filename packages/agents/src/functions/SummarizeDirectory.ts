@@ -37,7 +37,7 @@ export class SummarizeDirectoryFunction extends AgentFunctionBase<SummarizeDirec
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: SummarizeDirectoryParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
     return async (params: SummarizeDirectoryParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       const prompt = (summary: string | undefined, chunk: string) => {
-        return `Your job is to summaruze the contents of the following files. In this summary please structure your response on a per-file basis. NOTE: some files have been chunked, line numbers are annotated.\n
+        return `Your job is to summarize the contents of the following files. In this summary please structure your response on a per-file basis. NOTE: some files have been chunked, line numbers are annotated.\n
                 ${summary ? `An existing summary already exists, you MUST modify this to contain all new details, WITHOUT LOOSING INFORMATION already present within the summary.\n\`\`\`${summary}\`\`\`\n`: ""}
                 Chunk:\n\`\`\`\n${chunk}\n\`\`\`\n`;
       }
