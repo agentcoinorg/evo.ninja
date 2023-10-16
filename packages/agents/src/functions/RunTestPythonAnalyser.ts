@@ -1,7 +1,6 @@
 import {
   Agent,
   AgentFunctionResult,
-  WrapClient,
   LlmApi,
   ChatLogs,
   Tokenizer,
@@ -15,17 +14,18 @@ interface FunctionParams {
   implementationCode: string;
 }
 
+type TestExecutor = Promise<{ success: true } | { success: false, error: string }>
+
 export class RunTestPythonAnalyser extends AgentFunctionBase<FunctionParams> {
   constructor(
     private _llm: LlmApi,
     private _tokenizer: Tokenizer,
-    private client: WrapClient
   ) {
     super();
   }
 
   get name() {
-    return "runPythonTest";
+    return "runAndAnalysePythonTest";
   }
 
   get description() {
@@ -40,8 +40,8 @@ export class RunTestPythonAnalyser extends AgentFunctionBase<FunctionParams> {
           type: "string",
         },
         implementationCode: {
-          type: "string"
-        }
+          type: "string",
+        },
       },
       required: ["filename", "implementationCode"],
       additionalProperties: false,
@@ -49,36 +49,58 @@ export class RunTestPythonAnalyser extends AgentFunctionBase<FunctionParams> {
   }
 
   buildExecutor(_: Agent<unknown>, context: AgentBaseContext) {
-    return async (params: FunctionParams, rawParams?: string): Promise<AgentFunctionResult> => {
-      const testResult = await this.client.invoke<
-        { success: true } | { success: false; error: string }
-      >({
-        uri: "plugin/cmd",
-        method: "runPythonTest",
-        args: {
-          filename: params.filename,
-        },
-      });
+    return async (
+      params: FunctionParams,
+      rawParams?: string
+    ): Promise<AgentFunctionResult> => {
+      const testRunner = async (filename: string): TestExecutor => {
+        context.logger.notice("CMD.RUN_PYTHON_TEST = " + filename);
+        const command = `python ${filename}`;
+        const loopGuard = (): TestExecutor =>
+          new Promise((_, reject) =>
+            setTimeout(() => {
+              reject(
+                new Error(
+                  "15 seconds timeout reached on test. Maybe you have an infinite loop?"
+                )
+              );
+            }, 15000)
+          );
 
-      if (!testResult.ok) {
-        throw new Error(testResult.error?.message);
-      }
+        const executeTest = async (): TestExecutor => {
+          const response = await context.workspace.shellExec(command);
+          if (response.exitCode === 0 && response.stderr.endsWith("OK\n")) {
+            return {
+              success: true,
+            };
+          } else {
+            return {
+              success: false,
+              error: response.stderr,
+            };
+          }
+        };
 
-      if (!testResult.value.success) {
-        const message = `Modify the following implementation code in order to fix the error given:
+        try {
+          return await Promise.race([executeTest(), loopGuard()]);
+        } catch (e) {
+          return {
+            success: false,
+            error: "Error executing python test: " + e.message,
+          };
+        }
+      };
+
+      const testResult = await testRunner(params.filename)
+      if (!testResult.success) {
+        const message = `Provide what should be modified in the implementation:
 \`\`\`python
 ${params.implementationCode}
 \`\`\`
 
-Test failed with following error:
+Based on the received error:
 \`\`\`
-${testResult.value.error}
-\`\`\`
-
-Make sure that you are modifying the necessary code so you have an iterative development process.
-Return the entire implementation file, rather than just a piece of code; with the following format:
-\`\`\`python
-# code...
+${testResult.error}
 \`\`\`
 `;
         const chatLogs = new ChatLogs({
@@ -87,12 +109,13 @@ Return the entire implementation file, rather than just a piece of code; with th
             msgs: [
               {
                 role: "user",
-                content: "You are a python software development assistant that helps junior developer to debug problems"
+                content:
+                  "You are a python software development assistant that helps junior developer to debug problems",
               },
               {
                 role: "user",
                 content: message,
-              }
+              },
             ],
           },
           temporary: {
@@ -100,22 +123,29 @@ Return the entire implementation file, rather than just a piece of code; with th
             msgs: [],
           },
         });
-        const response = await this._llm.getResponse(chatLogs, undefined)
+        const response = await this._llm.getResponse(chatLogs, undefined);
 
         return {
           outputs: [],
           messages: [
             ChatMessageBuilder.functionCall(this.name, params),
-            ChatMessageBuilder.functionCallResult(this.name, response?.content || "Error could not be diagnosed. Can you please provide more information")
-          ]
+            ChatMessageBuilder.functionCallResult(
+              this.name,
+              response?.content ||
+                "Error could not be diagnosed. Can you please provide more information"
+            ),
+          ],
         };
       } else {
         return {
           outputs: [],
           messages: [
             ChatMessageBuilder.functionCall(this.name, params),
-            ChatMessageBuilder.functionCallResult(this.name, "Succesfully ran test.")
-          ]
+            ChatMessageBuilder.functionCallResult(
+              this.name,
+              "Succesfully ran test."
+            ),
+          ],
         };
       }
     };

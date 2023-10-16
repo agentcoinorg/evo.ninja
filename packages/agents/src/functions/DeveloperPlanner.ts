@@ -23,7 +23,7 @@ export class DeveloperPlanner extends AgentFunctionBase<FunctionParams> {
   }
 
   get name() {
-    return "developerPlanner";
+    return "planDevelopmentTasks";
   }
 
   get description() {

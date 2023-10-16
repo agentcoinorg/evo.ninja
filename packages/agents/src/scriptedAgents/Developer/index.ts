@@ -17,7 +17,7 @@ export class DeveloperAgent extends ScriptedAgent {
     const writeFileFn = new WriteFileFunction(context.client, context.scripts);
     const readFileFn = new ReadFileFunction(context.client, context.scripts);
     const readDirFn = new ReadDirectoryFunction(context.client, context.scripts);
-    const pythonTestAnalyser = new RunTestPythonAnalyser(context.llm, context.chat.tokenizer, context.client);
+    const pythonTestAnalyser = new RunTestPythonAnalyser(context.llm, context.chat.tokenizer);
     const developmentPlanner = new DeveloperPlanner(context.llm, context.chat.tokenizer)
 
     const config: ScriptedAgentConfig = {
