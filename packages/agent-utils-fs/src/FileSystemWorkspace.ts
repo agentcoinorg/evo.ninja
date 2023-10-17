@@ -1,7 +1,6 @@
 import { Workspace, DirectoryEntry } from "@evo-ninja/agent-utils";
 import fs from "fs";
 import path from "path-browserify";
-import { Workspace } from "@evo-ninja/agent-utils";
 import spawn from "spawn-command";
 
 export class FileSystemWorkspace implements Workspace {

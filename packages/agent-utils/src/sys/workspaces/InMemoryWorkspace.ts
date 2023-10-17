@@ -1,6 +1,5 @@
 import { DirectoryEntry, Workspace } from "./Workspace";
 import { InMemoryFS } from "./InMemoryFS";
-import {Workspace} from "./Workspace";
 
 export class InMemoryWorkspace implements Workspace {
   private fs: InMemoryFS = new InMemoryFS();
