@@ -77,7 +77,7 @@ export class FileSystemWorkspace implements Workspace {
 
   async exec(command: string, args?: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
     return await new Promise((resolve, reject) => {
-      const toExec = args ? `poetry run ${command} ${args.join(" ")}` : command;
+      const toExec = args ? `${command} ${args.join(" ")}` : command;
       const child = spawn(toExec, { cwd: this._workspacePath });
 
       let stdout = "";
