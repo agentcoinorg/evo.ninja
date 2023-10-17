@@ -35,28 +35,24 @@ export class DelegateAgentFunction<
   get name() {
     return this.delegateScriptedAgentFnName(this._name)
   }
-
-  get description() {
-    return `Delegate a task to "${this._name}" with expertise in "${this._expertise}". Provide all the required information to fully complete the task.`
+  get description(): string {
+    return `Delegate a task to "${this._name}" with expertise in "${this._expertise}". Provide all the required information to fully complete the task.`;
   }
-
-  get parameters() {
-    return {
-      type: "object",
-      properties: {
-        task: {
-          type: "string",
-          description: "The task to be delegated"
-        },
-        context: {
-          type: "string",
-          description: "Necessary information required to fully completed the task."
-        }
+  parameters: any = {
+    type: "object",
+    properties: {
+      task: {
+        type: "string",
+        description: "The task to be delegated"
       },
-      required: ["task"],
-      additionalProperties: false
-    }
-  }
+      context: {
+        type: "string",
+        description: "Necessary information required to fully completed the task."
+      }
+    },
+    required: ["task"],
+    additionalProperties: false
+  };
 
   onSuccess(name: string, rawParams: string | undefined, messages: string[], result: AgentOutput, variables: AgentVariables): AgentFunctionResult {
     return {

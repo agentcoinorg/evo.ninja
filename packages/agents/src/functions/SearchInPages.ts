@@ -39,32 +39,26 @@ export class SearchInPagesFunction extends AgentFunctionBase<SearchInPagesFuncPa
     super();
   }
 
-  get name(): string {
-    return "search_in_pages";
-  }
-  get description(): string {
-    return `Searches across different specific web page URLs for a given query.`;
-  }
-  get parameters() {
-    return {
-      type: "object",
-      properties: {
-        query: {
-          type: "string",
-          description: "Query to search the pages for",
-        },
-        urls: {
-          type: "array",
-          items: {
-            type: "string",
-          },
-          description: "URLs of the pages to search for the query",
-        },
+  name: string = "search_in_pages";
+  description: string = `Searches across different specific web page URLs for a given query.`;
+  parameters: any = {
+    type: "object",
+    properties: {
+      query: {
+        type: "string",
+        description: "Query to search the pages for",
       },
-      required: ["query", "urls"],
-      additionalProperties: false,
-    };
-  }
+      urls: {
+        type: "array",
+        items: {
+          type: "string",
+        },
+        description: "URLs of the pages to search for the query",
+      },
+    },
+    required: ["query", "urls"],
+    additionalProperties: false,
+  };
 
   buildExecutor(
     _: Agent<unknown>,

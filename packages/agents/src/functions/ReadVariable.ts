@@ -14,35 +14,27 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
     super();
   }
 
-  get name(): string {
-    return "readVariable";
-  }
-
-  get description(): string {
-    return "Read a ${variable}";
-  }
-
-  get parameters(): any {
-    return {
-      type: "object",
-      properties: {
-        name: {
-          type: "string",
-          description: "${name} of a variable"
-        },
-        start: {
-          type: "number",
-          description: "Index to start reading at"
-        },
-        count: {
-          type: "number",
-          description: "Number of bytes to read"
-        }
+  name: string = "readVariable";
+  description: string = "Read a variable";
+  parameters: any = {
+    type: "object",
+    properties: {
+      name: {
+        type: "string",
+        description: "Name of a variable"
       },
-      required: ["name", "start", "count"],
-      additionalProperties: false
-    }
-  }
+      start: {
+        type: "number",
+        description: "Index to start reading at"
+      },
+      count: {
+        type: "number",
+        description: "Number of bytes to read"
+      }
+    },
+    required: ["name", "start", "count"],
+    additionalProperties: false
+  };
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: ReadVarFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (params: ReadVarFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
@@ -70,11 +62,10 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        {
-          role: "function",
-          name: this.name,
-          content: readVariableResultMessage(params.name, varValue, params.start, params.count, this.maxVarLength)
-        }
+        ChatMessageBuilder.functionCallResult(
+          this.name, 
+          readVariableResultMessage(params.name, varValue, params.start, params.count, this.maxVarLength)
+        ),
       ]
     }
   }

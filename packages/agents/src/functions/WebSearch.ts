@@ -20,25 +20,19 @@ export class WebSearchFunction extends AgentFunctionBase<WebSearchFuncParameters
     super();
   }
 
-  get name(): string {
-    return "web_search";
-  }
-  get description(): string {
-    return `Searches the web for a given query.`;
-  }
-  get parameters() {
-    return {
-      type: "object",
-      properties: {
-        query: {
-          type: "string",
-          description: "Query to search the web for",
-        },
+  name: string = "web_search";
+  description: string = `Searches the web for a given query.`;
+  parameters: any = {
+    type: "object",
+    properties: {
+      query: {
+        type: "string",
+        description: "Query to search the web for",
       },
-      required: ["query"],
-      additionalProperties: false,
-    };
-  }
+    },
+    required: ["query"],
+    additionalProperties: false,
+  };
 
   buildExecutor(
     _: Agent<unknown>,

@@ -11,27 +11,19 @@ export class AnalyzeFormattingRequirementsFunction extends AgentFunctionBase<Ana
     super();
   }
 
-  get name(): string {
-    return "analyzeFormattingRequirements";
-  }
-
-  get description(): string {
-    return "Analyzes the requirements of a user defined goal";
-  }
-
-  get parameters() {
-    return {
-      type: "object",
-      properties: {
-        goal: {
-          type: "string",
-          description: "The user's goal"
-        }
-      },
-      required: ["goal"],
-      additionalProperties: false
-    }
-  }
+  name: string = "analyzeFormattingRequirements";
+  description: string = "Analyzes the requirements of a user defined goal";
+  parameters: any = {
+    type: "object",
+    properties: {
+      goal: {
+        type: "string",
+        description: "The user's goal"
+      }
+    },
+    required: ["goal"],
+    additionalProperties: false
+  };
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: AnalyzeFormattingRequirementsParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
     return async (params: AnalyzeFormattingRequirementsParameters, rawParams?: string): Promise<AgentFunctionResult> => {

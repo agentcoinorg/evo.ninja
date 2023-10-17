@@ -8,26 +8,19 @@ interface ReadDirectoryFuncParameters {
 };
 
 export class ReadDirectoryFunction extends ScriptFunction<ReadDirectoryFuncParameters> {
-  get name() {
-    return "fs_readDirectory"
-  }
 
-  get description() {
-    return "Reads the contents of the directory"
-  }
-
-  get parameters() {
-    return {
-      type: "object",
-      properties: {
-        path: {
-          type: "string",
-        }
-      },
-      required: ["path"],
-      additionalProperties: false
-    }
-  }
+  name: string = "fs_readDirectory";
+  description: string = "Reads the contents of the directory";
+  parameters: any = {
+    type: "object",
+    properties: {
+      path: {
+        type: "string",
+      }
+    },
+    required: ["path"],
+    additionalProperties: false
+  };
 
   onSuccess(scriptedAgent: ScriptedAgent, params: ReadDirectoryFuncParameters, rawParams: string | undefined, result: string, variables: AgentVariables): AgentFunctionResult {
     return {

@@ -24,33 +24,27 @@ export class VerifyResearchFunction extends AgentFunctionBase<VerifyResearchFunc
     super();
   }
 
-  get name(): string {
-    return "verify_research";
-  }
-  get description(): string {
-    return `Verify research for a given query.`;
-  }
-  get parameters() {
-    return {
-      type: "object",
-      properties: {
-        originalQuery: {
-          type: "string",
-          description: "Original query for the research",
-        },
-        context: {
-          type: "string",
-          description: "Context about the research",
-        },
-        foundData: {
-          type: "string",
-          description: "Data results for the research query",
-        },
+  name: string = "verify_research";
+  description: string = `Verify research for a given query.`;
+  parameters: any = {
+    type: "object",
+    properties: {
+      originalQuery: {
+        type: "string",
+        description: "Original query for the research",
       },
-      required: ["originalQuery", "context", "foundData"],
-      additionalProperties: false,
-    };
-  }
+      context: {
+        type: "string",
+        description: "Context about the research",
+      },
+      foundData: {
+        type: "string",
+        description: "Data results for the research query",
+      },
+    },
+    required: ["originalQuery", "context", "foundData"],
+    additionalProperties: false,
+  };
 
   buildExecutor(
     _: Agent<unknown>,

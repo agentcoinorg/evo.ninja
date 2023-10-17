@@ -12,27 +12,19 @@ export class SummarizeDirectoryFunction extends AgentFunctionBase<SummarizeDirec
     super();
   }
 
-  get name(): string {
-    return "summarizeDirectory";
-  }
-
-  get description(): string {
-    return "Summarize the contents of a directory. Includes file names and brief descriptions."
-  }
-
-  get parameters() {
-    return {
-      type: "object",
-      properties: {
-        subDirectory: {
-          type: "string",
-          description: "sub-directory to be summarized (default: root directory)"
-        }
-      },
-      required: [],
-      additionalProperties: false
-    }
-  }
+  name: string = "summarizeDirectory";
+  description: string = `Summarize the contents of a directory. Includes file names and brief descriptions.`;
+  parameters: any = {
+    type: "object",
+    properties: {
+      subDirectory: {
+        type: "string",
+        description: "sub-directory to be summarized (default: root directory)"
+      }
+    },
+    required: [],
+    additionalProperties: false
+  };
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: SummarizeDirectoryParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
     return async (params: SummarizeDirectoryParameters, rawParams?: string): Promise<AgentFunctionResult> => {
