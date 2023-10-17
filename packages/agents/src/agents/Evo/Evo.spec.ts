@@ -8,6 +8,8 @@ import {
   ConsoleLogger,
   Logger,
   AgentVariables,
+  WrapClient,
+  agentPlugin,
 } from "@evo-ninja/agent-utils";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
@@ -90,8 +92,9 @@ function createEvo(
         workspace, 
         env,
         variables: new AgentVariables(),
+        scripts,
+        client: new WrapClient(workspace, logger, agentPlugin({ logger }), env)
       }, 
-      scripts
     ),
     debugLog,
     llm,
@@ -125,7 +128,7 @@ describe("Evo Test Suite", () => {
       "How much was spent on utilities in total ? Write the answer in an output.txt file.";
     const { agent: evo, chat, llm } = createEvo("selects-agent-correctly");
 
-    const messages = evo.config.initialMessages({ goal });
+    const messages = evo.config.prompts.initialMessages({ goal });
     messages.forEach((message) => {
       chat.persistent(message.role, message.content as string);
     });

@@ -1,3 +1,3 @@
-export interface Chunker {
-  chunk(text: string): string[];
+export interface Chunker<TInput = string> {
+  chunk(input: TInput): string[];
 }

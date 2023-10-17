@@ -15,7 +15,7 @@ const rootDir = path.resolve(
   path.join(__dirname, "../../../")
 );
 
-const workspaceDir = process.env.AGENT_WORKSPACE || path.join(rootDir, "workspace");
+const sessionsDir = process.env.AGENT_WORKSPACE || path.join(rootDir, "sessions");
 
 const options = program
   .option("-c, --clean")
@@ -44,13 +44,13 @@ async function taskHandler(
   input: TaskInput | null
 ): Promise<StepHandler> {
 
-  const workspace = new AgentProtocolWorkspace(
-    path.join(workspaceDir, id)
+  const userWorkspace = new AgentProtocolWorkspace(
+    path.join(sessionsDir, id)
   );
   const app = createApp({
     rootDir,
-    userWorkspace: workspace,
-    taskId: id,
+    userWorkspace,
+    sessionName: id,
     debug: true,
   });
 
@@ -78,9 +78,9 @@ async function taskHandler(
         ? response.value.message
         : "No Message";
 
-    workspace.writeArtifacts();
-    const artifacts = workspace.getArtifacts();
-    workspace.cleanArtifacts();
+    userWorkspace.writeArtifacts();
+    const artifacts = userWorkspace.getArtifacts();
+    userWorkspace.cleanArtifacts();
 
     if (response.done) {
       if (!response.value.ok) {
@@ -112,5 +112,5 @@ async function taskHandler(
   return stepHandler;
 }
 Agent.handleTask(taskHandler, {
-  workspace: workspaceDir
+  workspace: sessionsDir
 }).start();

@@ -1,12 +1,8 @@
+import { DirectoryEntry, Workspace } from "./Workspace";
 import { InMemoryFS } from "./InMemoryFS";
-import {Workspace} from "./Workspace";
 
 export class InMemoryWorkspace implements Workspace {
   private fs: InMemoryFS = new InMemoryFS();
-
-  constructor(
-  ) {
-  }
 
   writeFileSync(subpath: string, data: string): void {
     this.fs.writeFileSync(subpath, data);
@@ -28,8 +24,9 @@ export class InMemoryWorkspace implements Workspace {
     this.fs.mkdirSync(subpath);
   }
 
-  readdirSync(subpath: string): string[] {
-    return this.fs.readdirSync(subpath);
+  readdirSync(subpath: string): DirectoryEntry[] {
+    return this.fs.readdirSync(subpath)
+      .filter((d) => !d.name.startsWith("."));
   }
 
   appendFileSync(subpath: string, data: string): void {
@@ -37,10 +34,6 @@ export class InMemoryWorkspace implements Workspace {
   }
 
   async exec(command: string, args?: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
-    throw new Error("Not implemented.");
-  }
-
-  async poetryInit(): Promise<void> {
-    throw new Error("Not implemented.");
+    throw new Error("Executing commands is not supported in this application environment.");
   }
 }

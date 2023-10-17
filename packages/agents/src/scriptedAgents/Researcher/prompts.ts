@@ -1,13 +1,14 @@
 import { ChatMessage } from "@evo-ninja/agent-utils";
 import { ScriptedAgentRunArgs } from "../ScriptedAgent";
+import { AgentPrompts } from "../../AgentBase";
 
-export const EXPERTISE = `searching the web, excels at parsing text, comprehending details, and synthesized insights tailored to user specifications.`;
-
-export const INITIAL_MESSAGES = ({ goal }: ScriptedAgentRunArgs): ChatMessage[] => [
-  {
-    role: "user",
-    content: `
-    You are an advanced web information retriever. You will receive a query and need to perform research to answer it.
+export const prompts: AgentPrompts<ScriptedAgentRunArgs> = {
+  name: "Researcher",
+  expertise: `searching the web, excels at parsing text, comprehending details, and synthesized insights tailored to user specifications.`,
+  initialMessages: ({ goal }: ScriptedAgentRunArgs): ChatMessage[] => [
+    {
+      role: "user",
+      content: `You are an advanced web information retriever. You will receive a query and need to perform research to answer it.
 
     1. Start by planning the research. You will received a detailed multi-step searching plan.
     
@@ -32,8 +33,10 @@ export const INITIAL_MESSAGES = ({ goal }: ScriptedAgentRunArgs): ChatMessage[] 
     Use the verifier ONLY ONCE
     
     Use scrape_text for getting all the text from a webpage, but not for searching for specific information.`,
-  },
-  { role: "user", content: goal },
-];
-
-export const LOOP_PREVENTION_PROMPT = `Assistant, you appear to be in a loop, try executing a different function.`;
+    },
+    { role: "user", content: goal },
+  ],
+  loopPreventionPrompt: `Assistant, you appear to be in a loop, try executing a different function.`,
+  agentSpeakPrompt: `You do not communicate with the user. If you have insufficient information, it may exist somewhere in the user's filesystem.
+  Use the "fs_readDirectory" function to try and discover this missing information.`
+};

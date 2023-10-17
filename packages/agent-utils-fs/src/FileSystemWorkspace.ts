@@ -1,8 +1,7 @@
+import { Workspace, DirectoryEntry } from "@evo-ninja/agent-utils";
 import fs from "fs";
 import path from "path-browserify";
-import { Workspace } from "@evo-ninja/agent-utils";
 import spawn from "spawn-command";
-import {getPythonDependencies} from "./parsePy";
 
 export class FileSystemWorkspace implements Workspace {
   constructor(
@@ -65,9 +64,11 @@ export class FileSystemWorkspace implements Workspace {
     fs.mkdirSync(absPath, { recursive: true });
   }
 
-  readdirSync(subpath: string): string[] {
+  readdirSync(subpath: string): DirectoryEntry[] {
     const absPath = this.toWorkspacePath(subpath);
-    return fs.readdirSync(absPath);
+    return fs.readdirSync(absPath, { withFileTypes: true })
+      .filter((d) => !d.name.startsWith("."))
+      .map((d) => ({ name: d.name, type: d.isDirectory() ? "directory" : "file" }));
   }
 
   appendFileSync(subpath: string, data: string): void {
@@ -99,12 +100,5 @@ export class FileSystemWorkspace implements Workspace {
         resolve({ exitCode, stdout, stderr });
       });
     });
-  }
-
-  async poetryInit(): Promise<void> {
-    await this.exec("poetry", ["init", "-n"]);
-    const dependencies = getPythonDependencies(this._workspacePath);
-    const alwaysAdd = ["pytest"];
-    await this.exec("poetry", ["add", `${dependencies.concat(alwaysAdd).join(" ")}`]);
   }
 }
