@@ -11,7 +11,7 @@ export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParamete
     return "cmd_initPoetry";
   }
   get description(): string {
-    return `Initialize a Poetry environment in the workspace.`;
+    return `Initialize a Python Poetry environment in the workspace.`;
   }
   get parameters() {
     return {}
@@ -33,7 +33,7 @@ export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParamete
           content: FUNCTION_CALL_SUCCESS_CONTENT(
             this.name,
             params,
-            "Initialized Python Poetry Environment."
+            "Initialized Poetry Environment."
           )
         }
       ],
@@ -41,7 +41,7 @@ export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParamete
         ChatMessageBuilder.functionCall(this.name, rawParams),
         ...ChatMessageBuilder.functionCallResultWithVariables(
           this.name,
-          "Initialized Python Poetry Environment. Call `poetry run [command]` to run a command.",
+          "Initialized Python Poetry Environment. You can now execute `poetry run [command] [args]` in the shell.",
           variables
         ),
       ]
