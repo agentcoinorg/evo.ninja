@@ -4,9 +4,8 @@ import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
 import { ReadFileFunction } from "../../functions/ReadFile";
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
-import * as prompts from "./prompts";
-
-const AGENT_NAME = "DataAnalyst";
+import { prompts } from "./prompts";
+import { RunAndAnalysePythonTestFunction } from "../../functions/RunAndAnalysePythonTest";
 
 export class DeveloperAgent extends ScriptedAgent {
   constructor(context: ScriptedAgentContext) {
@@ -14,18 +13,17 @@ export class DeveloperAgent extends ScriptedAgent {
     const onGoalFailedFn = new OnGoalFailedFunction(context.client, context.scripts);
     const writeFileFn = new WriteFileFunction(context.client, context.scripts);
     const readFileFn = new ReadFileFunction(context.client, context.scripts);
-    
+    const readDirectoryFn = new ReadDirectoryFunction(context.client, context.scripts);
+    const pythonTestAnalyserFn = new RunAndAnalysePythonTestFunction();
+
     const config: ScriptedAgentConfig = {
-      name: AGENT_NAME,
-      expertise: prompts.EXPERTISE,
-      initialMessages: prompts.INITIAL_MESSAGES(writeFileFn, readFileFn),
-      loopPreventionPrompt: prompts.LOOP_PREVENTION_PROMPT,
       functions: [
         onGoalAchievedFn,
         onGoalFailedFn,
         writeFileFn,
         readFileFn,
-        new ReadDirectoryFunction(context.client, context.scripts)
+        readDirectoryFn,
+        pythonTestAnalyserFn
       ],
       shouldTerminate: (functionCalled) => {
         return [
@@ -33,6 +31,7 @@ export class DeveloperAgent extends ScriptedAgent {
           onGoalFailedFn.name
         ].includes(functionCalled.name);
       },
+      prompts: prompts(onGoalAchievedFn, onGoalFailedFn)
     };
 
     super(config, context);

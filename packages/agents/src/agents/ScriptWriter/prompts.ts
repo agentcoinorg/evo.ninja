@@ -1,13 +1,15 @@
 import { ChatMessage } from "@evo-ninja/agent-utils";
 import { ScriptWriterRunArgs } from "./ScriptWriter";
 import { WriteScriptFunction } from "../../functions/WriteScript";
+import { AgentPrompts } from "../../AgentBase";
 
-export const EXPERTISE = `writing single-purpose scripts`;
-
-export const INITIAL_MESSAGES = ({ namespace, description, args }: ScriptWriterRunArgs): ChatMessage[] => [
-  {
-    role: "user",
-    content: `You are an agent designed to write JavaScript functions. 
+export const prompts: AgentPrompts<ScriptWriterRunArgs> = {
+  name: "ScriptWriter",
+  expertise: `writing single-purpose scripts`,
+  initialMessages: ({ namespace, description, args }: ScriptWriterRunArgs): ChatMessage[] => [
+    {
+      role: "user",
+      content: `You are an agent designed to write JavaScript functions. 
 1. Always think through the implementation step-by-step before coding.
 2. Submit your code using the writeScript function.
 3. Don't get disheartened by initial failures. Retry until success.
@@ -36,7 +38,7 @@ Example:
 const fs = require('fs');
 return fs.readFileSync(path, encoding);
 \`\`\``,
-  },
-];
-
-export const LOOP_PREVENTION_PROMPT = `Assistant, try executing the writeScript.`;
+    },
+  ],
+  loopPreventionPrompt: `Assistant, try executing the writeScript.`,
+};

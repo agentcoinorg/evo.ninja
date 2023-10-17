@@ -1,16 +1,18 @@
 import { ChatMessage } from "@evo-ninja/agent-utils";
 import { EvoRunArgs } from "./Evo";
 import { AgentFunctionBase } from "../../AgentFunctionBase";
+import { AgentPrompts } from "../../AgentBase";
 
-export const EXPERTISE = `an expert evolving assistant that achieves user goals`;
-
-export const INITIAL_MESSAGES = ( 
+export const prompts = ( 
   verifyGoalAchievedFn: AgentFunctionBase<any>,
   onGoalFailedFn: AgentFunctionBase<any>
-) => ({ goal }: EvoRunArgs): ChatMessage[] => [
-  {
-    role: "user",
-    content: `Purpose:
+): AgentPrompts<EvoRunArgs> => ({
+  name: "Evo",
+  expertise: `an expert evolving assistant that achieves user goals`,
+  initialMessages: ({ goal }: EvoRunArgs): ChatMessage[] => [
+    {
+      role: "user",
+      content: `Purpose:
 You are an expert assistant designed to achieve user goals.
 
 Functionalities:
@@ -31,11 +33,11 @@ Decision-making Process:
 REMEMBER:
 If info is missing, you assume the info is somewhere on the user's computer like the filesystem, unless you have a logical reason to think otherwise.
 Do not communicate with the user.`,
-  },
-  {
-    role: "user",
-    content: goal,
-  },
-];
-
-export const LOOP_PREVENTION_PROMPT = `Assistant, you seem to be looping. Try delegating a task or calling agent_onGoalAchieved or agent_onGoalFailed`;
+    },
+    {
+      role: "user",
+      content: goal,
+    },
+  ],
+  loopPreventionPrompt: `Assistant, you seem to be looping. Try delegating a task or calling agent_onGoalAchieved or agent_onGoalFailed`,
+});

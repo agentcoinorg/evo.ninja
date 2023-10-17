@@ -1,7 +1,9 @@
+import { Workspace, DirectoryEntry } from "@evo-ninja/agent-utils";
 import fs from "fs";
 import path from "path-browserify";
+import spawn from "spawn-command";
 
-export class FileSystemWorkspace {
+export class FileSystemWorkspace implements Workspace {
   constructor(
     private _workspacePath: string
   ) {
@@ -62,13 +64,41 @@ export class FileSystemWorkspace {
     fs.mkdirSync(absPath, { recursive: true });
   }
 
-  readdirSync(subpath: string): string[] {
+  readdirSync(subpath: string): DirectoryEntry[] {
     const absPath = this.toWorkspacePath(subpath);
-    return fs.readdirSync(absPath);
+    return fs.readdirSync(absPath, { withFileTypes: true })
+      .filter((d) => !d.name.startsWith("."))
+      .map((d) => ({ name: d.name, type: d.isDirectory() ? "directory" : "file" }));
   }
 
   appendFileSync(subpath: string, data: string): void {
     const absPath = this.toWorkspacePath(subpath);
     fs.appendFileSync(absPath, data);
+  }
+
+  async exec(command: string, args?: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
+    return await new Promise((resolve, reject) => {
+      const toExec = args ? `${command} ${args.join(" ")}` : command;
+      const child = spawn(toExec, { cwd: this._workspacePath });
+
+      let stdout = "";
+      let stderr = "";
+
+      child.on("error", (error: Error) => {
+        reject(error);
+      });
+
+      child.stdout?.on("data", (data: string) => {
+        stdout += data.toString();
+      });
+
+      child.stderr?.on("data", (data: string) => {
+        stderr += data.toString();
+      });
+
+      child.on("exit", (exitCode: number) => {
+        resolve({ exitCode, stdout, stderr });
+      });
+    });
   }
 }

@@ -15,7 +15,7 @@ import Chat, { ChatMessage } from "../components/Chat/Chat";
 import { MarkdownLogger } from '../sys/logger';
 import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
 import { onGoalAchievedScript, onGoalFailedScript, speakScript } from '../scripts';
-import { AgentVariables } from '@evo-ninja/agent-utils';
+import { AgentVariables, agentPlugin } from '@evo-ninja/agent-utils';
 
 
 function addScript(script: {name: string, definition: string, code: string}, scriptsWorkspace: EvoCore.Workspace) {
@@ -203,8 +203,9 @@ function Dojo() {
           workspace: userWorkspace,
           env,
           variables: new AgentVariables(),
+          scripts,
+          client: new EvoCore.WrapClient(userWorkspace, logger, agentPlugin({ logger }), env)
         },
-        scripts,
       ));
     } catch (err) {
       setDojoError(err);

@@ -4,6 +4,7 @@ build
 debug
 coverage
 workspace
+sessions
 chats
 .logs
 .tests
