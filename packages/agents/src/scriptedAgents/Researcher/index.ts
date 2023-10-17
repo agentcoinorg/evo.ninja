@@ -13,7 +13,6 @@ import { PlanResearchFunction } from "../../functions/PlanResearch";
 import { VerifyResearchFunction } from "../../functions/VerifyResearch";
 import { OpenAIEmbeddingFunction, connect } from "vectordb";
 import { ScrapeTextFunction } from "../../functions/ScrapeText";
-import { SearchFunction } from "../../functions/Search";
 import { prompts } from "./prompts";
 
 export class ResearcherAgent extends ScriptedAgent {
