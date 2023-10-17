@@ -123,6 +123,10 @@ export class Chat {
     return this._chatLogs.clone();
   }
 
+  public cloneEmpty(): Chat {
+    return new Chat(this.tokenizer, this.contextWindow);
+  }
+
   public toString(): string {
     return JSON.stringify(this, null, 2);
   }

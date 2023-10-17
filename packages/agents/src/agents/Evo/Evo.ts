@@ -1,28 +1,25 @@
 import {
   Chat,
-  Scripts,
-  WrapClient,
-  agentPlugin,
   Timeout,
   basicFunctionCallLoop,
   AgentOutput,
   RunResult,
-  AgentVariables,
 } from "@evo-ninja/agent-utils";
-import { AgentBase, AgentBaseContext } from "../../AgentBase";
+import { AgentBase } from "../../AgentBase";
 import {
   ScriptedAgentOrFactory,
   ScriptedAgentContext,
+  DataAnalystAgent,
+  DeveloperAgent,
+  ResearcherAgent,
 } from "../../scriptedAgents";
 import { DelegateAgentFunction } from "../../functions/DelegateScriptedAgent";
 import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
 import { ResultErr } from "@polywrap/result";
 import { VerifyGoalAchievedFunction } from "../../functions/VerifyGoalAchieved";
-import { getDefaultDelegatedAgents } from "./getDefaultDelegatedAgents";
-import * as prompts from "./prompts";
-
-const AGENT_NAME = "Evo";
+import { prompts } from "./prompts";
+import { Scripter } from "../Scripter";
 
 export interface EvoRunArgs {
   goal: string
@@ -30,30 +27,23 @@ export interface EvoRunArgs {
 
 export class Evo extends AgentBase<EvoRunArgs, ScriptedAgentContext> {
   constructor(
-    context: AgentBaseContext,
-    scripts: Scripts,
+    context: ScriptedAgentContext,
     timeout?: Timeout,
     delegatedAgents?: ScriptedAgentOrFactory[]
   ) {
-    const agentContext: ScriptedAgentContext = {
-      ...context,
-      scripts,
-      variables: new AgentVariables(),
-      client: new WrapClient(context.workspace, context.logger, agentPlugin({ logger: context.logger }), context.env),
-    };
+    const onGoalAchievedFn = new OnGoalAchievedFunction(context.client, context.scripts);
+    const onGoalFailedFn = new OnGoalFailedFunction(context.client, context.scripts);
+    const verifyGoalAchievedFn = new VerifyGoalAchievedFunction(context.client, context.scripts);
 
-    const onGoalAchievedFn = new OnGoalAchievedFunction(agentContext.client, agentContext.scripts);
-    const onGoalFailedFn = new OnGoalFailedFunction(agentContext.client, agentContext.scripts);
-    const verifyGoalAchievedFn = new VerifyGoalAchievedFunction(agentContext.client, agentContext.scripts);
-
-    delegatedAgents = delegatedAgents ?? getDefaultDelegatedAgents(agentContext);
+    delegatedAgents = delegatedAgents ?? [
+        DeveloperAgent,
+        ResearcherAgent,
+        DataAnalystAgent,
+        Scripter
+      ].map(agentClass => () => new agentClass({ ...context, chat: context.chat.cloneEmpty() }));
 
     super(
       {
-        name: AGENT_NAME,
-        expertise: prompts.EXPERTISE,
-        initialMessages: prompts.INITIAL_MESSAGES(verifyGoalAchievedFn, onGoalFailedFn),
-        loopPreventionPrompt: prompts.LOOP_PREVENTION_PROMPT,
         functions: [
           onGoalAchievedFn,
           onGoalFailedFn,
@@ -64,9 +54,10 @@ export class Evo extends AgentBase<EvoRunArgs, ScriptedAgentContext> {
             functionCalled.name
           );
         },
+        prompts: prompts(verifyGoalAchievedFn, onGoalFailedFn),
         timeout
       },
-      agentContext
+      context
     );
   }
 
@@ -94,8 +85,8 @@ export class Evo extends AgentBase<EvoRunArgs, ScriptedAgentContext> {
         (functionCalled) => {
           return this.config.shouldTerminate(functionCalled);
         },
-        this.config.loopPreventionPrompt,
-        this.config.agentSpeakPrompt
+        this.config.prompts.loopPreventionPrompt,
+        this.config.prompts.agentSpeakPrompt
       );
     } catch (err) {
       this.context.logger.error(err);

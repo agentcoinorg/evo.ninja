@@ -1,15 +1,11 @@
-import { AgentBase } from "../AgentBase";
+import { AgentBase, AgentPrompts } from "../AgentBase";
 import { AgentBaseContext } from "../AgentBase";
 
 import { ChatMessage, ExecuteAgentFunctionCalled, Scripts, WrapClient } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 
 export interface ScriptedAgentConfig {
-  name: string;
-  expertise: string;
-  initialMessages: (runArguments: ScriptedAgentRunArgs) => ChatMessage[];
-  loopPreventionPrompt: string;
-  agentSpeakPrompt?: string;
+  prompts: AgentPrompts<ScriptedAgentRunArgs>;
   shouldTerminate: (functionCalled: ExecuteAgentFunctionCalled) => boolean;
   functions: AgentFunctionBase<unknown>[];
 }

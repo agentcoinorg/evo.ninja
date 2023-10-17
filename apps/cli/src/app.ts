@@ -14,6 +14,8 @@ import {
   ChatMessage,
   ChatLog,
   AgentVariables,
+  WrapClient,
+  agentPlugin,
 } from "@evo-ninja/agent-utils";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
 import { FileSystemWorkspace, FileLogger } from "@evo-ninja/agent-utils-fs";
@@ -139,8 +141,9 @@ export function createApp(config?: AppConfig): App {
       workspace: userWorkspace,
       env,
       variables: new AgentVariables(),
+      scripts,
+      client: new WrapClient(userWorkspace, logger, agentPlugin({ logger }), env)
     },
-    scripts,
     config?.timeout
   );
 

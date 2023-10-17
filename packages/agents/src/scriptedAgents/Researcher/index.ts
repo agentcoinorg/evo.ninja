@@ -13,9 +13,7 @@ import { PlanResearchFunction } from "../../functions/PlanResearch";
 import { VerifyResearchFunction } from "../../functions/VerifyResearch";
 import { OpenAIEmbeddingFunction, connect } from "vectordb";
 import { ScrapeTextFunction } from "../../functions/ScrapeText";
-import * as prompts from "./prompts";
-
-const AGENT_NAME = "Researcher";
+import { prompts } from "./prompts";
 
 export class ResearcherAgent extends ScriptedAgent {
   constructor(context: ScriptedAgentContext) {
@@ -33,10 +31,6 @@ export class ResearcherAgent extends ScriptedAgent {
     const scrapeTextFunc = new ScrapeTextFunction(context.client, context.scripts)
 
     const config: ScriptedAgentConfig = {
-      name: AGENT_NAME,
-      expertise: prompts.EXPERTISE,
-      initialMessages: prompts.INITIAL_MESSAGES,
-      loopPreventionPrompt: prompts.LOOP_PREVENTION_PROMPT,
       functions: [
         onGoalAchievedFn,
         onGoalFailedFn,
@@ -62,6 +56,7 @@ export class ResearcherAgent extends ScriptedAgent {
           functionCalled.name
         );
       },
+      prompts,
     };
 
     super(config, context);

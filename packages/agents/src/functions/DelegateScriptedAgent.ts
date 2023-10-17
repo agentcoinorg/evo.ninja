@@ -28,8 +28,8 @@ export class DelegateAgentFunction<
       this.delegatedAgent().config :
       this.delegatedAgent.config;
 
-    this._expertise = config.expertise;
-    this._name = config.name;
+    this._expertise = config.prompts.expertise;
+    this._name = config.prompts.name;
   }
 
   get name() {
@@ -116,7 +116,7 @@ export class DelegateAgentFunction<
         if (response.done) {
           if (!response.value.ok) {
             return this.onFailure(
-              scriptedAgent.config.name,
+              scriptedAgent.config.prompts.name,
               params,
               rawParams,
               response.value.error,
@@ -125,7 +125,7 @@ export class DelegateAgentFunction<
           }
         
           return this.onSuccess(
-            scriptedAgent.config.name,
+            scriptedAgent.config.prompts.name,
             rawParams,
             messages,
             response.value.value,
