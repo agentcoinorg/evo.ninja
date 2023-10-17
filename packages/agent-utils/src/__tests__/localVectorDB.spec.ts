@@ -44,7 +44,7 @@ describe('Local Vector DB', () => {
       { text: "Hello universe" },
     ])
 
-    const results = await db.search("Hello", 2)
+    const results = await db.search("Hey", 2)
     const texts = results.map(result => result.text())
 
     expect(texts[0]).toEqual("Hello world")
