@@ -26,7 +26,7 @@ export class SummarizeDirectoryFunction extends AgentFunctionBase<SummarizeDirec
       properties: {
         subDirectory: {
           type: "string",
-          description: "sub-directory to be summaruzed (default: root directory)"
+          description: "sub-directory to be summarized (default: root directory)"
         }
       },
       required: [],
