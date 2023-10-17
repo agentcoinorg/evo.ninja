@@ -37,7 +37,7 @@ describe('Local Vector DB', () => {
     const store = new LocalDocumentStore(workspace, "testdb")
     const db = new LocalVectorDB(embeddingApi, store)
 
-    await db.bulkAdd([
+    await db.add([
       { text: "Goodbye world" },
       { text: "Hello world" },
       { text: "Goodbye universe" },
@@ -51,7 +51,7 @@ describe('Local Vector DB', () => {
     expect(texts[1]).toEqual("Hello universe")
   })
 
-  it.only('should handle large amounts of information', async () => {
+  it.skip('should handle large amounts of information', async () => {
     const workspace = new InMemoryWorkspace()
     const env = new Env(process.env);
     const consoleLogger = new ConsoleLogger();
@@ -62,16 +62,11 @@ describe('Local Vector DB', () => {
     )
     const store = new LocalDocumentStore(workspace, "testdb")
     const db = new LocalVectorDB(embeddingApi, store)
+    const data = Array.from({ length: 10000 }, () => generateRandomString(10))
 
-    console.log("Generating data")
-    const data = Array.from({ length: 70000 }, () => generateRandomString(10))
-
-    console.log("Adding data")
-    await db.bulkAdd(data.map(text => ({ text })))
+    await db.add(data.map(text => ({ text })))
 
     const results = await db.search("Hello", 5)
-    const texts = results.map(result => result.text())
-
-    console.log(texts)
+    expect(results.length).toEqual(5)
   })
 })

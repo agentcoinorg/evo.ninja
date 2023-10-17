@@ -32,29 +32,28 @@ export class OpenAIEmbeddingAPI implements EmbeddingApi {
     this.api = new OpenAIApi(this.configuration);
   }
 
-  async createEmbeddings(input: string | string[], tries?: number): Promise<EmbeddingCreationResult> {
+  async createEmbeddings(input: string | string[], tries?: number): Promise<EmbeddingCreationResult[]> {
     try {
       const inputs = Array.isArray(input) ? input : [input];
       this.validateInput(inputs);
 
       const batchedInputs = splitArray(inputs, this.modelConfig.maxInputsPerRequest);
 
-      console.log("batchedInputs", batchedInputs);
-      const tokens = batchedInputs.map(inputs => inputs.map(input => this.tokenizer.encode(input)));
-      const totalTokens = tokens.reduce((acc, curr) => acc + curr.length, 0);
-      console.log("totalTokens", totalTokens);
+      const results = await Promise.all(batchedInputs.map(async (inputs) => {
+        const { data } = await this.api.createEmbedding({
+          model: this.modelConfig.model,
+          input: inputs,
+        })
 
-      const { data } = await this.api.createEmbedding({
-        model: this.modelConfig.model,
-        input: batchedInputs
-      })
+        return data.data.map((innerData) => {
+          return {
+            embedding: innerData.embedding,
+            input: inputs[innerData.index]
+          }
+        });
+      }))
   
-      return {
-        embeddings: data.data,
-        model: data.model,
-        promptTokensUsed: data.usage.prompt_tokens,
-        totalTokensUsed: data.usage.total_tokens
-      }
+      return results.flat();
     } catch (err) {
       const error = cleanOpenAIError(err);
 

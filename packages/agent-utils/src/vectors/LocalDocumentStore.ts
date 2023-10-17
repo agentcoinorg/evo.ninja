@@ -1,7 +1,7 @@
 import { Workspace } from "../sys";
 import path from "path-browserify";
 import { v4 as uuid } from "uuid";
-import { DocumentMetadata, LocalDocument } from "./LocalDocument";
+import { LocalDocument } from "./LocalDocument";
 
 export class LocalDocumentStore {
   constructor(
@@ -9,7 +9,7 @@ export class LocalDocumentStore {
     private uri: string
   ) {}
 
-  add(data: { text: string, vector: number[], metadata?: DocumentMetadata }): LocalDocument {
+  add(data: { text: string, vector: number[] }): LocalDocument {
     const id = uuid()
 
     const document = new LocalDocument(id, {
@@ -20,7 +20,6 @@ export class LocalDocumentStore {
     document.save({
       text: data.text,
       vector: data.vector,
-      metadata: data.metadata,
     })
     return document
   }

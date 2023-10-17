@@ -9,41 +9,23 @@ export class LocalVectorDB {
     private store: LocalDocumentStore,
   ) {}
 
-  async add(item: {
-    text: string,
-    metadata?: Record<string, any>,
-  }): Promise<void> {
-    const embeddingsResult = await this.embeddingApi.createEmbeddings(item.text)
-    this.store.add({
-      text: item.text,
-      vector: embeddingsResult.embeddings[0].embedding,
-      metadata: item.metadata,
-    })
-  }
-
-  async bulkAdd(items: {
-    text: string,
-    metadata?: Record<string, any>,
+  async add(items: {
+    text: string
   }[]): Promise<void> {
     const itemTexts = items.map(item => item.text);
-    const { embeddings } = await this.embeddingApi.createEmbeddings(itemTexts)
+    const results = await this.embeddingApi.createEmbeddings(itemTexts)
 
-    let i = 0;
-
-    for await (const { embedding } of embeddings) {
+    for await (const result of results) {
       this.store.add({
-        text: items[i].text,
-        vector: embedding,
-        metadata: items[i].metadata,
+        text: result.input,
+        vector: result.embedding,
       })
-
-      i++;
     }
   }
 
   async search(query: string, limit: number): Promise<LocalDocument[]> {
-    const queryEmbeddingResponse = await this.embeddingApi.createEmbeddings(query);
-    const queryVector = queryEmbeddingResponse.embeddings[0].embedding;
+    const queryEmbeddingResults = await this.embeddingApi.createEmbeddings(query);
+    const queryVector = queryEmbeddingResults[0].embedding;
     const normalizedQueryVector = normalize(queryVector);
 
     const documents = this.store.list();

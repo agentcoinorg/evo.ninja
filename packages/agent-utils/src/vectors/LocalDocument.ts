@@ -2,10 +2,7 @@ import path from "path-browserify";
 import { Workspace } from "../sys";
 
 const VECTOR_FILENAME = "vector.json"
-const METADATA_FILENAME = "metadata.json"
 const DOCUMENT_FILENAME = "document.json"
-
-export type DocumentMetadata = Record<string, any>
 
 export class LocalDocument {
   constructor(
@@ -42,24 +39,10 @@ export class LocalDocument {
     return document.text
   }
 
-  metadata(): Record<string, any> | undefined {
-    const metadataPath = path.join(this.config.uri, METADATA_FILENAME)
-
-    if (!this.config.workspace.existsSync(metadataPath)) {
-      return undefined;
-    }
-
-    const metadataFileContent = this.config.workspace.readFileSync(metadataPath)
-    const metadataContent: { id: string; metadata: DocumentMetadata; } = JSON.parse(metadataFileContent)
-
-    return metadataContent.metadata
-  }
-
   save({
     text,
     vector,
-    metadata,
-  }: { text: string, vector: number[], metadata?: DocumentMetadata }): void {
+  }: { text: string, vector: number[] }): void {
     const docPath = this.config.uri
 
     const vectorPath = path.join(docPath, VECTOR_FILENAME)
@@ -78,13 +61,5 @@ export class LocalDocument {
       id: this.id,
       text,
     }))
-
-    if (metadata) {
-      const metadataPath = path.join(docPath, METADATA_FILENAME)
-      this.config.workspace.writeFileSync(metadataPath, JSON.stringify({
-        id: this.id,
-        metadata,
-      }))
-    }
   }
 }
