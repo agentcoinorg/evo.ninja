@@ -32,4 +32,8 @@ export class InMemoryWorkspace implements Workspace {
   appendFileSync(subpath: string, data: string): void {
     this.fs.appendFileSync(subpath, data);
   }
+
+  async exec(command: string, args?: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
+    throw new Error("Executing commands is not supported in this application environment.");
+  }
 }
