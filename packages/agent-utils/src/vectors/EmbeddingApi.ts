@@ -1,10 +1,10 @@
 export interface EmbeddingCreationResult {
-  embedding: number[];
+  embeddings: { embedding: number[] }[];
   model: string;
   promptTokensUsed: number,
   totalTokensUsed: number
 }
 
 export interface EmbeddingApi {
-  createEmbedding: (text: string) => Promise<EmbeddingCreationResult>
+  createEmbeddings: (input: string | string[]) => Promise<EmbeddingCreationResult>
 }
