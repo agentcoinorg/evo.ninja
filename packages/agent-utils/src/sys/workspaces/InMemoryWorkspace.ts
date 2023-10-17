@@ -33,6 +33,6 @@ export class InMemoryWorkspace implements Workspace {
   }
 
   async exec(command: string, args?: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
-    throw new Error("Not implemented.");
+    throw new Error("Executing commands is not supported in this application environment.");
   }
 }
