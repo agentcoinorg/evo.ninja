@@ -104,6 +104,14 @@ export class AgentProtocolWorkspace implements Workspace {
     this._artifactLog = new Map();
   }
 
+  async exec(command: string, args?: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
+    return await this._fsWorkspace.exec(command, args);
+  }
+
+  async poetryInit(): Promise<void> {
+    return await this._fsWorkspace.poetryInit();
+  }
+
   private processArtifacts(
     callback: (artifact: ArtifactLog, filePath: string) => void
   ): void {

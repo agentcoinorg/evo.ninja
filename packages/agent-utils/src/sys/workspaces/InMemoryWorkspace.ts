@@ -1,6 +1,7 @@
 import { InMemoryFS } from "./InMemoryFS";
+import {Workspace} from "./Workspace";
 
-export class InMemoryWorkspace {
+export class InMemoryWorkspace implements Workspace {
   private fs: InMemoryFS = new InMemoryFS();
 
   constructor(
@@ -33,5 +34,13 @@ export class InMemoryWorkspace {
 
   appendFileSync(subpath: string, data: string): void {
     this.fs.appendFileSync(subpath, data);
+  }
+
+  async exec(command: string, args?: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
+    throw new Error("Not implemented.");
+  }
+
+  async poetryInit(): Promise<void> {
+    throw new Error("Not implemented.");
   }
 }

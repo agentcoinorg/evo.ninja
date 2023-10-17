@@ -10,6 +10,7 @@
     "@evo-ninja/agent-utils": "~0.1.0"
   },
   "devDependencies": {
+    "spawn-command": "0.0.2-1",
     "rimraf": "~5.0.1",
     "ts-node": "10.9.1",
     "typescript": "4.9.5"

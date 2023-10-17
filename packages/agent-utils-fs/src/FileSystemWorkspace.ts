@@ -1,7 +1,10 @@
 import fs from "fs";
 import path from "path-browserify";
+import { Workspace } from "@evo-ninja/agent-utils";
+import spawn from "spawn-command";
+import {getPythonDependencies} from "./parsePy";
 
-export class FileSystemWorkspace {
+export class FileSystemWorkspace implements Workspace {
   constructor(
     private _workspacePath: string
   ) {
@@ -70,5 +73,38 @@ export class FileSystemWorkspace {
   appendFileSync(subpath: string, data: string): void {
     const absPath = this.toWorkspacePath(subpath);
     fs.appendFileSync(absPath, data);
+  }
+
+  async exec(command: string, args?: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
+    return await new Promise((resolve, reject) => {
+      const toExec = args ? `poetry run ${command} ${args.join(" ")}` : command;
+      const child = spawn(toExec, { cwd: this._workspacePath });
+
+      let stdout = "";
+      let stderr = "";
+
+      child.on("error", (error: Error) => {
+        reject(error);
+      });
+
+      child.stdout?.on("data", (data: string) => {
+        stdout += data.toString();
+      });
+
+      child.stderr?.on("data", (data: string) => {
+        stderr += data.toString();
+      });
+
+      child.on("exit", (exitCode: number) => {
+        resolve({ exitCode, stdout, stderr });
+      });
+    });
+  }
+
+  async poetryInit(): Promise<void> {
+    await this.exec("poetry", ["init", "-n"]);
+    const dependencies = getPythonDependencies(this._workspacePath);
+    const alwaysAdd = ["pytest"];
+    await this.exec("poetry", ["add", `${dependencies.concat(alwaysAdd).join(" ")}`]);
   }
 }
