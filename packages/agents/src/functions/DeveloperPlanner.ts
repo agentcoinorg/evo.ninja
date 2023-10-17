@@ -61,12 +61,11 @@ export class DeveloperPlanner extends AgentFunctionBase<FunctionParams> {
             {
               role: "user",
               content: `
-You specialize in thinking the entire process of software developement.
-Your paramount responsibility is to devise a step-by-step plan to execute a given task,
-ensuring tests are conceived prior to actual implementation.
+You are a senior software architect agent which specializes architecting and planning complex software programs development.
+Given a task, your job is to implement a step-by-step plan which ensures the development of the asked implementation and the unit tests of it.
 
-It's of utmost importance that you meticulously analyze the given goal and information available.
-Often, it contains explicit details or hints about the testing requirements, which are helpful when it comes to creating the plan
+You must be very aware of the goal from the user, as it could bring information about how the testing should be done, if this is the case please
+develop the entire plan around the tests, or examples.
 `,
             },
             {
