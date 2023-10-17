@@ -25,7 +25,7 @@ export class LocalDocumentStore {
   }
 
   list(): LocalDocument[] {
-    const ids = this.workspace.readdirSync(this.uri)
+    const ids = this.workspace.readdirSync(this.uri).map(entry => entry.name)
     return ids.map(id => new LocalDocument(id, {
       uri: path.join(this.uri, id),
       workspace: this.workspace,
