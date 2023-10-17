@@ -15,7 +15,7 @@ export class LocalVectorDB {
   async add(item: {
     text: string,
     metadata?: Record<string, any>,
-  }) {
+  }): Promise<void> {
     const embeddingsResult = await this.embeddingApi.createEmbedding(item.text)
     this.store.add({
       text: item.text,
@@ -27,7 +27,7 @@ export class LocalVectorDB {
   async bulkAdd(items: {
     text: string,
     metadata?: Record<string, any>,
-  }[]) {
+  }[]): Promise<void> {
     const batches = this.separateInBatches(items, this.config.maxParallelRequests)
 
     for await (const batch of batches) {

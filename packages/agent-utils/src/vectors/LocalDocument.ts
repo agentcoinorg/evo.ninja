@@ -59,7 +59,7 @@ export class LocalDocument {
     text,
     vector,
     metadata,
-  }: { text: string, vector: number[], metadata?: DocumentMetadata }) {
+  }: { text: string, vector: number[], metadata?: DocumentMetadata }): void {
     const docPath = this.config.uri
 
     const vectorPath = path.join(docPath, VECTOR_FILENAME)

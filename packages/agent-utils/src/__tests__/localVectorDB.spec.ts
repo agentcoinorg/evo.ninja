@@ -1,6 +1,6 @@
-import { LocalDocumentStore } from "../memory/LocalDocumentStore"
-import { LocalVectorDB } from "../memory/LocalVectorDB"
-import { OpenAIEmbeddingAPI } from "../memory/OpenAIEmbeddingApi"
+import { LocalDocumentStore } from "../vectors/LocalDocumentStore"
+import { LocalVectorDB } from "../vectors/LocalVectorDB"
+import { OpenAIEmbeddingAPI } from "../vectors/OpenAIEmbeddingApi"
 import { ConsoleLogger, Env, InMemoryWorkspace } from "../sys"
 import dotenv from "dotenv";
 import path from "path";
