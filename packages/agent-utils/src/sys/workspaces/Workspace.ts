@@ -3,7 +3,7 @@ export interface Workspace {
   readFileSync(subpath: string): string;
   existsSync(subpath: string): boolean;
   renameSync(oldPath: string, newPath: string): void;
-  mkdirSync(subpath: string): void;
+  mkdirSync(subpath: string, opts?: { recursive: boolean }): void;
   readdirSync(subpath: string): string[];
   appendFileSync(subpath: string, data: string): void;
 }

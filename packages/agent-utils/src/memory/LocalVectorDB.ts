@@ -1,48 +1,50 @@
 import { EmbeddingApi } from "./EmbeddingApi";
-import { v4 as uuid } from "uuid";
 import { normalize, normalizedCosineSimilarity } from "./utils";
-import { DBStore } from "./DBStore";
+import { LocalDocumentStore } from "./LocalDocumentStore";
+import { LocalDocument } from "./LocalDocument";
 
-export class MemoryProvider {
+export class LocalVectorDB {
   constructor(
     private embeddingApi: EmbeddingApi,
-    private store: DBStore
+    private store: LocalDocumentStore
   ) {}
 
-  async add(items: string[]) {
+  async add(items: {
+    text: string,
+    metadata?: Record<string, any>,
+  }[]) {
     await Promise.all(
-      items.map(async item => {
-        const embeddingsResult = await this.embeddingApi.createEmbedding(item)
-        const index = {
-          id: uuid(),
-          text: item,
+      items.map(async ({ text, metadata }) => {
+        const embeddingsResult = await this.embeddingApi.createEmbedding(text)
+        this.store.add({
+          text: text,
           vector: embeddingsResult.embedding,
-        }
-        this.store.add(index)
+          metadata,
+        })
       })
     )
   }
 
-  async search(query: string, limit: number): Promise<string[]> {
+  async search(query: string, limit: number): Promise<LocalDocument[]> {
     const queryEmbeddingResponse = await this.embeddingApi.createEmbedding(query);
     const queryVector = queryEmbeddingResponse.embedding;
     const normalizedQueryVector = normalize(queryVector);
 
-    const indexes = this.store.list();
+    const documents = this.store.list();
 
-    const distances = indexes.map(index => {
-      const vector = this.store.getVector(index);
+    const distances = documents.map(document => {
+      const vector = document.vector();
       const normalizedVector = normalize(vector);
 
       const distance = normalizedCosineSimilarity(queryVector, normalizedQueryVector, vector, normalizedVector);
-      return { index, distance };
+      return { document, distance };
     })
 
     const sortedDistances = distances.sort((a, b) => b.distance - a.distance);
     const topDistances = sortedDistances.slice(0, limit);
 
-    const results = topDistances.map(distance => {
-      return this.store.getDocument(distance.index)
+    const results = topDistances.map(({ document }) => {
+      return document
     })
 
     return results;

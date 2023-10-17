@@ -1,6 +1,6 @@
 import { Configuration, OpenAIApi } from "openai";
 import { EmbeddingApi, EmbeddingCreationResult } from "./EmbeddingApi";
-import { Logger } from "../sys";
+import { ILogger } from "../sys";
 import { OpenAIError, cleanOpenAIError } from "../utils/openai";
 
 export class OpenAIEmbeddingAPI implements EmbeddingApi {
@@ -10,7 +10,7 @@ export class OpenAIEmbeddingAPI implements EmbeddingApi {
   constructor(
     private apiKey: string,
     private model: string,
-    private logger: Logger,
+    private logger: ILogger,
     private _maxRateLimitRetries: number = 5
   ) {
     this.configuration = new Configuration({
