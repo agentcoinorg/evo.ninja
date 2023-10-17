@@ -6,23 +6,35 @@ import { LocalDocument } from "./LocalDocument";
 export class LocalVectorDB {
   constructor(
     private embeddingApi: EmbeddingApi,
-    private store: LocalDocumentStore
+    private store: LocalDocumentStore,
+    private config: {
+      maxParallelRequests: number,
+    }
   ) {}
 
-  async add(items: {
+  async add(item: {
+    text: string,
+    metadata?: Record<string, any>,
+  }) {
+    const embeddingsResult = await this.embeddingApi.createEmbedding(item.text)
+    this.store.add({
+      text: item.text,
+      vector: embeddingsResult.embedding,
+      metadata: item.metadata,
+    })
+  }
+
+  async bulkAdd(items: {
     text: string,
     metadata?: Record<string, any>,
   }[]) {
-    await Promise.all(
-      items.map(async ({ text, metadata }) => {
-        const embeddingsResult = await this.embeddingApi.createEmbedding(text)
-        this.store.add({
-          text: text,
-          vector: embeddingsResult.embedding,
-          metadata,
-        })
-      })
-    )
+    const batches = this.separateInBatches(items, this.config.maxParallelRequests)
+
+    for await (const batch of batches) {
+      await Promise.all(
+        batch.map(async ({ text, metadata }) => this.add({ text, metadata }))
+      )
+    }
   }
 
   async search(query: string, limit: number): Promise<LocalDocument[]> {
@@ -48,5 +60,14 @@ export class LocalVectorDB {
     })
 
     return results;
+  }
+
+  private separateInBatches<T>(items: T[], batchSize: number): T[][] {
+    return Array.from(
+      {
+        length: Math.ceil(items.length / batchSize)
+      },
+      (_, index) => items.slice(index * batchSize, index * batchSize + batchSize)
+    );
   }
 }

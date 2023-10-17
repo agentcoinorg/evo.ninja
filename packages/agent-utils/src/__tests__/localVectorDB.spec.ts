@@ -22,9 +22,11 @@ describe('Local Vector DB', () => {
       consoleLogger
     )
     const store = new LocalDocumentStore(workspace, "testdb")
-    const db = new LocalVectorDB(embeddingApi, store)
+    const db = new LocalVectorDB(embeddingApi, store, {
+      maxParallelRequests: 2
+    })
 
-    await db.add([
+    await db.bulkAdd([
       { text: "Goodbye world" },
       { text: "Hello world" },
       { text: "Goodbye universe" },
