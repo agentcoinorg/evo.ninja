@@ -1,6 +1,6 @@
-import { LocalDocumentStore } from "../vectors/LocalDocumentStore"
-import { LocalVectorDB } from "../vectors/LocalVectorDB"
-import { OpenAIEmbeddingAPI } from "../vectors/OpenAIEmbeddingApi"
+import { LocalDocumentStore } from "../embeddings/LocalDocumentStore"
+import { LocalVectorDB } from "../embeddings/LocalVectorDB"
+import { OpenAIEmbeddingAPI } from "../embeddings/OpenAIEmbeddingApi"
 import { ConsoleLogger, Env, InMemoryWorkspace } from "../sys"
 import dotenv from "dotenv";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
