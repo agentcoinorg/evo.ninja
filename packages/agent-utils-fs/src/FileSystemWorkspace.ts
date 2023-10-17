@@ -66,6 +66,7 @@ export class FileSystemWorkspace implements Workspace {
   readdirSync(subpath: string): DirectoryEntry[] {
     const absPath = this.toWorkspacePath(subpath);
     return fs.readdirSync(absPath, { withFileTypes: true })
+      .filter((d) => !d.name.startsWith("."))
       .map((d) => ({ name: d.name, type: d.isDirectory() ? "directory" : "file" }));
   }
 

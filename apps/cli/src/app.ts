@@ -47,12 +47,12 @@ export interface App {
 }
 
 export interface AppConfig {
-  rootDir?: string;
+  sessionName?: string;
   timeout?: Timeout;
-  userWorkspace?: Workspace;
+  rootDir?: string;
   debug?: boolean;
-  taskId?: string;
   messagesPath?: string;
+  userWorkspace?: Workspace;
 }
 
 const getMessagesFromPath = (path: string): { type: ChatLogType, msgs: ChatMessage[]}[] => {
@@ -70,15 +70,19 @@ export function createApp(config?: AppConfig): App {
     : path.join(__dirname, "../../../");
 
   const date = new Date();
-  const defaultId = `${date.getFullYear()}-${
+  const defaultSessionName = `${date.getFullYear()}-${
     date.getMonth() + 1
   }-${date.getDate()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`;
-  const taskId = config?.taskId ?? defaultId;
+  const sessionName = config?.sessionName ?? defaultSessionName;
   const env = new Env(process.env as Record<string, string>);
-  const workspacePath = path.join(rootDir, "workspace", taskId);
+  const workspacePath = path.join(rootDir, "sessions", sessionName);
+
+  // .evo directory
+  const evoInternalsPath = path.join(workspacePath, ".evo");
+  const evoInternalsWorkspace = new FileSystemWorkspace(evoInternalsPath);
+
   // Chat Log File
-  const logWorkspace = new FileSystemWorkspace(workspacePath);
-  const fileLogger = new FileLogger(logWorkspace.toWorkspacePath("chat.md"));
+  const fileLogger = new FileLogger(evoInternalsWorkspace.toWorkspacePath("chat.md"));
 
   // Logger
   const consoleLogger = new ConsoleLogger();
@@ -124,9 +128,7 @@ export function createApp(config?: AppConfig): App {
   let debugLog: DebugLog | undefined;
 
   if (config?.debug) {
-    debugLog = new DebugLog(
-      new FileSystemWorkspace(workspacePath)
-    );
+    debugLog = new DebugLog(evoInternalsWorkspace);
 
     // Wrap the LLM API
     llm = new DebugLlmApi(debugLog, llm);

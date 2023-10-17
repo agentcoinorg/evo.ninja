@@ -6,11 +6,11 @@ import { program } from "commander";
 export async function cli(): Promise<void> {
   program
     .argument("[goal]", "Goal to be achieved")
+    .option("-s, --session <name>")
     .option("-t, --timeout <seconds>")
     .option("-r, --root <path>")
     .option("-d, --debug")
     .option("-m, --messages <path>")
-    .option("--task <number>")
     .parse();
 
   const options = program.opts();
@@ -28,7 +28,7 @@ export async function cli(): Promise<void> {
     rootDir: options.root,
     debug: options.debug,
     messagesPath: options.messages,
-    taskId: options.task
+    sessionName: options.session
   });
 
   await app.logger.logHeader();
