@@ -1,4 +1,4 @@
-import { Workspace } from "@evo-ninja/agent-utils";
+import { DirectoryEntry, Workspace } from "@evo-ninja/agent-utils";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import { type Artifact, v4 as uuid } from "forked-agent-protocol";
 import path from "path";
@@ -65,7 +65,7 @@ export class AgentProtocolWorkspace implements Workspace {
     this._fsWorkspace.mkdirSync(subpath);
   }
 
-  readdirSync(subpath: string): string[] {
+  readdirSync(subpath: string): DirectoryEntry[] {
     return this._fsWorkspace.readdirSync(subpath);
   }
 

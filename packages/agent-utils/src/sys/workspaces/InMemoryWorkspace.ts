@@ -1,12 +1,9 @@
+import { DirectoryEntry, Workspace } from "./Workspace";
 import { InMemoryFS } from "./InMemoryFS";
 import {Workspace} from "./Workspace";
 
 export class InMemoryWorkspace implements Workspace {
   private fs: InMemoryFS = new InMemoryFS();
-
-  constructor(
-  ) {
-  }
 
   writeFileSync(subpath: string, data: string): void {
     this.fs.writeFileSync(subpath, data);
@@ -28,7 +25,7 @@ export class InMemoryWorkspace implements Workspace {
     this.fs.mkdirSync(subpath);
   }
 
-  readdirSync(subpath: string): string[] {
+  readdirSync(subpath: string): DirectoryEntry[] {
     return this.fs.readdirSync(subpath);
   }
 

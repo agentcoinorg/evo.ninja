@@ -26,12 +26,16 @@ export interface AgentBaseContext {
   variables: AgentVariables;
 }
 
-export interface AgentBaseConfig<TRunArgs> {
+export interface AgentPrompts<TRunArgs> {
   name: string;
   expertise: string;
   initialMessages: (runArguments: TRunArgs) => ChatMessage[];
   loopPreventionPrompt: string;
   agentSpeakPrompt?: string;
+}
+
+export interface AgentBaseConfig<TRunArgs> {
+  prompts: AgentPrompts<TRunArgs>;
   functions: AgentFunctionBase<unknown>[];
   shouldTerminate: (functionCalled: ExecuteAgentFunctionCalled) => boolean;
   timeout?: Timeout;
@@ -68,7 +72,7 @@ export class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> imp
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
     try {
-      this.config.initialMessages(args).forEach((message) => {
+      this.config.prompts.initialMessages(args).forEach((message) => {
         chat.persistent(message);
       });
 
@@ -99,8 +103,8 @@ export class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> imp
         (functionCalled) => {
           return this.config.shouldTerminate(functionCalled);
         },
-        this.config.loopPreventionPrompt,
-        this.config.agentSpeakPrompt
+        this.config.prompts.loopPreventionPrompt,
+        this.config.prompts.agentSpeakPrompt
       );
     } catch (err) {
       this.context.logger.error(err);

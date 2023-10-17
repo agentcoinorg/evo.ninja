@@ -124,6 +124,7 @@ describe("Research Agent Test Suite", () => {
     );
     const generatedFiles = agent.workspace
       .readdirSync("./")
+      .map((f) => f.name)
       .filter((f) => f.toLowerCase().includes(".txt"));
     const scrapedText = agent.workspace.readFileSync(generatedFiles[0]);
     expect(scrapedText).toBeTruthy();
@@ -139,6 +140,7 @@ describe("Research Agent Test Suite", () => {
     );
     const generatedFiles = agent.workspace
       .readdirSync("./")
+      .map((f) => f.name)
       .filter((f) => f.toLowerCase().includes(".txt"));
     const scrapedText = agent.workspace.readFileSync(generatedFiles[0]);
     expect(scrapedText).toBeTruthy();
@@ -156,6 +158,7 @@ describe("Research Agent Test Suite", () => {
     expect(response.value.ok).toBe(true);
     const generatedFiles = agent.workspace
       .readdirSync("./")
+      .map((f) => f.name)
       .filter(
         (f) =>
           f.toLowerCase().includes("tesla") ||

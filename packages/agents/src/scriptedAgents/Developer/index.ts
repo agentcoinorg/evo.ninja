@@ -4,9 +4,7 @@ import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
 import { ReadFileFunction } from "../../functions/ReadFile";
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
-import * as prompts from "./prompts";
-
-const AGENT_NAME = "DataAnalyst";
+import { prompts } from "./prompts";
 
 export class DeveloperAgent extends ScriptedAgent {
   constructor(context: ScriptedAgentContext) {
@@ -16,10 +14,6 @@ export class DeveloperAgent extends ScriptedAgent {
     const readFileFn = new ReadFileFunction(context.client, context.scripts);
     
     const config: ScriptedAgentConfig = {
-      name: AGENT_NAME,
-      expertise: prompts.EXPERTISE,
-      initialMessages: prompts.INITIAL_MESSAGES(writeFileFn, readFileFn),
-      loopPreventionPrompt: prompts.LOOP_PREVENTION_PROMPT,
       functions: [
         onGoalAchievedFn,
         onGoalFailedFn,
@@ -33,6 +27,7 @@ export class DeveloperAgent extends ScriptedAgent {
           onGoalFailedFn.name
         ].includes(functionCalled.name);
       },
+      prompts: prompts(onGoalAchievedFn, onGoalFailedFn)
     };
 
     super(config, context);

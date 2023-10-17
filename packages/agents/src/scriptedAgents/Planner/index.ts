@@ -4,9 +4,7 @@ import {
   ScriptedAgentContext,
 } from "../ScriptedAgent";
 import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
-import * as prompts from "./prompts";
-
-const AGENT_NAME = "Planner";
+import { prompts } from "./prompts";
 
 export class PlannerAgent extends ScriptedAgent {
   constructor(context: ScriptedAgentContext) {
@@ -16,14 +14,11 @@ export class PlannerAgent extends ScriptedAgent {
     );
 
     const config: ScriptedAgentConfig = {
-      name: AGENT_NAME,
-      expertise: prompts.EXPERTISE,
-      initialMessages: prompts.INITIAL_MESSAGES(AGENT_NAME, onGoalAchievedFn),
-      loopPreventionPrompt: prompts.LOOP_PREVENTION_PROMPT,
       functions: [onGoalAchievedFn],
       shouldTerminate: (functionCalled) => {
         return [onGoalAchievedFn.name].includes(functionCalled.name);
       },
+      prompts: prompts(onGoalAchievedFn)
     };
 
     super(config, context);

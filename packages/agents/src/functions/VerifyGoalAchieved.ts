@@ -1,4 +1,4 @@
-import { AgentOutputType, Scripts, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, ChatMessage, Chat, WrapClient, AgentVariables } from "@evo-ninja/agent-utils"
+import { AgentOutputType, Scripts, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, ChatMessage, WrapClient, AgentVariables } from "@evo-ninja/agent-utils"
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { GoalVerifierAgent } from "../scriptedAgents";
 import { AgentBaseContext } from "../AgentBase";
@@ -75,7 +75,7 @@ export class VerifyGoalAchievedFunction extends AgentFunctionBase<FunctionParams
     return async (params: FunctionParams, rawParams?: string): Promise<AgentFunctionResult> => {
       const scriptedAgent = new GoalVerifierAgent(
         {
-          chat: new Chat(context.chat.tokenizer),
+          chat: context.chat.cloneEmpty(),
           env: context.env,
           llm: context.llm,
           logger: context.logger,
