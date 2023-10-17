@@ -1,7 +1,8 @@
+import { Workspace, DirectoryEntry } from "@evo-ninja/agent-utils";
 import fs from "fs";
 import path from "path-browserify";
 
-export class FileSystemWorkspace {
+export class FileSystemWorkspace implements Workspace {
   constructor(
     private _workspacePath: string
   ) {
@@ -62,9 +63,10 @@ export class FileSystemWorkspace {
     fs.mkdirSync(absPath, { recursive: true });
   }
 
-  readdirSync(subpath: string): string[] {
+  readdirSync(subpath: string): DirectoryEntry[] {
     const absPath = this.toWorkspacePath(subpath);
-    return fs.readdirSync(absPath);
+    return fs.readdirSync(absPath, { withFileTypes: true })
+      .map((d) => ({ name: d.name, type: d.isDirectory() ? "directory" : "file" }));
   }
 
   appendFileSync(subpath: string, data: string): void {
