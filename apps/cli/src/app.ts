@@ -142,7 +142,7 @@ export function createApp(config?: AppConfig): App {
       logger,
       workspace: userWorkspace,
       env,
-      variables: new AgentVariables(),
+      variables: new AgentVariables(-1),
       scripts,
       client: new WrapClient(userWorkspace, logger, agentPlugin({ logger }), env)
     },

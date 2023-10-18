@@ -47,8 +47,8 @@ export class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> imp
     protected context: TAgentBaseContext
   ) {
     // Default functions that are added to every agent
-    const defaultFunctions = [
-      new ReadVariableFunction()
+    const defaultFunctions: any[] = [
+      // new ReadVariableFunction()
     ];
 
     // See which functions already exist
