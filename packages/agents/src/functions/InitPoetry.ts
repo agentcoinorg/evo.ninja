@@ -62,7 +62,7 @@ export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParamete
     await workspace.exec("poetry", ["init", "-n"]);
     const dependencies = this.getPythonDependencies(workspace, "/");
     const alwaysAdd = ["pytest"];
-    await workspace.exec("poetry", ["add", `${dependencies.concat(alwaysAdd).join(" ")}`]);
+    await workspace.exec("poetry", ["add", ...dependencies.concat(alwaysAdd)]);
   }
 
   // does not search recursively
