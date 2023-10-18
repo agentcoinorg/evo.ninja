@@ -3,7 +3,7 @@ import {
   AgentFunctionResult,
   AgentOutputType,
   AgentVariables,
-  ChatMessageBuilder, trimText,
+  ChatMessageBuilder,
   Workspace
 } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
