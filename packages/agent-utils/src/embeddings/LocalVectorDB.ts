@@ -9,11 +9,12 @@ export class LocalVectorDB {
     private store: LocalDocumentStore,
   ) {}
 
-  async add(items: {
-    text: string
-  }[]): Promise<void> {
-    const itemTexts = items.map(item => item.text);
-    const results = await this.embeddingApi.createEmbeddings(itemTexts)
+  async add(items: string[]): Promise<void>{
+    if (!items.length) {
+      return;
+    }
+
+    const results = await this.embeddingApi.createEmbeddings(items)
 
     for await (const result of results) {
       this.store.add({
