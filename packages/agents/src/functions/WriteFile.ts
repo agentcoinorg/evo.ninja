@@ -11,7 +11,6 @@ interface WriteFileFuncParameters {
 export class WriteFileFunction extends ScriptFunction<WriteFileFuncParameters> {
   
   name: string = "fs_writeFile";
-  description: string = "Writes data to a file, replacing the file if it already exists.";
   parameters: any = {
     type: "object",
     properties: {

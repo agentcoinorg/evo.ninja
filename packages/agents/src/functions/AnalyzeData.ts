@@ -52,21 +52,12 @@ export class AnalyzeDataFunction extends AgentFunctionBase<AnalyzeDataParameters
 
         const promptFinal = appendData(promptStr, chunk);
 
-        const chatLogs = new ChatLogs({
-          "persistent": {
-            tokens: this._tokenizer.encode(promptFinal).length,
-            msgs: [{
-              role: "user",
-              content: promptFinal
-            }]
-          },
-          "temporary": {
-            tokens: 0,
-            msgs: []
-          }
-        });
+        const chatLogs = ChatLogs.from([{
+          role: "user",
+          content: promptFinal
+        }], [], this._tokenizer);
 
-        const resp = await this._llm.getResponse(chatLogs, undefined);
+        const resp = await this._llm.getResponse(chatLogs);
 
         summary = resp?.content || "";
       }

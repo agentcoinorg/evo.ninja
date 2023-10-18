@@ -9,7 +9,6 @@ interface OnGoalFailedFuncParameters {
 export class OnGoalFailedFunction extends ScriptFunction<{}> {
 
   name: string = "agent_onGoalFailed";
-  description: string = "Informs the user that the agent could not achieve the goal.";
   parameters: any = {
     type: "object",
     properties: {

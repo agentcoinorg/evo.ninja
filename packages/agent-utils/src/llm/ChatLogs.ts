@@ -1,5 +1,6 @@
 import { ChatCompletionRequestMessage as ChatMessage } from "openai";
-import { AgentFunctionDefinition } from "../agent";
+import { Tokenizer } from "./Tokenizer";
+import { FunctionDefinition } from ".";
 
 export { ChatMessage };
 
@@ -14,7 +15,7 @@ export interface ChatLog {
 
 export interface ChatFunctions {
   tokens: number;
-  definitions: AgentFunctionDefinition[];
+  definitions: FunctionDefinition[];
 }
 
 export class ChatLogs {
@@ -64,7 +65,7 @@ export class ChatLogs {
     this._logs[type].msgs.push(...log.msgs);
   }
 
-  public addFunction(fn: AgentFunctionDefinition, tokens: number): void {
+  public addFunction(fn: FunctionDefinition, tokens: number): void {
     this._functions.tokens += tokens;
     this._functions.definitions.push(fn);
   }
@@ -94,5 +95,22 @@ export class ChatLogs {
         names: this._functions.definitions.map((d) => d.name)
       }
     };
+  }
+
+  static from(persistentMsgs: ChatMessage[], temporaryMsgs: ChatMessage[], tokenizer: Tokenizer): ChatLogs {
+    return new ChatLogs({
+      "persistent": {
+        tokens: persistentMsgs
+          .map(x => x.content ? tokenizer.encode(x.content).length : 0)
+          .reduce((a, b) => a + b, 0),
+        msgs: persistentMsgs
+      },
+      "temporary": {
+        tokens: temporaryMsgs
+          .map(x => x.content ? tokenizer.encode(x.content).length : 0)
+          .reduce((a, b) => a + b, 0),
+        msgs: temporaryMsgs
+      }
+    });
   }
 }

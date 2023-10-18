@@ -9,7 +9,6 @@ interface OnGoalAchievedFuncParameters {
 export class OnGoalAchievedFunction extends ScriptFunction<OnGoalAchievedFuncParameters> {
 
   name: string = "agent_onGoalAchieved";
-  description: string = "Informs the user that the goal has been achieved.";
   parameters: any = {
     type: "object",
     properties: {

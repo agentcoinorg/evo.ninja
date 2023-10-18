@@ -3,9 +3,9 @@ import {
   ChatLogs,
   ChatMessage,
   ChatLogType,
-  ContextWindow
+  ContextWindow,
+  FunctionDefinition
 } from ".";
-import { AgentFunctionDefinition } from "../agent";
 import { Logger } from "../sys";
 
 import { ChatCompletionRequestMessageRoleEnum } from "openai";
@@ -114,7 +114,7 @@ export class Chat {
     }
   }
 
-  public addFunction(fn: AgentFunctionDefinition): void {
+  public addFunction(fn: FunctionDefinition): void {
     const tokens = this._tokenizer.encode(JSON.stringify(fn)).length;
     this._chatLogs.addFunction(fn, tokens);
   }
