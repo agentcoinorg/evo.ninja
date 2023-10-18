@@ -24,7 +24,7 @@ export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParamete
   }
 
   get parameters() {
-    return {}
+    return {"type": "object", "properties": {}}
   }
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: InitPoetryFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
