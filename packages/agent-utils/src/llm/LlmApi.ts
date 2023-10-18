@@ -1,4 +1,4 @@
-import { ChatLogs, ChatMessage, OpenAIFunctions } from ".";
+import { ChatLogs, ChatMessage, FunctionDefinition } from ".";
 
 export declare const LlmRoles: {
   readonly System: "system";
@@ -19,7 +19,7 @@ export interface LlmApi {
   getModel(): string;
   getResponse(
     chatLog: ChatLogs,
-    functionDefinitions?: OpenAIFunctions,
+    functionDefinitions?: FunctionDefinition[],
     options?: LlmOptions
   ): Promise<ChatMessage | undefined>;
 }

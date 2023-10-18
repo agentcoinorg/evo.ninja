@@ -8,7 +8,7 @@ import {
   ChatLogType,
   ChatLog,
   ContextWindow,
-  AgentFunctionDefinition
+  FunctionDefinition
 } from "../";
 import dotenv from "dotenv";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
@@ -46,7 +46,7 @@ describe('LLM Test Suite', () => {
         ]
       }
     };
-    const functions: AgentFunctionDefinition[] = [];
+    const functions: FunctionDefinition[] = [];
 
     const consoleLogger = new ConsoleLogger();
     const logger = new Logger([

@@ -1,6 +1,6 @@
 import { ChatCompletionRequestMessage as ChatMessage } from "openai";
-import { AgentFunctionDefinition } from "../agent";
 import { Tokenizer } from "./Tokenizer";
+import { FunctionDefinition } from ".";
 
 export { ChatMessage };
 
@@ -15,7 +15,7 @@ export interface ChatLog {
 
 export interface ChatFunctions {
   tokens: number;
-  definitions: AgentFunctionDefinition[];
+  definitions: FunctionDefinition[];
 }
 
 export class ChatLogs {
@@ -65,7 +65,7 @@ export class ChatLogs {
     this._logs[type].msgs.push(...log.msgs);
   }
 
-  public addFunction(fn: AgentFunctionDefinition, tokens: number): void {
+  public addFunction(fn: FunctionDefinition, tokens: number): void {
     this._functions.tokens += tokens;
     this._functions.definitions.push(fn);
   }
