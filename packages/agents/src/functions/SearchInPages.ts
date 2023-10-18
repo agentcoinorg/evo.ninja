@@ -218,19 +218,10 @@ export class SearchInPagesFunction extends AgentFunctionBase<SearchInPagesFuncPa
     Chunks: ${JSON.stringify(results)}.
     Specify if the information is incomplete but still return it`
 
-    const chatLogs = new ChatLogs({
-      "persistent": {
-        tokens: this.tokenizer.encode(analyzerPrompt).length,
-        msgs: [{
-          role: "user",
-          content: analyzerPrompt
-        }]
-      },
-      "temporary": {
-        tokens: 0,
-        msgs: []
-      }
-    });
+    const chatLogs = ChatLogs.from([{
+      role: "user",
+      content: analyzerPrompt
+    }], [], this.tokenizer);
 
     const response = await this.llm.getResponse(chatLogs, undefined)
 

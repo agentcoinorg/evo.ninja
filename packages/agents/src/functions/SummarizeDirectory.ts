@@ -47,19 +47,10 @@ export class SummarizeDirectoryFunction extends AgentFunctionBase<SummarizeDirec
       for (const chunk of chunks) {
         const promptFinal = prompt(summary, chunk);
 
-        const chatLogs = new ChatLogs({
-          "persistent": {
-            tokens: this._tokenizer.encode(promptFinal).length,
-            msgs: [{
-              role: "user",
-              content: promptFinal
-            }]
-          },
-          "temporary": {
-            tokens: 0,
-            msgs: []
-          }
-        });
+        const chatLogs = ChatLogs.from([{
+          role: "user",
+          content: promptFinal
+        }], [], this._tokenizer);
 
         const resp = await this._llm.getResponse(chatLogs, undefined);
 

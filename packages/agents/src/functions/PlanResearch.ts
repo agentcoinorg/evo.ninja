@@ -49,19 +49,10 @@ export class PlanResearchFunction extends AgentFunctionBase<PlanResearchFuncPara
     ): Promise<AgentFunctionResult> => {
       try {
         const prompt = this.getPlanningPrompt(params.query);
-        const chatLogs = new ChatLogs({
-          "persistent": {
-            tokens: this._tokenizer.encode(prompt).length,
-            msgs: [{
-              role: "user",
-              content: prompt
-            }]
-          },
-          "temporary": {
-            tokens: 0,
-            msgs: []
-          }
-        });
+        const chatLogs = ChatLogs.from([{
+          role: "user",
+          content: prompt
+        }], [], this._tokenizer);
 
         const response = await this._llm.getResponse(chatLogs, undefined)
 

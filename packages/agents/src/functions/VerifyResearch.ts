@@ -63,19 +63,10 @@ export class VerifyResearchFunction extends AgentFunctionBase<VerifyResearchFunc
           context: params.context,
           foundData: params.foundData,
         });
-        const chatLogs = new ChatLogs({
-          "persistent": {
-            tokens: this._tokenizer.encode(prompt).length,
-            msgs: [{
-              role: "user",
-              content: prompt
-            }]
-          },
-          "temporary": {
-            tokens: 0,
-            msgs: []
-          }
-        });
+        const chatLogs = ChatLogs.from([{
+          role: "user",
+          content: prompt
+        }], [], this._tokenizer);
 
         const response = await this._llm.getResponse(chatLogs, undefined)
 
@@ -125,8 +116,9 @@ export class VerifyResearchFunction extends AgentFunctionBase<VerifyResearchFunc
         ChatMessageBuilder.functionCall(this.name, rawParams),
         ...ChatMessageBuilder.functionCallResultWithVariables(
           this.name,
-          `Verification: ` +
-            `${result}\n` +
+          `Verification: \n` +
+          `\`\`\`\n` +
+          `${result}\n` +
             `\`\`\``,
           variables
         ),

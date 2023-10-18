@@ -28,21 +28,10 @@ export class AnalyzeFormattingRequirementsFunction extends AgentFunctionBase<Ana
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: AnalyzeFormattingRequirementsParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
     return async (params: AnalyzeFormattingRequirementsParameters, rawParams?: string): Promise<AgentFunctionResult> => {
 
-      const prompt = `Given the following user goal, please identify any formatting requirements:\n\`\`\`\n${params.goal}\n\`\`\``;
-
-      const chatLogs = new ChatLogs({
-        "persistent": {
-          tokens: this._tokenizer.encode(prompt).length,
-          msgs: [{
-            role: "user",
-            content: prompt
-          }]
-        },
-        "temporary": {
-          tokens: 0,
-          msgs: []
-        }
-      });
+      const chatLogs = ChatLogs.from([{
+          role: "user",
+          content: `Given the following user goal, please identify any formatting requirements:\n\`\`\`\n${params.goal}\n\`\`\``
+        }], [], this._tokenizer);
 
       const resp = await this._llm.getResponse(chatLogs, undefined);
 
