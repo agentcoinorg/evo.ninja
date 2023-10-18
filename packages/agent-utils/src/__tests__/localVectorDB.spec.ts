@@ -38,10 +38,10 @@ describe('Local Vector DB', () => {
     const db = new LocalVectorDB(embeddingApi, store)
 
     await db.add([
-      { text: "Goodbye world" },
-      { text: "Hello world" },
-      { text: "Goodbye universe" },
-      { text: "Hello universe" },
+      "Goodbye world",
+      "Hello world",
+      "Goodbye universe",
+      "Hello universe",
     ])
 
     const results = await db.search("Hey", 2)
@@ -64,7 +64,7 @@ describe('Local Vector DB', () => {
     const db = new LocalVectorDB(embeddingApi, store)
     const data = Array.from({ length: 10000 }, () => generateRandomString(10))
 
-    await db.add(data.map(text => ({ text })))
+    await db.add(data)
 
     const results = await db.search("Hello", 5)
     expect(results.length).toEqual(5)
