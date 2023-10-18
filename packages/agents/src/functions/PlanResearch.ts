@@ -3,23 +3,22 @@ import {
   AgentFunctionResult,
   AgentOutputType,
   AgentVariables,
-  ChatLogs,
   ChatMessageBuilder,
   LlmApi,
   Tokenizer,
   trimText,
 } from "@evo-ninja/agent-utils";
-import { AgentFunctionBase } from "../AgentFunctionBase";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { AgentBaseContext } from "../AgentBase";
+import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 
 interface PlanResearchFuncParameters {
   query: string;
 }
 
-export class PlanResearchFunction extends AgentFunctionBase<PlanResearchFuncParameters> {
-  constructor(private _llm: LlmApi, private _tokenizer: Tokenizer) {
-    super();
+export class PlanResearchFunction extends LlmAgentFunctionBase<PlanResearchFuncParameters> {
+  constructor(llm: LlmApi, tokenizer: Tokenizer) {
+    super(llm, tokenizer);
   }
 
   name: string = "plan_research";
@@ -48,20 +47,12 @@ export class PlanResearchFunction extends AgentFunctionBase<PlanResearchFuncPara
       rawParams?: string
     ): Promise<AgentFunctionResult> => {
       try {
-        const chatLogs = ChatLogs.from([{
-          role: "user",
-          content: this.getPlanningPrompt(params.query)
-        }], [], this._tokenizer);
 
-        const response = await this._llm.getResponse(chatLogs)
-
-        if (!response || !response.content) {
-          throw new Error("Failed to plan research: No response from LLM");
-        }
-  
+        const resp = await this.askLlm(this.getPlanningPrompt(params.query));
+        
         return this.onSuccess(
           params,
-          response.content,
+          resp,
           rawParams,
           context.variables
         );

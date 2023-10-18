@@ -3,15 +3,14 @@ import {
   AgentFunctionResult,
   AgentOutputType,
   AgentVariables,
-  ChatLogs,
   ChatMessageBuilder,
   LlmApi,
   Tokenizer,
   trimText,
 } from "@evo-ninja/agent-utils";
-import { AgentFunctionBase } from "../AgentFunctionBase";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { AgentBaseContext } from "../AgentBase";
+import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 
 interface VerifyResearchFuncParameters {
   originalQuery: string;
@@ -19,9 +18,9 @@ interface VerifyResearchFuncParameters {
   foundData: string;
 }
 
-export class VerifyResearchFunction extends AgentFunctionBase<VerifyResearchFuncParameters> {
-  constructor(private _llm: LlmApi, private _tokenizer: Tokenizer) {
-    super();
+export class VerifyResearchFunction extends LlmAgentFunctionBase<VerifyResearchFuncParameters> {
+  constructor(llm: LlmApi, tokenizer: Tokenizer) {
+    super(llm, tokenizer);
   }
 
   name: string = "verify_research";
@@ -63,20 +62,12 @@ export class VerifyResearchFunction extends AgentFunctionBase<VerifyResearchFunc
           context: params.context,
           foundData: params.foundData,
         });
-        const chatLogs = ChatLogs.from([{
-          role: "user",
-          content: prompt
-        }], [], this._tokenizer);
 
-        const response = await this._llm.getResponse(chatLogs)
-
-        if (!response || !response.content) {
-          throw new Error("Failed to verify research: No response from LLM");
-        }
+        const response = await this.askLlm(prompt);
   
         return this.onSuccess(
           params,
-          response.content,
+          response,
           rawParams,
           context.variables
         );
