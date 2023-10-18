@@ -3,11 +3,11 @@ import {
   AgentFunctionResult,
   AgentOutputType,
   AgentVariables,
-  ChatMessageBuilder,
+  ChatMessageBuilder, trimText,
   Workspace
 } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
-import { FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
+import {FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT} from "../agents/Scripter/utils";
 import { AgentBaseContext } from "../AgentBase";
 import path from "path";
 
@@ -20,7 +20,7 @@ export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParamete
   }
 
   get description(): string {
-    return `Initialize a Python Poetry environment in the workspace.`;
+    return `Initialize a Python Poetry environment in the workspace. Always write your code solution before running this function.`;
   }
 
   get parameters() {
@@ -29,7 +29,10 @@ export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParamete
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: InitPoetryFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (params: InitPoetryFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
-      await this.poetryInit(context.workspace);
+      const result = await this.poetryInit(context.workspace);
+      if (result.exitCode !== 0) {
+        return this.onError(result.stderr, params, rawParams, context.variables);
+      }
       return this.onSuccess(params, rawParams, context.variables);
     };
   }
@@ -58,12 +61,32 @@ export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParamete
     }
   }
 
-  private async poetryInit(workspace: Workspace): Promise<void> {
+  private onError(error: string, params: InitPoetryFuncParameters, rawParams: string | undefined, variables: AgentVariables): AgentFunctionResult {
+    return {
+      outputs: [
+        {
+          type: AgentOutputType.Error,
+          title: "Failed to initialize poetry environment",
+          content: FUNCTION_CALL_FAILED(params, this.name, error ?? "Unknown error"),
+        }
+      ],
+      messages: [
+        ChatMessageBuilder.functionCall(this.name, rawParams),
+        ...ChatMessageBuilder.functionCallResultWithVariables(
+          this.name,
+          `Failed to init poetry: ${error}.`,
+          variables
+        ),
+      ]
+    }
+  }
+
+  private async poetryInit(workspace: Workspace):  Promise<{exitCode: number, stdout: string, stderr: string}> {
     await workspace.exec("poetry", ["init", "-n"]);
     const dependencies = this.getPythonDependencies(workspace, "/");
     const alwaysAdd = ["pytest", "pydantic"];
     const toAdd = Array.from(new Set(dependencies.concat(alwaysAdd)));
-    await workspace.exec("poetry", ["add", ...toAdd]);
+    return await workspace.exec("poetry", ["add", ...toAdd]);
   }
 
   // does not search recursively
