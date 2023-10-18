@@ -37,6 +37,4 @@ export const prompts: AgentPrompts<ScriptedAgentRunArgs> = {
     { role: "user", content: goal },
   ],
   loopPreventionPrompt: `Assistant, you appear to be in a loop, try executing a different function.`,
-  agentSpeakPrompt: `You do not communicate with the user. If you have insufficient information, it may exist somewhere in the user's filesystem.
-  Use the "fs_readDirectory" function to try and discover this missing information.`
 };
