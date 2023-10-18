@@ -19,7 +19,7 @@ export class LlmQueryBuilder {
 
   temporary(role: ChatRole, content: string): LlmQueryBuilder {
     this.logs.add(
-      "persistent", 
+      "temporary", 
       { 
         tokens: this.tokenizer.encode(content).length,
         msgs: [{ role, content }]
@@ -28,6 +28,6 @@ export class LlmQueryBuilder {
   }
 
   build(): LlmQuery {
-    return new LlmQuery(this.llm, this.logs);
+    return new LlmQuery(this.llm, this.tokenizer, this.logs);
   }
 }
