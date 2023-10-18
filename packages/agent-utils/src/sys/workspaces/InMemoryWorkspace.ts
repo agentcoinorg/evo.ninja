@@ -20,8 +20,8 @@ export class InMemoryWorkspace implements Workspace {
     this.fs.renameSync(oldPath, newPath);
   }
 
-  mkdirSync(subpath: string): void {
-    this.fs.mkdirSync(subpath);
+  mkdirSync(subpath: string, opts: { recursive: boolean } = { recursive: false }): void {
+    this.fs.mkdirSync(subpath, opts);
   }
 
   readdirSync(subpath: string): DirectoryEntry[] {
