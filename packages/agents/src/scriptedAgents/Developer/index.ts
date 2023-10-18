@@ -6,9 +6,10 @@ import { ReadFileFunction } from "../../functions/ReadFile";
 // import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
 import { prompts } from "./prompts";
 import { RunAndAnalysePythonTestFunction } from "../../functions/RunAndAnalysePythonTest";
-import { DevelopmentPlanner } from "../../functions/DevelopmentPlanner";
+// import { DevelopmentPlanner } from "../../functions/DevelopmentPlanner";
 import { SummarizeDirectoryFunction } from "../../functions/SummarizeDirectory";
 import { OpenAI } from "@evo-ninja/agent-utils";
+
 export class DeveloperAgent extends ScriptedAgent {
   constructor(context: ScriptedAgentContext) {
     const fastLlm = new OpenAI(context.env.OPENAI_API_KEY, "gpt-3.5-turbo-16k-0613", 16000, 2000, context.logger)
@@ -19,7 +20,7 @@ export class DeveloperAgent extends ScriptedAgent {
     const readFileFn = new ReadFileFunction(context.client, context.scripts);
     // const readDirectoryFn = new ReadDirectoryFunction(context.client, context.scripts);
     const pythonTestAnalyserFn = new RunAndAnalysePythonTestFunction();
-    const developmentPlannerFn = new DevelopmentPlanner(context.llm, context.chat.tokenizer);
+    // const developmentPlannerFn = new DevelopmentPlanner(context.llm, context.chat.tokenizer);
     const summarizeDirectoryFn = new SummarizeDirectoryFunction(fastLlm, context.chat.tokenizer);
 
     const config: ScriptedAgentConfig = {
@@ -29,7 +30,7 @@ export class DeveloperAgent extends ScriptedAgent {
         writeFileFn,
         readFileFn,
         pythonTestAnalyserFn,
-        developmentPlannerFn,
+        // developmentPlannerFn,
         summarizeDirectoryFn
       ],
       shouldTerminate: (functionCalled) => {
@@ -38,7 +39,7 @@ export class DeveloperAgent extends ScriptedAgent {
           onGoalFailedFn.name
         ].includes(functionCalled.name);
       },
-      prompts: prompts(onGoalAchievedFn, onGoalFailedFn, developmentPlannerFn, summarizeDirectoryFn)
+      prompts: prompts(onGoalAchievedFn, onGoalFailedFn, summarizeDirectoryFn)
     };
 
     super(config, context);

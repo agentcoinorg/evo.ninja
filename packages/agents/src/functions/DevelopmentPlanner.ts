@@ -38,13 +38,16 @@ export class DevelopmentPlanner extends AgentFunctionBase<FunctionParams> {
       properties: {
         goal: {
           type: "string",
+          description: "The goal that the user wants to achieve"
         },
         context: {
           type: "string",
+          description: "Necessary information required sucessfully create the goal."
         },
         summarizedInfo: {
           type: "string",
-        },
+          description: "Information about summarized files available in workspace"
+        }
       },
       required: ["goal"],
       additionalProperties: false,
@@ -60,11 +63,10 @@ export class DevelopmentPlanner extends AgentFunctionBase<FunctionParams> {
 
       const content = `Given the goal: ${params.goal}. Please create a step-by-step plan to succesfully build what is asked.
 
-Your plan MUST consist in coding and testing iterations. Do not add anything into the plan that the user haven't asked for.
+Your plan MUST consist in coding and testing iterations. Do not add anything into the plan that the user hasn't asked for.
 
 ### IMPORTANT
-Before starting to write any plan, make sure that you understand the requirements given in the goal;
-as they may provide insights into the testing strategy. 
+Before starting to write any plan, make sure that you understand what is given in the goal; as they may provide insights into the testing strategy. 
 If this is the case, your plan should be centered around these tests or user-provided examples.`;
       const msgs: ChatMessage[] = [
         {

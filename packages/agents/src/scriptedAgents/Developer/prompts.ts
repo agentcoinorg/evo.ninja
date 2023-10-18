@@ -6,7 +6,7 @@ import { AgentPrompts } from "../../AgentBase";
 export const prompts = (
   writeFileFn: AgentFunctionBase<any>,
   pythonTestAnalyserFn: AgentFunctionBase<any>,
-  developmentPlannerFn: AgentFunctionBase<any>,
+  // developmentPlannerFn: AgentFunctionBase<any>,
   summarizeDirectoryFn: AgentFunctionBase<any>
 ): AgentPrompts<ScriptedAgentRunArgs> => ({
   name: "Developer",
@@ -15,14 +15,26 @@ export const prompts = (
     {
       role: "user",
       content: `
-You're a senior python software developer. When it comes to building software, you MUST follow the next steps:
+You're a senior python software developer. You must perform the following steps:
 
 0. You MUST try to get the information of any available file (if any) that will help you to achieve the goal ${summarizeDirectoryFn.name}.
-1. Create a step-by-step plan to achieve your task by calling the ${developmentPlannerFn.name} function.  It's **very** important that:
-  - You send the entire information you have available from goal as "context"
-  - If you get any information from the ${summarizeDirectoryFn.name} function you must send it as "summarizedInfo"
-2. You will write the necessary code with ${writeFileFn.name} function
-3. You must run unit tests using ${pythonTestAnalyserFn.name} function. If the test fails you must update the code to fix it, based on the error received.
+1. Create a step-by-step plan to achieve the requested goal. Make sure this plan is complete as this will be your starting place
+2. You will execute this plan step by step
+
+## Guidelines
+- The user's request defines the software requirements.
+- Always write tests before writing the implementation.
+- Always write the **complete** solution. The code should always work as expected on the first try when copy-pasted.
+- When writing/modifying any file you must add the entire code. Not just the part you'd like to add
+
+## Required Workflow
+1. If the user did not provide tests, write tests using ${writeFileFn.name}
+2. write code solution using ${writeFileFn.name}
+3. run tests using ${pythonTestAnalyserFn.name}
+4. if tests did not run correctly, fix tests. If tests ran but failed, fix solution.
+5. repeat steps 3-4 until all tests pass
+## Important
+- The user's goal might contain information about tests. Always follow the user's instructions.
 - Never mock functionality in tests unless the user asked you to.
 - If you write novel tests that the user did not provide, they must follow this structure:
 \`\`\`python
