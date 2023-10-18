@@ -33,7 +33,7 @@ export class AnalyzeFormattingRequirementsFunction extends AgentFunctionBase<Ana
           content: `Given the following user goal, please identify any formatting requirements:\n\`\`\`\n${params.goal}\n\`\`\``
         }], [], this._tokenizer);
 
-      const resp = await this._llm.getResponse(chatLogs, undefined);
+      const resp = await this._llm.getResponse(chatLogs);
 
       return {
         outputs: [],

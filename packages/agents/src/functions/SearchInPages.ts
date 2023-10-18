@@ -223,7 +223,7 @@ export class SearchInPagesFunction extends AgentFunctionBase<SearchInPagesFuncPa
       content: analyzerPrompt
     }], [], this.tokenizer);
 
-    const response = await this.llm.getResponse(chatLogs, undefined)
+    const response = await this.llm.getResponse(chatLogs)
 
     if (!response || !response.content) {
       throw new Error("Failed to plan research: No response from LLM");

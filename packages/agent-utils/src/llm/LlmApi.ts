@@ -19,7 +19,7 @@ export interface LlmApi {
   getModel(): string;
   getResponse(
     chatLog: ChatLogs,
-    functionDefinitions: OpenAIFunctions,
+    functionDefinitions?: OpenAIFunctions,
     options?: LlmOptions
   ): Promise<ChatMessage | undefined>;
 }

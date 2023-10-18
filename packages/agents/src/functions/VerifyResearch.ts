@@ -68,7 +68,7 @@ export class VerifyResearchFunction extends AgentFunctionBase<VerifyResearchFunc
           content: prompt
         }], [], this._tokenizer);
 
-        const response = await this._llm.getResponse(chatLogs, undefined)
+        const response = await this._llm.getResponse(chatLogs)
 
         if (!response || !response.content) {
           throw new Error("Failed to verify research: No response from LLM");

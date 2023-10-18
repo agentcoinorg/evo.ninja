@@ -55,7 +55,7 @@ export class OpenAI implements LlmApi {
 
   async getResponse(
     chatLog: ChatLogs,
-    functionDefinitions: OpenAIFunctions,
+    functionDefinitions?: OpenAIFunctions,
     options?: LlmOptions,
     tries?: number
   ): Promise<ChatMessage | undefined> {

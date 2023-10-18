@@ -52,7 +52,7 @@ export class SummarizeDirectoryFunction extends AgentFunctionBase<SummarizeDirec
           content: promptFinal
         }], [], this._tokenizer);
 
-        const resp = await this._llm.getResponse(chatLogs, undefined);
+        const resp = await this._llm.getResponse(chatLogs);
 
         summary = resp?.content || "";
       }
