@@ -10,7 +10,6 @@ interface ReadDirectoryFuncParameters {
 export class ReadDirectoryFunction extends ScriptFunction<ReadDirectoryFuncParameters> {
 
   name: string = "fs_readDirectory";
-  description: string = "Reads the contents of the directory";
   parameters: any = {
     type: "object",
     properties: {

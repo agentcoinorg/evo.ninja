@@ -2,7 +2,6 @@ import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
 export class CsvFilterRowsFunction extends ScriptFunction<{ csvData: string, columnIndex: number, searchString: string, withHeader: boolean }> {
   name: string = "csv_filterRows";
-  description: string = "Filters and returns rows from a parsed CSV dataset based on a specified column index and a search string.";
   parameters: any = {
     type: "object",
     properties: { 

@@ -13,7 +13,6 @@ export class ReadFileFunction extends ScriptFunction<ReadFileFuncParameters> {
   }
 
   name: string = "fs_readFile";
-  description: string = "Reads data from a file.";
   parameters: any = {
     type: "object",
     properties: {
