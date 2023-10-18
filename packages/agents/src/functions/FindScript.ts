@@ -6,8 +6,6 @@ import { AgentBaseContext } from "../AgentBase";
 interface FindScriptFuncParameters { 
   namespace: string, 
   description: string, 
-  arguments: string, 
-  code: string 
 }
 
 export class FindScriptFunction extends AgentFunctionBase<FindScriptFuncParameters> {
