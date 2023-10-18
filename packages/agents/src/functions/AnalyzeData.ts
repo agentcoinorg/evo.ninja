@@ -11,27 +11,19 @@ export class AnalyzeDataFunction extends AgentFunctionBase<AnalyzeDataParameters
     super();
   }
 
-  get name(): string {
-    return "analyzeData";
-  }
-
-  get description(): string {
-    return "Analyzes large datasets and returns a comprehensive summary of all details"
-  }
-
-  get parameters() {
-    return {
-      type: "object",
-      properties: {
-        data: {
-          type: "string",
-          description: "The datasets to be analyzed"
-        }
-      },
-      required: ["data"],
-      additionalProperties: false
-    }
-  }
+  name: string = "analyzeData";
+  description: string = "Analyzes large datasets and returns a comprehensive summary of all details";
+  parameters: any = {
+    type: "object",
+    properties: {
+      data: {
+        type: "string",
+        description: "The datasets to be analyzed"
+      }
+    },
+    required: ["data"],
+    additionalProperties: false
+  };
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: AnalyzeDataParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
     return async (params: AnalyzeDataParameters, rawParams?: string): Promise<AgentFunctionResult> => {

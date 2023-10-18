@@ -22,25 +22,19 @@ export class PlanResearchFunction extends AgentFunctionBase<PlanResearchFuncPara
     super();
   }
 
-  get name(): string {
-    return "plan_research";
-  }
-  get description(): string {
-    return `Plans the research for a given query.`;
-  }
-  get parameters() {
-    return {
-      type: "object",
-      properties: {
-        query: {
-          type: "string",
-          description: "Query to plan the research for",
-        },
+  name: string = "plan_research";
+  description: string = `Plans the research for a given query.`;
+  parameters: any = {
+    type: "object",
+    properties: {
+      query: {
+        type: "string",
+        description: "Query to plan the research for",
       },
-      required: ["query"],
-      additionalProperties: false,
-    };
-  }
+    },
+    required: ["query"],
+    additionalProperties: false,
+  };
 
   buildExecutor(
     _: Agent<unknown>,

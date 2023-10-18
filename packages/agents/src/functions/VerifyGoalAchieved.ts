@@ -13,23 +13,15 @@ export class VerifyGoalAchievedFunction extends AgentFunctionBase<FunctionParams
     super();
   }
 
-  get name() {
-    return "verifyGoalAchieved";
-  }
-
-  get description() {
-    return `Verifies that the goal has been achieved.`
-  }
-
-  get parameters() {
-    return {
-      type: "object",
-      properties: {
-      },
-      required: [],
-      additionalProperties: false
-    }
-  }
+  name: string = "verifyGoalAchieved";
+  description: string = `Verifies that the goal has been achieved.`;
+  parameters: any = {
+    type: "object",
+    properties: {
+    },
+    required: [],
+    additionalProperties: false
+  };
 
   onSuccess(name: string, rawParams: string | undefined, messages: string[], result: AgentOutput, variables: AgentVariables): AgentFunctionResult {
     return {

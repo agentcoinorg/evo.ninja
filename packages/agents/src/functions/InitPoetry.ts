@@ -14,18 +14,10 @@ import path from "path";
 interface InitPoetryFuncParameters {}
 
 export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParameters> {
-
-  get name(): string {
-    return "cmd_initPoetry";
-  }
-
-  get description(): string {
-    return `Initialize a Python Poetry environment in the workspace.`;
-  }
-
-  get parameters() {
-    return {}
-  }
+  
+  name: string = "cmd_initPoetry";
+  description: string = `Initialize a Python Poetry environment in the workspace.`;
+  parameters: any = {};
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: InitPoetryFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (params: InitPoetryFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
