@@ -1,7 +1,8 @@
-import { Agent, AgentFunctionResult, ChatMessageBuilder, LlmApi, Tokenizer } from "@evo-ninja/agent-utils";
-import { AgentBaseContext } from "../AgentBase";
+import { AgentFunctionResult, ChatMessageBuilder, LlmApi, Tokenizer } from "@evo-ninja/agent-utils";
+import { AgentContext } from "../AgentContext";
 import { DirectoryChunker } from "@evo-ninja/agent-utils";
 import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
+import { Agent } from "../Agent";
 
 interface SummarizeDirectoryParameters {
   subDirectory?: string;
@@ -26,7 +27,7 @@ export class SummarizeDirectoryFunction extends LlmAgentFunctionBase<SummarizeDi
     additionalProperties: false
   };
 
-  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: SummarizeDirectoryParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
+  buildExecutor(agent: Agent, context: AgentContext): (params: SummarizeDirectoryParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
     return async (params: SummarizeDirectoryParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       const prompt = (summary: string | undefined, chunk: string) =>
         `Your job is to summarize the contents of the following files. In this summary please structure your response on a per-file basis. NOTE: some files have been chunked, line numbers are annotated.\n

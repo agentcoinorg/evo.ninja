@@ -1,7 +1,7 @@
 import { Result } from "@polywrap/result";
 import { AgentOutput } from "./AgentOutput";
 
-export interface Agent<TRunArgs> {
+export interface RunnableAgent<TRunArgs> {
   run(args: TRunArgs): AsyncGenerator<AgentOutput, RunResult, string | undefined>;
 }
 

@@ -16,7 +16,7 @@ import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import fs from "fs";
 import { Evo } from "./Evo";
-import { AgentBaseContext } from "../../AgentBase";
+import { AgentContext } from "../../AgentContext";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -83,7 +83,7 @@ function createEvo(
 
   return {
     agent: new Evo(
-      new AgentBaseContext(
+      new AgentContext(
         debugLlm, 
         chat, 
         logger, 

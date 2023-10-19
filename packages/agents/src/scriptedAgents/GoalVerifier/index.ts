@@ -1,18 +1,26 @@
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
 import { ReadFileFunction } from "../../functions/ReadFile";
-import { AgentBaseContext } from "../../AgentBase";
-import { AgentWithGoal } from "../../AgentWithGoal";
-import { ScriptedAgentRunArgs } from "../ScriptedAgent";
+import { AgentContext } from "../../AgentContext";
 import { prompts } from "./prompts";
+import { ChatMessage } from "@evo-ninja/agent-utils";
+import { Agent } from "../../Agent";
+import { AgentConfig } from "../../AgentConfig";
 
-export class GoalVerifierAgent extends AgentWithGoal<ScriptedAgentRunArgs> {
-  constructor(context: AgentBaseContext) {
+export interface GoalVerifierRunArgs {
+  messagesToVerify: ChatMessage[]
+}
+
+export class GoalVerifierAgent extends Agent<GoalVerifierRunArgs> {
+  constructor(context: AgentContext) {
     super(
-      prompts,
-      [
-        new ReadFileFunction(context.scripts),
-        new ReadDirectoryFunction(context.scripts),
-      ], 
+      new AgentConfig(
+        prompts,
+        [
+          new ReadFileFunction(context.scripts),
+          new ReadDirectoryFunction(context.scripts),
+        ], 
+        context.scripts, 
+      ),
       context
     );
   }

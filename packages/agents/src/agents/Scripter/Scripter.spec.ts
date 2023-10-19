@@ -15,7 +15,7 @@ import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import { ScripterAgent } from ".";
-import { AgentBaseContext } from "../../AgentBase";
+import { AgentContext } from "../../AgentContext";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -72,7 +72,7 @@ describe('Dev Agent Test Suite', () => {
 
     return {
       agent: new ScripterAgent(
-        new AgentBaseContext(
+        new AgentContext(
           debugLlm, 
           chat, 
           logger, 

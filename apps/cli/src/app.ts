@@ -1,4 +1,4 @@
-import { AgentBaseContext, Evo } from "@evo-ninja/agents";
+import { AgentContext, Evo } from "@evo-ninja/agents";
 import {
   Env,
   OpenAI,
@@ -133,7 +133,7 @@ export function createApp(config?: AppConfig): App {
 
   // Evo
   const evo = new Evo(
-    new AgentBaseContext(
+    new AgentContext(
       llm,
       chat,
       logger,

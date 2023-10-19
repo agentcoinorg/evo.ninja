@@ -1,10 +1,10 @@
 import {
-  Agent,
   AgentFunctionResult,
   ChatMessageBuilder,
 } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
-import { AgentBaseContext } from "../AgentBase";
+import { AgentContext } from "../AgentContext";
+import { Agent } from "../Agent";
 
 interface FunctionParams {
   filename: string;
@@ -40,7 +40,7 @@ export class RunAndAnalysePythonTestFunction extends AgentFunctionBase<FunctionP
     };
   }
 
-  buildExecutor(_: Agent<unknown>, context: AgentBaseContext) {
+  buildExecutor(_: Agent, context: AgentContext) {
     return async (
       params: FunctionParams,
       rawParams?: string

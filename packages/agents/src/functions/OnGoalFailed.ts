@@ -1,6 +1,6 @@
 import { AgentOutputType } from "@evo-ninja/agent-utils"
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
-import { ScriptedAgent } from "../scriptedAgents/ScriptedAgent"
+import { Agent } from "../Agent";
 
 interface OnGoalFailedFuncParameters { 
   message: string
@@ -21,12 +21,12 @@ export class OnGoalFailedFunction extends ScriptFunction<{}> {
     additionalProperties: false
   };
 
-  onSuccess(scriptedAgent: ScriptedAgent, params: OnGoalFailedFuncParameters, rawParams: string | undefined, result: string) {
+  onSuccess(agent: Agent, params: OnGoalFailedFuncParameters, rawParams: string | undefined, result: string) {
     return {
       outputs: [
         {
           type: AgentOutputType.Success,
-          title: `[${scriptedAgent.config.prompts.name}] ${this.name}`,
+          title: `[${agent.config.prompts.name}] ${this.name}`,
           content: params.message
         }
       ],
@@ -34,12 +34,12 @@ export class OnGoalFailedFunction extends ScriptFunction<{}> {
     }
   }
 
-  onFailure(scriptedAgent: ScriptedAgent, params: OnGoalFailedFuncParameters, rawParams: string | undefined, error: string) {
+  onFailure(agent: Agent, params: OnGoalFailedFuncParameters, rawParams: string | undefined, error: string) {
     return {
       outputs: [
         {
           type: AgentOutputType.Error,
-          title: `[${scriptedAgent.config.prompts.name}] Error in ${this.name}: ${error}`,
+          title: `[${agent.config.prompts.name}] Error in ${this.name}: ${error}`,
           content: params.message
         }
       ],

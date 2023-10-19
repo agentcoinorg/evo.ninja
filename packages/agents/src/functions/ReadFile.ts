@@ -1,6 +1,6 @@
 import { AgentOutputType, trimText, ChatMessageBuilder, AgentFunctionResult, AgentVariables, Scripts } from "@evo-ninja/agent-utils"
-import { ScriptedAgent } from "../scriptedAgents"
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
+import { Agent } from "../Agent";
 
 interface ReadFileFuncParameters { 
   path: string;
@@ -27,12 +27,12 @@ export class ReadFileFunction extends ScriptFunction<ReadFileFuncParameters> {
     additionalProperties: false
   };
 
-  onSuccess(scriptedAgent: ScriptedAgent, params: ReadFileFuncParameters, rawParams: string | undefined, result: string, variables: AgentVariables): AgentFunctionResult {
+  onSuccess(agent: Agent, params: ReadFileFuncParameters, rawParams: string | undefined, result: string, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
           type: AgentOutputType.Success,
-          title: `[${scriptedAgent.config.prompts.name}] ${this.name}`,
+          title: `[${agent.config.prompts.name}] ${this.name}`,
           content: `${params.path}\n` +
             `${params.encoding}\n` +
             `${trimText(result, 200)}`

@@ -1,4 +1,4 @@
-export * from './Agent';
+export * from './RunnableAgent';
 export * from './AgentFunction';
 export * from './AgentOutput';
 export * from './AgentVariables';

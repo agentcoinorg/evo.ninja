@@ -1,5 +1,4 @@
 import {
-  Agent,
   AgentFunctionResult,
   AgentOutputType,
   AgentVariables,
@@ -9,8 +8,9 @@ import {
   trimText,
 } from "@evo-ninja/agent-utils";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
-import { AgentBaseContext } from "../AgentBase";
+import { AgentContext } from "../AgentContext";
 import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
+import { Agent } from "../Agent";
 
 interface PlanResearchFuncParameters {
   query: string;
@@ -36,8 +36,8 @@ export class PlanResearchFunction extends LlmAgentFunctionBase<PlanResearchFuncP
   };
 
   buildExecutor(
-    _: Agent<unknown>,
-    context: AgentBaseContext
+    _: Agent,
+    context: AgentContext
   ): (
     params: PlanResearchFuncParameters,
     rawParams?: string
