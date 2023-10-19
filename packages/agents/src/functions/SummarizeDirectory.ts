@@ -1,15 +1,15 @@
-import { Agent, AgentFunctionResult, ChatLogs, ChatMessageBuilder, LlmApi, Tokenizer } from "@evo-ninja/agent-utils";
-import { AgentFunctionBase } from "../AgentFunctionBase";
+import { Agent, AgentFunctionResult, ChatMessageBuilder, LlmApi, Tokenizer } from "@evo-ninja/agent-utils";
 import { AgentBaseContext } from "../AgentBase";
 import { DirectoryChunker } from "@evo-ninja/agent-utils";
+import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 
 interface SummarizeDirectoryParameters {
   subDirectory?: string;
 }
 
-export class SummarizeDirectoryFunction extends AgentFunctionBase<SummarizeDirectoryParameters> {
-  constructor(private _llm: LlmApi, private _tokenizer: Tokenizer) {
-    super();
+export class SummarizeDirectoryFunction extends LlmAgentFunctionBase<SummarizeDirectoryParameters> {
+  constructor(llm: LlmApi, tokenizer: Tokenizer) {
+    super(llm, tokenizer);
   }
 
   name: string = "summarizeDirectory";
@@ -35,7 +35,7 @@ export class SummarizeDirectoryFunction extends AgentFunctionBase<SummarizeDirec
       }
 
       const fuzTokens = 200;
-      const maxInputTokens = this._llm.getMaxContextTokens() - (this._llm.getMaxResponseTokens() + fuzTokens);
+      const maxInputTokens = this.llm.getMaxContextTokens() - (this.llm.getMaxResponseTokens() + fuzTokens);
       const chunker = new DirectoryChunker({ maxChunkSize: maxInputTokens })
       const chunks = chunker.chunk({
         workspace: context.workspace,
@@ -45,14 +45,7 @@ export class SummarizeDirectoryFunction extends AgentFunctionBase<SummarizeDirec
       let summary: string | undefined = undefined;
 
       for (const chunk of chunks) {
-        const chatLogs = ChatLogs.from([{
-          role: "user",
-          content: prompt(summary, chunk)
-        }], [], this._tokenizer);
-
-        const resp = await this._llm.getResponse(chatLogs);
-
-        summary = resp?.content || "";
+        summary = await this.askLlm(prompt(summary, chunk));
       }
 
       return {

@@ -4,3 +4,4 @@ export * from "./ContextWindow";
 export * from "./LlmApi";
 export * from "./OpenAI";
 export * from "./Tokenizer";
+export * from "./query";

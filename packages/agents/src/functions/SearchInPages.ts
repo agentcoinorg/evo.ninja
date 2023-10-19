@@ -3,7 +3,6 @@ import {
   AgentFunctionResult,
   AgentOutputType,
   AgentVariables,
-  ChatLogs,
   ChatMessageBuilder,
   Chunker,
   LlmApi,
@@ -12,10 +11,10 @@ import {
 } from "@evo-ninja/agent-utils";
 import axios from "axios";
 import { v4 as uuid } from "forked-agent-protocol";
-import { AgentFunctionBase } from "../AgentFunctionBase";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { AgentBaseContext } from "../AgentBase";
 import { Connection, EmbeddingFunction } from "vectordb";
+import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 
 interface SearchInPagesFuncParameters {
   query: string;
@@ -26,17 +25,17 @@ const MAX_RESULTS_TOKENS = 6000
 const SEARCH_RESULTS_LIMIT = 25
 const FETCH_WEBPAGE_TIMEOUT = 8000
 
-export class SearchInPagesFunction extends AgentFunctionBase<SearchInPagesFuncParameters> {
+export class SearchInPagesFunction extends LlmAgentFunctionBase<SearchInPagesFuncParameters> {
   constructor(
     private chunker: Chunker,
-    private tokenizer: Tokenizer,
-    private llm: LlmApi,
+    tokenizer: Tokenizer,
+    llm: LlmApi,
     private lanceDb: {
       connect: () => Promise<Connection>,
       embeddingFunction: (columnName: string) => EmbeddingFunction<string>
     }
   ) {
-    super();
+    super(llm, tokenizer);
   }
 
   name: string = "search_in_pages";
@@ -218,18 +217,7 @@ export class SearchInPagesFunction extends AgentFunctionBase<SearchInPagesFuncPa
     Chunks: ${JSON.stringify(results)}.
     Specify if the information is incomplete but still return it`
 
-    const chatLogs = ChatLogs.from([{
-      role: "user",
-      content: analyzerPrompt
-    }], [], this.tokenizer);
-
-    const response = await this.llm.getResponse(chatLogs)
-
-    if (!response || !response.content) {
-      throw new Error("Failed to plan research: No response from LLM");
-    }
-
-    return response.content
+    return await this.askLlm(analyzerPrompt);
   }
 
   private limitResults(results: string[], maxTokens: number): string[] {

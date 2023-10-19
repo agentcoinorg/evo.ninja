@@ -1,14 +1,14 @@
-import { Agent, AgentFunctionResult, ChatLogs, ChatMessageBuilder, LlmApi, Tokenizer } from "@evo-ninja/agent-utils";
-import { AgentFunctionBase } from "../AgentFunctionBase";
+import { Agent, AgentFunctionResult, ChatMessageBuilder, LlmApi, Tokenizer } from "@evo-ninja/agent-utils";
 import { AgentBaseContext } from "../AgentBase";
+import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 
 interface AnalyzeDataParameters {
   data: string;
 }
 
-export class AnalyzeDataFunction extends AgentFunctionBase<AnalyzeDataParameters> {
-  constructor(private _llm: LlmApi, private _tokenizer: Tokenizer) {
-    super();
+export class AnalyzeDataFunction extends LlmAgentFunctionBase<AnalyzeDataParameters> {
+  constructor(llm: LlmApi, tokenizer: Tokenizer) {
+    super(llm, tokenizer);
   }
 
   name: string = "analyzeData";
@@ -28,7 +28,7 @@ export class AnalyzeDataFunction extends AgentFunctionBase<AnalyzeDataParameters
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: AnalyzeDataParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
     return async (params: AnalyzeDataParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       const fuzTokens = 200;
-      const maxTokens = this._llm.getMaxContextTokens() - fuzTokens;
+      const maxTokens = this.llm.getMaxContextTokens() - fuzTokens;
 
       const prompt = (summary: string | undefined) => {
         return `Your job is to analyze data. You will summarize the dataset provided in a way that includes all unique details.\n
@@ -45,21 +45,14 @@ export class AnalyzeDataFunction extends AgentFunctionBase<AnalyzeDataParameters
 
       while (idx < len) {
         const promptStr = prompt(summary);
-        const propmtTokens = this._tokenizer.encode(promptStr).length;
+        const propmtTokens = this.tokenizer.encode(promptStr).length;
         const chunkTokens = (maxTokens - propmtTokens);
         const chunk = params.data.substring(idx, Math.min(idx + chunkTokens, len));
         idx += chunkTokens;
 
         const promptFinal = appendData(promptStr, chunk);
 
-        const chatLogs = ChatLogs.from([{
-          role: "user",
-          content: promptFinal
-        }], [], this._tokenizer);
-
-        const resp = await this._llm.getResponse(chatLogs);
-
-        summary = resp?.content || "";
+        summary = await this.askLlm(promptFinal);
       }
 
       return {
