@@ -15,35 +15,27 @@ export class CreateScriptFunction extends AgentFunctionBase<CreateScriptFuncPara
     super();
   }
 
-  get name(): string {
-    return "createScript";
-  }
-
-  get description(): string {
-    return `Create a script using JavaScript.`;
-  }
-
-  get parameters() {
-    return {
-      type: "object",
-      properties: {
-        namespace: {
-          type: "string",
-          description: "The namespace of the script, e.g. fs.readFile"
-        },
-        description: {
-          type: "string",
-          description: "The detailed description of the script."
-        },
-        arguments: {
-          type: "string",
-          description: "The arguments of the script. E.g. '{ path: string, encoding: string }'. Use only what you need, no optional arguments."
-        },
+  name: string = "createScript";
+  description: string = `Create a script using JavaScript.`;
+  parameters: any = {
+    type: "object",
+    properties: {
+      namespace: {
+        type: "string",
+        description: "The namespace of the script, e.g. fs.readFile"
       },
-      required: ["namespace", "description", "arguments"],
-      additionalProperties: false
-    }
-  }
+      description: {
+        type: "string",
+        description: "The detailed description of the script."
+      },
+      arguments: {
+        type: "string",
+        description: "The arguments of the script. E.g. '{ path: string, encoding: string }'. Use only what you need, no optional arguments."
+      },
+    },
+    required: ["namespace", "description", "arguments"],
+    additionalProperties: false
+  };
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: CreateScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (params: CreateScriptFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {

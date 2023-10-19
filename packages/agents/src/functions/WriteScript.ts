@@ -16,41 +16,33 @@ export class WriteScriptFunction extends AgentFunctionBase<WriteScriptFuncParame
       "axios",
       "util",
       "path"
-    ]
+    ];
 
-  get name(): string {
-    return "writeScript";
-  }
-
-  get description(): string {
-    return `Writes the function.`;
-  }
-
-  get parameters(): any {
-    return {
-      type: "object",
-      properties: {
-        namespace: {
-          type: "string",
-          description: "The namespace of the function, e.g. fs.readFile"
-        },
-        description: {
-          type: "string",
-          description: "The detailed description of the function."
-        },
-        arguments: {
-          type: "string",
-          description: "The arguments of the function. E.g. '{ path: string, encoding: string }'"
-        },
-        code: {
-          type: "string",
-          description: "The code of the function."
-        }
+  name: string = "writeScript";
+  description: string = `Writes the function.`;
+  parameters: any = {
+    type: "object",
+    properties: {
+      namespace: {
+        type: "string",
+        description: "The namespace of the function, e.g. fs.readFile"
       },
-      required: ["namespace", "description", "arguments", "code"],
-      additionalProperties: false
-    }
-  }
+      description: {
+        type: "string",
+        description: "The detailed description of the function."
+      },
+      arguments: {
+        type: "string",
+        description: "The arguments of the function. E.g. '{ path: string, encoding: string }'"
+      },
+      code: {
+        type: "string",
+        description: "The code of the function."
+      }
+    },
+    required: ["namespace", "description", "arguments", "code"],
+    additionalProperties: false
+  };
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: WriteScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (

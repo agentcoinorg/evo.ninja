@@ -7,8 +7,9 @@ import {
   ChatCompletionRequestMessageFunctionCall,
   Configuration,
   OpenAIApi,
-  CreateChatCompletionRequest
+  ChatCompletionFunctions,
 } from "openai";
+import { cleanOpenAIError } from "../utils/openai";
 
 export {
   ChatCompletionResponseMessage as OpenAIResponse,
@@ -21,7 +22,7 @@ interface OpenAIError {
   data: unknown;
 }
 
-export type OpenAIFunctions = CreateChatCompletionRequest["functions"]
+export type FunctionDefinition = ChatCompletionFunctions;
 
 export class OpenAI implements LlmApi {
   private _configuration: Configuration;
@@ -55,7 +56,7 @@ export class OpenAI implements LlmApi {
 
   async getResponse(
     chatLog: ChatLogs,
-    functionDefinitions: OpenAIFunctions,
+    functionDefinitions?: FunctionDefinition[],
     options?: LlmOptions,
     tries?: number
   ): Promise<ChatMessage | undefined> {
@@ -81,7 +82,7 @@ export class OpenAI implements LlmApi {
 
       return choice.message;
     } catch (err) {
-      const error = this._cleanError(err);
+      const error = cleanOpenAIError(err);
 
       // Special handling
       if (typeof error === "object") {
@@ -112,7 +113,7 @@ export class OpenAI implements LlmApi {
   private _createChatCompletion(options: {
     messages: ChatCompletionRequestMessage[];
     model?: string;
-    functions?: OpenAIFunctions;
+    functions?: FunctionDefinition[];
   } & LlmOptions) {
     return this._api.createChatCompletion({
       messages: options.messages,
@@ -122,28 +123,5 @@ export class OpenAI implements LlmApi {
       temperature: options.temperature || 0,
       max_tokens: options.max_tokens
     });
-  }
-
-  private _cleanError(error: unknown): Partial<OpenAIError> | unknown {
-    let errorData: Partial<OpenAIError> = { };
-    let errorObj = error as Record<string, unknown>;
-
-    if (
-      typeof error === "object" &&
-      errorObj.message
-    ) {
-      if (errorObj.response) {
-        const responseObj = errorObj.response as Record<string, unknown>;
-        errorData.status = responseObj.status as number | undefined;
-        errorData.data = responseObj.data;
-      }
-      errorData.message = errorObj.message as string | undefined;
-    }
-
-    if (errorData.message) {
-      return errorData;
-    } else {
-      return error;
-    }
   }
 }

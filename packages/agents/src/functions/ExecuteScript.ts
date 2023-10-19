@@ -14,31 +14,23 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
     super();
   }
 
-  get name(): string {
-    return "executeScript";
-  }
-
-  get description(): string {
-    return `Execute an script.`;
-  }
-
-  get parameters() {
-    return {
-      type: "object",
-      properties: {
-        namespace: {
-          type: "string",
-          description: "Namespace of the script to execute"
-        },
-        arguments: {
-          type: "string",
-          description: "JSON-formatted arguments to pass into the script being executed.",
-        }
+  name: string = "executeScript";
+  description: string = `Execute an script.`;
+  parameters: any = {
+    type: "object",
+    properties: {
+      namespace: {
+        type: "string",
+        description: "Namespace of the script to execute"
       },
-      required: ["namespace", "arguments"],
-      additionalProperties: false
-    }
-  }
+      arguments: {
+        type: "string",
+        description: "JSON-formatted arguments to pass into the script being executed.",
+      }
+    },
+    required: ["namespace", "arguments"],
+    additionalProperties: false
+  };
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: ExecuteScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (params: ExecuteScriptFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {

@@ -15,17 +15,9 @@ interface InitPoetryFuncParameters {}
 
 export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParameters> {
 
-  get name(): string {
-    return "cmd_initPoetry";
-  }
-
-  get description(): string {
-    return `Initialize a Python Poetry environment in the workspace. Always write your code solution before running this function.`;
-  }
-
-  get parameters() {
-    return {"type": "object", "properties": {}}
-  }
+  name: string = "cmd_initPoetry";
+  description: string = `Initialize a Python Poetry environment in the workspace.`;
+  parameters: any = {"type": "object", "properties": {}};
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: InitPoetryFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (params: InitPoetryFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {

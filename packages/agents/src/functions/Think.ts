@@ -7,27 +7,20 @@ interface ThinkFuncParameters {
 }
 
 export class ThinkFunction extends AgentFunctionBase<ThinkFuncParameters> {
-  get name(): string {
-    return "think";
-  }
 
-  get description(): string {
-    return "Helps me to think what I should do if I don't know how to achieve the goal";
-  }
-
-  get parameters() {
-    return {
-      type: "object",
-      properties: {
-        thoughts: {
-          type: "string",
-          description: "Your current thoughts about the topic."
-        },
+  name: string = "think";
+  description: string = "Helps me to think what I should do if I don't know how to achieve the goal";
+  parameters: any = {
+    type: "object",
+    properties: {
+      thoughts: {
+        type: "string",
+        description: "Your current thoughts about the topic."
       },
-      required: ["thoughts"],
-      additionalProperties: false
-    };
-  }
+    },
+    required: ["thoughts"],
+    additionalProperties: false
+  };
 
   buildExecutor(_: Agent<unknown>, context: AgentBaseContext): (params: ThinkFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (params: ThinkFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {

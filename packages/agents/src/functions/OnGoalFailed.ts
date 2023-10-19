@@ -7,27 +7,19 @@ interface OnGoalFailedFuncParameters {
 };
 
 export class OnGoalFailedFunction extends ScriptFunction<{}> {
-  get name() {
-    return "agent_onGoalFailed"
-  }
 
-  get description() {
-    return "Informs the user that the agent could not achieve the goal."
-  }
-
-  get parameters() {
-    return {
-      type: "object",
-      properties: {
-        message: {
-          type: "string",
-          description: "information about how the goal was achieved"
-        }
-      },
-      required: ["message"],
-      additionalProperties: false
-    }
-  }
+  name: string = "agent_onGoalFailed";
+  parameters: any = {
+    type: "object",
+    properties: {
+      message: {
+        type: "string",
+        description: "information about how the goal was achieved"
+      }
+    },
+    required: ["message"],
+    additionalProperties: false
+  };
 
   onSuccess(scriptedAgent: ScriptedAgent, params: OnGoalFailedFuncParameters, rawParams: string | undefined, result: string) {
     return {

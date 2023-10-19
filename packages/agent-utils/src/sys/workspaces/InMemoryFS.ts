@@ -1,7 +1,7 @@
 import { DirectoryEntry } from "./Workspace";
 
 export class InMemoryFile implements DirectoryEntry {
-  public readonly type: "file";
+  public readonly type = "file";
 
   constructor(
     public readonly name: string,
@@ -18,7 +18,7 @@ export class InMemoryFile implements DirectoryEntry {
 }
 
 export class InMemoryDir implements DirectoryEntry {
-  public readonly type: "directory";
+  public readonly type = "directory";
 
   constructor(
     public readonly name: string,
@@ -44,6 +44,7 @@ export class InMemoryDir implements DirectoryEntry {
 
   getDirectory(name: string): InMemoryDir | undefined {
     const item = this._entries.get(name);
+
     if (item?.type === "directory") {
       return item;
     }

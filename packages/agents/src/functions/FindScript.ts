@@ -6,8 +6,6 @@ import { AgentBaseContext } from "../AgentBase";
 interface FindScriptFuncParameters { 
   namespace: string, 
   description: string, 
-  arguments: string, 
-  code: string 
 }
 
 export class FindScriptFunction extends AgentFunctionBase<FindScriptFuncParameters> {
@@ -15,29 +13,23 @@ export class FindScriptFunction extends AgentFunctionBase<FindScriptFuncParamete
     super();
   }
 
-  get name(): string {
-    return "findScript";
-  }
-  get description(): string {
-    return `Search for an script.`;
-  }
-  get parameters() {
-    return {
-      type: "object",
-      properties: {
-        namespace: {
-          type: "string",
-          description: "Partial namespace of the script"
-        },
-        description: {
-          type: "string",
-          description: "The detailed description of the arguments and output of the script."
-        },
+  name: string = "findScript";
+  description: string = `Search for an script.`;
+  parameters: any = {
+    type: "object",
+    properties: {
+      namespace: {
+        type: "string",
+        description: "Partial namespace of the script"
       },
-      required: ["namespace", "description"],
-      additionalProperties: false
-    }
-  }
+      description: {
+        type: "string",
+        description: "The detailed description of the arguments and output of the script."
+      },
+    },
+    required: ["namespace", "description"],
+    additionalProperties: false
+  };
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: FindScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (params: FindScriptFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {

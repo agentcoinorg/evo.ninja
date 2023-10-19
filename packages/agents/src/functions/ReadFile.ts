@@ -12,29 +12,20 @@ export class ReadFileFunction extends ScriptFunction<ReadFileFuncParameters> {
     super(client, scripts);
   }
 
-  get name() {
-    return "fs_readFile"
-  }
-
-  get description() {
-    return "Reads data from a file."
-  }
-
-  get parameters() {
-    return {
-      type: "object",
-      properties: {
-        path: {
-          type: "string",
-        },
-        encoding: {
-          type: "string"
-        },
+  name: string = "fs_readFile";
+  parameters: any = {
+    type: "object",
+    properties: {
+      path: {
+        type: "string",
       },
-      required: ["path", "encoding"],
-      additionalProperties: false
-    }
-  }
+      encoding: {
+        type: "string"
+      },
+    },
+    required: ["path", "encoding"],
+    additionalProperties: false
+  };
 
   onSuccess(scriptedAgent: ScriptedAgent, params: ReadFileFuncParameters, rawParams: string | undefined, result: string, variables: AgentVariables): AgentFunctionResult {
     return {

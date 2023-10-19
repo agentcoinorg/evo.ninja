@@ -12,27 +12,19 @@ export class SummarizeDirectoryFunction extends AgentFunctionBase<SummarizeDirec
     super();
   }
 
-  get name(): string {
-    return "summarizeDirectory";
-  }
-
-  get description(): string {
-    return "Summarize the contents of a directory. Includes file names and brief descriptions."
-  }
-
-  get parameters() {
-    return {
-      type: "object",
-      properties: {
-        subDirectory: {
-          type: "string",
-          description: "sub-directory to be summarized (default: root directory)"
-        }
-      },
-      required: [],
-      additionalProperties: false
-    }
-  }
+  name: string = "summarizeDirectory";
+  description: string = `Summarize the contents of a directory. Includes file names and brief descriptions.`;
+  parameters: any = {
+    type: "object",
+    properties: {
+      subDirectory: {
+        type: "string",
+        description: "sub-directory to be summarized (default: root directory)"
+      }
+    },
+    required: [],
+    additionalProperties: false
+  };
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: SummarizeDirectoryParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
     return async (params: SummarizeDirectoryParameters, rawParams?: string): Promise<AgentFunctionResult> => {
@@ -53,23 +45,12 @@ export class SummarizeDirectoryFunction extends AgentFunctionBase<SummarizeDirec
       let summary: string | undefined = undefined;
 
       for (const chunk of chunks) {
-        const promptFinal = prompt(summary, chunk);
+        const chatLogs = ChatLogs.from([{
+          role: "user",
+          content: prompt(summary, chunk)
+        }], [], this._tokenizer);
 
-        const chatLogs = new ChatLogs({
-          "persistent": {
-            tokens: this._tokenizer.encode(promptFinal).length,
-            msgs: [{
-              role: "user",
-              content: promptFinal
-            }]
-          },
-          "temporary": {
-            tokens: 0,
-            msgs: []
-          }
-        });
-
-        const resp = await this._llm.getResponse(chatLogs, undefined);
+        const resp = await this._llm.getResponse(chatLogs);
 
         summary = resp?.content || "";
       }

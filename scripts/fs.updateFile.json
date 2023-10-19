@@ -1,0 +1,6 @@
+{
+  "name": "fs.updateFile",
+  "description": "Removes the text between [startLn, endLn) in a file and inserts new content at startLn. endLn defaults to the length of the document (in lines). Line numbers are 0-indexed.",
+  "arguments": "{ path: string, content: string, startLn: number, endLn?: number }",
+  "code": "./fs.updateFile.js"
+}

@@ -11,48 +11,29 @@ export class AnalyzeFormattingRequirementsFunction extends AgentFunctionBase<Ana
     super();
   }
 
-  get name(): string {
-    return "analyzeFormattingRequirements";
-  }
-
-  get description(): string {
-    return "Analyzes the requirements of a user defined goal";
-  }
-
-  get parameters() {
-    return {
-      type: "object",
-      properties: {
-        goal: {
-          type: "string",
-          description: "The user's goal"
-        }
-      },
-      required: ["goal"],
-      additionalProperties: false
-    }
-  }
+  name: string = "analyzeFormattingRequirements";
+  description: string = "Analyzes the requirements of a user defined goal";
+  parameters: any = {
+    type: "object",
+    properties: {
+      goal: {
+        type: "string",
+        description: "The user's goal"
+      }
+    },
+    required: ["goal"],
+    additionalProperties: false
+  };
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: AnalyzeFormattingRequirementsParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
     return async (params: AnalyzeFormattingRequirementsParameters, rawParams?: string): Promise<AgentFunctionResult> => {
 
-      const prompt = `Given the following user goal, please identify any formatting requirements:\n\`\`\`\n${params.goal}\n\`\`\``;
+      const chatLogs = ChatLogs.from([{
+          role: "user",
+          content: `Given the following user goal, please identify any formatting requirements:\n\`\`\`\n${params.goal}\n\`\`\``
+        }], [], this._tokenizer);
 
-      const chatLogs = new ChatLogs({
-        "persistent": {
-          tokens: this._tokenizer.encode(prompt).length,
-          msgs: [{
-            role: "user",
-            content: prompt
-          }]
-        },
-        "temporary": {
-          tokens: 0,
-          msgs: []
-        }
-      });
-
-      const resp = await this._llm.getResponse(chatLogs, undefined);
+      const resp = await this._llm.getResponse(chatLogs);
 
       return {
         outputs: [],

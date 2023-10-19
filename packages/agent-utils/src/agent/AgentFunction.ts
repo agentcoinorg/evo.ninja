@@ -1,9 +1,5 @@
 import { AgentOutput } from "./AgentOutput";
-import { ChatMessage } from "../llm";
-
-import { ChatCompletionFunctions } from "openai";
-
-export type AgentFunctionDefinition = ChatCompletionFunctions;
+import { ChatMessage, FunctionDefinition } from "../llm";
 
 export type AgentFunctionResult = {
   outputs: AgentOutput[];
@@ -11,7 +7,7 @@ export type AgentFunctionResult = {
 };
 
 export interface AgentFunction<TContext> {
-  definition: AgentFunctionDefinition;
+  definition: FunctionDefinition;
   buildExecutor(
     context: TContext
   ): (params: any, rawParams?: string) => Promise<AgentFunctionResult>;

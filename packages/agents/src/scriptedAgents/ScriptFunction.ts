@@ -18,6 +18,17 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
     super();
   }
 
+  get description(): string {
+    const scriptName = this.name.split("_").join(".");
+    const script = this.scripts.getScriptByName(scriptName);
+
+    if (!script) {
+      throw new Error(`Unable to find the script ${scriptName}`);
+    }
+
+    return script.description;
+  }
+
   onSuccess(scriptedAgent: ScriptedAgent, params: any, rawParams: string | undefined, result: string, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [

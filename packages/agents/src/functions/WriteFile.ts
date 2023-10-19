@@ -9,32 +9,24 @@ interface WriteFileFuncParameters {
 };
 
 export class WriteFileFunction extends ScriptFunction<WriteFileFuncParameters> {
-  get name() {
-    return "fs_writeFile"
-  }
-
-  get description() {
-    return "Writes data to a file, replacing the file if it already exists."
-  }
-
-  get parameters() {
-    return {
-      type: "object",
-      properties: {
-        path: {
-          type: "string",
-        },
-        data: {
-          type: "string"
-        },
-        encoding: {
-          type: "string"
-        },
+  
+  name: string = "fs_writeFile";
+  parameters: any = {
+    type: "object",
+    properties: {
+      path: {
+        type: "string",
       },
-      required: ["path", "data", "encoding"],
-      additionalProperties: false
-    }
-  }
+      data: {
+        type: "string"
+      },
+      encoding: {
+        type: "string"
+      },
+    },
+    required: ["path", "data", "encoding"],
+    additionalProperties: false
+  };
 
   onSuccess(scriptedAgent: ScriptedAgent, params: WriteFileFuncParameters, rawParams: string | undefined, result: string, variables: AgentVariables): AgentFunctionResult {
     return {

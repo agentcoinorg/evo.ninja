@@ -24,33 +24,27 @@ export class VerifyResearchFunction extends AgentFunctionBase<VerifyResearchFunc
     super();
   }
 
-  get name(): string {
-    return "verify_research";
-  }
-  get description(): string {
-    return `Verify research for a given query.`;
-  }
-  get parameters() {
-    return {
-      type: "object",
-      properties: {
-        originalQuery: {
-          type: "string",
-          description: "Original query for the research",
-        },
-        context: {
-          type: "string",
-          description: "Context about the research",
-        },
-        foundData: {
-          type: "string",
-          description: "Data results for the research query",
-        },
+  name: string = "verify_research";
+  description: string = `Verify research for a given query.`;
+  parameters: any = {
+    type: "object",
+    properties: {
+      originalQuery: {
+        type: "string",
+        description: "Original query for the research",
       },
-      required: ["originalQuery", "context", "foundData"],
-      additionalProperties: false,
-    };
-  }
+      context: {
+        type: "string",
+        description: "Context about the research",
+      },
+      foundData: {
+        type: "string",
+        description: "Data results for the research query",
+      },
+    },
+    required: ["originalQuery", "context", "foundData"],
+    additionalProperties: false,
+  };
 
   buildExecutor(
     _: Agent<unknown>,
@@ -69,21 +63,12 @@ export class VerifyResearchFunction extends AgentFunctionBase<VerifyResearchFunc
           context: params.context,
           foundData: params.foundData,
         });
-        const chatLogs = new ChatLogs({
-          "persistent": {
-            tokens: this._tokenizer.encode(prompt).length,
-            msgs: [{
-              role: "user",
-              content: prompt
-            }]
-          },
-          "temporary": {
-            tokens: 0,
-            msgs: []
-          }
-        });
+        const chatLogs = ChatLogs.from([{
+          role: "user",
+          content: prompt
+        }], [], this._tokenizer);
 
-        const response = await this._llm.getResponse(chatLogs, undefined)
+        const response = await this._llm.getResponse(chatLogs)
 
         if (!response || !response.content) {
           throw new Error("Failed to verify research: No response from LLM");
@@ -131,8 +116,9 @@ export class VerifyResearchFunction extends AgentFunctionBase<VerifyResearchFunc
         ChatMessageBuilder.functionCall(this.name, rawParams),
         ...ChatMessageBuilder.functionCallResultWithVariables(
           this.name,
-          `Verification: ` +
-            `${result}\n` +
+          `Verification: \n` +
+          `\`\`\`\n` +
+          `${result}\n` +
             `\`\`\``,
           variables
         ),

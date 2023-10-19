@@ -22,25 +22,19 @@ export class PlanResearchFunction extends AgentFunctionBase<PlanResearchFuncPara
     super();
   }
 
-  get name(): string {
-    return "plan_research";
-  }
-  get description(): string {
-    return `Plans the research for a given query.`;
-  }
-  get parameters() {
-    return {
-      type: "object",
-      properties: {
-        query: {
-          type: "string",
-          description: "Query to plan the research for",
-        },
+  name: string = "plan_research";
+  description: string = `Plans the research for a given query.`;
+  parameters: any = {
+    type: "object",
+    properties: {
+      query: {
+        type: "string",
+        description: "Query to plan the research for",
       },
-      required: ["query"],
-      additionalProperties: false,
-    };
-  }
+    },
+    required: ["query"],
+    additionalProperties: false,
+  };
 
   buildExecutor(
     _: Agent<unknown>,
@@ -54,22 +48,12 @@ export class PlanResearchFunction extends AgentFunctionBase<PlanResearchFuncPara
       rawParams?: string
     ): Promise<AgentFunctionResult> => {
       try {
-        const prompt = this.getPlanningPrompt(params.query);
-        const chatLogs = new ChatLogs({
-          "persistent": {
-            tokens: this._tokenizer.encode(prompt).length,
-            msgs: [{
-              role: "user",
-              content: prompt
-            }]
-          },
-          "temporary": {
-            tokens: 0,
-            msgs: []
-          }
-        });
+        const chatLogs = ChatLogs.from([{
+          role: "user",
+          content: this.getPlanningPrompt(params.query)
+        }], [], this._tokenizer);
 
-        const response = await this._llm.getResponse(chatLogs, undefined)
+        const response = await this._llm.getResponse(chatLogs)
 
         if (!response || !response.content) {
           throw new Error("Failed to plan research: No response from LLM");
