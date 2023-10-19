@@ -5,6 +5,8 @@ import {
   AgentOutput,
   RunResult,
 } from "@evo-ninja/agent-utils";
+import { ResultErr } from "@polywrap/result";
+
 import { AgentBase } from "../../AgentBase";
 import {
   ScriptedAgentOrFactory,
@@ -16,10 +18,9 @@ import {
 import { DelegateAgentFunction } from "../../functions/DelegateScriptedAgent";
 import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
-import { ResultErr } from "@polywrap/result";
 import { VerifyGoalAchievedFunction } from "../../functions/VerifyGoalAchieved";
-import { prompts } from "./prompts";
 import { Scripter } from "../Scripter";
+import { prompts } from "./prompts";
 
 export interface EvoRunArgs {
   goal: string
@@ -59,6 +60,25 @@ export class Evo extends AgentBase<EvoRunArgs, ScriptedAgentContext> {
       },
       context
     );
+  }
+
+  public async* run(
+    args: EvoRunArgs,
+    context?: string
+  ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
+    // To help Evo determine what agents to delegate to,
+    // we first read the files contained within the directory
+    const files = this.context.workspace.readdirSync("./");
+    this.context.chat.temporary({
+      role: "user",
+      content: `Files: ${
+        files.filter((x) => x.type === "file").map((x) => x.name).join(", ")
+      }\nDirectories: ${
+        files.filter((x) => x.type === "directory").map((x) => x.name).join(", ")
+      }`
+    });
+
+    return yield* super.run(args, context);
   }
 
   public async *runWithChat(args: {

@@ -38,7 +38,7 @@ export class ChatMessageBuilder {
       return [
         ChatMessageBuilder.functionCallResult(funcName, `Due to it's size, the result is stored in variable \${${varName}} (total length: ${result.length}).
 To read different parts of the stored variable, use the function readVariable("\${${varName}}", start, count)`),
-        ChatMessageBuilder.functionCall("readVariable", { name: varName, start: 0, count: threshold}),
+        ChatMessageBuilder.functionCall("readVariable", { name: `\${${varName}}`, start: 0, count: threshold}),
         ChatMessageBuilder.functionCallResult("readVariable", readVariableResultMessage(varName, result, 0, threshold, threshold)),
       ];
     } else {

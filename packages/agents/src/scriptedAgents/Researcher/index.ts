@@ -35,7 +35,7 @@ export class ResearcherAgent extends ScriptedAgent {
         new DelegateAgentFunction(() => new WebResearcherAgent({
           ...context,
           chat: context.chat.cloneEmpty()
-        }))
+        })),
       ],
       shouldTerminate: (functionCalled) => {
         return [onGoalAchievedFn.name, onGoalFailedFn.name].includes(
