@@ -18,7 +18,7 @@ import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
 import { ResultErr } from "@polywrap/result";
 import { VerifyGoalAchievedFunction } from "../../functions/VerifyGoalAchieved";
 import { prompts } from "./prompts";
-import { Scripter } from "../Scripter";
+import { ScripterAgent } from "../Scripter";
 
 export interface EvoRunArgs {
   goal: string
@@ -38,7 +38,7 @@ export class Evo extends AgentBase<EvoRunArgs, AgentBaseContext> {
         DeveloperAgent,
         ResearcherAgent,
         DataAnalystAgent,
-        Scripter
+        ScripterAgent
       ].map(agentClass => () => new agentClass(context.cloneEmpty()));
 
     super(

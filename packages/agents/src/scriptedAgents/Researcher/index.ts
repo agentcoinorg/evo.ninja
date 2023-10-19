@@ -1,10 +1,4 @@
 import { WriteFileFunction } from "../../functions/WriteFile";
-import {
-  ScriptedAgent,
-  ScriptedAgentConfig,
-} from "../ScriptedAgent";
-import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
-import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
 import { HTMLChunker } from "@evo-ninja/agent-utils";
 import { WebSearchFunction } from "../../functions/WebSearch";
 import { SearchInPagesFunction } from "../../functions/SearchInPages";
@@ -14,18 +8,14 @@ import { OpenAIEmbeddingFunction, connect } from "vectordb";
 import { ScrapeTextFunction } from "../../functions/ScrapeText";
 import { prompts } from "./prompts";
 import { AgentBaseContext } from "../../AgentBase";
+import { AgentWithGoal } from "../../AgentWithGoal";
+import { ScriptedAgentRunArgs } from "../ScriptedAgent";
 
-export class ResearcherAgent extends ScriptedAgent {
+export class ResearcherAgent extends AgentWithGoal<ScriptedAgentRunArgs> {
   constructor(context: AgentBaseContext) {
-
-    const onGoalAchievedFn = new OnGoalAchievedFunction(context.scripts);
-    const onGoalFailedFn = new OnGoalFailedFunction(context.scripts);
-    const scrapeTextFunc = new ScrapeTextFunction(context.scripts)
-
-    const config: ScriptedAgentConfig = {
-      functions: [
-        onGoalAchievedFn,
-        onGoalFailedFn,
+    super(
+      () => prompts,
+      [
         new WriteFileFunction(context.scripts),
         new PlanResearchFunction(context.llm, context.chat.tokenizer),
         new VerifyResearchFunction(context.llm, context.chat.tokenizer),
@@ -41,16 +31,9 @@ export class ResearcherAgent extends ScriptedAgent {
           }
         ),
         new WebSearchFunction(),
-        scrapeTextFunc
-      ],
-      shouldTerminate: (functionCalled) => {
-        return [onGoalAchievedFn.name, onGoalFailedFn.name].includes(
-          functionCalled.name
-        );
-      },
-      prompts,
-    };
-
-    super(config, context);
+        new ScrapeTextFunction(context.scripts)
+      ], 
+      context
+    );
   }
 }

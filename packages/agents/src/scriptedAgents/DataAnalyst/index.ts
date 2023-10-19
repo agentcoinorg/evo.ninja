@@ -1,9 +1,6 @@
 import {
-  ScriptedAgent,
-  ScriptedAgentConfig,
+  ScriptedAgentRunArgs,
 } from "../ScriptedAgent";
-import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
-import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
 import { AnalyzeFormattingRequirementsFunction } from "../../functions/AnalyzeFormattingRequirements";
 import { AnalyzeDataFunction } from "../../functions/AnalyzeData";
 import { CsvAddColumnFunction } from "../../functions/CsvAddColumn";
@@ -18,15 +15,13 @@ import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
 import { ThinkFunction } from "../../functions/Think";
 import { prompts } from "./prompts";
 import { AgentBaseContext } from "../../AgentBase";
+import { AgentWithGoal } from "../../AgentWithGoal";
 
-export class DataAnalystAgent extends ScriptedAgent {
+export class DataAnalystAgent extends AgentWithGoal<ScriptedAgentRunArgs> {
   constructor(context: AgentBaseContext) {
-    const onGoalAchievedFn = new OnGoalAchievedFunction(context.scripts);
-    const onGoalFailedFn = new OnGoalFailedFunction(context.scripts);
-    const config: ScriptedAgentConfig = {
-      functions: [
-        onGoalAchievedFn,
-        onGoalFailedFn,
+    super(
+      () => prompts,
+      [
         new AnalyzeFormattingRequirementsFunction(context.llm, context.chat.tokenizer),
         new AnalyzeDataFunction(context.llm, context.chat.tokenizer),
         new CsvAddColumnFunction(context.scripts),
@@ -39,15 +34,8 @@ export class DataAnalystAgent extends ScriptedAgent {
         new WriteFileFunction(context.scripts),
         new ReadDirectoryFunction(context.scripts),
         new ThinkFunction()
-      ],
-      shouldTerminate: (functionCalled) => {
-        return [onGoalAchievedFn.name, onGoalFailedFn.name].includes(
-          functionCalled.name
-        );
-      },
-      prompts
-    };
-
-    super(config, context);
+      ], 
+      context
+    );
   }
 }
