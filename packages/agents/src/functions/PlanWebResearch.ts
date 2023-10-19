@@ -12,17 +12,17 @@ import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/S
 import { AgentBaseContext } from "../AgentBase";
 import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 
-interface PlanResearchFuncParameters {
+interface PlanWebResearchFuncParameters {
   query: string;
 }
 
-export class PlanResearchFunction extends LlmAgentFunctionBase<PlanResearchFuncParameters> {
+export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearchFuncParameters> {
   constructor(llm: LlmApi, tokenizer: Tokenizer) {
     super(llm, tokenizer);
   }
 
-  name: string = "plan_research";
-  description: string = `Plans the research for a given query.`;
+  name: string = "plan_webResearch";
+  description: string = `Plans how to research on the internet for a given query.`;
   parameters: any = {
     type: "object",
     properties: {
@@ -39,11 +39,11 @@ export class PlanResearchFunction extends LlmAgentFunctionBase<PlanResearchFuncP
     _: Agent<unknown>,
     context: AgentBaseContext
   ): (
-    params: PlanResearchFuncParameters,
+    params: PlanWebResearchFuncParameters,
     rawParams?: string
   ) => Promise<AgentFunctionResult> {
     return async (
-      params: PlanResearchFuncParameters,
+      params: PlanWebResearchFuncParameters,
       rawParams?: string
     ): Promise<AgentFunctionResult> => {
       try {
@@ -68,7 +68,7 @@ export class PlanResearchFunction extends LlmAgentFunctionBase<PlanResearchFuncP
   }
 
   private onSuccess(
-    params: PlanResearchFuncParameters,
+    params: PlanWebResearchFuncParameters,
     result: string,
     rawParams: string | undefined,
     variables: AgentVariables
@@ -102,7 +102,7 @@ export class PlanResearchFunction extends LlmAgentFunctionBase<PlanResearchFuncP
   }
 
   private onError(
-    params: PlanResearchFuncParameters,
+    params: PlanWebResearchFuncParameters,
     error: string,
     rawParams: string | undefined,
     variables: AgentVariables
