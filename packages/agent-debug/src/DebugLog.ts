@@ -14,6 +14,7 @@ interface DebugStep {
   time: Timer;
   message?: string;
   error?: string;
+  llmTime: Timer;
   llmReqs: DebugLlmReq[];
 }
 
@@ -55,6 +56,7 @@ export class DebugLog {
   stepStart(): void {
     const step: DebugStep = {
       time: new Timer(),
+      llmTime: new Timer(),
       llmReqs: []
     };
     step.time.start();
@@ -82,6 +84,7 @@ export class DebugLog {
     this.goal.llmReqs += 1;
     this.goal.tokens += req.tokens;
     this._latestStep.llmReqs.push(req);
+    this._latestStep.llmTime.add(req.time.duration());
     this.save();
   }
 
