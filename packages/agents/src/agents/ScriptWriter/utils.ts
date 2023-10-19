@@ -1,14 +1,10 @@
-import { Chat, ContextWindow, Env, InMemoryWorkspace, LlmApi, Logger } from "@evo-ninja/agent-utils";
+import { Chat, ContextWindow, InMemoryWorkspace } from "@evo-ninja/agent-utils";
 import { ScriptWriter } from "./ScriptWriter";
+import { AgentBaseContext } from "../../AgentBase";
 
-export const createScriptWriter = (args: {
-  llm: LlmApi,
-  chat: Chat,
-  logger: Logger,
-  env: Env
-}): ScriptWriter => {
+export const createScriptWriter = (context: AgentBaseContext): ScriptWriter => {
   const workspace = new InMemoryWorkspace();
-  const contextWindow = new ContextWindow(args.llm);
-  const chat = new Chat(args.chat.tokenizer, contextWindow, args.logger);
-  return new ScriptWriter(args.llm, chat, workspace, args.logger, args.env);
+  const contextWindow = new ContextWindow(context.llm);
+  const chat = new Chat(context.chat.tokenizer, contextWindow, context.logger);
+  return new ScriptWriter(new AgentBaseContext(context.llm, chat, context.logger, workspace, context.env, context.scripts));
 };

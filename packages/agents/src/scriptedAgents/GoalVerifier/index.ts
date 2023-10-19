@@ -1,44 +1,19 @@
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
 import { ReadFileFunction } from "../../functions/ReadFile";
-import {
-  ScriptedAgent,
-  ScriptedAgentConfig,
-  ScriptedAgentContext,
-} from "../ScriptedAgent";
-import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
-import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
+import { AgentBaseContext } from "../../AgentBase";
+import { AgentWithGoal } from "../../AgentWithGoal";
+import { ScriptedAgentRunArgs } from "../ScriptedAgent";
 import { prompts } from "./prompts";
 
-export class GoalVerifierAgent extends ScriptedAgent {
-  constructor(context: ScriptedAgentContext) {
-
-    const onGoalAchievedFn = new OnGoalAchievedFunction(
-      context.client,
-      context.scripts
+export class GoalVerifierAgent extends AgentWithGoal<ScriptedAgentRunArgs> {
+  constructor(context: AgentBaseContext) {
+    super(
+      prompts,
+      [
+        new ReadFileFunction(context.scripts),
+        new ReadDirectoryFunction(context.scripts),
+      ], 
+      context
     );
-
-    const onGoalFailedFn = new OnGoalFailedFunction(
-      context.client,
-      context.scripts
-    );
-
-    const config: ScriptedAgentConfig = {
-      functions:
-        [
-          onGoalAchievedFn,
-          onGoalFailedFn,
-          new ReadFileFunction(context.client, context.scripts),
-          new ReadDirectoryFunction(context.client, context.scripts),
-      ],
-      shouldTerminate: (functionCalled) => {
-        return [
-          onGoalAchievedFn.name,
-          onGoalFailedFn.name
-        ].includes(functionCalled.name);
-      },
-      prompts: prompts(onGoalAchievedFn, onGoalFailedFn)
-    };
-
-    super(config, context);
   }
 }

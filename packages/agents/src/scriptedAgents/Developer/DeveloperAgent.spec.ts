@@ -7,9 +7,6 @@ import {
   LlmApi,
   ConsoleLogger,
   Logger,
-  agentPlugin,
-  WrapClient,
-  AgentVariables,
 } from "@evo-ninja/agent-utils";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
@@ -19,6 +16,7 @@ import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import { ScriptedAgent, DeveloperAgent } from "..";
 import fs from "fs";
+import { AgentBaseContext } from "../../AgentBase";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -84,21 +82,14 @@ describe('Dev Agent Test Suite', () => {
 
     return {
       agent: new DeveloperAgent(
-        {
-          client: new WrapClient(
-            workspace,
-            logger,
-            agentPlugin({ logger }),
-            env
-          ),
-          llm: debugLlm,
+        new AgentBaseContext(
+          debugLlm,
           chat,
-          workspace,
-          scripts,
           logger,
+          workspace,
           env,
-          variables: new AgentVariables()
-        }
+          scripts,
+        )
       ),
       debugLog
     };

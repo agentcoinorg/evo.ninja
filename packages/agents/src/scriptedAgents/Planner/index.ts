@@ -1,17 +1,14 @@
 import {
   ScriptedAgent,
   ScriptedAgentConfig,
-  ScriptedAgentContext,
 } from "../ScriptedAgent";
 import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
 import { prompts } from "./prompts";
+import { AgentBaseContext } from "../../AgentBase";
 
 export class PlannerAgent extends ScriptedAgent {
-  constructor(context: ScriptedAgentContext) {
-    const onGoalAchievedFn = new OnGoalAchievedFunction(
-      context.client,
-      context.scripts
-    );
+  constructor(context: AgentBaseContext) {
+    const onGoalAchievedFn = new OnGoalAchievedFunction(context.scripts);
 
     const config: ScriptedAgentConfig = {
       functions: [onGoalAchievedFn],

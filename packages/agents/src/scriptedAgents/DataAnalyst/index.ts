@@ -1,10 +1,6 @@
 import {
-  ScriptedAgent,
-  ScriptedAgentConfig,
-  ScriptedAgentContext,
+  ScriptedAgentRunArgs,
 } from "../ScriptedAgent";
-import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
-import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
 import { AnalyzeFormattingRequirementsFunction } from "../../functions/AnalyzeFormattingRequirements";
 import { AnalyzeDataFunction } from "../../functions/AnalyzeData";
 import { CsvAddColumnFunction } from "../../functions/CsvAddColumn";
@@ -18,42 +14,28 @@ import { ReadFileFunction } from "../../functions/ReadFile";
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
 import { ThinkFunction } from "../../functions/Think";
 import { prompts } from "./prompts";
+import { AgentBaseContext } from "../../AgentBase";
+import { AgentWithGoal } from "../../AgentWithGoal";
 
-export class DataAnalystAgent extends ScriptedAgent {
-  constructor(context: ScriptedAgentContext) {
-    const onGoalAchievedFn = new OnGoalAchievedFunction(
-      context.client,
-      context.scripts
-    );
-    const onGoalFailedFn = new OnGoalFailedFunction(
-      context.client,
-      context.scripts
-    );
-    const config: ScriptedAgentConfig = {
-      functions: [
-        onGoalAchievedFn,
-        onGoalFailedFn,
+export class DataAnalystAgent extends AgentWithGoal<ScriptedAgentRunArgs> {
+  constructor(context: AgentBaseContext) {
+    super(
+      () => prompts,
+      [
         new AnalyzeFormattingRequirementsFunction(context.llm, context.chat.tokenizer),
         new AnalyzeDataFunction(context.llm, context.chat.tokenizer),
-        new CsvAddColumnFunction(context.client, context.scripts),
-        new CsvFilterRowsFunction(context.client, context.scripts),
-        new CsvJoinByColumnFunction(context.client, context.scripts),
-        new CsvOrderColumnsFunction(context.client, context.scripts),
-        new CsvSortByColumnFunction(context.client, context.scripts),
-        new CsvSumColumnFunction(context.client, context.scripts),
-        new ReadFileFunction(context.client, context.scripts, 1000),
-        new WriteFileFunction(context.client, context.scripts),
-        new ReadDirectoryFunction(context.client, context.scripts),
+        new CsvAddColumnFunction(context.scripts),
+        new CsvFilterRowsFunction(context.scripts),
+        new CsvJoinByColumnFunction(context.scripts),
+        new CsvOrderColumnsFunction(context.scripts),
+        new CsvSortByColumnFunction(context.scripts),
+        new CsvSumColumnFunction(context.scripts),
+        new ReadFileFunction(context.scripts, 1000),
+        new WriteFileFunction(context.scripts),
+        new ReadDirectoryFunction(context.scripts),
         new ThinkFunction()
-      ],
-      shouldTerminate: (functionCalled) => {
-        return [onGoalAchievedFn.name, onGoalFailedFn.name].includes(
-          functionCalled.name
-        );
-      },
-      prompts
-    };
-
-    super(config, context);
+      ], 
+      context
+    );
   }
 }

@@ -1,7 +1,7 @@
 import { AgentBase, AgentPrompts } from "../AgentBase";
 import { AgentBaseContext } from "../AgentBase";
 
-import { ChatMessage, ExecuteAgentFunctionCalled, Scripts, WrapClient } from "@evo-ninja/agent-utils";
+import { ChatMessage, ExecuteAgentFunctionCalled } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 
 export interface ScriptedAgentConfig {
@@ -10,27 +10,22 @@ export interface ScriptedAgentConfig {
   functions: AgentFunctionBase<unknown>[];
 }
 
-export interface ScriptedAgentContext extends AgentBaseContext {
-  scripts: Scripts;
-  client: WrapClient;
-}
-
 export interface ScriptedAgentRunArgs {
   goal: string;
   initialMessages?: ChatMessage[]
 }
 
-export class ScriptedAgent extends AgentBase<ScriptedAgentRunArgs, ScriptedAgentContext> {
+export class ScriptedAgent extends AgentBase<ScriptedAgentRunArgs, AgentBaseContext> {
   constructor(
     config: ScriptedAgentConfig,
-    context: ScriptedAgentContext,
+    context: AgentBaseContext,
   ) {
     super(config, context);
   }
 
   public static create(
     config: ScriptedAgentConfig,
-    context: ScriptedAgentContext
+    context: AgentBaseContext
   ): ScriptedAgent {
     return new ScriptedAgent(config, context);
   }

@@ -1,4 +1,4 @@
-import { Evo } from "@evo-ninja/agents";
+import { AgentBaseContext, Evo } from "@evo-ninja/agents";
 import {
   Env,
   OpenAI,
@@ -13,9 +13,6 @@ import {
   ChatLogType,
   ChatMessage,
   ChatLog,
-  AgentVariables,
-  WrapClient,
-  agentPlugin,
 } from "@evo-ninja/agent-utils";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
 import { FileSystemWorkspace, FileLogger } from "@evo-ninja/agent-utils-fs";
@@ -136,16 +133,14 @@ export function createApp(config?: AppConfig): App {
 
   // Evo
   const evo = new Evo(
-    {
+    new AgentBaseContext(
       llm,
       chat,
       logger,
-      workspace: userWorkspace,
+      userWorkspace,
       env,
-      variables: new AgentVariables(),
       scripts,
-      client: new WrapClient(userWorkspace, logger, agentPlugin({ logger }), env)
-    },
+    ),
     config?.timeout
   );
 
