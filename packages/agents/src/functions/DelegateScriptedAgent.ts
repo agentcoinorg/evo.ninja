@@ -64,10 +64,9 @@ export class DelegateAgentFunction<
 
       const result = await this.askAgent(
         scriptedAgent,
-        { goal: params.task },
+        { goal: `Task: ${params.task}\nContext: ${params.context}` },
         context
       );
-      //params.context
 
       if (!result.ok) {
         return this.onFailure(

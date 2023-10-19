@@ -89,7 +89,6 @@ export class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> imp
 
   public async* run(
     args: TRunArgs,
-    context?: string
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
     try {
@@ -101,11 +100,6 @@ export class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> imp
       this.config.functions.forEach((fn) => {
         chat.addFunction(fn.getDefinition());
       });
-
-      // If additional context is needed
-      if (context) {
-        chat.persistent("user", context);
-      }
 
       if (this.config.timeout) {
         setTimeout(this.config.timeout.callback, this.config.timeout.milliseconds);
