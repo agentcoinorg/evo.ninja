@@ -6,7 +6,9 @@ import { ReadFileFunction } from "../../functions/ReadFile";
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
 import { prompts } from "./prompts";
 import { RunAndAnalysePythonTestFunction } from "../../functions/RunAndAnalysePythonTest";
-import { PlanDevelopmentFunction } from "../../functions/PlanDevelopment";
+import { CodeFunction } from "../../functions/Code";
+import { AnalyzeWorkspaceFunction } from "../../functions/AnalyzeWorkspace";
+import { AnalyzeCodeFunction } from "../../functions/AnalyzeCode";
 
 export class DeveloperAgent extends ScriptedAgent {
   constructor(context: ScriptedAgentContext) {
@@ -19,13 +21,15 @@ export class DeveloperAgent extends ScriptedAgent {
 
     const config: ScriptedAgentConfig = {
       functions: [
-        // onGoalAchievedFn,
+        new CodeFunction(context.llm, context.chat.tokenizer),
+        // new AnalyzeWorkspaceFunction(context.llm, context.chat.tokenizer),
+        new AnalyzeCodeFunction(context.llm, context.chat.tokenizer),
+        onGoalAchievedFn,
         // onGoalFailedFn,
-        // writeFileFn,
-        // readFileFn,
+        writeFileFn,
+        readFileFn,
         // readDirectoryFn,
         // pythonTestAnalyserFn,
-        new PlanDevelopmentFunction(context.llm, context.chat.tokenizer)
       ],
       shouldTerminate: (functionCalled) => {
         return [

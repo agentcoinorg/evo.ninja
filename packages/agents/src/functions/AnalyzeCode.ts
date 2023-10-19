@@ -13,23 +13,23 @@ import { AgentFunctionBase } from "../AgentFunctionBase";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { AgentBaseContext } from "../AgentBase";
 
-interface PlanDevelopmentFuncParameters {
+interface AnalyzeCodeFuncParameters {
   query: string;
 }
 
-export class PlanDevelopmentFunction extends AgentFunctionBase<PlanDevelopmentFuncParameters> {
+export class AnalyzeCodeFunction extends AgentFunctionBase<AnalyzeCodeFuncParameters> {
   constructor(private _llm: LlmApi, private _tokenizer: Tokenizer) {
     super();
   }
 
-  name: string = "plan_development";
-  description: string = `Plans the development for a given query.`;
+  name: string = "analyze_code";
+  description: string = `Analyzes the code across files for a given query.`;
   parameters: any = {
     type: "object",
     properties: {
       query: {
         type: "string",
-        description: "Query to plan the development for",
+        description: "Query to analyze the code for",
       },
     },
     required: ["query"],
@@ -40,44 +40,31 @@ export class PlanDevelopmentFunction extends AgentFunctionBase<PlanDevelopmentFu
     _: Agent<unknown>,
     context: AgentBaseContext
   ): (
-    params: PlanDevelopmentFuncParameters,
+    params: AnalyzeCodeFuncParameters,
     rawParams?: string
   ) => Promise<AgentFunctionResult> {
     return async (
-      params: PlanDevelopmentFuncParameters,
+      params: AnalyzeCodeFuncParameters,
       rawParams?: string
     ): Promise<AgentFunctionResult> => {
       try {
         const files = context.workspace.readdirSync("/");
-        const textFiles = files
-          .filter((f) => !f.name.includes("test") && !f.name.startsWith("."));
-
-        const textFileContents = textFiles.map((f) => `
+        const textFileContents = files.map((f) => `
 
         File: ${f.name}
         Content: ${context.workspace.readFileSync(f.name)}
         
         `)
-        textFiles.forEach(f => {
-          const text = context.workspace.readFileSync(f.name)
-          const tokens = context.chat.tokenizer.encode(text)
-
-          console.log({
-            name: f.name,
-            tokens: tokens.length,
-            textLength: text.length,
-          })
-        })
 
         const chatLogs = ChatLogs.from([{
           role: "user",
-          content: this.getPlanningPrompt(params.query, `Files in workspace to consider: \n\n${textFileContents.join("\n")}`)
+          content: this.getAnalysisPrompt(params.query, textFileContents.join("\n"))
         }], [], this._tokenizer);
 
         const response = await this._llm.getResponse(chatLogs)
 
         if (!response || !response.content) {
-          throw new Error("Failed to plan development: No response from LLM");
+          throw new Error("Failed to Analysis: No response from LLM");
         }
 
         console.log(response.content)
@@ -100,7 +87,7 @@ export class PlanDevelopmentFunction extends AgentFunctionBase<PlanDevelopmentFu
   }
 
   private onSuccess(
-    params: PlanDevelopmentFuncParameters,
+    params: AnalyzeCodeFuncParameters,
     result: string,
     rawParams: string | undefined,
     variables: AgentVariables
@@ -109,11 +96,11 @@ export class PlanDevelopmentFunction extends AgentFunctionBase<PlanDevelopmentFu
       outputs: [
         {
           type: AgentOutputType.Success,
-          title: `Plan development for '${params.query}'`,
+          title: `Analysis for '${params.query}'`,
           content: FUNCTION_CALL_SUCCESS_CONTENT(
             this.name,
             params,
-            `Development plan:` +
+            `Analysis:` +
               `\n--------------\n` +
               `${result}\n` +
               `\n--------------\n`
@@ -124,7 +111,7 @@ export class PlanDevelopmentFunction extends AgentFunctionBase<PlanDevelopmentFu
         ChatMessageBuilder.functionCall(this.name, rawParams),
         ...ChatMessageBuilder.functionCallResultWithVariables(
           this.name,
-          `Development plan:` +
+          `Analysis:` +
           `\n--------------\n` +
           `${result}\n` +
           `\n--------------\n`,
@@ -135,7 +122,7 @@ export class PlanDevelopmentFunction extends AgentFunctionBase<PlanDevelopmentFu
   }
 
   private onError(
-    params: PlanDevelopmentFuncParameters,
+    params: AnalyzeCodeFuncParameters,
     error: string,
     rawParams: string | undefined,
     variables: AgentVariables
@@ -144,7 +131,7 @@ export class PlanDevelopmentFunction extends AgentFunctionBase<PlanDevelopmentFu
       outputs: [
         {
           type: AgentOutputType.Error,
-          title: `Plan development`,
+          title: `Analysis`,
           content: FUNCTION_CALL_FAILED(
             params,
             this.name,
@@ -156,7 +143,7 @@ export class PlanDevelopmentFunction extends AgentFunctionBase<PlanDevelopmentFu
         ChatMessageBuilder.functionCall(this.name, rawParams),
         ...ChatMessageBuilder.functionCallResultWithVariables(
           this.name,
-          `Error planning development\n` + 
+          `Error analyzing code\n` + 
           `\`\`\`\n` +
           `${trimText(error, 300)}\n` +
           `\`\`\``,
@@ -166,15 +153,17 @@ export class PlanDevelopmentFunction extends AgentFunctionBase<PlanDevelopmentFu
     };
   }
 
-  private getPlanningPrompt(query: string, context: string): string {
-    return `You are a Development Planning agent tasked to receive a query and need to plan the development for it in steps.
-    All development will be done in Python and without using any external libraries. Consider the context to answer the query
-    as it contains specific information about the project you are working on.
-
-    Do NOT include any development that's not specifically asked for or needed to answer the query.
+  private getAnalysisPrompt(query: string, files: string): string {
+    return `You are an expert python code analyzer. You will given a query and a list of files.
+    Some files will be python source files, others are just text files for context. You will consider
+    the context of the text files; but only analyze the code in the python source files.
+    You must ensure that the code in the files fully satisfy the query.
+    If the code does not satisfy the query, you will tell the user exactly what's missing and why
     
-    Context: ${context}
+    Do NOT invent requirements that don't exist or come up with improvements unless needed.
+    
+    Query: ${query}
     -------------------------------
-    Query: ${query}`;
+    Files: ${files}`;
   }
 }
