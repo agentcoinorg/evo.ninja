@@ -46,7 +46,7 @@ export class Evo extends AgentBase<EvoRunArgs, AgentBaseContext> {
         functions: [
           onGoalAchievedFn,
           onGoalFailedFn,
-          ...delegatedAgents.map((x) => new DelegateAgentFunction(x)),
+          ...delegatedAgents.map((x) => new DelegateAgentFunction(x, context.llm, context.chat.tokenizer)),
         ],
         shouldTerminate: (functionCalled) => {
           return [onGoalAchievedFn.name, onGoalFailedFn.name].includes(

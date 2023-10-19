@@ -82,7 +82,7 @@ export class VerifyGoalAchievedFunction extends LlmAgentFunctionBase<FunctionPar
           this.name,
           rawParams,
           [],
-          result.value,
+          result.value.output,
           context.variables
         );
       }

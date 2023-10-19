@@ -19,58 +19,31 @@ export abstract class LlmAgentFunctionBase<TParams> extends AgentFunctionBase<TP
       .content();
   }
 
-  protected async askAgent<TRunArgs>(agent: Agent<TRunArgs>, runArgs: TRunArgs, context: AgentBaseContext): Promise<Result<AgentOutput, string | undefined>> {
-    const result = await runAgent(agent, runArgs, context);
+  protected async askAgent<TRunArgs>(
+    agent: Agent<TRunArgs>, 
+    runArgs: TRunArgs, 
+    context: AgentBaseContext
+  ): Promise<Result<{output: AgentOutput, messages: string[]}, string | undefined>> {
+    let iterator = agent.run(runArgs);
 
-    if (!result.ok) {
-      return ResultErr(result.error);
-    }
+    const messages = [];
 
-    const [output] = result.value;
+    while (true) {
+      const response = await iterator.next();
 
-    return ResultOk(output);
-  }
-
-  protected async talkWithAgent<TRunArgs>(agent: Agent<TRunArgs>, runArgs: TRunArgs, context: AgentBaseContext): Promise<Result<AgentOutput, string | undefined>> {
-    const result = await runAgent(agent, runArgs, context);
-
-    if (!result.ok) {
-      return ResultErr(result.error);
-    }
-
-    const [output, messages] = result.value;
-    
-    for (const message of messages) {
-      context.chat.add("temporary", {
-        role: "assistant",
-        content: message
-      });
-    }
-
-    return ResultOk(output);
-  }
-}
-
-const runAgent = async <TRunArgs>(agent: Agent<TRunArgs>, runArgs: TRunArgs, context: AgentBaseContext): Promise<Result<[AgentOutput, string[]], string | undefined>> => {
-  let iterator = agent.run(runArgs);
-
-  const messages = [];
-
-  while (true) {
-    const response = await iterator.next();
-
-    if (response.done) {
-      if (!response.value.ok) {
-        return ResultErr(response.value.error);
+      if (response.done) {
+        if (!response.value.ok) {
+          return ResultErr(response.value.error);
+        }
+      
+        return ResultOk({ output: response.value.value, messages });
+      } else {
+        if (response.value.type === "message" && response.value.content) {
+          messages.push(response.value.content);
+        }
       }
-    
-      return ResultOk([response.value.value, messages]);
-    } else {
-      if (response.value.type === "message" && response.value.content) {
-        messages.push(response.value.content);
-      }
-    }
 
-    response.value && context.logger.info(response.value.title);
+      response.value && context.logger.info(response.value.title);
+    }
   }
 }

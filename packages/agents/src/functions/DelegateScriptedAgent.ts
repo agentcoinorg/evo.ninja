@@ -1,6 +1,6 @@
-import { AgentOutputType, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, ChatMessage, AgentVariables } from "@evo-ninja/agent-utils"
-import { AgentFunctionBase } from "../AgentFunctionBase";
+import { AgentOutputType, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, ChatMessage, AgentVariables, LlmApi, Tokenizer } from "@evo-ninja/agent-utils"
 import { AgentBase, AgentBaseContext } from "../AgentBase";
+import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 
 interface DelegateAgentParams {
   task: string;
@@ -13,14 +13,16 @@ interface AgentRunArgs {
 
 export class DelegateAgentFunction<
   TAgent extends AgentBase<AgentRunArgs, AgentBaseContext>
-> extends AgentFunctionBase<DelegateAgentParams> {
+> extends LlmAgentFunctionBase<DelegateAgentParams> {
   private _name: string;
   private _expertise: string;
 
   constructor(
     private delegatedAgent: TAgent | (() => TAgent),
+    llm: LlmApi,
+    tokenizer: Tokenizer
   ) {
-    super();
+    super(llm, tokenizer);
 
     // TODO: we need a better way of handling agent lifetimes
     //       and static values associated with them (config + factory)
@@ -53,6 +55,39 @@ export class DelegateAgentFunction<
     required: ["task"],
     additionalProperties: false
   };
+
+  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext) {
+    return async (params: DelegateAgentParams, rawParams?: string): Promise<AgentFunctionResult> => {
+      const scriptedAgent = typeof this.delegatedAgent === "function" ?
+        this.delegatedAgent() :
+        this.delegatedAgent;
+
+      const result = await this.askAgent(
+        scriptedAgent,
+        { goal: params.task },
+        context
+      );
+      //params.context
+
+      if (!result.ok) {
+        return this.onFailure(
+          scriptedAgent.config.prompts.name,
+          params,
+          rawParams,
+          result.error,
+          context.variables
+        );
+      }
+
+      return this.onSuccess(
+        scriptedAgent.config.prompts.name,
+        rawParams,
+        result.value.messages,
+        result.value.output,
+        context.variables
+      );
+    }
+  }
 
   onSuccess(name: string, rawParams: string | undefined, messages: string[], result: AgentOutput, variables: AgentVariables): AgentFunctionResult {
     return {
@@ -91,50 +126,6 @@ export class DelegateAgentFunction<
           variables
         )
       ]
-    }
-  }
-
-  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext) {
-    return async (params: DelegateAgentParams, rawParams?: string): Promise<AgentFunctionResult> => {
-      const scriptedAgent = typeof this.delegatedAgent === "function" ?
-        this.delegatedAgent() :
-        this.delegatedAgent;
-
-      let iterator = scriptedAgent.run({
-        goal: params.task,
-      }, params.context);
-
-      const messages = [];
-
-      while (true) {
-        const response = await iterator.next();
-
-        if (response.done) {
-          if (!response.value.ok) {
-            return this.onFailure(
-              scriptedAgent.config.prompts.name,
-              params,
-              rawParams,
-              response.value.error,
-              context.variables
-            );
-          }
-        
-          return this.onSuccess(
-            scriptedAgent.config.prompts.name,
-            rawParams,
-            messages,
-            response.value.value,
-            context.variables
-          );
-        } else {
-          if (response.value.type === "message" && response.value.content) {
-            messages.push(response.value.content);
-          }
-        }
-
-        response.value && context.logger.info(response.value.title);
-      }
     }
   }
 
