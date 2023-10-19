@@ -23,7 +23,7 @@ export class Scripter extends AgentBase<ScripterRunArgs, AgentBaseContext> {
 
     const config: AgentBaseConfig<ScripterRunArgs> = {
       functions: [
-        new CreateScriptFunction(),
+        new CreateScriptFunction(context.llm, context.chat.tokenizer),
         new ExecuteScriptFunction(),
         new FindScriptFunction(context.scripts),
         new ReadVariableFunction(),

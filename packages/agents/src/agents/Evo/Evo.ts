@@ -39,7 +39,7 @@ export class Evo extends AgentBase<EvoRunArgs, AgentBaseContext> {
         ResearcherAgent,
         DataAnalystAgent,
         Scripter
-      ].map(agentClass => () => new agentClass({ ...context, chat: context.chat.cloneEmpty() }));
+      ].map(agentClass => () => new agentClass(context.cloneEmpty()));
 
     super(
       {

@@ -1,8 +1,8 @@
 import { Agent, AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder, Script } from "@evo-ninja/agent-utils";
-import { AgentFunctionBase } from "../AgentFunctionBase";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { createScriptWriter } from "../agents/ScriptWriter/utils";
 import { AgentBaseContext } from "../AgentBase";
+import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 
 interface CreateScriptFuncParameters { 
   namespace: string;
@@ -10,7 +10,7 @@ interface CreateScriptFuncParameters {
   arguments: string;
 }
 
-export class CreateScriptFunction extends AgentFunctionBase<CreateScriptFuncParameters> {
+export class CreateScriptFunction extends LlmAgentFunctionBase<CreateScriptFuncParameters> {
   name: string = "createScript";
   description: string = `Create a script using JavaScript.`;
   parameters: any = {
@@ -38,35 +38,22 @@ export class CreateScriptFunction extends AgentFunctionBase<CreateScriptFuncPara
       if (params.namespace.startsWith("agent.")) {
         return this.onErrorCannotCreateScriptsOnAgentNamespace(params, rawParams, context.variables);
       }
-
-      // Create a fresh ScriptWriter agent
-      const writer = createScriptWriter(context);
-
       context.logger.notice(`Creating script '${params.namespace}'...`);
 
-      let iterator = writer.run({
-        namespace: params.namespace,
-        description: params.description,
-        args: params.arguments
-      });
+      const writer = createScriptWriter(context);
 
-      while(true) {
-        const response = await iterator.next();
+      const result = await this.askAgent(
+        writer, 
+        {
+          namespace: params.namespace,
+          description: params.description,
+          args: params.arguments
+        },
+        context
+      );
 
-        if (response.done) {
-          if (!response.value.ok) {
-            return this.onErrorCreateScript(params, rawParams, response.value.error?.toString() || "Unknown error", context.variables);
-          }
-          break;
-        }
-
-        response.value && context.logger.info(response.value.title);
-
-        // TODO: we should not be communicating the ScriptWriter's completion
-        //       via a special file in the workspace
-        if (writer.workspace.existsSync("index.js")) {
-          break;
-        }
+      if (!result.ok) {
+        return this.onErrorCreateScript(params, rawParams, result.error?.toString() || "Unknown error", context.variables);
       }
 
       const index = writer.workspace.readFileSync("index.js");
