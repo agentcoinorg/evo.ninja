@@ -1,6 +1,6 @@
 import { DirectoryEntry, Workspace } from "@evo-ninja/agent-utils";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
-import { type Artifact, v4 as uuid } from "forked-agent-protocol";
+import { type Artifact, v4 as uuid } from "agent-protocol";
 import path from "path";
 import fs from "fs";
 

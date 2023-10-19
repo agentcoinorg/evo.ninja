@@ -3639,6 +3639,17 @@ aes-js@3.0.0:
   resolved "https://registry.yarnpkg.com/aes-js/-/aes-js-3.0.0.tgz#e21df10ad6c2053295bcbb8dab40b09dbea87e4d"
   integrity sha512-H7wUZRn8WpTq9jocdxQ2c8x2sKo9ZVmzfRE13GiNJXfp7NcKYEdvl3vspKjXox6RIG2VtaRe4JFvxG4rqp2Zuw==
 
+agent-protocol@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/agent-protocol/-/agent-protocol-1.0.1.tgz#378f07a13a6bf29b8028bd3e1e8bc7ae3530194a"
+  integrity sha512-AkmpN+VxtwE5Z1Afk4Jp06TVivMq7wuWKnDdTdXAfcObdH6o9ihoq3tyWO3ENzl245WrTjPn7b4gLCZrZaW5Iw==
+  dependencies:
+    "@types/uuid" "^9.0.2"
+    express "^4.18.2"
+    express-openapi-validator "^5.0.4"
+    js-yaml "^4.1.0"
+    uuid "^9.0.0"
+
 ajv-draft-04@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/ajv-draft-04/-/ajv-draft-04-1.0.0.tgz#3b64761b268ba0b9e668f0b41ba53fce0ad77fc8"
@@ -6287,17 +6298,6 @@ fork-ts-checker-webpack-plugin@^6.5.0:
     schema-utils "2.7.0"
     semver "^7.3.2"
     tapable "^1.0.0"
-
-forked-agent-protocol@0.0.5:
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/forked-agent-protocol/-/forked-agent-protocol-0.0.5.tgz#0d4beb980ac32df15ea0032309fa51e4578d0f00"
-  integrity sha512-9OK2jlHNaUjEzAyMTWWmeNQa4KubKtUt/F3xYz1L7KB879K1HKcnaP3tXAYh4OsqATdtrGsQtRG5myND2CyoQA==
-  dependencies:
-    "@types/uuid" "^9.0.2"
-    express "^4.18.2"
-    express-openapi-validator "^5.0.4"
-    js-yaml "^4.1.0"
-    uuid "^9.0.0"
 
 form-data@4.0.0, form-data@^4.0.0:
   version "4.0.0"
