@@ -10,6 +10,7 @@ import { prompts } from "./prompts";
 import { AgentBaseContext } from "../../AgentBase";
 import { AgentWithGoal } from "../../AgentWithGoal";
 import { ScriptedAgentRunArgs } from "../ScriptedAgent";
+import { ReadFileFunction } from "../../functions/ReadFile";
 
 export class ResearcherAgent extends AgentWithGoal<ScriptedAgentRunArgs> {
   constructor(context: AgentBaseContext) {
@@ -17,6 +18,7 @@ export class ResearcherAgent extends AgentWithGoal<ScriptedAgentRunArgs> {
       () => prompts,
       [
         new WriteFileFunction(context.scripts),
+        new ReadFileFunction(context.scripts),
         new PlanResearchFunction(context.llm, context.chat.tokenizer),
         new VerifyResearchFunction(context.llm, context.chat.tokenizer),
         new SearchInPagesFunction(
