@@ -1,4 +1,4 @@
-import { AgentBase, AgentBaseConfig } from "../../AgentBase";
+import { AgentBase, AgentBaseConfig, AgentBaseContext } from "../../AgentBase";
 import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
 import { CreateScriptFunction } from "../../functions/CreateScript";
@@ -8,29 +8,28 @@ import { ReadVariableFunction } from "../../functions/ReadVariable";
 import { ReadFileFunction } from "../../functions/ReadFile";
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
-import { ScriptedAgentContext } from "../../scriptedAgents";
 import { prompts } from "./prompts";
 
 export interface ScripterRunArgs {
   goal: string
 }
 
-export class Scripter extends AgentBase<ScripterRunArgs, ScriptedAgentContext> {
+export class Scripter extends AgentBase<ScripterRunArgs, AgentBaseContext> {
   constructor(
-    context: ScriptedAgentContext,
+    context: AgentBaseContext,
   ) {
-    const onGoalAchievedFn = new OnGoalAchievedFunction(context.client, context.scripts);
-    const onGoalFailedFn = new OnGoalFailedFunction(context.client, context.scripts);
+    const onGoalAchievedFn = new OnGoalAchievedFunction(context.scripts);
+    const onGoalFailedFn = new OnGoalFailedFunction(context.scripts);
 
     const config: AgentBaseConfig<ScripterRunArgs> = {
       functions: [
-        new CreateScriptFunction(context.scripts),
-        new ExecuteScriptFunction(context.client, context.scripts),
+        new CreateScriptFunction(),
+        new ExecuteScriptFunction(),
         new FindScriptFunction(context.scripts),
         new ReadVariableFunction(),
-        new ReadFileFunction(context.client, context.scripts),
-        new WriteFileFunction(context.client, context.scripts),
-        new ReadDirectoryFunction(context.client, context.scripts),
+        new ReadFileFunction(context.scripts),
+        new WriteFileFunction(context.scripts),
+        new ReadDirectoryFunction(context.scripts),
         onGoalAchievedFn,
         onGoalFailedFn,
       ],

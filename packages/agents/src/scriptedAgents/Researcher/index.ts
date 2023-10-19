@@ -2,7 +2,6 @@ import { WriteFileFunction } from "../../functions/WriteFile";
 import {
   ScriptedAgent,
   ScriptedAgentConfig,
-  ScriptedAgentContext,
 } from "../ScriptedAgent";
 import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
@@ -14,27 +13,20 @@ import { VerifyResearchFunction } from "../../functions/VerifyResearch";
 import { OpenAIEmbeddingFunction, connect } from "vectordb";
 import { ScrapeTextFunction } from "../../functions/ScrapeText";
 import { prompts } from "./prompts";
+import { AgentBaseContext } from "../../AgentBase";
 
 export class ResearcherAgent extends ScriptedAgent {
-  constructor(context: ScriptedAgentContext) {
+  constructor(context: AgentBaseContext) {
 
-    const onGoalAchievedFn = new OnGoalAchievedFunction(
-      context.client,
-      context.scripts
-    );
-
-    const onGoalFailedFn = new OnGoalFailedFunction(
-      context.client,
-      context.scripts
-    );
-
-    const scrapeTextFunc = new ScrapeTextFunction(context.client, context.scripts)
+    const onGoalAchievedFn = new OnGoalAchievedFunction(context.scripts);
+    const onGoalFailedFn = new OnGoalFailedFunction(context.scripts);
+    const scrapeTextFunc = new ScrapeTextFunction(context.scripts)
 
     const config: ScriptedAgentConfig = {
       functions: [
         onGoalAchievedFn,
         onGoalFailedFn,
-        new WriteFileFunction(context.client, context.scripts),
+        new WriteFileFunction(context.scripts),
         new PlanResearchFunction(context.llm, context.chat.tokenizer),
         new VerifyResearchFunction(context.llm, context.chat.tokenizer),
         new SearchInPagesFunction(

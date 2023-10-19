@@ -11,7 +11,9 @@ import {
   Timeout,
   Workspace,
   AgentVariables,
-  basicFunctionCallLoop
+  basicFunctionCallLoop,
+  Scripts, 
+  WrapClient
 } from "@evo-ninja/agent-utils";
 import { ResultErr } from "@polywrap/result";
 import { AgentFunctionBase } from "./AgentFunctionBase";
@@ -24,6 +26,8 @@ export interface AgentBaseContext {
   workspace: Workspace;
   env: Env;
   variables: AgentVariables;
+  scripts: Scripts;
+  client: WrapClient;
 }
 
 export interface AgentPrompts<TRunArgs> {

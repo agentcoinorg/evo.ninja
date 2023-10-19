@@ -6,7 +6,6 @@ import {
   JsEngine,
   JsEngine_GlobalVar,
   Scripts,
-  WrapClient,
   shimCode
 } from "@evo-ninja/agent-utils"
 import { ScriptedAgent } from "./ScriptedAgent"
@@ -14,7 +13,7 @@ import { AgentFunctionBase } from "../AgentFunctionBase";
 import { AgentBaseContext } from "../AgentBase";
 
 export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams> {
-  constructor(private client: WrapClient, private scripts: Scripts) {
+  constructor(private readonly scripts: Scripts) {
     super();
   }
 
@@ -63,7 +62,7 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
   buildExecutor(scriptedAgent: ScriptedAgent, context: AgentBaseContext): (params: TParams, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (params: any, rawParams?: string): Promise<AgentFunctionResult> => {
       const scriptName = this.name.split("_").join(".");
-      const script = this.scripts.getScriptByName(scriptName);
+      const script = context.scripts.getScriptByName(scriptName);
 
       if (!script) {
         return this.onFailure(scriptedAgent, params, rawParams, `Unable to find the script ${scriptName}`, context.variables);
@@ -76,7 +75,7 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
         })
       );
 
-      const jsEngine = new JsEngine(this.client);
+      const jsEngine = new JsEngine(context.client);
       const result = await jsEngine.evalWithGlobals({
         src: shimCode(script.code),
         globals
@@ -84,7 +83,7 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
 
       if (result.ok) {
         if (result.value.error == null) {
-          const jsPromiseOutput = this.client.jsPromiseOutput;
+          const jsPromiseOutput = context.client.jsPromiseOutput;
           if (jsPromiseOutput.ok) {
             const result = typeof jsPromiseOutput.value !== "string" ? JSON.stringify(jsPromiseOutput.value) : jsPromiseOutput.value;
             return this.onSuccess(scriptedAgent, params, rawParams, result, context.variables);

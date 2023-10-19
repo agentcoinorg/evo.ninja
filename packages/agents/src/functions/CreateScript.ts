@@ -1,4 +1,4 @@
-import { Agent, AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder, Script, Scripts } from "@evo-ninja/agent-utils";
+import { Agent, AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder, Script } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { createScriptWriter } from "../agents/ScriptWriter/utils";
@@ -11,10 +11,6 @@ interface CreateScriptFuncParameters {
 }
 
 export class CreateScriptFunction extends AgentFunctionBase<CreateScriptFuncParameters> {
-  constructor(private scripts: Scripts) {
-    super();
-  }
-
   name: string = "createScript";
   description: string = `Create a script using JavaScript.`;
   parameters: any = {
@@ -44,12 +40,7 @@ export class CreateScriptFunction extends AgentFunctionBase<CreateScriptFuncPara
       }
 
       // Create a fresh ScriptWriter agent
-      const writer = createScriptWriter({
-        llm: context.llm,
-        chat: context.chat,
-        logger: context.logger,
-        env: context.env,
-      });
+      const writer = createScriptWriter(context);
 
       context.logger.notice(`Creating script '${params.namespace}'...`);
 
@@ -86,7 +77,7 @@ export class CreateScriptFunction extends AgentFunctionBase<CreateScriptFuncPara
         arguments: params.arguments,
         code: index
       };
-      this.scripts.addScript(params.namespace, script);
+      context.scripts.addScript(params.namespace, script);
       
       return this.onSuccess(script, params, rawParams, context.variables);
     };

@@ -5,6 +5,9 @@ import {
   Env,
   Logger,
   AgentVariables,
+  WrapClient,
+  agentPlugin,
+  Scripts,
 } from "@evo-ninja/agent-utils";
 import { AgentBase, AgentBaseConfig, AgentBaseContext } from "../../AgentBase";
 import { WriteScriptFunction } from "../../functions/WriteScript";
@@ -26,7 +29,8 @@ export class ScriptWriter extends AgentBase<
     chat: Chat,
     workspace: Workspace,
     logger: Logger,
-    env: Env
+    env: Env,
+    scripts: Scripts,
   ) {
     const agentContext: AgentBaseContext = {
       llm: llm,
@@ -35,6 +39,8 @@ export class ScriptWriter extends AgentBase<
       workspace: workspace,
       variables: new AgentVariables(),
       env,
+      scripts,
+      client: new WrapClient(workspace, logger, agentPlugin({ logger }), env)
     };
 
     const writeScriptFn = new WriteScriptFunction();

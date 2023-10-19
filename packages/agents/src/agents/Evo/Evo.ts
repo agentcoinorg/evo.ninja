@@ -5,10 +5,9 @@ import {
   AgentOutput,
   RunResult,
 } from "@evo-ninja/agent-utils";
-import { AgentBase } from "../../AgentBase";
+import { AgentBase, AgentBaseContext } from "../../AgentBase";
 import {
   ScriptedAgentOrFactory,
-  ScriptedAgentContext,
   DataAnalystAgent,
   DeveloperAgent,
   ResearcherAgent,
@@ -25,15 +24,15 @@ export interface EvoRunArgs {
   goal: string
 }
 
-export class Evo extends AgentBase<EvoRunArgs, ScriptedAgentContext> {
+export class Evo extends AgentBase<EvoRunArgs, AgentBaseContext> {
   constructor(
-    context: ScriptedAgentContext,
+    context: AgentBaseContext,
     timeout?: Timeout,
     delegatedAgents?: ScriptedAgentOrFactory[]
   ) {
-    const onGoalAchievedFn = new OnGoalAchievedFunction(context.client, context.scripts);
-    const onGoalFailedFn = new OnGoalFailedFunction(context.client, context.scripts);
-    const verifyGoalAchievedFn = new VerifyGoalAchievedFunction(context.client, context.scripts);
+    const onGoalAchievedFn = new OnGoalAchievedFunction(context.scripts);
+    const onGoalFailedFn = new OnGoalFailedFunction(context.scripts);
+    const verifyGoalAchievedFn = new VerifyGoalAchievedFunction(context.llm, context.chat.tokenizer);
 
     delegatedAgents = delegatedAgents ?? [
         DeveloperAgent,
@@ -77,7 +76,7 @@ export class Evo extends AgentBase<EvoRunArgs, ScriptedAgentContext> {
         this.config.functions.map((fn) => {
           return {
             definition: fn.getDefinition(),
-            buildExecutor: (context: ScriptedAgentContext) => {
+            buildExecutor: (context: AgentBaseContext) => {
               return fn.buildExecutor(this, context);
             },
           };

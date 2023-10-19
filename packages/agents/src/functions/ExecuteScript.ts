@@ -1,4 +1,4 @@
-import { Agent, AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder, JsEngine, JsEngine_GlobalVar, Scripts, WrapClient, shimCode, trimText } from "@evo-ninja/agent-utils";
+import { Agent, AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder, JsEngine, JsEngine_GlobalVar, shimCode, trimText } from "@evo-ninja/agent-utils";
 import JSON5 from "json5";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
@@ -10,10 +10,6 @@ interface ExecuteScriptFuncParameters {
 }
 
 export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncParameters> {
-  constructor(private client: WrapClient, private scripts: Scripts) {
-    super();
-  }
-
   name: string = "executeScript";
   description: string = `Execute an script.`;
   parameters: any = {
@@ -35,7 +31,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: ExecuteScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (params: ExecuteScriptFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       try {
-        const script = this.scripts.getScriptByName(params.namespace);
+        const script = context.scripts.getScriptByName(params.namespace);
 
         if (!script) {
           return this.onError(params.namespace, this.scriptNotFound(params), params, rawParams, context.variables);
@@ -68,7 +64,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
             })
           );
 
-        const jsEngine = new JsEngine(this.client);
+        const jsEngine = new JsEngine(context.client);
 
         const result = await jsEngine.evalWithGlobals({
           src: shimCode(script.code),
@@ -77,9 +73,9 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
 
         return result.ok
           ? result.value.error == null
-            ? this.client.jsPromiseOutput.ok
-              ? this.onSuccess(params.namespace, this.client.jsPromiseOutput.value, params, rawParams, context.variables)
-              : this.onError(params.namespace, JSON.stringify(this.client.jsPromiseOutput.error), params, rawParams, context.variables)
+            ? context.client.jsPromiseOutput.ok
+              ? this.onSuccess(params.namespace, context.client.jsPromiseOutput.value, params, rawParams, context.variables)
+              : this.onError(params.namespace, JSON.stringify(context.client.jsPromiseOutput.error), params, rawParams, context.variables)
             : this.onError(params.namespace, result.value.error, params, rawParams, context.variables)
           : this.onError(params.namespace, result.error?.toString(), params, rawParams, context.variables);
       } catch (e: any) {
