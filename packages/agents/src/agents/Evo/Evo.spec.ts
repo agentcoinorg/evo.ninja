@@ -7,9 +7,6 @@ import {
   LlmApi,
   ConsoleLogger,
   Logger,
-  AgentVariables,
-  WrapClient,
-  agentPlugin,
 } from "@evo-ninja/agent-utils";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
@@ -19,6 +16,7 @@ import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import fs from "fs";
 import { Evo } from "./Evo";
+import { AgentBaseContext } from "../../AgentBase";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -85,16 +83,14 @@ function createEvo(
 
   return {
     agent: new Evo(
-      {
-        llm: debugLlm, 
+      new AgentBaseContext(
+        debugLlm, 
         chat, 
         logger, 
         workspace, 
         env,
-        variables: new AgentVariables(),
         scripts,
-        client: new WrapClient(workspace, logger, agentPlugin({ logger }), env)
-      }, 
+      )
     ),
     debugLog,
     llm,

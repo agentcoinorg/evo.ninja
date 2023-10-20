@@ -7,9 +7,6 @@ import {
   LlmApi,
   ConsoleLogger,
   Logger,
-  AgentVariables,
-  agentPlugin,
-  WrapClient,
 } from "@evo-ninja/agent-utils";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
@@ -17,7 +14,8 @@ import * as rimraf from "rimraf";
 import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
-import { Scripter } from ".";
+import { ScripterAgent } from ".";
+import { AgentBaseContext } from "../../AgentBase";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -30,7 +28,7 @@ jest.setTimeout(120000);
 describe('Dev Agent Test Suite', () => {
 
   function createAgent(testName: string): {
-    agent: Scripter;
+    agent: ScripterAgent;
     debugLog: DebugLog;
   } {
     const testCaseDir = path.join(__dirname, ".tests", testName);
@@ -73,23 +71,21 @@ describe('Dev Agent Test Suite', () => {
     const workspace = new FileSystemWorkspace(testCaseDir);
 
     return {
-      agent: new Scripter(
-        {
-          llm: debugLlm,
-          chat,
-          logger,
-          workspace,
+      agent: new ScripterAgent(
+        new AgentBaseContext(
+          debugLlm, 
+          chat, 
+          logger, 
+          workspace, 
           env,
-          variables: new AgentVariables(),
           scripts,
-          client: new WrapClient(workspace, logger, agentPlugin({ logger }), env)
-        },
+        )
       ),
       debugLog
     };
   }
 
-  async function runAgent(agent: Scripter, goal: string, debugLog: DebugLog) {
+  async function runAgent(agent: ScripterAgent, goal: string, debugLog: DebugLog) {
     debugLog.goalStart(goal);
     const iterator = agent.run({ goal });
 

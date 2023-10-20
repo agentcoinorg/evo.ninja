@@ -11,19 +11,40 @@ import {
   Timeout,
   Workspace,
   AgentVariables,
-  basicFunctionCallLoop
+  basicFunctionCallLoop,
+  Scripts, 
+  WrapClient,
+  agentPlugin
 } from "@evo-ninja/agent-utils";
 import { ResultErr } from "@polywrap/result";
 import { AgentFunctionBase } from "./AgentFunctionBase";
 import { ReadVariableFunction } from "./functions/ReadVariable";
 
-export interface AgentBaseContext {
-  llm: LlmApi;
-  chat: Chat;
-  logger: Logger;
-  workspace: Workspace;
-  env: Env;
-  variables: AgentVariables;
+export class AgentBaseContext {
+  constructor(
+    public readonly llm: LlmApi,
+    public chat: Chat,
+    public readonly logger: Logger,
+    public readonly workspace: Workspace,
+    public readonly env: Env,
+    public readonly scripts: Scripts,
+    public readonly client: WrapClient = new WrapClient(workspace, logger, agentPlugin({ logger }), env),
+    public readonly variables: AgentVariables = new AgentVariables()
+  ) {
+  }
+
+  cloneEmpty(): AgentBaseContext {
+    return new AgentBaseContext(
+      this.llm,
+      this.chat.cloneEmpty(),
+      this.logger,
+      this.workspace,
+      this.env,
+      this.scripts,
+      this.client,
+      new AgentVariables()
+    );
+  }
 }
 
 export interface AgentPrompts<TRunArgs> {
@@ -68,7 +89,6 @@ export class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> imp
 
   public async* run(
     args: TRunArgs,
-    context?: string
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
     try {
@@ -86,11 +106,6 @@ export class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> imp
       this.config.functions.forEach((fn) => {
         chat.addFunction(fn.getDefinition());
       });
-
-      // If additional context is needed
-      if (context) {
-        chat.persistent("user", context);
-      }
 
       if (this.config.timeout) {
         setTimeout(this.config.timeout.callback, this.config.timeout.milliseconds);

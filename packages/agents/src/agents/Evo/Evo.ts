@@ -7,48 +7,47 @@ import {
 } from "@evo-ninja/agent-utils";
 import { ResultErr } from "@polywrap/result";
 
-import { AgentBase } from "../../AgentBase";
 import {
   ScriptedAgentOrFactory,
-  ScriptedAgentContext,
   DataAnalystAgent,
   DeveloperAgent,
   ResearcherAgent,
 } from "../../scriptedAgents";
+import { AgentBase, AgentBaseContext } from "../../AgentBase";
 import { DelegateAgentFunction } from "../../functions/DelegateScriptedAgent";
 import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
 import { VerifyGoalAchievedFunction } from "../../functions/VerifyGoalAchieved";
-import { Scripter } from "../Scripter";
 import { prompts } from "./prompts";
+import { ScripterAgent } from "../Scripter";
 
 export interface EvoRunArgs {
   goal: string
 }
 
-export class Evo extends AgentBase<EvoRunArgs, ScriptedAgentContext> {
+export class Evo extends AgentBase<EvoRunArgs, AgentBaseContext> {
   constructor(
-    context: ScriptedAgentContext,
+    context: AgentBaseContext,
     timeout?: Timeout,
     delegatedAgents?: ScriptedAgentOrFactory[]
   ) {
-    const onGoalAchievedFn = new OnGoalAchievedFunction(context.client, context.scripts);
-    const onGoalFailedFn = new OnGoalFailedFunction(context.client, context.scripts);
-    const verifyGoalAchievedFn = new VerifyGoalAchievedFunction(context.client, context.scripts);
+    const onGoalAchievedFn = new OnGoalAchievedFunction(context.scripts);
+    const onGoalFailedFn = new OnGoalFailedFunction(context.scripts);
+    const verifyGoalAchievedFn = new VerifyGoalAchievedFunction(context.llm, context.chat.tokenizer);
 
     delegatedAgents = delegatedAgents ?? [
         DeveloperAgent,
         ResearcherAgent,
         DataAnalystAgent,
-        Scripter
-      ].map(agentClass => () => new agentClass({ ...context, chat: context.chat.cloneEmpty() }));
+        ScripterAgent
+      ].map(agentClass => () => new agentClass(context.cloneEmpty()));
 
     super(
       {
         functions: [
           onGoalAchievedFn,
           onGoalFailedFn,
-          ...delegatedAgents.map((x) => new DelegateAgentFunction(x)),
+          ...delegatedAgents.map((x) => new DelegateAgentFunction(x, context.llm, context.chat.tokenizer)),
         ],
         shouldTerminate: (functionCalled) => {
           return [onGoalAchievedFn.name, onGoalFailedFn.name].includes(
@@ -63,8 +62,7 @@ export class Evo extends AgentBase<EvoRunArgs, ScriptedAgentContext> {
   }
 
   public async* run(
-    args: EvoRunArgs,
-    context?: string
+    args: EvoRunArgs
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     // To help Evo determine what agents to delegate to,
     // we first read the files contained within the directory
@@ -78,7 +76,7 @@ export class Evo extends AgentBase<EvoRunArgs, ScriptedAgentContext> {
       }`
     });
 
-    return yield* super.run(args, context);
+    return yield* super.run(args);
   }
 
   public async *runWithChat(args: {
@@ -97,7 +95,7 @@ export class Evo extends AgentBase<EvoRunArgs, ScriptedAgentContext> {
         this.config.functions.map((fn) => {
           return {
             definition: fn.getDefinition(),
-            buildExecutor: (context: ScriptedAgentContext) => {
+            buildExecutor: (context: AgentBaseContext) => {
               return fn.buildExecutor(this, context);
             },
           };

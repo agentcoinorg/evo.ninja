@@ -1,11 +1,3 @@
-import {
-  LlmApi,
-  Chat,
-  Workspace,
-  Env,
-  Logger,
-  AgentVariables,
-} from "@evo-ninja/agent-utils";
 import { AgentBase, AgentBaseConfig, AgentBaseContext } from "../../AgentBase";
 import { WriteScriptFunction } from "../../functions/WriteScript";
 import { ThinkFunction } from "../../functions/Think";
@@ -21,22 +13,7 @@ export class ScriptWriter extends AgentBase<
   ScriptWriterRunArgs,
   AgentBaseContext
 > {
-  constructor(
-    llm: LlmApi,
-    chat: Chat,
-    workspace: Workspace,
-    logger: Logger,
-    env: Env
-  ) {
-    const agentContext: AgentBaseContext = {
-      llm: llm,
-      chat: chat,
-      logger,
-      workspace: workspace,
-      variables: new AgentVariables(),
-      env,
-    };
-
+  constructor(context: AgentBaseContext) {
     const writeScriptFn = new WriteScriptFunction();
 
     const config: AgentBaseConfig<ScriptWriterRunArgs> = {
@@ -49,6 +26,6 @@ export class ScriptWriter extends AgentBase<
       prompts,
     };
 
-    super(config, agentContext);
+    super(config, context);
   }
 }

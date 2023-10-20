@@ -7,9 +7,6 @@ import {
   LlmApi,
   ConsoleLogger,
   Logger,
-  WrapClient,
-  agentPlugin,
-  AgentVariables,
 } from "@evo-ninja/agent-utils";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
@@ -19,6 +16,7 @@ import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import { PlannerAgent, ScriptedAgent } from "..";
 import * as fs from "fs";
+import { AgentBaseContext } from "../../AgentBase";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -84,21 +82,14 @@ describe('Planner Agent Test Suite', () => {
 
     return {
       agent: new PlannerAgent(
-        {
-          client: new WrapClient(
-            workspace,
-            logger,
-            agentPlugin({ logger }),
-            env
-          ),
-          llm: debugLlm,
+        new AgentBaseContext(
+          debugLlm,
           chat,
-          workspace,
-          scripts,
           logger,
+          workspace,
           env,
-          variables: new AgentVariables()
-        }
+          scripts,
+        )
       ),
       debugLog
     };

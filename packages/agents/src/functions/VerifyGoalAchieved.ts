@@ -1,16 +1,14 @@
-import { AgentOutputType, Scripts, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, ChatMessage, WrapClient, AgentVariables } from "@evo-ninja/agent-utils"
-import { AgentFunctionBase } from "../AgentFunctionBase";
+import { AgentOutputType, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, ChatMessage, AgentVariables, LlmApi, Tokenizer } from "@evo-ninja/agent-utils"
 import { GoalVerifierAgent } from "../scriptedAgents";
 import { AgentBaseContext } from "../AgentBase";
+import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 
 interface FunctionParams {
-  task: string;
-  context?: string;
 }
 
-export class VerifyGoalAchievedFunction extends AgentFunctionBase<FunctionParams> {
-  constructor(private client: WrapClient, private scripts: Scripts) {
-    super();
+export class VerifyGoalAchievedFunction extends LlmAgentFunctionBase<FunctionParams> {
+  constructor(llm: LlmApi, tokenizer: Tokenizer) {
+    super(llm, tokenizer);
   }
 
   name: string = "verifyGoalAchieved";
@@ -65,54 +63,28 @@ export class VerifyGoalAchievedFunction extends AgentFunctionBase<FunctionParams
 
   buildExecutor(agent: Agent<unknown>, context: AgentBaseContext) {
     return async (params: FunctionParams, rawParams?: string): Promise<AgentFunctionResult> => {
-      const scriptedAgent = new GoalVerifierAgent(
-        {
-          chat: context.chat.cloneEmpty(),
-          env: context.env,
-          llm: context.llm,
-          logger: context.logger,
-          workspace: context.workspace,
-          scripts: this.scripts,
-          client: this.client,
-          variables: context.variables
-        }
+      const result = await this.askAgent(
+        new GoalVerifierAgent(context.cloneEmpty()), 
+        { initialMessages: context.chat.messages, goal: "" }, 
+        context,
       );
 
-      let iterator = scriptedAgent.run({
-        goal: "",
-        initialMessages: context.chat.messages
-      }, params.context);
-
-      const messages = [];
-
-      while (true) {
-        const response = await iterator.next();
-
-        if (response.done) {
-          if (!response.value.ok) {
-            return this.onFailure(
-              this.name,
-              params,
-              rawParams,
-              response.value.error,
-              context.variables
-            );
-          }
-        
-          return this.onSuccess(
-            this.name,
-            rawParams,
-            messages,
-            response.value.value,
-            context.variables
-          );
-        } else {
-          if (response.value.type === "message" && response.value.content) {
-            messages.push(response.value.content);
-          }
-        }
-
-        response.value && context.logger.info(response.value.title);
+      if (!result.ok) {
+        return this.onFailure(
+          this.name,
+          params,
+          rawParams,
+          result.error,
+          context.variables
+        );
+      } else {
+        return this.onSuccess(
+          this.name,
+          rawParams,
+          [],
+          result.value.output,
+          context.variables
+        );
       }
     }
   }

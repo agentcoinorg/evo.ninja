@@ -1,4 +1,4 @@
-import { AgentOutputType, trimText, ChatMessageBuilder, AgentFunctionResult, AgentVariables, Scripts, WrapClient } from "@evo-ninja/agent-utils"
+import { AgentOutputType, trimText, ChatMessageBuilder, AgentFunctionResult, AgentVariables, Scripts } from "@evo-ninja/agent-utils"
 import { ScriptedAgent } from "../scriptedAgents"
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
@@ -8,8 +8,8 @@ interface ReadFileFuncParameters {
 };
 
 export class ReadFileFunction extends ScriptFunction<ReadFileFuncParameters> {
-  constructor(client: WrapClient, scripts: Scripts, private _saveThreshold?: number) {
-    super(client, scripts);
+  constructor(scripts: Scripts, private _saveThreshold?: number) {
+    super(scripts);
   }
 
   name: string = "fs_readFile";

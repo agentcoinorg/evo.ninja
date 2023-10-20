@@ -1,38 +1,24 @@
-import {
-  ScriptedAgent,
-  ScriptedAgentConfig,
-  ScriptedAgentContext,
-} from "../ScriptedAgent";
-import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
-import { OnGoalFailedFunction } from "../../functions/OnGoalFailed";
-import { HTMLChunker } from "@evo-ninja/agent-utils";
 import { WebSearchFunction } from "../../functions/WebSearch";
 import { SearchInPagesFunction } from "../../functions/SearchInPages";
 import { PlanWebResearchFunction } from "../../functions/PlanWebResearch";
 import { VerifyResearchFunction } from "../../functions/VerifyResearch";
 import { ScrapeTextFunction } from "../../functions/ScrapeText";
-import { OpenAIEmbeddingFunction, connect } from "vectordb";
+import { AgentWithGoal } from "../../AgentWithGoal";
+import { ScriptedAgentRunArgs } from "../ScriptedAgent";
+import { AgentBaseContext } from "../../AgentBase";
 import { prompts } from "./prompts";
 
-export class WebResearcherAgent extends ScriptedAgent {
-  constructor(context: ScriptedAgentContext) {
+import { HTMLChunker } from "@evo-ninja/agent-utils";
+import { OpenAIEmbeddingFunction, connect } from "vectordb";
 
-    const onGoalAchievedFn = new OnGoalAchievedFunction(
-      context.client,
-      context.scripts
-    );
+export class WebResearcherAgent extends AgentWithGoal<ScriptedAgentRunArgs> {
+  constructor(context: AgentBaseContext) {
 
-    const onGoalFailedFn = new OnGoalFailedFunction(
-      context.client,
-      context.scripts
-    );
+    const scrapeTextFunc = new ScrapeTextFunction(context.scripts)
 
-    const scrapeTextFunc = new ScrapeTextFunction(context.client, context.scripts)
-
-    const config: ScriptedAgentConfig = {
-      functions: [
-        onGoalAchievedFn,
-        onGoalFailedFn,
+    super(
+      () => prompts,
+      [
         new PlanWebResearchFunction(context.llm, context.chat.tokenizer),
         new VerifyResearchFunction(context.llm, context.chat.tokenizer),
         new SearchInPagesFunction(
@@ -49,14 +35,7 @@ export class WebResearcherAgent extends ScriptedAgent {
         new WebSearchFunction(),
         scrapeTextFunc
       ],
-      shouldTerminate: (functionCalled) => {
-        return [onGoalAchievedFn.name, onGoalFailedFn.name].includes(
-          functionCalled.name
-        );
-      },
-      prompts,
-    };
-
-    super(config, context);
+      context
+    );
   }
 }
