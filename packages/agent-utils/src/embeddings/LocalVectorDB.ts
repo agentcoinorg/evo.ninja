@@ -1,51 +1,32 @@
+import { Workspace } from "../sys";
+import { LocalCollection } from "./LocalCollection";
 import { EmbeddingApi } from "./EmbeddingApi";
-import { normalize, normalizedCosineSimilarity } from "./utils";
-import { LocalDocumentStore } from "./LocalDocumentStore";
-import { LocalDocument } from "./LocalDocument";
+import path from "path-browserify";
 
 export class LocalVectorDB {
   constructor(
+    private workspace: Workspace,
+    private uri: string,
     private embeddingApi: EmbeddingApi,
-    private store: LocalDocumentStore,
   ) {}
 
-  async add(items: string[]): Promise<void>{
-    if (!items.length) {
-      return;
-    }
+  addCollection(name: string): LocalCollection {
+    const collection = new LocalCollection(
+      path.join(this.uri, name),
+      this.embeddingApi,
+      this.workspace,
+    )
 
-    const results = await this.embeddingApi.createEmbeddings(items)
-
-    for await (const result of results) {
-      this.store.add({
-        text: result.input,
-        vector: result.embedding,
-      })
-    }
+    collection.save()
+    return collection
   }
 
-  async search(query: string, limit: number): Promise<LocalDocument[]> {
-    const queryEmbeddingResults = await this.embeddingApi.createEmbeddings(query);
-    const queryVector = queryEmbeddingResults[0].embedding;
-    const normalizedQueryVector = normalize(queryVector);
-
-    const documents = this.store.list();
-
-    const distances = documents.map(document => {
-      const vector = document.vector();
-      const normalizedVector = normalize(vector);
-
-      const distance = normalizedCosineSimilarity(queryVector, normalizedQueryVector, vector, normalizedVector);
-      return { document, distance };
-    })
-
-    const sortedDistances = distances.sort((a, b) => b.distance - a.distance);
-    const topDistances = sortedDistances.slice(0, limit);
-
-    const results = topDistances.map(({ document }) => {
-      return document
-    })
-
-    return results;
+  listCollections(): LocalCollection[] {
+    const names = this.workspace.readdirSync(this.uri).map(entry => entry.name)
+    return names.map(name => new LocalCollection(
+      path.join(this.uri, name),
+      this.embeddingApi,
+      this.workspace,
+    ))
   }
 }

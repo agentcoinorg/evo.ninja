@@ -1,4 +1,3 @@
-import { LocalDocumentStore } from "../embeddings/LocalDocumentStore"
 import { LocalVectorDB } from "../embeddings/LocalVectorDB"
 import { OpenAIEmbeddingAPI } from "../embeddings/OpenAIEmbeddingApi"
 import { ConsoleLogger, Env, InMemoryWorkspace } from "../sys"
@@ -25,6 +24,71 @@ const generateRandomString = (length: number): string => {
 }
 
 describe('Local Vector DB', () => {
+  it('should list created collections', async () => {
+    const workspace = new InMemoryWorkspace()
+    const env = new Env(process.env);
+    const consoleLogger = new ConsoleLogger();
+    const embeddingApi = new OpenAIEmbeddingAPI(
+      env.OPENAI_API_KEY,
+      consoleLogger,
+      cl100k_base
+    )
+    const db = new LocalVectorDB(workspace, "testdb", embeddingApi)
+    db.addCollection("testA")
+    db.addCollection("testB")
+    
+    const collections = db.listCollections()
+    const names = collections.map(collection => collection.name)
+    const uris = collections.map(collection => collection.uri)
+
+    expect(names.length).toEqual(2)
+    expect(names).toContain("testA")
+    expect(names).toContain("testB")
+
+    expect(uris.length).toEqual(2)
+    expect(uris).toContain("testdb/testA")
+    expect(uris).toContain("testdb/testB")
+  })
+
+  it('should properly separate collection data', async () => {
+    const workspace = new InMemoryWorkspace()
+    const env = new Env(process.env);
+    const consoleLogger = new ConsoleLogger();
+    const embeddingApi = new OpenAIEmbeddingAPI(
+      env.OPENAI_API_KEY,
+      consoleLogger,
+      cl100k_base
+    )
+    const db = new LocalVectorDB(workspace,  "testdb", embeddingApi)
+    const collectionA = db.addCollection("testA")
+    const collectionB = db.addCollection("testB")
+
+    await collectionA.add([
+      "Hello world",
+      "Hello universe",
+    ])
+
+    await collectionB.add([
+      "Goodbye world",
+      "Goodbye universe",
+    ])
+
+    const resultsA = await collectionA.search("Hey", 4)
+    const textsA = resultsA.map(result => result.text())
+
+    const resultsB = await collectionB.search("Hey", 4)
+    const textsB = resultsB.map(result => result.text())
+
+    expect(textsA.length).toEqual(2)
+    expect(textsB.length).toEqual(2)
+
+    expect(textsA[0]).toContain("Hello")
+    expect(textsA[1]).toContain("Hello")
+
+    expect(textsB[0]).toContain("Goodbye")
+    expect(textsB[1]).toContain("Goodbye")
+  })
+
   it('should be able to save and load vectors', async () => {
     const workspace = new InMemoryWorkspace()
     const env = new Env(process.env);
@@ -34,17 +98,17 @@ describe('Local Vector DB', () => {
       consoleLogger,
       cl100k_base
     )
-    const store = new LocalDocumentStore(workspace, "testdb")
-    const db = new LocalVectorDB(embeddingApi, store)
+    const db = new LocalVectorDB(workspace, "testdb", embeddingApi)
+    const collection = db.addCollection("test")
 
-    await db.add([
+    await collection.add([
       "Goodbye world",
       "Hello world",
       "Goodbye universe",
       "Hello universe",
     ])
 
-    const results = await db.search("Hey", 2)
+    const results = await collection.search("Hey", 2)
     const texts = results.map(result => result.text())
 
     expect(texts[0]).toEqual("Hello world")
@@ -60,13 +124,13 @@ describe('Local Vector DB', () => {
       consoleLogger,
       cl100k_base
     )
-    const store = new LocalDocumentStore(workspace, "testdb")
-    const db = new LocalVectorDB(embeddingApi, store)
+    const db = new LocalVectorDB(workspace, "testdb", embeddingApi)
+    const collection = db.addCollection("test")
     const data = Array.from({ length: 10000 }, () => generateRandomString(10))
 
-    await db.add(data)
+    await collection.add(data)
 
-    const results = await db.search("Hello", 5)
+    const results = await collection.search("Hello", 5)
     expect(results.length).toEqual(5)
   })
 })

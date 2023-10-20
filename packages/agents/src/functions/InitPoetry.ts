@@ -7,20 +7,24 @@ import {
 } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
+import {FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT} from "../agents/Scripter/utils";
 import path from "path";
 import { Agent } from "../Agent";
 
 interface InitPoetryFuncParameters {}
 
 export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParameters> {
-  
+
   name: string = "cmd_initPoetry";
   description: string = `Initialize a Python Poetry environment in the workspace.`;
-  parameters: any = {};
+  parameters: any = {"type": "object", "properties": {}};
 
   buildExecutor({ context }: Agent<unknown>): (params: InitPoetryFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (params: InitPoetryFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
-      await this.poetryInit(context.workspace);
+      const result = await this.poetryInit(context.workspace);
+      if (result.exitCode !== 0) {
+        return this.onError(result.stderr, params, rawParams, context.variables);
+      }
       return this.onSuccess(params, rawParams, context.variables);
     };
   }
@@ -49,11 +53,32 @@ export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParamete
     }
   }
 
-  private async poetryInit(workspace: Workspace): Promise<void> {
+  private onError(error: string, params: InitPoetryFuncParameters, rawParams: string | undefined, variables: AgentVariables): AgentFunctionResult {
+    return {
+      outputs: [
+        {
+          type: AgentOutputType.Error,
+          title: "Failed to initialize poetry environment",
+          content: FUNCTION_CALL_FAILED(params, this.name, error ?? "Unknown error"),
+        }
+      ],
+      messages: [
+        ChatMessageBuilder.functionCall(this.name, rawParams),
+        ...ChatMessageBuilder.functionCallResultWithVariables(
+          this.name,
+          `Failed to init poetry: ${error}.`,
+          variables
+        ),
+      ]
+    }
+  }
+
+  private async poetryInit(workspace: Workspace):  Promise<{exitCode: number, stdout: string, stderr: string}> {
     await workspace.exec("poetry", ["init", "-n"]);
     const dependencies = this.getPythonDependencies(workspace, "/");
-    const alwaysAdd = ["pytest"];
-    await workspace.exec("poetry", ["add", `${dependencies.concat(alwaysAdd).join(" ")}`]);
+    const alwaysAdd = ["pytest", "pydantic"];
+    const toAdd = Array.from(new Set(dependencies.concat(alwaysAdd)));
+    return await workspace.exec("poetry", ["add", ...toAdd]);
   }
 
   // does not search recursively
@@ -72,7 +97,7 @@ export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParamete
 
     const externalImports = uniqueImports.filter(importName => {
       const maybeLocalPath = path.join(dir, `${importName}.py`);
-      return !workspace.existsSync(maybeLocalPath);
+      return !workspace.existsSync(maybeLocalPath) && !this.common_native_python_packages.has(importName);
     });
 
     return externalImports;
@@ -99,4 +124,240 @@ export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParamete
 
     return imports;
   }
+
+  common_native_python_packages = new Set([
+      "_ast",
+      "_bisect",
+      "_blake2",
+      "_codecs",
+      "_collections",
+      "_datetime",
+      "_elementtree",
+      "_functools",
+      "_heapq",
+      "_imp",
+      "_io",
+      "_json",
+      "_locale",
+      "_md5",
+      "_operator",
+      "_pickle",
+      "_posixsubprocess",
+      "_random",
+      "_sha1",
+      "_sha256",
+      "_sha3",
+      "_sha512",
+      "_signal",
+      "_sre",
+      "_stat",
+      "_string",
+      "_struct",
+      "_symtable",
+      "_thread",
+      "_tracemalloc",
+      "_warnings",
+      "_weakref",
+      "abc",
+      "argparse",
+      "array",
+      "ast",
+      "asynchat",
+      "asyncio",
+      "asyncore",
+      "atexit",
+      "audioop",
+      "base64",
+      "bdb",
+      "binascii",
+      "binhex",
+      "bisect",
+      "builtins",
+      "bz2",
+      "cProfile",
+      "calendar",
+      "cgi",
+      "cgitb",
+      "chunk",
+      "cmath",
+      "cmd",
+      "code",
+      "codecs",
+      "codeop",
+      "collections",
+      "colorsys",
+      "compileall",
+      "concurrent",
+      "configparser",
+      "contextlib",
+      "contextvars",
+      "copy",
+      "copyreg",
+      "crypt",
+      "csv",
+      "ctypes",
+      "curses",
+      "dataclasses",
+      "datetime",
+      "dbm",
+      "decimal",
+      "difflib",
+      "dis",
+      "distutils",
+      "doctest",
+      "email",
+      "encodings",
+      "ensurepip",
+      "enum",
+      "errno",
+      "faulthandler",
+      "fcntl",
+      "filecmp",
+      "fileinput",
+      "fnmatch",
+      "formatter",
+      "fractions",
+      "ftplib",
+      "functools",
+      "gc",
+      "getopt",
+      "getpass",
+      "gettext",
+      "glob",
+      "grp",
+      "gzip",
+      "hashlib",
+      "heapq",
+      "hmac",
+      "html",
+      "http",
+      "imaplib",
+      "imghdr",
+      "imp",
+      "importlib",
+      "inspect",
+      "io",
+      "ipaddress",
+      "itertools",
+      "json",
+      "keyword",
+      "lib2to3",
+      "linecache",
+      "locale",
+      "logging",
+      "lzma",
+      "mailbox",
+      "mailcap",
+      "marshal",
+      "math",
+      "mimetypes",
+      "mmap",
+      "modulefinder",
+      "msilib",
+      "msvcrt",
+      "multiprocessing",
+      "netrc",
+      "nntplib",
+      "nt",
+      "ntpath",
+      "opcode",
+      "operator",
+      "optparse",
+      "os",
+      "pathlib",
+      "pdb",
+      "pickle",
+      "pipes",
+      "pkgutil",
+      "platform",
+      "plistlib",
+      "poplib",
+      "posix",
+      "posixpath",
+      "pprint",
+      "profile",
+      "pstats",
+      "pty",
+      "pwd",
+      "py_compile",
+      "pyclbr",
+      "pydoc",
+      "queue",
+      "quopri",
+      "random",
+      "re",
+      "readline",
+      "reprlib",
+      "resource",
+      "rlcompleter",
+      "runpy",
+      "sched",
+      "secrets",
+      "select",
+      "selectors",
+      "shelve",
+      "shlex",
+      "shutil",
+      "signal",
+      "site",
+      "smtpd",
+      "smtplib",
+      "sndhdr",
+      "socket",
+      "socketserver",
+      "spwd",
+      "sqlite3",
+      "sre_compile",
+      "sre_constants",
+      "sre_parse",
+      "ssl",
+      "stat",
+      "statistics",
+      "string",
+      "stringprep",
+      "struct",
+      "subprocess",
+      "sunau",
+      "symbol",
+      "symtable",
+      "sys",
+      "sysconfig",
+      "tabnanny",
+      "tarfile",
+      "telnetlib",
+      "tempfile",
+      "termios",
+      "textwrap",
+      "this",
+      "threading",
+      "time",
+      "timeit",
+      "token",
+      "tokenize",
+      "trace",
+      "traceback",
+      "tracemalloc",
+      "tty",
+      "turtle",
+      "types",
+      "typing",
+      "unicodedata",
+      "unittest",
+      "urllib",
+      "uu",
+      "uuid",
+      "venv",
+      "wave",
+      "weakref",
+      "webbrowser",
+      "wsgiref",
+      "xdrlib",
+      "xml",
+      "xmlrpc",
+      "zipapp",
+      "zipfile",
+      "zipimport",
+      "zoneinfo",
+      "zlib"
+    ]);
 }

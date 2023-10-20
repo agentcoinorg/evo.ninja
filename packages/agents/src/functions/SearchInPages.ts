@@ -9,7 +9,7 @@ import {
   trimText,
 } from "@evo-ninja/agent-utils";
 import axios from "axios";
-import { v4 as uuid } from "forked-agent-protocol";
+import { v4 as uuid } from "agent-protocol";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { Connection, EmbeddingFunction } from "vectordb";
 import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
