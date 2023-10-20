@@ -9,17 +9,17 @@ import { OnGoalFailedFunction } from "./functions/OnGoalFailed";
 import { AgentPrompts } from "./AgentPrompts";
 
 export class AgentConfig<TRunArgs> {
-  shouldTerminate: (functionCalled: ExecuteAgentFunctionCalled) => boolean;
-  prompts: AgentPrompts<TRunArgs>;
+  readonly shouldTerminate: (functionCalled: ExecuteAgentFunctionCalled) => boolean;
+  readonly prompts: AgentPrompts<TRunArgs>;
 
   constructor(
     promptFactory: (
       onGoalAchievedFn: AgentFunctionBase<any>,
       onGoalFailedFn: AgentFunctionBase<any>
     ) => AgentPrompts<TRunArgs>,
-    readonly functions: AgentFunctionBase<unknown>[],
+    public readonly functions: AgentFunctionBase<unknown>[],
     scripts: Scripts,
-    readonly timeout?: Timeout,
+    public readonly timeout?: Timeout,
     shouldTerminate?: (functionCalled: ExecuteAgentFunctionCalled) => boolean,
     overrideDefaultFunctions?: boolean,
   ) {

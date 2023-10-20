@@ -6,8 +6,7 @@ import {
   Workspace
 } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
-import { FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
-import {FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT} from "../agents/Scripter/utils";
+import { FUNCTION_CALL_SUCCESS_CONTENT, FUNCTION_CALL_FAILED} from "../agents/Scripter/utils";
 import path from "path";
 import { Agent } from "../Agent";
 
