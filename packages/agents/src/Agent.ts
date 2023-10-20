@@ -10,14 +10,6 @@ import { ResultErr } from "@polywrap/result";
 import { AgentConfig } from "./AgentConfig";
 import { AgentContext } from "./AgentContext";
 
-export interface AgentPrompts<TRunArgs> {
-  name: string;
-  expertise: string;
-  initialMessages: (runArguments: TRunArgs) => ChatMessage[];
-  loopPreventionPrompt: string;
-  agentSpeakPrompt?: string;
-}
-
 export type GoalRunArgs = {
   goal: string;
 };
@@ -25,7 +17,7 @@ export type GoalRunArgs = {
 export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
   constructor(
     public readonly config: AgentConfig<TRunArgs>,
-    private readonly context: AgentContext,
+    public readonly context: AgentContext,
   ) { 
   }
 
@@ -69,7 +61,7 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
           return {
             definition: fn.getDefinition(),
             buildExecutor: (context: AgentContext) => {
-              return fn.buildExecutor(this, context);
+              return fn.buildExecutor(this);
             }
           }
         }),
