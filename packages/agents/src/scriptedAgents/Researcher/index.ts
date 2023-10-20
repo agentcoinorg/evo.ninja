@@ -1,16 +1,12 @@
-import { WriteFileFunction } from "../../functions/WriteFile";
-import { HTMLChunker } from "@evo-ninja/agent-utils";
-import { WebSearchFunction } from "../../functions/WebSearch";
-import { SearchInPagesFunction } from "../../functions/SearchInPages";
-import { PlanResearchFunction } from "../../functions/PlanResearch";
-import { VerifyResearchFunction } from "../../functions/VerifyResearch";
-import { OpenAIEmbeddingFunction, connect } from "vectordb";
-import { ScrapeTextFunction } from "../../functions/ScrapeText";
 import { prompts } from "./prompts";
-import { AgentContext } from "../../AgentContext";
-import { ReadFileFunction } from "../../functions/ReadFile";
 import { Agent } from "../../Agent";
 import { AgentConfig } from "../../AgentConfig";
+import { AgentContext } from "../../AgentContext";
+import { WriteFileFunction } from "../../functions/WriteFile";
+import { ReadFileFunction } from "../../functions/ReadFile";
+import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
+import { DelegateAgentFunction } from "../../functions/DelegateScriptedAgent";
+import { WebResearcherAgent } from "../WebResearcher";
 
 export class ResearcherAgent extends Agent {
   constructor(context: AgentContext) {
@@ -20,21 +16,12 @@ export class ResearcherAgent extends Agent {
         [
           new WriteFileFunction(context.scripts),
           new ReadFileFunction(context.scripts),
-          new PlanResearchFunction(context.llm, context.chat.tokenizer),
-          new VerifyResearchFunction(context.llm, context.chat.tokenizer),
-          new SearchInPagesFunction(
-            new HTMLChunker({ maxChunkSize: 5000 }),
-            context.chat.tokenizer,
+          new ReadDirectoryFunction(context.scripts),
+          new DelegateAgentFunction(
+            () => new WebResearcherAgent(context.cloneEmpty()),
             context.llm,
-            {
-              connect: async () => connect({
-                uri:  `./db/lance`,
-              }),
-              embeddingFunction: (column) => new OpenAIEmbeddingFunction(column, context.env.OPENAI_API_KEY)
-            }
+            context.chat.tokenizer
           ),
-          new WebSearchFunction(),
-          new ScrapeTextFunction(context.scripts)
         ], 
         context.scripts,
       ),

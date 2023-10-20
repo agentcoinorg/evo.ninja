@@ -28,7 +28,14 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
   public async* run(
     args: TRunArgs,
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
-    return yield* this.runWithChat(this.config.prompts.initialMessages(args));
+    return yield* this.runWithChat([
+      // Add an extra prompt informing agent about variable usage
+      {
+        role: "system",
+        content: `Variables are annotated using the \${variable-name} syntax. Variables can be used as function argument using the \${variable-name} syntax. Variables are created as needed, and do not exist unless otherwise stated.`
+      },
+      ...this.config.prompts.initialMessages(args)
+    ]);
   }
 
   public async* runWithChat(

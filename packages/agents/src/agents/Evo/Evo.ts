@@ -1,17 +1,20 @@
 import {
   Timeout,
+  AgentOutput,
+  RunResult
 } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../../AgentContext";
 import {
   DataAnalystAgent,
   DeveloperAgent,
   ResearcherAgent,
+  ScribeAgent
 } from "../../scriptedAgents";
 import { DelegateAgentFunction } from "../../functions/DelegateScriptedAgent";
 import { VerifyGoalAchievedFunction } from "../../functions/VerifyGoalAchieved";
 import { prompts } from "./prompts";
 import { ScripterAgent } from "../Scripter";
-import { Agent } from "../../Agent";
+import { Agent, GoalRunArgs } from "../../Agent";
 import { AgentConfig } from "../../AgentConfig";
 
 export type AgentOrFactory = (Agent | (() => Agent));
@@ -25,11 +28,12 @@ export class Evo extends Agent {
     const verifyGoalAchievedFn = new VerifyGoalAchievedFunction(context.llm, context.chat.tokenizer);
 
     delegatedAgents = delegatedAgents ?? [
-        DeveloperAgent,
-        ResearcherAgent,
-        DataAnalystAgent,
-        ScripterAgent
-      ].map(agentClass => () => new agentClass(context.cloneEmpty()));
+      DeveloperAgent,
+      ResearcherAgent,
+      DataAnalystAgent,
+      ScripterAgent,
+      ScribeAgent
+    ].map(agentClass => () => new agentClass(context.cloneEmpty()));
 
     super(
       new AgentConfig(
@@ -43,5 +47,23 @@ export class Evo extends Agent {
       ),
       context,
     );
+  }
+
+  public async* run(
+    args: GoalRunArgs
+  ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
+    // To help Evo determine what agents to delegate to,
+    // we first read the files contained within the directory
+    const files = this.context.workspace.readdirSync("./");
+    this.context.chat.temporary({
+      role: "user",
+      content: `Files: ${
+        files.filter((x) => x.type === "file").map((x) => x.name).join(", ")
+      }\nDirectories: ${
+        files.filter((x) => x.type === "directory").map((x) => x.name).join(", ")
+      }`
+    });
+
+    return yield* super.run(args);
   }
 }
