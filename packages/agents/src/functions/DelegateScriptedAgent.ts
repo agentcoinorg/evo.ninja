@@ -60,7 +60,7 @@ export class DelegateAgentFunction<
 
       const result = await this.askAgent(
         scriptedAgent,
-        { goal: `Task: ${params.task}\nContext: ${params.context}` },
+        { goal: `Task: ${params.task}${params.context ? `\nContext: ${params.context}` : ""}` },
         context
       );
 
