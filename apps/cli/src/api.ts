@@ -60,7 +60,7 @@ async function taskHandler(
   logger.info(`Trying to achieve goal: ${input}\nTask with ID: ${id}`);
   debugLog?.goalStart(input);
 
-  let iterator = app.evo.run({ goal: input });
+  let iterator = app.evo.run({ goal: input }, { max_tokens: 550 });
 
   async function stepHandler(stepInput: StepInput | null): Promise<StepResult> {
     logger.info(`Running step....`);

@@ -14,7 +14,8 @@ import {
   basicFunctionCallLoop,
   Scripts, 
   WrapClient,
-  agentPlugin
+  agentPlugin,
+  LlmOptions
 } from "@evo-ninja/agent-utils";
 import { ResultErr } from "@polywrap/result";
 import { AgentFunctionBase } from "./AgentFunctionBase";
@@ -89,6 +90,7 @@ export class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> imp
 
   public async* run(
     args: TRunArgs,
+    llmOptions?: LlmOptions
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
     try {
@@ -119,7 +121,8 @@ export class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> imp
           return this.config.shouldTerminate(functionCalled);
         },
         this.config.prompts.loopPreventionPrompt,
-        this.config.prompts.agentSpeakPrompt
+        this.config.prompts.agentSpeakPrompt,
+        llmOptions
       );
     } catch (err) {
       this.context.logger.error(err);

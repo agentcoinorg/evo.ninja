@@ -7,7 +7,7 @@ import {
   executeAgentFunction,
   processFunctionAndArgs
 } from "./processFunctionArgs";
-import { Chat, ChatMessage, LlmApi } from "../llm";
+import { Chat, ChatMessage, LlmApi, LlmOptions } from "../llm";
 
 import { ResultErr, ResultOk } from "@polywrap/result";
 import { AGENT_SPEAK_RESPONSE } from "./prompts";
@@ -21,7 +21,8 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
     result: ExecuteAgentFunctionResult["result"]
   ) => boolean,
   loopPreventionPrompt: string,
-  agentSpeakPrompt: string = AGENT_SPEAK_RESPONSE
+  agentSpeakPrompt: string = AGENT_SPEAK_RESPONSE,
+  options?: LlmOptions
 ): AsyncGenerator<AgentOutput, RunResult, string | undefined>
 {
   const { llm, chat } = context;
@@ -30,7 +31,7 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
     await chat.fitToContextWindow();
 
     const functionDefinitions = agentFunctions.map(f => f.definition);
-    const response = await llm.getResponse(chat.chatLogs, functionDefinitions);
+    const response = await llm.getResponse(chat.chatLogs, functionDefinitions, options);
 
     if (!response) {
       return ResultErr("No response from LLM.");
