@@ -1,18 +1,14 @@
-import { AgentOutputType, ChatMessageBuilder, AgentOutput, Agent, AgentFunctionResult, ChatMessage, AgentVariables, LlmApi, Tokenizer } from "@evo-ninja/agent-utils"
-import { AgentBase, AgentBaseContext } from "../AgentBase";
+import { AgentOutputType, ChatMessageBuilder, AgentOutput, AgentFunctionResult, ChatMessage, AgentVariables, LlmApi, Tokenizer } from "@evo-ninja/agent-utils"
 import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
+import { Agent } from "../Agent";
 
 interface DelegateAgentParams {
   task: string;
   context?: string;
 }
 
-interface AgentRunArgs {
-  goal: string
-}
-
 export class DelegateAgentFunction<
-  TAgent extends AgentBase<AgentRunArgs, AgentBaseContext>
+  TAgent extends Agent
 > extends LlmAgentFunctionBase<DelegateAgentParams> {
   private _name: string;
   private _expertise: string;
@@ -56,7 +52,7 @@ export class DelegateAgentFunction<
     additionalProperties: false
   };
 
-  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext) {
+  buildExecutor({ context }: Agent<unknown>) {
     return async (params: DelegateAgentParams, rawParams?: string): Promise<AgentFunctionResult> => {
       const scriptedAgent = typeof this.delegatedAgent === "function" ?
         this.delegatedAgent() :
@@ -64,7 +60,7 @@ export class DelegateAgentFunction<
 
       const result = await this.askAgent(
         scriptedAgent,
-        { goal: `Task: ${params.task}\nContext: ${params.context}` },
+        { goal: `Task: ${params.task}${params.context ? `\nContext: ${params.context}` : ""}` },
         context
       );
 

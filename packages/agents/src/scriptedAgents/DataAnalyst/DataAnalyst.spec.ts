@@ -14,9 +14,10 @@ import * as rimraf from "rimraf";
 import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
-import { DataAnalystAgent, ScriptedAgent } from "..";
+import { DataAnalystAgent } from "..";
 import fs from "fs";
-import { AgentBaseContext } from "../../AgentBase";
+import { AgentContext } from "../../AgentContext";
+import { Agent } from "../../Agent";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -31,7 +32,7 @@ describe("Data Analyst Agent Test Suite", () => {
     testName: string,
     pathsForFilesToInclude?: string[]
   ): {
-    agent: ScriptedAgent;
+    agent: Agent;
     debugLog: DebugLog;
   } {
     const testCaseDir = path.join(__dirname, ".tests", testName);
@@ -84,7 +85,7 @@ describe("Data Analyst Agent Test Suite", () => {
 
     return {
       agent: new DataAnalystAgent(
-        new AgentBaseContext(
+        new AgentContext(
           debugLlm,
           chat,
           logger,
@@ -98,7 +99,7 @@ describe("Data Analyst Agent Test Suite", () => {
   }
 
   async function runDataAnalystAgent(
-    agent: ScriptedAgent,
+    agent: Agent,
     goal: string,
     debugLog: DebugLog
   ) {

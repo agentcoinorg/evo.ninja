@@ -1,14 +1,14 @@
 import { ChatMessage } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../../AgentFunctionBase";
-import { EvoRunArgs } from "../../agents";
-import { AgentPrompts } from "../../AgentBase";
+import { GoalRunArgs } from "../../Agent";
+import { AgentPrompts } from "../../AgentPrompts";
 
 export const prompts = ( 
   onGoalAchievedFn: AgentFunctionBase<any>,
-): AgentPrompts<EvoRunArgs> => ({
+): AgentPrompts<GoalRunArgs> => ({
   name: "Planner",
   expertise: `I provide a plan that tells you how to achieve any goal`,
-  initialMessages: ({ goal }: EvoRunArgs): ChatMessage[] => [
+  initialMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
     {
       role: "user",
       content: `You are an expert planner. 

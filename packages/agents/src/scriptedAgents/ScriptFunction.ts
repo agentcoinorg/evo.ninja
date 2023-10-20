@@ -8,9 +8,8 @@ import {
   Scripts,
   shimCode
 } from "@evo-ninja/agent-utils"
-import { ScriptedAgent } from "./ScriptedAgent"
 import { AgentFunctionBase } from "../AgentFunctionBase";
-import { AgentBaseContext } from "../AgentBase";
+import { Agent } from "../Agent";
 
 export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams> {
   constructor(private readonly scripts: Scripts) {
@@ -28,12 +27,12 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
     return script.description;
   }
 
-  onSuccess(scriptedAgent: ScriptedAgent, params: any, rawParams: string | undefined, result: string, variables: AgentVariables): AgentFunctionResult {
+  onSuccess(agent: Agent, params: any, rawParams: string | undefined, result: string, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
           type: AgentOutputType.Success,
-          title: `[${scriptedAgent.config.prompts.name}] ${this.name}`,
+          title: `[${agent.config.prompts.name}] ${this.name}`,
           content: `${params.query}`
         }
       ],
@@ -44,12 +43,12 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
     }
   }
 
-  onFailure(scriptedAgent: ScriptedAgent, params: any, rawParams: string | undefined, error: string, variables: AgentVariables): AgentFunctionResult {
+  onFailure(agent: Agent, params: any, rawParams: string | undefined, error: string, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
           type: AgentOutputType.Error,
-          title: `[${scriptedAgent.config.prompts.name}] Error in ${this.name}: ${error}`
+          title: `[${agent.config.prompts.name}] Error in ${this.name}: ${error}`
         }
       ],
       messages: [
@@ -59,13 +58,14 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
     }
   }
 
-  buildExecutor(scriptedAgent: ScriptedAgent, context: AgentBaseContext): (params: TParams, rawParams?: string) => Promise<AgentFunctionResult> {
+  buildExecutor(agent: Agent<unknown>): (params: TParams, rawParams?: string) => Promise<AgentFunctionResult> {
+    const { context } = agent;
     return async (params: any, rawParams?: string): Promise<AgentFunctionResult> => {
       const scriptName = this.name.split("_").join(".");
       const script = context.scripts.getScriptByName(scriptName);
 
       if (!script) {
-        return this.onFailure(scriptedAgent, params, rawParams, `Unable to find the script ${scriptName}`, context.variables);
+        return this.onFailure(agent, params, rawParams, `Unable to find the script ${scriptName}`, context.variables);
       }
 
       const globals: JsEngine_GlobalVar[] = Object.entries(params).map(
@@ -86,15 +86,15 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
           const jsPromiseOutput = context.client.jsPromiseOutput;
           if (jsPromiseOutput.ok) {
             const result = typeof jsPromiseOutput.value !== "string" ? JSON.stringify(jsPromiseOutput.value) : jsPromiseOutput.value;
-            return this.onSuccess(scriptedAgent, params, rawParams, result, context.variables);
+            return this.onSuccess(agent, params, rawParams, result, context.variables);
           } else {
-            return this.onFailure(scriptedAgent, params, rawParams, jsPromiseOutput.error.message, context.variables);
+            return this.onFailure(agent, params, rawParams, jsPromiseOutput.error.message, context.variables);
           }
         } else {
-          return this.onFailure(scriptedAgent, params, rawParams, result.value.error.toString(), context.variables);
+          return this.onFailure(agent, params, rawParams, result.value.error.toString(), context.variables);
         }
       } else {
-        return this.onFailure(scriptedAgent, params, rawParams,result.error?.toString() ?? "Unknown error", context.variables);
+        return this.onFailure(agent, params, rawParams,result.error?.toString() ?? "Unknown error", context.variables);
       }
     };
   }

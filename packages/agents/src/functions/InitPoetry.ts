@@ -1,5 +1,4 @@
 import {
-  Agent,
   AgentFunctionResult,
   AgentOutputType,
   AgentVariables,
@@ -7,9 +6,9 @@ import {
   Workspace
 } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
-import {FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT} from "../agents/Scripter/utils";
-import { AgentBaseContext } from "../AgentBase";
+import { FUNCTION_CALL_SUCCESS_CONTENT, FUNCTION_CALL_FAILED} from "../agents/Scripter/utils";
 import path from "path";
+import { Agent } from "../Agent";
 
 interface InitPoetryFuncParameters {}
 
@@ -19,7 +18,7 @@ export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParamete
   description: string = `Initialize a Python Poetry environment in the workspace.`;
   parameters: any = {"type": "object", "properties": {}};
 
-  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: InitPoetryFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
+  buildExecutor({ context }: Agent<unknown>): (params: InitPoetryFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (params: InitPoetryFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       const result = await this.poetryInit(context.workspace);
       if (result.exitCode !== 0) {

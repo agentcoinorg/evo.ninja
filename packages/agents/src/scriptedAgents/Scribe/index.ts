@@ -2,22 +2,25 @@ import { WriteFileFunction } from "../../functions/WriteFile";
 import { ReadFileFunction } from "../../functions/ReadFile";
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
 import { ThinkFunction } from "../../functions/Think";
-import { AgentBaseContext } from "../../AgentBase";
-import { AgentWithGoal } from "../../AgentWithGoal";
-import { ScriptedAgentRunArgs } from "../ScriptedAgent";
+import { Agent } from "../../Agent";
+import { AgentContext } from "../../AgentContext";
+import { AgentConfig } from "../../AgentConfig";
 import { prompts } from "./prompts";
 
-export class ScribeAgent extends AgentWithGoal<ScriptedAgentRunArgs> {
-  constructor(context: AgentBaseContext) {
+export class ScribeAgent extends Agent {
+  constructor(context: AgentContext) {
 
     super(
-      () => prompts,
-      [
-        new WriteFileFunction(context.scripts),
-        new ReadFileFunction(context.scripts),
-        new ReadDirectoryFunction(context.scripts),
-        new ThinkFunction()
-      ],
+      new AgentConfig(
+        () => prompts,
+        [
+          new WriteFileFunction(context.scripts),
+          new ReadFileFunction(context.scripts),
+          new ReadDirectoryFunction(context.scripts),
+          new ThinkFunction()
+        ],
+        context.scripts
+      ),
       context
     );
   }

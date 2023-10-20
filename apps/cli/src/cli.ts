@@ -41,7 +41,7 @@ export async function cli(): Promise<void> {
 
   app.debugLog?.goalStart(goal);
 
-  let iterator = options.messages ? app.evo.runWithChat({ chat: app.chat }) : app.evo.run({ goal });
+  let iterator = options.messages ? app.evo.runWithChat([...app.chat.messages]) : app.evo.run({ goal });
 
   while(true) {
     app.debugLog?.stepStart();
