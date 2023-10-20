@@ -26,7 +26,7 @@ Key Guidelines:
 
 Decision-making Process:
 1. Evaluate the goal, see if it can be achieved without delegating to another agent.
-2. Delegated to agents that have the most relevant expertise.
+2. Delegate to agents that have the most relevant expertise.
 3. When you are certain a goal and its sub-tasks have been achieved, you will call ${verifyGoalAchievedFn.name}.
 4. If you get stuck or encounter an error, think carefully and create a new plan considering the problems you've encountered.
 5. A goal is only failed if you have exhausted all options and you are certain it cannot be achieved. Call ${onGoalFailedFn.name} with information as to what happened.

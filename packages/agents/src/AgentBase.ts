@@ -92,14 +92,15 @@ export class AgentBase<TRunArgs, TAgentBaseContext extends AgentBaseContext> imp
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
     try {
-      this.config.prompts.initialMessages(args).forEach((message) => {
-        chat.persistent(message);
-      });
-
       // Add an extra prompt informing agent about variable usage
       chat.persistent({
         role: "system",
         content: `Variables are annotated using the \${variable-name} syntax. Variables can be used as function argument using the \${variable-name} syntax. Variables are created as needed, and do not exist unless otherwise stated.`
+      });
+
+      // Add all initial messages
+      this.config.prompts.initialMessages(args).forEach((message) => {
+        chat.persistent(message);
       });
 
       // Add functions to chat
