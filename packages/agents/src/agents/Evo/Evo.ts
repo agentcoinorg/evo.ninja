@@ -12,6 +12,7 @@ import {
   DataAnalystAgent,
   DeveloperAgent,
   ResearcherAgent,
+  ScribeAgent
 } from "../../scriptedAgents";
 import { AgentBase, AgentBaseContext } from "../../AgentBase";
 import { DelegateAgentFunction } from "../../functions/DelegateScriptedAgent";
@@ -36,11 +37,12 @@ export class Evo extends AgentBase<EvoRunArgs, AgentBaseContext> {
     const verifyGoalAchievedFn = new VerifyGoalAchievedFunction(context.llm, context.chat.tokenizer);
 
     delegatedAgents = delegatedAgents ?? [
-        DeveloperAgent,
-        ResearcherAgent,
-        DataAnalystAgent,
-        ScripterAgent
-      ].map(agentClass => () => new agentClass(context.cloneEmpty()));
+      DeveloperAgent,
+      ResearcherAgent,
+      DataAnalystAgent,
+      ScripterAgent,
+      ScribeAgent
+    ].map(agentClass => () => new agentClass(context.cloneEmpty()));
 
     super(
       {

@@ -4,7 +4,7 @@ import { AgentPrompts } from "../../AgentBase";
 
 export const prompts: AgentPrompts<ScripterRunArgs> = {
   name: "Scripter",
-  expertise: `executing and creating scripts to solve basic tasks`,
+  expertise: `executing and creating custom scripts to solve tasks`,
   initialMessages: ({ goal }: ScripterRunArgs): ChatMessage[] => [
     {
       role: "user",
