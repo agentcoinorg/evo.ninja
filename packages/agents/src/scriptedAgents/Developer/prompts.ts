@@ -1,15 +1,15 @@
 import { ChatMessage } from "@evo-ninja/agent-utils";
-import { ScriptedAgentRunArgs } from "../ScriptedAgent";
 import { AgentFunctionBase } from "../../AgentFunctionBase";
-import { AgentPrompts } from "../../AgentBase";
+import { GoalRunArgs } from "../../Agent";
+import { AgentPrompts } from "../../AgentPrompts";
 
 export const prompts = ( 
   writeFileFn: AgentFunctionBase<any>,
   readFileFn: AgentFunctionBase<any>,
-): AgentPrompts<ScriptedAgentRunArgs> => ({
+): AgentPrompts<GoalRunArgs> => ({
   name: "Developer",
   expertise: `building software projects with one or more files.`,
-  initialMessages: ({ goal }: ScriptedAgentRunArgs): ChatMessage[] => [
+  initialMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
     { 
       role: "user", 
       content: `

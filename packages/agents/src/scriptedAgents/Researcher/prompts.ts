@@ -1,11 +1,11 @@
 import { ChatMessage } from "@evo-ninja/agent-utils";
-import { ScriptedAgentRunArgs } from "../ScriptedAgent";
-import { AgentPrompts } from "../../AgentBase";
+import { GoalRunArgs } from "../../Agent";
+import { AgentPrompts } from "../../AgentPrompts";
 
-export const prompts: AgentPrompts<ScriptedAgentRunArgs> = {
+export const prompts: AgentPrompts<GoalRunArgs> = {
   name: "Researcher",
   expertise: `searching the web, excels at parsing text, comprehending details, and synthesized insights tailored to user specifications.`,
-  initialMessages: ({ goal }: ScriptedAgentRunArgs): ChatMessage[] => [
+  initialMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
     {
       role: "user",
       content: `You are an advanced web information retriever. You will receive a query and need to perform research to answer it.

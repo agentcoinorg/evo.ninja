@@ -1,6 +1,6 @@
-import { Agent, AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder, trimText } from "@evo-ninja/agent-utils";
+import { AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder, trimText } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
-import { AgentBaseContext } from "../AgentBase";
+import { Agent } from "../Agent";
 
 interface WriteScriptFuncParameters { 
   namespace: string, 
@@ -44,7 +44,7 @@ export class WriteScriptFunction extends AgentFunctionBase<WriteScriptFuncParame
     additionalProperties: false
   };
 
-  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: WriteScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
+  buildExecutor({ context }: Agent<unknown>): (params: WriteScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (
       params: {
         namespace: string,

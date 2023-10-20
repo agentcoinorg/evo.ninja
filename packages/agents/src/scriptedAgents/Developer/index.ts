@@ -2,15 +2,15 @@ import { WriteFileFunction } from "../../functions/WriteFile";
 import { ReadFileFunction } from "../../functions/ReadFile";
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
 import { RunAndAnalysePythonTestFunction } from "../../functions/RunAndAnalysePythonTest";
+import { AgentContext } from "../../AgentContext";
+import { Agent } from "../../Agent";
+import { AgentConfig } from "../../AgentConfig";
 import { SummarizeDirectoryFunction } from "../../functions/SummarizeDirectory";
 import { InitPoetryFunction } from "../../functions/InitPoetry";
-import { ScriptedAgentRunArgs } from "../ScriptedAgent";
-import { AgentBaseContext } from "../../AgentBase";
-import { AgentWithGoal } from "../../AgentWithGoal";
 import { prompts } from "./prompts";
 
-export class DeveloperAgent extends AgentWithGoal<ScriptedAgentRunArgs> {
-  constructor(context: AgentBaseContext) {
+export class DeveloperAgent extends Agent {
+  constructor(context: AgentContext) {
     const writeFileFn = new WriteFileFunction(context.scripts);
     const readFileFn = new ReadFileFunction(context.scripts);
     const readDirectoryFn = new ReadDirectoryFunction(context.scripts);
@@ -19,15 +19,20 @@ export class DeveloperAgent extends AgentWithGoal<ScriptedAgentRunArgs> {
     const initPoetryFn = new InitPoetryFunction();
 
     super(
-      () => prompts(writeFileFn, readFileFn),
-      [
-        writeFileFn,
-        readFileFn,
-        readDirectoryFn,
-        pythonTestAnalyserFn,
-        summarizeDirectoryFn,
-        initPoetryFn
-      ], 
+      new AgentConfig(
+        () => prompts(writeFileFn, readFileFn),
+        [
+          writeFileFn,
+          readFileFn,
+          new ReadDirectoryFunction(context.scripts),
+          new RunAndAnalysePythonTestFunction(),
+          readDirectoryFn,
+          pythonTestAnalyserFn,
+          summarizeDirectoryFn,
+          initPoetryFn
+        ], 
+        context.scripts
+      ),
       context
     );
   }

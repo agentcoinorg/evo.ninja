@@ -1,8 +1,8 @@
-import { Agent, AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder, Script } from "@evo-ninja/agent-utils";
+import { AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder, Script } from "@evo-ninja/agent-utils";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { createScriptWriter } from "../agents/ScriptWriter/utils";
-import { AgentBaseContext } from "../AgentBase";
 import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
+import { Agent } from "../Agent";
 
 interface CreateScriptFuncParameters { 
   namespace: string;
@@ -33,7 +33,7 @@ export class CreateScriptFunction extends LlmAgentFunctionBase<CreateScriptFuncP
     additionalProperties: false
   };
 
-  buildExecutor(agent: Agent<unknown>, context: AgentBaseContext): (params: CreateScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
+  buildExecutor({ context }: Agent<unknown>): (params: CreateScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (params: CreateScriptFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       if (params.namespace.startsWith("agent.")) {
         return this.onErrorCannotCreateScriptsOnAgentNamespace(params, rawParams, context.variables);

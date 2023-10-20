@@ -1,23 +1,24 @@
-import {
-  ScriptedAgent,
-  ScriptedAgentConfig,
-} from "../ScriptedAgent";
-import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
 import { prompts } from "./prompts";
-import { AgentBaseContext } from "../../AgentBase";
+import { AgentContext } from "../../AgentContext";
+import { Agent } from "../../Agent";
+import { AgentConfig } from "../../AgentConfig";
+import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
 
-export class PlannerAgent extends ScriptedAgent {
-  constructor(context: AgentBaseContext) {
+export class PlannerAgent extends Agent {
+  constructor(context: AgentContext) {
     const onGoalAchievedFn = new OnGoalAchievedFunction(context.scripts);
-
-    const config: ScriptedAgentConfig = {
-      functions: [onGoalAchievedFn],
-      shouldTerminate: (functionCalled) => {
-        return [onGoalAchievedFn.name].includes(functionCalled.name);
-      },
-      prompts: prompts(onGoalAchievedFn)
-    };
-
-    super(config, context);
+    super(
+      new AgentConfig(
+        (onGoalAchievedFn) => prompts(onGoalAchievedFn),
+        [
+          onGoalAchievedFn,
+        ],
+        context.scripts,
+        undefined,
+        (functionCalled) => functionCalled.name === onGoalAchievedFn.name,
+        true
+      ), 
+      context
+    );
   }
 }

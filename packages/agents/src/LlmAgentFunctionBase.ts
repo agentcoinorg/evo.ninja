@@ -1,7 +1,8 @@
-import { LlmApi, Tokenizer, LlmQueryBuilder, AgentOutput, Agent } from "@evo-ninja/agent-utils";
+import { LlmApi, Tokenizer, LlmQueryBuilder, AgentOutput } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "./AgentFunctionBase";
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
-import { AgentBaseContext } from "./AgentBase";
+import { AgentContext } from "./AgentContext";
+import { Agent } from "./Agent";
 
 export abstract class LlmAgentFunctionBase<TParams> extends AgentFunctionBase<TParams> {
   constructor(protected llm: LlmApi, protected tokenizer: Tokenizer) {
@@ -22,7 +23,7 @@ export abstract class LlmAgentFunctionBase<TParams> extends AgentFunctionBase<TP
   protected async askAgent<TRunArgs>(
     agent: Agent<TRunArgs>, 
     runArgs: TRunArgs, 
-    context: AgentBaseContext
+    context: AgentContext
   ): Promise<Result<{output: AgentOutput, messages: string[]}, string | undefined>> {
     let iterator = agent.run(runArgs);
 

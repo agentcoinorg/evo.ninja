@@ -1,4 +1,4 @@
-import { RunResult } from "./Agent";
+import { RunResult } from "./RunnableAgent";
 import { AgentOutput, AgentOutputType } from "./AgentOutput";
 import { AgentFunction } from "./AgentFunction";
 import {
