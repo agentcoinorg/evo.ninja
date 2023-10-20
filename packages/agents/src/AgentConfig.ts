@@ -21,16 +21,19 @@ export class AgentConfig<TRunArgs> {
     functions: AgentFunctionBase<unknown>[],
     scripts: Scripts,
     readonly timeout?: Timeout,
-    shouldTerminate?: (functionCalled: ExecuteAgentFunctionCalled) => boolean
+    shouldTerminate?: (functionCalled: ExecuteAgentFunctionCalled) => boolean,
+    overrideDefaultFunctions?: boolean,
   ) {
     const onGoalAchievedFn = new OnGoalAchievedFunction(scripts);
     const onGoalFailedFn = new OnGoalFailedFunction(scripts);
     // Default functions that are added to every agent
-    const defaultFunctions = [
-      new ReadVariableFunction(),
-      onGoalAchievedFn,
-      onGoalFailedFn,
-    ];
+    const defaultFunctions = !overrideDefaultFunctions 
+      ? [
+        new ReadVariableFunction(),
+        onGoalAchievedFn,
+        onGoalFailedFn,
+      ] 
+      : [];
 
     // See which functions already exist
     const existingFunctions = new Map(
