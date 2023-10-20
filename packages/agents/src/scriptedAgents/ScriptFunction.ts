@@ -9,7 +9,6 @@ import {
   shimCode
 } from "@evo-ninja/agent-utils"
 import { AgentFunctionBase } from "../AgentFunctionBase";
-import { AgentContext } from "../AgentContext";
 import { Agent } from "../Agent";
 
 export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams> {
@@ -59,7 +58,8 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
     }
   }
 
-  buildExecutor(agent: Agent, context: AgentContext): (params: TParams, rawParams?: string) => Promise<AgentFunctionResult> {
+  buildExecutor(agent: Agent<unknown>): (params: TParams, rawParams?: string) => Promise<AgentFunctionResult> {
+    const { context } = agent;
     return async (params: any, rawParams?: string): Promise<AgentFunctionResult> => {
       const scriptName = this.name.split("_").join(".");
       const script = context.scripts.getScriptByName(scriptName);

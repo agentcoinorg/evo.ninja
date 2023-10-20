@@ -8,7 +8,6 @@ import {
   trimText,
 } from "@evo-ninja/agent-utils";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
-import { AgentContext } from "../AgentContext";
 import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 import { Agent } from "../Agent";
 
@@ -35,10 +34,7 @@ export class PlanResearchFunction extends LlmAgentFunctionBase<PlanResearchFuncP
     additionalProperties: false,
   };
 
-  buildExecutor(
-    _: Agent,
-    context: AgentContext
-  ): (
+  buildExecutor({ context }: Agent<unknown>): (
     params: PlanResearchFuncParameters,
     rawParams?: string
   ) => Promise<AgentFunctionResult> {

@@ -1,5 +1,4 @@
 import { AgentOutputType, ChatMessageBuilder, AgentOutput, AgentFunctionResult, ChatMessage, AgentVariables, LlmApi, Tokenizer } from "@evo-ninja/agent-utils"
-import { AgentContext } from "../AgentContext";
 import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 import { Agent } from "../Agent";
 
@@ -53,7 +52,7 @@ export class DelegateAgentFunction<
     additionalProperties: false
   };
 
-  buildExecutor(agent: Agent<unknown>, context: AgentContext) {
+  buildExecutor({ context }: Agent<unknown>) {
     return async (params: DelegateAgentParams, rawParams?: string): Promise<AgentFunctionResult> => {
       const scriptedAgent = typeof this.delegatedAgent === "function" ?
         this.delegatedAgent() :

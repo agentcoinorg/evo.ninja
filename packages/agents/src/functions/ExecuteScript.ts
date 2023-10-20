@@ -2,7 +2,6 @@ import {  AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuild
 import JSON5 from "json5";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
-import { AgentContext } from "../AgentContext";
 import { Agent } from "../Agent";
 
 interface ExecuteScriptFuncParameters { 
@@ -29,7 +28,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
     additionalProperties: false
   };
 
-  buildExecutor(agent: Agent, context: AgentContext): (params: ExecuteScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
+  buildExecutor({ context }: Agent<unknown>): (params: ExecuteScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (params: ExecuteScriptFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       try {
         const script = context.scripts.getScriptByName(params.namespace);

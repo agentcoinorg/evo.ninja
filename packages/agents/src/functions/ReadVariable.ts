@@ -1,7 +1,6 @@
 import { AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder, readVariableResultMessage } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
-import { AgentContext } from "../AgentContext";
 import { Agent } from "../Agent";
 
 interface ReadVarFuncParameters {
@@ -37,7 +36,7 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
     additionalProperties: false
   };
 
-  buildExecutor(agent: Agent, context: AgentContext): (params: ReadVarFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
+  buildExecutor({ context }: Agent<unknown>): (params: ReadVarFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (params: ReadVarFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       const variable = context.variables.get(params.name);
       if (!variable) {

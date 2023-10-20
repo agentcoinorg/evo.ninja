@@ -11,7 +11,6 @@ import {
 import axios from "axios";
 import { v4 as uuid } from "forked-agent-protocol";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
-import { AgentContext } from "../AgentContext";
 import { Connection, EmbeddingFunction } from "vectordb";
 import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 import { Agent } from "../Agent";
@@ -59,10 +58,7 @@ export class SearchInPagesFunction extends LlmAgentFunctionBase<SearchInPagesFun
     additionalProperties: false,
   };
 
-  buildExecutor(
-    _: Agent,
-    context: AgentContext
-  ): (
+  buildExecutor({ context }: Agent<unknown>): (
     params: SearchInPagesFuncParameters,
     rawParams?: string
   ) => Promise<AgentFunctionResult> {

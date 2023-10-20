@@ -8,7 +8,6 @@ import {
 import axios from "axios";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
-import { AgentContext } from "../AgentContext";
 import { Agent } from "../Agent";
 
 interface WebSearchFuncParameters {
@@ -34,10 +33,7 @@ export class WebSearchFunction extends AgentFunctionBase<WebSearchFuncParameters
     additionalProperties: false,
   };
 
-  buildExecutor(
-    _: Agent,
-    context: AgentContext
-  ): (
+  buildExecutor({ context }: Agent<unknown>): (
     params: WebSearchFuncParameters,
     rawParams?: string
   ) => Promise<AgentFunctionResult> {

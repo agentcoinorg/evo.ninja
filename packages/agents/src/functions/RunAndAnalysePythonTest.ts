@@ -3,7 +3,6 @@ import {
   ChatMessageBuilder,
 } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
-import { AgentContext } from "../AgentContext";
 import { Agent } from "../Agent";
 
 interface FunctionParams {
@@ -40,7 +39,7 @@ export class RunAndAnalysePythonTestFunction extends AgentFunctionBase<FunctionP
     };
   }
 
-  buildExecutor(_: Agent, context: AgentContext) {
+  buildExecutor({ context }: Agent<unknown>) {
     return async (
       params: FunctionParams,
       rawParams?: string

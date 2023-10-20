@@ -1,5 +1,4 @@
 import { AgentFunctionResult, ChatMessageBuilder, LlmApi, Tokenizer } from "@evo-ninja/agent-utils";
-import { AgentContext } from "../AgentContext";
 import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 import { Agent } from "../Agent";
 
@@ -26,7 +25,7 @@ export class AnalyzeDataFunction extends LlmAgentFunctionBase<AnalyzeDataParamet
     additionalProperties: false
   };
 
-  buildExecutor(agent: Agent, context: AgentContext): (params: AnalyzeDataParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
+  buildExecutor({ context }: Agent<unknown>): (params: AnalyzeDataParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
     return async (params: AnalyzeDataParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       const fuzTokens = 200;
       const maxTokens = this.llm.getMaxContextTokens() - fuzTokens;

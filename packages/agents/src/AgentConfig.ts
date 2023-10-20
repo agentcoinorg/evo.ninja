@@ -6,7 +6,7 @@ import { AgentFunctionBase } from "./AgentFunctionBase";
 import { ReadVariableFunction } from "./functions/ReadVariable";
 import { OnGoalAchievedFunction } from "./functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "./functions/OnGoalFailed";
-import { AgentPrompts } from "./Agent";
+import { AgentPrompts } from "./AgentPrompts";
 
 export class AgentConfig<TRunArgs> {
   functions: AgentFunctionBase<unknown>[];

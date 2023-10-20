@@ -1,6 +1,5 @@
 import { AgentOutputType, ChatMessageBuilder, AgentOutput, AgentFunctionResult, ChatMessage, AgentVariables, LlmApi, Tokenizer } from "@evo-ninja/agent-utils"
 import { GoalVerifierAgent } from "../scriptedAgents";
-import { AgentContext } from "../AgentContext";
 import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 import { Agent } from "../Agent";
 
@@ -62,7 +61,7 @@ export class VerifyGoalAchievedFunction extends LlmAgentFunctionBase<FunctionPar
     }
   }
 
-  buildExecutor(agent: Agent, context: AgentContext) {
+  buildExecutor({ context }: Agent<unknown>) {
     return async (params: FunctionParams, rawParams?: string): Promise<AgentFunctionResult> => {
       const result = await this.askAgent(
         new GoalVerifierAgent(context.cloneEmpty()), 
