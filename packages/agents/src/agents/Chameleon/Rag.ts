@@ -2,7 +2,6 @@ import { AgentContext } from "../../AgentContext";
 import { TextRagBuilder } from "./TextRagBuilder";
 import { StandardRagBuilder } from "./StandardRagBuilder";
 
-
 export class Rag {
   static text(context: AgentContext): TextRagBuilder {
     return new TextRagBuilder(context);

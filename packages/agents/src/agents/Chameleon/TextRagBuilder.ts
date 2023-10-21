@@ -1,7 +1,6 @@
 import { AgentContext } from "../../AgentContext";
 import { Rag } from "./Rag";
 
-
 export class TextRagBuilder {
   private _limit: number;
   private _characterLimit: number;

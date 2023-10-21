@@ -1,7 +1,6 @@
 import { OpenAIEmbeddingAPI, LocalVectorDB } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../../AgentContext";
 
-
 export class StandardRagBuilder<TItem> {
   private _limit: number;
   private _items: TItem[];

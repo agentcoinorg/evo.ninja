@@ -1,4 +1,4 @@
-import { Chat, AgentFunction, ExecuteAgentFunctionCalled, ExecuteAgentFunctionResult, AGENT_SPEAK_RESPONSE, AgentOutput, RunResult, processFunctionAndArgs, AgentOutputType, executeAgentFunction, ChatMessage, LlmQueryBuilderV2 } from "@evo-ninja/agent-utils";
+import { Chat, AgentFunction, ExecuteAgentFunctionCalled, ExecuteAgentFunctionResult, AGENT_SPEAK_RESPONSE, AgentOutput, RunResult, processFunctionAndArgs, AgentOutputType, executeAgentFunction, ChatMessage, LlmQuery } from "@evo-ninja/agent-utils";
 import { ResultErr, ResultOk } from "@polywrap/result";
 import { AgentContext } from "../../AgentContext";
 import { DeveloperAgent, ResearcherAgent, DataAnalystAgent } from "../../scriptedAgents";
@@ -20,11 +20,10 @@ export async function* basicFunctionCallLoop(
 ): AsyncGenerator<AgentOutput, RunResult, string | undefined>
 {
   const { llm, chat } = context;
-  const queryBuilder = (msgs?: ChatMessage[]) => new LlmQueryBuilderV2(context.llm, context.chat.tokenizer, msgs);
-  const getQuery = (msg: ChatMessage) => queryBuilder([msg])
-    .message("user", "What is the obove message trying to achieve?")
-    .build()
-    .content();
+  // const queryBuilder = (msgs?: ChatMessage[]) => new LlmQueryBuilderV2(context.llm, context.chat.tokenizer, msgs);
+  const llmQuery = (msgs?: ChatMessage[]) => new LlmQuery(context.llm, context.chat.tokenizer);
+  const getQuery = (msg: ChatMessage) => llmQuery()
+    .ask(`\`\`\`${JSON.stringify(msg)}\`\`\`\nWhat is the obove message trying to achieve?`);
 
   while (true) {
     console.log("CHAT LOGS1.1", chat.chatLogs.messages.length);
@@ -187,7 +186,7 @@ const shortenLargeMessages = async (query: string, chat: Chat, context: AgentCon
 
 const shortenMessage = async (message: ChatMessage, query: string, context: AgentContext): Promise<void> => {
     const result = await Rag.text(context)
-      .chunks(TextChunker.multiLines(message.content ?? "", 10))
+      .chunks(TextChunker.words(message.content ?? "", 100))
       .limit(50)
       .characterLimit(2000)
       .query(query);

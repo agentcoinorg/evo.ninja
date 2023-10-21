@@ -1,6 +1,5 @@
 import { cleanWhitespace } from "./cleanWhitespace";
 
-
 export class TextChunker {
   static singleLine(content: string): string[] {
     const lines = cleanWhitespace(content).split("\n");
@@ -26,6 +25,20 @@ export class TextChunker {
         currentChunk = "";
       }
       currentChunk += char;
+    }
+    return chunks;
+  }
+
+  static words(content: string, characterLimit: number): string[] {
+    const trimmedContent = cleanWhitespace(content);
+    const chunks = [];
+    let currentChunk = "";
+    for (const word of trimmedContent.split(" ")) {
+      if (currentChunk.length + word.length > characterLimit) {
+        chunks.push(currentChunk);
+        currentChunk = "";
+      }
+      currentChunk += word;
     }
     return chunks;
   }
