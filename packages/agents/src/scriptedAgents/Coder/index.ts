@@ -4,9 +4,8 @@ import { Agent } from "../../Agent";
 import { AgentConfig } from "../../AgentConfig";
 import { prompts } from "./prompts";
 import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
-import { CodeFunction } from "../../functions/Code";
 
-export class DeveloperAgent extends Agent {
+export class CoderAgent extends Agent {
   constructor(context: AgentContext) {
     const writeFileFn = new WriteFileFunction(context.scripts);
     const onGoalAchieved = new OnGoalAchievedFunction(context.scripts);
@@ -15,8 +14,7 @@ export class DeveloperAgent extends Agent {
       new AgentConfig(
         () => prompts(writeFileFn, onGoalAchieved),
         [
-          new CodeFunction(context.llm, context.chat.tokenizer),
-          onGoalAchieved,
+          writeFileFn,
         ], 
         context.scripts
       ),

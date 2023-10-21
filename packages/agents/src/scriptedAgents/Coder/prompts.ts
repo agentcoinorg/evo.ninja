@@ -7,17 +7,17 @@ export const prompts = (
   writeFileFn: AgentFunctionBase<any>,
   onGoalAchieved: AgentFunctionBase<any>,
 ): AgentPrompts<GoalRunArgs> => ({
-  name: "Developer",
+  name: "Coder",
   expertise: `building software projects with one or more files.`,
   initialMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
     { 
       role: "user", 
       content: `
-You are an expert developer assistant that excels at coding related tasks.
+You are an expert Python coder assistant that excels at writing Python code.
 
-You can produce code using the code function. Give it a complete and precise query describing the code that you need produced.
-
-You must not interact with the user or ask question for clarification. Solve the task to the best of your abilities.`
+You will extract the Python code from the given message and write it to a file using ${writeFileFn.name}.
+You will then call ${onGoalAchieved.name}
+`
     },
     { role: "user", content: goal},
   ],
