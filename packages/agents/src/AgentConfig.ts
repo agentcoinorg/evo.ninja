@@ -3,7 +3,6 @@ import {
   Timeout, Scripts
 } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "./AgentFunctionBase";
-import { ReadVariableFunction } from "./functions/ReadVariable";
 import { OnGoalAchievedFunction } from "./functions/OnGoalAchieved";
 import { OnGoalFailedFunction } from "./functions/OnGoalFailed";
 import { AgentPrompts } from "./AgentPrompts";
@@ -28,7 +27,6 @@ export class AgentConfig<TRunArgs> {
     // Default functions that are added to every agent
     const defaultFunctions = !overrideDefaultFunctions 
       ? [
-        new ReadVariableFunction(),
         onGoalAchievedFn,
         onGoalFailedFn,
       ] 

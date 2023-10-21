@@ -1,38 +1,34 @@
 import {
-  RunnableAgent,
-  ChatMessage,
-  Workspace,
   AgentOutput,
+  ChatMessage,
+  ExecuteAgentFunctionCalled,
   RunResult,
-  basicFunctionCallLoop,
+  Timeout,
 } from "@evo-ninja/agent-utils";
+import { AgentContext } from "../../AgentContext";
+import { prompts } from "./prompts";
+import { Agent } from "../../Agent";
+import { AgentConfig } from "../../AgentConfig";
 import { ResultErr } from "@polywrap/result";
-import { AgentConfig } from "./AgentConfig";
-import { AgentContext } from "./AgentContext";
-import { ExecuteAgentFunctionCalled } from "@evo-ninja/agent-utils";
+import { basicFunctionCallLoop } from "./basicFunctionCallLoop";
 
-export type GoalRunArgs = {
-  goal: string;
-};
-
-export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
+export class ChameleonAgent extends Agent {
   constructor(
-    public readonly config: AgentConfig<TRunArgs>,
-    public readonly context: AgentContext,
-  ) { 
+    context: AgentContext,
+    timeout?: Timeout,
+  ) {
+    super(
+      new AgentConfig(
+        prompts,
+        [],
+        context.scripts,
+        timeout
+      ),
+      context,
+    );
   }
 
-  public get workspace(): Workspace {
-    return this.context.workspace;
-  }
-
-  public async* run(
-    args: TRunArgs,
-  ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
-    return yield* this.runWithChat(this.config.prompts.initialMessages(args));
-  }
-
-  public async* runWithChat(
+  public override async* runWithChat(
     messages: ChatMessage[],
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
@@ -43,6 +39,18 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
       );
     }
     try {
+      const files = this.context.workspace.readdirSync("./");
+      chat.persistent({
+        role: "system",
+        content: `Current directory: './'
+Files: ${
+  files.filter((x) => x.type === "file").map((x) => x.name).join(", ")
+}\nDirectories: ${
+  files.filter((x) => x.type === "directory").map((x) => x.name).join(", ")
+}` 
+      });
+      chat.persistent({ role: "user", content: "If you can not achieve a goal, first try to exhaust different approaches before giving up." });
+
       for (const message of messages) {
         chat.persistent(message);
       }

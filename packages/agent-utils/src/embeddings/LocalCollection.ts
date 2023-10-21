@@ -60,7 +60,39 @@ export class LocalCollection {
     return results;
   }
 
+  async searchUnique(query: string, limit: number): Promise<LocalDocument[]> {
+    const queryEmbeddingResults = await this.embeddingApi.createEmbeddings(query);
+    const queryVector = queryEmbeddingResults[0].embedding;
+    const normalizedQueryVector = normalize(queryVector);
+
+    const documents = this.documentStore.list();
+
+    const distances = documents.map(document => {
+      const vector = document.vector();
+      const normalizedVector = normalize(vector);
+
+      const distance = normalizedCosineSimilarity(queryVector, normalizedQueryVector, vector, normalizedVector);
+      return { document, distance, text: document.text() };
+    })
+
+    const sortedDistances = [...new Map(distances.map(x =>
+      [x.text, x])).values()]
+      .sort((a, b) => b.distance - a.distance);
+    
+    const topDistances = sortedDistances.slice(0, limit);
+
+    const results = topDistances.map(({ document }) => {
+      return document
+    })
+
+    return results;
+  }
+
   save(): void {
     this.workspace.mkdirSync(this.uri, { recursive: true });
+  }
+
+  delete(): void {
+    this.workspace.rmdirSync(this.uri, { recursive: true });
   }
 }

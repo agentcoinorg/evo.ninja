@@ -21,6 +21,20 @@ export class LocalVectorDB {
     return collection
   }
 
+
+  removeCollection(name: string): void {
+    try {
+
+      const collection = new LocalCollection(
+        path.join(this.uri, name),
+        this.embeddingApi,
+        this.workspace,
+      )
+  
+      collection.delete();
+    } catch {}
+  }
+
   listCollections(): LocalCollection[] {
     const names = this.workspace.readdirSync(this.uri).map(entry => entry.name)
     return names.map(name => new LocalCollection(

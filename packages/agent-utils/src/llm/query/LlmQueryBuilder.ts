@@ -1,5 +1,5 @@
 import { ChatRole } from "../Chat";
-import { ChatLogs } from "../ChatLogs";
+import { ChatLogs, ChatMessage } from "../ChatLogs";
 import { LlmApi } from "../LlmApi";
 import { Tokenizer } from "../Tokenizer";
 import { LlmQuery } from "./LlmQuery";
@@ -29,5 +29,18 @@ export class LlmQueryBuilder {
 
   build(): LlmQuery {
     return new LlmQuery(this.llm, this.tokenizer, this.logs);
+  }
+}
+
+export class LlmQueryBuilderV2 {
+  constructor(private readonly llm: LlmApi, private readonly tokenizer: Tokenizer, private messages: ChatMessage[] = [] ) {}
+
+  message(role: ChatRole, content: string): LlmQueryBuilderV2 {
+    this.messages.push({ role, content });
+    return this;
+  }
+
+  build(): LlmQuery {
+    return new LlmQuery(this.llm, this.tokenizer, ChatLogs.from(this.messages, [], this.tokenizer));
   }
 }

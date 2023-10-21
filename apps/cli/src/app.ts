@@ -1,4 +1,4 @@
-import { AgentContext, Evo } from "@evo-ninja/agents";
+import { AgentContext, ChameleonAgent, GoalRunArgs } from "@evo-ninja/agents";
 import {
   Env,
   OpenAI,
@@ -13,6 +13,7 @@ import {
   ChatLogType,
   ChatMessage,
   ChatLog,
+  RunnableAgent,
 } from "@evo-ninja/agent-utils";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
 import { FileSystemWorkspace, FileLogger } from "@evo-ninja/agent-utils-fs";
@@ -35,7 +36,7 @@ const prompt = (query: string) =>
   new Promise<string>((resolve) => rl.question(query, resolve));
 
 export interface App {
-  evo: Evo;
+  evo: RunnableAgent<GoalRunArgs>;
   logger: Logger;
   fileLogger: FileLogger;
   consoleLogger: ConsoleLogger;
@@ -132,7 +133,7 @@ export function createApp(config?: AppConfig): App {
   }
 
   // Evo
-  const evo = new Evo(
+  const evo = new ChameleonAgent(
     new AgentContext(
       llm,
       chat,

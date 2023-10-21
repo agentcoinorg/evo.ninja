@@ -65,6 +65,11 @@ export class ChatLogs {
     this._logs[type].msgs.push(...log.msgs);
   }
 
+  public insert(type: ChatLogType, log: ChatLog, index: number) {
+    this._logs[type].tokens += log.tokens;
+    this._logs[type].msgs.splice(index, 0, ...log.msgs);
+  }
+
   public addFunction(fn: FunctionDefinition, tokens: number): void {
     this._functions.tokens += tokens;
     this._functions.definitions.push(fn);

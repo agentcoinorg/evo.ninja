@@ -64,6 +64,11 @@ export class FileSystemWorkspace implements Workspace {
     fs.mkdirSync(absPath, { recursive: true });
   }
 
+  rmdirSync(subpath: string, opts?: { recursive: boolean }): void {
+    const absPath = this.toWorkspacePath(subpath);
+    fs.rmdirSync(absPath, opts);
+  }
+
   readdirSync(subpath: string): DirectoryEntry[] {
     const absPath = this.toWorkspacePath(subpath);
     return fs.readdirSync(absPath, { withFileTypes: true })

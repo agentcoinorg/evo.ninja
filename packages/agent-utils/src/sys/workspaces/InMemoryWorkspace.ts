@@ -24,6 +24,10 @@ export class InMemoryWorkspace implements Workspace {
     this.fs.mkdirSync(subpath, opts);
   }
 
+  rmdirSync(subpath: string, opts: { recursive: boolean }): void {
+    this.fs.rmdirSync(subpath, opts);
+  }
+
   readdirSync(subpath: string): DirectoryEntry[] {
     return this.fs.readdirSync(subpath)
       .filter((d) => !d.name.startsWith("."));

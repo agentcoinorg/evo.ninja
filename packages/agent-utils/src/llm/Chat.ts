@@ -53,18 +53,18 @@ export class Chat {
       const tokens = this._tokenizer.encode(JSON.stringify(msg)).length;
 
       // If the message is larger than the context window
-      if (this._contextWindow?.shouldChunk(tokens)) {
-        const chunked = this._contextWindow.chunk(
-          msg,
-          this._tokenizer
-        );
-        this._chatLogs.add(type, chunked);
-      } else {
+      // if (this._contextWindow?.shouldChunk(tokens)) {
+      //   const chunked = this._contextWindow.chunk(
+      //     msg,
+      //     this._tokenizer
+      //   );
+      //   this._chatLogs.add(type, chunked);
+      // } else {
         this._chatLogs.add(type, {
           tokens,
           msgs: [msg]
         });
-      }
+      // }
     }
   }
 

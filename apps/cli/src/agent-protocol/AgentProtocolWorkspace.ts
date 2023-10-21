@@ -65,6 +65,10 @@ export class AgentProtocolWorkspace implements Workspace {
     this._fsWorkspace.mkdirSync(subpath);
   }
 
+  rmdirSync(subpath: string): void {
+    this._fsWorkspace.rmdirSync(subpath);
+  }
+
   readdirSync(subpath: string): DirectoryEntry[] {
     return this._fsWorkspace.readdirSync(subpath);
   }
