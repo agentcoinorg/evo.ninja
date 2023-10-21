@@ -23,7 +23,7 @@ export async function* basicFunctionCallLoop(
   // const queryBuilder = (msgs?: ChatMessage[]) => new LlmQueryBuilderV2(context.llm, context.chat.tokenizer, msgs);
   const llmQuery = (msgs?: ChatMessage[]) => new LlmQuery(context.llm, context.chat.tokenizer);
   const getQuery = (msg: ChatMessage) => llmQuery()
-    .ask(`\`\`\`${JSON.stringify(msg)}\`\`\`\nWhat is the obove message trying to achieve?`);
+    .ask(`\`\`\`${JSON.stringify(msg)}\`\`\`\nWhat is the above message trying to achieve?`);
 
   while (true) {
     console.log("CHAT LOGS1.1", chat.chatLogs.messages.length);
