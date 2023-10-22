@@ -44,12 +44,16 @@ async function taskHandler(
   input: TaskInput | null
 ): Promise<StepHandler> {
 
-  const userWorkspace = new AgentProtocolWorkspace(
-    path.join(sessionsDir, id)
+  const customWorkspacePath = path.join(sessionsDir, id);
+  const customWorkspace = new AgentProtocolWorkspace(
+    customWorkspacePath
   );
   const app = createApp({
     rootDir,
-    userWorkspace,
+    customWorkspace: {
+      workspace: customWorkspace,
+      path: customWorkspacePath
+    },
     sessionName: id,
     debug: true,
   });
@@ -78,9 +82,9 @@ async function taskHandler(
         ? response.value.message
         : "No Message";
 
-    userWorkspace.writeArtifacts();
-    const artifacts = userWorkspace.getArtifacts();
-    userWorkspace.cleanArtifacts();
+    customWorkspace.writeArtifacts();
+    const artifacts = customWorkspace.getArtifacts();
+    customWorkspace.cleanArtifacts();
 
     if (response.done) {
       if (!response.value.ok) {

@@ -7,6 +7,7 @@ import {
   LlmApi,
   ConsoleLogger,
   Logger,
+  SubWorkspace
 } from "@evo-ninja/agent-utils";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
@@ -67,6 +68,7 @@ describe("Research Agent Test Suite", () => {
     const scripts = new Scripts(scriptsWorkspace, "./");
 
     const workspace = new FileSystemWorkspace(testCaseDir);
+    const internals = new SubWorkspace(".evo", workspace);
 
     return {
       agent: new ResearcherAgent(
@@ -75,6 +77,7 @@ describe("Research Agent Test Suite", () => {
           chat,
           logger,
           workspace,
+          internals,
           env,
           scripts,
         )
