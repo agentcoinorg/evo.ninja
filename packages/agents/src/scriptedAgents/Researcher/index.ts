@@ -30,7 +30,7 @@ export class ResearcherAgent extends Agent {
           //   }
           // ),
           new WebSearchFunction(),
-          new ScrapeTextFunction(context.scripts)
+          new ScrapeTextFunction()
         ], 
         context.scripts,
       ),

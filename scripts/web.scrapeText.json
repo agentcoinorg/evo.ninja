@@ -1,7 +1,0 @@
-{
-  "name": "web.scrapeText",
-  "description": "This is a naive function that opens a web page and extracts all text present in the HTML. Due to its broad approach, it may retrieve a large amount of irrelevant or extraneous data. It's recommended to use this function as a last resort when more precise methods fail or are unavailable",
-  "arguments": "{ url: string }",
-  "code": "./web.scrapeText.js"
-}
-
