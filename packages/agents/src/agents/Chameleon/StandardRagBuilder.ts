@@ -42,6 +42,6 @@ export class StandardRagBuilder<TItem> {
         throw new Error(`Text ${text} not found in items.`);
       }
       return item;
-    }).sort((a, b) => a - b);
+    });
   }
 }
