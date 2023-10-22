@@ -1,4 +1,4 @@
-import { Chat, AgentFunction, ExecuteAgentFunctionCalled, ExecuteAgentFunctionResult, AGENT_SPEAK_RESPONSE, AgentOutput, RunResult, processFunctionAndArgs, AgentOutputType, executeAgentFunction, ChatMessage, ChatLog, FunctionDefinition } from "@evo-ninja/agent-utils";
+import { Chat, AgentFunction, ExecuteAgentFunctionCalled, ExecuteAgentFunctionResult, AGENT_SPEAK_RESPONSE, AgentOutput, RunResult, processFunctionAndArgs, AgentOutputType, executeAgentFunction, ChatMessage, ChatLogs, FunctionDefinition } from "@evo-ninja/agent-utils";
 import { ResultErr, ResultOk } from "@polywrap/result";
 import { AgentContext } from "../../AgentContext";
 
@@ -11,14 +11,14 @@ export async function* basicFunctionCallLoop(
   ) => boolean,
   loopPreventionPrompt: string,
   agentSpeakPrompt: string = AGENT_SPEAK_RESPONSE,
-  beforeLlmResponse: () => Promise<{ logs: ChatLog, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[]}>,
+  beforeLlmResponse: () => Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[]}>,
 ): AsyncGenerator<AgentOutput, RunResult, string | undefined>
 {
-  const { llm, chat } = this.context;
- 
+  const { llm, chat } = context;
+
   while (true) {
     const { logs, agentFunctions, allFunctions } = await beforeLlmResponse();
-    
+
     const response = await llm.getResponse(logs, agentFunctions);
 
     if (!response) {
