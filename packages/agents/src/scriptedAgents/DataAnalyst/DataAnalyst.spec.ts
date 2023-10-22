@@ -7,6 +7,7 @@ import {
   LlmApi,
   ConsoleLogger,
   Logger,
+  SubWorkspace
 } from "@evo-ninja/agent-utils";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
@@ -71,6 +72,7 @@ describe("Data Analyst Agent Test Suite", () => {
     const scripts = new Scripts(scriptsWorkspace, "./");
 
     const workspace = new FileSystemWorkspace(testCaseDir);
+    const internals = new SubWorkspace(".evo", workspace);
 
     if (pathsForFilesToInclude) {
       for (const filePath of pathsForFilesToInclude) {
@@ -90,6 +92,7 @@ describe("Data Analyst Agent Test Suite", () => {
           chat,
           logger,
           workspace,
+          internals,
           env,
           scripts,
         ),

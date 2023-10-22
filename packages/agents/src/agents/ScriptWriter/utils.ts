@@ -6,5 +6,13 @@ export const createScriptWriter = (context: AgentContext): ScriptWriter => {
   const workspace = new InMemoryWorkspace();
   const contextWindow = new ContextWindow(context.llm);
   const chat = new Chat(context.chat.tokenizer, contextWindow, context.logger);
-  return new ScriptWriter(new AgentContext(context.llm, chat, context.logger, workspace, context.env, context.scripts));
+  return new ScriptWriter(new AgentContext(
+    context.llm,
+    chat,
+    context.logger,
+    workspace,
+    context.internals,
+    context.env,
+    context.scripts
+  ));
 };

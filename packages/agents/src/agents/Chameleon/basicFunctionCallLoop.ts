@@ -151,7 +151,6 @@ const findBestAgent = async (query: string, context: AgentContext): Promise<[Age
     };
   });
 
-
   const agents = await Rag.standard<{ persona: string, agent: Agent}>(context)
     .items(agentsWithPrompts)
     .limit(1)

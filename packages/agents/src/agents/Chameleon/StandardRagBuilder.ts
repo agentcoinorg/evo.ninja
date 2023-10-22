@@ -6,8 +6,7 @@ export class StandardRagBuilder<TItem> {
   private _items: TItem[];
   private _selector: (item: TItem) => string;
 
-  constructor(private readonly context: AgentContext) {
-  }
+  constructor(private readonly context: AgentContext) { }
 
   items(items: TItem[]): StandardRagBuilder<TItem> {
     this._items = items;
@@ -31,7 +30,7 @@ export class StandardRagBuilder<TItem> {
       this.context.chat.tokenizer
     );
 
-    const db = new LocalVectorDB(this.context.workspace, "testdb", embeddingApi);
+    const db = new LocalVectorDB(this.context.internals, "ragdb", embeddingApi);
 
     const uuid = Math.floor(Date.now() / 1000).toString(16);
 
