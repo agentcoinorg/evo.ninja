@@ -157,22 +157,22 @@ const joinUnderCharLimit = (chunks: string[], characterLimit: number, separator:
   return result;
 }
 
-const getUnderCharLimit = (chunks: string[], characterLimit: number): string[] => {
-  let totalLength = 0;
-  const newChunks = [];
-  for (const chunk of chunks) {
-    if (totalLength + chunk.length > characterLimit) {
-      const remainingCharacters = characterLimit - totalLength;
-      if (remainingCharacters > 0) {
-        newChunks.push(chunk.substring(0, remainingCharacters));
-      }
-      break;
-    }
-    newChunks.push(chunk);
-    totalLength += chunk.length;
-  }
-  return newChunks;
-}
+// const getUnderCharLimit = (chunks: string[], characterLimit: number): string[] => {
+//   let totalLength = 0;
+//   const newChunks = [];
+//   for (const chunk of chunks) {
+//     if (totalLength + chunk.length > characterLimit) {
+//       const remainingCharacters = characterLimit - totalLength;
+//       if (remainingCharacters > 0) {
+//         newChunks.push(chunk.substring(0, remainingCharacters));
+//       }
+//       break;
+//     }
+//     newChunks.push(chunk);
+//     totalLength += chunk.length;
+//   }
+//   return newChunks;
+// }
 
 const shortenLargeMessages = async (query: string, chat: Chat, context: AgentContext): Promise<void> => {
   for(let i = 2; i < chat.chatLogs.messages.length ; i++) {
@@ -208,4 +208,4 @@ files.filter((x) => x.type === "directory").map((x) => x.name).join(", ")
 };
 
 const previewChunks = (chunks: string[], charLimit: 2000): string => joinUnderCharLimit(chunks, charLimit - "...\n".length, "\n...\n")
-const limitChunks = (chunks: string[], charLimit: 2000): string[] => getUnderCharLimit(chunks, charLimit - "...\n".length)
+// const limitChunks = (chunks: string[], charLimit: 2000): string[] => getUnderCharLimit(chunks, charLimit)
