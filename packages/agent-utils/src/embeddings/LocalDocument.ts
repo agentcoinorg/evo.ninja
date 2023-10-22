@@ -4,7 +4,17 @@ import { Workspace } from "../sys";
 const VECTOR_FILENAME = "vector.json"
 const DOCUMENT_FILENAME = "document.json"
 
+export interface LocalDocumentData {
+  id: string;
+  text: string;
+  metadata: {
+    index: number;
+  }
+}
+
 export class LocalDocument {
+  private _data: LocalDocumentData;
+
   constructor(
     readonly id: string,
     private config: {
@@ -27,16 +37,19 @@ export class LocalDocument {
   }
 
   text(): string {
-    const documentPath = path.join(this.config.uri, DOCUMENT_FILENAME)
-
-    if (!this.config.workspace.existsSync(documentPath)) {
-      throw new Error(`Document file for '${this.id}' does not exist: ${documentPath}. Did you forget to call .save()?`)
+    if (!this._data) {
+      this.loadData()
     }
 
-    const documentFileContent = this.config.workspace.readFileSync(documentPath)
-    const document: { id: string; text: string; } = JSON.parse(documentFileContent)
+    return this._data.text
+  }
 
-    return document.text
+  metadata(): LocalDocumentData['metadata'] {
+    if (!this._data) {
+      this.loadData()
+    }
+
+    return this._data.metadata
   }
 
   save({
@@ -52,14 +65,34 @@ export class LocalDocument {
       this.config.workspace.mkdirSync(docPath, { recursive: true });
     }
 
+    const index = this.config.workspace.readdirSync(docPath).length;
+
     this.config.workspace.writeFileSync(vectorPath, JSON.stringify({
       id: this.id,
       vector,
     }))
 
-    this.config.workspace.writeFileSync(documentPath, JSON.stringify({
+    const documentData: LocalDocumentData = {
       id: this.id,
       text,
-    }))
+      metadata: {
+        index,
+      }
+    }
+
+    this.config.workspace.writeFileSync(documentPath, JSON.stringify(documentData))
+  }
+
+  private loadData() {
+    const documentPath = path.join(this.config.uri, DOCUMENT_FILENAME)
+
+    if (!this.config.workspace.existsSync(documentPath)) {
+      throw new Error(`Document file for '${this.id}' does not exist: ${documentPath}. Did you forget to call .save()?`)
+    }
+
+    const documentFileContent = this.config.workspace.readFileSync(documentPath)
+    const document: LocalDocumentData = JSON.parse(documentFileContent)
+
+    this._data = document
   }
 }
