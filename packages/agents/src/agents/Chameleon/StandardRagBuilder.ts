@@ -3,15 +3,9 @@ import { AgentContext } from "../../AgentContext";
 
 export class StandardRagBuilder<TItem> {
   private _limit: number;
-  private _items: TItem[];
   private _selector: (item: TItem) => string;
 
-  constructor(private readonly context: AgentContext) { }
-
-  items(items: TItem[]): StandardRagBuilder<TItem> {
-    this._items = items;
-    return this;
-  }
+  constructor( private readonly _items: TItem[], private readonly context: AgentContext) { }
 
   limit(limit: number): StandardRagBuilder<TItem> {
     this._limit = limit;
@@ -48,6 +42,6 @@ export class StandardRagBuilder<TItem> {
         throw new Error(`Text ${text} not found in items.`);
       }
       return item;
-    });
+    }).sort((a, b) => a - b);
   }
 }

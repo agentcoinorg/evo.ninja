@@ -6,7 +6,7 @@ export class Rag {
   //   return new TextRagBuilder(context);
   // }
 
-  static standard<TItem = string>(context: AgentContext): StandardRagBuilder<TItem> {
-    return new StandardRagBuilder<TItem>(context);
+  static standard<TItem = string>(items: TItem[], context: AgentContext): StandardRagBuilder<TItem> {
+    return new StandardRagBuilder<TItem>(items, context);
   }
 }

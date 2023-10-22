@@ -25,8 +25,7 @@ export class TextRagBuilder {
   }
 
   async query(query: string): Promise<string[]> {
-    const relevantLines = await Rag.standard(this.context)
-      .items(this._chunks)
+    const relevantLines = await Rag.standard(this._chunks, this.context)
       .limit(this._limit)
       .selector(x => x)
       .query(query);

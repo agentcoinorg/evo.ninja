@@ -2,7 +2,6 @@ import {
   AgentFunction,
   AgentOutput,
   ChatLogs,
-  ChatMessage,
   ExecuteAgentFunctionCalled,
   FunctionDefinition,
   RunResult,
@@ -24,12 +23,10 @@ export abstract class NewAgent<TRunArgs> extends Agent<TRunArgs> {
     args: TRunArgs,
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     this.initializeChat(args);
-    return yield* this.runWithChat(this.config.prompts.initialMessages(args));
+    return yield* this.runWithChat();
   }
 
-  public override async* runWithChat(
-    messages: ChatMessage[],
-  ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
+  public async* runWithChat(): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
     if (this.config.timeout) {
       setTimeout(
@@ -38,10 +35,6 @@ export abstract class NewAgent<TRunArgs> extends Agent<TRunArgs> {
       );
     }
     try {
-      for (const message of messages) {
-        chat.persistent(message);
-      }
-
       // Add functions to chat
       this.config.functions.forEach((fn) => {
         chat.addFunction(fn.getDefinition());

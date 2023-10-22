@@ -13,8 +13,7 @@ import { agentPrompts, prompts } from "./prompts";
 import { Agent, GoalRunArgs } from "../../Agent";
 import { AgentConfig } from "../../AgentConfig";
 import { AgentFunctionBase } from "../../AgentFunctionBase";
-import { DeveloperAgent, ResearcherAgent, DataAnalystAgent, WebResearcherAgent, ScribeAgent } from "../../scriptedAgents";
-import { ScripterAgent } from "../Scripter";
+import { DeveloperAgent, ResearcherAgent, DataAnalystAgent, WebResearcherAgent } from "../../scriptedAgents";
 import { Rag } from "./Rag";
 import { TextChunker } from "./TextChunker";
 import { Prompt } from "./Prompt";
@@ -47,11 +46,6 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
   protected async beforeLlmResponse(): Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[]}> {
     const { chat } = this.context;
     const { messages } = chat.chatLogs;
-    const getQuery = (msg: ChatMessage) => this.askLlm(
-      new Prompt()
-        .json(msg)
-        .line("What is the above message trying to achieve?")
-    );
 
     let query = "";
     if (messages.length <= 2) {
@@ -60,16 +54,32 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
       const lastMessage = messages.slice(-1)[0];
 
       if (isLargeMsg(lastMessage)) {
-        const q = await getQuery(messages.slice(-2)[0]);
+        const q = await this.askLlm(
+          new Prompt()
+            .json(messages.slice(-2)[0])
+            .line("What is the above message trying to achieve?")
+        );
 
         await shortenMessage(lastMessage, q, this.context);
       }
-      query = await getQuery(lastMessage);
+      query = await this.askLlm(
+        new Prompt()
+          .json([
+            { role: "user", content: "You are an expert assistant capable of accomplishing a multitude of tasks using functions that use external tools (like internet, file system, etc.)." }, 
+            ...messages
+          ])
+          .line(`
+            Consider the above chat between a user and assistant.
+            In your expert opinion, what is the best next step for the assistant?
+          `)
+      );
     }
 
     await shortenLargeMessages(query, chat, this.context);
+    console.log("Query: ", query);
 
     const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(query, this.context);
+    console.log("Selected agent: ", agent.config.prompts.name);
 
     const logs = insertPersonaAsFirstMsg(persona, chat.chatLogs, chat.tokenizer);
 
@@ -106,8 +116,6 @@ const findBestAgent = async (query: string, context: AgentContext): Promise<[Age
     DeveloperAgent,
     ResearcherAgent,
     DataAnalystAgent,
-    ScripterAgent,
-    ScribeAgent,
     WebResearcherAgent
   ].map(agentClass => new agentClass(context.cloneEmpty()));
 
@@ -119,11 +127,12 @@ const findBestAgent = async (query: string, context: AgentContext): Promise<[Age
     };
   });
 
-  const agents = await Rag.standard<{ persona: string, expertise: string, agent: Agent}>(context)
-    .items(agentsWithPrompts)
-    .limit(1)
+  const agents = await Rag.standard(agentsWithPrompts, context)
+    .limit(3)
     .selector(x => x.expertise)
     .query(query);
+
+  console.log("Selected agents: ", agents.map(x => x.agent.config.prompts.name));
 
   const agentsWithPrompt = agents[0];
 
@@ -185,11 +194,10 @@ const shortenLargeMessages = async (query: string, chat: Chat, context: AgentCon
 
 const shortenMessage = async (message: ChatMessage, query: string, context: AgentContext): Promise<void> => {
   message.content = previewChunks(
-    await Rag.standard(context)
-    .items(TextChunker.words(message.content ?? "", 100))
-    .limit(50)
-    .selector(x => x)
-    .query(query),
+    await Rag.standard(TextChunker.characters(message.content ?? "", 100), context)
+      .limit(50)
+      .selector(x => x)
+      .query(query),
     2000
   );
 };
