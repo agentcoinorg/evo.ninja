@@ -14,10 +14,6 @@ export class Prompt {
     return new Prompt(this._text + `\`\`\`${toPrompt(JSON.stringify(obj))}\`\`\``);
   }
 
-  showAndAsk(context: string, question: string): Prompt {
-    return new Prompt(this.block(context) + "\n" + this.block(question));
-  }
-
   line(builder: ((prompt: Prompt) => Prompt | string) | string): Prompt {
     if (typeof builder === "string") {
       return new Prompt(this._text + "\n" + toPrompt(builder));
@@ -32,10 +28,6 @@ export class Prompt {
   }
 
   toString(): string {
-    new Prompt()
-      .block("Example")
-      .line(x => x.text("Explain above"));
-
     return this._text;
   }
 }
