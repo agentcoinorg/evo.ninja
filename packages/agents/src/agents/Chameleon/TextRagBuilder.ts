@@ -35,6 +35,10 @@ export class TextRagBuilder {
     const returnedLines = [];
     for (const line of relevantLines) {
       if (totalLength + line.length > this._characterLimit) {
+        const remainingCharacters = this._characterLimit - totalLength;
+        if (remainingCharacters > 0) {
+          returnedLines.push(line.substring(0, remainingCharacters));
+        }
         break;
       }
       returnedLines.push(line);

@@ -19,7 +19,7 @@ export class StandardRagBuilder<TItem> {
     return this;
   }
 
-  selector(selector: (item: any) => string): StandardRagBuilder<TItem> {
+  selector(selector: (item: TItem) => string): StandardRagBuilder<TItem> {
     this._selector = selector;
     return this;
   }
