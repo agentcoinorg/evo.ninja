@@ -1,12 +1,6 @@
-import { Chat, AgentFunction, ExecuteAgentFunctionCalled, ExecuteAgentFunctionResult, AGENT_SPEAK_RESPONSE, AgentOutput, RunResult, processFunctionAndArgs, AgentOutputType, executeAgentFunction, ChatMessage, LlmQuery } from "@evo-ninja/agent-utils";
+import { Chat, AgentFunction, ExecuteAgentFunctionCalled, ExecuteAgentFunctionResult, AGENT_SPEAK_RESPONSE, AgentOutput, RunResult, processFunctionAndArgs, AgentOutputType, executeAgentFunction, ChatMessage, ChatLog, FunctionDefinition } from "@evo-ninja/agent-utils";
 import { ResultErr, ResultOk } from "@polywrap/result";
 import { AgentContext } from "../../AgentContext";
-import { DeveloperAgent, ResearcherAgent, DataAnalystAgent } from "../../scriptedAgents";
-import { ScripterAgent } from "../Scripter";
-import { Agent } from "../../Agent";
-import { AgentFunctionBase } from "../../AgentFunctionBase";
-import { TextChunker } from "./TextChunker";
-import { Rag } from "./Rag";
 
 export async function* basicFunctionCallLoop(
   context: AgentContext,
@@ -16,61 +10,16 @@ export async function* basicFunctionCallLoop(
     result: ExecuteAgentFunctionResult["result"]
   ) => boolean,
   loopPreventionPrompt: string,
-  agentSpeakPrompt: string = AGENT_SPEAK_RESPONSE
+  agentSpeakPrompt: string = AGENT_SPEAK_RESPONSE,
+  beforeLlmResponse: () => Promise<{ logs: ChatLog, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[]}>,
 ): AsyncGenerator<AgentOutput, RunResult, string | undefined>
 {
-  const { llm, chat } = context;
-  // const queryBuilder = (msgs?: ChatMessage[]) => new LlmQueryBuilderV2(context.llm, context.chat.tokenizer, msgs);
-  const llmQuery = (msgs?: ChatMessage[]) => new LlmQuery(context.llm, context.chat.tokenizer);
-  const getQuery = (msg: ChatMessage) => llmQuery()
-    .ask(`\`\`\`${JSON.stringify(msg)}\`\`\`\nWhat is the above message trying to achieve?`);
-
+  const { llm, chat } = this.context;
+ 
   while (true) {
-    console.log("CHAT LOGS1.1", chat.chatLogs.messages.length);
-    let query = "";
-    if (chat.chatLogs.messages.length <= 2) {
-      query = chat.chatLogs.messages[chat.chatLogs.messages.length - 1].content ?? "";
-    } else {
-      const lastMessage = chat.chatLogs.messages[chat.chatLogs.messages.length - 1];
-
-      if (lastMessage.content && lastMessage.content.length > 2000) {
-        console.log("CHAT LOGS1.1.1", chat.chatLogs.messages.length);
-        console.log("MSG - 2", chat.chatLogs.messages[chat.chatLogs.messages.length - 2]);
-
-        const q = await getQuery(chat.chatLogs.messages[chat.chatLogs.messages.length - 2]);
-        console.log("CHAT LOGS1.1.2", chat.chatLogs.messages.length);
-
-        await shortenMessage(lastMessage, q, context);
-      }
-      console.log("CHAT LOGS1.1.3", chat.chatLogs.messages.length);
-
-      console.log("MSG - lastMessage", lastMessage);
-      query = await getQuery(lastMessage);
-    }
-    console.log("QUERY", query);
-    console.log("QUERY.length", query.length);
-    console.log("QUERY.tokens", chat.tokenizer.encode(query).length);
-    console.log("CHAT LOGS1.2", chat.chatLogs.messages.length);
-
-    await shortenLargeMessages(query, chat, context);
-    console.log("CHAT LOGS1.3", chat.chatLogs.messages.length);
-
-    const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(query, context);
-    console.log("CHAT LOGSX", chat.chatLogs.messages.length);
-
-    const newLogs = chat.chatLogs.clone();
-    newLogs.insert("persistent", {
-      tokens: 0,
-      msgs: [{
-        role: "user",
-        content: persona,
-      } as ChatMessage],
-    }, 0);
-
-
-    console.log("CHAT LOGS2", newLogs.messages.length);
-
-    const response = await llm.getResponse(newLogs, agentFunctions.map(f => f.definition));
+    const { logs, agentFunctions, allFunctions } = await beforeLlmResponse();
+    
+    const response = await llm.getResponse(logs, agentFunctions);
 
     if (!response) {
       return ResultErr("No response from LLM.");
@@ -78,16 +27,8 @@ export async function* basicFunctionCallLoop(
 
     if (response.function_call) {
       const { name, arguments: args } = response.function_call;
-      console.log("Function", name);
 
-      const sanitizedFunctionAndArgs = processFunctionAndArgs(name, args, allFunctions.map((fn) => {
-        return {
-          definition: fn.getDefinition(),
-          buildExecutor: (context: AgentContext) => {
-            return fn.buildExecutor(agent);
-          }
-        }
-      }), context.variables)
+      const sanitizedFunctionAndArgs = processFunctionAndArgs(name, args, allFunctions, context.variables)
       if (!sanitizedFunctionAndArgs.ok) {
         chat.temporary(response);
         chat.temporary("system", sanitizedFunctionAndArgs.error);
@@ -134,62 +75,3 @@ async function* _preventLoopAndSaveMsg(chat: Chat, response: ChatMessage, loopPr
     } as AgentOutput;
   }
 }
-
-const findBestAgent = async (query: string, context: AgentContext): Promise<[Agent<unknown>, AgentFunction<AgentContext>[], string, AgentFunctionBase<unknown>[]]> => {
-  const allAgents: Agent[] = [
-    DeveloperAgent,
-    ResearcherAgent,
-    DataAnalystAgent,
-    ScripterAgent
-  ].map(agentClass => new agentClass(context.cloneEmpty()));
-
-  const agentsWithPrompts = allAgents.map(agent => {
-    return {
-      persona: agent.config.prompts.expertise + "\n" + agent.config.functions.map(x => x.name).join("\n"),
-      // persona: agent.config.prompts.initialMessages({ goal: "" })[0].content ?? "",
-      agent,
-    };
-  });
-
-
-  const agents = await Rag.standard<{ persona: string, agent: Agent}>(context)
-    .items(agentsWithPrompts)
-    .limit(1)
-    .selector(x => x.persona)
-    .query(query);
-
-  const agentsWithPrompt = agents[0];
-
-  return [
-    agentsWithPrompt.agent, 
-    agentsWithPrompt.agent.config.functions.map((fn: any) => {
-      return {
-        definition: fn.getDefinition(),
-        buildExecutor: (context: AgentContext) => {
-          return fn.buildExecutor(agentsWithPrompt.agent);
-        }
-      }
-    }),
-    agentsWithPrompt.persona, 
-    agentsWithPrompts.map(x => x.agent.config.functions).flat()
-  ];
-};
-
-const shortenLargeMessages = async (query: string, chat: Chat, context: AgentContext): Promise<void> => {
-  for(let i = 2; i < chat.chatLogs.messages.length ; i++) {
-    const message = chat.chatLogs.messages[i];
-    if (message.content && message.content.length > 2000) {
-      await shortenMessage(message, query, context);
-    }
-  }
-};
-
-const shortenMessage = async (message: ChatMessage, query: string, context: AgentContext): Promise<void> => {
-    const result = await Rag.text(context)
-      .chunks(TextChunker.words(message.content ?? "", 100))
-      .limit(50)
-      .characterLimit(2000)
-      .query(query);
-
-    message.content = "...\n" + result.join("\n...\n");
-};
