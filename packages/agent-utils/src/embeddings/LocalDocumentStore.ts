@@ -17,9 +17,12 @@ export class LocalDocumentStore {
       workspace: this.workspace,
     })
 
+    const index = this.workspace.readdirSync(this.uri).length;
+
     document.save({
       text: data.text,
       vector: data.vector,
+      index
     })
     return document
   }

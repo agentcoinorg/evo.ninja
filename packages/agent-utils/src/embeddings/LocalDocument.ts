@@ -55,7 +55,8 @@ export class LocalDocument {
   save({
     text,
     vector,
-  }: { text: string, vector: number[] }): void {
+    index
+  }: { text: string, vector: number[]; index: number }): void {
     const docPath = this.config.uri
 
     const vectorPath = path.join(docPath, VECTOR_FILENAME)
@@ -64,8 +65,6 @@ export class LocalDocument {
     if (!this.config.workspace.existsSync(docPath)) {
       this.config.workspace.mkdirSync(docPath, { recursive: true });
     }
-
-    const index = this.config.workspace.readdirSync(docPath).length;
 
     this.config.workspace.writeFileSync(vectorPath, JSON.stringify({
       id: this.id,

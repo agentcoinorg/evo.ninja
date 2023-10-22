@@ -40,6 +40,7 @@ export class TextChunker {
       }
       currentChunk += word;
     }
-    return chunks;
+    // TODO: temp fix. Do more general solution
+    return chunks.filter(x => x.length > 0);
   }
 }
