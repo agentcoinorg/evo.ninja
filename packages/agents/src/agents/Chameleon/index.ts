@@ -1,12 +1,9 @@
 import {
   AgentFunction,
-  AgentOutput,
   Chat,
   ChatLogs,
   ChatMessage,
-  ExecuteAgentFunctionCalled,
   FunctionDefinition,
-  RunResult,
   Timeout,
   Tokenizer,
   Workspace,
@@ -15,16 +12,15 @@ import { AgentContext } from "../../AgentContext";
 import { agentPrompts, prompts } from "./prompts";
 import { Agent, GoalRunArgs } from "../../Agent";
 import { AgentConfig } from "../../AgentConfig";
-import { ResultErr } from "@polywrap/result";
-import { basicFunctionCallLoop } from "./basicFunctionCallLoop";
 import { AgentFunctionBase } from "../../AgentFunctionBase";
 import { DeveloperAgent, ResearcherAgent, DataAnalystAgent, WebResearcherAgent, ScribeAgent } from "../../scriptedAgents";
 import { ScripterAgent } from "../Scripter";
 import { Rag } from "./Rag";
 import { TextChunker } from "./TextChunker";
 import { Prompt } from "./Prompt";
+import { NewAgent } from "./NewAgent";
 
-export class ChameleonAgent extends Agent {
+export class ChameleonAgent extends NewAgent<GoalRunArgs> {
   constructor(
     context: AgentContext,
     timeout?: Timeout,
@@ -38,60 +34,6 @@ export class ChameleonAgent extends Agent {
       ),
       context,
     );
-  }
-
-  public async* run(
-    args: GoalRunArgs,
-  ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
-    this.initializeChat(args);
-    return yield* this.runWithChat(this.config.prompts.initialMessages(args));
-  }
-
-  public override async* runWithChat(
-    messages: ChatMessage[],
-  ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
-    const { chat } = this.context;
-    if (this.config.timeout) {
-      setTimeout(
-        this.config.timeout.callback,
-        this.config.timeout.milliseconds
-      );
-    }
-    try {
-      for (const message of messages) {
-        chat.persistent(message);
-      }
-
-      // Add functions to chat
-      this.config.functions.forEach((fn) => {
-        chat.addFunction(fn.getDefinition());
-      });
-
-      if (this.config.timeout) {
-        setTimeout(this.config.timeout.callback, this.config.timeout.milliseconds);
-      }
-
-      return yield* basicFunctionCallLoop(
-        this.context,
-        this.config.functions.map((fn) => {
-          return {
-            definition: fn.getDefinition(),
-            buildExecutor: (context: AgentContext) => {
-              return fn.buildExecutor(this);
-            }
-          }
-        }),
-        (functionCalled: ExecuteAgentFunctionCalled) => {
-          return this.config.shouldTerminate(functionCalled);
-        },
-        this.config.prompts.loopPreventionPrompt,
-        this.config.prompts.agentSpeakPrompt,
-        this.beforeLlmResponse.bind(this)
-      );
-    } catch (err) {
-      this.context.logger.error(err);
-      return ResultErr("Unrecoverable error encountered.");
-    }
   }
 
   protected initializeChat(args: GoalRunArgs): void {
@@ -171,16 +113,16 @@ const findBestAgent = async (query: string, context: AgentContext): Promise<[Age
 
   const agentsWithPrompts = allAgents.map(agent => {
     return {
-      persona: agent.config.prompts.expertise + "\n" + agent.config.functions.map(x => x.name).join("\n"),
-      // persona: agent.config.prompts.initialMessages({ goal: "" })[0].content ?? "",
+      expertise: agent.config.prompts.expertise + "\n" + agent.config.functions.map(x => x.name).join("\n"),
+      persona: agent.config.prompts.initialMessages({ goal: "" })[0].content ?? "",
       agent,
     };
   });
 
-  const agents = await Rag.standard<{ persona: string, agent: Agent}>(context)
+  const agents = await Rag.standard<{ persona: string, expertise: string, agent: Agent}>(context)
     .items(agentsWithPrompts)
     .limit(1)
-    .selector(x => x.persona)
+    .selector(x => x.expertise)
     .query(query);
 
   const agentsWithPrompt = agents[0];
@@ -197,7 +139,7 @@ const isLargeMsg = (message: ChatMessage): boolean => {
   return !!message.content && message.content.length > 2000;
 }
 
-const joinUnderCharsLimit = (chunks: string[], characterLimit: number, separator: string): string => {
+const joinUnderCharLimit = (chunks: string[], characterLimit: number, separator: string): string => {
   let result = "";
 
   for (const chunk of chunks) {
@@ -215,6 +157,23 @@ const joinUnderCharsLimit = (chunks: string[], characterLimit: number, separator
   return result;
 }
 
+const getUnderCharLimit = (chunks: string[], characterLimit: number): string[] => {
+  let totalLength = 0;
+  const newChunks = [];
+  for (const chunk of chunks) {
+    if (totalLength + chunk.length > characterLimit) {
+      const remainingCharacters = characterLimit - totalLength;
+      if (remainingCharacters > 0) {
+        newChunks.push(chunk.substring(0, remainingCharacters));
+      }
+      break;
+    }
+    newChunks.push(chunk);
+    totalLength += chunk.length;
+  }
+  return newChunks;
+}
+
 const shortenLargeMessages = async (query: string, chat: Chat, context: AgentContext): Promise<void> => {
   for(let i = 2; i < chat.chatLogs.messages.length ; i++) {
     const message = chat.chatLogs.messages[i];
@@ -225,13 +184,14 @@ const shortenLargeMessages = async (query: string, chat: Chat, context: AgentCon
 };
 
 const shortenMessage = async (message: ChatMessage, query: string, context: AgentContext): Promise<void> => {
-    const result = await Rag.text(context)
-      .chunks(TextChunker.words(message.content ?? "", 100))
-      .limit(50)
-      .characterLimit(2000)
-      .query(query);
-
-    message.content = "...\n" + joinUnderCharsLimit(result, 1995, "\n...\n");
+  message.content = previewChunks(
+    await Rag.standard(context)
+    .items(TextChunker.words(message.content ?? "", 100))
+    .limit(50)
+    .selector(x => x)
+    .query(query),
+    2000
+  );
 };
 
 const buildDirectoryPreviewMsg = (workspace: Workspace): ChatMessage => {
@@ -246,3 +206,6 @@ files.filter((x) => x.type === "directory").map((x) => x.name).join(", ")
 }` 
   }
 };
+
+const previewChunks = (chunks: string[], charLimit: 2000): string => joinUnderCharLimit(chunks, charLimit - "...\n".length, "\n...\n")
+const limitChunks = (chunks: string[], charLimit: 2000): string[] => getUnderCharLimit(chunks, charLimit - "...\n".length)
