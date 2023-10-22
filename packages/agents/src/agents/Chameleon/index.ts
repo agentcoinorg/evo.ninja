@@ -18,7 +18,7 @@ import { AgentConfig } from "../../AgentConfig";
 import { ResultErr } from "@polywrap/result";
 import { basicFunctionCallLoop } from "./basicFunctionCallLoop";
 import { AgentFunctionBase } from "../../AgentFunctionBase";
-import { DeveloperAgent, ResearcherAgent, DataAnalystAgent } from "../../scriptedAgents";
+import { DeveloperAgent, ResearcherAgent, DataAnalystAgent, WebResearcherAgent, ScribeAgent } from "../../scriptedAgents";
 import { ScripterAgent } from "../Scripter";
 import { Rag } from "./Rag";
 import { TextChunker } from "./TextChunker";
@@ -164,7 +164,9 @@ const findBestAgent = async (query: string, context: AgentContext): Promise<[Age
     DeveloperAgent,
     ResearcherAgent,
     DataAnalystAgent,
-    ScripterAgent
+    ScripterAgent,
+    ScribeAgent,
+    WebResearcherAgent
   ].map(agentClass => new agentClass(context.cloneEmpty()));
 
   const agentsWithPrompts = allAgents.map(agent => {
