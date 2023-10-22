@@ -195,6 +195,24 @@ const isLargeMsg = (message: ChatMessage): boolean => {
   return !!message.content && message.content.length > 2000;
 }
 
+const joinUnderCharsLimit = (chunks: string[], characterLimit: number, separator: string): string => {
+  let result = "";
+
+  for (const chunk of chunks) {
+    if (result.length + chunk.length + separator.length > characterLimit) {
+      break;
+    }
+
+    if (result === "") {
+      result += chunk;
+    } else {
+      result += separator + chunk;
+    }
+  }
+
+  return result;
+}
+
 const shortenLargeMessages = async (query: string, chat: Chat, context: AgentContext): Promise<void> => {
   for(let i = 2; i < chat.chatLogs.messages.length ; i++) {
     const message = chat.chatLogs.messages[i];
@@ -211,7 +229,7 @@ const shortenMessage = async (message: ChatMessage, query: string, context: Agen
       .characterLimit(2000)
       .query(query);
 
-    message.content = "...\n" + result.join("\n...\n");
+    message.content = "...\n" + joinUnderCharsLimit(result, 1995, "\n...\n");
 };
 
 const buildDirectoryPreviewMsg = (workspace: Workspace): ChatMessage => {
