@@ -5,11 +5,15 @@ import {
   AgentOutput,
   RunResult,
   basicFunctionCallLoop,
+  LlmQuery,
+  LlmQueryBuilderV2,
+  ChatLogs,
 } from "@evo-ninja/agent-utils";
 import { ResultErr } from "@polywrap/result";
 import { AgentConfig } from "./AgentConfig";
 import { AgentContext } from "./AgentContext";
 import { ExecuteAgentFunctionCalled } from "@evo-ninja/agent-utils";
+import { Prompt } from "./agents/Chameleon/Prompt";
 
 export type GoalRunArgs = {
   goal: string;
@@ -76,5 +80,17 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
       this.context.logger.error(err);
       return ResultErr("Unrecoverable error encountered.");
     }
+  }
+
+  protected expression(msgs?: ChatMessage[]): LlmQuery {
+    return new LlmQuery(this.context.llm, this.context.chat.tokenizer, ChatLogs.from(msgs ?? [], [], this.context.chat.tokenizer));
+  }
+
+  protected expressionBuilder(msgs?: ChatMessage[]): LlmQueryBuilderV2 {
+    return new LlmQueryBuilderV2(this.context.llm, this.context.chat.tokenizer, msgs);
+  }
+
+  protected askLlm(query: string | Prompt): Promise<string> {
+    return this.expression().ask(query.toString());
   }
 }
