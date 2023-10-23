@@ -1,10 +1,10 @@
 import {
   AgentFunction,
-  Chat,
   ChatLogs,
   ChatMessage,
   FunctionDefinition,
   MessageChunker,
+  TextChunker,
   Timeout,
   Tokenizer,
   Workspace,
@@ -12,17 +12,17 @@ import {
   OpenAIEmbeddingAPI,
   LlmApi,
   LlmQueryBuilder,
-  ContextualizedChat
+  ContextualizedChat,
+  Chat
 } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../../AgentContext";
 import { agentPrompts, prompts } from "./prompts";
 import { GoalRunArgs } from "../../Agent";
 import { AgentConfig } from "../../AgentConfig";
 import { Rag } from "./Rag";
-import { TextChunker } from "./TextChunker";
 import { Prompt } from "./Prompt";
 import { NewAgent } from "./NewAgent";
-import { previewChunks } from "./helpers";
+import { charsToTokens, previewChunks } from "./helpers";
 import { findBestAgent } from "./findBestAgent";
 
 export class ChameleonAgent extends NewAgent<GoalRunArgs> {
@@ -140,17 +140,17 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     const lastMessage = messages.slice(-1)[0];
 
     if (isLargeMsg(lastMessage)) {
-      await shortenMessage(lastMessage, this.lastQuery!, this.context);
+      await this.shortenMessage(lastMessage, this.lastQuery!);
     }
+    
+    const prediction = await this.predictBestNextStep(messages);
 
-    const query = await this.predictBestNextStep(messages);
+    this.lastQuery = prediction;
+    console.log("Prediction: ", prediction);
 
-    this.lastQuery = query;
-    console.log("Query: ", query);
+    await this.shortenLargeMessages(prediction);
 
-    await shortenLargeMessages(query, chat, this.context);
-
-    const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(query, this.context);
+    const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(prediction, this.context);
 
     const logs = insertPersonaAsFirstMsg(persona, chat.chatLogs, chat.tokenizer);
 
@@ -168,7 +168,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     }
   }
 
-  async predictBestNextStep(messages: ChatMessage[]): Promise<string> {
+  private async predictBestNextStep(messages: ChatMessage[]): Promise<string> {
     //TODO: Keep persona in chat logs when doing this
     return await this.askLlm(
       new Prompt()
@@ -182,6 +182,82 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
         )
     );
   };
+
+  private async shortenLargeMessages(query: string): Promise<void> {
+    for(let i = 2; i < this.context.chat.chatLogs.messages.length ; i++) {
+      const message = this.context.chat.chatLogs.messages[i];
+      if (isLargeMsg(message)) {
+        await this.shortenMessage(message, query);
+      }
+    }
+  }
+
+  private async shortenMessage(message: ChatMessage, query: string): Promise<void> {
+    message.content = await this.advancedFilterText(message.content ?? "", query);
+  }
+
+  // private async filterText(text: string, query: string, context: AgentContext): Promise<string> {
+  //   const chunks = TextChunker.parentDocRetrieval(text, {
+  //     parentChunker: (text: string) => TextChunker.sentences(text),
+  //     childChunker: (parentText: string) =>
+  //       TextChunker.fixedCharacterLength(parentText, { chunkLength: 100, overlap: 15 })
+  //   });
+
+  //   const result = await Rag.standard(chunks, context)
+  //     .selector(x => x.doc)
+  //     .limit(12)
+  //     .sortByIndex()
+  //     .onlyUnique()
+  //     .query(query);
+
+  //   return previewChunks(
+  //     result.map(x => x.metadata.parent),
+  //     maxContextChars(context) * 0.07
+  //   );
+  // }
+
+  private async advancedFilterText(text: string, query: string): Promise<string> {
+    const chunks = TextChunker.parentDocRetrieval(text, {
+      parentChunker: (text: string) => TextChunker.sentences(text),
+      childChunker: (parentText: string) =>
+        TextChunker.fixedCharacterLength(parentText, { chunkLength: 100, overlap: 15 })
+    });
+    const result = await Rag.standard(chunks, this.context)
+      .selector(x => x.doc)
+      .limit(48)
+      .sortByIndex()
+      .onlyUnique()
+      .query(query);
+
+    const maxCharsToUse = this.maxContextChars() * 0.5;
+    const charsForPreview = maxCharsToUse * 0.7;
+
+    const bigPreview = previewChunks(
+      result.map(x => x.metadata.parent),
+      charsForPreview
+    );
+
+    const prompt = new Prompt()
+      .block(bigPreview)
+      .line(`Goal:`)
+      .line(x => x.block(query))
+      .line(`
+        Consider the above text in respect to the desired goal.
+        Rewrite the text to better achieve the goal.
+        Filter out unecessary information. Do not add new information.
+        IMPORTANT: Respond only with the new text!`
+      ).toString();
+
+    const filteredText = await this.askLlm(prompt, charsToTokens(maxCharsToUse - prompt.length));
+
+    console.log("filteredText", text);
+
+    return filteredText;
+  }
+
+  private maxContextChars(): number {
+    return this.context.llm.getMaxContextTokens() ?? 8000;
+  }
 }
 
 const insertPersonaAsFirstMsg = (persona: string, logs: ChatLogs, tokenizer: Tokenizer): ChatLogs => {
@@ -201,31 +277,6 @@ const insertPersonaAsFirstMsg = (persona: string, logs: ChatLogs, tokenizer: Tok
 const isLargeMsg = (message: ChatMessage): boolean => {
   return !!message.content && message.content.length > 2000;
 }
-
-const shortenLargeMessages = async (query: string, chat: Chat, context: AgentContext): Promise<void> => {
-  for(let i = 2; i < chat.chatLogs.messages.length ; i++) {
-    const message = chat.chatLogs.messages[i];
-    if (isLargeMsg(message)) {
-      await shortenMessage(message, query, context);
-    }
-  }
-};
-
-const shortenMessage = async (message: ChatMessage, query: string, context: AgentContext): Promise<void> => {
-  await filterMessageContent(message, query, context);
-};
-
-const filterMessageContent = async (message: ChatMessage, query: string, context: AgentContext): Promise<void> => {
-  message.content = previewChunks(
-    (await Rag.standard(TextChunker.characters(message.content ?? "", 1000), context)
-      .limit(2)
-      .selector(x => x)
-      .query(query))
-      .sortByIndex()
-      .onlyUnique(),
-    2000
-  );
-};
 
 const buildDirectoryPreviewMsg = (workspace: Workspace): ChatMessage => {
   const files = workspace.readdirSync("./");
