@@ -54,14 +54,14 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
       await this.shortenMessage(lastMessage, this.lastQuery!);
     }
     
-    const query = await this.predictBestNextStep(messages);
+    const prediction = await this.predictBestNextStep(messages);
 
-    this.lastQuery = query;
-    console.log("Query: ", query);
+    this.lastQuery = prediction;
+    console.log("Prediction: ", prediction);
 
-    await this.shortenLargeMessages(query);
+    await this.shortenLargeMessages(prediction);
 
-    const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(query, this.context);
+    const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(prediction, this.context);
 
     const logs = insertPersonaAsFirstMsg(persona, chat.chatLogs, chat.tokenizer);
 
