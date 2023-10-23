@@ -4,6 +4,20 @@ export const limitChunks = (chunks: string[], charLimit: number): string[] => ge
 export const tokensToChars = (tokenCnt: number) => tokenCnt * 4;
 export const charsToTokens = (charCnt: number) => charCnt / 4;
 
+export const filterDuplicates = <TItem, TCompare>(items: TItem[], compareBy: (item: TItem) => TCompare): TItem[] => {
+  const set = new Set();
+  const uniqueItems = [];
+  for (const item of items) {
+    if (set.has(compareBy(item))) {
+      continue;
+    }
+    uniqueItems.push(item);
+    set.add(compareBy(item));
+  }
+
+  return uniqueItems;
+};
+
 const joinUnderCharLimit = (chunks: string[], characterLimit: number, separator: string): string => {
   let result = "";
 

@@ -107,46 +107,28 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     message.content = await this.advancedFilterText(message.content ?? "", query);
   }
 
-  // private async filterText(text: string, query: string, context: AgentContext): Promise<string> {
-  //   const chunks = TextChunker.parentDocRetrieval(text, {
-  //     parentChunker: (text: string) => TextChunker.sentences(text),
-  //     childChunker: (parentText: string) =>
-  //       TextChunker.fixedCharacterLength(parentText, { chunkLength: 100, overlap: 15 })
-  //   });
-
-  //   const result = await Rag.standard(chunks, context)
-  //     .selector(x => x.doc)
-  //     .limit(12)
-  //     .sortByIndex()
-  //     .onlyUnique()
-  //     .query(query);
-
-  //   return previewChunks(
-  //     result.map(x => x.metadata.parent),
-  //     maxContextChars(context) * 0.07
-  //   );
-  // }
-
   private async advancedFilterText(text: string, query: string): Promise<string> {
     const chunks = TextChunker.parentDocRetrieval(text, {
       parentChunker: (text: string) => TextChunker.sentences(text),
       childChunker: (parentText: string) =>
         TextChunker.fixedCharacterLength(parentText, { chunkLength: 100, overlap: 15 })
     });
-    const result = await Rag.standard(chunks, this.context)
+
+    const maxCharsToUse = this.maxContextChars() * 0.75;
+    const charsForPreview = maxCharsToUse * 0.7;
+
+    console.log("maxCharsToUse", maxCharsToUse);
+    console.log("charsForPreview", charsForPreview);
+
+    const bigPreview = await Rag.standard(chunks, this.context)
       .selector(x => x.doc)
       .limit(48)
       .sortByIndex()
       .onlyUnique()
-      .query(query);
-
-    const maxCharsToUse = this.maxContextChars() * 0.5;
-    const charsForPreview = maxCharsToUse * 0.7;
-
-    const bigPreview = previewChunks(
-      result.map(x => x.metadata.parent),
-      charsForPreview
-    );
+      .query(query)
+      .map(x => x.metadata.parent)
+      .unique()
+      .then(x => previewChunks(x, charsForPreview));
 
     const prompt = new Prompt()
       .block(bigPreview)
@@ -159,7 +141,9 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
         IMPORTANT: Respond only with the new text!`
       ).toString();
 
-    const filteredText = await this.askLlm(prompt, charsToTokens(maxCharsToUse - prompt.length));
+    console.log("maxCharsToUse - prompt.length", maxCharsToUse - prompt.length);
+
+    const filteredText = await this.askLlm(prompt, Math.floor(charsToTokens(maxCharsToUse - prompt.length)));
 
     console.log("filteredText", text);
 
