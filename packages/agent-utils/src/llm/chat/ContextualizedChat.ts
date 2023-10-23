@@ -6,7 +6,8 @@ import {
 import {
   MessageChunker,
   LocalVectorDB,
-  LocalCollection
+  LocalCollection,
+  BaseDocumentMetadata
 } from "../../";
 
 import { v4 as uuid } from "uuid";
@@ -19,8 +20,7 @@ interface Chunk {
 
 type ChunkIdx = number;
 
-interface DocumentMetadata {
-  chunkIdx: ChunkIdx;
+interface DocumentMetadata extends BaseDocumentMetadata {
   tokens: number;
 }
 
@@ -131,7 +131,7 @@ export class ContextualizedChat {
     tokenLimit: number
   ): Promise<{ msg: ChatMessage; chunkIdx: ChunkIdx; }[]> {
     // Search the collection for relevant chunks
-    const results = await this._collections[type].search(context, -1);
+    const results = await this._collections[type].search(context);
 
     // Aggregate as many as possible
     const chunks: { msg: ChatMessage; chunkIdx: ChunkIdx; }[] = [];
@@ -143,7 +143,7 @@ export class ContextualizedChat {
       }
 
       const msg = JSON.parse(chunkText) as ChatMessage;
-      const chunkIdx = metadata.chunkIdx;
+      const chunkIdx = metadata.index;
       chunks.push({ msg, chunkIdx });
       tokenCounter += metadata.tokens;
       return true;
@@ -221,7 +221,7 @@ export class ContextualizedChat {
 
     // Create an array of chunk document metadata
     const metadatas: DocumentMetadata[] = newChunks.map((chunk, index) => ({
-      chunkIdx: startChunkIdx + index,
+      index: startChunkIdx + index,
       tokens: this._rawChat.tokenizer.encode(chunk).length
     }));
 

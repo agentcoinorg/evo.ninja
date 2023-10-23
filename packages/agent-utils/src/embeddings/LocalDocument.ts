@@ -4,13 +4,17 @@ import { Workspace } from "../sys";
 const VECTOR_FILENAME = "vector.json"
 const DOCUMENT_FILENAME = "document.json"
 
-export interface LocalDocumentData<TMetadata = unknown> {
-  id: string;
-  text: string;
-  metadata?: TMetadata;
+export interface BaseDocumentMetadata {
+  index: number;
 }
 
-export class LocalDocument<TMetadata = unknown> {
+export interface LocalDocumentData<TMetadata extends BaseDocumentMetadata = BaseDocumentMetadata> {
+  id: string;
+  text: string;
+  metadata: TMetadata;
+}
+
+export class LocalDocument<TMetadata extends BaseDocumentMetadata = BaseDocumentMetadata> {
   private _data: LocalDocumentData<TMetadata>;
 
   constructor(
@@ -42,7 +46,7 @@ export class LocalDocument<TMetadata = unknown> {
     return this._data.text
   }
 
-  metadata(): TMetadata | undefined {
+  metadata(): TMetadata {
     if (!this._data) {
       this.loadData()
     }
@@ -68,6 +72,12 @@ export class LocalDocument<TMetadata = unknown> {
       id: this.id,
       vector,
     }))
+
+    if (!metadata) {
+      metadata = {
+        index: this.config.workspace.readdirSync(docPath).length - 1,
+      } as TMetadata
+    }
 
     const documentData: LocalDocumentData = {
       id: this.id,

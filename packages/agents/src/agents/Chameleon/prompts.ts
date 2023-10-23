@@ -15,5 +15,6 @@ export const agentPrompts = (
 });
 
 export const prompts = {
+  generalAgentPersona: "You are an expert assistant capable of accomplishing a multitude of tasks using functions that use external tools (like internet, file system, etc.).",
   exhaustAllApproaches: "If you can not achieve a goal, first try to exhaust different approaches before giving up.",
 };

@@ -16,19 +16,19 @@ import {
 } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../../AgentContext";
 import { agentPrompts, prompts } from "./prompts";
-import { Agent, GoalRunArgs } from "../../Agent";
+import { GoalRunArgs } from "../../Agent";
 import { AgentConfig } from "../../AgentConfig";
-import { AgentFunctionBase } from "../../AgentFunctionBase";
-import { DeveloperAgent, ResearcherAgent, DataAnalystAgent, WebResearcherAgent, ScribeAgent } from "../../scriptedAgents";
 import { Rag } from "./Rag";
 import { TextChunker } from "./TextChunker";
 import { Prompt } from "./Prompt";
 import { NewAgent } from "./NewAgent";
+import { previewChunks } from "./helpers";
+import { findBestAgent } from "./findBestAgent";
 
 export class ChameleonAgent extends NewAgent<GoalRunArgs> {
   private _cChat: ContextualizedChat;
   private _chunker: MessageChunker;
-  private _lastQuery: string | undefined;
+  private lastQuery: string | undefined;
 
   constructor(
     context: AgentContext,
@@ -136,41 +136,20 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     const { chat } = this.context;
     const { messages } = chat.chatLogs;
 
-    let query = "";
-    if (messages.length <= 2) {
-      query = messages.slice(-1)[0].content ?? "";
-    } else {
-      const lastMessage = messages.slice(-1)[0];
+    const lastMessage = messages.slice(-1)[0];
 
-      if (isLargeMsg(lastMessage)) {
-        const q = this._lastQuery ?? await this.askLlm(
-            new Prompt()
-              .json(messages.slice(-2)[0])
-              .line("What is the above message trying to achieve?")
-          );
-
-        await shortenMessage(lastMessage, q, this.context);
-      }
-      //TODO: Keep persona in chat logs when doing this
-      query = await this.askLlm(
-        new Prompt()
-          .json([
-            { role: "user", content: "You are an expert assistant capable of accomplishing a multitude of tasks using functions that use external tools (like internet, file system, etc.)." }, 
-            ...messages
-          ])
-          .line(`
-            Consider the above chat between a user and assistant.
-            In your expert opinion, what is the best next step for the assistant?`
-          )
-      );
+    if (isLargeMsg(lastMessage)) {
+      await shortenMessage(lastMessage, this.lastQuery!, this.context);
     }
 
-    this._lastQuery = query;
-    await shortenLargeMessages(query, chat, this.context);
+    const query = await this.predictBestNextStep(messages);
+
+    this.lastQuery = query;
     console.log("Query: ", query);
 
+    await shortenLargeMessages(query, chat, this.context);
+
     const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(query, this.context);
-    console.log("Selected agent: ", agent.config.prompts.name);
 
     const logs = insertPersonaAsFirstMsg(persona, chat.chatLogs, chat.tokenizer);
 
@@ -187,6 +166,21 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
       })
     }
   }
+
+  async predictBestNextStep(messages: ChatMessage[]): Promise<string> {
+    //TODO: Keep persona in chat logs when doing this
+    return await this.askLlm(
+      new Prompt()
+        .json([
+          { role: "user", content: prompts.generalAgentPersona }, 
+          ...messages
+        ])
+        .line(`
+          Consider the above chat between a user and assistant.
+          In your expert opinion, what is the best next step for the assistant?`
+        )
+    );
+  };
 }
 
 const insertPersonaAsFirstMsg = (persona: string, logs: ChatLogs, tokenizer: Tokenizer): ChatLogs => {
@@ -203,82 +197,9 @@ const insertPersonaAsFirstMsg = (persona: string, logs: ChatLogs, tokenizer: Tok
   return newLogs;
 };
 
-const findBestAgent = async (query: string, context: AgentContext): Promise<[Agent<unknown>, FunctionDefinition[], string, AgentFunctionBase<unknown>[]]> => {
-  const allAgents: Agent[] = [
-    DeveloperAgent,
-    ResearcherAgent,
-    WebResearcherAgent,
-    DataAnalystAgent,
-    ScribeAgent
-  ].map(agentClass => new agentClass(context.cloneEmpty()));
-
-  const agentsWithPrompts = allAgents.map(agent => {
-    return {
-      expertise: agent.config.prompts.expertise + "\n" + agent.config.functions.map(x => x.name).join("\n"),
-      persona: agent.config.prompts.initialMessages({ goal: "" })[0].content ?? "",
-      agent,
-    };
-  });
-
-  const result = await Rag.standard(agentsWithPrompts, context)
-    .limit(1)
-    .selector(x => x.expertise)
-    .query(query);
-
-  const agents = result
-    .sortByIndex()
-    .onlyUnique();
-
-  console.log("Selected agents: ", agents.map(x => x.agent.config.prompts.name));
-
-  const agentWithPrompt = agents[0];
-
-  return [
-    agentWithPrompt.agent,
-    agentWithPrompt.agent.config.functions.map(f => f.getDefinition()),
-    agentWithPrompt.persona,
-    agentsWithPrompts.map(x => x.agent.config.functions).flat()
-  ];
-};
-
 const isLargeMsg = (message: ChatMessage): boolean => {
   return !!message.content && message.content.length > 2000;
 }
-
-const joinUnderCharLimit = (chunks: string[], characterLimit: number, separator: string): string => {
-  let result = "";
-
-  for (const chunk of chunks) {
-    if (result.length + chunk.length + separator.length > characterLimit) {
-      break;
-    }
-
-    if (result === "") {
-      result += chunk;
-    } else {
-      result += separator + chunk;
-    }
-  }
-
-  return result;
-}
-
-// const getUnderCharLimit = (chunks: string[], characterLimit: number): string[] => {
-//   let totalLength = 0;
-//   const newChunks = [];
-//   for (const chunk of chunks) {
-//     if (totalLength + chunk.length > characterLimit) {
-//       const remainingCharacters = characterLimit - totalLength;
-//       if (remainingCharacters > 0) {
-//         newChunks.push(chunk.substring(0, remainingCharacters));
-//       }
-//       break;
-//     }
-//     newChunks.push(chunk);
-//     totalLength += chunk.length;
-//   }
-//   return newChunks;
-// }
 
 const shortenLargeMessages = async (query: string, chat: Chat, context: AgentContext): Promise<void> => {
   for(let i = 2; i < chat.chatLogs.messages.length ; i++) {
@@ -290,6 +211,10 @@ const shortenLargeMessages = async (query: string, chat: Chat, context: AgentCon
 };
 
 const shortenMessage = async (message: ChatMessage, query: string, context: AgentContext): Promise<void> => {
+  await filterMessageContent(message, query, context);
+};
+
+const filterMessageContent = async (message: ChatMessage, query: string, context: AgentContext): Promise<void> => {
   message.content = previewChunks(
     (await Rag.standard(TextChunker.characters(message.content ?? "", 1000), context)
       .limit(2)
@@ -359,6 +284,3 @@ async function summarizeMessage(message: ChatMessage, llm: LlmApi, tokenizer: To
 
   return summary || "";
 }
-
-const previewChunks = (chunks: string[], charLimit: 2000): string => joinUnderCharLimit(chunks, charLimit - "...\n".length, "\n...\n")
-// const limitChunks = (chunks: string[], charLimit: 2000): string[] => getUnderCharLimit(chunks, charLimit)
