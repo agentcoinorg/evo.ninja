@@ -4,7 +4,6 @@ import path from "path";
 import { OpenAIEmbeddingAPI, LocalVectorDB, LocalCollection } from "../embeddings";
 import { InMemoryWorkspace, Env, ConsoleLogger } from "../sys";
 import { TextChunker } from "../chunking/TextChunker";
-import { splitIntoSentences } from "../chunking/splitters";
 
 dotenv.config({
   path: path.join(__dirname, "../../../../.env")
@@ -48,14 +47,14 @@ describe("Chunker", () => {
   })
 
   test("Parent-doc-retrieval - Parent Sentences; Child Characters", async () => {
-    const { docs, metadatas } = TextChunker.parentDocRetrieval(text, {
-      parentChunker: (text: string) => splitIntoSentences(text),
+    const chunks = TextChunker.parentDocRetrieval(text, {
+      parentChunker: (text: string) => TextChunker.sentences(text),
       childChunker: (parentText: string) =>
         TextChunker.fixedCharacterLength(parentText, { chunkLength: 100, overlap: 15 })
     })
 
     const collection = db.addCollection('parentdocs') as LocalCollection<{ parent: string }>
-    await collection.add(docs, metadatas)
+    await collection.add(chunks.map(x => x.doc), chunks.map(x => x.metadata))
 
     const searchResults = await collection.search(query, 3)
     const results = searchResults.map(s => ({

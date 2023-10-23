@@ -29,14 +29,12 @@ export const findBestAgent = async (
     };
   });
 
-  const result = await Rag.standard(agentsWithPrompts, context)
-    .limit(1)
+  const agents = await Rag.standard(agentsWithPrompts, context)
     .selector(x => x.expertise)
-    .query(query);
-
-  const agents = result
+    .limit(1)
     .sortByIndex()
-    .onlyUnique();
+    .onlyUnique()
+    .query(query);
 
   console.log("Selected agents: ", agents.map(x => x.agent.config.prompts.name));
 

@@ -1,5 +1,5 @@
-export const previewChunks = (chunks: string[], charLimit: 2000): string => joinUnderCharLimit(chunks, charLimit - "...\n".length, "\n...\n")
-export const limitChunks = (chunks: string[], charLimit: 2000): string[] => getUnderCharLimit(chunks, charLimit)
+export const previewChunks = (chunks: string[], charLimit: number): string => joinUnderCharLimit(chunks, charLimit - "...\n".length, "\n...\n")
+export const limitChunks = (chunks: string[], charLimit: number): string[] => getUnderCharLimit(chunks, charLimit)
 
 const joinUnderCharLimit = (chunks: string[], characterLimit: number, separator: string): string => {
   let result = "";
