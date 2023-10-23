@@ -44,15 +44,15 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
       context,
     );
     this._chunker = new MessageChunker({ maxChunkSize: 2000 });
-    // Gross, I know... will cleanup later
+    const embeddingApi = new OpenAIEmbeddingAPI(
+      this.context.env.OPENAI_API_KEY,
+      this.context.logger,
+      this.context.chat.tokenizer
+    );
     this._cChat = new ContextualizedChat(
       this.context.chat,
       this._chunker,
-      new LocalVectorDB(this.context.internals, "cchat", new OpenAIEmbeddingAPI(
-        this.context.env.OPENAI_API_KEY,
-        this.context.logger,
-        this.context.chat.tokenizer
-      ))
+      new LocalVectorDB(this.context.internals, "cchat", embeddingApi)
     );
   }
 
