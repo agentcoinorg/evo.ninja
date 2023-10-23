@@ -11,7 +11,7 @@ export class LocalVectorDB {
     private embeddingApi: EmbeddingApi,
   ) {}
 
-  addCollection<TMetadata>(name: string): LocalCollection<TMetadata> {
+  addCollection<TMetadata extends BaseDocumentMetadata = BaseDocumentMetadata>(name: string): LocalCollection<TMetadata> {
     const collection = new LocalCollection<TMetadata>(
       path.join(this.uri, name),
       this.embeddingApi,
