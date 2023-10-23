@@ -117,9 +117,6 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     const maxCharsToUse = this.maxContextChars() * 0.75;
     const charsForPreview = maxCharsToUse * 0.7;
 
-    console.log("maxCharsToUse", maxCharsToUse);
-    console.log("charsForPreview", charsForPreview);
-
     const bigPreview = await Rag.standard(chunks, this.context)
       .selector(x => x.doc)
       .limit(48)
@@ -141,11 +138,14 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
         IMPORTANT: Respond only with the new text!`
       ).toString();
 
-    console.log("maxCharsToUse - prompt.length", maxCharsToUse - prompt.length);
 
     const filteredText = await this.askLlm(prompt, Math.floor(charsToTokens(maxCharsToUse - prompt.length)));
 
     console.log("filteredText", text);
+    console.log("maxCharsToUse", maxCharsToUse);
+    console.log("charsForPreview", charsForPreview);
+    console.log("maxCharsToUse - prompt.length", maxCharsToUse - prompt.length);
+    console.log("filteredText.length", filteredText.length);
 
     return filteredText;
   }
