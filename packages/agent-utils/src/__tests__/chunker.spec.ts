@@ -4,6 +4,7 @@ import path from "path";
 import { OpenAIEmbeddingAPI, LocalVectorDB, LocalCollection } from "../embeddings";
 import { InMemoryWorkspace, Env, ConsoleLogger } from "../sys";
 import { TextChunker } from "../chunking/TextChunker";
+import { splitIntoSentences } from "../chunking/splitters";
 
 dotenv.config({
   path: path.join(__dirname, "../../../../.env")
@@ -28,7 +29,7 @@ describe("Chunker", () => {
     )
     const db = new LocalVectorDB(workspace, "testdb", embeddingApi)
 
-  it("Characters-based", async () => {
+  test("Characters-based", async () => {
     const chunks = TextChunker.fixedCharacterLength(text, { chunkLength: 100, overlap: 0 });
     const collection = db.addCollection('chars')
     await collection.add(chunks)
@@ -37,7 +38,7 @@ describe("Chunker", () => {
     console.log(`CHARS: ${JSON.stringify(searchResults.map(s => s.text()), null, 2)}`)
   })
 
-  it("Characters-based with overlap", async () => {
+  test("Characters-based with overlap", async () => {
     const chunks = TextChunker.fixedCharacterLength(text, { chunkLength: 100, overlap: 15 });
     const collection = db.addCollection('charsoverlap')
     await collection.add(chunks)
@@ -46,17 +47,12 @@ describe("Chunker", () => {
     console.log(`CHARS OVERLAP: ${JSON.stringify(searchResults.map(s => s.text()), null, 2)}`)
   })
 
-  it("Sentence-based", async () => {
-    const chunks = TextChunker.bySentences(text, { chunkLength: 100, overlap: 15 });
-    const collection = db.addCollection('sentences')
-    await collection.add(chunks)
-    const searchResults = await collection.search(query, 3)
-
-    console.log(`SENTENCES: ${JSON.stringify(searchResults.map(s => s.text()), null, 2)}`)
-  })
-
-  it("Parent-doc-retrieval", async () => {
-    const { docs, metadatas } = TextChunker.parentDocRetrieval(text, { chunkLength: 100, overlap: 15 })
+  test("Parent-doc-retrieval - Parent Sentences; Child Characters", async () => {
+    const { docs, metadatas } = TextChunker.parentDocRetrieval(text, {
+      parentChunker: (text: string) => splitIntoSentences(text),
+      childChunker: (parentText: string) =>
+        TextChunker.fixedCharacterLength(parentText, { chunkLength: 100, overlap: 15 })
+    })
 
     const collection = db.addCollection('parentdocs') as LocalCollection<{ parent: string }>
     await collection.add(docs, metadatas)
