@@ -33,20 +33,18 @@ describe("Chunker", () => {
     const chunks = TextChunker.fixedCharacterLength(text, { chunkLength: 100, overlap: 0 });
     const collection = db.addCollection('chars')
     await collection.add(chunks)
-    const searchResults = await collection.search(query)
-    const results = searchResults.slice(0, 3);
+    const searchResults = await collection.search(query, 3)
 
-    console.log(`CHARS: ${JSON.stringify(results.map(s => s.text()), null, 2)}`)
+    console.log(`CHARS: ${JSON.stringify(searchResults.map(s => s.text()), null, 2)}`)
   })
 
   test("Characters-based with overlap", async () => {
     const chunks = TextChunker.fixedCharacterLength(text, { chunkLength: 100, overlap: 15 });
     const collection = db.addCollection('charsoverlap')
     await collection.add(chunks)
-    const searchResults = await collection.search(query)
-    const results = searchResults.slice(0, 3);
+    const searchResults = await collection.search(query, 3)
 
-    console.log(`CHARS OVERLAP: ${JSON.stringify(results.map(s => s.text()), null, 2)}`)
+    console.log(`CHARS OVERLAP: ${JSON.stringify(searchResults.map(s => s.text()), null, 2)}`)
   })
 
   test("Parent-doc-retrieval - Parent Sentences; Child Characters", async () => {
@@ -59,10 +57,9 @@ describe("Chunker", () => {
     const collection = db.addCollection('parentdocs') as LocalCollection<{ parent: string; index: number }>
     await collection.add(docs, metadatas.map(({ parent }, index) => ({ parent, index })))
 
-    const searchResults = await collection.search(query)
-    const results = searchResults.slice(0, 3);
+    const searchResults = await collection.search(query, 3)
 
-    const pdrResults = results.map(s => ({
+    const pdrResults = searchResults.map(s => ({
       text: s.text(),
       parent: s.metadata()?.parent
     }))
@@ -78,10 +75,11 @@ describe("Chunker", () => {
 
     const searchResults = await collection.searchWithSurroundingContext(query, {
       surroundingCharacters: 500,
-      overlap: 15
+      overlap: 15,
+      limit: 3
     })
 
-    console.log(`Surrounding: ${JSON.stringify(searchResults.slice(0, 3).map(r => ({
+    console.log(`Surrounding: ${JSON.stringify(searchResults.map(r => ({
       text: r.match.text(),
       surrounding: r.withSurrounding,
     })), null, 2)}`)

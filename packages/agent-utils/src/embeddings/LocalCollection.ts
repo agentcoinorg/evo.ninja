@@ -67,8 +67,8 @@ export class LocalCollection<TMetadata extends BaseDocumentMetadata = BaseDocume
     return limit ? results.slice(0, limit) : results;
   }
 
-  async searchWithSurroundingContext(query: string, opts: { surroundingCharacters: number, overlap?: number }) {
-    const { surroundingCharacters, overlap } = opts;
+  async searchWithSurroundingContext(query: string, opts: { surroundingCharacters: number, overlap?: number, limit?: number }) {
+    const { surroundingCharacters, overlap, limit } = opts;
     const halfSurroundChars = Math.floor(surroundingCharacters / 2);
     
     const results = await this.search(query);
@@ -100,7 +100,7 @@ export class LocalCollection<TMetadata extends BaseDocumentMetadata = BaseDocume
       }
     })
 
-    return surroundedResults;
+    return limit ? surroundedResults.slice(0, limit) : surroundedResults;
   }
 
   async searchUnique(query: string, limit: number): Promise<LocalDocument<TMetadata>[]> {
