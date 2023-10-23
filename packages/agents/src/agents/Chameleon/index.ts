@@ -66,13 +66,14 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     const { chat } = this.context;
     const { messages } = chat.chatLogs;
 
-    const shortendMessages = this.previousPrediction 
-      ? await this.shortenLargeMessages(this.previousPrediction)
-      : messages; 
+    if (this.previousPrediction) {
+      // This will shorten only new messages (since the rest were already shortened)
+      await this.shortenLargeMessages(this.previousPrediction);
+    }
 
-    const prediction = await this.predictBestNextStep(shortendMessages);
-    console.log("Prediction: ", prediction);
+    const prediction = await this.predictBestNextStep(messages);
     this.previousPrediction = prediction;
+    console.log("Prediction: ", prediction);
 
     const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(prediction, this.context);
 
@@ -118,22 +119,14 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     );
   };
 
-  private async shortenLargeMessages(query: string): Promise<ChatMessage[]> {
-    const newMsgs: ChatMessage[] = [];
-
+  private async shortenLargeMessages(query: string): Promise<void> {
     for(let i = 0; i < this.context.chat.chatLogs.messages.length ; i++) {
       const message = this.context.chat.chatLogs.messages[i];
       if (i <= 3 || !this.isLargeMsg(message)) {
-        newMsgs.push(message);
       } else {
-        newMsgs.push({
-          role: message.role,
-          content: await this.advancedFilterText(message.content ?? "", query)
-        });
+        message.content = await this.advancedFilterText(message.content ?? "", query);
       }
     }
-
-    return newMsgs;
   }
 
   private async advancedFilterText(text: string, query: string): Promise<string> {
