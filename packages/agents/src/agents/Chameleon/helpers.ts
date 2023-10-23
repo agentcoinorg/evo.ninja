@@ -1,8 +1,22 @@
+import { Agent } from "../../Agent";
+import { AgentContext } from "../../AgentContext";
+
 export const previewChunks = (chunks: string[], charLimit: number): string => joinUnderCharLimit(chunks, charLimit - "...\n".length, "\n...\n")
 export const limitChunks = (chunks: string[], charLimit: number): string[] => getUnderCharLimit(chunks, charLimit)
 
 export const tokensToChars = (tokenCnt: number) => tokenCnt * 4;
 export const charsToTokens = (charCnt: number) => Math.floor(charCnt / 4);
+
+export const agentFunctionBaseToAgentFunction = <TRunArgs>(agent: Agent<TRunArgs>) => {
+  return (fn: any) => {
+    return {
+      definition: fn.getDefinition(),
+      buildExecutor: (context: AgentContext) => {
+        return fn.buildExecutor(agent);
+      }
+    }
+  };
+};
 
 export const filterDuplicates = <TItem, TCompare>(items: TItem[], compareBy: (item: TItem) => TCompare): TItem[] => {
   const set = new Set();
