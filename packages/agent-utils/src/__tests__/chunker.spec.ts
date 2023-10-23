@@ -51,17 +51,36 @@ describe("Chunker", () => {
       parentChunker: (text: string) => TextChunker.sentences(text),
       childChunker: (parentText: string) =>
         TextChunker.fixedCharacterLength(parentText, { chunkLength: 100, overlap: 15 })
-    })
+    });
 
-    const collection = db.addCollection('parentdocs') as LocalCollection<{ parent: string }>
-    await collection.add(chunks.map(x => x.doc), chunks.map(x => x.metadata))
+    const collection = db.addCollection('parentdocs') as LocalCollection<{ parent: string; index: number }>
+    await collection.add(chunks.map(x => x.doc), chunks.map(x => x.metadata).map(({ parent }, index) => ({ parent, index })))
 
     const searchResults = await collection.search(query, 3)
-    const results = searchResults.map(s => ({
+
+    const pdrResults = searchResults.map(s => ({
       text: s.text(),
       parent: s.metadata()?.parent
     }))
 
-    console.log(`PDR: ${JSON.stringify(results, null, 2)}`)
+    console.log(`PDR: ${JSON.stringify(pdrResults, null, 2)}`)
+  })
+
+  test("Surrounding context", async () => {
+    const chunks = TextChunker.fixedCharacterLength(text, { chunkLength: 100, overlap: 15 })
+
+    const collection = db.addCollection('surrounding') as LocalCollection<{ index: number }>
+    await collection.add(chunks, chunks.map((_, idx) => ({ index: idx })))
+
+    const searchResults = await collection.searchWithSurroundingContext(query, {
+      surroundingCharacters: 500,
+      overlap: 15,
+      limit: 3
+    })
+
+    console.log(`Surrounding: ${JSON.stringify(searchResults.map(r => ({
+      text: r.match.text(),
+      surrounding: r.withSurrounding,
+    })), null, 2)}`)
   })
 })
