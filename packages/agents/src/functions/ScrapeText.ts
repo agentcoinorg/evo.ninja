@@ -68,8 +68,12 @@ export class ScrapeTextFunction extends AgentFunctionBase<{ url: string }> {
     const html = response.data;
     const $ = load(html);
 
+    // Remove not needed tags
     $('script').remove();
     $('style').remove();
+    $('noscript').remove();
+    $('link').remove();
+    $('head').remove();
 
     const texts: string[] = [];
 
