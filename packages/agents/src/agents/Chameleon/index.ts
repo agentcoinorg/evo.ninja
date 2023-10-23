@@ -212,38 +212,3 @@ files.filter((x) => x.type === "directory").map((x) => x.name).join(", ")
 }` 
   }
 };
-
-// async function summarizeMessage(message: ChatMessage, llm: LlmApi, tokenizer: Tokenizer): Promise<string> {
-//   const fuzTokens = 200;
-//   const maxTokens = llm.getMaxContextTokens() - fuzTokens;
-
-//   const prompt = (summary: string | undefined) => {
-//     return `Summarize the following data. Includes all unique details.\n
-//             ${summary ? `An existing summary exists, please add all new details found to it.\n\`\`\`\n${summary}\n\`\`\`\n` : ``}`;
-//   }
-//   const appendData = (prompt: string, chunk: string) => {
-//     return `${prompt}\nData:\n\`\`\`\n${chunk}\n\`\`\``;
-//   }
-
-//   let summary: string | undefined = undefined;
-//   const data = message.content || "";
-//   const len = data.length;
-//   let idx = 0;
-
-//   while (idx < len) {
-//     const promptStr = prompt(summary);
-//     const propmtTokens = tokenizer.encode(promptStr).length;
-//     const chunkTokens = (maxTokens - propmtTokens);
-//     const chunk = data.substring(idx, Math.min(idx + chunkTokens, len));
-//     idx += chunkTokens;
-
-//     const promptFinal = appendData(promptStr, chunk);
-
-//     summary = await new LlmQueryBuilder(llm, tokenizer)
-//       .persistent("user", promptFinal)
-//       .build()
-//       .content();
-//   }
-
-//   return summary || "";
-// }
