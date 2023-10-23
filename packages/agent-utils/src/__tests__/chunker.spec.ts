@@ -55,12 +55,13 @@ describe("Chunker", () => {
     console.log(`SENTENCES: ${JSON.stringify(searchResults.map(s => s.text()), null, 2)}`)
   })
 
-  it("Parent-doc-retrieval", async () => {
-    const chunks = chunkTextBySentences(text, 100, 15);
-    const collection = db.addCollection('sentences')
-    await collection.add(chunks)
-    const searchResults = await collection.search(query, 3)
+  // it("Parent-doc-retrieval", async () => {
+  //   const parentChunks = text.split(". ")
+  //   const chunks = chunkTextBySentences(text, 100, 15);
+  //   const collection = db.addCollection('sentences')
+  //   await collection.add(chunks)
+  //   const searchResults = await collection.search(query, 3)
 
-    console.log(`SENTENCES: ${JSON.stringify(searchResults.map(s => s.text()), null, 2)}`)
-  })
+  //   console.log(`SENTENCES: ${JSON.stringify(searchResults.map(s => s.text()), null, 2)}`)
+  // })
 })
