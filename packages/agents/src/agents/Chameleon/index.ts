@@ -20,6 +20,8 @@ import { Prompt } from "./Prompt";
 import { NewAgent } from "./NewAgent";
 
 export class ChameleonAgent extends NewAgent<GoalRunArgs> {
+  private lastQuery: string | undefined;
+
   constructor(
     context: AgentContext,
     timeout?: Timeout,
@@ -54,14 +56,15 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
       const lastMessage = messages.slice(-1)[0];
 
       if (isLargeMsg(lastMessage)) {
-        const q = await this.askLlm(
-          new Prompt()
-            .json(messages.slice(-2)[0])
-            .line("What is the above message trying to achieve?")
-        );
+        const q = this.lastQuery ?? await this.askLlm(
+            new Prompt()
+              .json(messages.slice(-2)[0])
+              .line("What is the above message trying to achieve?")
+          );
 
         await shortenMessage(lastMessage, q, this.context);
       }
+      //TODO: Keep persona in chat logs when doing this
       query = await this.askLlm(
         new Prompt()
           .json([
@@ -70,11 +73,12 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
           ])
           .line(`
             Consider the above chat between a user and assistant.
-            In your expert opinion, what is the best next step for the assistant?
-          `)
+            In your expert opinion, what is the best next step for the assistant?`
+          )
       );
     }
 
+    this.lastQuery = query;
     await shortenLargeMessages(query, chat, this.context);
     console.log("Query: ", query);
 
@@ -194,8 +198,8 @@ const shortenLargeMessages = async (query: string, chat: Chat, context: AgentCon
 
 const shortenMessage = async (message: ChatMessage, query: string, context: AgentContext): Promise<void> => {
   message.content = previewChunks(
-    await Rag.standard(TextChunker.characters(message.content ?? "", 100), context)
-      .limit(50)
+    await Rag.standard(TextChunker.characters(message.content ?? "", 1000), context)
+      .limit(2)
       .selector(x => x)
       .query(query),
     2000
