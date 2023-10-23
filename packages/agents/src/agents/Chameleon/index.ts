@@ -131,19 +131,23 @@ const findBestAgent = async (query: string, context: AgentContext): Promise<[Age
     };
   });
 
-  const agents = await Rag.standard(agentsWithPrompts, context)
-    .limit(3)
+  const result = await Rag.standard(agentsWithPrompts, context)
+    .limit(1)
     .selector(x => x.expertise)
     .query(query);
 
+  const agents = result
+    .sortByIndex()
+    .onlyUnique();
+
   console.log("Selected agents: ", agents.map(x => x.agent.config.prompts.name));
 
-  const agentsWithPrompt = agents[0];
+  const agentWithPrompt = agents[0];
 
   return [
-    agentsWithPrompt.agent, 
-    agentsWithPrompt.agent.config.functions.map(f => f.getDefinition()),
-    agentsWithPrompt.persona, 
+    agentWithPrompt.agent, 
+    agentWithPrompt.agent.config.functions.map(f => f.getDefinition()),
+    agentWithPrompt.persona, 
     agentsWithPrompts.map(x => x.agent.config.functions).flat()
   ];
 };
@@ -198,10 +202,12 @@ const shortenLargeMessages = async (query: string, chat: Chat, context: AgentCon
 
 const shortenMessage = async (message: ChatMessage, query: string, context: AgentContext): Promise<void> => {
   message.content = previewChunks(
-    await Rag.standard(TextChunker.characters(message.content ?? "", 1000), context)
+    (await Rag.standard(TextChunker.characters(message.content ?? "", 1000), context)
       .limit(2)
       .selector(x => x)
-      .query(query),
+      .query(query))
+      .sortByIndex()
+      .onlyUnique(),
     2000
   );
 };

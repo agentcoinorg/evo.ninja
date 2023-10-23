@@ -1,4 +1,4 @@
-import { OpenAIEmbeddingAPI, LocalVectorDB } from "@evo-ninja/agent-utils";
+import { OpenAIEmbeddingAPI, LocalVectorDB, LocalDocument } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../../AgentContext";
 
 export class StandardRagBuilder<TItem> {
@@ -17,7 +17,7 @@ export class StandardRagBuilder<TItem> {
     return this;
   }
 
-  async query(query: string): Promise<TItem[]> {
+  async query(query: string): Promise<RagQuery<TItem>> {
     const embeddingApi = new OpenAIEmbeddingAPI(
       this.context.env.OPENAI_API_KEY,
       this.context.logger,
@@ -28,20 +28,68 @@ export class StandardRagBuilder<TItem> {
 
     const uuid = Math.floor(Date.now() / 1000).toString(16);
 
-    const collection = db.addCollection(uuid);
+    const collection = db.addCollection<{ index: number }>(uuid);
 
-    await collection.add(this._items.map(x => this._selector(x)));
+    await collection.add(this._items.map(x => this._selector(x)), this._items.map((_, i) => ({ index: i })));
 
     const results = await collection.search(query, this._limit);
 
-    const texts = results.map(result => result.text());
-
-    return texts.map(text => {
-      const item = this._items.find(x => this._selector(x) === text);
-      if (!item) {
-        throw new Error(`Text ${text} not found in items.`);
-      }
-      return item;
-    });
+    return new RagQuery(this._items, results, this._selector);
   }
 }
+
+export class RagQuery<TItem> {
+  constructor(private readonly items: TItem[], private readonly results: LocalDocument<{ index: number }>[], private readonly selector: (item: TItem) => string) {
+  }
+
+  sortByIndex(): RagQuery<TItem> {
+    const items = [...this.results]
+      .sort((a, b) => {
+        return a.metadata()!.index - b.metadata()!.index;
+      })
+      .map(x => {
+        return this.items[x.metadata()!.index];
+      });
+
+    return new RagQuery(items, this.results, this.selector);
+  }
+
+
+  sortByRelevance(): RagQuery<TItem> {
+    const items = [...this.results]
+      .map(x => {
+        return this.items[x.metadata()!.index];
+      });
+
+    return new RagQuery(items, this.results, this.selector);
+  }
+
+  onlyUnique(): TItem[] {
+    const set = new Set();
+    const uniqueItems = [];
+    for (const item of this.items) {
+      if (set.has(this.selector(item))) {
+        continue;
+      }
+      uniqueItems.push(item);
+      set.add(this.selector(item));
+    }
+
+    return uniqueItems;
+  }
+
+  withDuplicates(): TItem[] {
+    const set = new Set();
+    const uniqueItems = [];
+    for (const item of this.items) {
+      if (set.has(this.selector(item))) {
+        continue;
+      }
+      uniqueItems.push(item);
+      set.add(this.selector(item));
+    }
+
+    return uniqueItems;
+  }
+}
+

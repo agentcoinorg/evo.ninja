@@ -10,8 +10,8 @@ export class LocalVectorDB {
     private embeddingApi: EmbeddingApi,
   ) {}
 
-  addCollection(name: string): LocalCollection {
-    const collection = new LocalCollection(
+  addCollection<TMetadata>(name: string): LocalCollection<TMetadata> {
+    const collection = new LocalCollection<TMetadata>(
       path.join(this.uri, name),
       this.embeddingApi,
       this.workspace,
