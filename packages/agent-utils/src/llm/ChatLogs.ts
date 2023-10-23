@@ -67,8 +67,8 @@ export class ChatLogs {
     return this._logs[type];
   }
 
-  public getMsg(type: ChatLogType, index: number): ChatMessage {
-    return this._logs[type].msgs[index];
+  public getMsg(type: ChatLogType, index: number): ChatMessage | undefined {
+    return this._logs[type].msgs.at(index);
   }
 
   public getMsgTokens(type: ChatLogType, index: number): number {

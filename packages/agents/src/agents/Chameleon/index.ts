@@ -24,7 +24,6 @@ import { ResultErr } from "@polywrap/result";
 import { basicFunctionCallLoop } from "./basicFunctionCallLoop";
 import { AgentFunctionBase } from "../../AgentFunctionBase";
 import { DeveloperAgent, ResearcherAgent, DataAnalystAgent, WebResearcherAgent, ScribeAgent } from "../../scriptedAgents";
-import { ScripterAgent } from "../Scripter";
 import { Rag } from "./Rag";
 import { TextChunker } from "./TextChunker";
 import { Prompt } from "./Prompt";
@@ -33,7 +32,6 @@ import { ContextualizedChat } from "./ContextualizedChat";
 export class ChameleonAgent extends Agent {
   private _cChat: ContextualizedChat;
   private _chunker: MessageChunker;
-  private _prevChatLogs: ChatLogs | undefined;
 
   constructor(
     context: AgentContext,
@@ -48,7 +46,7 @@ export class ChameleonAgent extends Agent {
       ),
       context,
     );
-    this._chunker = new MessageChunker({ maxChunkSize: 500 });
+    this._chunker = new MessageChunker({ maxChunkSize: 2000 });
     // Gross, I know... will cleanup later
     this._cChat = new ContextualizedChat(
       this.context.chat,
@@ -64,7 +62,7 @@ export class ChameleonAgent extends Agent {
   public async* run(
     args: GoalRunArgs,
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
-    this.initializeChat(args);
+    this.initializeChat();
     return yield* this.runWithChat(this.config.prompts.initialMessages(args));
   }
 
@@ -110,43 +108,40 @@ export class ChameleonAgent extends Agent {
     }
   }
 
-  protected initializeChat(args: GoalRunArgs): void {
+  protected initializeChat(): void {
     const { chat } = this.context;
 
     chat.persistent(buildDirectoryPreviewMsg(this.context.workspace));
     chat.persistent("user", prompts.exhaustAllApproaches);
-    chat.persistent("user", args.goal);
   }
 
   protected async beforeLlmResponse2(): Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[]}> {
 
-    const emptyMessage: ChatMessage = {
-      role: "system",
-      content: ""
-    };
-
     // Retrieve the last message
-    let lastMessage =
-      this.context.chat.getLastMessage("temporary") ||
-      this.context.chat.getLastMessage("persistent") ||
-      emptyMessage;
+    const rawChatLogs = this.context.chat.chatLogs;
+    const lastMessages = [
+      rawChatLogs.getMsg("persistent", -1),
+      rawChatLogs.getMsg("temporary", -2),
+      rawChatLogs.getMsg("temporary", -1)
+    ].filter((x) => x !== undefined) as ChatMessage[];
 
-    // If it's large, summarize it
-    if (this._chunker.shouldChunk(lastMessage)) {
-      lastMessage.content = await summarizeMessage(
-        lastMessage,
-        this.context.llm,
-        this.context.chat.tokenizer
-      );
+    // Summarize large messages
+    for (let i = 0; i < lastMessages.length; ++i) {
+      const msg = lastMessages[i];
+      if (this._chunker.shouldChunk(msg)) {
+        const content = await summarizeMessage(
+          msg,
+          this.context.llm,
+          this.context.chat.tokenizer
+        );
+        lastMessages[i] = { ...msg, content };
+      }
     }
 
     // Predict the next step
     const prediction = await this.askLlm(
       new Prompt()
-        .json([
-          ...(this._prevChatLogs?.messages || []),
-          lastMessage
-        ])
+        .json(lastMessages)
         .line(`
           Consider the above chat between a user and assistant.
           In your expert opinion, what is the best next step for the assistant?`
@@ -250,10 +245,9 @@ const findBestAgent = async (query: string, context: AgentContext): Promise<[Age
   const allAgents: Agent[] = [
     DeveloperAgent,
     ResearcherAgent,
+    WebResearcherAgent,
     DataAnalystAgent,
-    ScripterAgent,
-    ScribeAgent,
-    WebResearcherAgent
+    ScribeAgent
   ].map(agentClass => new agentClass(context.cloneEmpty()));
 
   const agentsWithPrompts = allAgents.map(agent => {
@@ -364,7 +358,7 @@ async function summarizeMessage(message: ChatMessage, llm: LlmApi, tokenizer: To
 
   while (idx < len) {
     const promptStr = prompt(summary);
-    const propmtTokens = this.tokenizer.encode(promptStr).length;
+    const propmtTokens = tokenizer.encode(promptStr).length;
     const chunkTokens = (maxTokens - propmtTokens);
     const chunk = data.substring(idx, Math.min(idx + chunkTokens, len));
     idx += chunkTokens;
@@ -372,7 +366,7 @@ async function summarizeMessage(message: ChatMessage, llm: LlmApi, tokenizer: To
     const promptFinal = appendData(promptStr, chunk);
 
     summary = await new LlmQueryBuilder(llm, tokenizer)
-      .persistent(message.role, promptFinal)
+      .persistent("user", promptFinal)
       .build()
       .content();
   }

@@ -14,6 +14,9 @@ export class MessageChunker implements Chunker<ChatMessage> {
       message.content || "",
       this.config.maxChunkSize,
       0.08 * this.config.maxChunkSize
-    );
+    ).map((chunk) => (JSON.stringify({
+      ...message,
+      content: chunk
+    })));
   }
 }

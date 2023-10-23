@@ -108,6 +108,11 @@ export class ContextualizedChat {
       const chunkMetadata = this._chunkMetadata[type][chunkMetadataPtr];
       const msgPtr = chunkMetadata.msgPtr;
       const msg = chatLog.getMsg(type, msgPtr);
+
+      if (!msg) {
+        throw Error("Incorrect msg index, this should never happen.");
+      }
+
       const tokens = chatLog.getMsgTokens(type, msgPtr);
       if (tokenCounter + tokens > tokenLimit) {
         return false;
@@ -151,19 +156,14 @@ export class ContextualizedChat {
     }[] = [];
     let tokenCounter = 0;
 
-    const addMsg = (text: string, metadata: DocumentMetadata): boolean => {
+    const addMsg = (chunkText: string, metadata: DocumentMetadata): boolean => {
       if (tokenCounter + metadata.tokens > tokenLimit) {
         return false;
       }
 
       const chunkMetadataPtr = metadata.chunkMetadataPtr;
-      const chunkMetadata = this._chunkMetadata[type][chunkMetadataPtr];
-      const originalMsg = this._chat.chatLogs.getMsg(type, chunkMetadata.msgPtr);
 
-      const msg = {
-        ...originalMsg,
-        content: text
-      };
+      const msg = JSON.parse(chunkText) as ChatMessage;
       msgs.push({ msg, chunkMetadataPtr });
       tokenCounter += metadata.tokens;
       return true;
