@@ -3,8 +3,8 @@ import {
   ChatLogs,
   ChatMessage,
   ChatLogType,
-  FunctionDefinition
-} from ".";
+} from "./";
+import { FunctionDefinition } from "../";
 
 import { ChatCompletionRequestMessageRoleEnum } from "openai";
 

@@ -1,6 +1,4 @@
-import { ChatLogs, ChatMessage } from "../ChatLogs";
-import { LlmApi } from "../LlmApi";
-import { Tokenizer } from "../Tokenizer";
+import { ChatLogs, ChatMessage, Tokenizer, LlmApi } from "../";
 
 export class LlmQuery {
   constructor(private readonly llm: LlmApi, private tokenizer: Tokenizer, private logs: ChatLogs = new ChatLogs()) {}

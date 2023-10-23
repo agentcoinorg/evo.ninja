@@ -11,7 +11,8 @@ import {
   LocalVectorDB,
   OpenAIEmbeddingAPI,
   LlmApi,
-  LlmQueryBuilder
+  LlmQueryBuilder,
+  ContextualizedChat
 } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../../AgentContext";
 import { agentPrompts, prompts } from "./prompts";
@@ -23,7 +24,6 @@ import { Rag } from "./Rag";
 import { TextChunker } from "./TextChunker";
 import { Prompt } from "./Prompt";
 import { NewAgent } from "./NewAgent";
-import { ContextualizedChat } from "./ContextualizedChat";
 
 export class ChameleonAgent extends NewAgent<GoalRunArgs> {
   private _cChat: ContextualizedChat;

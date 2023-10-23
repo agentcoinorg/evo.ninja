@@ -1,6 +1,7 @@
+import { Tokenizer } from "./";
+import { FunctionDefinition } from "../";
+
 import { ChatCompletionRequestMessage as ChatMessage } from "openai";
-import { Tokenizer } from "./Tokenizer";
-import { FunctionDefinition } from ".";
 
 export { ChatMessage };
 

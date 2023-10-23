@@ -1,7 +1,4 @@
-import { ChatRole } from "../Chat";
-import { ChatLogs, ChatMessage } from "../ChatLogs";
-import { LlmApi } from "../LlmApi";
-import { Tokenizer } from "../Tokenizer";
+import { ChatRole, ChatLogs, ChatMessage, LlmApi, Tokenizer } from "../";
 import { LlmQuery } from "./LlmQuery";
 
 export class LlmQueryBuilder {
