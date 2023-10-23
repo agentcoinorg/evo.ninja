@@ -49,18 +49,14 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     const { chat } = this.context;
     const { messages } = chat.chatLogs;
 
-    let query = "";
-    if (messages.length <= 2) {
-      query = messages.slice(-1)[0].content ?? "";
-    } else {
-      const lastMessage = messages.slice(-1)[0];
+    const lastMessage = messages.slice(-1)[0];
 
-      if (isLargeMsg(lastMessage)) {
-        await shortenMessage(lastMessage, this.lastQuery!, this.context);
-      }
-      
-      query = await this.predictBestNextStep(messages);
+    if (isLargeMsg(lastMessage)) {
+      await shortenMessage(lastMessage, this.lastQuery!, this.context);
     }
+    
+    const query = await this.predictBestNextStep(messages);
+
     this.lastQuery = query;
     console.log("Query: ", query);
 
