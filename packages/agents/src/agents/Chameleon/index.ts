@@ -15,7 +15,7 @@ import { AgentConfig } from "../../AgentConfig";
 import { Rag } from "./Rag";
 import { Prompt } from "./Prompt";
 import { NewAgent } from "./NewAgent";
-import { previewChunks } from "./helpers";
+import { charsToTokens, previewChunks } from "./helpers";
 import { findBestAgent } from "./findBestAgent";
 
 export class ChameleonAgent extends NewAgent<GoalRunArgs> {
@@ -54,14 +54,14 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
       await this.shortenMessage(lastMessage, this.lastQuery!);
     }
     
-    const query = await this.predictBestNextStep(messages);
+    const prediction = await this.predictBestNextStep(messages);
 
-    this.lastQuery = query;
-    console.log("Query: ", query);
+    this.lastQuery = prediction;
+    console.log("Prediction: ", prediction);
 
-    await this.shortenLargeMessages(query);
+    await this.shortenLargeMessages(prediction);
 
-    const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(query, this.context);
+    const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(prediction, this.context);
 
     const logs = insertPersonaAsFirstMsg(persona, chat.chatLogs, chat.tokenizer);
 
@@ -123,7 +123,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
 
   //   return previewChunks(
   //     result.map(x => x.metadata.parent),
-  //     2000
+  //     maxContextChars(context) * 0.07
   //   );
   // }
 
@@ -133,7 +133,6 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
       childChunker: (parentText: string) =>
         TextChunker.fixedCharacterLength(parentText, { chunkLength: 100, overlap: 15 })
     });
-
     const result = await Rag.standard(chunks, this.context)
       .selector(x => x.doc)
       .limit(48)
@@ -141,9 +140,12 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
       .onlyUnique()
       .query(query);
 
+    const maxCharsToUse = this.maxContextChars() * 0.5;
+    const charsForPreview = maxCharsToUse * 0.7;
+
     const bigPreview = previewChunks(
       result.map(x => x.metadata.parent),
-      8000
+      charsForPreview
     );
 
     const prompt = new Prompt()
@@ -155,15 +157,17 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
         Rewrite the text to better achieve the goal.
         Filter out unecessary information. Do not add new information.
         IMPORTANT: Respond only with the new text!`
-      );
+      ).toString();
 
-    console.log(prompt.toString());
-
-    const filteredText = await this.askLlm(prompt);
+    const filteredText = await this.askLlm(prompt, charsToTokens(maxCharsToUse - prompt.length));
 
     console.log("filteredText", text);
 
     return filteredText;
+  }
+
+  private maxContextChars(): number {
+    return this.context.chat.contextWindow?.maxContextTokens ?? 8000;
   }
 }
 

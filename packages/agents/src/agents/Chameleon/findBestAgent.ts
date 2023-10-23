@@ -32,7 +32,6 @@ export const findBestAgent = async (
   const agents = await Rag.standard(agentsWithPrompts, context)
     .selector(x => x.expertise)
     .limit(1)
-    .sortByIndex()
     .onlyUnique()
     .query(query);
 
