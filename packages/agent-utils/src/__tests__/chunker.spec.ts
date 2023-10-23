@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import path from "path";
-import { chunkByCharacters, chunkTextBySentences } from "../chunking/CharactersChunker";
-import { OpenAIEmbeddingAPI, LocalVectorDB } from "../embeddings";
+import { chunkByCharacters, chunkTextBySentences, splitIntoSentences } from "../chunking/CharactersChunker";
+import { OpenAIEmbeddingAPI, LocalVectorDB, LocalCollection } from "../embeddings";
 import { InMemoryWorkspace, Env, ConsoleLogger } from "../sys";
 
 dotenv.config({
@@ -15,7 +15,7 @@ Born in Scranton, Pennsylvania, Biden moved with his family to Delaware in 1953.
 
 Taking office at age 78, Biden is the oldest president in U.S. history, the first to have a female vice president, and the first from Delaware. In 2021, he signed a bipartisan infrastructure bill, as well as a $1.9 trillion economic stimulus package in response to the COVID-19 pandemic and subsequent recession. Biden proposed the Build Back Better Act, which failed in Congress, but aspects of which were incorporated into the Inflation Reduction Act that was signed into law in 2022. Biden also signed the bipartisan CHIPS and Science Act, which focused on manufacturing, appointed Ketanji Brown Jackson to the Supreme Court and worked with congressional Republicans to prevent a first ever national default by negotiating a deal to raise the debt ceiling. In foreign policy, Biden restored America's membership in the Paris Agreement. He oversaw the complete withdrawal of U.S. troops from Afghanistan that ended the war in Afghanistan, during which the Afghan government collapsed and the Taliban seized control. Biden has responded to the Russian invasion of Ukraine by imposing sanctions on Russia and authorizing civilian and military aid to Ukraine. During the 2023 Israel–Hamas war, Biden announced American military support for Israel, and condemned the actions of Hamas and other Palestinian militants as terrorism. In April 2023, he announced his candidacy for the Democratic Party nomination in the 2024 presidential election.`
 
-const query = 'Joe Biden party'
+const query = 'relationship with Obama'
 
 describe("Chunker", () => {
   const workspace = new InMemoryWorkspace()
@@ -55,13 +55,32 @@ describe("Chunker", () => {
     console.log(`SENTENCES: ${JSON.stringify(searchResults.map(s => s.text()), null, 2)}`)
   })
 
-  // it("Parent-doc-retrieval", async () => {
-  //   const parentChunks = text.split(". ")
-  //   const chunks = chunkTextBySentences(text, 100, 15);
-  //   const collection = db.addCollection('sentences')
-  //   await collection.add(chunks)
-  //   const searchResults = await collection.search(query, 3)
+  it("Parent-doc-retrieval", async () => {
+    const parentChunks = splitIntoSentences(text)
+    const parentAndChildDocs = parentChunks.map(parentChunk => {
+      return {
+        parent: parentChunk,
+        children: chunkTextBySentences(parentChunk, 100, 15)
+      }
+    }).map(parentAndChildDoc => {
+      return {
+        metadatas: parentAndChildDoc.children.map(() => ({ parent: parentAndChildDoc.parent })),
+        documents: parentAndChildDoc.children
+      }
+    })
 
-  //   console.log(`SENTENCES: ${JSON.stringify(searchResults.map(s => s.text()), null, 2)}`)
-  // })
+    const docs = parentAndChildDocs.flatMap(parentAndChildDoc => parentAndChildDoc.documents)
+    const metadatas = parentAndChildDocs.flatMap(parentAndChildDoc => parentAndChildDoc.metadatas)
+
+    const collection = db.addCollection('parentdocs') as LocalCollection<{ parent: string }>
+    await collection.add(docs, metadatas)
+
+    const searchResults = await collection.search(query, 3)
+    const results = searchResults.map(s => ({
+      text: s.text(),
+      parent: s.metadata()?.parent
+    }))
+
+    console.log(`PDR: ${JSON.stringify(results, null, 2)}`)
+  })
 })
