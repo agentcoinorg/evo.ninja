@@ -293,7 +293,7 @@ function getSmallChunks(chunks: Chunk[]): ChunkIdx[] {
 
 function postProcessMessages(messages: ChatMessage[]): ChatMessage[] {
   const result: ChatMessage[] = [];
-  const varChunkPrefix = "chunk(\"\${";
+  const varChunkPrefix = "Variable \"\${";
   const varNameRegex = /\$\{([^}]+)\}/;
   let prevVarName: undefined | string = undefined;
 
@@ -315,6 +315,12 @@ function postProcessMessages(messages: ChatMessage[]): ChatMessage[] {
       result.push(message);
     }
 
+    if (prevVarName && !varName) {
+      // Append a helpful message
+      const lastMessage = result.at(-1) as ChatMessage;
+      lastMessage.content += `\nThe above function result was too large, so it was stored in the variable \"\${${prevVarName}}\".`
+    }
+
     prevVarName = varName;
   }
 
@@ -322,5 +328,9 @@ function postProcessMessages(messages: ChatMessage[]): ChatMessage[] {
 }
 
 function variableChunkText(chunk: string, index: number, varName: string): string {
-  return `chunk("${varName}", ${index}):\n\`\`\`\n${chunk}\n\`\`\``;
+  const message = JSON.parse(chunk) as ChatMessage;
+  return JSON.stringify({
+    ...message,
+    content: `Variable "${varName}" chunk #${index}\n\`\`\`\n${message.content}\n\`\`\``
+  });
 }

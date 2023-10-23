@@ -10,8 +10,6 @@ import {
   Workspace,
   LocalVectorDB,
   OpenAIEmbeddingAPI,
-  LlmApi,
-  LlmQueryBuilder,
   ContextualizedChat,
   Chat
 } from "@evo-ninja/agent-utils";
@@ -28,7 +26,7 @@ import { findBestAgent } from "./findBestAgent";
 export class ChameleonAgent extends NewAgent<GoalRunArgs> {
   private _cChat: ContextualizedChat;
   private _chunker: MessageChunker;
-  private lastQuery: string | undefined;
+  private lastQuery: string = "";
 
   constructor(
     context: AgentContext,
@@ -43,7 +41,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
       ),
       context,
     );
-    this._chunker = new MessageChunker({ maxChunkSize: 2000 });
+    this._chunker = new MessageChunker({ maxChunkSize: context.variables.saveThreshold });
     const embeddingApi = new OpenAIEmbeddingAPI(
       this.context.env.OPENAI_API_KEY,
       this.context.logger,
@@ -62,6 +60,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
 
     chat.persistent(buildDirectoryPreviewMsg(this.context.workspace));
     chat.persistent("user", prompts.exhaustAllApproaches);
+    chat.persistent("user", prompts.variablesExplainer);
     chat.persistent("user", args.goal);
   }
 
@@ -70,6 +69,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     // Retrieve the last message
     const rawChatLogs = this.context.chat.chatLogs;
     const lastMessages = [
+      { role: "user", content: prompts.generalAgentPersona },
       rawChatLogs.getMsg("persistent", -1),
       rawChatLogs.getMsg("temporary", -2),
       rawChatLogs.getMsg("temporary", -1)
@@ -79,10 +79,9 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     for (let i = 0; i < lastMessages.length; ++i) {
       const msg = lastMessages[i];
       if (this._chunker.shouldChunk(msg)) {
-        const content = await summarizeMessage(
-          msg,
-          this.context.llm,
-          this.context.chat.tokenizer
+        const content = await this.advancedFilterText(
+          msg.content || "",
+          this.lastQuery
         );
         lastMessages[i] = { ...msg, content };
       }
@@ -140,9 +139,9 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     const lastMessage = messages.slice(-1)[0];
 
     if (isLargeMsg(lastMessage)) {
-      await this.shortenMessage(lastMessage, this.lastQuery!);
+      await this.shortenMessage(lastMessage, this.lastQuery);
     }
-    
+
     const prediction = await this.predictBestNextStep(messages);
 
     this.lastQuery = prediction;
@@ -281,7 +280,7 @@ const isLargeMsg = (message: ChatMessage): boolean => {
 const buildDirectoryPreviewMsg = (workspace: Workspace): ChatMessage => {
   const files = workspace.readdirSync("./");
   return {
-    role: "system",
+    role: "user",
     content: `Current directory: './'
 Files: ${
 files.filter((x) => x.type === "file").map((x) => x.name).join(", ")
@@ -300,39 +299,4 @@ function prependAgentMessages(agent: AgentConfig<unknown>, chat: Chat): void {
     msgs.map((msg) => chat.tokenizer.encode(msg.content || "").length),
     0
   );
-}
-
-async function summarizeMessage(message: ChatMessage, llm: LlmApi, tokenizer: Tokenizer): Promise<string> {
-  const fuzTokens = 200;
-  const maxTokens = llm.getMaxContextTokens() - fuzTokens;
-
-  const prompt = (summary: string | undefined) => {
-    return `Summarize the following data. Includes all unique details.\n
-            ${summary ? `An existing summary exists, please add all new details found to it.\n\`\`\`\n${summary}\n\`\`\`\n` : ``}`;
-  }
-  const appendData = (prompt: string, chunk: string) => {
-    return `${prompt}\nData:\n\`\`\`\n${chunk}\n\`\`\``;
-  }
-
-  let summary: string | undefined = undefined;
-  const data = message.content || "";
-  const len = data.length;
-  let idx = 0;
-
-  while (idx < len) {
-    const promptStr = prompt(summary);
-    const propmtTokens = tokenizer.encode(promptStr).length;
-    const chunkTokens = (maxTokens - propmtTokens);
-    const chunk = data.substring(idx, Math.min(idx + chunkTokens, len));
-    idx += chunkTokens;
-
-    const promptFinal = appendData(promptStr, chunk);
-
-    summary = await new LlmQueryBuilder(llm, tokenizer)
-      .persistent("user", promptFinal)
-      .build()
-      .content();
-  }
-
-  return summary || "";
 }

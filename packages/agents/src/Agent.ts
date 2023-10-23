@@ -23,8 +23,7 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
   constructor(
     public readonly config: AgentConfig<TRunArgs>,
     public readonly context: AgentContext,
-  ) { 
-  }
+  ) {}
 
   public get workspace(): Workspace {
     return this.context.workspace;
