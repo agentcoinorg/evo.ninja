@@ -1,9 +1,9 @@
 import dotenv from "dotenv";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import path from "path";
-import { chunkByCharacters, chunkTextBySentences, splitIntoSentences } from "../chunking/CharactersChunker";
 import { OpenAIEmbeddingAPI, LocalVectorDB, LocalCollection } from "../embeddings";
 import { InMemoryWorkspace, Env, ConsoleLogger } from "../sys";
+import { TextChunker } from "../chunking/TextChunker";
 
 dotenv.config({
   path: path.join(__dirname, "../../../../.env")
@@ -29,7 +29,7 @@ describe("Chunker", () => {
     const db = new LocalVectorDB(workspace, "testdb", embeddingApi)
 
   it("Characters-based", async () => {
-    const chunks = chunkByCharacters(text, 100, 0);
+    const chunks = TextChunker.fixedCharacterLength(text, { chunkLength: 100, overlap: 0 });
     const collection = db.addCollection('chars')
     await collection.add(chunks)
     const searchResults = await collection.search(query, 3)
@@ -38,7 +38,7 @@ describe("Chunker", () => {
   })
 
   it("Characters-based with overlap", async () => {
-    const chunks = chunkByCharacters(text, 100, 15);
+    const chunks = TextChunker.fixedCharacterLength(text, { chunkLength: 100, overlap: 15 });
     const collection = db.addCollection('charsoverlap')
     await collection.add(chunks)
     const searchResults = await collection.search(query, 3)
@@ -47,7 +47,7 @@ describe("Chunker", () => {
   })
 
   it("Sentence-based", async () => {
-    const chunks = chunkTextBySentences(text, 100, 15);
+    const chunks = TextChunker.bySentences(text, { chunkLength: 100, overlap: 15 });
     const collection = db.addCollection('sentences')
     await collection.add(chunks)
     const searchResults = await collection.search(query, 3)
@@ -56,21 +56,7 @@ describe("Chunker", () => {
   })
 
   it("Parent-doc-retrieval", async () => {
-    const parentChunks = splitIntoSentences(text)
-    const parentAndChildDocs = parentChunks.map(parentChunk => {
-      return {
-        parent: parentChunk,
-        children: chunkTextBySentences(parentChunk, 100, 15)
-      }
-    }).map(parentAndChildDoc => {
-      return {
-        metadatas: parentAndChildDoc.children.map(() => ({ parent: parentAndChildDoc.parent })),
-        documents: parentAndChildDoc.children
-      }
-    })
-
-    const docs = parentAndChildDocs.flatMap(parentAndChildDoc => parentAndChildDoc.documents)
-    const metadatas = parentAndChildDocs.flatMap(parentAndChildDoc => parentAndChildDoc.metadatas)
+    const { docs, metadatas } = TextChunker.parentDocRetrieval(text, { chunkLength: 100, overlap: 15 })
 
     const collection = db.addCollection('parentdocs') as LocalCollection<{ parent: string }>
     await collection.add(docs, metadatas)
