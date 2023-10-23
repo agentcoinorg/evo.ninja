@@ -3,7 +3,6 @@ import {
   Scripts,
   OpenAI,
   Chat,
-  ContextWindow,
   LlmApi,
   ConsoleLogger,
   Logger,
@@ -62,8 +61,7 @@ describe('Dev Agent Test Suite', () => {
     );
     const debugLlm = new DebugLlmApi(debugLog, llm);
 
-    const contextWindow = new ContextWindow(llm);
-    const chat = new Chat(cl100k_base, contextWindow, logger);
+    const chat = new Chat(cl100k_base);
 
     const scriptsDir = path.join(rootDir, "scripts");
     const scriptsWorkspace = new FileSystemWorkspace(
