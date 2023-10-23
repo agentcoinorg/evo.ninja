@@ -4,6 +4,8 @@ import { AgentContext } from "../../AgentContext";
 export class StandardRagBuilder<TItem> {
   private _limit: number;
   private _selector: (item: TItem) => string;
+  private _sort: "index" | "relevance";
+  private _unique: boolean;
 
   constructor( private readonly _items: TItem[], private readonly context: AgentContext) { }
 
@@ -17,7 +19,27 @@ export class StandardRagBuilder<TItem> {
     return this;
   }
 
-  async query(query: string): Promise<RagQuery<TItem>> {
+  sortByIndex(): StandardRagBuilder<TItem> {
+    this._sort = "index";
+    return this;
+  }
+
+  sortByRelevance(): StandardRagBuilder<TItem> {
+    this._sort = "relevance";
+    return this;
+  }
+
+  onlyUnique(): StandardRagBuilder<TItem> {
+    this._unique = true;
+    return this;
+  }
+
+  withDuplicates(): StandardRagBuilder<TItem> {
+    this._unique = false;
+    return this;
+  }
+
+  async query(query: string): Promise<TItem[]> {
     const embeddingApi = new OpenAIEmbeddingAPI(
       this.context.env.OPENAI_API_KEY,
       this.context.logger,
@@ -34,62 +56,62 @@ export class StandardRagBuilder<TItem> {
 
     const results = await collection.search(query, this._limit);
 
-    return new RagQuery(this._items, results, this._selector);
-  }
-}
+    let filteredItems;
+    if (this._sort === "index") {
+      filteredItems = this._sortByIndex(this._items, results);
+    } else {
+      filteredItems = this._sortByRelevance(this._items, results);
+    }
 
-export class RagQuery<TItem> {
-  constructor(private readonly items: TItem[], private readonly results: LocalDocument<{ index: number }>[], private readonly selector: (item: TItem) => string) {
+    if (this._unique) {
+      return this._onlyUnique(filteredItems);
+    } else {
+      return this._withDuplicates(filteredItems);
+    }
   }
 
-  sortByIndex(): RagQuery<TItem> {
-    const items = [...this.results]
+  private _sortByIndex(items: TItem[], results: LocalDocument<{ index: number }>[]): TItem[] {
+    return [...results]
       .sort((a, b) => {
         return a.metadata()!.index - b.metadata()!.index;
       })
       .map(x => {
-        return this.items[x.metadata()!.index];
+        return items[x.metadata()!.index];
       });
-
-    return new RagQuery(items, this.results, this.selector);
   }
 
-
-  sortByRelevance(): RagQuery<TItem> {
-    const items = [...this.results]
+  private _sortByRelevance(items: TItem[], results: LocalDocument<{ index: number }>[]): TItem[] {
+    return [...results]
       .map(x => {
-        return this.items[x.metadata()!.index];
+        return items[x.metadata()!.index];
       });
-
-    return new RagQuery(items, this.results, this.selector);
   }
 
-  onlyUnique(): TItem[] {
+  private _onlyUnique(items: TItem[]): TItem[] {
     const set = new Set();
     const uniqueItems = [];
-    for (const item of this.items) {
-      if (set.has(this.selector(item))) {
+    for (const item of items) {
+      if (set.has(this._selector(item))) {
         continue;
       }
       uniqueItems.push(item);
-      set.add(this.selector(item));
+      set.add(this._selector(item));
     }
 
     return uniqueItems;
   }
 
-  withDuplicates(): TItem[] {
+  private _withDuplicates(items: TItem[]): TItem[] {
     const set = new Set();
     const uniqueItems = [];
-    for (const item of this.items) {
-      if (set.has(this.selector(item))) {
+    for (const item of items) {
+      if (set.has(this._selector(item))) {
         continue;
       }
       uniqueItems.push(item);
-      set.add(this.selector(item));
+      set.add(this._selector(item));
     }
 
     return uniqueItems;
   }
 }
-
