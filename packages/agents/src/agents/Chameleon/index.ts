@@ -15,7 +15,7 @@ import { AgentConfig } from "../../AgentConfig";
 import { Rag } from "./Rag";
 import { Prompt } from "./Prompt";
 import { NewAgent } from "./NewAgent";
-import { charsToTokens, previewChunks } from "./helpers";
+import { previewChunks, tokensToChars } from "./helpers";
 import { findBestAgent } from "./findBestAgent";
 
 export class ChameleonAgent extends NewAgent<GoalRunArgs> {
@@ -50,7 +50,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
 
     const lastMessage = messages.slice(-1)[0];
 
-    if (isLargeMsg(lastMessage)) {
+    if (this.isLargeMsg(lastMessage)) {
       await this.shortenMessage(lastMessage, this.lastQuery!);
     }
     
@@ -97,7 +97,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
   private async shortenLargeMessages(query: string): Promise<void> {
     for(let i = 2; i < this.context.chat.chatLogs.messages.length ; i++) {
       const message = this.context.chat.chatLogs.messages[i];
-      if (isLargeMsg(message)) {
+      if (this.isLargeMsg(message)) {
         await this.shortenMessage(message, query);
       }
     }
@@ -139,19 +139,28 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
       ).toString();
 
 
-    const filteredText = await this.askLlm(prompt, Math.floor(charsToTokens(maxCharsToUse - prompt.length)));
+    const filteredText = await this.askLlm(prompt, Math.floor(this.maxContextTokens() * 0.06));
 
     console.log("filteredText", filteredText);
     console.log("maxCharsToUse", maxCharsToUse);
     console.log("charsForPreview", charsForPreview);
-    console.log("maxCharsToUse - prompt.length", maxCharsToUse - prompt.length);
+    console.log("response chars", this.maxContextChars() * 0.06);
     console.log("filteredText.length", filteredText.length);
 
     return filteredText;
   }
 
   private maxContextChars(): number {
+    return tokensToChars(this.maxContextTokens());
+  }
+
+  private maxContextTokens(): number {
     return this.context.chat.contextWindow?.maxContextTokens ?? 8000;
+  }
+
+
+  isLargeMsg = (message: ChatMessage): boolean => {
+    return !!message.content && message.content.length > this.maxContextChars() * 0.0625;
   }
 }
 
@@ -167,10 +176,6 @@ const insertPersonaAsFirstMsg = (persona: string, logs: ChatLogs, tokenizer: Tok
 
   return newLogs;
 };
-
-const isLargeMsg = (message: ChatMessage): boolean => {
-  return !!message.content && message.content.length > 2000;
-}
 
 const buildDirectoryPreviewMsg = (workspace: Workspace): ChatMessage => {
   const files = workspace.readdirSync("./");
