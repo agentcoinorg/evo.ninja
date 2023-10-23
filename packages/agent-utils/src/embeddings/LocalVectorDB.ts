@@ -21,7 +21,6 @@ export class LocalVectorDB {
     return collection
   }
 
-
   removeCollection(name: string): void {
     try {
 

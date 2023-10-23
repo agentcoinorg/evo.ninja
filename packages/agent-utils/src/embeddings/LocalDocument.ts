@@ -4,16 +4,14 @@ import { Workspace } from "../sys";
 const VECTOR_FILENAME = "vector.json"
 const DOCUMENT_FILENAME = "document.json"
 
-export interface LocalDocumentData {
+export interface LocalDocumentData<TMetadata = unknown> {
   id: string;
   text: string;
-  metadata: {
-    index: number;
-  }
+  metadata?: TMetadata;
 }
 
-export class LocalDocument {
-  private _data: LocalDocumentData;
+export class LocalDocument<TMeatadata = unknown> {
+  private _data: LocalDocumentData<TMeatadata>;
 
   constructor(
     readonly id: string,
@@ -44,7 +42,7 @@ export class LocalDocument {
     return this._data.text
   }
 
-  metadata(): LocalDocumentData['metadata'] {
+  metadata(): TMeatadata | undefined {
     if (!this._data) {
       this.loadData()
     }
@@ -54,9 +52,9 @@ export class LocalDocument {
 
   save({
     text,
+    metadata,
     vector,
-    index
-  }: { text: string, vector: number[]; index: number }): void {
+  }: { text: string; metadata?: TMeatadata; vector: number[]; }): void {
     const docPath = this.config.uri
 
     const vectorPath = path.join(docPath, VECTOR_FILENAME)
@@ -74,9 +72,7 @@ export class LocalDocument {
     const documentData: LocalDocumentData = {
       id: this.id,
       text,
-      metadata: {
-        index,
-      }
+      metadata
     }
 
     this.config.workspace.writeFileSync(documentPath, JSON.stringify(documentData))
@@ -90,7 +86,7 @@ export class LocalDocument {
     }
 
     const documentFileContent = this.config.workspace.readFileSync(documentPath)
-    const document: LocalDocumentData = JSON.parse(documentFileContent)
+    const document: LocalDocumentData<TMeatadata> = JSON.parse(documentFileContent)
 
     this._data = document
   }
