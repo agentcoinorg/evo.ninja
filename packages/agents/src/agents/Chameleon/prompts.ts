@@ -10,10 +10,6 @@ export const agentPrompts = (
   name: "Chameleon",
   expertise: `an expert evolving assistant that achieves user goals`,
   initialMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
-    {
-      role: "user",
-      content: goal,
-    },
   ],
   loopPreventionPrompt: `Assistant, you seem to be looping. Try delegating a task or calling agent_onGoalAchieved or agent_onGoalFailed`,
 });

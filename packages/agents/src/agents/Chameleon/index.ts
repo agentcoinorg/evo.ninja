@@ -1,13 +1,10 @@
 import {
   AgentFunction,
-  AgentOutput,
   Chat,
   ChatLogs,
   ChatMessage,
-  ExecuteAgentFunctionCalled,
   FunctionDefinition,
   MessageChunker,
-  RunResult,
   Timeout,
   Tokenizer,
   Workspace,
@@ -20,18 +17,18 @@ import { AgentContext } from "../../AgentContext";
 import { agentPrompts, prompts } from "./prompts";
 import { Agent, GoalRunArgs } from "../../Agent";
 import { AgentConfig } from "../../AgentConfig";
-import { ResultErr } from "@polywrap/result";
-import { basicFunctionCallLoop } from "./basicFunctionCallLoop";
 import { AgentFunctionBase } from "../../AgentFunctionBase";
 import { DeveloperAgent, ResearcherAgent, DataAnalystAgent, WebResearcherAgent, ScribeAgent } from "../../scriptedAgents";
 import { Rag } from "./Rag";
 import { TextChunker } from "./TextChunker";
 import { Prompt } from "./Prompt";
+import { NewAgent } from "./NewAgent";
 import { ContextualizedChat } from "./ContextualizedChat";
 
-export class ChameleonAgent extends Agent {
+export class ChameleonAgent extends NewAgent<GoalRunArgs> {
   private _cChat: ContextualizedChat;
   private _chunker: MessageChunker;
+  private _lastQuery: string | undefined;
 
   constructor(
     context: AgentContext,
@@ -59,63 +56,15 @@ export class ChameleonAgent extends Agent {
     );
   }
 
-  public async* run(
-    args: GoalRunArgs,
-  ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
-    this.initializeChat();
-    return yield* this.runWithChat(this.config.prompts.initialMessages(args));
-  }
-
-  public override async* runWithChat(
-    messages: ChatMessage[],
-  ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
-    const { chat } = this.context;
-    if (this.config.timeout) {
-      setTimeout(
-        this.config.timeout.callback,
-        this.config.timeout.milliseconds
-      );
-    }
-    try {
-      for (const message of messages) {
-        chat.persistent(message);
-      }
-
-      if (this.config.timeout) {
-        setTimeout(this.config.timeout.callback, this.config.timeout.milliseconds);
-      }
-
-      return yield* basicFunctionCallLoop(
-        this.context,
-        this.config.functions.map((fn) => {
-          return {
-            definition: fn.getDefinition(),
-            buildExecutor: (context: AgentContext) => {
-              return fn.buildExecutor(this);
-            }
-          }
-        }),
-        (functionCalled: ExecuteAgentFunctionCalled) => {
-          return this.config.shouldTerminate(functionCalled);
-        },
-        this.config.prompts.loopPreventionPrompt,
-        this.config.prompts.agentSpeakPrompt,
-        this.beforeLlmResponse2.bind(this)
-      );
-    } catch (err) {
-      this.context.logger.error(err);
-      return ResultErr("Unrecoverable error encountered.");
-    }
-  }
-
-  protected initializeChat(): void {
+  protected initializeChat(args: GoalRunArgs): void {
     const { chat } = this.context;
 
     chat.persistent(buildDirectoryPreviewMsg(this.context.workspace));
     chat.persistent("user", prompts.exhaustAllApproaches);
+    chat.persistent("user", args.goal);
   }
 
-  protected async beforeLlmResponse2(): Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[]}> {
+  protected async beforeLlmResponse(): Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[]}> {
 
     // Retrieve the last message
     const rawChatLogs = this.context.chat.chatLogs;
@@ -183,14 +132,9 @@ export class ChameleonAgent extends Agent {
     }
   }
 
-  protected async beforeLlmResponse(): Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[]}> {
+  protected async beforeLlmResponse0(): Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[]}> {
     const { chat } = this.context;
     const { messages } = chat.chatLogs;
-    const getQuery = (msg: ChatMessage) => this.askLlm(
-      new Prompt()
-        .json(msg)
-        .line("What is the above message trying to achieve?")
-    );
 
     let query = "";
     if (messages.length <= 2) {
@@ -199,16 +143,34 @@ export class ChameleonAgent extends Agent {
       const lastMessage = messages.slice(-1)[0];
 
       if (isLargeMsg(lastMessage)) {
-        const q = await getQuery(messages.slice(-2)[0]);
+        const q = this._lastQuery ?? await this.askLlm(
+            new Prompt()
+              .json(messages.slice(-2)[0])
+              .line("What is the above message trying to achieve?")
+          );
 
         await shortenMessage(lastMessage, q, this.context);
       }
-      query = await getQuery(lastMessage);
+      //TODO: Keep persona in chat logs when doing this
+      query = await this.askLlm(
+        new Prompt()
+          .json([
+            { role: "user", content: "You are an expert assistant capable of accomplishing a multitude of tasks using functions that use external tools (like internet, file system, etc.)." }, 
+            ...messages
+          ])
+          .line(`
+            Consider the above chat between a user and assistant.
+            In your expert opinion, what is the best next step for the assistant?`
+          )
+      );
     }
 
+    this._lastQuery = query;
     await shortenLargeMessages(query, chat, this.context);
+    console.log("Query: ", query);
 
     const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(query, this.context);
+    console.log("Selected agent: ", agent.config.prompts.name);
 
     const logs = insertPersonaAsFirstMsg(persona, chat.chatLogs, chat.tokenizer);
 
@@ -252,24 +214,29 @@ const findBestAgent = async (query: string, context: AgentContext): Promise<[Age
 
   const agentsWithPrompts = allAgents.map(agent => {
     return {
-      persona: agent.config.prompts.expertise + "\n" + agent.config.functions.map(x => x.name).join("\n"),
-      // persona: agent.config.prompts.initialMessages({ goal: "" })[0].content ?? "",
+      expertise: agent.config.prompts.expertise + "\n" + agent.config.functions.map(x => x.name).join("\n"),
+      persona: agent.config.prompts.initialMessages({ goal: "" })[0].content ?? "",
       agent,
     };
   });
 
-  const agents = await Rag.standard<{ persona: string, agent: Agent}>(context)
-    .items(agentsWithPrompts)
+  const result = await Rag.standard(agentsWithPrompts, context)
     .limit(1)
-    .selector(x => x.persona)
+    .selector(x => x.expertise)
     .query(query);
 
-  const agentsWithPrompt = agents[0];
+  const agents = result
+    .sortByIndex()
+    .onlyUnique();
+
+  console.log("Selected agents: ", agents.map(x => x.agent.config.prompts.name));
+
+  const agentWithPrompt = agents[0];
 
   return [
-    agentsWithPrompt.agent,
-    agentsWithPrompt.agent.config.functions.map(f => f.getDefinition()),
-    agentsWithPrompt.persona,
+    agentWithPrompt.agent,
+    agentWithPrompt.agent.config.functions.map(f => f.getDefinition()),
+    agentWithPrompt.persona,
     agentsWithPrompts.map(x => x.agent.config.functions).flat()
   ];
 };
@@ -278,7 +245,7 @@ const isLargeMsg = (message: ChatMessage): boolean => {
   return !!message.content && message.content.length > 2000;
 }
 
-const joinUnderCharsLimit = (chunks: string[], characterLimit: number, separator: string): string => {
+const joinUnderCharLimit = (chunks: string[], characterLimit: number, separator: string): string => {
   let result = "";
 
   for (const chunk of chunks) {
@@ -296,6 +263,23 @@ const joinUnderCharsLimit = (chunks: string[], characterLimit: number, separator
   return result;
 }
 
+// const getUnderCharLimit = (chunks: string[], characterLimit: number): string[] => {
+//   let totalLength = 0;
+//   const newChunks = [];
+//   for (const chunk of chunks) {
+//     if (totalLength + chunk.length > characterLimit) {
+//       const remainingCharacters = characterLimit - totalLength;
+//       if (remainingCharacters > 0) {
+//         newChunks.push(chunk.substring(0, remainingCharacters));
+//       }
+//       break;
+//     }
+//     newChunks.push(chunk);
+//     totalLength += chunk.length;
+//   }
+//   return newChunks;
+// }
+
 const shortenLargeMessages = async (query: string, chat: Chat, context: AgentContext): Promise<void> => {
   for(let i = 2; i < chat.chatLogs.messages.length ; i++) {
     const message = chat.chatLogs.messages[i];
@@ -306,13 +290,15 @@ const shortenLargeMessages = async (query: string, chat: Chat, context: AgentCon
 };
 
 const shortenMessage = async (message: ChatMessage, query: string, context: AgentContext): Promise<void> => {
-    const result = await Rag.text(context)
-      .chunks(TextChunker.words(message.content ?? "", 100))
-      .limit(50)
-      .characterLimit(2000)
-      .query(query);
-
-    message.content = "...\n" + joinUnderCharsLimit(result, 1995, "\n...\n");
+  message.content = previewChunks(
+    (await Rag.standard(TextChunker.characters(message.content ?? "", 1000), context)
+      .limit(2)
+      .selector(x => x)
+      .query(query))
+      .sortByIndex()
+      .onlyUnique(),
+    2000
+  );
 };
 
 const buildDirectoryPreviewMsg = (workspace: Workspace): ChatMessage => {
@@ -373,3 +359,6 @@ async function summarizeMessage(message: ChatMessage, llm: LlmApi, tokenizer: To
 
   return summary || "";
 }
+
+const previewChunks = (chunks: string[], charLimit: 2000): string => joinUnderCharLimit(chunks, charLimit - "...\n".length, "\n...\n")
+// const limitChunks = (chunks: string[], charLimit: 2000): string[] => getUnderCharLimit(chunks, charLimit)

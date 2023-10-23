@@ -175,8 +175,6 @@ export class WebSearchFunction extends AgentFunctionBase<WebSearchFuncParameters
         description: result.snippet ?? "",
       }));
 
-    console.log("SEARCH RESULT", result);
-
     return result;
   }
 }
