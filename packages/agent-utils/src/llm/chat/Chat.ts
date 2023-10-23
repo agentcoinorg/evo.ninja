@@ -3,22 +3,18 @@ import {
   ChatLogs,
   ChatMessage,
   ChatLogType,
-  ContextWindow,
-  FunctionDefinition
-} from ".";
-import { Logger } from "../sys";
+} from "./";
+import { FunctionDefinition } from "../";
 
 import { ChatCompletionRequestMessageRoleEnum } from "openai";
 
 export type ChatRole = ChatCompletionRequestMessageRoleEnum;
 
 export class Chat {
-  private _chatLogs: ChatLogs;
+  protected _chatLogs: ChatLogs;
 
   constructor(
-    private _tokenizer: Tokenizer,
-    private _contextWindow?: ContextWindow,
-    private _logger?: Logger,
+    protected _tokenizer: Tokenizer,
   ) {
     this._chatLogs = new ChatLogs();
   }
@@ -35,10 +31,6 @@ export class Chat {
     return this._tokenizer;
   }
 
-  get contextWindow(): ContextWindow | undefined {
-    return this._contextWindow;
-  }
-
   get messages(): ChatMessage[] {
     return this._chatLogs.messages;
   }
@@ -51,20 +43,7 @@ export class Chat {
 
     for (const msg of msgs) {
       const tokens = this._tokenizer.encode(JSON.stringify(msg)).length;
-
-      // If the message is larger than the context window
-      // if (this._contextWindow?.shouldChunk(tokens)) {
-      //   const chunked = this._contextWindow.chunk(
-      //     msg,
-      //     this._tokenizer
-      //   );
-      //   this._chatLogs.add(type, chunked);
-      // } else {
-        this._chatLogs.add(type, {
-          tokens,
-          msgs: [msg]
-        });
-      // }
+      this._chatLogs.add(type, [msg], [tokens]);
     }
   }
 
@@ -119,12 +98,20 @@ export class Chat {
     this._chatLogs.addFunction(fn, tokens);
   }
 
+  public getLastMessage(type: ChatLogType): ChatMessage | undefined {
+    const chatLog = this._chatLogs.get(type);
+    if (chatLog.msgs.length < 1) {
+      return undefined;
+    }
+    return chatLog.msgs[chatLog.msgs.length - 1];
+  }
+
   public cloneChatLogs(): ChatLogs {
     return this._chatLogs.clone();
   }
 
   public cloneEmpty(): Chat {
-    return new Chat(this.tokenizer, this.contextWindow);
+    return new Chat(this.tokenizer);
   }
 
   public toString(): string {
@@ -133,26 +120,5 @@ export class Chat {
 
   public toJSON(): ChatLogs {
     return this._chatLogs;
-  }
-
-  public async fitToContextWindow(): Promise<void> {
-    if (!this._contextWindow) {
-      return Promise.resolve();
-    }
-
-    if (!this._contextWindow.shouldSummarize(this.tokens)) {
-      return Promise.resolve();
-    }
-
-    this._logger?.error(
-      `! Max Tokens Exceeded (${
-        this.tokens} / ${this._contextWindow.maxContextTokens
-      })`
-    );
-
-    this._chatLogs = await this._contextWindow.summarizeChat(
-      this._chatLogs,
-      this._tokenizer
-    );
   }
 }

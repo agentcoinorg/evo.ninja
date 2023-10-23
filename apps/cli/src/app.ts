@@ -9,7 +9,6 @@ import {
   Timeout,
   Workspace,
   LlmApi,
-  ContextWindow,
   ChatLogType,
   ChatMessage,
   ChatLog,
@@ -120,8 +119,7 @@ export function createApp(config?: AppConfig): App {
   );
 
   // Chat
-  const contextWindow = new ContextWindow(llm);
-  const chat = new Chat(cl100k_base, contextWindow, logger);
+  const chat = new Chat(cl100k_base);
 
   if (config?.messagesPath) {
     const msgPath = path.join(rootDir, config.messagesPath)

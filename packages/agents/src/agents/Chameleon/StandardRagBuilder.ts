@@ -1,4 +1,5 @@
 import { OpenAIEmbeddingAPI, LocalVectorDB, LocalDocument } from "@evo-ninja/agent-utils";
+import { v4 as uuid } from "uuid";
 import { AgentContext } from "../../AgentContext";
 
 export class StandardRagBuilder<TItem> {
@@ -48,9 +49,7 @@ export class StandardRagBuilder<TItem> {
 
     const db = new LocalVectorDB(this.context.internals, "ragdb", embeddingApi);
 
-    const uuid = Math.floor(Date.now() / 1000).toString(16);
-
-    const collection = db.addCollection<{ index: number }>(uuid);
+    const collection = db.addCollection<{ index: number }>(uuid());
 
     await collection.add(this._items.map(x => this._selector(x)), this._items.map((_, i) => ({ index: i })));
 
