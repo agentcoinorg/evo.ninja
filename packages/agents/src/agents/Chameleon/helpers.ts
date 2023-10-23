@@ -2,7 +2,7 @@ export const previewChunks = (chunks: string[], charLimit: number): string => jo
 export const limitChunks = (chunks: string[], charLimit: number): string[] => getUnderCharLimit(chunks, charLimit)
 
 export const tokensToChars = (tokenCnt: number) => tokenCnt * 4;
-export const charsToTokens = (charCnt: number) => charCnt / 4;
+export const charsToTokens = (charCnt: number) => Math.floor(charCnt / 4);
 
 export const filterDuplicates = <TItem, TCompare>(items: TItem[], compareBy: (item: TItem) => TCompare): TItem[] => {
   const set = new Set();
