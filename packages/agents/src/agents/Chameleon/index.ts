@@ -22,7 +22,7 @@ import { AgentConfig } from "../../AgentConfig";
 import { Rag } from "./Rag";
 import { Prompt } from "./Prompt";
 import { NewAgent } from "./NewAgent";
-import { charsToTokens, previewChunks } from "./helpers";
+import { previewChunks, tokensToChars } from "./helpers";
 import { findBestAgent } from "./findBestAgent";
 
 export class ChameleonAgent extends NewAgent<GoalRunArgs> {
@@ -138,7 +138,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
 
     const lastMessage = messages.slice(-1)[0];
 
-    if (isLargeMsg(lastMessage)) {
+    if (this.isLargeMsg(lastMessage)) {
       await this.shortenMessage(lastMessage, this.lastQuery!);
     }
     
@@ -185,7 +185,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
   private async shortenLargeMessages(query: string): Promise<void> {
     for(let i = 2; i < this.context.chat.chatLogs.messages.length ; i++) {
       const message = this.context.chat.chatLogs.messages[i];
-      if (isLargeMsg(message)) {
+      if (this.isLargeMsg(message)) {
         await this.shortenMessage(message, query);
       }
     }
@@ -195,46 +195,25 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     message.content = await this.advancedFilterText(message.content ?? "", query);
   }
 
-  // private async filterText(text: string, query: string, context: AgentContext): Promise<string> {
-  //   const chunks = TextChunker.parentDocRetrieval(text, {
-  //     parentChunker: (text: string) => TextChunker.sentences(text),
-  //     childChunker: (parentText: string) =>
-  //       TextChunker.fixedCharacterLength(parentText, { chunkLength: 100, overlap: 15 })
-  //   });
-
-  //   const result = await Rag.standard(chunks, context)
-  //     .selector(x => x.doc)
-  //     .limit(12)
-  //     .sortByIndex()
-  //     .onlyUnique()
-  //     .query(query);
-
-  //   return previewChunks(
-  //     result.map(x => x.metadata.parent),
-  //     maxContextChars(context) * 0.07
-  //   );
-  // }
-
   private async advancedFilterText(text: string, query: string): Promise<string> {
     const chunks = TextChunker.parentDocRetrieval(text, {
       parentChunker: (text: string) => TextChunker.sentences(text),
       childChunker: (parentText: string) =>
         TextChunker.fixedCharacterLength(parentText, { chunkLength: 100, overlap: 15 })
     });
-    const result = await Rag.standard(chunks, this.context)
+
+    const maxCharsToUse = this.maxContextChars() * 0.75;
+    const charsForPreview = maxCharsToUse * 0.7;
+
+    const bigPreview = await Rag.standard(chunks, this.context)
       .selector(x => x.doc)
       .limit(48)
       .sortByIndex()
       .onlyUnique()
-      .query(query);
-
-    const maxCharsToUse = this.maxContextChars() * 0.5;
-    const charsForPreview = maxCharsToUse * 0.7;
-
-    const bigPreview = previewChunks(
-      result.map(x => x.metadata.parent),
-      charsForPreview
-    );
+      .query(query)
+      .map(x => x.metadata.parent)
+      .unique()
+      .then(x => previewChunks(x, charsForPreview));
 
     const prompt = new Prompt()
       .block(bigPreview)
@@ -247,15 +226,29 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
         IMPORTANT: Respond only with the new text!`
       ).toString();
 
-    const filteredText = await this.askLlm(prompt, charsToTokens(maxCharsToUse - prompt.length));
 
-    console.log("filteredText", text);
+    const filteredText = await this.askLlm(prompt, Math.floor(this.maxContextTokens() * 0.06));
+
+    console.log("filteredText", filteredText);
+    console.log("maxCharsToUse", maxCharsToUse);
+    console.log("charsForPreview", charsForPreview);
+    console.log("response chars", this.maxContextChars() * 0.06);
+    console.log("filteredText.length", filteredText.length);
 
     return filteredText;
   }
 
   private maxContextChars(): number {
+    return tokensToChars(this.maxContextTokens());
+  }
+
+  private maxContextTokens(): number {
     return this.context.llm.getMaxContextTokens() ?? 8000;
+  }
+
+
+  isLargeMsg = (message: ChatMessage): boolean => {
+    return !!message.content && message.content.length > this.maxContextChars() * 0.0625;
   }
 }
 
@@ -272,10 +265,6 @@ const insertPersonaAsFirstMsg = (persona: string, logs: ChatLogs, tokenizer: Tok
 
   return newLogs;
 };
-
-const isLargeMsg = (message: ChatMessage): boolean => {
-  return !!message.content && message.content.length > 2000;
-}
 
 const buildDirectoryPreviewMsg = (workspace: Workspace): ChatMessage => {
   const files = workspace.readdirSync("./");
