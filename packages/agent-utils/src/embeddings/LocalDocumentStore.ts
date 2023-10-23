@@ -1,9 +1,9 @@
 import { Workspace } from "../sys";
 import path from "path-browserify";
 import { v4 as uuid } from "uuid";
-import { LocalDocument } from "./LocalDocument";
+import { BaseDocumentMetadata, LocalDocument } from "./LocalDocument";
 
-export class LocalDocumentStore<TMetadata = unknown> {
+export class LocalDocumentStore<TMetadata extends BaseDocumentMetadata = BaseDocumentMetadata> {
   constructor(
     private workspace: Workspace,
     private uri: string

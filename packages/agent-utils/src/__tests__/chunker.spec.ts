@@ -33,18 +33,20 @@ describe("Chunker", () => {
     const chunks = TextChunker.fixedCharacterLength(text, { chunkLength: 100, overlap: 0 });
     const collection = db.addCollection('chars')
     await collection.add(chunks)
-    const searchResults = await collection.search(query, 3)
+    const searchResults = await collection.search(query)
+    const results = searchResults.slice(0, 3);
 
-    console.log(`CHARS: ${JSON.stringify(searchResults.map(s => s.text()), null, 2)}`)
+    console.log(`CHARS: ${JSON.stringify(results.map(s => s.text()), null, 2)}`)
   })
 
   test("Characters-based with overlap", async () => {
     const chunks = TextChunker.fixedCharacterLength(text, { chunkLength: 100, overlap: 15 });
     const collection = db.addCollection('charsoverlap')
     await collection.add(chunks)
-    const searchResults = await collection.search(query, 3)
+    const searchResults = await collection.search(query)
+    const results = searchResults.slice(0, 3);
 
-    console.log(`CHARS OVERLAP: ${JSON.stringify(searchResults.map(s => s.text()), null, 2)}`)
+    console.log(`CHARS OVERLAP: ${JSON.stringify(results.map(s => s.text()), null, 2)}`)
   })
 
   test("Parent-doc-retrieval - Parent Sentences; Child Characters", async () => {
@@ -54,15 +56,34 @@ describe("Chunker", () => {
         TextChunker.fixedCharacterLength(parentText, { chunkLength: 100, overlap: 15 })
     })
 
-    const collection = db.addCollection('parentdocs') as LocalCollection<{ parent: string }>
-    await collection.add(docs, metadatas)
+    const collection = db.addCollection('parentdocs') as LocalCollection<{ parent: string; index: number }>
+    await collection.add(docs, metadatas.map(({ parent }, index) => ({ parent, index })))
 
-    const searchResults = await collection.search(query, 3)
-    const results = searchResults.map(s => ({
+    const searchResults = await collection.search(query)
+    const results = searchResults.slice(0, 3);
+
+    const pdrResults = results.map(s => ({
       text: s.text(),
       parent: s.metadata()?.parent
     }))
 
-    console.log(`PDR: ${JSON.stringify(results, null, 2)}`)
+    console.log(`PDR: ${JSON.stringify(pdrResults, null, 2)}`)
+  })
+
+  test("Surrounding context", async () => {
+    const chunks = TextChunker.fixedCharacterLength(text, { chunkLength: 100, overlap: 15 })
+
+    const collection = db.addCollection('surrounding') as LocalCollection<{ index: number }>
+    await collection.add(chunks, chunks.map((_, idx) => ({ index: idx })))
+
+    const searchResults = await collection.searchWithSurroundingContext(query, {
+      surroundingCharacters: 500,
+      overlap: 15
+    })
+
+    console.log(`Surrounding: ${JSON.stringify(searchResults.slice(0, 3).map(r => ({
+      text: r.match.text(),
+      surrounding: r.withSurrounding,
+    })), null, 2)}`)
   })
 })
