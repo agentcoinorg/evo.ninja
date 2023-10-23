@@ -25,14 +25,14 @@ export class LlmQuery {
     return response;
   }
 
-  async ask(question: string): Promise<string> {
+  async ask(question: string, maxResponseTokens?: number): Promise<string> {
     this.logs.add(
       "temporary", 
       [{ role: "user", content: question }],
       [this.tokenizer.encode(question).length]
     );
 
-    const response = await this.llm.getResponse(this.logs);
+    const response = await this.llm.getResponse(this.logs, undefined, { max_tokens: maxResponseTokens});
   
     if (!response || !response.content) {
       throw new Error("No response from LLM");
