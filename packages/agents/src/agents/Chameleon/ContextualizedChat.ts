@@ -189,7 +189,6 @@ export class ContextualizedChat {
   }
 
   private async _processNewMessages(): Promise<void> {
-    // ensure all new messages have been processed
     await this._processNewMessagesByType("persistent");
     await this._processNewMessagesByType("temporary");
   }
@@ -199,14 +198,14 @@ export class ContextualizedChat {
 
     // If no messages exist
     if (messages.length === 0) {
-      return Promise.resolve();
+      return;
     }
 
     const lastProcessedIdx = this._getLastProcessedMessageIndex(type);
 
     // If we've already processed all messages
     if (lastProcessedIdx === messages.length - 1) {
-      return Promise.resolve();
+      return;
     }
 
     // Process all messages from lastProcessedIdx -> messages.length
