@@ -141,7 +141,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
 
     const filteredText = await this.askLlm(prompt, Math.floor(charsToTokens(maxCharsToUse - prompt.length)));
 
-    console.log("filteredText", text);
+    console.log("filteredText", filteredText);
     console.log("maxCharsToUse", maxCharsToUse);
     console.log("charsForPreview", charsForPreview);
     console.log("maxCharsToUse - prompt.length", maxCharsToUse - prompt.length);
