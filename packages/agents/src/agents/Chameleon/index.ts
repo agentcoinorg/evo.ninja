@@ -51,7 +51,7 @@ export class ChameleonAgent extends Agent {
     this._chunker = new MessageChunker({ maxChunkSize: 500 });
     // Gross, I know... will cleanup later
     this._cChat = new ContextualizedChat(
-      context.chat,
+      this.context.chat,
       this._chunker,
       new LocalVectorDB(this.context.internals, "cchat", new OpenAIEmbeddingAPI(
         this.context.env.OPENAI_API_KEY,
@@ -125,8 +125,13 @@ export class ChameleonAgent extends Agent {
       content: ""
     };
 
-    // Retrieve the last message (or a summary of it)
-    let lastMessage = this.context.chat.getLastMessage("temporary") || emptyMessage;
+    // Retrieve the last message
+    let lastMessage =
+      this.context.chat.getLastMessage("temporary") ||
+      this.context.chat.getLastMessage("persistent") ||
+      emptyMessage;
+
+    // If it's large, summarize it
     if (this._chunker.shouldChunk(lastMessage)) {
       lastMessage.content = await summarizeMessage(
         lastMessage,
@@ -164,14 +169,13 @@ export class ChameleonAgent extends Agent {
       }
     );
 
-    const logs = insertPersonaAsFirstMsg(
-      persona,
-      contextualizedChat.chatLogs,
-      contextualizedChat.tokenizer
+    prependAgentMessages(
+      agent.config,
+      contextualizedChat
     );
 
     return {
-      logs,
+      logs: contextualizedChat.chatLogs,
       agentFunctions,
       allFunctions: allFunctions.map((fn: any) => {
         return {
@@ -329,6 +333,17 @@ files.filter((x) => x.type === "directory").map((x) => x.name).join(", ")
 }` 
   }
 };
+
+function prependAgentMessages(agent: AgentConfig<unknown>, chat: Chat): void {
+  // TODO: refactor the AgentConfig to only include the agent's prompt, assume goal will be added
+  const msgs = agent.prompts.initialMessages({ goal: "foo bar remove me" }).slice(0, -1);
+  chat.chatLogs.insert(
+    "persistent",
+    msgs,
+    msgs.map((msg) => chat.tokenizer.encode(msg.content || "").length),
+    0
+  );
+}
 
 async function summarizeMessage(message: ChatMessage, llm: LlmApi, tokenizer: Tokenizer): Promise<string> {
   const fuzTokens = 200;

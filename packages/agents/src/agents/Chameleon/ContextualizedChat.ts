@@ -243,7 +243,7 @@ export class ContextualizedChat {
 
     // If we're processing persistent messages,
     // and it isn't a large message, early out
-    if (type === "persistent" && chunks.length > 1) {
+    if (type === "persistent" && chunks.length === 1) {
       return Promise.resolve();
     }
 
