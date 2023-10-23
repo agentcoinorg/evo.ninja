@@ -2,7 +2,7 @@ export const previewChunks = (chunks: string[], charLimit: number): string => jo
 export const limitChunks = (chunks: string[], charLimit: number): string[] => getUnderCharLimit(chunks, charLimit)
 
 export const tokensToChars = (tokenCnt: number) => tokenCnt * 4;
-export const charsToTokens = (charCnt: number) => charCnt / 4;
+export const charsToTokens = (charCnt: number) => Math.floor(charCnt / 4);
 
 const joinUnderCharLimit = (chunks: string[], characterLimit: number, separator: string): string => {
   let result = "";
