@@ -29,7 +29,7 @@ export class DataAnalystAgent extends Agent {
           new CsvOrderColumnsFunction(context.scripts),
           new CsvSortByColumnFunction(context.scripts),
           new CsvSumColumnFunction(context.scripts),
-          new ReadFileFunction(context.scripts, 1000),
+          new ReadFileFunction(context.scripts),
           new WriteFileFunction(context.scripts),
           new ReadDirectoryFunction(context.scripts),
           new ThinkFunction()

@@ -7,7 +7,8 @@ import {
   MessageChunker,
   LocalVectorDB,
   LocalCollection,
-  BaseDocumentMetadata
+  BaseDocumentMetadata,
+  AgentVariables
 } from "../../";
 
 import { v4 as uuid } from "uuid";
@@ -36,7 +37,8 @@ export class ContextualizedChat {
   constructor(
     private _rawChat: Chat,
     private _chunker: MessageChunker,
-    db: LocalVectorDB
+    db: LocalVectorDB,
+    private _variables: AgentVariables
   ) {
     this._collections = {
       persistent: db.addCollection<DocumentMetadata>(uuid()),
@@ -79,6 +81,11 @@ export class ContextualizedChat {
         (a, b) => a.chunkIdx - b.chunkIdx
       ).map((x) => x.msg)
     };
+
+    // Post-process the resulting message log,
+    // allowing us to (for example) join variable previews
+    sorted.persistent = postProcessMessages(sorted.persistent);
+    sorted.temporary = postProcessMessages(sorted.temporary);
 
     const chat = this._rawChat.cloneEmpty();
     chat.add("persistent", sorted.persistent);
@@ -196,9 +203,28 @@ export class ContextualizedChat {
 
     const newChunks: string[] = [];
 
+    // If the message contains a variable, load the variable's data
+    const varName = message.content || "";
+    let isVariable = false;
+
+    if (AgentVariables.hasSyntax(varName)) {
+      const data = this._variables.get(varName);
+      if (data) {
+        message.content = data;
+        isVariable = true;
+      }
+    }
+
     // If the message is large and requires chunking
-    if (this._chunker.shouldChunk(message)) { 
-      newChunks.push(...this._chunker.chunk(message));
+    if (this._chunker.shouldChunk(message)) {
+      // If it was a variable, prepend its name
+      if (isVariable) {
+        newChunks.push(...this._chunker.chunk(message).map(
+          (chunk, index) => variableChunkText(chunk, index, varName)
+        ));
+      } else {
+        newChunks.push(...this._chunker.chunk(message));
+      }
     } else {
       newChunks.push(JSON.stringify(message));
     }
@@ -263,4 +289,38 @@ function getSmallChunks(chunks: Chunk[]): ChunkIdx[] {
   }
 
   return smallChunksIdxs;
+}
+
+function postProcessMessages(messages: ChatMessage[]): ChatMessage[] {
+  const result: ChatMessage[] = [];
+  const varChunkPrefix = "chunk(\"\${";
+  const varNameRegex = /\$\{([^}]+)\}/;
+  let prevVarName: undefined | string = undefined;
+
+  for (const message of messages) {
+
+    // Detect variable preview messages
+    let varName: undefined | string = undefined;
+    if (message.content?.startsWith(varChunkPrefix)) {
+      const match = message.content.match(varNameRegex);
+      varName = (match && match[1]) || undefined;
+    }
+
+    if (varName && prevVarName === varName) {
+      // Join this preview with the previous
+      const lastMessage = result.at(-1) as ChatMessage;
+      lastMessage.content += `\n\n${message.content}`;
+      result[result.length - 1] = lastMessage;
+    } else {
+      result.push(message);
+    }
+
+    prevVarName = varName;
+  }
+
+  return result;
+}
+
+function variableChunkText(chunk: string, index: number, varName: string): string {
+  return `chunk("${varName}", ${index}):\n\`\`\`\n${chunk}\n\`\`\``;
 }

@@ -93,13 +93,12 @@ export class WebSearchFunction extends AgentFunctionBase<WebSearchFuncParameters
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           this.name,
           `Found the following result for the web search: '${params.query}'` +
             `\`\`\`\n` +
             `${result}\n` +
-            `\`\`\``,
-          variables
+            `\`\`\``
         ),
       ],
     };
@@ -125,13 +124,12 @@ export class WebSearchFunction extends AgentFunctionBase<WebSearchFuncParameters
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           this.name,
           `Error web searching for '${params.query}'\n` + 
           `\`\`\`\n` +
           `${trimText(error, 300)}\n` +
-          `\`\`\``,
-          variables
+          `\`\`\``
         ),
       ],
     };

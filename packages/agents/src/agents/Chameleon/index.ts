@@ -52,7 +52,8 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     this._cChat = new ContextualizedChat(
       this.context.chat,
       this._chunker,
-      new LocalVectorDB(this.context.internals, "cchat", embeddingApi)
+      new LocalVectorDB(this.context.internals, "cchat", embeddingApi),
+      context.variables
     );
   }
 

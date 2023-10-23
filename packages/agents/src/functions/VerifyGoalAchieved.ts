@@ -1,4 +1,4 @@
-import { AgentOutputType, ChatMessageBuilder, AgentOutput, AgentFunctionResult, ChatMessage, AgentVariables, LlmApi, Tokenizer } from "@evo-ninja/agent-utils"
+import { AgentOutputType, ChatMessageBuilder, AgentOutput, AgentFunctionResult, ChatMessage, LlmApi, Tokenizer } from "@evo-ninja/agent-utils"
 import { GoalVerifierAgent } from "../scriptedAgents";
 import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 import { Agent } from "../Agent";
@@ -21,7 +21,7 @@ export class VerifyGoalAchievedFunction extends LlmAgentFunctionBase<FunctionPar
     additionalProperties: false
   };
 
-  onSuccess(name: string, rawParams: string | undefined, messages: string[], result: AgentOutput, variables: AgentVariables): AgentFunctionResult {
+  onSuccess(name: string, rawParams: string | undefined, messages: string[], result: AgentOutput): AgentFunctionResult {
     return {
       outputs: [
         result
@@ -32,16 +32,15 @@ export class VerifyGoalAchievedFunction extends LlmAgentFunctionBase<FunctionPar
           role: "assistant",
           content: x,
         }) as ChatMessage),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           name,
-          result.content || "Successfully accomplished the task.",
-          variables
+          result.content || "Successfully accomplished the task."
         )
       ]
     }
   }
 
-  onFailure(name: string, params: any, rawParams: string | undefined, error: string | undefined, variables: AgentVariables): AgentFunctionResult {
+  onFailure(name: string, params: any, rawParams: string | undefined, error: string | undefined): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -52,10 +51,9 @@ export class VerifyGoalAchievedFunction extends LlmAgentFunctionBase<FunctionPar
       ],
       messages: [
         ChatMessageBuilder.functionCall(name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           name,
-          `Error: ${error}`,
-          variables
+          `Error: ${error}`
         )
       ]
     }
@@ -74,16 +72,14 @@ export class VerifyGoalAchievedFunction extends LlmAgentFunctionBase<FunctionPar
           this.name,
           params,
           rawParams,
-          result.error,
-          context.variables
+          result.error
         );
       } else {
         return this.onSuccess(
           this.name,
           rawParams,
           [],
-          result.value.output,
-          context.variables
+          result.value.output
         );
       }
     }

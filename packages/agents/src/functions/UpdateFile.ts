@@ -1,4 +1,4 @@
-import { AgentOutputType, trimText, ChatMessageBuilder, AgentFunctionResult, AgentVariables } from "@evo-ninja/agent-utils"
+import { AgentOutputType, trimText, ChatMessageBuilder, AgentFunctionResult } from "@evo-ninja/agent-utils"
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 import { Agent } from "../Agent";
 
@@ -40,7 +40,7 @@ export class UpdateFileFunction extends ScriptFunction<UpdateFileFuncParameters>
     }
   }
 
-  onSuccess(agent: Agent<unknown>, params: UpdateFileFuncParameters, rawParams: string | undefined, result: string, variables: AgentVariables): AgentFunctionResult {
+  onSuccess(agent: Agent<unknown>, params: UpdateFileFuncParameters, rawParams: string | undefined): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -53,7 +53,7 @@ export class UpdateFileFunction extends ScriptFunction<UpdateFileFuncParameters>
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(this.name, "Successfully updated file.", variables)
+        ChatMessageBuilder.functionCallResult(this.name, "Successfully updated file.")
       ]
     }
   }

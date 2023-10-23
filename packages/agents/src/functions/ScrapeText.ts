@@ -1,4 +1,4 @@
-import { AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder, trimText } from "@evo-ninja/agent-utils";
+import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder, trimText } from "@evo-ninja/agent-utils";
 import { load } from "cheerio";
 import axios from "axios";
 import { Agent } from "../Agent";
@@ -39,15 +39,13 @@ export class ScrapeTextFunction extends AgentFunctionBase<{ url: string }> {
         return this.onSuccess(
           params,
           JSON.stringify(response),
-          rawParams,
-          agent.context.variables
+          rawParams
         );
       } catch (err) {
         return this.onError(
           params,
           err.toString(),
-          rawParams,
-          agent.context.variables
+          rawParams
         );
       }
     };
@@ -96,8 +94,7 @@ export class ScrapeTextFunction extends AgentFunctionBase<{ url: string }> {
   private onSuccess(
     params: ScrapeTextFuncParameters,
     result: string,
-    rawParams: string | undefined,
-    variables: AgentVariables
+    rawParams: string | undefined
   ): AgentFunctionResult {
     return {
       outputs: [
@@ -116,13 +113,12 @@ export class ScrapeTextFunction extends AgentFunctionBase<{ url: string }> {
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           this.name,
           `Scrape text from '${params.url}'` +
             `\`\`\`\n` +
             `${result}\n` +
-            `\`\`\``,
-          variables
+            `\`\`\``
         ),
       ],
     };
@@ -131,8 +127,7 @@ export class ScrapeTextFunction extends AgentFunctionBase<{ url: string }> {
   private onError(
     params: ScrapeTextFuncParameters,
     error: string,
-    rawParams: string | undefined,
-    variables: AgentVariables
+    rawParams: string | undefined
   ) {
     return {
       outputs: [
@@ -148,13 +143,12 @@ export class ScrapeTextFunction extends AgentFunctionBase<{ url: string }> {
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           this.name,
           `Error scraping text from '${params.url}'\n` + 
           `\`\`\`\n` +
           `${trimText(error, 300)}\n` +
-          `\`\`\``,
-          variables
+          `\`\`\``
         ),
       ],
     };
