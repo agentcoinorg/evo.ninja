@@ -6,10 +6,15 @@ import {
   ChatMessage,
   ExecuteAgentFunctionCalled,
   FunctionDefinition,
+  MessageChunker,
   RunResult,
   Timeout,
   Tokenizer,
   Workspace,
+  LocalVectorDB,
+  OpenAIEmbeddingAPI,
+  LlmApi,
+  LlmQueryBuilder
 } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../../AgentContext";
 import { agentPrompts, prompts } from "./prompts";
@@ -23,8 +28,13 @@ import { ScripterAgent } from "../Scripter";
 import { Rag } from "./Rag";
 import { TextChunker } from "./TextChunker";
 import { Prompt } from "./Prompt";
+import { ContextualizedChat } from "./ContextualizedChat";
 
 export class ChameleonAgent extends Agent {
+  private _cChat: ContextualizedChat;
+  private _chunker: MessageChunker;
+  private _prevChatLogs: ChatLogs | undefined;
+
   constructor(
     context: AgentContext,
     timeout?: Timeout,
@@ -37,6 +47,17 @@ export class ChameleonAgent extends Agent {
         timeout
       ),
       context,
+    );
+    this._chunker = new MessageChunker({ maxChunkSize: 500 });
+    // Gross, I know... will cleanup later
+    this._cChat = new ContextualizedChat(
+      context.chat,
+      this._chunker,
+      new LocalVectorDB(this.context.internals, "cchat", new OpenAIEmbeddingAPI(
+        this.context.env.OPENAI_API_KEY,
+        this.context.logger,
+        this.context.chat.tokenizer
+      ))
     );
   }
 
@@ -62,11 +83,6 @@ export class ChameleonAgent extends Agent {
         chat.persistent(message);
       }
 
-      // Add functions to chat
-      this.config.functions.forEach((fn) => {
-        chat.addFunction(fn.getDefinition());
-      });
-
       if (this.config.timeout) {
         setTimeout(this.config.timeout.callback, this.config.timeout.milliseconds);
       }
@@ -86,7 +102,7 @@ export class ChameleonAgent extends Agent {
         },
         this.config.prompts.loopPreventionPrompt,
         this.config.prompts.agentSpeakPrompt,
-        this.beforeLlmResponse.bind(this)
+        this.beforeLlmResponse2.bind(this)
       );
     } catch (err) {
       this.context.logger.error(err);
@@ -96,10 +112,76 @@ export class ChameleonAgent extends Agent {
 
   protected initializeChat(args: GoalRunArgs): void {
     const { chat } = this.context;
-    
+
     chat.persistent(buildDirectoryPreviewMsg(this.context.workspace));
     chat.persistent("user", prompts.exhaustAllApproaches);
     chat.persistent("user", args.goal);
+  }
+
+  protected async beforeLlmResponse2(): Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[]}> {
+
+    const emptyMessage: ChatMessage = {
+      role: "system",
+      content: ""
+    };
+
+    // Retrieve the last message (or a summary of it)
+    let lastMessage = this.context.chat.getLastMessage("temporary") || emptyMessage;
+    if (this._chunker.shouldChunk(lastMessage)) {
+      lastMessage.content = await summarizeMessage(
+        lastMessage,
+        this.context.llm,
+        this.context.chat.tokenizer
+      );
+    }
+
+    // Predict the next step
+    const prediction = await this.askLlm(
+      new Prompt()
+        .json([
+          ...(this._prevChatLogs?.messages || []),
+          lastMessage
+        ])
+        .line(`
+          Consider the above chat between a user and assistant.
+          In your expert opinion, what is the best next step for the assistant?`
+        )
+    );
+
+    const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(prediction, this.context);
+
+    const context = `${persona}\n${prediction}`;
+    const maxContextTokens = this.context.llm.getMaxContextTokens();
+    const maxResponseTokens = this.context.llm.getMaxResponseTokens();
+    // TODO: remove this once we properly track function definition tokens
+    const fuzz = 500;
+    const maxChatTokens = maxContextTokens - maxResponseTokens - fuzz;
+
+    const contextualizedChat = await this._cChat.contextualize(
+      context, {
+        persistent: maxChatTokens * 0.25,
+        temporary: maxChatTokens * 0.75
+      }
+    );
+
+    const logs = insertPersonaAsFirstMsg(
+      persona,
+      contextualizedChat.chatLogs,
+      contextualizedChat.tokenizer
+    );
+
+    return {
+      logs,
+      agentFunctions,
+      allFunctions: allFunctions.map((fn: any) => {
+        return {
+          definition: fn.getDefinition(),
+          buildExecutor: (context: AgentContext) => {
+            return fn.buildExecutor(agent);
+          }
+        }
+      })
+    }
   }
 
   protected async beforeLlmResponse(): Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[]}> {
@@ -148,13 +230,14 @@ export class ChameleonAgent extends Agent {
 
 const insertPersonaAsFirstMsg = (persona: string, logs: ChatLogs, tokenizer: Tokenizer): ChatLogs => {
   const newLogs = logs.clone();
-  newLogs.insert("persistent", {
-    tokens: tokenizer.encode(persona).length,
-    msgs: [{
+  newLogs.insert("persistent",
+    [{
       role: "user",
       content: persona,
     } as ChatMessage],
-  }, 0);
+    [tokenizer.encode(persona).length],
+    0
+  );
 
   return newLogs;
 };
@@ -186,9 +269,9 @@ const findBestAgent = async (query: string, context: AgentContext): Promise<[Age
   const agentsWithPrompt = agents[0];
 
   return [
-    agentsWithPrompt.agent, 
+    agentsWithPrompt.agent,
     agentsWithPrompt.agent.config.functions.map(f => f.getDefinition()),
-    agentsWithPrompt.persona, 
+    agentsWithPrompt.persona,
     agentsWithPrompts.map(x => x.agent.config.functions).flat()
   ];
 };
@@ -246,3 +329,38 @@ files.filter((x) => x.type === "directory").map((x) => x.name).join(", ")
 }` 
   }
 };
+
+async function summarizeMessage(message: ChatMessage, llm: LlmApi, tokenizer: Tokenizer): Promise<string> {
+  const fuzTokens = 200;
+  const maxTokens = llm.getMaxContextTokens() - fuzTokens;
+
+  const prompt = (summary: string | undefined) => {
+    return `Summarize the following data. Includes all unique details.\n
+            ${summary ? `An existing summary exists, please add all new details found to it.\n\`\`\`\n${summary}\n\`\`\`\n` : ``}`;
+  }
+  const appendData = (prompt: string, chunk: string) => {
+    return `${prompt}\nData:\n\`\`\`\n${chunk}\n\`\`\``;
+  }
+
+  let summary: string | undefined = undefined;
+  const data = message.content || "";
+  const len = data.length;
+  let idx = 0;
+
+  while (idx < len) {
+    const promptStr = prompt(summary);
+    const propmtTokens = this.tokenizer.encode(promptStr).length;
+    const chunkTokens = (maxTokens - propmtTokens);
+    const chunk = data.substring(idx, Math.min(idx + chunkTokens, len));
+    idx += chunkTokens;
+
+    const promptFinal = appendData(promptStr, chunk);
+
+    summary = await new LlmQueryBuilder(llm, tokenizer)
+      .persistent(message.role, promptFinal)
+      .build()
+      .content();
+  }
+
+  return summary || "";
+}

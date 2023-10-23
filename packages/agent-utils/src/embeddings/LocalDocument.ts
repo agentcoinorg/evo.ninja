@@ -10,8 +10,8 @@ export interface LocalDocumentData<TMetadata = unknown> {
   metadata?: TMetadata;
 }
 
-export class LocalDocument<TMeatadata = unknown> {
-  private _data: LocalDocumentData<TMeatadata>;
+export class LocalDocument<TMetadata = unknown> {
+  private _data: LocalDocumentData<TMetadata>;
 
   constructor(
     readonly id: string,
@@ -42,7 +42,7 @@ export class LocalDocument<TMeatadata = unknown> {
     return this._data.text
   }
 
-  metadata(): TMeatadata | undefined {
+  metadata(): TMetadata | undefined {
     if (!this._data) {
       this.loadData()
     }
@@ -54,7 +54,7 @@ export class LocalDocument<TMeatadata = unknown> {
     text,
     metadata,
     vector,
-  }: { text: string; metadata?: TMeatadata; vector: number[]; }): void {
+  }: { text: string; metadata?: TMetadata; vector: number[]; }): void {
     const docPath = this.config.uri
 
     const vectorPath = path.join(docPath, VECTOR_FILENAME)
@@ -86,7 +86,7 @@ export class LocalDocument<TMeatadata = unknown> {
     }
 
     const documentFileContent = this.config.workspace.readFileSync(documentPath)
-    const document: LocalDocumentData<TMeatadata> = JSON.parse(documentFileContent)
+    const document: LocalDocumentData<TMetadata> = JSON.parse(documentFileContent)
 
     this._data = document
   }

@@ -127,6 +127,7 @@ export class ContextWindow {
       // Aggregate as many messages as possible,
       // based on max size of the context window
       const toSummarize: ChatMessage[] = [];
+      const tokens: number[] = [];
       let tokenCounter = 0;
       let index = 0;
 
@@ -140,16 +141,14 @@ export class ContextWindow {
         }
 
         toSummarize.push(msg);
+        tokens.push(contentTokens);
         tokenCounter += contentTokens
         index++;
       }
 
       // Summarize
       const toSummarizeLogs = new ChatLogs();
-      toSummarizeLogs.add("persistent", {
-        msgs: toSummarize,
-        tokens: tokenCounter
-      });
+      toSummarizeLogs.add("persistent", toSummarize, tokens);
       const message = await this._llm.getResponse(
         toSummarizeLogs,
         undefined,

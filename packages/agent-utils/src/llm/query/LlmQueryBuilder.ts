@@ -10,20 +10,18 @@ export class LlmQueryBuilder {
   persistent(role: ChatRole, content: string): LlmQueryBuilder {
     this.logs.add(
       "persistent", 
-      { 
-        tokens: this.tokenizer.encode(content).length,
-        msgs: [{ role, content }]
-      });
+      [{ role, content }],
+      [this.tokenizer.encode(content).length]
+    );
     return this;
   }
 
   temporary(role: ChatRole, content: string): LlmQueryBuilder {
     this.logs.add(
-      "temporary", 
-      { 
-        tokens: this.tokenizer.encode(content).length,
-        msgs: [{ role, content }]
-      });
+      "temporary",
+      [{ role, content }],
+      [this.tokenizer.encode(content).length]
+    );
     return this;
   }
 

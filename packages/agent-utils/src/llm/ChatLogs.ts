@@ -29,14 +29,21 @@ export class ChatLogs {
       msgs: [],
     },
   };
+  private _tokensPerMsg: Record<ChatLogType, number[]> = {
+    "persistent": [],
+    "temporary": []
+  };
   private _functions: ChatFunctions = {
     tokens: 0,
     definitions: []
   };
 
-  constructor(logs?: Record<ChatLogType, ChatLog>, functions?: ChatFunctions) {
+  constructor(logs?: Record<ChatLogType, ChatLog>, tokensPerMsg?: Record<ChatLogType, number[]>, functions?: ChatFunctions) {
     if (logs) {
       this._logs = logs;
+    }
+    if (tokensPerMsg) {
+      this._tokensPerMsg = tokensPerMsg;
     }
     if (functions) {
       this._functions = functions;
@@ -60,14 +67,32 @@ export class ChatLogs {
     return this._logs[type];
   }
 
-  public add(type: ChatLogType, log: ChatLog) {
-    this._logs[type].tokens += log.tokens;
-    this._logs[type].msgs.push(...log.msgs);
+  public getMsg(type: ChatLogType, index: number): ChatMessage {
+    return this._logs[type].msgs[index];
   }
 
-  public insert(type: ChatLogType, log: ChatLog, index: number) {
-    this._logs[type].tokens += log.tokens;
-    this._logs[type].msgs.splice(index, 0, ...log.msgs);
+  public getMsgTokens(type: ChatLogType, index: number): number {
+    const tokens = this._tokensPerMsg[type];
+    if (index < 0 || index >= tokens.length) {
+      throw Error("invalid index");
+    }
+    return tokens[index];
+  }
+
+  public add(type: ChatLogType, msgs: ChatMessage[], tokens: number[]) {
+    if (msgs.length !== tokens.length) {
+      throw Error("msgs & tokens must be equal size.");
+    }
+
+    this._logs[type].tokens += tokens.reduce((acc, cur) => acc + cur, 0);
+    this._tokensPerMsg[type].push(...tokens);
+    this._logs[type].msgs.push(...msgs);
+  }
+
+  public insert(type: ChatLogType, msgs: ChatMessage[], tokens: number[], index: number) {
+    this._logs[type].tokens += tokens.reduce((acc, cur) => acc + cur, 0);
+    this._tokensPerMsg[type].splice(index, 0, ...tokens);
+    this._logs[type].msgs.splice(index, 0, ...msgs);
   }
 
   public addFunction(fn: FunctionDefinition, tokens: number): void {
@@ -78,6 +103,7 @@ export class ChatLogs {
   public clone(): ChatLogs {
     return new ChatLogs(
       JSON.parse(JSON.stringify(this._logs)),
+      JSON.parse(JSON.stringify(this._tokensPerMsg)),
       JSON.parse(JSON.stringify(this._functions))
     );
   }
@@ -103,19 +129,23 @@ export class ChatLogs {
   }
 
   static from(persistentMsgs: ChatMessage[], temporaryMsgs: ChatMessage[], tokenizer: Tokenizer): ChatLogs {
+    const persistentTokens = persistentMsgs
+      .map(x => x.content ? tokenizer.encode(x.content).length : 0);
+    const temporaryTokens = persistentMsgs
+      .map(x => x.content ? tokenizer.encode(x.content).length : 0);
+
     return new ChatLogs({
       "persistent": {
-        tokens: persistentMsgs
-          .map(x => x.content ? tokenizer.encode(x.content).length : 0)
-          .reduce((a, b) => a + b, 0),
+        tokens: persistentTokens.reduce((a, b) => a + b, 0),
         msgs: persistentMsgs
       },
       "temporary": {
-        tokens: temporaryMsgs
-          .map(x => x.content ? tokenizer.encode(x.content).length : 0)
-          .reduce((a, b) => a + b, 0),
+        tokens: temporaryTokens.reduce((a, b) => a + b, 0),
         msgs: temporaryMsgs
       }
+    }, {
+      "persistent": persistentTokens,
+      "temporary": temporaryTokens
     });
   }
 }

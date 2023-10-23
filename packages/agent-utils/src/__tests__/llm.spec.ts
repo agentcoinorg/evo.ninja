@@ -7,7 +7,6 @@ import {
   ChatRole,
   ChatLogType,
   ChatLog,
-  ContextWindow,
   FunctionDefinition
 } from "../";
 import dotenv from "dotenv";
@@ -69,8 +68,7 @@ describe('LLM Test Suite', () => {
       env.MAX_RESPONSE_TOKENS,
       logger
     );
-    const contextWindow = new ContextWindow(llm);
-    const chat = new Chat(cl100k_base, contextWindow, logger);
+    const chat = new Chat(cl100k_base);
 
     for (const msg of msgs.persistent.msgs) {
       chat.persistent(msg.role as ChatRole, msg.content ?? "");

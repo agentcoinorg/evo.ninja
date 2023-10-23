@@ -20,10 +20,9 @@ export class LlmQuery {
     
     this.logs.add(
       "temporary", 
-      { 
-        tokens: this.tokenizer.encode(response.content).length,
-        msgs: [{ role: response.role, content: response.content }]
-      });
+      [{ role: response.role, content: response.content }],
+      [this.tokenizer.encode(response.content).length]
+    );
 
     return response;
   }
@@ -31,10 +30,9 @@ export class LlmQuery {
   async ask(question: string): Promise<string> {
     this.logs.add(
       "temporary", 
-      { 
-        tokens: this.tokenizer.encode(question).length,
-        msgs: [{ role: "user", content: question }]
-      });
+      [{ role: "user", content: question }],
+      [this.tokenizer.encode(question).length]
+    );
 
     const response = await this.llm.getResponse(this.logs);
   
@@ -44,10 +42,9 @@ export class LlmQuery {
     
     this.logs.add(
       "temporary", 
-      { 
-        tokens: this.tokenizer.encode(response.content).length,
-        msgs: [{ role: response.role, content: response.content }]
-      });
+      [{ role: response.role, content: response.content }],
+      [this.tokenizer.encode(response.content).length]
+    );
 
     return response?.content ?? "";
   }
