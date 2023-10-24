@@ -5,6 +5,9 @@ import { WebSearchFunction } from "../../functions/WebSearch";
 import { PlanWebResearchFunction } from "../../functions/PlanWebResearch";
 import { ScrapeTextFunction } from "../../functions/ScrapeText";
 import { prompts } from "./prompts";
+import { ReadFileFunction } from "../../functions/ReadFile";
+import { WriteFileFunction } from "../../functions/WriteFile";
+import { VerifyResearchFunction } from "../../functions/VerifyResearch";
 
 export class WebResearcherAgent extends Agent {
   constructor(context: AgentContext) {
@@ -13,7 +16,7 @@ export class WebResearcherAgent extends Agent {
         () => prompts,
         [
           new PlanWebResearchFunction(context.llm, context.chat.tokenizer),
-          // new VerifyResearchFunction(context.llm, context.chat.tokenizer),
+          new VerifyResearchFunction(context.llm, context.chat.tokenizer),
           // new SearchInPagesFunction(
           //   new HTMLChunker({ maxChunkSize: 5000 }),
           //   context.chat.tokenizer,
@@ -26,7 +29,9 @@ export class WebResearcherAgent extends Agent {
           //   }
           // ),
           new WebSearchFunction(),
-          new ScrapeTextFunction()
+          new ScrapeTextFunction(),
+          new ReadFileFunction(context.scripts),
+          new WriteFileFunction(context.scripts),
         ],
         context.scripts
       ),

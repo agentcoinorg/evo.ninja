@@ -33,7 +33,7 @@ export class DataAnalystAgent extends Agent {
           new WriteFileFunction(context.scripts),
           new ReadDirectoryFunction(context.scripts),
           new ThinkFunction()
-        ], 
+        ],
         context.scripts,
       ),
       context

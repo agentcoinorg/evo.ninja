@@ -14,6 +14,7 @@ import { AgentConfig } from "./AgentConfig";
 import { AgentContext } from "./AgentContext";
 import { ExecuteAgentFunctionCalled } from "@evo-ninja/agent-utils";
 import { Prompt } from "./agents/Chameleon/Prompt";
+import { agentFunctionBaseToAgentFunction } from "./agents/Chameleon/helpers";
 
 export type GoalRunArgs = {
   goal: string;
@@ -68,14 +69,7 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
 
       return yield* basicFunctionCallLoop(
         this.context,
-        this.config.functions.map((fn) => {
-          return {
-            definition: fn.getDefinition(),
-            buildExecutor: (context: AgentContext) => {
-              return fn.buildExecutor(this);
-            }
-          }
-        }),
+        this.config.functions.map(agentFunctionBaseToAgentFunction(this)),
         (functionCalled: ExecuteAgentFunctionCalled) => {
           return this.config.shouldTerminate(functionCalled);
         },
