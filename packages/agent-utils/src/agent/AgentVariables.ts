@@ -5,7 +5,7 @@ export class AgentVariables {
   public static Prefix = "${";
   public static Suffix = "}";
 
-  constructor(private _saveThreshold: number = 1000) { }
+  constructor(private _saveThreshold: number = 1250) { }
 
   static hasSyntax(name: string): boolean {
     return name.startsWith(AgentVariables.Prefix) &&
