@@ -30,7 +30,7 @@ export class AgentContext {
       this.env,
       this.scripts,
       this.client,
-      new AgentVariables()
+      this.variables
     );
   }
 }

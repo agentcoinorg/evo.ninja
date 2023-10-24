@@ -1,4 +1,4 @@
-import { AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder, Script } from "@evo-ninja/agent-utils";
+import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder, Script } from "@evo-ninja/agent-utils";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { createScriptWriter } from "../agents/ScriptWriter/utils";
 import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
@@ -36,7 +36,7 @@ export class CreateScriptFunction extends LlmAgentFunctionBase<CreateScriptFuncP
   buildExecutor({ context }: Agent<unknown>): (params: CreateScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (params: CreateScriptFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       if (params.namespace.startsWith("agent.")) {
-        return this.onErrorCannotCreateScriptsOnAgentNamespace(params, rawParams, context.variables);
+        return this.onErrorCannotCreateScriptsOnAgentNamespace(params, rawParams);
       }
       context.logger.notice(`Creating script '${params.namespace}'...`);
 
@@ -53,7 +53,7 @@ export class CreateScriptFunction extends LlmAgentFunctionBase<CreateScriptFuncP
       );
 
       if (!result.ok) {
-        return this.onErrorCreateScript(params, rawParams, result.error?.toString() || "Unknown error", context.variables);
+        return this.onErrorCreateScript(params, rawParams, result.error?.toString() || "Unknown error");
       }
 
       const index = writer.workspace.readFileSync("index.js");
@@ -65,12 +65,12 @@ export class CreateScriptFunction extends LlmAgentFunctionBase<CreateScriptFuncP
         code: index
       };
       context.scripts.addScript(params.namespace, script);
-      
-      return this.onSuccess(script, params, rawParams, context.variables);
+
+      return this.onSuccess(script, params, rawParams);
     };
   }
 
-  private onSuccess(script: Script, params: CreateScriptFuncParameters,  rawParams: string | undefined, variables: AgentVariables): AgentFunctionResult {
+  private onSuccess(script: Script, params: CreateScriptFuncParameters, rawParams: string | undefined): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -88,12 +88,12 @@ export class CreateScriptFunction extends LlmAgentFunctionBase<CreateScriptFuncP
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(this.name, `Script '${script.name}' created.`, variables)
+        ChatMessageBuilder.functionCallResult(this.name, `Script '${script.name}' created.`)
       ]
     }
   }
 
-  private onErrorCannotCreateScriptsOnAgentNamespace(params: CreateScriptFuncParameters,  rawParams: string | undefined, variables: AgentVariables) {
+  private onErrorCannotCreateScriptsOnAgentNamespace(params: CreateScriptFuncParameters,  rawParams: string | undefined) {
     return {
       outputs: [
         {
@@ -108,16 +108,15 @@ export class CreateScriptFunction extends LlmAgentFunctionBase<CreateScriptFuncP
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           this.name,
-          `Error: Scripts in the 'agent' namespace cannot be created. Try searching for an existing script instead.`,
-          variables
+          `Error: Scripts in the 'agent' namespace cannot be created. Try searching for an existing script instead.`
         )
       ]
     }
   }
 
-  private onErrorCreateScript(params: CreateScriptFuncParameters, rawParams: string | undefined, error: string, variables: AgentVariables) {
+  private onErrorCreateScript(params: CreateScriptFuncParameters, rawParams: string | undefined, error: string) {
     return {
       outputs: [
         {
@@ -132,10 +131,9 @@ export class CreateScriptFunction extends LlmAgentFunctionBase<CreateScriptFuncP
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           this.name,
-          `Error trying to create the script: ${error}.`,
-          variables
+          `Error trying to create the script: ${error}.`
         )
       ]
     }

@@ -1,4 +1,4 @@
-import { AgentOutputType, trimText, ChatMessageBuilder, AgentFunctionResult, AgentVariables, Scripts } from "@evo-ninja/agent-utils"
+import { AgentOutputType, trimText, ChatMessageBuilder, AgentFunctionResult, Scripts } from "@evo-ninja/agent-utils"
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 import { Agent } from "../Agent";
 
@@ -8,7 +8,7 @@ interface ReadFileFuncParameters {
 };
 
 export class ReadFileFunction extends ScriptFunction<ReadFileFuncParameters> {
-  constructor(scripts: Scripts, private _saveThreshold?: number) {
+  constructor(scripts: Scripts) {
     super(scripts);
   }
 
@@ -27,7 +27,7 @@ export class ReadFileFunction extends ScriptFunction<ReadFileFuncParameters> {
     additionalProperties: false
   };
 
-  onSuccess(agent: Agent, params: ReadFileFuncParameters, rawParams: string | undefined, result: string, variables: AgentVariables): AgentFunctionResult {
+  onSuccess(agent: Agent, params: ReadFileFuncParameters, rawParams: string | undefined, result: string): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -40,7 +40,7 @@ export class ReadFileFunction extends ScriptFunction<ReadFileFuncParameters> {
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(this.name, result, variables, this._saveThreshold)
+        ChatMessageBuilder.functionCallResult(this.name, result)
       ]
     }
   }

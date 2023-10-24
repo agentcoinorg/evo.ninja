@@ -86,12 +86,11 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           this.name,
           `Research plan: '${params.query}'` +
             `${result}\n` +
-            `\`\`\``,
-          variables
+            `\`\`\``
         ),
       ],
     };
@@ -117,13 +116,12 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           this.name,
           `Error planning research for '${params.query}'\n` + 
           `\`\`\`\n` +
           `${trimText(error, 300)}\n` +
-          `\`\`\``,
-          variables
+          `\`\`\``
         ),
       ],
     };

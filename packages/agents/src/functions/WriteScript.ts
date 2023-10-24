@@ -79,7 +79,7 @@ export class WriteScriptFunction extends AgentFunctionBase<WriteScriptFuncParame
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(this.name, "Success.", variables),
+        ChatMessageBuilder.functionCallResult(this.name, "Success."),
       ]
     }
   }
@@ -120,11 +120,10 @@ export class WriteScriptFunction extends AgentFunctionBase<WriteScriptFuncParame
       ],
       messages: [
         ChatMessageBuilder.functionCall(functionName, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           functionName,
           `Failed writing the function.\n` +
-          `Namespaces starting with 'agent.' are reserved.`,
-          variables
+          `Namespaces starting with 'agent.' are reserved.`
         ),
       ]
     }
@@ -141,10 +140,9 @@ export class WriteScriptFunction extends AgentFunctionBase<WriteScriptFuncParame
       ],
       messages: [
         ChatMessageBuilder.functionCall(functionName, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           functionName,
-          `Cannot require libraries other than ${WriteScriptFunction.allowedLibs.join(", ")}.`,
-          variables
+          `Cannot require libraries other than ${WriteScriptFunction.allowedLibs.join(", ")}.`
         ),
       ]
     }

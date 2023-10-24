@@ -51,7 +51,7 @@ export class SummarizeDirectoryFunction extends LlmAgentFunctionBase<SummarizeDi
         outputs: [],
         messages: [
           ChatMessageBuilder.functionCall(this.name, rawParams),
-          ...ChatMessageBuilder.functionCallResultWithVariables(this.name, summary || "", context.variables)
+          ChatMessageBuilder.functionCallResult(this.name, summary || "")
         ]
       };
     }

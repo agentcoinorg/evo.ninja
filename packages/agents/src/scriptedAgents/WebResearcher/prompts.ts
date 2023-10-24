@@ -16,22 +16,13 @@ export const prompts = {
         Example of undesired behavior: Searching "US births 2019", then "US births 2020", then "US births 2021"...
         Desired behavior: Searching "US births from 2019 to 2021"
   
-      2. For each step, you will web search for results. If you find the answer to the query in the results, settle for that.
-         If you don't find the answer, choose the URLs of all the different pages you think would contain relevant information and use search_in_pages.
-         The more URLs you pass the better.
+      2. For each step, you will web search for results
   
-      3. Prioritize accuracy & precision, try to retrieve exact values and do not round. Do not settle for the first piece of information found if there
-         are more precise results available.
-         Example: "population of New York in 2020" and you get the following results: ["1.6 million",  "1.600.000", "1,611,989"], you will take "1,611,989"
-         Make sure to thoroughly examine if you see more than one result, and choose the most accurate one, state it.
+      3. If by searching for something specific you find something else that is relevant, state it and consider it.
   
-      4. If by searching for something specific you find something else that is relevant, state it and consider it.
+      4. If the research verification says the data is incomplete, search for the missing data. If you still cannot find it, consider it unavailable and don't fail; just return it. 
   
-      5. Verify the research result, giving it the information you think is complete. Always communicate the original query to the verifier.
-      If the research verification says the data is incomplete, search for the missing data. If you have already used the verifier once and found new information, even if incomplete,
-      DO NOT FAIL, call the agent_onGoalAchieved function with what you have. Use the verifier ONLY ONCE.
-  
-      6. Use scrape_text for getting all the text from a webpage, but not for searching for specific information.`,
+      5. Use scrape_text for getting all the text from a webpage, but not for searching for specific information.`,
     },
     { role: "user", content: goal },
   ],

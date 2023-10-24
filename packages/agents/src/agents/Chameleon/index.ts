@@ -12,6 +12,7 @@ import {
   ContextualizedChat,
   Chat,
 } from "@evo-ninja/agent-utils";
+import { Agent } from "../../Agent";
 import { AgentContext } from "../../AgentContext";
 import { agentPrompts, prompts } from "./prompts";
 import { GoalRunArgs } from "../../Agent";
@@ -26,6 +27,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
   private _cChat: ContextualizedChat;
   private _chunker: MessageChunker;
   private previousPrediction: string | undefined;
+  private previousAgent: Agent<unknown> | undefined;
 
   constructor(
     context: AgentContext,
@@ -40,7 +42,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
       ),
       context,
     );
-    this._chunker = new MessageChunker({ maxChunkSize: 2000 });
+    this._chunker = new MessageChunker({ maxChunkSize: context.variables.saveThreshold });
     const embeddingApi = new OpenAIEmbeddingAPI(
       this.context.env.OPENAI_API_KEY,
       this.context.logger,
@@ -49,7 +51,8 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     this._cChat = new ContextualizedChat(
       this.context.chat,
       this._chunker,
-      new LocalVectorDB(this.context.internals, "cchat", embeddingApi)
+      new LocalVectorDB(this.context.internals, "cchat", embeddingApi),
+      context.variables
     );
   }
 
@@ -58,6 +61,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
 
     chat.persistent(buildDirectoryPreviewMsg(this.context.workspace));
     chat.persistent("user", prompts.exhaustAllApproaches);
+    chat.persistent("user", prompts.variablesExplainer);
     chat.persistent("user", args.goal);
   }
 
@@ -70,11 +74,13 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
       await this.shortenLargeMessages(this.previousPrediction);
     }
 
-    const prediction = await this.predictBestNextStep(messages);
-    this.previousPrediction = prediction;
-    console.log("Prediction: ", prediction);
+    const prediction = await this.predictBestNextStep(messages, this.previousAgent);
 
     const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(prediction, this.context);
+
+    this.previousPrediction = prediction;
+    this.previousAgent = agent;
+    console.log("Prediction: ", prediction);
 
     const contextualizedChat = await this.contextualizeChat(persona, prediction);
 
@@ -103,12 +109,16 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     );
   }
 
-  private async predictBestNextStep(messages: ChatMessage[]): Promise<string> {
-    //TODO: Keep persona in chat logs when doing this
+  private async predictBestNextStep(messages: ChatMessage[], previousAgent: Agent<unknown> | undefined): Promise<string> {
+    const agentPersona = previousAgent ?
+      // TODO: fix this when we refactor agent prompts
+      previousAgent.config.prompts.initialMessages({ goal: "" }).slice(0, -1) :
+      [{ role: "user", content: prompts.generalAgentPersona }];
+
     return await this.askLlm(
       new Prompt()
         .json([
-          { role: "user", content: prompts.generalAgentPersona }, 
+          ...agentPersona,
           ...messages
         ])
         .line(`
@@ -202,7 +212,7 @@ const insertPersonaAsFirstMsg = (persona: string, logs: ChatLogs, tokenizer: Tok
 const buildDirectoryPreviewMsg = (workspace: Workspace): ChatMessage => {
   const files = workspace.readdirSync("./");
   return {
-    role: "system",
+    role: "user",
     content: `Current directory: './'
 Files: ${
 files.filter((x) => x.type === "file").map((x) => x.name).join(", ")
