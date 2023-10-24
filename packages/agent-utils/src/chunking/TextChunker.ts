@@ -1,27 +1,25 @@
 import { cleanWhitespace } from "./cleanWhitespace";
 
 export class TextChunker {
-  private constructor() {}
-
   static fixedCharacterLength(text: string, opts: { chunkLength: number, overlap: number }): string[] {
     const { chunkLength, overlap } = opts
-    
+
     if (chunkLength <= overlap) {
-        throw new Error("Chunk length must be greater than overlap length.");
+      throw new Error("Chunk length must be greater than overlap length.");
     }
-  
+
     let chunks: string[] = [];
     let startIndex = 0;
-  
+
     while (startIndex < text.length) {
-        let endIndex = startIndex + chunkLength;
-        let chunk = text.slice(startIndex, endIndex);
-  
-        chunks.push(chunk);
-  
-        startIndex = endIndex - overlap;
+      let endIndex = startIndex + chunkLength;
+      let chunk = text.slice(startIndex, endIndex);
+
+      chunks.push(chunk);
+
+      startIndex = endIndex - overlap;
     }
-  
+
     return chunks;
   }
 
@@ -35,7 +33,7 @@ export class TextChunker {
     }
   }[] {
     const { parentChunker, childChunker } = opts
-    
+
     const parentChunks = parentChunker(text)
     const parentAndChildDocs = parentChunks.map(parentChunk => {
       return {
