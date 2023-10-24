@@ -222,8 +222,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
       .limit(10)
       .onlyUnique()
       .query(params.query)
-      .unique()
-      .collect();
+      .unique();
 
     return matches;
   }

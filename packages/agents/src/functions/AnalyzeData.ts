@@ -42,8 +42,7 @@ export class AnalyzeDataFunction extends LlmAgentFunctionBase<AnalyzeDataParamet
     const relevantChunks = await Rag.standard(chunks, context)
       .limit(3)
       .sortByIndex()
-      .query(params.question)
-      .collect();
+      .query(params.question);
 
     let prompt = new Prompt();
 

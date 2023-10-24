@@ -101,7 +101,7 @@ describe('LLM Test Suite', () => {
       console.log("Input tokens", chat.tokenizer.encode(prompt).length);
       console.log("Output tokens", outputTokens);
       
-      const filteredText = await new LlmQuery(llm, chat.tokenizer).ask(prompt, outputTokens);
+      const filteredText = await new LlmQuery(llm, chat.tokenizer).ask(prompt, { maxResponseTokens: outputTokens });
       console.log("filteredText", filteredText);
     }
   }, ONE_MINUTE_TIMEOUT);

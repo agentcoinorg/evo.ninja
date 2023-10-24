@@ -124,7 +124,10 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
         .line(`
           Consider the above chat between a user and assistant.
           In your expert opinion, what is the best next step for the assistant?`
-        )
+        ),
+      {
+        model: "gpt-3.5-turbo-16k-0613"
+      }
     );
   };
 
@@ -170,7 +173,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
         ).toString();
 
     const outputTokens = charsToTokens(maxCharsToUse * 0.25);
-    const filteredText = await this.askLlm(prompt, outputTokens);
+    const filteredText = await this.askLlm(prompt, { maxResponseTokens: outputTokens });
 
     console.log("filteredText", filteredText);
     console.log("maxCharsToUse", maxCharsToUse);
