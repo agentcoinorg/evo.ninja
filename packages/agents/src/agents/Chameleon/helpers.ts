@@ -18,20 +18,6 @@ export const agentFunctionBaseToAgentFunction = <TRunArgs>(agent: Agent<TRunArgs
   };
 };
 
-export const filterDuplicates = <TItem, TCompare>(items: TItem[], compareBy: (item: TItem) => TCompare): TItem[] => {
-  const set = new Set();
-  const uniqueItems = [];
-  for (const item of items) {
-    if (set.has(compareBy(item))) {
-      continue;
-    }
-    uniqueItems.push(item);
-    set.add(compareBy(item));
-  }
-
-  return uniqueItems;
-};
-
 const joinUnderCharLimit = (chunks: string[], characterLimit: number, separator: string): string => {
   let result = "";
 

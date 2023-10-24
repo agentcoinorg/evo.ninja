@@ -4,7 +4,7 @@ import { LocalDocumentStore } from "./LocalDocumentStore";
 import { BaseDocumentMetadata, LocalDocument } from "./LocalDocument";
 import { Workspace } from "../sys";
 import path from "path-browserify";
-import { getTextFromNextChunks, getTextFromPriorChunks } from "../chunking/utils";
+import { getTextFromNextChunks, getTextFromPriorChunks, sortDocumentsByIndex } from "../chunking/utils";
 
 export class LocalCollection<TMetadata extends BaseDocumentMetadata = BaseDocumentMetadata> {
   private documentStore: LocalDocumentStore<TMetadata>;
@@ -73,7 +73,7 @@ export class LocalCollection<TMetadata extends BaseDocumentMetadata = BaseDocume
     
     const results = await this.search(query);
 
-    const resultsSortedByIndex = this.sortDocumentsByIndex(results);
+    const resultsSortedByIndex = sortDocumentsByIndex(results);
 
     const surroundedResults = results.map(result => {
       const resultIndex = result.metadata()!.index;
@@ -137,21 +137,5 @@ export class LocalCollection<TMetadata extends BaseDocumentMetadata = BaseDocume
 
   delete(): void {
     this.workspace.rmdirSync(this.uri, { recursive: true });
-  }
-
-  private sortDocumentsByIndex(documents: LocalDocument<TMetadata>[]): LocalDocument<TMetadata>[] {
-    return documents.slice().sort(
-      (a, b) => {
-        if (a.metadata().index === undefined) {
-          throw new Error(`Found document with id '${a.id}' but no index`)
-        }
-
-        if (!b.metadata().index === undefined) {
-          throw new Error(`Found document with id '${b.id}' but no index`)
-        }
-
-        return a.metadata().index - b.metadata().index
-      }
-    );
   }
 }

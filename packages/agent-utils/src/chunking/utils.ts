@@ -1,3 +1,5 @@
+import { BaseDocumentMetadata, LocalDocument } from "../embeddings"
+
 export const getTextFromPriorChunks = (args: { sortedElements: { text: () => string }[], currentIndex: number, overlap: number, characterLimit: number}) => {
   const { sortedElements, currentIndex, overlap, characterLimit } = args
   
@@ -49,3 +51,19 @@ export const getTextFromNextChunks = (args: { sortedElements: { text: () => stri
 
   return textForward
 }
+
+export const sortDocumentsByIndex = <TMetadata extends BaseDocumentMetadata>(documents: LocalDocument<TMetadata>[]): LocalDocument<TMetadata>[] => {
+  return documents.slice().sort(
+    (a, b) => {
+      if (a.metadata().index === undefined) {
+        throw new Error(`Found document with id '${a.id}' but no index`)
+      }
+
+      if (!b.metadata().index === undefined) {
+        throw new Error(`Found document with id '${b.id}' but no index`)
+      }
+
+      return a.metadata().index - b.metadata().index
+    }
+  );
+};

@@ -11,7 +11,8 @@ import {
   LocalVectorDB,
   OpenAIEmbeddingAPI,
   ContextualizedChat,
-  Chat
+  Chat,
+  TextRecombiner,
 } from "@evo-ninja/agent-utils";
 import { AgentContext } from "../../AgentContext";
 import { agentPrompts, prompts } from "./prompts";
@@ -147,6 +148,29 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
       .query(query)
       .map(x => x.metadata.parent)
       .unique()
+      .then(x => previewChunks(x, charsForPreview));
+
+
+    const bigPreview2 = await Rag.standard(chunks, this.context)
+      .selector(x => x.doc)
+      .limit(48)
+      .sortByIndex()
+      .onlyUnique()
+      .recombine((results, items) => { return results.map(x => x.item); })
+      .query(query)
+      .map(x => x.metadata.parent)
+      .unique()
+      .then(x => previewChunks(x, charsForPreview));
+
+    const bigPreview3 = await Rag.standard(
+      TextChunker.fixedCharacterLength(text, { chunkLength: 100, overlap: 15 }), 
+      this.context
+    )
+      .limit(48)
+      .sortByIndex()
+      .onlyUnique()
+      .recombine(TextRecombiner.surroundingText(500, 15, 3))
+      .query(query)
       .then(x => previewChunks(x, charsForPreview));
 
     const prompt = new Prompt()

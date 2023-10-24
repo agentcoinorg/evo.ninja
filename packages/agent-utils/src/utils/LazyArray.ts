@@ -1,5 +1,3 @@
-import { filterDuplicates } from "./helpers";
-
 export class LazyArray<TItem> {
   constructor(private readonly items: TItem[] | Promise<TItem[]>) {
   }
@@ -40,3 +38,17 @@ export class LazyArray<TItem> {
     return this.items;
   }
 }
+
+export const filterDuplicates = <TItem, TCompare>(items: TItem[], compareBy: (item: TItem) => TCompare): TItem[] => {
+  const set = new Set();
+  const uniqueItems = [];
+  for (const item of items) {
+    if (set.has(compareBy(item))) {
+      continue;
+    }
+    uniqueItems.push(item);
+    set.add(compareBy(item));
+  }
+
+  return uniqueItems;
+};
