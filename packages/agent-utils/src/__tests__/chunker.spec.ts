@@ -4,6 +4,7 @@ import path from "path";
 import { OpenAIEmbeddingAPI, LocalVectorDB, LocalCollection } from "../embeddings";
 import { InMemoryWorkspace, Env, ConsoleLogger } from "../sys";
 import { TextChunker } from "../chunking/TextChunker";
+import { CsvChunker } from "../chunking/CsvChunker";
 
 dotenv.config({
   path: path.join(__dirname, "../../../../.env")
@@ -83,4 +84,48 @@ describe("Chunker", () => {
       surrounding: r.withSurrounding,
     })), null, 2)}`)
   })
-})
+
+  test.only("CSV Chunking", () => {
+    const header = "Col1,Col2,Col3";
+    const rows = [
+      "a1,b1,c1",
+      "a2,b2,c2",
+      "a3,b3,c3",
+      "a4,b4,c4",
+      "a5,b5,c5",
+      "a6,b6,c6",
+      "a7,b7,c7",
+      "a8,b8,c8",
+      "a9,b9,c9"
+    ];
+    const csvData = [
+      header,
+      ...rows
+    ].join("\n");
+
+    const chunks = CsvChunker.newlinesWithHeader(
+      csvData,
+      { chunkLength: 3, overlap: 1 }
+    );
+
+    expect(chunks.length).toBe(5);
+    expect(chunks[0]).toBe([
+      header,
+      rows[0],
+      rows[1],
+      rows[2]
+    ].join("\n"));
+    expect(chunks[1]).toBe([
+      header,
+      rows[2],
+      rows[3],
+      rows[4]
+    ].join("\n"));
+    expect(chunks[2]).toBe([
+      header,
+      rows[4],
+      rows[5],
+      rows[6]
+    ].join("\n"));
+  });
+});

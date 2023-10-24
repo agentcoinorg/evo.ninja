@@ -7,7 +7,8 @@ import { LazyArray } from "./LazyArray";
 
 export class StandardRagBuilder<TItem> {
   private _limit: number;
-  private _selector: (item: TItem) => string;
+  // TODO: need to handle cases where TItem is not a string
+  private _selector: (item: TItem) => string = x => x as unknown as string;
   private _sort: "index" | "relevance";
   private _unique: boolean;
 
