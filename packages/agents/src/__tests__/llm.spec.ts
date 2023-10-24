@@ -7,7 +7,8 @@ import {
   ChatRole,
   ChatLogType,
   ChatLog,
-  FunctionDefinition
+  FunctionDefinition,
+  LlmModel
 } from "@evo-ninja/agent-utils";
 import dotenv from "dotenv";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
@@ -60,10 +61,10 @@ describe('LLM Test Suite', () => {
     const env = new Env(
       process.env as Record<string, string>
     );
-
+``
     const llm = new OpenAI(
       env.OPENAI_API_KEY,
-      env.GPT_MODEL,
+      env.GPT_MODEL as LlmModel,
       env.CONTEXT_WINDOW_TOKENS,
       env.MAX_RESPONSE_TOKENS,
       logger
