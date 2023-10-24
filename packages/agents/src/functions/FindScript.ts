@@ -63,12 +63,11 @@ export class FindScriptFunction extends AgentFunctionBase<FindScriptFuncParamete
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           this.name,
           `Found the following results for script '${params.namespace}'\n` + 
           `${candidates.map((c) => `Namespace: ${c.name}\nArguments: ${c.arguments}\nDescription: ${c.description}`).join("\n--------------\n")}\n` +
-          `\`\`\``,
-          variables
+          `\`\`\``
         ),
       ]
     }
@@ -89,10 +88,9 @@ export class FindScriptFunction extends AgentFunctionBase<FindScriptFuncParamete
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           this.name,
           `Found no results for script '${params.namespace}'. Try creating the script instead.`,
-          variables
         ),
       ]
     }

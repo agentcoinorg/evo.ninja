@@ -1,6 +1,5 @@
-import { AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
-import { Agent } from "../Agent";
 
 interface ThinkFuncParameters { 
   thoughts: string
@@ -22,13 +21,13 @@ export class ThinkFunction extends AgentFunctionBase<ThinkFuncParameters> {
     additionalProperties: false
   };
 
-  buildExecutor({ context }: Agent<unknown>): (params: ThinkFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
+  buildExecutor(): (params: ThinkFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (params: ThinkFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
-      return this.onSuccess(params, rawParams, params.thoughts, context.variables);
+      return this.onSuccess(params, rawParams, params.thoughts);
     };
   }
 
-  public onSuccess(params: any, rawParams: string | undefined, result: string, variables: AgentVariables) {
+  public onSuccess(params: any, rawParams: string | undefined, result: string) {
     return {
       outputs: [
         {
@@ -43,7 +42,7 @@ export class ThinkFunction extends AgentFunctionBase<ThinkFuncParameters> {
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(this.name, result, variables),
+        ChatMessageBuilder.functionCallResult(this.name, result),
       ]
     }
   }

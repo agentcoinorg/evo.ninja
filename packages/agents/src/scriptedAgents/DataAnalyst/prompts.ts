@@ -14,7 +14,8 @@ export const prompts: AgentPrompts<GoalRunArgs> = {
 0. Understand Requirements - Understand all requirements of your task by calling the analyzeFormattingRequirements function. These requirements MUST be respected in all future actions.
 1. Read - Read all relevant data files. If no files were provided, try to fs_readDirectory to find relevant files.
 2. Analyze - Data that is too large must be analyzed first. You must know what is contained within the data.
-3. Modify - Modify the data based on the requirements AND analysis you've done prior. Each modification you make NEEDS to have justification, stating how it abides by the requirements of the goal.`
+3. Join - Join datasets whenever possible. Operating on datasets is much easier when they are viewed in aggregate.
+4. Modify - Modify the data based on the requirements AND analysis you've done prior. Each modification you make NEEDS to have justification, stating how it abides by the requirements of the goal.`
     },
     { role: "user", content: goal },
   ],

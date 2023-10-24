@@ -7,6 +7,7 @@ import { PlanWebResearchFunction } from "../../functions/PlanWebResearch";
 import { prompts } from "./prompts";
 import { ReadFileFunction } from "../../functions/ReadFile";
 import { WriteFileFunction } from "../../functions/WriteFile";
+import { VerifyResearchFunction } from "../../functions/VerifyResearch";
 
 export class WebResearcherAgent extends Agent {
   constructor(context: AgentContext) {

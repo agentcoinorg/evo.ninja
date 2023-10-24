@@ -88,7 +88,7 @@ export class RunAndAnalysePythonTestFunction extends AgentFunctionBase<FunctionP
           outputs: [],
           messages: [
             ChatMessageBuilder.functionCall(this.name, params),
-            ...ChatMessageBuilder.functionCallResultWithVariables(this.name, testResult.error, context.variables)
+            ChatMessageBuilder.functionCallResult(this.name, testResult.error)
           ],
         };
       } else {
