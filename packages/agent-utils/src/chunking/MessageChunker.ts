@@ -6,7 +6,7 @@ export class MessageChunker implements Chunker<ChatMessage> {
   constructor(private readonly config: { maxChunkSize: number }) { }
 
   shouldChunk(message: ChatMessage): boolean {
-    return JSON.stringify(message).length > this.config.maxChunkSize;
+    return JSON.stringify(message.content).length > this.config.maxChunkSize;
   }
 
   chunk(message: ChatMessage): string[] {
