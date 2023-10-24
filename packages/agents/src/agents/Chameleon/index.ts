@@ -4,14 +4,13 @@ import {
   ChatMessage,
   FunctionDefinition,
   MessageChunker,
-  TextChunker,
   Timeout,
   Tokenizer,
   Workspace,
   LocalVectorDB,
   OpenAIEmbeddingAPI,
   ContextualizedChat,
-  Chat
+  Chat,
 } from "@evo-ninja/agent-utils";
 import { Agent } from "../../Agent";
 import { AgentContext } from "../../AgentContext";
@@ -21,7 +20,7 @@ import { AgentConfig } from "../../AgentConfig";
 import { Rag } from "./Rag";
 import { Prompt } from "./Prompt";
 import { NewAgent } from "./NewAgent";
-import { agentFunctionBaseToAgentFunction, previewChunks, tokensToChars } from "./helpers";
+import { agentFunctionBaseToAgentFunction, charsToTokens, tokensToChars } from "./helpers";
 import { findBestAgent } from "./findBestAgent";
 
 export class ChameleonAgent extends NewAgent<GoalRunArgs> {
@@ -125,7 +124,10 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
         .line(`
           Consider the above chat between a user and assistant.
           In your expert opinion, what is the best next step for the assistant?`
-        )
+        ),
+      {
+        model: "gpt-3.5-turbo-16k-0613"
+      }
     );
   };
 
@@ -140,42 +142,43 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
   }
 
   private async advancedFilterText(text: string, query: string): Promise<string> {
-    const chunks = TextChunker.parentDocRetrieval(text, {
-      parentChunker: (text: string) => TextChunker.sentences(text),
-      childChunker: (parentText: string) =>
-        TextChunker.fixedCharacterLength(parentText, { chunkLength: 100, overlap: 15 })
-    });
-
-    const maxCharsToUse = this.maxContextChars() * 0.75;
+    const maxCharsToUse = this.maxContextChars() * 0.45;
     const charsForPreview = maxCharsToUse * 0.7;
 
-    const bigPreview = await Rag.standard(chunks, this.context)
-      .selector(x => x.doc)
-      .limit(48)
-      .sortByIndex()
-      .onlyUnique()
-      .query(query)
-      .map(x => x.metadata.parent)
-      .unique()
-      .then(x => previewChunks(x, charsForPreview));
+    const bigPreview = await Rag.filterWithSurroundingText(
+      text, 
+      query, 
+      this.context,
+      {
+        charLimit: charsForPreview,
+        surroundingCharacters: 750,
+        chunkLength: 100,
+        overlap: 15
+      });
 
-    const prompt = new Prompt()
-      .block(bigPreview)
-      .line(`Goal:`)
-      .line(x => x.block(query))
-      .line(`
-        Consider the above text in respect to achieving the desired goal.
-        Summarize the text, including all unique details.
-        Filter out unecessary information. Do not add new information.
-        IMPORTANT: Respond only with the new text!`
-      ).toString();
+      const prompt = new Prompt()
+        .text("Assistant's next step:")
+        .line(x => x.block(query))
+        .line("Result:")
+        .line(x => x.block(bigPreview))
+        .line(`
+          Imagine you are an expert content reducer. 
+          Above are the snippets of the content result from the assistant's next step.
+          Rewrite the content to convey the relevant information that the assistant wanted.
+          Merge the snippets into a coherent content result.
+          Filter out unecessary information.
+          Do not summarize or add new information.
+          Make sure you keep all the information and all the data that the assistant wanted.
+          IMPORTANT: Respond only with the new content!"`
+        ).toString();
 
-    const filteredText = await this.askLlm(prompt, Math.floor(this.maxContextTokens() * 0.06));
+    const outputTokens = charsToTokens(maxCharsToUse * 0.25);
+    const filteredText = await this.askLlm(prompt, { maxResponseTokens: outputTokens });
 
     console.log("filteredText", filteredText);
     console.log("maxCharsToUse", maxCharsToUse);
     console.log("charsForPreview", charsForPreview);
-    console.log("response chars", this.maxContextChars() * 0.06);
+    console.log("output tokens", outputTokens);
     console.log("filteredText.length", filteredText.length);
 
     return filteredText;

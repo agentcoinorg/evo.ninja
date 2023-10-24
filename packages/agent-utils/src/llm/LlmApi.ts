@@ -11,6 +11,7 @@ export declare type LlmRole = typeof LlmRoles[keyof typeof LlmRoles];
 export interface LlmOptions {
   temperature?: number;
   max_tokens?: number;
+  model?: string;
 }
 
 export interface LlmApi {

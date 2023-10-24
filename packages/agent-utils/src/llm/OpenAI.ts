@@ -65,7 +65,8 @@ export class OpenAI implements LlmApi {
         messages: chatLog.messages,
         functions: functionDefinitions,
         temperature: options ? options.temperature : 0,
-        max_tokens: options ? options.max_tokens : this._defaultMaxResponseTokens
+        max_tokens: options ? options.max_tokens : this._defaultMaxResponseTokens,
+        model: options ? options.model : this._defaultModel
       });
 
       if (completion.data.choices.length < 1) {
