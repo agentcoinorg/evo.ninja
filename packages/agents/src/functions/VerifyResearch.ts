@@ -101,13 +101,12 @@ export class VerifyResearchFunction extends LlmAgentFunctionBase<VerifyResearchF
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           this.name,
           `Verification: \n` +
           `\`\`\`\n` +
           `${result}\n` +
-            `\`\`\``,
-          variables
+            `\`\`\``
         ),
       ],
     };
@@ -133,13 +132,12 @@ export class VerifyResearchFunction extends LlmAgentFunctionBase<VerifyResearchF
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           this.name,
           `Error verifying research for '${params.originalQuery}'\n` + 
           `\`\`\`\n` +
           `${trimText(error, 300)}\n` +
-          `\`\`\``,
-          variables
+          `\`\`\``
         ),
       ],
     };

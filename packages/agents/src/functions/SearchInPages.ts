@@ -1,7 +1,6 @@
 import {
   AgentFunctionResult,
   AgentOutputType,
-  AgentVariables,
   ChatMessageBuilder,
   Chunker,
   LlmApi,
@@ -103,15 +102,13 @@ export class SearchInPagesFunction extends LlmAgentFunctionBase<SearchInPagesFun
         return this.onSuccess(
           params,
           llmAnalysisResponse,
-          rawParams,
-          context.variables
+          rawParams
         );
       } catch (err) {
         return this.onError(
           params,
           err.toString(),
-          rawParams,
-          context.variables
+          rawParams
         );
       }
     };
@@ -120,8 +117,7 @@ export class SearchInPagesFunction extends LlmAgentFunctionBase<SearchInPagesFun
   private onSuccess(
     params: SearchInPagesFuncParameters,
     result: string,
-    rawParams: string | undefined,
-    variables: AgentVariables
+    rawParams: string | undefined
   ): AgentFunctionResult {
     return {
       outputs: [
@@ -140,12 +136,11 @@ export class SearchInPagesFunction extends LlmAgentFunctionBase<SearchInPagesFun
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           this.name,
           `Found the following result for the search: '${params.query}'` +
             `${result}\n` +
-            `\`\`\``,
-          variables
+            `\`\`\``
         ),
       ],
     };
@@ -154,8 +149,7 @@ export class SearchInPagesFunction extends LlmAgentFunctionBase<SearchInPagesFun
   private onError(
     params: SearchInPagesFuncParameters,
     error: string,
-    rawParams: string | undefined,
-    variables: AgentVariables
+    rawParams: string | undefined
   ) {
     return {
       outputs: [
@@ -171,13 +165,12 @@ export class SearchInPagesFunction extends LlmAgentFunctionBase<SearchInPagesFun
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           this.name,
           `Error searching in pages for '${params.query}'\n` + 
           `\`\`\`\n` +
           `${trimText(error, 300)}\n` +
-          `\`\`\``,
-          variables
+          `\`\`\``
         ),
       ],
     };

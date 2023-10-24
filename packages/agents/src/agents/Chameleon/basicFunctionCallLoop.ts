@@ -38,6 +38,18 @@ export async function* basicFunctionCallLoop(
 
       const { result, functionCalled } = await executeAgentFunction(sanitizedFunctionAndArgs.value, args, context)
 
+      // Save large results as variables
+      for (const message of result.messages) {
+        if (message.role !== "function") {
+          continue;
+        }
+        const functionResult = message.content || "";
+        if (context.variables.shouldSave(functionResult)) {
+          const varName = context.variables.save(name || "", functionResult);
+          message.content = `\${${varName}}`;
+        }
+      }
+
       result.messages.forEach(x => chat.temporary(x));
       const terminate = functionCalled && shouldTerminate(functionCalled, result);
 

@@ -69,8 +69,7 @@ export class DelegateAgentFunction<
           scriptedAgent.config.prompts.name,
           params,
           rawParams,
-          result.error,
-          context.variables
+          result.error
         );
       }
 
@@ -95,16 +94,15 @@ export class DelegateAgentFunction<
           role: "assistant",
           content: x,
         }) as ChatMessage),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           this.delegateScriptedAgentFnName(name),
-          result.content || "Successfully accomplished the task.",
-          variables
+          result.content || "Successfully accomplished the task."
         )
       ]
     }
   }
 
-  onFailure(name: string, params: any, rawParams: string | undefined, error: string | undefined, variables: AgentVariables): AgentFunctionResult {
+  onFailure(name: string, params: any, rawParams: string | undefined, error: string | undefined): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -115,10 +113,9 @@ export class DelegateAgentFunction<
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.delegateScriptedAgentFnName(name), rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           this.delegateScriptedAgentFnName(name),
-          `Error: ${error}`,
-          variables
+          `Error: ${error}`
         )
       ]
     }
