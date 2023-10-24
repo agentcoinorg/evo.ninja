@@ -16,6 +16,7 @@ import TurndownService from "turndown";
 import { Rag } from "../agents/Chameleon/Rag";
 import { AgentContext } from "../AgentContext";
 import { load } from "cheerio";
+import { Prompt } from "../agents/Chameleon/Prompt";
 
 export interface WebSearchFuncParameters {
   query: string;
@@ -65,8 +66,13 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
           context.env.SERP_API_KEY
         );
 
-        const llmAnalysisResponse = await this.askLlm(`Look at this information: ${JSON.stringify(googleResults, null, 2)}.
-        Is it enough to answer: ${params.query}? . If it is, state the answer and say "TRUE"`)
+        const googleResultsAnalysisPrompt = new Prompt()
+          .line(`Look at this information:`)
+          .json(googleResults)
+          .line(`Is it enough to answer: ${params.query}? If it is, state the answer and say "TRUE`)
+          .toString()
+
+        const llmAnalysisResponse = await this.askLlm(googleResultsAnalysisPrompt)
 
         if (llmAnalysisResponse.includes("TRUE")) {
           return this.onSuccess(
@@ -77,15 +83,36 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
           );
         }
 
-        const results = await this.searchInPages({
+        const searchMatches = await this.searchInPages({
           urls: googleResults.map(x => x.url),
           query: params.query,
           context
         })
+
+        const analyzeChunkMatchesPrompt = new Prompt()
+        .text(`
+          I will give you chunks of text from different webpages.
+
+          I want to extract ${params.query} from them. Keep in mind some information may not be properly formatted.
+          Do your best to extract as much information as you can.
+
+          Prioritize accuracy. Do not settle for the first piece of information found if there are more precise results available
+          Example: "population of New York in 2020" and you get the following results:
+          ["1.5 million",  "nearly 1.600.000", "1,611,989"], you will take "1,611,989"
+
+          Chunks:
+        `)
+        .json(searchMatches)
+        .line(`Specify if the information is incomplete but still return it`)
+        .toString()
+
+        console.log(analyzeChunkMatchesPrompt)
+
+        const analysisFromChunks = await this.askLlm(analyzeChunkMatchesPrompt)
   
         return this.onSuccess(
           params,
-          results,
+          analysisFromChunks,
           rawParams,
           context.variables
         );
@@ -198,20 +225,9 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
       .unique()
       .then(async (results) => {
         return results
-      })
+      });
 
-    console.log(`Best matches: ${JSON.stringify(matches, null, 2)}`)
-
-    const llmAnalysisResponse = await this.analyzeResults(params.query, matches)
-
-    // const evaluation = await this.askLlm(`Look at this information: ${llmAnalysisResponse}.
-    //   does it completely, fully, and precisely answer: ${params.query}?.
-    //   If not, what is missing?`
-    // )
-
-    // const response = `Found data: ${llmAnalysisResponse}\n\nEvaluation of the found data: ${evaluation}`
-
-    return llmAnalysisResponse
+    return matches;
   }
 
   private async processWebpage(url: string) {
@@ -237,22 +253,6 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
       .replaceAll("\n", "  ")
 
     return markdownText
-  }
-
-  private async analyzeResults(query: string, results: string[]) {
-    const analyzerPrompt = `I will give you chunks of text from different webpages. 
-    I want to extract ${
-      query
-    } from them. Keep in mind some information may not be properly formatted.
-    Do your best to extract as much information as you can.
-
-    Prioritize accuracy. Do not settle for the first piece of information found if there are more precise results available
-    Example: "population of New York in 2020" and you get the following results: ["1.5 million",  "nearly 1.600.000", "1,611,989"], you will take "1,611,989"
-    
-    Chunks: ${JSON.stringify(results)}.
-    Specify if the information is incomplete but still return it`
-
-    return await this.askLlm(analyzerPrompt);
   }
 
   private async searchOnGoogle(query: string, apiKey: string, maxResults = 6) {
