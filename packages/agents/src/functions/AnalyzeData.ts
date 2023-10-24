@@ -29,7 +29,7 @@ export class AnalyzeDataFunction extends LlmAgentFunctionBase<AnalyzeDataParamet
         description: "the question your analysis is trying to answer"
       }
     },
-    required: ["data"],
+    required: ["data", "question"],
     additionalProperties: false
   };
 

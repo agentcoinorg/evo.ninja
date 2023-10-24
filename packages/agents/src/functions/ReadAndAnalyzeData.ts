@@ -23,7 +23,7 @@ export class ReadAndAnalyzeDataFunction extends AgentFunctionBase<ReadAndAnalyze
         description: "the question your analysis is trying to answer"
       }
     },
-    required: ["path"],
+    required: ["path", "question"],
     additionalProperties: false
   }
 
