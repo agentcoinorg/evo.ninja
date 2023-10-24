@@ -3,20 +3,33 @@ import {
   AgentOutputType,
   AgentVariables,
   ChatMessageBuilder,
+  LlmApi,
+  TextChunker,
+  Tokenizer,
   trimText,
 } from "@evo-ninja/agent-utils";
 import axios from "axios";
-import { AgentFunctionBase } from "../AgentFunctionBase";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { Agent } from "../Agent";
+import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
+import TurndownService from "turndown";
+import { Rag } from "../agents/Chameleon/Rag";
+import { AgentContext } from "../AgentContext";
+import { load } from "cheerio";
+import { Prompt } from "../agents/Chameleon/Prompt";
 
-interface WebSearchFuncParameters {
+export interface WebSearchFuncParameters {
   query: string;
 }
 
-export class WebSearchFunction extends AgentFunctionBase<WebSearchFuncParameters> {
-  constructor() {
-    super();
+const FETCH_WEBPAGE_TIMEOUT = 4000
+
+export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParameters> {
+  constructor(
+    llm: LlmApi,
+    tokenizer: Tokenizer,
+  ) {
+    super(llm, tokenizer);
   }
 
   name: string = "web_search";
@@ -52,10 +65,54 @@ export class WebSearchFunction extends AgentFunctionBase<WebSearchFuncParameters
           params.query,
           context.env.SERP_API_KEY
         );
+
+        const googleResultsAnalysisPrompt = new Prompt()
+          .line(`Look at this information:`)
+          .json(googleResults)
+          .line(`Is it enough to answer: ${params.query}? If it is, state the answer and say "TRUE`)
+          .toString()
+
+        const llmAnalysisResponse = await this.askLlm(googleResultsAnalysisPrompt)
+
+        if (llmAnalysisResponse.includes("TRUE")) {
+          return this.onSuccess(
+            params,
+            llmAnalysisResponse,
+            rawParams,
+            context.variables
+          );
+        }
+
+        const searchMatches = await this.searchInPages({
+          urls: googleResults.map(x => x.url),
+          query: params.query,
+          context
+        })
+
+        const analyzeChunkMatchesPrompt = new Prompt()
+        .text(`
+          I will give you chunks of text from different webpages.
+
+          I want to extract ${params.query} from them. Keep in mind some information may not be properly formatted.
+          Do your best to extract as much information as you can.
+
+          Prioritize accuracy. Do not settle for the first piece of information found if there are more precise results available
+          Example: "population of New York in 2020" and you get the following results:
+          ["1.5 million",  "nearly 1.600.000", "1,611,989"], you will take "1,611,989"
+
+          Chunks:
+        `)
+        .json(searchMatches)
+        .line(`Specify if the information is incomplete but still return it`)
+        .toString()
+
+        console.log(analyzeChunkMatchesPrompt)
+
+        const analysisFromChunks = await this.askLlm(analyzeChunkMatchesPrompt)
   
         return this.onSuccess(
           params,
-          JSON.stringify(googleResults),
+          analysisFromChunks,
           rawParams,
           context.variables
         );
@@ -135,7 +192,68 @@ export class WebSearchFunction extends AgentFunctionBase<WebSearchFuncParameters
     };
   }
 
-  private async searchOnGoogle(query: string, apiKey: string, maxResults = 4) {
+  private fetchHTML(url: string) {
+    return axios.get(url, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (X11; Linux x86_64; rv:107.0) Gecko/20100101 Firefox/107.0",
+      },
+      timeout: FETCH_WEBPAGE_TIMEOUT,
+    });
+  }
+
+  private async searchInPages(params: { urls: string[], query: string, context: AgentContext }) {
+    const urlsContents = await Promise.all(params.urls.map(async url => {
+      try {
+        const response = await this.processWebpage(url);
+        return response
+      } catch(e) {
+        params.context.logger.error(`Failed to process ${url}`)
+        return ""
+      }
+    }))
+
+    const webpagesChunks = urlsContents.flatMap(webpageContent =>
+      TextChunker.fixedCharacterLength(webpageContent, { chunkLength: 500, overlap: 100 })
+    )
+
+    const matches = await Rag.standard(webpagesChunks, params.context)
+      .selector(x => x)
+      .limit(10)
+      .onlyUnique()
+      .query(params.query)
+      .unique()
+      .collect();
+
+    return matches;
+  }
+
+  private async processWebpage(url: string) {
+    const response = await this.fetchHTML(url);
+    const $ = load(response.data);
+
+    $('script').remove();
+    $('style').remove();
+    $('noscript').remove();
+    $('link').remove();
+    $('head').remove();
+    $('image').remove();
+    $('img').remove();
+
+    const html = $.html()
+
+    const turndownService = new TurndownService();
+    const markdownText = turndownService
+      .turndown(html)
+      .split("\n")
+      .map(x => x.trim())
+      .join("\n")
+      .replaceAll("\n", "  ")
+
+    return markdownText
+  }
+
+  private async searchOnGoogle(query: string, apiKey: string, maxResults = 6) {
     const axiosClient = axios.create({
       baseURL: "https://serpapi.com",
     });
@@ -173,6 +291,6 @@ export class WebSearchFunction extends AgentFunctionBase<WebSearchFuncParameters
         description: result.snippet ?? "",
       }));
 
-    return result;
+    return result.slice(0, maxResults);
   }
 }
