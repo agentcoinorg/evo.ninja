@@ -8,7 +8,7 @@ import {
   ChatLogType,
   ChatLog,
   FunctionDefinition
-} from "../";
+} from "@evo-ninja/agent-utils";
 import dotenv from "dotenv";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import path from "path";
@@ -81,7 +81,7 @@ describe('LLM Test Suite', () => {
     for (let i = 0; i < 20; i++) {
       const response = await llm.getResponse(
         chat.chatLogs,
-        functions,
+        functions.length > 0 ? functions : undefined,
         { temperature: 0.1 }
       );
       console.log(response);

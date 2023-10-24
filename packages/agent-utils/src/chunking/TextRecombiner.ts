@@ -1,48 +1,43 @@
 import { BaseDocumentMetadata, LocalDocument } from "../embeddings";
 import { LazyArray } from "../utils/LazyArray";
-import { sortDocumentsByIndex } from "./utils";
 
 export class TextRecombiner {
   static surroundingText(
     surroundingCharacters: number, 
     overlap?: number, 
-    limit?: number
   ): <TMetadata extends BaseDocumentMetadata>(results: LazyArray<{item: string, doc: LocalDocument<TMetadata> }>, originalItems: string[]) => LazyArray<string> {
     const halfSurroundChars = Math.floor(surroundingCharacters / 2);
     
     return <TMetadata extends BaseDocumentMetadata>(results: LazyArray<{item: string, doc: LocalDocument<TMetadata> }>, originalItems: string[]): LazyArray<string> => {
       const promise = results.then(results => {
         const docs = results.map(x => x.doc);
-        const resultsSortedByIndex = sortDocumentsByIndex(docs);
   
         const surroundedResults = docs.map(result => {
           const resultIndex = result.metadata()!.index;
     
           const textBehind = getTextFromPriorChunks({
-            sortedElements: resultsSortedByIndex,
+            originalItems,
             currentIndex: resultIndex,
             overlap: overlap ?? 0,
-            characterLimit: halfSurroundChars
+            characterLimit: halfSurroundChars,
           })
     
           const textForward = getTextFromNextChunks({
-            sortedElements: resultsSortedByIndex,
+            originalItems,
             currentIndex: resultIndex,
             overlap: overlap ?? 0,
-            characterLimit: halfSurroundChars
+            characterLimit: halfSurroundChars,
           })
     
           const withSurrounding = [textBehind, result.text(), textForward].join("")
-    
+
           return {
             match: result,
             withSurrounding
           };
         })
     
-        return limit 
-          ? surroundedResults.slice(0, limit).map(x => x.withSurrounding) 
-          : surroundedResults.map(x => x.withSurrounding);
+        return surroundedResults.map(x => x.withSurrounding);
       });
   
       return new LazyArray(promise);
@@ -50,19 +45,19 @@ export class TextRecombiner {
   }
 }
 
-export const getTextFromPriorChunks = (args: { sortedElements: { text: () => string }[], currentIndex: number, overlap: number, characterLimit: number}) => {
-  const { sortedElements, currentIndex, overlap, characterLimit } = args
+export const getTextFromPriorChunks = (args: { originalItems: string[], currentIndex: number, overlap: number, characterLimit: number }) => {
+  const { originalItems, currentIndex, overlap, characterLimit } = args
   
   let textBehind = ""
 
   for (let i = currentIndex - 1; i >= 0; i--) {
-    const prevResult = sortedElements[i]
+    const prevResult = originalItems[i]
 
     if (!prevResult || textBehind.length > characterLimit) {
       return textBehind
     }
 
-    const prevResultText = overlap ? prevResult.text().slice(0, -overlap) : prevResult.text()
+    const prevResultText = overlap ? prevResult.slice(0, -overlap) : prevResult;
 
     if (prevResultText.length + textBehind.length <= characterLimit) {
       textBehind = prevResultText + textBehind
@@ -76,19 +71,19 @@ export const getTextFromPriorChunks = (args: { sortedElements: { text: () => str
   return textBehind
 }
 
-export const getTextFromNextChunks = (args: { sortedElements: { text: () => string }[], currentIndex: number, overlap: number, characterLimit: number}) => {
-  const { sortedElements, currentIndex, overlap, characterLimit } = args
+export const getTextFromNextChunks = (args: { originalItems: string[], currentIndex: number, overlap: number, characterLimit: number}) => {
+  const { originalItems, currentIndex, overlap, characterLimit } = args
   
   let textForward = ""
 
-  for (let i = currentIndex + 1; i <= sortedElements.length; i++) {
-    const nextResult = sortedElements[i]
+  for (let i = currentIndex + 1; i <= originalItems.length; i++) {
+    const nextResult = originalItems[i]
 
     if (!nextResult || textForward.length > characterLimit) {
       return textForward
     }
 
-    const nextResultText = overlap ? nextResult.text().slice(overlap) : nextResult.text()
+    const nextResultText = overlap ? nextResult.slice(overlap) : nextResult;
 
     if (nextResultText.length + textForward.length <= characterLimit) {
       textForward = textForward + nextResultText

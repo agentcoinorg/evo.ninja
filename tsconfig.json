@@ -18,7 +18,7 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "module": "commonjs",
     "sourceMap": true,
     "target": "es2015",
