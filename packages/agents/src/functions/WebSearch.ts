@@ -102,22 +102,48 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
           First take the most precise result, determine what's missing and fill it with pieces of other results.
           If there are multiple result pieces that contain the same information, choose the one that is more precise.
 
+          The most precise results might be scattered across multiple results.
+
           Results:
         `)
         .json(searchResults)
         .line(`Specify if the information is incomplete but still return it.`)
-        .line(`State why each piece is the most precise, step by step.`)
-        .toString())
-
-        const result = await this.askLlm(new Prompt()
-        .text(`Extract the information from the following text, removing any reasoning: ${analysisFromChunks}`)
         .toString(), {
           model: "gpt-3.5-turbo-16k-0613"
         })
+
+        const missingAnalysis = await this.askLlm(new Prompt()
+        .text(`Ill give you a query and a piece of information.
+        If the information can't completely answer the query, say "TRUE" and specify what's missing.
+        If not, just return the information.
+        
+        Query: ${params.query}
+        
+        Information: ${analysisFromChunks}
+        `)
+        .toString())
+
+        if (missingAnalysis.includes("TRUE")) {
+          const missingQuery = missingAnalysis.replace("TRUE", "").trim()
+
+          const missingResults = await Rag.standard(searchResults, context)
+            .limit(2)
+            .selector(x => x)
+            .sortByRelevance()
+            .query(missingQuery)
+
+          console.log("missingResults: ", missingResults)
+        }
+
+        // const result = await this.askLlm(new Prompt()
+        // .text(`Extract the information from the following text, removing any reasoning: ${analysisFromChunks}`)
+        // .toString(), {
+        //   model: "gpt-3.5-turbo-16k-0613"
+        // })
   
         return this.onSuccess(
           params,
-          result,
+          analysisFromChunks,
           rawParams,
           context.variables
         );
@@ -225,20 +251,21 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
       }
     }))
 
-    const results: string[] = [];
+    // const results: string[] = [];
 
-    await Promise.all(urlsContents.map(async (matches) => {
-      const extracted = await this.extractInfoWithLLM({
-        info: matches,
-        query: params.query
-      })
+    // await Promise.all(urlsContents.map(async (matches) => {
+    //   const extracted = await this.extractInfoWithLLM({
+    //     info: matches,
+    //     query: params.query
+    //   })
 
-      console.log("extracted: ", extracted)
+    //   console.log("extracted: ", extracted)
 
-      results.push(extracted)
-    }))
+    //   results.push(extracted)
+    // }))
 
-    return results;
+    // return results;
+    return urlsContents;
   }
 
   private async processWebpage(url: string) {
