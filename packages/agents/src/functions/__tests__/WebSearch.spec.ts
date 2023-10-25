@@ -17,6 +17,7 @@ import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import { ResearcherAgent } from "../..";
 import { AgentContext } from "../../AgentContext";
 import { WebSearchFuncParameters, WebSearchFunction } from "../WebSearch";
+import { LlmModel } from "@evo-ninja/agent-utils";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -45,7 +46,7 @@ describe("WebSearch function", () => {
 
     const llm: LlmApi = new OpenAI(
       env.OPENAI_API_KEY,
-      env.GPT_MODEL,
+      env.GPT_MODEL as LlmModel,
       env.CONTEXT_WINDOW_TOKENS,
       env.MAX_RESPONSE_TOKENS,
       logger

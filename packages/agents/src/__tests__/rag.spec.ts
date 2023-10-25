@@ -18,6 +18,7 @@ import { Rag } from "../agents/Chameleon/Rag";
 import { charsToTokens, previewChunks, tokensToChars } from "../agents/Chameleon/helpers";
 import fs from "fs";
 import { AgentContext } from "../AgentContext";
+import { LlmModel } from "@evo-ninja/agent-utils";
 
 dotenv.config({
   path: path.join(__dirname, "../../../../.env")
@@ -51,7 +52,7 @@ describe('LLM Test Suite', () => {
 
     const llm = new OpenAI(
       env.OPENAI_API_KEY,
-      env.GPT_MODEL,
+      env.GPT_MODEL as LlmModel,
       env.CONTEXT_WINDOW_TOKENS,
       env.MAX_RESPONSE_TOKENS,
       logger

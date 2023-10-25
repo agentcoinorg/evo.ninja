@@ -18,6 +18,7 @@ import { PlannerAgent } from "..";
 import * as fs from "fs";
 import { AgentContext } from "../../AgentContext";
 import { Agent } from "../../Agent";
+import { LlmModel } from "@evo-ninja/agent-utils";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -50,7 +51,7 @@ describe('Planner Agent Test Suite', () => {
 
     const llm: LlmApi = new OpenAI(
       env.OPENAI_API_KEY,
-      env.GPT_MODEL,
+      env.GPT_MODEL as LlmModel,
       env.CONTEXT_WINDOW_TOKENS,
       env.MAX_RESPONSE_TOKENS,
       logger
