@@ -11,7 +11,7 @@ import {
 
 import { Rag } from "../../rag/Rag";
 import { AgentContext } from "../../agent/AgentContext";
-import { StandardRagBuilderV2 } from "../../rag/StandardRagBuilderV2";
+import { StandardRagBuilder } from "../../rag/StandardRagBuilder";
 import { MessageRecombiner } from "../../chunking/MessageRecombiner";
 
 type MsgIdx = number;
@@ -39,7 +39,7 @@ export class ContextualizedChat {
     "temporary": []
   };
 
-  private _rags: Record<ChatLogType, StandardRagBuilderV2<MessageChunk>>;
+  private _rags: Record<ChatLogType, StandardRagBuilder<MessageChunk>>;
 
   constructor(
     _context: AgentContext,
@@ -48,9 +48,9 @@ export class ContextualizedChat {
     private _variables: AgentVariables
   ) {
     this._rags = {
-      persistent: Rag.standardV2<MessageChunk>(_context)
+      persistent: Rag.standard<MessageChunk>(_context)
         .selector(x => x.json),
-      temporary: Rag.standardV2<MessageChunk>(_context)
+      temporary: Rag.standard<MessageChunk>(_context)
         .selector(x => x.json)  
     };
   }

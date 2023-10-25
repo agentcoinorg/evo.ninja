@@ -1,8 +1,9 @@
-import { FunctionDefinition, StandardRagBuilder, Rag } from "@evo-ninja/agent-utils";
+import { FunctionDefinition, Rag, ArrayRecombiner } from "@evo-ninja/agent-utils";
 import { Agent, GoalRunArgs } from "../../Agent";
 import { AgentContext } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../../AgentFunctionBase";
 import { DeveloperAgent, ResearcherAgent, DataAnalystAgent, WebResearcherAgent } from "../../scriptedAgents";
+import { StandardRagBuilder } from "@evo-ninja/agent-utils/build/rag/StandardRagBuilder";
 
 type AgentWithPrompts = {
   expertise: string;
@@ -39,12 +40,14 @@ export const findBestAgent = async (
   if (!agentRag) {
     agentRag = Rag.standard<AgentWithPrompts>(context)
       .addItems(agentsWithPrompts)
-      .selector(x => x.expertise)
-      .limit(1)
-      .onlyUnique();
+      .selector(x => x.expertise);
   }
 
-  const agents = await agentRag.query(query);
+  const agents = await agentRag
+    .query(query)
+    .recombine(ArrayRecombiner.standard({
+      limit: 1,
+    }));
 
   console.log("Selected agents: ", agents.map(x => x.agent.config.prompts.name));
 

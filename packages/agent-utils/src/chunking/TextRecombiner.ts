@@ -1,6 +1,6 @@
 import { BaseDocumentMetadata, LocalDocument } from "../embeddings";
 import { Tokenizer } from "../llm";
-import { Recombiner } from "../rag/StandardRagBuilderV2";
+import { Recombiner } from "../rag/StandardRagBuilder";
 import { LazyArray } from "../utils/LazyArray";
 
 export class TextRecombiner {

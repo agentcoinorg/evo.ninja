@@ -1,6 +1,6 @@
 import { LocalDocument } from "../embeddings";
 import { MessageChunk } from "../llm";
-import { Recombiner } from "../rag/StandardRagBuilderV2";
+import { Recombiner } from "../rag/StandardRagBuilder";
 
 export class MessageRecombiner {
   static standard(

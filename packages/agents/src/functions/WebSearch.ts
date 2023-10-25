@@ -8,6 +8,7 @@ import {
   Tokenizer,
   trimText,
   Rag,
+  ArrayRecombiner,
 } from "@evo-ninja/agent-utils";
 import axios from "axios";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
@@ -219,11 +220,11 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
 
     const matches = await Rag.standard(params.context)
       .addItems(webpagesChunks)
-      .selector(x => x)
-      .limit(10)
-      .onlyUnique()
       .query(params.query)
-      .unique();
+      .recombine(ArrayRecombiner.standard({
+        limit: 10,
+        unique: true,
+      }));
 
     return matches;
   }

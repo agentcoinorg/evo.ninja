@@ -1,4 +1,4 @@
-import { AgentFunctionResult, ChatMessageBuilder, LlmApi, Tokenizer, CsvChunker, Rag, AgentContext } from "@evo-ninja/agent-utils";
+import { AgentFunctionResult, ChatMessageBuilder, LlmApi, Tokenizer, CsvChunker, Rag, AgentContext, ArrayRecombiner } from "@evo-ninja/agent-utils";
 import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 import { Agent } from "../Agent";
 import { Prompt } from "../agents/Chameleon/Prompt";
@@ -39,9 +39,11 @@ export class AnalyzeDataFunction extends LlmAgentFunctionBase<AnalyzeDataParamet
 
     const relevantChunks = await Rag.standard(context)
       .addItems(chunks)
-      .limit(3)
-      .sortByIndex()
-      .query(params.question);
+      .query(params.question)
+      .recombine(ArrayRecombiner.standard({ 
+        limit: 3, 
+        sort: "index" 
+      }));
 
     let prompt = new Prompt();
 
