@@ -34,6 +34,11 @@ export class ContextualizedChat {
 
   private _collections: Record<ChatLogType, LocalCollection<DocumentMetadata>>;
 
+  private _functionCallResultFirstChunks: Record<ChunkIdx, {
+    text: string,
+    metadata: DocumentMetadata
+  }> = {};
+
   constructor(
     private _rawChat: Chat,
     private _chunker: MessageChunker,
@@ -137,11 +142,11 @@ export class ContextualizedChat {
     type: ChatLogType,
     tokenLimit: number
   ): Promise<{ msg: ChatMessage; chunkIdx: ChunkIdx; }[]> {
-    // Search the collection for relevant chunks
-    const results = await this._collections[type].search(context);
 
     // Aggregate as many as possible
     const chunks: { msg: ChatMessage; chunkIdx: ChunkIdx; }[] = [];
+    const chunksAdded: Set<ChunkIdx> = new Set();
+    const msgsAdded: Record<MsgIdx, number> = {};
     let tokenCounter = 0;
 
     const addChunk = (chunkText: string, metadata: DocumentMetadata): boolean => {
@@ -149,12 +154,65 @@ export class ContextualizedChat {
         return false;
       }
 
-      const msg = JSON.parse(chunkText) as ChatMessage;
       const chunkIdx = metadata.index;
+      const chunk = this._chunks[type][chunkIdx];
+
+      // Only add up to 4 chunks per message
+      if (!msgsAdded[chunk.msgIdx]) {
+        msgsAdded[chunk.msgIdx] = 0;
+      }
+      if (msgsAdded[chunk.msgIdx] >= 4) {
+        return true;
+      }
+      msgsAdded[chunk.msgIdx] += 1;
+
+      const msg = JSON.parse(chunkText) as ChatMessage;
+
+      // Track the chunk index
+      if (chunksAdded.has(chunkIdx)) {
+        return true;
+      } else {
+        chunksAdded.add(chunkIdx);
+      }
+
       chunks.push({ msg, chunkIdx });
       tokenCounter += metadata.tokens;
+
+      if ((msg.role === "assistant" && msg.function_call) || msg.role === "function") {
+        // Ensure function call + results are always added together.
+        // We most traverse the chunk array to find the nearest neighbor
+        const direction = msg.role === "assistant" ? 1 : -1;
+        const search = msg.role === "assistant" ? "function" : "assistant";
+        let funcChunkIdx: number | undefined = undefined;
+        let nextChunkIdx = chunkIdx + direction;
+        while (!funcChunkIdx) {
+          if (this._chunks[type].length >= nextChunkIdx || nextChunkIdx < 0) {
+            break;
+          }
+
+          const msg = this._rawChat.chatLogs.getMsg(
+            type, this._chunks[type][nextChunkIdx].msgIdx
+          );
+
+          if (msg?.role === search) {
+            // We found it
+            funcChunkIdx = nextChunkIdx;
+          } else {
+            nextChunkIdx += direction;
+          }
+        }
+
+        if (!funcChunkIdx || chunksAdded.has(funcChunkIdx)) return true;
+
+        const firstChunk = this._functionCallResultFirstChunks[funcChunkIdx];
+        return addChunk(firstChunk.text, firstChunk.metadata);
+      }
+
       return true;
     }
+
+    // Search the collection for relevant chunks
+    const results = await this._collections[type].search(context);
 
     for (const result of results) {
       const chunkText = result.text();
@@ -257,6 +315,15 @@ export class ContextualizedChat {
 
     // Add the chunks to the vectordb collection
     await this._collections[type].add(newChunks, metadatas);
+
+    // If the message is a function call or result,
+    // store the first chunk's text so we can easily retrieve it
+    if (message.role === "function" || message.function_call) {
+      this._functionCallResultFirstChunks[startChunkIdx] = {
+        text: newChunks[0],
+        metadata: metadatas[0]
+      };
+    }
 
     return;
   }

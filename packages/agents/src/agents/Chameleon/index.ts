@@ -150,6 +150,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     );
   };
 
+  // TODO: explore removing this
   private async shortenLargeMessages(query: string): Promise<void> {
     for(let i = 0; i < this.context.chat.chatLogs.messages.length ; i++) {
       const message = this.context.chat.chatLogs.messages[i];
@@ -160,6 +161,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     }
   }
 
+  // TODO: try using same ContextualizeChat logic for chunking and summarizing?
   private async advancedFilterText(text: string, query: string): Promise<string> {
     const maxCharsToUse = this.maxContextChars() * 0.45;
     const charsForPreview = maxCharsToUse * 0.7;
@@ -192,7 +194,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
         ).toString();
 
     const outputTokens = charsToTokens(maxCharsToUse * 0.25);
-    const filteredText = await this.askLlm(prompt, { maxResponseTokens: outputTokens });
+    const filteredText = await this.askLlm(prompt, { maxResponseTokens: outputTokens, model: "gpt-3.5-turbo-16k-0613" });
 
     console.log("filteredText", filteredText);
     console.log("maxCharsToUse", maxCharsToUse);
