@@ -6,8 +6,7 @@ export class CsvOrderColumnsFunction extends ScriptFunction<{ csvData: string }>
     type: "object",
     properties: { 
       csvData: {
-          type: "string",
-          description: "The raw CSV data as a string string (not a file name or path)."
+          type: "string"
       },
       outputFile: {
           type: "string",

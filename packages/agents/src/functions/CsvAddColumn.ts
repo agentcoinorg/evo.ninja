@@ -6,8 +6,7 @@ export class CsvAddColumnFunction extends ScriptFunction<{ csvData: string, colu
     type: "object",
     properties: { 
       csvData: {
-          type: "string",
-          description: "The raw CSV data as a string string (not a file name or path)."
+          type: "string"
       },
       column: {
           type: "string"

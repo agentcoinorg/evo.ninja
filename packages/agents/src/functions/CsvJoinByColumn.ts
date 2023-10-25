@@ -6,12 +6,10 @@ export class CsvJoinByColumnFunction extends ScriptFunction<{ csv1Path: string, 
     type: "object",
     properties: { 
       csvData1: {
-          type: "string",
-          description: "The raw CSV data as a string string (not a file name or path)."
+          type: "string"
       },
       csvData2: {
-          type: "string",
-          description: "The raw CSV data as a string string (not a file name or path)."
+          type: "string"
       },
       joinColumnName: {
           type: "string"
