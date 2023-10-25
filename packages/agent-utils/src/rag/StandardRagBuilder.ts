@@ -1,11 +1,11 @@
 
-import { OpenAIEmbeddingAPI, LocalVectorDB, LocalDocument, LazyArray, filterDuplicates, LocalCollection } from "@evo-ninja/agent-utils";
 import { v4 as uuid } from "uuid";
-import { AgentContext } from "../../AgentContext";
+import { AgentContext } from "../agent/AgentContext";
+import { LocalCollection, OpenAIEmbeddingAPI, LocalVectorDB, LocalDocument } from "../embeddings";
+import { LazyArray, filterDuplicates } from "../utils";
 
 export class StandardRagBuilder<TItem> {
   private _limit: number;
-  // TODO: need to handle cases where TItem is not a string
   private _selector: (item: TItem) => string = x => x as unknown as string;
   private _sort: "index" | "relevance";
   private _unique: boolean;
@@ -68,16 +68,27 @@ export class StandardRagBuilder<TItem> {
   }
 
   query(query: string): LazyArray<TItem> {
+    console.log("Que", this._items.length);
     const itemsToAdd = this._items.slice(this.lastAddedItemIndex + 1);
 
+    console.log("Adding items to collection: ", itemsToAdd, "aaaaaaaaaa");
     const addToCollectionPromise = itemsToAdd.length
-      ? this.collection.add(itemsToAdd.map(x => this._selector(x)), itemsToAdd.map((_, i) => ({ index: this.lastAddedItemIndex + i + 1 })))
+      ? this.collection.add(itemsToAdd.map(x => {
+        const text = this._selector(x);
+        if (typeof text != "string") {
+          throw Error("Selector should return a string. Perhaps you forgot to set the selector?");
+        }
+        return text;
+      }), itemsToAdd.map((_, i) => ({ index: this.lastAddedItemIndex + i + 1 })))
       : Promise.resolve();
     this.lastAddedItemIndex = this._items.length - 1;
+    console.log("Query", this.lastAddedItemIndex);
     
     const resultPromise = addToCollectionPromise
       .then(async () => {
+        console.log("Searching collection");
         const results = await this.collection.search(query, this._limit);
+        console.log("Searching collection results");
         let filteredItems;
         if (this._sort === "index") {
           filteredItems = this._sortByIndex(this._items, results);

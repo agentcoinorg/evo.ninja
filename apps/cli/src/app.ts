@@ -1,4 +1,4 @@
-import { AgentContext, ChameleonAgent, GoalRunArgs } from "@evo-ninja/agents";
+import { ChameleonAgent, GoalRunArgs } from "@evo-ninja/agents";
 import {
   Env,
   OpenAI,
@@ -13,7 +13,8 @@ import {
   ChatMessage,
   ChatLog,
   RunnableAgent,
-  LlmModel
+  LlmModel,
+  AgentContext,
 } from "@evo-ninja/agent-utils";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
 import { FileSystemWorkspace, FileLogger } from "@evo-ninja/agent-utils-fs";

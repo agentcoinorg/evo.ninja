@@ -1,5 +1,7 @@
-import { Agent } from "../../Agent";
-import { AgentContext } from "../../AgentContext";
+import { RunnableAgent } from "../agent";
+import { AgentContext } from "../agent/AgentContext";
+
+export * from "./LazyArray";
 
 export const previewChunks = (chunks: string[], charLimit: number): string => joinUnderCharLimit(chunks, charLimit - "...\n".length, "\n...\n")
 export const limitChunks = (chunks: string[], charLimit: number): string[] => getUnderCharLimit(chunks, charLimit)
@@ -7,11 +9,11 @@ export const limitChunks = (chunks: string[], charLimit: number): string[] => ge
 export const tokensToChars = (tokenCnt: number) => tokenCnt * 4;
 export const charsToTokens = (charCnt: number) => Math.floor(charCnt / 4);
 
-export const agentFunctionBaseToAgentFunction = <TRunArgs>(agent: Agent<TRunArgs>) => {
+export const agentFunctionBaseToAgentFunction = <TRunArgs>(agent: RunnableAgent<TRunArgs>) => {
   return (fn: any) => {
     return {
       definition: fn.getDefinition(),
-      buildExecutor: (context: AgentContext) => {
+      buildExecutor: (_: AgentContext) => {
         return fn.buildExecutor(agent);
       }
     }

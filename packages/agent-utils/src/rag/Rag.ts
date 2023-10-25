@@ -1,11 +1,16 @@
-import { TextChunker, TextRecombiner } from "@evo-ninja/agent-utils";
-import { AgentContext } from "../../AgentContext";
 import { StandardRagBuilder } from "./StandardRagBuilder";
-import { previewChunks } from "./helpers";
+import { AgentContext } from "../agent/AgentContext";
+import { previewChunks } from "../utils";
+import { TextChunker, TextRecombiner } from "../chunking";
+import { StandardRagBuilderV2 } from "./StandardRagBuilderV2";
 
 export class Rag {
   static standard<TItem = string>(context: AgentContext, collectionName?: string): StandardRagBuilder<TItem> {
     return new StandardRagBuilder<TItem>(context, collectionName);
+  }
+
+  static standardV2<TItem = string>(context: AgentContext, collectionName?: string): StandardRagBuilderV2<TItem> {
+    return new StandardRagBuilderV2<TItem>(context, collectionName);
   }
 
   static async filterWithSurroundingText(text: string, query: string, context: AgentContext, opts: { charLimit: number, surroundingCharacters: number, chunkLength: number, overlap: number}): Promise<string> {

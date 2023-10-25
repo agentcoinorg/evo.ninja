@@ -67,6 +67,34 @@ export class LocalCollection<TMetadata extends BaseDocumentMetadata = BaseDocume
     return limit ? results.slice(0, limit) : results;
   }
 
+  improvedSearch(query: string | number[]): AsyncGenerator<LocalDocument<TMetadata>, void, void>
+  improvedSearch(queryVector: number[]): AsyncGenerator<LocalDocument<TMetadata>, void, void>
+  async* improvedSearch(
+    queryOrVector: string | number[]
+  ): AsyncGenerator<LocalDocument<TMetadata>, void, void> {
+    const queryVector = typeof queryOrVector === "string"
+      ? (await this.embeddingApi.createEmbeddings(queryOrVector))[0].embedding
+      : queryOrVector as number[];
+
+    const normalizedQueryVector = normalize(queryVector);
+
+    const documents = this.documentStore.list();
+
+    const scores = documents.map(document => {
+      const vector = document.vector();
+      const normalizedVector = normalize(vector);
+
+      const score = normalizedCosineSimilarity(queryVector, normalizedQueryVector, vector, normalizedVector);
+      return { document, score };
+    })
+
+    const sortedScores = scores.sort((a, b) => b.score - a.score);
+
+    for (const { document } of sortedScores) {
+      yield document;
+    }
+  }
+
   async searchWithSurroundingContext(query: string, opts: { surroundingCharacters: number, overlap?: number, limit?: number }) {
     const { surroundingCharacters, overlap, limit } = opts;
     const halfSurroundChars = Math.floor(surroundingCharacters / 2);

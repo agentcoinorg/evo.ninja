@@ -8,16 +8,17 @@ import {
   InMemoryWorkspace,
   Scripts,
   WrapClient,
-  LlmQuery
+  LlmQuery,
+  charsToTokens, 
+  tokensToChars,
+  Rag,
 } from "@evo-ninja/agent-utils";
 import dotenv from "dotenv";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import path from "path";
 import { Prompt } from "../agents/Chameleon/Prompt";
-import { Rag } from "../agents/Chameleon/Rag";
-import { charsToTokens, previewChunks, tokensToChars } from "../agents/Chameleon/helpers";
 import fs from "fs";
-import { AgentContext } from "../AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
 import { LlmModel } from "@evo-ninja/agent-utils";
 
 dotenv.config({

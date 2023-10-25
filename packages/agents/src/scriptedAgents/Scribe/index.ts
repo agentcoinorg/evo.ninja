@@ -3,7 +3,7 @@ import { ReadFileFunction } from "../../functions/ReadFile";
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
 import { ThinkFunction } from "../../functions/Think";
 import { Agent } from "../../Agent";
-import { AgentContext } from "../../AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
 import { AgentConfig } from "../../AgentConfig";
 import { prompts } from "./prompts";
 

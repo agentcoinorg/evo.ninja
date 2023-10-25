@@ -8,14 +8,14 @@ import {
   LlmQuery,
   LlmQueryBuilderV2,
   ChatLogs,
-  LlmModel
+  LlmModel,
+  agentFunctionBaseToAgentFunction
 } from "@evo-ninja/agent-utils";
 import { ResultErr } from "@polywrap/result";
 import { AgentConfig } from "./AgentConfig";
-import { AgentContext } from "./AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
 import { ExecuteAgentFunctionCalled } from "@evo-ninja/agent-utils";
 import { Prompt } from "./agents/Chameleon/Prompt";
-import { agentFunctionBaseToAgentFunction } from "./agents/Chameleon/helpers";
 
 export type GoalRunArgs = {
   goal: string;

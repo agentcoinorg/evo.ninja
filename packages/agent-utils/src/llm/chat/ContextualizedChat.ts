@@ -5,13 +5,15 @@ import {
 } from ".";
 import {
   MessageChunker,
-  LocalVectorDB,
-  LocalCollection,
   BaseDocumentMetadata,
   AgentVariables
 } from "../../";
 
-import { v4 as uuid } from "uuid";
+import { StandardRagBuilder } from "../../rag/StandardRagBuilder";
+import { Rag } from "../../rag/Rag";
+import { AgentContext } from "../../agent/AgentContext";
+import { StandardRagBuilderV2 } from "../../rag/StandardRagBuilderV2";
+import { MessageRecombiner } from "../../chunking/MessageRecombiner";
 
 type MsgIdx = number;
 
@@ -25,6 +27,12 @@ interface DocumentMetadata extends BaseDocumentMetadata {
   tokens: number;
 }
 
+export type MessageChunk = {
+  json: string;
+  tokens: number;
+  index: number;
+};
+
 export class ContextualizedChat {
 
   private _chunks: Record<ChatLogType, Chunk[]> = {
@@ -32,17 +40,19 @@ export class ContextualizedChat {
     "temporary": []
   };
 
-  private _collections: Record<ChatLogType, LocalCollection<DocumentMetadata>>;
+  private _rags: Record<ChatLogType, StandardRagBuilderV2<MessageChunk>>;
 
   constructor(
+    _context: AgentContext,
     private _rawChat: Chat,
     private _chunker: MessageChunker,
-    db: LocalVectorDB,
     private _variables: AgentVariables
   ) {
-    this._collections = {
-      persistent: db.addCollection<DocumentMetadata>(uuid()),
-      temporary: db.addCollection<DocumentMetadata>(uuid())
+    this._rags = {
+      persistent: Rag.standardV2<MessageChunk>(_context)
+        .selector(x => x.json),
+      temporary: Rag.standardV2<MessageChunk>(_context)
+        .selector(x => x.json)  
     };
   }
 
@@ -52,34 +62,30 @@ export class ContextualizedChat {
 
   async contextualize(context: string, tokenLimits: Record<ChatLogType, number>): Promise<Chat> {
     // Ensure all new messages have been processed
-    await this._processNewMessages();
+    this._processNewMessages();
 
     // Aggregate all "persistent" chunks
     const persistentSmallChunks = this._aggregateSmallChunks(
       "persistent",
       tokenLimits["persistent"]
     );
-    const persistentLargeChunks = await this._contextualizeChunks(
-      context,
-      "persistent",
-      tokenLimits["persistent"] - persistentSmallChunks.tokens
-    );
 
-    // Aggregate all "temporary" chunks
-    const temporaryChunks = await this._contextualizeChunks(
-      context,
-      "temporary",
-      tokenLimits["temporary"]
-    );
+    const persistentLargeChunks = await this._rags["persistent"]
+      .query(context)
+      .recombiner(MessageRecombiner.standard(tokenLimits["persistent"] - persistentSmallChunks.tokens));
+
+    const temporaryChunks = await this._rags["temporary"]
+      .query(context)
+      .recombiner(MessageRecombiner.standard(tokenLimits["temporary"]));
 
     // Sort persistent and temporary chunks
     const sorted = {
       persistent: [...persistentSmallChunks.chunks, ...persistentLargeChunks].sort(
-        (a, b) => a.chunkIdx - b.chunkIdx
-      ).map((x) => x.msg),
+        (a, b) => a.index - b.index
+      ).map((x) => JSON.parse(x.json) as ChatMessage),
       temporary: temporaryChunks.sort(
-        (a, b) => a.chunkIdx - b.chunkIdx
-      ).map((x) => x.msg)
+        (a, b) => a.index - b.index
+      ).map((x) => JSON.parse(x.json) as ChatMessage)
     };
 
     // Post-process the resulting message log,
@@ -94,90 +100,44 @@ export class ContextualizedChat {
   }
 
   private _aggregateSmallChunks(type: ChatLogType, tokenLimit: number): {
-    chunks: {
-      msg: ChatMessage;
-      chunkIdx: ChunkIdx;
-    }[];
+    chunks: MessageChunk[]
     tokens: number;
   } {
-    const chunks: { msg: ChatMessage; chunkIdx: ChunkIdx; }[] = [];
     const chatLog = this._rawChat.chatLogs;
     const smallChunkIdxs = getSmallChunks(this._chunks[type]);
     let tokenCounter = 0;
+    
+    const chunks: MessageChunk[] = [];
 
-    const addChunk = (chunkIdx: ChunkIdx): boolean => {
-      const chunk = this._chunks[type][chunkIdx];
-      const msgIdx = chunk.msgIdx;
-      const msg = chatLog.getMsg(type, msgIdx);
+    for (const index of smallChunkIdxs) {
+      const chunk = this._chunks[type][index];
+      const msg = chatLog.getMsg(type, chunk.msgIdx);
 
       if (!msg) {
         throw Error("Incorrect msg index, this should never happen.");
       }
 
-      const tokens = chatLog.getMsgTokens(type, msgIdx);
+      const tokens = chatLog.getMsgTokens(type, chunk.msgIdx);
       if (tokenCounter + tokens > tokenLimit) {
-        return false;
-      }
-      chunks.push({ msg, chunkIdx });
-      tokenCounter += tokens;
-      return true;
-    };
-
-    for (const smallChunkIdx of smallChunkIdxs) {
-      if (!addChunk(smallChunkIdx)) {
         break;
       }
+      chunks.push({
+        json: JSON.stringify(msg),
+        tokens,
+        index
+      });
+      tokenCounter += tokens;
     }
 
     return { chunks, tokens: tokenCounter };
   }
 
-  private async _contextualizeChunks(
-    context: string,
-    type: ChatLogType,
-    tokenLimit: number
-  ): Promise<{ msg: ChatMessage; chunkIdx: ChunkIdx; }[]> {
-    // Search the collection for relevant chunks
-    const results = await this._collections[type].search(context);
-
-    // Aggregate as many as possible
-    const chunks: { msg: ChatMessage; chunkIdx: ChunkIdx; }[] = [];
-    let tokenCounter = 0;
-
-    const addChunk = (chunkText: string, metadata: DocumentMetadata): boolean => {
-      if (tokenCounter + metadata.tokens > tokenLimit) {
-        return false;
-      }
-
-      const msg = JSON.parse(chunkText) as ChatMessage;
-      const chunkIdx = metadata.index;
-      chunks.push({ msg, chunkIdx });
-      tokenCounter += metadata.tokens;
-      return true;
-    }
-
-    for (const result of results) {
-      const chunkText = result.text();
-      const metadata = result.metadata();
-
-      if (!metadata) {
-        throw Error("metadata is missing, this should never happen")
-      }
-
-      if (!addChunk(chunkText, metadata)) {
-        break;
-      }
-    }
-
-    return chunks;
+  private async _processNewMessages() {
+    this._processNewMessagesByType("persistent");
+    this._processNewMessagesByType("temporary");
   }
 
-  private async _processNewMessages(): Promise<void> {
-    await this._processNewMessagesByType("persistent");
-    await this._processNewMessagesByType("temporary");
-  }
-
-  private async _processNewMessagesByType(type: ChatLogType): Promise<void> {
+  private _processNewMessagesByType(type: ChatLogType) {
     const messages = this._rawChat.chatLogs.get(type).msgs;
 
     // If no messages exist
@@ -195,11 +155,11 @@ export class ContextualizedChat {
     // Process all messages from lastProcessedIdx -> messages.length
     for (let i = lastProcessedIdx + 1; i < messages.length; ++i) {
       const message = messages[i];
-      await this._processNewMessage(message, i, type);
+      this._processNewMessage(message, i, type);
     }
   }
 
-  private async _processNewMessage(message: ChatMessage, msgIdx: number, type: ChatLogType): Promise<void> {
+  private _processNewMessage(message: ChatMessage, msgIdx: number, type: ChatLogType) {
 
     const newChunks: string[] = [];
 
@@ -245,14 +205,14 @@ export class ContextualizedChat {
       return;
     }
 
-    // Create an array of chunk document metadata
-    const metadatas: DocumentMetadata[] = newChunks.map((chunk, index) => ({
-      index: startChunkIdx + index,
-      tokens: this._rawChat.tokenizer.encode(chunk).length
-    }));
-
-    // Add the chunks to the vectordb collection
-    await this._collections[type].add(newChunks, metadatas);
+    // Add the chunks to the rag
+    this._rags[type].addItems(
+      newChunks.map((chunk, index) => ({
+        index: startChunkIdx + index,
+        tokens: this._rawChat.tokenizer.encode(chunk).length,
+        json: chunk
+      }))
+    );
 
     return;
   }

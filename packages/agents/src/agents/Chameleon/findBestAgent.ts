@@ -1,10 +1,8 @@
-import { FunctionDefinition } from "@evo-ninja/agent-utils";
+import { FunctionDefinition, StandardRagBuilder, Rag } from "@evo-ninja/agent-utils";
 import { Agent, GoalRunArgs } from "../../Agent";
-import { AgentContext } from "../../AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../../AgentFunctionBase";
 import { DeveloperAgent, ResearcherAgent, DataAnalystAgent, WebResearcherAgent } from "../../scriptedAgents";
-import { Rag } from "./Rag";
-import { StandardRagBuilder } from "./StandardRagBuilder";
 
 type AgentWithPrompts = {
   expertise: string;

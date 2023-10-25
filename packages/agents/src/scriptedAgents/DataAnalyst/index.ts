@@ -10,7 +10,7 @@ import { WriteFileFunction } from "../../functions/WriteFile";
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
 import { ThinkFunction } from "../../functions/Think";
 import { prompts } from "./prompts";
-import { AgentContext } from "../../AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
 import { AgentConfig } from "../../AgentConfig";
 import { Agent } from "../../Agent";
 

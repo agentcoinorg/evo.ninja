@@ -1,4 +1,5 @@
 import { BaseDocumentMetadata, LocalDocument } from "../embeddings";
+import { Recombiner } from "../rag/StandardRagBuilderV2";
 import { LazyArray } from "../utils/LazyArray";
 
 export class TextRecombiner {
@@ -41,6 +42,53 @@ export class TextRecombiner {
       });
   
       return new LazyArray(promise);
+    };
+  }
+
+  static surroundingTextWithPreview(
+    surroundingCharacters: number, 
+    separator: string,
+    characterLimit: number, 
+    overlap?: number, 
+  ): Recombiner<string, string> {
+    const halfSurroundChars = Math.floor(surroundingCharacters / 2);
+    
+    return async (results: AsyncGenerator<LocalDocument<{ index: number }>>, originalItems: string[]): Promise<string> => {
+      const iterator = results;
+
+      let text = "";
+
+      for await (const result of iterator) {
+        const resultIndex = result.metadata()!.index;
+
+        const textBehind = getTextFromPriorChunks({
+          originalItems,
+          currentIndex: resultIndex,
+          overlap: overlap ?? 0,
+          characterLimit: halfSurroundChars,
+        })
+  
+        const textForward = getTextFromNextChunks({
+          originalItems,
+          currentIndex: resultIndex,
+          overlap: overlap ?? 0,
+          characterLimit: halfSurroundChars,
+        })
+  
+        const surrounding = [textBehind, result.text(), textForward].join("")
+    
+        if (text.length + surrounding.length + separator.length > characterLimit) {
+          break;
+        }
+    
+        if (text === "") {
+          text += surrounding;
+        } else {
+          text += separator + surrounding;
+        }
+      }
+
+      return text;
     };
   }
 }

@@ -1,4 +1,4 @@
-import { AgentContext } from "../../AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
 import { CreateScriptFunction } from "../../functions/CreateScript";
 import { ExecuteScriptFunction } from "../../functions/ExecuteScript";
 import { FindScriptFunction } from "../../functions/FindScript";

@@ -1,8 +1,6 @@
-import { AgentFunctionResult, ChatMessageBuilder, LlmApi, Tokenizer, CsvChunker } from "@evo-ninja/agent-utils";
+import { AgentFunctionResult, ChatMessageBuilder, LlmApi, Tokenizer, CsvChunker, Rag, AgentContext } from "@evo-ninja/agent-utils";
 import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 import { Agent } from "../Agent";
-import { AgentContext } from "../AgentContext";
-import { Rag } from "../agents/Chameleon/Rag";
 import { Prompt } from "../agents/Chameleon/Prompt";
 
 interface AnalyzeDataParameters {

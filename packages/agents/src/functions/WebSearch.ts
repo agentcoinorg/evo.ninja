@@ -7,14 +7,14 @@ import {
   TextChunker,
   Tokenizer,
   trimText,
+  Rag,
 } from "@evo-ninja/agent-utils";
 import axios from "axios";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { Agent } from "../Agent";
 import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 import TurndownService from "turndown";
-import { Rag } from "../agents/Chameleon/Rag";
-import { AgentContext } from "../AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
 import { load } from "cheerio";
 import { Prompt } from "../agents/Chameleon/Prompt";
 

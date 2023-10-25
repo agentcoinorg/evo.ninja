@@ -11,18 +11,19 @@ import {
   OpenAIEmbeddingAPI,
   ContextualizedChat,
   Chat,
+  agentFunctionBaseToAgentFunction,
+  charsToTokens,
+  tokensToChars,
+  Rag,
 } from "@evo-ninja/agent-utils";
 import { Agent } from "../../Agent";
-import { AgentContext } from "../../AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
 import { agentPrompts, prompts } from "./prompts";
 import { GoalRunArgs } from "../../Agent";
 import { AgentConfig } from "../../AgentConfig";
-import { Rag } from "./Rag";
 import { Prompt } from "./Prompt";
 import { NewAgent } from "./NewAgent";
-import { agentFunctionBaseToAgentFunction, charsToTokens, tokensToChars } from "./helpers";
 import { findBestAgent } from "./findBestAgent";
-import { LlmModels } from "@evo-ninja/agent-utils";
 
 export class ChameleonAgent extends NewAgent<GoalRunArgs> {
   private _cChat: ContextualizedChat;
@@ -44,15 +45,10 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
       context,
     );
     this._chunker = new MessageChunker({ maxChunkSize: context.variables.saveThreshold });
-    const embeddingApi = new OpenAIEmbeddingAPI(
-      this.context.env.OPENAI_API_KEY,
-      this.context.logger,
-      this.context.chat.tokenizer
-    );
     this._cChat = new ContextualizedChat(
+      this.context,
       this.context.chat,
       this._chunker,
-      new LocalVectorDB(this.context.internals, "cchat", embeddingApi),
       context.variables
     );
   }
