@@ -39,6 +39,15 @@ export class ContextualizedChat {
     metadata: DocumentMetadata
   }> = {};
 
+  private _lastTwoMsgs: Record<ChatLogType, {
+    text: string;
+    metadata: DocumentMetadata;
+    msgIdx: MsgIdx;
+  }[]> = {
+    "persistent": [],
+    "temporary": []
+  };
+
   constructor(
     private _rawChat: Chat,
     private _chunker: MessageChunker,
@@ -180,7 +189,7 @@ export class ContextualizedChat {
 
       if ((msg.role === "assistant" && msg.function_call) || msg.role === "function") {
         // Ensure function call + results are always added together.
-        // We most traverse the chunk array to find the nearest neighbor
+        // We must traverse the chunk array to find the nearest neighbor
         const direction = msg.role === "assistant" ? 1 : -1;
         const search = msg.role === "assistant" ? "function" : "assistant";
         let funcChunkIdx: number | undefined = undefined;
@@ -209,6 +218,11 @@ export class ContextualizedChat {
       }
 
       return true;
+    }
+
+    // Start by always adding the last 2 messages to the chat (1st chunk)
+    for (const lastMsg of this._lastTwoMsgs[type]) {
+      addChunk(lastMsg.text, lastMsg.metadata);
     }
 
     // Search the collection for relevant chunks
@@ -323,6 +337,18 @@ export class ContextualizedChat {
         text: newChunks[0],
         metadata: metadatas[0]
       };
+    }
+
+    // Keep track of the 2 most recent (temporary) messages
+    this._lastTwoMsgs[type].push({
+      text: newChunks[0],
+      metadata: metadatas[0],
+      msgIdx: msgIdx
+    });
+    this._lastTwoMsgs[type].sort((a, b) => b.msgIdx - a.msgIdx);
+
+    if (this._lastTwoMsgs[type].length > 2) {
+      this._lastTwoMsgs[type].pop();
     }
 
     return;
