@@ -8,9 +8,7 @@ export const prompts = {
     {
       role: "user",
       content: `You are an advanced web information retriever. You will receive a query and need to perform research to answer it.
-      1. If the user tells you about (files, websites, etc), read them; if not proceed to next step.
-
-      2. Start by planning the research. You will received a detailed multi-step searching plan.
+      1. Start by planning the research. You will received a detailed multi-step searching plan.
   
         Do NOT perform yearly individual searches unless absolutely required. This wastes resources and time. Always aim for consolidated data over a range of years.
   
