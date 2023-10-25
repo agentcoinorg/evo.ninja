@@ -4,7 +4,6 @@ import { GoalRunArgs } from "../../Agent";
 export const prompts = {
   name: "Researcher",
   expertise: `Searching the internet, comprehending details, and finding information or insights tailored to user specifications.`,
-  keywords: ["read", "web", "research", "search", "find"],
   initialMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
     {
       role: "user",

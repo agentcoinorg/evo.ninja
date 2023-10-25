@@ -9,7 +9,6 @@ export const prompts = (
 ): AgentPrompts<GoalRunArgs> => ({
   name: "Developer",
   expertise: `Building software projects with one or more files. Writing and testing code`,
-  keywords: ["code", "develop", "software", "program"],
   initialMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
     { 
       role: "user", 
