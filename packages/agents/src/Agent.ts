@@ -8,6 +8,7 @@ import {
   LlmQuery,
   LlmQueryBuilderV2,
   ChatLogs,
+  LlmModel
 } from "@evo-ninja/agent-utils";
 import { ResultErr } from "@polywrap/result";
 import { AgentConfig } from "./AgentConfig";
@@ -90,7 +91,7 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
     return new LlmQueryBuilderV2(this.context.llm, this.context.chat.tokenizer, msgs);
   }
 
-  protected askLlm(query: string | Prompt, opts?: { maxResponseTokens?: number, model?: string }): Promise<string> {
+  protected askLlm(query: string | Prompt, opts?: { maxResponseTokens?: number, model?: LlmModel }): Promise<string> {
     return this.expression().ask(query.toString(), opts);
   }
 }
