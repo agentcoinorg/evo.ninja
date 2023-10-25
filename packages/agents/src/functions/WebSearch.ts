@@ -83,34 +83,41 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
           );
         }
 
-        const searchMatches = await this.searchInPages({
+        const searchResults = await this.searchInPages({
           urls: googleResults.map(x => x.url),
           query: params.query,
           context
         })
 
-        const analyzeChunkMatchesPrompt = new Prompt()
+        const analysisFromChunks = await this.askLlm(new Prompt()
         .text(`
-          I will give you chunks of text from different webpages.
+          I will give you different results for the query: ${params.query}.
 
-          I want to extract ${params.query} from them. Keep in mind some information may not be properly formatted.
-          Do your best to extract as much information as you can.
-
-          Prioritize accuracy. Do not settle for the first piece of information found if there are more precise results available
+          I want you to extract the information from them to answer the query.
+          
+          Prioritize precision. If there are multiple results that contain the same information, choose the one that is more precise.
           Example: "population of New York in 2020" and you get the following results:
           ["1.5 million",  "nearly 1.600.000", "1,611,989"], you will take "1,611,989"
 
-          Chunks:
-        `)
-        .json(searchMatches)
-        .line(`Specify if the information is incomplete but still return it`)
-        .toString()
+          First take the most precise result, determine what's missing and fill it with pieces of other results.
+          If there are multiple result pieces that contain the same information, choose the one that is more precise.
 
-        const analysisFromChunks = await this.askLlm(analyzeChunkMatchesPrompt)
+          Results:
+        `)
+        .json(searchResults)
+        .line(`Specify if the information is incomplete but still return it.`)
+        .line(`State why each piece is the most precise, step by step.`)
+        .toString())
+
+        const result = await this.askLlm(new Prompt()
+        .text(`Extract the information from the following text, removing any reasoning: ${analysisFromChunks}`)
+        .toString(), {
+          model: "gpt-3.5-turbo-16k-0613"
+        })
   
         return this.onSuccess(
           params,
-          analysisFromChunks,
+          result,
           rawParams,
           context.variables
         );
@@ -204,25 +211,34 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
     const urlsContents = await Promise.all(params.urls.map(async url => {
       try {
         const response = await this.processWebpage(url);
-        return response
+        const matches = await Rag.filterWithSurroundingText(response, params.query, params.context, {
+          chunkLength: 100,
+          surroundingCharacters: 750,
+          overlap: 20,
+          charLimit: 4000
+        })
+
+        return matches
       } catch(e) {
         params.context.logger.error(`Failed to process ${url}`)
         return ""
       }
     }))
 
-    const webpagesChunks = urlsContents.flatMap(webpageContent =>
-      TextChunker.fixedCharacterLength(webpageContent, { chunkLength: 500, overlap: 100 })
-    )
+    const results: string[] = [];
 
-    const matches = await Rag.standard(webpagesChunks, params.context)
-      .selector(x => x)
-      .limit(10)
-      .onlyUnique()
-      .query(params.query)
-      .unique();
+    await Promise.all(urlsContents.map(async (matches) => {
+      const extracted = await this.extractInfoWithLLM({
+        info: matches,
+        query: params.query
+      })
 
-    return matches;
+      console.log("extracted: ", extracted)
+
+      results.push(extracted)
+    }))
+
+    return results;
   }
 
   private async processWebpage(url: string) {
@@ -246,11 +262,13 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
       .map(x => x.trim())
       .join("\n")
       .replaceAll("\n", "  ")
+      .replaceAll(/--+/gm, "-")
+      .replaceAll(/==+/gm, "-")
 
     return markdownText
   }
 
-  private async searchOnGoogle(query: string, apiKey: string, maxResults = 6) {
+  private async searchOnGoogle(query: string, apiKey: string, maxResults = 4) {
     const axiosClient = axios.create({
       baseURL: "https://serpapi.com",
     });
@@ -289,5 +307,35 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
       }));
 
     return result.slice(0, maxResults);
+  }
+
+  private async extractInfoWithLLM(args: {
+    info: string;
+    query: string;
+  }) {
+    const analyzeChunkMatchesPrompt = new Prompt()
+      .text(`
+        I will give you pieces of information.
+
+        I want to extract ${args.query} from them. Keep in mind some information may not be properly formatted.
+        Do your best to extract as much information as you can.
+
+        Prioritize accuracy. Do not settle for the first piece of information found if there are more precise results available
+
+        Prioritize accuracy. Do not settle for the first piece of information found if there are more precise results available
+        Example: "population of New York in 2020" and you get the following results:
+        ["1.5 million",  "nearly 1.600.000", "1,611,989"], you will take "1,611,989"
+
+        Information:
+
+        ${args.info}
+
+        Specify if the information is incomplete but still return it
+      `)
+      .toString()
+
+    return await this.askLlm(analyzeChunkMatchesPrompt, {
+      model: "gpt-3.5-turbo-16k-0613"
+    })
   }
 }
