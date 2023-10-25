@@ -11,7 +11,7 @@ export const prompts = {
 
       1. Start by planning the research. You will received a detailed multi-step searching plan.
   
-        Do NOT perform yearly individual searches unless absolutely required. This wastes resources and time. Always aim for consolidated data over a range of years.
+        Do NOT perform yearly individual searches unless absolutely required. This wastes resources and time. Always search for data over a range of years.
   
         Example of undesired behavior: Searching "US births 2019", then "US births 2020", then "US births 2021"...
         Desired behavior: Searching "US births from 2019 to 2021"
