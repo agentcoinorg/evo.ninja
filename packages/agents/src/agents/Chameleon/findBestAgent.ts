@@ -1,17 +1,25 @@
 import { FunctionDefinition } from "@evo-ninja/agent-utils";
-import { Agent } from "../../Agent";
+import { Agent, GoalRunArgs } from "../../Agent";
 import { AgentContext } from "../../AgentContext";
 import { AgentFunctionBase } from "../../AgentFunctionBase";
 import { DeveloperAgent, ResearcherAgent, DataAnalystAgent } from "../../scriptedAgents";
 import { Rag } from "./Rag";
+import { StandardRagBuilder } from "./StandardRagBuilder";
+
+type AgentWithPrompts = {
+  expertise: string;
+  persona: string;
+  agent: Agent<GoalRunArgs>;
+};
+let agentRag: StandardRagBuilder<AgentWithPrompts>;
 
 export const findBestAgent = async (
-  query: string, 
-  context: AgentContext
+  query: string,
+  context: AgentContext,
 ): Promise<[
-  Agent<unknown>, 
-  FunctionDefinition[], 
-  string, 
+  Agent<unknown>,
+  FunctionDefinition[],
+  string,
   AgentFunctionBase<unknown>[]
 ]> => {
   const allAgents: Agent[] = [
@@ -28,20 +36,24 @@ export const findBestAgent = async (
     };
   });
 
-  const agents = await Rag.standard(agentsWithPrompts, context)
-    .selector(x => x.expertise)
-    .limit(1)
-    .onlyUnique()
-    .query(query);
+  if (!agentRag) {
+    agentRag = Rag.standard<AgentWithPrompts>(context)
+      .addItems(agentsWithPrompts)
+      .selector(x => x.expertise)
+      .limit(1)
+      .onlyUnique();
+  }
+
+  const agents = await agentRag.query(query);
 
   console.log("Selected agents: ", agents.map(x => x.agent.config.prompts.name));
 
   const agentWithPrompt = agents[0];
 
   return [
-    agentWithPrompt.agent, 
+    agentWithPrompt.agent,
     agentWithPrompt.agent.config.functions.map(f => f.getDefinition()),
-    agentWithPrompt.persona, 
+    agentWithPrompt.persona,
     agentsWithPrompts.map(x => x.agent.config.functions).flat()
   ];
 };

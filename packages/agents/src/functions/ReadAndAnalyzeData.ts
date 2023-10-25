@@ -39,7 +39,8 @@ export class ReadAndAnalyzeDataFunction extends AgentFunctionBase<ReadAndAnalyze
         outputs: [],
         messages: [
           ChatMessageBuilder.functionCall(this.name, rawParams),
-          ChatMessageBuilder.functionCallResult(this.name, `Data File Stored in Variable: \${${variable}}\nData Summary:\n\`\`\`\n${summary}\n\`\`\``)
+          ChatMessageBuilder.functionCallResult(this.name, `Data File Stored in Variable: \${${variable}}\nData Summary:\n\`\`\`\n${summary}\n\`\`\``),
+          ChatMessageBuilder.functionCallResult(this.name, `\${${variable}}`)
         ]
       };
     }
