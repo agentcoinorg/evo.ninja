@@ -226,7 +226,11 @@ export class ContextualizedChat {
         newChunks.push(...this._chunker.chunk(message));
       }
     } else {
-      newChunks.push(JSON.stringify(message));
+      if (isVariable) {
+        newChunks.push(variableChunkText(message, 0, varName));
+      } else {
+        newChunks.push(JSON.stringify(message));
+      }
     }
 
     const chunks = this._chunks[type];
@@ -327,8 +331,8 @@ function postProcessMessages(messages: ChatMessage[]): ChatMessage[] {
   return result;
 }
 
-function variableChunkText(chunk: string, index: number, varName: string): string {
-  const message = JSON.parse(chunk) as ChatMessage;
+function variableChunkText(chunk: string | ChatMessage, index: number, varName: string): string {
+  const message = typeof chunk === "string" ? JSON.parse(chunk) as ChatMessage : chunk;
   return JSON.stringify({
     ...message,
     content: `Variable "${varName}" chunk #${index}\n\`\`\`\n${message.content}\n\`\`\``

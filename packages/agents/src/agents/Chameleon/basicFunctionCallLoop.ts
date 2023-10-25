@@ -44,7 +44,7 @@ export async function* basicFunctionCallLoop(
           continue;
         }
         const functionResult = message.content || "";
-        if (context.variables.shouldSave(functionResult)) {
+        if (result.storeInVariable || context.variables.shouldSave(functionResult)) {
           const varName = context.variables.save(name || "", functionResult);
           message.content = `\${${varName}}`;
         }

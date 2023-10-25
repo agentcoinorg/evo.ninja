@@ -22,7 +22,6 @@ import { Prompt } from "./Prompt";
 import { NewAgent } from "./NewAgent";
 import { agentFunctionBaseToAgentFunction, charsToTokens, tokensToChars } from "./helpers";
 import { findBestAgent } from "./findBestAgent";
-import { LlmModels } from "@evo-ninja/agent-utils";
 
 export class ChameleonAgent extends NewAgent<GoalRunArgs> {
   private _cChat: ContextualizedChat;

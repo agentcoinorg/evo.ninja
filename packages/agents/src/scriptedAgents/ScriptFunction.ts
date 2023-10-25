@@ -11,7 +11,7 @@ import { AgentFunctionBase } from "../AgentFunctionBase";
 import { Agent } from "../Agent";
 
 export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams> {
-  constructor(private readonly scripts: Scripts) {
+  constructor(private scripts: Scripts, private storeInVariable?: boolean) {
     super();
   }
 
@@ -36,9 +36,10 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, rawParams),
+        ChatMessageBuilder.functionCall(this.name, rawParams || params),
         ChatMessageBuilder.functionCallResult(this.name, result)
-      ]
+      ],
+      storeInVariable: this.storeInVariable
     }
   }
 
@@ -51,7 +52,7 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, rawParams),
+        ChatMessageBuilder.functionCall(this.name, rawParams || params),
         ChatMessageBuilder.functionCallResult(this.name, `Error: ${error}`)
       ]
     }

@@ -58,7 +58,10 @@ export class AnalyzeDataFunction extends LlmAgentFunctionBase<AnalyzeDataParamet
       Tailor your response to the following question:
     `).line(params.question);
 
-    return await this.askLlm(prompt.toString());
+    return await this.askLlm(prompt.toString(), {
+      model: "gpt-3.5-turbo-16k-0613",
+      maxResponseTokens: 100
+    });
   }
 
   buildExecutor({ context }: Agent<unknown>): (params: AnalyzeDataParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
