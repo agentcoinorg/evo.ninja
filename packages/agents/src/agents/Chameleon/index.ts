@@ -30,6 +30,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
   private previousPrediction: string | undefined;
   private loopCounter: number = 0;
   private previousAgent: Agent<unknown> | undefined;
+  private goal: string = "";
 
   constructor(
     context: AgentContext,
@@ -65,6 +66,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     chat.persistent("user", prompts.exhaustAllApproaches);
     chat.persistent("user", prompts.variablesExplainer);
     chat.persistent("user", args.goal);
+    this.goal = args.goal;
   }
 
   protected async beforeLlmResponse(): Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[], finalOutput?: AgentOutput }> {
@@ -142,7 +144,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
         .line(`
           Consider the above chat between a user and assistant.
           In your expert opinion, what is the best next step for the assistant?
-          ${terminationStr ? `If the goal is achieved, simply respond with "${terminationStr}"` : ""}`
+          ${terminationStr && this.goal.length < 350 ? `If you are 100% sure the user's goal has been achieved, simply respond with "${terminationStr}". The user's goal is: "${this.goal}"` : ""}`
         ),
       {
         model: "gpt-3.5-turbo-16k-0613"
