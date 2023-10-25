@@ -14,8 +14,7 @@ export const prompts: AgentPrompts<GoalRunArgs> = {
 PROCESS:
 1. Understand - You **MUST** first understand the data, call the **understandData** function.
 2. Join - Join datasets whenever possible. Operating on datasets is much easier when they are viewed in aggregate.
-3. Modify - Modify the data based on the requirements AND analysis you've done prior. Do not modify files you have not read first.
-4. Complete - When you have completed your goal, respond with the text "GOAL ACHIEVED!"`
+3. Modify - Modify the data based on the requirements AND analysis you've done prior. Do not modify files you have not read first.`
     },
     { role: "user", content: goal },
   ],
