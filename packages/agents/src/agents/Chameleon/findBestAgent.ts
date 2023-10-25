@@ -3,14 +3,12 @@ import { Agent, GoalRunArgs } from "../../Agent";
 import { AgentContext } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../../AgentFunctionBase";
 import { DeveloperAgent, ResearcherAgent, DataAnalystAgent, WebResearcherAgent } from "../../scriptedAgents";
-import { StandardRagBuilder } from "@evo-ninja/agent-utils/build/rag/StandardRagBuilder";
 
 type AgentWithPrompts = {
   expertise: string;
   persona: string;
   agent: Agent<GoalRunArgs>;
 };
-let agentRag: StandardRagBuilder<AgentWithPrompts>;
 
 export const findBestAgent = async (
   query: string, 
@@ -37,11 +35,9 @@ export const findBestAgent = async (
     };
   });
 
-  if (!agentRag) {
-    agentRag = Rag.standard<AgentWithPrompts>(context)
+  const agentRag = Rag.standard<AgentWithPrompts>(context)
       .addItems(agentsWithPrompts)
       .selector(x => x.expertise);
-  }
 
   const agents = await agentRag
     .query(query)
