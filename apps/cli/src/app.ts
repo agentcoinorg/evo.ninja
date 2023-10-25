@@ -12,7 +12,8 @@ import {
   ChatLogType,
   ChatMessage,
   ChatLog,
-  RunnableAgent
+  RunnableAgent,
+  LlmModel
 } from "@evo-ninja/agent-utils";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
 import { FileSystemWorkspace, FileLogger } from "@evo-ninja/agent-utils-fs";
@@ -112,7 +113,7 @@ export function createApp(config?: AppConfig): App {
   // LLM
   let llm: LlmApi = new OpenAI(
     env.OPENAI_API_KEY,
-    env.GPT_MODEL,
+    env.GPT_MODEL as LlmModel,
     env.CONTEXT_WINDOW_TOKENS,
     env.MAX_RESPONSE_TOKENS,
     logger

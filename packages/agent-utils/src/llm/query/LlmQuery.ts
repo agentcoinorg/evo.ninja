@@ -1,16 +1,16 @@
-import { ChatLogs, ChatMessage, Tokenizer, LlmApi } from "../";
+import { ChatLogs, ChatMessage, Tokenizer, LlmApi, LlmModel } from "../";
 
 export class LlmQuery {
   constructor(private readonly llm: LlmApi, private tokenizer: Tokenizer, private logs: ChatLogs = new ChatLogs()) {}
 
-  async content(): Promise<string> {
-    const response = await this.response();
+  async content(opts?: { maxResponseTokens?: number, model?: LlmModel }): Promise<string> {
+    const response = await this.response(opts);
 
     return response?.content ?? "";
   }
   
-  async response(): Promise<ChatMessage | undefined> {
-    const response = await this.llm.getResponse(this.logs);
+  async response(opts?: { maxResponseTokens?: number, model?: LlmModel }): Promise<ChatMessage | undefined> {
+    const response = await this.llm.getResponse(this.logs, undefined, opts);
   
     if (!response || !response.content) {
       throw new Error("No response from LLM");
@@ -25,7 +25,7 @@ export class LlmQuery {
     return response;
   }
 
-  async ask(question: string, opts?: { maxResponseTokens?: number, model?: string }): Promise<string> {
+  async ask(question: string, opts?: { maxResponseTokens?: number, model?: LlmModel }): Promise<string> {
     this.logs.add(
       "temporary", 
       [{ role: "user", content: question }],
