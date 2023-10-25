@@ -72,11 +72,11 @@ export class ContextualizedChat {
 
     const persistentLargeChunks = await this._rags["persistent"]
       .query(context)
-      .recombiner(MessageRecombiner.standard(tokenLimits["persistent"] - persistentSmallChunks.tokens));
+      .recombine(MessageRecombiner.standard(tokenLimits["persistent"] - persistentSmallChunks.tokens));
 
     const temporaryChunks = await this._rags["temporary"]
       .query(context)
-      .recombiner(MessageRecombiner.standard(tokenLimits["temporary"]));
+      .recombine(MessageRecombiner.standard(tokenLimits["temporary"]));
 
     // Sort persistent and temporary chunks
     const sorted = {

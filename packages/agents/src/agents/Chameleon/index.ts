@@ -139,15 +139,15 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
   }
 
   private async advancedFilterText(text: string, query: string): Promise<string> {
-    const maxCharsToUse = this.maxContextChars() * 0.45;
-    const charsForPreview = maxCharsToUse * 0.7;
+    const maxTokensToUse = this.maxContextTokens() * 0.45;
+    const tokensForPreview = maxTokensToUse * 0.7;
 
     const bigPreview = await Rag.filterWithSurroundingText(
       text, 
       query, 
       this.context,
       {
-        charLimit: charsForPreview,
+        tokenLimit: tokensForPreview,
         surroundingCharacters: 750,
         chunkLength: 100,
         overlap: 15
@@ -169,13 +169,13 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
           IMPORTANT: Respond only with the new content!"`
         ).toString();
 
-    const outputTokens = charsToTokens(maxCharsToUse * 0.25);
+    const outputTokens = Math.floor(maxTokensToUse * 0.25);
     const filteredText = await this.askLlm(prompt, { maxResponseTokens: outputTokens });
 
     console.log("filteredText", filteredText);
-    console.log("maxCharsToUse", maxCharsToUse);
-    console.log("charsForPreview", charsForPreview);
-    console.log("output tokens", outputTokens);
+    console.log("maxTokensToUse", maxTokensToUse);
+    console.log("tokensForPreview", tokensForPreview);
+    console.log("tokensForPreview", tokensForPreview);
     console.log("filteredText.length", filteredText.length);
 
     return filteredText;
@@ -188,7 +188,6 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
   private maxContextTokens(): number {
     return this.context.llm.getMaxContextTokens() ?? 8000;
   }
-
 
   isLargeMsg = (message: ChatMessage): boolean => {
     return !!message.content && message.content.length > this.maxContextChars() * 0.0625;

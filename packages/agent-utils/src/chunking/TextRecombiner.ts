@@ -1,4 +1,5 @@
 import { BaseDocumentMetadata, LocalDocument } from "../embeddings";
+import { Tokenizer } from "../llm";
 import { Recombiner } from "../rag/StandardRagBuilderV2";
 import { LazyArray } from "../utils/LazyArray";
 
@@ -48,7 +49,8 @@ export class TextRecombiner {
   static surroundingTextWithPreview(
     surroundingCharacters: number, 
     separator: string,
-    characterLimit: number, 
+    tokenLimit: number, 
+    tokenizer: Tokenizer,
     overlap?: number, 
   ): Recombiner<string, string> {
     const halfSurroundChars = Math.floor(surroundingCharacters / 2);
@@ -76,16 +78,21 @@ export class TextRecombiner {
         })
   
         const surrounding = [textBehind, result.text(), textForward].join("")
-    
-        if (text.length + surrounding.length + separator.length > characterLimit) {
+
+        let newText = text;
+        if (newText === "") {
+          newText += surrounding;
+        } else {
+          newText += separator + surrounding;
+        }
+
+        const tokenCount = tokenizer.encode(newText).length;
+
+        if (tokenCount > tokenLimit) {
           break;
         }
     
-        if (text === "") {
-          text += surrounding;
-        } else {
-          text += separator + surrounding;
-        }
+        text = newText;
       }
 
       return text;

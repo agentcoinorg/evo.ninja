@@ -67,9 +67,9 @@ export class LocalCollection<TMetadata extends BaseDocumentMetadata = BaseDocume
     return limit ? results.slice(0, limit) : results;
   }
 
-  improvedSearch(query: string | number[]): AsyncGenerator<LocalDocument<TMetadata>, void, void>
-  improvedSearch(queryVector: number[]): AsyncGenerator<LocalDocument<TMetadata>, void, void>
-  async* improvedSearch(
+  iterativeSearch(query: string | number[]): AsyncGenerator<LocalDocument<TMetadata>, void, void>
+  iterativeSearch(queryVector: number[]): AsyncGenerator<LocalDocument<TMetadata>, void, void>
+  async* iterativeSearch(
     queryOrVector: string | number[]
   ): AsyncGenerator<LocalDocument<TMetadata>, void, void> {
     const queryVector = typeof queryOrVector === "string"

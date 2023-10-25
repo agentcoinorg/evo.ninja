@@ -35,7 +35,9 @@ export class StandardRagBuilderV2<TItem> {
     return this;
   }
 
-  query(query: string): QueryWithRecombineV2<TItem> {
+  query(query: string): QueryWithRecombineV2<TItem>
+  query(queryVector: number[]): QueryWithRecombineV2<TItem>
+  query(queryOrQueryVector: string | number[]): QueryWithRecombineV2<TItem> {
     const itemsToAdd = this._items.slice(this.lastAddedItemIndex + 1);
 
     const addToCollectionPromise = itemsToAdd.length
@@ -49,21 +51,21 @@ export class StandardRagBuilderV2<TItem> {
       : Promise.resolve();
     this.lastAddedItemIndex = this._items.length - 1;
 
-    return new QueryWithRecombineV2<TItem>(query, this.collection, this._items, addToCollectionPromise);
+    return new QueryWithRecombineV2<TItem>(queryOrQueryVector, this.collection, this._items, addToCollectionPromise);
   }
 }
 
 export class QueryWithRecombineV2<TItem> {
   constructor(
-    private readonly query: string,
+    private readonly queryOrQueryVector: string | number[],
     private readonly collection: LocalCollection<{ index: number }>,
     private readonly _items: TItem[],
     private readonly addToCollectionPromise: Promise<unknown>, 
   ) { }
 
-  recombiner<TRecombine>(recombiner: Recombiner<TItem, TRecombine>): Promise<TRecombine> {
+  recombine<TRecombine>(recombiner: Recombiner<TItem, TRecombine>): Promise<TRecombine> {
     return this.addToCollectionPromise.then(() => {
-      const iterator = this.collection.improvedSearch(this.query);
+      const iterator = this.collection.iterativeSearch(this.queryOrQueryVector);
 
       return recombiner(iterator, this._items);
     });
