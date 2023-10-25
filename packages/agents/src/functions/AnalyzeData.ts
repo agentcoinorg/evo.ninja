@@ -39,7 +39,8 @@ export class AnalyzeDataFunction extends LlmAgentFunctionBase<AnalyzeDataParamet
       { chunkLength: 20, overlap: 2 }
     );
 
-    const relevantChunks = await Rag.standard(chunks, context)
+    const relevantChunks = await Rag.standard(context)
+      .addItems(chunks)
       .limit(3)
       .sortByIndex()
       .query(params.question);

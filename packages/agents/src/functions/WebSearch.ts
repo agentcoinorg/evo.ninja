@@ -217,7 +217,8 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
       TextChunker.fixedCharacterLength(webpageContent, { chunkLength: 500, overlap: 100 })
     )
 
-    const matches = await Rag.standard(webpagesChunks, params.context)
+    const matches = await Rag.standard(params.context)
+      .addItems(webpagesChunks)
       .selector(x => x)
       .limit(10)
       .onlyUnique()
