@@ -11,17 +11,17 @@ type TestExecutor = Promise<
   { success: true } | { success: false; error: string }
 >;
 
-export class RunAndAnalysePythonTestFunction extends AgentFunctionBase<RunPytestFuncParams> {
+export class RunPytest extends AgentFunctionBase<RunPytestFuncParams> {
   constructor() {
     super();
   }
 
   get name() {
-    return "runAndAnalysePythonTest";
+    return "runPytest";
   }
 
   get description() {
-    return `Run python test and analyses error.`;
+    return "Run python tests using pytest and returns the output received";
   }
 
   get parameters() {
@@ -38,7 +38,7 @@ export class RunAndAnalysePythonTestFunction extends AgentFunctionBase<RunPytest
       params: RunPytestFuncParams,
       rawParams?: string
     ): Promise<AgentFunctionResult> => {
-      const testRunner = async (filename: string): TestExecutor => {
+      const testRunner = async (): TestExecutor => {
         // context.logger.notice("CMD.RUN_PYTHON_TEST = " + filename);
         // const command = `python ${filename}`;
         // const loopGuard = (): TestExecutor =>
@@ -55,8 +55,7 @@ export class RunAndAnalysePythonTestFunction extends AgentFunctionBase<RunPytest
         // const executeTest = async (): TestExecutor => {
         const runTest = async (): TestExecutor => {
           const response = await context.workspace.exec("pytest");
-          const summaryPattern =
-            /=========================== short test summary info ============================([\s\S]+?)===========================/;
+          const summaryPattern = /=========================== short test summary info ============================([\s\S]+?)===========================/;
 
           if (response.exitCode == 0) {
             return {
@@ -65,6 +64,8 @@ export class RunAndAnalysePythonTestFunction extends AgentFunctionBase<RunPytest
           } else {
             const match = summaryPattern.exec(response.stdout);
             if (match) {
+              console.log("this is the array of match")
+              console.log(match)
               console.log("this is the text: ");
               console.log(match[1]);
               return {
@@ -89,7 +90,7 @@ export class RunAndAnalysePythonTestFunction extends AgentFunctionBase<RunPytest
         // }
       };
 
-      const testResult = await testRunner(params.filename);
+      const testResult = await testRunner();
       if (!testResult.success) {
         return {
           outputs: [],

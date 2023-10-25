@@ -10,16 +10,16 @@ import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 import { Agent } from "../Agent";
 import { Rag } from "../agents/Chameleon/Rag";
 
-interface AnalyzeCodeFuncParameters {
+interface DevelopmentPlannerFuncParameters {
   query: string;
   context: string;
 }
 
-export class AnalyzeCode extends LlmAgentFunctionBase<AnalyzeCodeFuncParameters> {
+export class DevelopmentPlanner extends LlmAgentFunctionBase<DevelopmentPlannerFuncParameters> {
   constructor(llm: LlmApi, tokenizer: Tokenizer) {
     super(llm, tokenizer);
   }
-  name: string = "analyzeCode";
+  name: string = "DevelopmentPlanner";
   description: string = "Plans how to develop software based on user goal";
   parameters: any = {
     type: "object",
@@ -38,7 +38,7 @@ export class AnalyzeCode extends LlmAgentFunctionBase<AnalyzeCodeFuncParameters>
   };
   buildExecutor({ context }: Agent<unknown>) {
     return async (
-      params: AnalyzeCodeFuncParameters,
+      params: DevelopmentPlannerFuncParameters,
       rawParams?: string | undefined
     ): Promise<AgentFunctionResult> => {
       const files = context.workspace.readdirSync("./");
@@ -58,9 +58,6 @@ export class AnalyzeCode extends LlmAgentFunctionBase<AnalyzeCodeFuncParameters>
           .then(async (results) => {
             return results;
           });
-
-        console.log("matches received:")
-        console.log(matches)
         informationAvailable = matches;
       }
 
