@@ -11,6 +11,7 @@ import {
   OpenAIEmbeddingAPI,
   ContextualizedChat,
   Chat,
+  AgentOutput
 } from "@evo-ninja/agent-utils";
 import { Agent } from "../../Agent";
 import { AgentContext } from "../../AgentContext";
@@ -22,13 +23,14 @@ import { Prompt } from "./Prompt";
 import { NewAgent } from "./NewAgent";
 import { agentFunctionBaseToAgentFunction, charsToTokens, tokensToChars } from "./helpers";
 import { findBestAgent } from "./findBestAgent";
-import { LlmModels } from "@evo-ninja/agent-utils";
 
 export class ChameleonAgent extends NewAgent<GoalRunArgs> {
   private _cChat: ContextualizedChat;
   private _chunker: MessageChunker;
   private previousPrediction: string | undefined;
+  private loopCounter: number = 0;
   private previousAgent: Agent<unknown> | undefined;
+  private goal: string = "";
 
   constructor(
     context: AgentContext,
@@ -64,9 +66,10 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     chat.persistent("user", prompts.exhaustAllApproaches);
     chat.persistent("user", prompts.variablesExplainer);
     chat.persistent("user", args.goal);
+    this.goal = args.goal;
   }
 
-  protected async beforeLlmResponse(): Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[]}> {
+  protected async beforeLlmResponse(): Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[], finalOutput?: AgentOutput }> {
     const { chat } = this.context;
     const { messages } = chat.chatLogs;
 
@@ -75,7 +78,23 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
       await this.shortenLargeMessages(this.previousPrediction);
     }
 
-    const prediction = await this.predictBestNextStep(messages, this.previousAgent);
+    const prediction = (!this.previousPrediction || this.loopCounter % 2 === 0) ?
+      await this.predictBestNextStep(messages, this.previousAgent, this.previousPrediction ? "SUCCESS": undefined) :
+      this.previousPrediction;
+
+    if (prediction === "SUCCESS") {
+      return {
+        logs: chat.chatLogs,
+        agentFunctions: [],
+        allFunctions: [],
+        finalOutput: {
+          type: "success",
+          title: "SUCCESS"
+        }
+      };
+    }
+
+    this.loopCounter += 1;
 
     const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(prediction, this.context);
 
@@ -110,7 +129,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     );
   }
 
-  private async predictBestNextStep(messages: ChatMessage[], previousAgent: Agent<unknown> | undefined): Promise<string> {
+  private async predictBestNextStep(messages: ChatMessage[], previousAgent: Agent<unknown> | undefined, terminationStr?: string): Promise<string> {
     const agentPersona = previousAgent ?
       // TODO: fix this when we refactor agent prompts
       previousAgent.config.prompts.initialMessages({ goal: "" }).slice(0, -1) :
@@ -124,7 +143,8 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
         ])
         .line(`
           Consider the above chat between a user and assistant.
-          In your expert opinion, what is the best next step for the assistant?`
+          In your expert opinion, what is the best next step for the assistant?
+          ${terminationStr && this.goal.length < 350 ? `If you are 100% sure the user's goal has been achieved, simply respond with "${terminationStr}". The user's goal is: "${this.goal}"` : ""}`
         ),
       {
         model: "gpt-3.5-turbo-16k-0613"
@@ -132,6 +152,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     );
   };
 
+  // TODO: explore removing this
   private async shortenLargeMessages(query: string): Promise<void> {
     for(let i = 0; i < this.context.chat.chatLogs.messages.length ; i++) {
       const message = this.context.chat.chatLogs.messages[i];
@@ -142,6 +163,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     }
   }
 
+  // TODO: try using same ContextualizeChat logic for chunking and summarizing?
   private async advancedFilterText(text: string, query: string): Promise<string> {
     const maxCharsToUse = this.maxContextChars() * 0.45;
     const charsForPreview = maxCharsToUse * 0.7;
@@ -174,7 +196,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
         ).toString();
 
     const outputTokens = charsToTokens(maxCharsToUse * 0.25);
-    const filteredText = await this.askLlm(prompt, { maxResponseTokens: outputTokens });
+    const filteredText = await this.askLlm(prompt, { maxResponseTokens: outputTokens, model: "gpt-3.5-turbo-16k-0613" });
 
     console.log("filteredText", filteredText);
     console.log("maxCharsToUse", maxCharsToUse);

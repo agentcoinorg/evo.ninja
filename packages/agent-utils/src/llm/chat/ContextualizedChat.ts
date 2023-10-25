@@ -8,7 +8,8 @@ import {
   LocalVectorDB,
   LocalCollection,
   BaseDocumentMetadata,
-  AgentVariables
+  AgentVariables,
+  PriorityContainer
 } from "../../";
 
 import { v4 as uuid } from "uuid";
@@ -33,6 +34,20 @@ export class ContextualizedChat {
   };
 
   private _collections: Record<ChatLogType, LocalCollection<DocumentMetadata>>;
+
+  private _functionCallResultFirstChunks: Record<ChunkIdx, {
+    text: string,
+    metadata: DocumentMetadata
+  }> = {};
+
+  private _lastTwoMsgs: Record<ChatLogType, PriorityContainer<{
+    text: string;
+    metadata: DocumentMetadata;
+    msgIdx: MsgIdx;
+  }>> = {
+    "persistent": new PriorityContainer(2, (a, b) => b.msgIdx - a.msgIdx),
+    "temporary": new PriorityContainer(2, (a, b) => b.msgIdx - a.msgIdx),
+  };
 
   constructor(
     private _rawChat: Chat,
@@ -137,11 +152,11 @@ export class ContextualizedChat {
     type: ChatLogType,
     tokenLimit: number
   ): Promise<{ msg: ChatMessage; chunkIdx: ChunkIdx; }[]> {
-    // Search the collection for relevant chunks
-    const results = await this._collections[type].search(context);
 
     // Aggregate as many as possible
     const chunks: { msg: ChatMessage; chunkIdx: ChunkIdx; }[] = [];
+    const chunksAdded: Set<ChunkIdx> = new Set();
+    const msgsAdded: Record<MsgIdx, number> = {};
     let tokenCounter = 0;
 
     const addChunk = (chunkText: string, metadata: DocumentMetadata): boolean => {
@@ -149,12 +164,70 @@ export class ContextualizedChat {
         return false;
       }
 
-      const msg = JSON.parse(chunkText) as ChatMessage;
       const chunkIdx = metadata.index;
+      const chunk = this._chunks[type][chunkIdx];
+
+      // Only add up to 4 chunks per message
+      if (!msgsAdded[chunk.msgIdx]) {
+        msgsAdded[chunk.msgIdx] = 0;
+      }
+      if (msgsAdded[chunk.msgIdx] >= 4) {
+        return true;
+      }
+      msgsAdded[chunk.msgIdx] += 1;
+
+      const msg = JSON.parse(chunkText) as ChatMessage;
+
+      // Track the chunk index
+      if (chunksAdded.has(chunkIdx)) {
+        return true;
+      } else {
+        chunksAdded.add(chunkIdx);
+      }
+
       chunks.push({ msg, chunkIdx });
       tokenCounter += metadata.tokens;
+
+      if ((msg.role === "assistant" && msg.function_call) || msg.role === "function") {
+        // Ensure function call + results are always added together.
+        // We must traverse the chunk array to find the nearest neighbor
+        const direction = msg.role === "assistant" ? 1 : -1;
+        const search = msg.role === "assistant" ? "function" : "assistant";
+        let funcChunkIdx: number | undefined = undefined;
+        let nextChunkIdx = chunkIdx + direction;
+        while (!funcChunkIdx) {
+          if (this._chunks[type].length >= nextChunkIdx || nextChunkIdx < 0) {
+            break;
+          }
+
+          const msg = this._rawChat.chatLogs.getMsg(
+            type, this._chunks[type][nextChunkIdx].msgIdx
+          );
+
+          if (msg?.role === search) {
+            // We found it
+            funcChunkIdx = nextChunkIdx;
+          } else {
+            nextChunkIdx += direction;
+          }
+        }
+
+        if (!funcChunkIdx || chunksAdded.has(funcChunkIdx)) return true;
+
+        const firstChunk = this._functionCallResultFirstChunks[funcChunkIdx];
+        return addChunk(firstChunk.text, firstChunk.metadata);
+      }
+
       return true;
     }
+
+    // Start by always adding the last 2 messages to the chat (1st chunk)
+    for (const lastMsg of this._lastTwoMsgs[type].getItems()) {
+      addChunk(lastMsg.text, lastMsg.metadata);
+    }
+
+    // Search the collection for relevant chunks
+    const results = await this._collections[type].search(context);
 
     for (const result of results) {
       const chunkText = result.text();
@@ -226,7 +299,11 @@ export class ContextualizedChat {
         newChunks.push(...this._chunker.chunk(message));
       }
     } else {
-      newChunks.push(JSON.stringify(message));
+      if (isVariable) {
+        newChunks.push(variableChunkText(message, 0, varName));
+      } else {
+        newChunks.push(JSON.stringify(message));
+      }
     }
 
     const chunks = this._chunks[type];
@@ -253,6 +330,22 @@ export class ContextualizedChat {
 
     // Add the chunks to the vectordb collection
     await this._collections[type].add(newChunks, metadatas);
+
+    // If the message is a function call or result,
+    // store the first chunk's text so we can easily retrieve it
+    if (message.role === "function" || message.function_call) {
+      this._functionCallResultFirstChunks[startChunkIdx] = {
+        text: newChunks[0],
+        metadata: metadatas[0]
+      };
+    }
+
+    // Keep track of the 2 most recent (temporary) messages
+    this._lastTwoMsgs[type].addItem({
+      text: newChunks[0],
+      metadata: metadatas[0],
+      msgIdx: msgIdx
+    });
 
     return;
   }
@@ -327,8 +420,8 @@ function postProcessMessages(messages: ChatMessage[]): ChatMessage[] {
   return result;
 }
 
-function variableChunkText(chunk: string, index: number, varName: string): string {
-  const message = JSON.parse(chunk) as ChatMessage;
+function variableChunkText(chunk: string | ChatMessage, index: number, varName: string): string {
+  const message = typeof chunk === "string" ? JSON.parse(chunk) as ChatMessage : chunk;
   return JSON.stringify({
     ...message,
     content: `Variable "${varName}" chunk #${index}\n\`\`\`\n${message.content}\n\`\`\``
