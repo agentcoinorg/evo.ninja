@@ -56,13 +56,23 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     );
   }
 
-  protected initializeChat(args: GoalRunArgs): void {
+  protected async initializeChat(args: GoalRunArgs): Promise<void> {
     const { chat } = this.context;
 
     chat.persistent(buildDirectoryPreviewMsg(this.context.workspace));
     chat.persistent("user", prompts.exhaustAllApproaches);
     chat.persistent("user", prompts.variablesExplainer);
-    chat.persistent("user", args.goal);
+
+
+    if (args.goal.length > 1300) {
+      const summarizedGoal = await this.askLlm(
+        "Summarize this to a max of 1300 characters: \n" + args.goal,
+        { model: "gpt-3.5-turbo-0613" }
+      );
+      chat.persistent("user", summarizedGoal);
+    } else {
+      chat.persistent("user", args.goal);
+    }
   }
 
   protected async beforeLlmResponse(): Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[]}> {

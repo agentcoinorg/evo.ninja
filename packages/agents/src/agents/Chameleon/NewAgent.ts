@@ -22,7 +22,7 @@ export abstract class NewAgent<TRunArgs> extends Agent<TRunArgs> {
   public async* run(
     args: TRunArgs,
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
-    this.initializeChat(args);
+    await this.initializeChat(args);
     return yield* this.runWithChat();
   }
 
