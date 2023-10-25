@@ -4,7 +4,7 @@ import { AgentPrompts } from "../../AgentPrompts";
 
 export const prompts: AgentPrompts<GoalRunArgs> = {
   name: "DataAnalyst",
-  expertise: `adept at processing CSV files, extracting key data points, and performing calculations to derive insights from the information.`,
+  expertise: `adept at processing CSV files, extracting key data points, and performing calculations to derive insights from the information. Also specializes in writing information respecting precision and format`,
   initialMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
     {
       role: "user",

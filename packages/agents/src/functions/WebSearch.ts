@@ -106,8 +106,6 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         .line(`Specify if the information is incomplete but still return it`)
         .toString()
 
-        console.log(analyzeChunkMatchesPrompt)
-
         const analysisFromChunks = await this.askLlm(analyzeChunkMatchesPrompt)
   
         return this.onSuccess(
