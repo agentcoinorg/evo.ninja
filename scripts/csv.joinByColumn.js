@@ -75,7 +75,7 @@ function joinCSVs(csv1, csv2, columnName) {
   return `${serializedHeaders}\n${serializedDataRows}`;
 }
 
-const result = joinCSVs(csvData1, csvData2, joinColumnName);
+const result = joinCSVs(csv1, csv2, joinColumnName);
 
 if (typeof outputFile === "string") {
   fs.writeFileSync(outputFile, result);

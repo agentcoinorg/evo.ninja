@@ -45,7 +45,7 @@ function orderColumnsAlphabetically(rows) {
   return reorderedRows;
 }
 
-const { rows, delimiter } = parseCSV(csvData);
+const { rows, delimiter } = parseCSV(csv);
 
 const reorderedRows = orderColumnsAlphabetically(rows);
 

@@ -42,7 +42,7 @@ function addColumnToCSVRows(rows, column, values) {
   return rows;
 }
 
-const { rows, delimiter } = parseCSV(csvData);
+const { rows, delimiter } = parseCSV(csv);
 
 const updatedRows = addColumnToCSVRows(rows, column, values);
 

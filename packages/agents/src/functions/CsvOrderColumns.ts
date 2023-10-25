@@ -1,11 +1,11 @@
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
-export class CsvOrderColumnsFunction extends ScriptFunction<{ csvData: string }> {
+export class CsvOrderColumnsFunction extends ScriptFunction<{ csv: string }> {
   name: string = "csv_orderColumns";
   parameters: any = {
     type: "object",
     properties: { 
-      csvData: {
+      csv: {
           type: "string"
       },
       outputFile: {
@@ -13,7 +13,7 @@ export class CsvOrderColumnsFunction extends ScriptFunction<{ csvData: string }>
           description: "Write the result to a file"
       }
     },
-    required: ["csvData"],
+    required: ["csv"],
     additionalProperties: false
   };
 }

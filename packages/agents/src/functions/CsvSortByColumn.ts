@@ -1,11 +1,11 @@
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
-export class CsvSortByColumnFunction extends ScriptFunction<{ csvData: string, columnIndex: string }> {
+export class CsvSortByColumnFunction extends ScriptFunction<{ csv: string, columnIndex: string }> {
   name: string = "csv_sortByColumn";
   parameters: any = {
     type: "object",
     properties: { 
-      csvData: {
+      csv: {
           type: "string"
       },
       columnIndex: {
@@ -16,7 +16,7 @@ export class CsvSortByColumnFunction extends ScriptFunction<{ csvData: string, c
           description: "Write the result to a file"
       }
     },
-    required: ["csvData", "columnIndex"],
+    required: ["csv", "columnIndex"],
     additionalProperties: false
   };
 }

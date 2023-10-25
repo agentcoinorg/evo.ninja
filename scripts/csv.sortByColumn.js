@@ -46,7 +46,7 @@ function sortCSVByColumn(rows, columnIndex) {
   return [header].concat(sortedDataRows);
 }
 
-const { rows, delimiter } = parseCSV(csvData);
+const { rows, delimiter } = parseCSV(csv);
 
 const sortedRows = sortCSVByColumn(rows, columnIndex);
 

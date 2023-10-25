@@ -26,7 +26,7 @@ function serializeCSV(rows, delimiter) {
   return rows.map(row => row.join(delimiter)).join("\n");
 }
 
-const { rows, delimiter } = parseCSV(csvData);
+const { rows, delimiter } = parseCSV(csv);
 
 // Separate header from the rest of the rows
 let resultRows = [];

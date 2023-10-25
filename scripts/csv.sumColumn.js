@@ -22,7 +22,7 @@ function parseCSV(data) {
   return { rows: rows.map(row => row.split(delimiter)), delimiter };
 }
 
-const { rows } = parseCSV(csvData);
+const { rows } = parseCSV(csv);
 let sum = 0;
 
 // Start from 1 if there's a header row

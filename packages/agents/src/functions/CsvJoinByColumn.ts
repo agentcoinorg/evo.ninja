@@ -5,10 +5,10 @@ export class CsvJoinByColumnFunction extends ScriptFunction<{ csv1Path: string, 
   parameters: any = {
     type: "object",
     properties: { 
-      csvData1: {
+      csv1: {
           type: "string"
       },
-      csvData2: {
+      csv2: {
           type: "string"
       },
       joinColumnName: {
@@ -19,7 +19,7 @@ export class CsvJoinByColumnFunction extends ScriptFunction<{ csv1Path: string, 
           description: "Write the result to a file"
       }
     },
-    required: ["csvData1", "csvData2", "joinColumnName"],
+    required: ["csv1", "csv2", "joinColumnName"],
     additionalProperties: false
   };
 }
