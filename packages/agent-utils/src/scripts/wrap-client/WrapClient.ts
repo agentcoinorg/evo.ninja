@@ -29,7 +29,7 @@ export class WrapClient extends PolywrapClient {
     const builder = new PolywrapClientConfigBuilder()
       .addBundle("web3")
       .addBundle("sys")
-      // .setPackage("ipfs/QmVhzZEswxuhNLxoREpemBGBpMKngMjyLFkdXRBTzP3grQ", jsEnginePackage)
+      .setPackage("ipfs/QmVhzZEswxuhNLxoREpemBGBpMKngMjyLFkdXRBTzP3grQ", jsEnginePackage)
       .setPackage("plugin/math", PluginPackage.from(module => ({
         "random": async () => {
           return Math.random();
