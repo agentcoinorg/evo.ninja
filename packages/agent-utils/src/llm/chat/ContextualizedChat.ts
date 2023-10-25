@@ -8,7 +8,8 @@ import {
   LocalVectorDB,
   LocalCollection,
   BaseDocumentMetadata,
-  AgentVariables
+  AgentVariables,
+  PriorityContainer
 } from "../../";
 
 import { v4 as uuid } from "uuid";
@@ -39,13 +40,13 @@ export class ContextualizedChat {
     metadata: DocumentMetadata
   }> = {};
 
-  private _lastTwoMsgs: Record<ChatLogType, {
+  private _lastTwoMsgs: Record<ChatLogType, PriorityContainer<{
     text: string;
     metadata: DocumentMetadata;
     msgIdx: MsgIdx;
-  }[]> = {
-    "persistent": [],
-    "temporary": []
+  }>> = {
+    "persistent": new PriorityContainer(2, (a, b) => b.msgIdx - a.msgIdx),
+    "temporary": new PriorityContainer(2, (a, b) => b.msgIdx - a.msgIdx),
   };
 
   constructor(
@@ -221,7 +222,7 @@ export class ContextualizedChat {
     }
 
     // Start by always adding the last 2 messages to the chat (1st chunk)
-    for (const lastMsg of this._lastTwoMsgs[type]) {
+    for (const lastMsg of this._lastTwoMsgs[type].getItems()) {
       addChunk(lastMsg.text, lastMsg.metadata);
     }
 
@@ -340,16 +341,11 @@ export class ContextualizedChat {
     }
 
     // Keep track of the 2 most recent (temporary) messages
-    this._lastTwoMsgs[type].push({
+    this._lastTwoMsgs[type].addItem({
       text: newChunks[0],
       metadata: metadatas[0],
       msgIdx: msgIdx
     });
-    this._lastTwoMsgs[type].sort((a, b) => b.msgIdx - a.msgIdx);
-
-    if (this._lastTwoMsgs[type].length > 2) {
-      this._lastTwoMsgs[type].pop();
-    }
 
     return;
   }
