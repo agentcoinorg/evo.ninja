@@ -4,14 +4,12 @@ import { AgentContext } from "../../AgentContext";
 import { AgentFunctionBase } from "../../AgentFunctionBase";
 import { DeveloperAgent, ResearcherAgent, DataAnalystAgent, WebResearcherAgent } from "../../scriptedAgents";
 import { Rag } from "./Rag";
-import { StandardRagBuilder } from "./StandardRagBuilder";
 
 type AgentWithPrompts = {
   expertise: string;
   persona: string;
   agent: Agent<GoalRunArgs>;
 };
-let agentRag: StandardRagBuilder<AgentWithPrompts>;
 
 export const findBestAgent = async (
   query: string, 
@@ -38,13 +36,11 @@ export const findBestAgent = async (
     };
   });
 
-  if (!agentRag) {
-    agentRag = Rag.standard<AgentWithPrompts>(context)
-      .addItems(agentsWithPrompts)
-      .selector(x => x.expertise)
-      .limit(1)
-      .onlyUnique();
-  }
+  let agentRag = Rag.standard<AgentWithPrompts>(context)
+    .addItems(agentsWithPrompts)
+    .selector(x => x.expertise)
+    .limit(1)
+    .onlyUnique();
 
   const agents = await agentRag.query(query);
 
