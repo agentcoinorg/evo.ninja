@@ -1,4 +1,4 @@
-import { FunctionDefinition, Rag, ArrayRecombiner } from "@evo-ninja/agent-utils";
+import { FunctionDefinition, Rag, ArrayRecombiner, InMemoryWorkspace } from "@evo-ninja/agent-utils";
 import { Agent, GoalRunArgs } from "../../Agent";
 import { AgentContext } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../../AgentFunctionBase";
@@ -10,9 +10,13 @@ type AgentWithPrompts = {
   agent: Agent<GoalRunArgs>;
 };
 
+const workspace = new InMemoryWorkspace();
+const AGENT_COLLECTION_NAME = "agents-for-prediction";
+let isDbInitialized = false;
+
 export const findBestAgent = async (
-  query: string,
-  context: AgentContext,
+  queryOrVector: string | number[], 
+  context: AgentContext
 ): Promise<[
   Agent<unknown>,
   FunctionDefinition[],
@@ -34,12 +38,22 @@ export const findBestAgent = async (
     };
   });
 
-  const agentRag = Rag.standard<AgentWithPrompts>(context)
-      .addItems(agentsWithPrompts)
-      .selector(x => x.expertise);
+  let rag;
 
-  const agents = await agentRag
-    .query(query)
+  if (!isDbInitialized) {
+    rag = await Rag.standard<AgentWithPrompts>(context, AGENT_COLLECTION_NAME, workspace)
+      .selector(x => x.expertise)
+      .addItems(agentsWithPrompts)
+      .forceAddItemsToCollection();
+    
+    isDbInitialized = true;
+  } else {
+    rag = Rag.standard<AgentWithPrompts>(context, AGENT_COLLECTION_NAME, workspace, agentsWithPrompts)
+      .selector(x => x.expertise);
+  }
+
+  const agents = await rag
+    .query(queryOrVector)
     .recombine(ArrayRecombiner.standard({
       limit: 1,
     }));
