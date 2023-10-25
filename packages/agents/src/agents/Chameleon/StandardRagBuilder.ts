@@ -1,5 +1,5 @@
 
-import { OpenAIEmbeddingAPI, LocalVectorDB, LocalDocument, LazyArray, filterDuplicates } from "@evo-ninja/agent-utils";
+import { OpenAIEmbeddingAPI, LocalVectorDB, LocalDocument, LazyArray, filterDuplicates, LocalCollection } from "@evo-ninja/agent-utils";
 import { v4 as uuid } from "uuid";
 import { AgentContext } from "../../AgentContext";
 
@@ -9,8 +9,29 @@ export class StandardRagBuilder<TItem> {
   private _selector: (item: TItem) => string = x => x as unknown as string;
   private _sort: "index" | "relevance";
   private _unique: boolean;
+  private readonly collection: LocalCollection<{ index: number }>;
+  private addToCollectionPromise: Promise<unknown>;
+  private _items: TItem[];
+  private lastAddedItemIndex: number;
 
-  constructor( private readonly _items: TItem[], private readonly context: AgentContext) { }
+  constructor(context: AgentContext, collectionName?: string) {
+    const embeddingApi = new OpenAIEmbeddingAPI(
+      context.env.OPENAI_API_KEY,
+      context.logger,
+      context.chat.tokenizer
+    );
+
+    const db = new LocalVectorDB(context.internals, "ragdb", embeddingApi);
+
+    this.collection = db.addCollection<{ index: number }>(collectionName ?? uuid());
+    this._items = [];
+    this.lastAddedItemIndex = -1;
+  }
+
+  addItems(items: TItem[]): StandardRagBuilder<TItem> {
+    this._items.push(...items);
+    return this;
+  }
 
   limit(limit: number): StandardRagBuilder<TItem> {
     this._limit = limit;
@@ -43,23 +64,20 @@ export class StandardRagBuilder<TItem> {
   }
 
   recombine<TRecombine>(recombiner: (results: LazyArray<{item: TItem, doc: LocalDocument<{ index: number }> }>, originalItems: TItem[]) => TRecombine): QueryWithRecombine<TItem, TRecombine> {
-    return new QueryWithRecombine<TItem, TRecombine>(this._items, this.context, this._limit, this._selector, this._sort, this._unique, recombiner);
+    return new QueryWithRecombine<TItem, TRecombine>(this.collection, this._items, this.addToCollectionPromise, this._limit, this._sort, this._unique, recombiner);
   }
 
   query(query: string): LazyArray<TItem> {
-    const embeddingApi = new OpenAIEmbeddingAPI(
-      this.context.env.OPENAI_API_KEY,
-      this.context.logger,
-      this.context.chat.tokenizer
-    );
+    const itemsToAdd = this._items.slice(this.lastAddedItemIndex + 1);
 
-    const db = new LocalVectorDB(this.context.internals, "ragdb", embeddingApi);
-
-    const collection = db.addCollection<{ index: number }>(uuid());
-
-    const resultPromise = collection.add(this._items.map(x => this._selector(x)), this._items.map((_, i) => ({ index: i })))
+    const addToCollectionPromise = itemsToAdd.length
+      ? this.collection.add(itemsToAdd.map(x => this._selector(x)), itemsToAdd.map((_, i) => ({ index: this.lastAddedItemIndex + i + 1 })))
+      : Promise.resolve();
+    this.lastAddedItemIndex = this._items.length - 1;
+    
+    const resultPromise = addToCollectionPromise
       .then(async () => {
-        const results = await collection.search(query, this._limit);
+        const results = await this.collection.search(query, this._limit);
         let filteredItems;
         if (this._sort === "index") {
           filteredItems = this._sortByIndex(this._items, results);
@@ -96,29 +114,19 @@ export class StandardRagBuilder<TItem> {
 
 export class QueryWithRecombine<TItem, TRecombine> {
   constructor(
-    private readonly _items: TItem[], 
-    private readonly context: AgentContext,
+    private readonly collection: LocalCollection<{ index: number }>,
+    private readonly _items: TItem[],
+    private readonly addToCollectionPromise: Promise<unknown>, 
     private readonly _limit: number,
-    private readonly _selector: (item: TItem) => string,
     private readonly _sort: "index" | "relevance",
     private readonly _unique: boolean,
     private readonly _recombine: (results: LazyArray<{item: TItem, doc: LocalDocument<{ index: number }> }>, originalItems: TItem[]) => TRecombine
   ) { }
 
   query(query: string): TRecombine {
-    const embeddingApi = new OpenAIEmbeddingAPI(
-      this.context.env.OPENAI_API_KEY,
-      this.context.logger,
-      this.context.chat.tokenizer
-    );
-
-    const db = new LocalVectorDB(this.context.internals, "ragdb", embeddingApi);
-
-    const collection = db.addCollection<{ index: number }>(uuid());
-
-    const resultPromise = collection.add(this._items.map(x => this._selector(x)), this._items.map((_, i) => ({ index: i })))
+    const resultPromise = this.addToCollectionPromise
       .then(async () => {
-        const results = await collection.search(query, this._limit);
+        const results = await this.collection.search(query, this._limit);
         let filteredItems: {item: TItem, doc: LocalDocument<{ index: number }> }[];
         if (this._sort === "index") {
           filteredItems = this._sortByIndex(this._items, results);
