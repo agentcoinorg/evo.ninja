@@ -6,7 +6,6 @@ import { CsvOrderColumnsFunction } from "../../functions/CsvOrderColumns";
 import { CsvSortByColumnFunction } from "../../functions/CsvSortByColumn";
 import { CsvSumColumnFunction } from "../../functions/CsvSumColumn";
 import { WriteFileFunction } from "../../functions/WriteFile";
-import { ThinkFunction } from "../../functions/Think";
 import { prompts } from "./prompts";
 import { AgentContext } from "../../AgentContext";
 import { AgentConfig } from "../../AgentConfig";
@@ -25,8 +24,7 @@ export class DataAnalystAgent extends Agent {
           new CsvOrderColumnsFunction(context.scripts, true),
           new CsvSortByColumnFunction(context.scripts, true),
           new CsvSumColumnFunction(context.scripts, true),
-          new WriteFileFunction(context.scripts),
-          new ThinkFunction()
+          new WriteFileFunction(context.scripts)
         ],
         context.scripts,
       ),

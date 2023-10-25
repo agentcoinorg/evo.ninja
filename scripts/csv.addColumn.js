@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 function detectDelimiter(row) {
   const supportedDelimiters = [",", ";", "\t", "|", ":"];
 
@@ -11,6 +14,9 @@ function detectDelimiter(row) {
 }
 
 function parseCSV(data) {
+  if (data.indexOf("\n") === -1 && path.extname(data) === ".csv") {
+    data = fs.readFileSync(data, "utf-8");
+  }
   const rows = data.trim().split('\n');
   const delimiter = detectDelimiter(rows[0]);
   return { rows: rows.map(row => row.split(delimiter)), delimiter };
@@ -40,4 +46,10 @@ const { rows, delimiter } = parseCSV(csvData);
 
 const updatedRows = addColumnToCSVRows(rows, column, values);
 
-return serializeCSV(updatedRows, delimiter);
+const result = serializeCSV(updatedRows, delimiter);
+
+if (typeof outputFile === "string") {
+  fs.writeFileSync(outputFile, result);
+}
+
+return result;

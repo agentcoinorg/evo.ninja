@@ -6,10 +6,15 @@ export class CsvSortByColumnFunction extends ScriptFunction<{ csvData: string, c
     type: "object",
     properties: { 
       csvData: {
-          type: "string"
+          type: "string",
+          description: "The raw CSV data as a string string (not a file name or path)."
       },
       columnIndex: {
           type: "number"
+      },
+      outputFile: {
+          type: "string",
+          description: "Write the result to a file"
       }
     },
     required: ["csvData", "columnIndex"],

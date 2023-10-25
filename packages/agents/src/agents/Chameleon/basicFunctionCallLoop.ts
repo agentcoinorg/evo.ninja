@@ -11,13 +11,17 @@ export async function* basicFunctionCallLoop(
   ) => boolean,
   loopPreventionPrompt: string,
   agentSpeakPrompt: string = AGENT_SPEAK_RESPONSE,
-  beforeLlmResponse: () => Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[]}>,
+  beforeLlmResponse: () => Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[], finalOutput?: AgentOutput }>,
 ): AsyncGenerator<AgentOutput, RunResult, string | undefined>
 {
   const { llm, chat } = context;
 
   while (true) {
-    const { logs, agentFunctions, allFunctions } = await beforeLlmResponse();
+    const { logs, agentFunctions, allFunctions, finalOutput } = await beforeLlmResponse();
+
+    if (finalOutput) {
+      return ResultOk(finalOutput);
+    }
 
     const response = await llm.getResponse(logs, agentFunctions);
 

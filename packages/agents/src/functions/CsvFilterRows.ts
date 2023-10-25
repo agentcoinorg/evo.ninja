@@ -6,7 +6,8 @@ export class CsvFilterRowsFunction extends ScriptFunction<{ csvData: string, col
     type: "object",
     properties: { 
       csvData: {
-        type: "string"
+        type: "string",
+        description: "The raw CSV data as a string string (not a file name or path)."
       },
       columnIndex: {
         type: "number"
@@ -16,6 +17,10 @@ export class CsvFilterRowsFunction extends ScriptFunction<{ csvData: string, col
       },
       withHeader: {
         type: "boolean"
+      },
+      outputFile: {
+          type: "string",
+          description: "Write the result to a file"
       }
     },
     required: ["csvData", "columnIndex", "searchString", "withHeader"],

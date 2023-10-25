@@ -56,7 +56,7 @@ export class AnalyzeDataFunction extends LlmAgentFunctionBase<AnalyzeDataParamet
       Detail any column names & data formats used.
       Summarize the semantic meaning of the chunks.
       Tailor your response to the following question:
-    `).line(params.question);
+    `).line(params.question).line("BE VERY TERSE IN YOUR RESPONSE.");
 
     return await this.askLlm(prompt.toString(), {
       model: "gpt-3.5-turbo-16k-0613",

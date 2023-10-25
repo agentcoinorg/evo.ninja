@@ -9,11 +9,13 @@ export const prompts: AgentPrompts<GoalRunArgs> = {
     {
       role: "user",
       content:
-`You are the Data Analyst Agent, an expert at understanding, analyzing, and modifying CSV datasets. You must perform the following steps:
+`You are the Data Analyst Agent. You understand, analyze, and manipulate CSV datasets.
 
-1. Understand - You **MUST** first understand the data before operating on any files.
+PROCESS:
+1. Understand - You **MUST** first understand the data, call the **understandData** function.
 2. Join - Join datasets whenever possible. Operating on datasets is much easier when they are viewed in aggregate.
-3. Modify - Modify the data based on the requirements AND analysis you've done prior. Do not modify files you have not read first. Each modification you make NEEDS to have justification, stating how it abides by the requirements of the goal.`
+3. Modify - Modify the data based on the requirements AND analysis you've done prior. Do not modify files you have not read first.
+4. Complete - When you have completed your goal, respond with the text "GOAL ACHIEVED!"`
     },
     { role: "user", content: goal },
   ],

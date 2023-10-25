@@ -6,13 +6,19 @@ export class CsvJoinByColumnFunction extends ScriptFunction<{ csv1Path: string, 
     type: "object",
     properties: { 
       csvData1: {
-          type: "string"
+          type: "string",
+          description: "The raw CSV data as a string string (not a file name or path)."
       },
       csvData2: {
-          type: "string"
+          type: "string",
+          description: "The raw CSV data as a string string (not a file name or path)."
       },
       joinColumnName: {
           type: "string"
+      },
+      outputFile: {
+          type: "string",
+          description: "Write the result to a file"
       }
     },
     required: ["csvData1", "csvData2", "joinColumnName"],

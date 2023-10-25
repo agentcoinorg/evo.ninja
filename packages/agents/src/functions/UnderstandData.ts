@@ -1,4 +1,3 @@
-import { AnalyzeFormattingRequirementsFunction } from "./AnalyzeFormattingRequirements";
 import { ReadDirectoryFunction } from "./ReadDirectory";
 import { ReadAndAnalyzeDataFunction } from "./ReadAndAnalyzeData";
 import { AgentFunctionBase } from "../AgentFunctionBase";
@@ -26,10 +25,6 @@ export class UnderstandDataFunction extends AgentFunctionBase<UnderstandDataPara
 
   buildExecutor(agent: Agent<unknown>): (params: UnderstandDataParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
     return async (params: UnderstandDataParameters, rawParams?: string): Promise<AgentFunctionResult> => {
-      const analyzeFormattingRequirements = new AnalyzeFormattingRequirementsFunction(
-        agent.context.llm,
-        agent.context.chat.tokenizer
-      ).buildExecutor(agent);
       const readDirectory = new ReadDirectoryFunction(
         agent.context.scripts
       ).buildExecutor(agent);
@@ -39,7 +34,6 @@ export class UnderstandDataFunction extends AgentFunctionBase<UnderstandDataPara
       // - read directory
       // - read and analyze all files
       const results: AgentFunctionResult[] = await Promise.all([
-        analyzeFormattingRequirements({ goal: params.goal }),
         readDirectory({ path: "./" }),
         ...this.readAndAnalyzeFiles(agent, params.goal)
       ]);

@@ -126,6 +126,11 @@ export const requireShim = (lib: string) => {
         ext: undefined // TODO
       })).value
     },
+    extname: (path: string) => {
+      return __wrap_subinvoke("plugin/path", "extname", clean({
+        path
+      })).value
+    },
     format: (pathObject: any) => {
       return __wrap_subinvoke("plugin/path", "format", clean({ pathObject })).value
     },

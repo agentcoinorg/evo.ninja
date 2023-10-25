@@ -11,6 +11,7 @@ import {
   OpenAIEmbeddingAPI,
   ContextualizedChat,
   Chat,
+  AgentOutput
 } from "@evo-ninja/agent-utils";
 import { Agent } from "../../Agent";
 import { AgentContext } from "../../AgentContext";
@@ -27,6 +28,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
   private _cChat: ContextualizedChat;
   private _chunker: MessageChunker;
   private previousPrediction: string | undefined;
+  private loopCounter: number = 0;
   private previousAgent: Agent<unknown> | undefined;
 
   constructor(
@@ -65,7 +67,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     chat.persistent("user", args.goal);
   }
 
-  protected async beforeLlmResponse(): Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[]}> {
+  protected async beforeLlmResponse(): Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[], finalOutput?: AgentOutput }> {
     const { chat } = this.context;
     const { messages } = chat.chatLogs;
 
@@ -74,7 +76,23 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
       await this.shortenLargeMessages(this.previousPrediction);
     }
 
-    const prediction = await this.predictBestNextStep(messages, this.previousAgent);
+    const prediction = (!this.previousPrediction || this.loopCounter % 2 === 0) ?
+      await this.predictBestNextStep(messages, this.previousAgent, this.previousPrediction ? "SUCCESS": undefined) :
+      this.previousPrediction;
+
+    if (prediction === "SUCCESS") {
+      return {
+        logs: chat.chatLogs,
+        agentFunctions: [],
+        allFunctions: [],
+        finalOutput: {
+          type: "success",
+          title: "SUCCESS"
+        }
+      };
+    }
+
+    this.loopCounter += 1;
 
     const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(prediction, this.context);
 
@@ -109,7 +127,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     );
   }
 
-  private async predictBestNextStep(messages: ChatMessage[], previousAgent: Agent<unknown> | undefined): Promise<string> {
+  private async predictBestNextStep(messages: ChatMessage[], previousAgent: Agent<unknown> | undefined, terminationStr?: string): Promise<string> {
     const agentPersona = previousAgent ?
       // TODO: fix this when we refactor agent prompts
       previousAgent.config.prompts.initialMessages({ goal: "" }).slice(0, -1) :
@@ -123,7 +141,8 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
         ])
         .line(`
           Consider the above chat between a user and assistant.
-          In your expert opinion, what is the best next step for the assistant?`
+          In your expert opinion, what is the best next step for the assistant?
+          ${terminationStr ? `If the goal is achieved, simply respond with "${terminationStr}"` : ""}`
         ),
       {
         model: "gpt-3.5-turbo-16k-0613"
