@@ -6,7 +6,8 @@ import {
 import {
   MessageChunker,
   BaseDocumentMetadata,
-  AgentVariables
+  AgentVariables,
+  PriorityContainer
 } from "../../";
 
 import { Rag } from "../../rag/Rag";
@@ -14,22 +15,19 @@ import { AgentContext } from "../../agent/AgentContext";
 import { StandardRagBuilder } from "../../rag/StandardRagBuilder";
 import { MessageRecombiner } from "../../chunking/MessageRecombiner";
 
-type MsgIdx = number;
+export type MsgIdx = number;
 
 interface Chunk {
   msgIdx: MsgIdx;
 }
 
-type ChunkIdx = number;
-
-interface DocumentMetadata extends BaseDocumentMetadata {
-  tokens: number;
-}
+export type ChunkIdx = number;
 
 export type MessageChunk = {
   json: string;
   tokens: number;
-  index: number;
+  chunkIdx: ChunkIdx;
+  msgIdx: MsgIdx;
 };
 
 export class ContextualizedChat {
@@ -40,6 +38,20 @@ export class ContextualizedChat {
   };
 
   private _rags: Record<ChatLogType, StandardRagBuilder<MessageChunk>>;
+
+  private _functionCallResultFirstChunks: Record<ChunkIdx, {
+    text: string,
+    metadata: BaseDocumentMetadata
+  }> = {};
+
+  private _lastTwoMsgs: Record<ChatLogType, PriorityContainer<{
+    text: string;
+    metadata: BaseDocumentMetadata;
+    msgIdx: MsgIdx;
+  }>> = {
+    "persistent": new PriorityContainer(2, (a, b) => b.msgIdx - a.msgIdx),
+    "temporary": new PriorityContainer(2, (a, b) => b.msgIdx - a.msgIdx),
+  };
 
   constructor(
     _context: AgentContext,
@@ -71,19 +83,27 @@ export class ContextualizedChat {
 
     const persistentLargeChunks = await this._rags["persistent"]
       .query(contextVector)
-      .recombine(MessageRecombiner.standard(tokenLimits["persistent"] - persistentSmallChunks.tokens));
+      .recombine(MessageRecombiner.standard(
+        tokenLimits["persistent"] - persistentSmallChunks.tokens,
+        this._rawChat.chatLogs,
+        "persistent"
+      ));
 
     const temporaryChunks = await this._rags["temporary"]
       .query(contextVector)
-      .recombine(MessageRecombiner.standard(tokenLimits["temporary"]));
+      .recombine(MessageRecombiner.standard(
+        tokenLimits["temporary"],
+        this._rawChat.chatLogs,
+        "temporary"
+      ));
 
     // Sort persistent and temporary chunks
     const sorted = {
       persistent: [...persistentSmallChunks.chunks, ...persistentLargeChunks].sort(
-        (a, b) => a.index - b.index
+        (a, b) => a.chunkIdx - b.chunkIdx
       ).map((x) => JSON.parse(x.json) as ChatMessage),
       temporary: temporaryChunks.sort(
-        (a, b) => a.index - b.index
+        (a, b) => a.chunkIdx - b.chunkIdx
       ).map((x) => JSON.parse(x.json) as ChatMessage)
     };
 
@@ -108,8 +128,8 @@ export class ContextualizedChat {
     
     const chunks: MessageChunk[] = [];
 
-    for (const index of smallChunkIdxs) {
-      const chunk = this._chunks[type][index];
+    for (const chunkIdx of smallChunkIdxs) {
+      const chunk = this._chunks[type][chunkIdx];
       const msg = chatLog.getMsg(type, chunk.msgIdx);
 
       if (!msg) {
@@ -123,7 +143,8 @@ export class ContextualizedChat {
       chunks.push({
         json: JSON.stringify(msg),
         tokens,
-        index
+        chunkIdx,
+        msgIdx: chunk.msgIdx
       });
       tokenCounter += tokens;
     }
@@ -185,7 +206,11 @@ export class ContextualizedChat {
         newChunks.push(...this._chunker.chunk(message));
       }
     } else {
-      newChunks.push(JSON.stringify(message));
+      if (isVariable) {
+        newChunks.push(variableChunkText(message, 0, varName));
+      } else {
+        newChunks.push(JSON.stringify(message));
+      }
     }
 
     const chunks = this._chunks[type];
@@ -207,11 +232,28 @@ export class ContextualizedChat {
     // Add the chunks to the rag
     this._rags[type].addItems(
       newChunks.map((chunk, index) => ({
-        index: startChunkIdx + index,
+        chunkIdx: startChunkIdx + index,
+        msgIdx,
         tokens: this._rawChat.tokenizer.encode(chunk).length,
         json: chunk
       }))
     );
+
+    // If the message is a function call or result,
+    // store the first chunk's text so we can easily retrieve it
+    if (message.role === "function" || message.function_call) {
+      this._functionCallResultFirstChunks[startChunkIdx] = {
+        text: newChunks[0],
+        metadata: { index: startChunkIdx }
+      };
+    }
+
+    // Keep track of the 2 most recent (temporary) messages
+    this._lastTwoMsgs[type].addItem({
+      text: newChunks[0],
+      metadata: { index: startChunkIdx },
+      msgIdx: msgIdx
+    });
 
     return;
   }
@@ -286,8 +328,8 @@ function postProcessMessages(messages: ChatMessage[]): ChatMessage[] {
   return result;
 }
 
-function variableChunkText(chunk: string, index: number, varName: string): string {
-  const message = JSON.parse(chunk) as ChatMessage;
+function variableChunkText(chunk: string | ChatMessage, index: number, varName: string): string {
+  const message = typeof chunk === "string" ? JSON.parse(chunk) as ChatMessage : chunk;
   return JSON.stringify({
     ...message,
     content: `Variable "${varName}" chunk #${index}\n\`\`\`\n${message.content}\n\`\`\``

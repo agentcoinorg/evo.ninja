@@ -8,7 +8,7 @@ export class LlmQuery {
 
     return response?.content ?? "";
   }
-  
+
   async response(opts?: { maxResponseTokens?: number, model?: LlmModel }): Promise<ChatMessage | undefined> {
     const response = await this.llm.getResponse(this.logs, undefined, opts);
   

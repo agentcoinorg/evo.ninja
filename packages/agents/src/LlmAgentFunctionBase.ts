@@ -17,7 +17,7 @@ export abstract class LlmAgentFunctionBase<TParams> extends AgentFunctionBase<TP
     return this.queryBuilder()
       .persistent("user", question)
       .build()
-      .content();
+      .content(opts);
   }
 
   protected async askAgent<TRunArgs>(

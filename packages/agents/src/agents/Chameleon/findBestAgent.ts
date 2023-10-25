@@ -11,12 +11,12 @@ type AgentWithPrompts = {
 };
 
 export const findBestAgent = async (
-  query: string, 
-  context: AgentContext
+  query: string,
+  context: AgentContext,
 ): Promise<[
-  Agent<unknown>, 
-  FunctionDefinition[], 
-  string, 
+  Agent<unknown>,
+  FunctionDefinition[],
+  string,
   AgentFunctionBase<unknown>[]
 ]> => {
   const allAgents: Agent[] = [
@@ -24,7 +24,6 @@ export const findBestAgent = async (
     ResearcherAgent,
     DataAnalystAgent,
     WebResearcherAgent,
-    // ScribeAgent
   ].map(agentClass => new agentClass(context.cloneEmpty()));
 
   const agentsWithPrompts = allAgents.map(agent => {
@@ -50,9 +49,9 @@ export const findBestAgent = async (
   const agentWithPrompt = agents[0];
 
   return [
-    agentWithPrompt.agent, 
+    agentWithPrompt.agent,
     agentWithPrompt.agent.config.functions.map(f => f.getDefinition()),
-    agentWithPrompt.persona, 
+    agentWithPrompt.persona,
     agentsWithPrompts.map(x => x.agent.config.functions).flat()
   ];
 };

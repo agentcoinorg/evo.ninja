@@ -1,6 +1,6 @@
 {
   "name": "csv.filterRows",
-  "description": "Filters and returns rows from a parsed CSV dataset based on a specified column index and a search string.",
-  "arguments": "{ csvData: string, columnIndex: number, searchString: string, withHeader: boolean }",
+  "description": "Filters and returns rows from a CSV dataset based on a specified column index and a search string",
+  "arguments": "{ csv: string, columnIndex: number, searchString: string, withHeader: boolean, outputFile: string }",
   "code": "./csv.filterRows.js"
 }

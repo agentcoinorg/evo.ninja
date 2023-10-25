@@ -4,7 +4,6 @@ import { Agent } from "../Agent";
 
 interface ReadDirectoryFuncParameters { 
   path: string;
-  encoding: string;
 };
 
 export class ReadDirectoryFunction extends ScriptFunction<ReadDirectoryFuncParameters> {
@@ -28,7 +27,6 @@ export class ReadDirectoryFunction extends ScriptFunction<ReadDirectoryFuncParam
           type: AgentOutputType.Success,
           title: `[${agent.config.prompts.name}] ${this.name}`,
           content: `${params.path}\n` +
-            `${params.encoding}\n` +
             `${trimText(result, 200)}`
         }
       ],
