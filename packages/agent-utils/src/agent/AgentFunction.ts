@@ -4,6 +4,7 @@ import { ChatMessage, FunctionDefinition } from "../llm";
 export type AgentFunctionResult = {
   outputs: AgentOutput[];
   messages: ChatMessage[];
+  storeInVariable?: boolean;
 };
 
 export interface AgentFunction<TContext> {

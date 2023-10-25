@@ -158,6 +158,11 @@ const requireShim = (lib) => {
                 ext: undefined // TODO
             })).value;
         },
+        extname: (path) => {
+            return __wrap_subinvoke("plugin/path", "extname", clean({
+                path
+            })).value;
+        },
         format: (pathObject) => {
             return __wrap_subinvoke("plugin/path", "format", clean({ pathObject })).value;
         },
@@ -449,7 +454,8 @@ const globalToShimVarNameMap = {
     process: "processShim"
 };`;
 
-export const shimCode = (code: string) => `${packagesShim}
+export const shimCode = (code: string) => `
+  ${packagesShim}
 
   ${Object.entries(globalToShimVarNameMap).map(([global, shim]) => `var ${global} = ${shim};`).join("\n")}
 
