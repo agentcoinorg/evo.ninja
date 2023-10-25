@@ -1,10 +1,12 @@
-import { prompts } from "./prompts";
 import { Agent } from "../../Agent";
-import { AgentConfig } from "../../AgentConfig";
 import { AgentContext } from "../../AgentContext";
-import { WriteFileFunction } from "../../functions/WriteFile";
+import { AgentConfig } from "../../AgentConfig";
+import { WebSearchFunction } from "../../functions/WebSearch";
+import { PlanWebResearchFunction } from "../../functions/PlanWebResearch";
+import { prompts } from "./prompts";
 import { ReadFileFunction } from "../../functions/ReadFile";
-import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
+import { WriteFileFunction } from "../../functions/WriteFile";
+import { ScrapeTextFunction } from "../../functions/ScrapeText";
 
 export class ResearcherAgent extends Agent {
   constructor(context: AgentContext) {
@@ -12,11 +14,13 @@ export class ResearcherAgent extends Agent {
       new AgentConfig(
         () => prompts,
         [
-          new WriteFileFunction(context.scripts),
+          new PlanWebResearchFunction(context.llm, context.chat.tokenizer),
+          new WebSearchFunction(context.llm, context.chat.tokenizer),
+          new ScrapeTextFunction(),
           new ReadFileFunction(context.scripts),
-          new ReadDirectoryFunction(context.scripts),
-        ], 
-        context.scripts,
+          new WriteFileFunction(context.scripts),
+        ],
+        context.scripts
       ),
       context
     );

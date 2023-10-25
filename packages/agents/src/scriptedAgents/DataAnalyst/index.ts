@@ -8,7 +8,6 @@ import { CsvSumColumnFunction } from "../../functions/CsvSumColumn";
 import { ReadAndAnalyzeDataFunction } from "../../functions/ReadAndAnalyzeData";
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
-import { ThinkFunction } from "../../functions/Think";
 import { prompts } from "./prompts";
 import { AgentContext } from "../../AgentContext";
 import { AgentConfig } from "../../AgentConfig";
@@ -30,7 +29,6 @@ export class DataAnalystAgent extends Agent {
           new ReadAndAnalyzeDataFunction(),
           new WriteFileFunction(context.scripts),
           new ReadDirectoryFunction(context.scripts),
-          new ThinkFunction()
         ],
         context.scripts,
       ),
