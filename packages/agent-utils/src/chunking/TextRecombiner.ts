@@ -4,48 +4,6 @@ import { Recombiner } from "../rag/StandardRagBuilder";
 import { LazyArray } from "../utils/LazyArray";
 
 export class TextRecombiner {
-  static surroundingText(
-    surroundingCharacters: number, 
-    overlap?: number, 
-  ): <TMetadata extends BaseDocumentMetadata>(results: LazyArray<{item: string, doc: LocalDocument<TMetadata> }>, originalItems: string[]) => LazyArray<string> {
-    const halfSurroundChars = Math.floor(surroundingCharacters / 2);
-    
-    return <TMetadata extends BaseDocumentMetadata>(results: LazyArray<{item: string, doc: LocalDocument<TMetadata> }>, originalItems: string[]): LazyArray<string> => {
-      const promise = results.then(results => {
-        const docs = results.map(x => x.doc);
-  
-        const surroundedResults = docs.map(result => {
-          const resultIndex = result.metadata()!.index;
-    
-          const textBehind = getTextFromPriorChunks({
-            originalItems,
-            currentIndex: resultIndex,
-            overlap: overlap ?? 0,
-            characterLimit: halfSurroundChars,
-          })
-    
-          const textForward = getTextFromNextChunks({
-            originalItems,
-            currentIndex: resultIndex,
-            overlap: overlap ?? 0,
-            characterLimit: halfSurroundChars,
-          })
-    
-          const withSurrounding = [textBehind, result.text(), textForward].join("")
-
-          return {
-            match: result,
-            withSurrounding
-          };
-        })
-    
-        return surroundedResults.map(x => x.withSurrounding);
-      });
-  
-      return new LazyArray(promise);
-    };
-  }
-
   static surroundingTextWithPreview(
     surroundingCharacters: number, 
     separator: string,
