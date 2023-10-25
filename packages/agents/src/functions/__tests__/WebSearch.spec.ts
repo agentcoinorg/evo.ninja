@@ -14,10 +14,10 @@ import * as rimraf from "rimraf";
 import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
-import { ResearcherAgent } from "../..";
 import { AgentContext } from "../../AgentContext";
 import { WebSearchFuncParameters, WebSearchFunction } from "../WebSearch";
 import { LlmModel } from "@evo-ninja/agent-utils";
+import { WebResearcherAgent } from "../../scriptedAgents";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -61,7 +61,7 @@ describe("WebSearch function", () => {
     const workspace = new FileSystemWorkspace(testCaseDir);
     const internals = new SubWorkspace(".evo", workspace);
 
-    const agent = new ResearcherAgent(
+    const agent = new WebResearcherAgent(
       new AgentContext(
         llm,
         chat,

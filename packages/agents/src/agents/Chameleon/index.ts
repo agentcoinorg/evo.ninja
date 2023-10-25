@@ -124,6 +124,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
         ])
         .line(`
           Consider the above chat between a user and assistant.
+          Consider that if information needs to be used, and it is not in the chat, it must be searched or read.
           In your expert opinion, what is the best next step for the assistant?`
         ),
       {
