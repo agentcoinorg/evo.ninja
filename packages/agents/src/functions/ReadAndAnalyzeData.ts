@@ -9,8 +9,8 @@ interface ReadAndAnalyzeDataParameters {
 }
 
 export class ReadAndAnalyzeDataFunction extends AgentFunctionBase<ReadAndAnalyzeDataParameters> {
-  name: string = "readAndAnalyzeData";
-  description: string = "Read and analyze datasets to answer questions. Returns a comprehensive summary of all relevant details."
+  name: string = "readAndAnalyzeCSVData";
+  description: string = "Read and analyze CSV datasets to answer questions. Returns a comprehensive summary of all relevant details."
   parameters: any = {
     type: "object",
     properties: {
