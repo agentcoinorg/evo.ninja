@@ -89,6 +89,8 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
           context
         })
 
+        console.log("searchResults: ", searchResults)
+
         const analysisFromChunks = await this.askLlm(new Prompt()
         .text(`
           I will give you different results for the query: ${params.query}.
@@ -107,43 +109,20 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
           Results:
         `)
         .json(searchResults)
-        .line(`Specify if the information is incomplete but still return it.`)
-        .toString(), {
-          model: "gpt-3.5-turbo-16k-0613"
-        })
-
-        const missingAnalysis = await this.askLlm(new Prompt()
-        .text(`Ill give you a query and a piece of information.
-        If the information can't completely answer the query, say "TRUE" and specify what's missing.
-        If not, just return the information.
-        
-        Query: ${params.query}
-        
-        Information: ${analysisFromChunks}
-        `)
+        .text(`Specify if the information is incomplete but still return it.
+        ALWAYS state ALL possibilities for each result piece, and which piece of information is the most precise, next to each piece.
+        Providing an exact figure doesn't necessarily mean it's the most precise result.`)
         .toString())
 
-        if (missingAnalysis.includes("TRUE")) {
-          const missingQuery = missingAnalysis.replace("TRUE", "").trim()
+        console.log("analysisFromChunks: ", analysisFromChunks)
 
-          const missingResults = await Rag.standard(searchResults, context)
-            .limit(2)
-            .selector(x => x)
-            .sortByRelevance()
-            .query(missingQuery)
-
-          console.log("missingResults: ", missingResults)
-        }
-
-        // const result = await this.askLlm(new Prompt()
-        // .text(`Extract the information from the following text, removing any reasoning: ${analysisFromChunks}`)
-        // .toString(), {
-        //   model: "gpt-3.5-turbo-16k-0613"
-        // })
+        const result = await this.askLlm(new Prompt()
+        .text(`Extract the information from the following text, removing any reasoning: ${analysisFromChunks}`)
+        .toString())
   
         return this.onSuccess(
           params,
-          analysisFromChunks,
+          result,
           rawParams,
           context.variables
         );
