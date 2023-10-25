@@ -16,13 +16,10 @@ export const prompts = {
         Example of undesired behavior: Searching "US births 2019", then "US births 2020", then "US births 2021"...
         Desired behavior: Searching "US births from 2019 to 2021"
   
-      2. For each step, you will web search for results
+      2. For each step, you will web search for results, if the query can be answered with the web search results, settle for that.
+      If it can't, scrape the most relevant webpages until you find it.
   
-      3. If by searching for something specific you find something else that is relevant, state it and consider it.
-  
-      4. If the research verification says the data is incomplete, search for the missing data. If you still cannot find it, consider it unavailable and don't fail; just return it. 
-  
-      5. Use scrape_text for getting all the text from a webpage, but not for searching for specific information.`,
+      3. After scraping, ask yourself if the data is complete. If it is, return it. If it is not, search for the missing data. If you still cannot find it, consider it unavailable and don't fail; just return it.`,
     },
     { role: "user", content: goal },
   ],

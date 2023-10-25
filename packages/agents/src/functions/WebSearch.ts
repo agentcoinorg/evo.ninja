@@ -65,64 +65,10 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
           params.query,
           context.env.SERP_API_KEY
         );
-
-        const googleResultsAnalysisPrompt = new Prompt()
-          .line(`Look at this information:`)
-          .json(googleResults)
-          .line(`Is it enough to answer: ${params.query}? If it is, state the answer and say "TRUE`)
-          .toString()
-
-        const llmAnalysisResponse = await this.askLlm(googleResultsAnalysisPrompt)
-
-        if (llmAnalysisResponse.includes("TRUE")) {
-          return this.onSuccess(
-            params,
-            llmAnalysisResponse,
-            rawParams,
-            context.variables
-          );
-        }
-
-        const searchResults = await this.searchInPages({
-          urls: googleResults.map(x => x.url),
-          query: params.query,
-          context
-        })
-
-        console.log("searchResults: ", searchResults)
-
-        const analysisFromChunks = await this.askLlm(new Prompt()
-        .text(`
-          I will give you different results for the query: ${params.query}.
-
-          I want you to extract the information from them to answer the query.
-          
-          Prioritize precision. If there are multiple results that contain the same information, choose the one that is more precise.
-          Example: "population of New York in 2020" and you get the following results:
-          ["1.5 million",  "nearly 1.600.000", "1,611,989"], you will take "1,611,989"
-
-          First take the most precise result, determine what's missing and fill it with pieces of other results.
-          If there are multiple result pieces that contain the same information, choose the one that is more precise.
-
-          The most precise results might be scattered across multiple results.
-
-          Results:
-        `)
-        .json(searchResults)
-        .text(`Specify if the information is incomplete but still return it.
-        ALWAYS state ALL possibilities for each result piece, and which piece of information is the most precise, next to each piece.
-        Providing an exact figure doesn't necessarily mean it's the most precise result.`)
-        .toString())
-
-        console.log("analysisFromChunks: ", analysisFromChunks)
-
-        const result = await this.askLlm(new Prompt()
-        .text(`Extract the information from the following text, removing any reasoning: ${analysisFromChunks}`)
-        .toString())
   
         return this.onSuccess(
           params,
-          result,
+          JSON.stringify(googleResults, null, 2),
           rawParams,
           context.variables
         );
@@ -274,7 +220,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
     return markdownText
   }
 
-  private async searchOnGoogle(query: string, apiKey: string, maxResults = 4) {
+  private async searchOnGoogle(query: string, apiKey: string) {
     const axiosClient = axios.create({
       baseURL: "https://serpapi.com",
     });
@@ -312,7 +258,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         description: result.snippet ?? "",
       }));
 
-    return result.slice(0, maxResults);
+    return result.slice(0, 4);
   }
 
   private async extractInfoWithLLM(args: {
