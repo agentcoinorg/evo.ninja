@@ -72,7 +72,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     const prediction = await this.predictBestNextStep(messages, this.previousAgent);
     const predictionVector = await this.createEmbeddingVector(prediction);
 
-    const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(prediction, this.context);
+    const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(predictionVector, this.context);
 
     this.previousPrediction = prediction;
     this.previousPredictionVector = predictionVector;
