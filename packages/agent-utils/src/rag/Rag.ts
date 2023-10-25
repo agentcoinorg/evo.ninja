@@ -12,12 +12,12 @@ export class Rag {
     return new StandardRagBuilderV2<TItem>(context, collectionName);
   }
 
-  static async filterWithSurroundingText(text: string, query: string, context: AgentContext, opts: { tokenLimit: number, surroundingCharacters: number, chunkLength: number, overlap: number}): Promise<string> {
+  static async filterWithSurroundingText(text: string, queryOrQueryVector: string | number[], context: AgentContext, opts: { tokenLimit: number, surroundingCharacters: number, chunkLength: number, overlap: number}): Promise<string> {
     const { tokenLimit, surroundingCharacters, chunkLength, overlap } = opts;
     
     return Rag.standardV2(context)
       .addItems(TextChunker.fixedCharacterLength(text, { chunkLength: chunkLength, overlap }))
-      .query(query)
+      .query(queryOrQueryVector)
       .recombine(TextRecombiner.surroundingTextWithPreview(surroundingCharacters, "...\n", tokenLimit, context.chat.tokenizer, overlap))
   }
 }

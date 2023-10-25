@@ -9,7 +9,6 @@ import {
   AgentVariables
 } from "../../";
 
-import { StandardRagBuilder } from "../../rag/StandardRagBuilder";
 import { Rag } from "../../rag/Rag";
 import { AgentContext } from "../../agent/AgentContext";
 import { StandardRagBuilderV2 } from "../../rag/StandardRagBuilderV2";
@@ -60,7 +59,7 @@ export class ContextualizedChat {
     return this._rawChat;
   }
 
-  async contextualize(context: string, tokenLimits: Record<ChatLogType, number>): Promise<Chat> {
+  async contextualize(contextVector: number[], tokenLimits: Record<ChatLogType, number>): Promise<Chat> {
     // Ensure all new messages have been processed
     this._processNewMessages();
 
@@ -71,11 +70,11 @@ export class ContextualizedChat {
     );
 
     const persistentLargeChunks = await this._rags["persistent"]
-      .query(context)
+      .query(contextVector)
       .recombine(MessageRecombiner.standard(tokenLimits["persistent"] - persistentSmallChunks.tokens));
 
     const temporaryChunks = await this._rags["temporary"]
-      .query(context)
+      .query(contextVector)
       .recombine(MessageRecombiner.standard(tokenLimits["temporary"]));
 
     // Sort persistent and temporary chunks
