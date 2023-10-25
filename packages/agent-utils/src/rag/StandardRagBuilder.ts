@@ -68,10 +68,8 @@ export class StandardRagBuilder<TItem> {
   }
 
   query(query: string): LazyArray<TItem> {
-    console.log("Que", this._items.length);
     const itemsToAdd = this._items.slice(this.lastAddedItemIndex + 1);
 
-    console.log("Adding items to collection: ", itemsToAdd, "aaaaaaaaaa");
     const addToCollectionPromise = itemsToAdd.length
       ? this.collection.add(itemsToAdd.map(x => {
         const text = this._selector(x);
@@ -82,13 +80,10 @@ export class StandardRagBuilder<TItem> {
       }), itemsToAdd.map((_, i) => ({ index: this.lastAddedItemIndex + i + 1 })))
       : Promise.resolve();
     this.lastAddedItemIndex = this._items.length - 1;
-    console.log("Query", this.lastAddedItemIndex);
     
     const resultPromise = addToCollectionPromise
       .then(async () => {
-        console.log("Searching collection");
         const results = await this.collection.search(query, this._limit);
-        console.log("Searching collection results");
         let filteredItems;
         if (this._sort === "index") {
           filteredItems = this._sortByIndex(this._items, results);

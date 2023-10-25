@@ -3,7 +3,7 @@ import { v4 as uuid } from "uuid";
 import { AgentContext } from "../agent/AgentContext";
 import { LocalCollection, OpenAIEmbeddingAPI, LocalVectorDB, LocalDocument } from "../embeddings";
 
-export type Recombiner<TItem, TRecombine> = (results: AsyncGenerator<LocalDocument<{ index: number }>>, originalItems: TItem[]) => Promise<TRecombine>;
+export type Recombiner<TItem, TRecombine> = (results: () => Promise<AsyncGenerator<LocalDocument<{ index: number }>>>, originalItems: TItem[]) => Promise<TRecombine>;
 
 export class StandardRagBuilderV2<TItem> {
   private _selector: (item: TItem) => string = x => x as unknown as string;
@@ -36,18 +36,24 @@ export class StandardRagBuilderV2<TItem> {
   }
 
   query(queryOrVector: string | number[]): QueryWithRecombineV2<TItem> {
-    const itemsToAdd = this._items.slice(this.lastAddedItemIndex + 1);
 
-    const addToCollectionPromise = itemsToAdd.length
-      ? this.collection.add(itemsToAdd.map(x => {
+    const addToCollectionPromise = async () => {
+      const itemsToAdd = this._items.slice(this.lastAddedItemIndex + 1);
+
+      if (!itemsToAdd.length) {
+        return;
+      }
+      
+      await this.collection.add(itemsToAdd.map(x => {
         const text = this._selector(x);
         if (typeof text != "string") {
           throw Error("Selector should return a string. Perhaps you forgot to set the selector?");
         }
         return text;
-      }), itemsToAdd.map((_, i) => ({ index: this.lastAddedItemIndex + i + 1 })))
-      : Promise.resolve();
-    this.lastAddedItemIndex = this._items.length - 1;
+        }), itemsToAdd.map((_, i) => ({ index: this.lastAddedItemIndex + i + 1 })));
+
+      this.lastAddedItemIndex = this._items.length - 1;
+    };
 
     return new QueryWithRecombineV2<TItem>(queryOrVector, this.collection, this._items, addToCollectionPromise);
   }
@@ -58,14 +64,16 @@ export class QueryWithRecombineV2<TItem> {
     private readonly queryOrVector: string | number[],
     private readonly collection: LocalCollection<{ index: number }>,
     private readonly _items: TItem[],
-    private readonly addToCollectionPromise: Promise<unknown>, 
+    private readonly addToCollectionPromise: () => Promise<unknown>, 
   ) { }
 
   recombine<TRecombine>(recombiner: Recombiner<TItem, TRecombine>): Promise<TRecombine> {
-    return this.addToCollectionPromise.then(() => {
-      const iterator = this.collection.iterativeSearch(this.queryOrVector);
-
-      return recombiner(iterator, this._items);
-    });
+    return recombiner(
+      async () => {
+        await this.addToCollectionPromise();
+        return this.collection.iterativeSearch(this.queryOrVector);
+      },
+      this._items
+    );
   }
 }

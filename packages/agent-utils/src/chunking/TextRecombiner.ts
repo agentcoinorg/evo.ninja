@@ -55,8 +55,8 @@ export class TextRecombiner {
   ): Recombiner<string, string> {
     const halfSurroundChars = Math.floor(surroundingCharacters / 2);
     
-    return async (results: AsyncGenerator<LocalDocument<{ index: number }>>, originalItems: string[]): Promise<string> => {
-      const iterator = results;
+    return async (results: () => Promise<AsyncGenerator<LocalDocument<{ index: number }>>>, originalItems: string[]): Promise<string> => {
+      const iterator = await results();
 
       let text = "";
 

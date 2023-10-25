@@ -7,8 +7,12 @@ export class MessageRecombiner {
     tokenLimit: number,
   ): Recombiner<MessageChunk, MessageChunk[]> {
     
-    return async (results: AsyncGenerator<LocalDocument<{ index: number }>>, originalItems: MessageChunk[]): Promise<MessageChunk[]> => {
-      const iterator = results;
+    return async (results: () => Promise<AsyncGenerator<LocalDocument<{ index: number }>>>, originalItems: MessageChunk[]): Promise<MessageChunk[]> => {
+      if (calculateTotalTokens(originalItems) < tokenLimit) {
+        return originalItems;
+      }
+      
+      const iterator = await results();
 
       let messages = [];
 
@@ -29,3 +33,7 @@ export class MessageRecombiner {
     };
   }
 }
+
+const calculateTotalTokens = (chunks: MessageChunk[]) => {
+  return chunks.reduce((acc, chunk) => acc + chunk.tokens, 0);
+};
