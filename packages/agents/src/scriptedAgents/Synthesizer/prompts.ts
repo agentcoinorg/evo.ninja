@@ -7,7 +7,7 @@ export const prompts = {
   initialMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
     {
       role: "user",
-      content: `You are a reader and synthsizer agent. Your job is to read text files, analyze text file contents`,
+      content: `You are a reader and synthesizer agent. Your job is to read text files, analyze text file contents`,
     },
     {
       role: "user",
