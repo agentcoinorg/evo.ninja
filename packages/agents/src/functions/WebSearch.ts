@@ -9,21 +9,26 @@ import {
   trimText,
   Rag,
   ArrayRecombiner,
+  AgentContext
 } from "@evo-ninja/agent-utils";
 import axios from "axios";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { Agent } from "../Agent";
 import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 import TurndownService from "turndown";
-import { AgentContext } from "@evo-ninja/agent-utils";
 import { load } from "cheerio";
 import { Prompt } from "../agents/Chameleon/Prompt";
 
 export interface WebSearchFuncParameters {
-  query: string;
+  queries: string[];
 }
 
 const FETCH_WEBPAGE_TIMEOUT = 4000
+const TRUSTED_SOURCES = [
+  "wikipedia",
+  "statista",
+  "macrotrends"
+]
 
 export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParameters> {
   constructor(
@@ -34,98 +39,80 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
   }
 
   name: string = "web_search";
-  description: string = `Searches the web for a given query.`;
+  description: string = `Searches the web for multiple queries.`;
   parameters: any = {
     type: "object",
     properties: {
-      query: {
-        type: "string",
-        description: "Query to search the web for",
+      queries: {
+        type: "array",
+        items: {
+            type: "string"
+        },
+        description: "Queries to search the web for in parallel",
       },
     },
-    required: ["query"],
+    required: ["queries"],
     additionalProperties: false,
   };
 
-  buildExecutor({ context }: Agent<unknown>): (
+  buildExecutor(agent: Agent<unknown>): (
     params: WebSearchFuncParameters,
     rawParams?: string
   ) => Promise<AgentFunctionResult> {
     return async (
-      params: WebSearchFuncParameters,
-      rawParams?: string
+      params: WebSearchFuncParameters
     ): Promise<AgentFunctionResult> => {
-      try {
-        if (!context.env.SERP_API_KEY) {
-          throw new Error(
-            "SERP_API_KEY environment variable is required to use the websearch plugin. See env.template for help"
-          );
-        }
-
-        const googleResults = await this.searchOnGoogle(
-          params.query,
-          context.env.SERP_API_KEY
-        );
-
-        const googleResultsAnalysisPrompt = new Prompt()
-          .line(`Look at this information:`)
-          .json(googleResults)
-          .line(`Is it enough to answer: ${params.query}? If it is, state the answer and say "TRUE`)
-          .toString()
-
-        const llmAnalysisResponse = await this.askLlm(googleResultsAnalysisPrompt)
-
-        if (llmAnalysisResponse.includes("TRUE")) {
-          return this.onSuccess(
-            params,
-            llmAnalysisResponse,
-            rawParams,
-            context.variables
-          );
-        }
-
-        const searchMatches = await this.searchInPages({
-          urls: googleResults.map(x => x.url),
-          query: params.query,
-          context
-        })
-
-        const analyzeChunkMatchesPrompt = new Prompt()
-        .text(`
-          I will give you chunks of text from different webpages.
-
-          I want to extract ${params.query} from them. Keep in mind some information may not be properly formatted.
-          Do your best to extract as much information as you can.
-
-          Prioritize accuracy. Do not settle for the first piece of information found if there are more precise results available
-          Example: "population of New York in 2020" and you get the following results:
-          ["1.5 million",  "nearly 1.600.000", "1,611,989"], you will take "1,611,989"
-
-          Chunks:
-        `)
-        .json(searchMatches)
-        .line(`Specify if the information is incomplete but still return it`)
-        .toString()
-
-        console.log(analyzeChunkMatchesPrompt)
-
-        const analysisFromChunks = await this.askLlm(analyzeChunkMatchesPrompt)
-  
-        return this.onSuccess(
-          params,
-          analysisFromChunks,
-          rawParams,
-          context.variables
-        );
-      } catch (err) {
-        return this.onError(
-          params,
-          err.toString(),
-          rawParams,
-          context.variables
+      const searches = [];
+      for (const query of params.queries) {
+        searches.push(
+          this.runQuery(agent, query, JSON.stringify({ queries: [query] }))
         );
       }
+      const results = await Promise.all(searches);
+      return {
+        outputs: results.flatMap((x) => x.outputs),
+        messages: results.flatMap((x) => x.messages)
+      };
     };
+  }
+
+  private async runQuery({ context }: Agent<unknown>, query: string, rawParams?: string): Promise<AgentFunctionResult> {
+    try {
+      if (!context.env.SERP_API_KEY) {
+        throw new Error(
+          "SERP_API_KEY environment variable is required to use the websearch plugin. See env.template for help"
+        );
+      }
+
+      const googleResults = await this.searchOnGoogle(
+        query,
+        context.env.SERP_API_KEY
+      );
+
+      const containsTrustedSource = googleResults.some(x => x.trustedSource)
+      const resultsFromTrustedSources = containsTrustedSource ? googleResults
+      .filter(x => x.trustedSource) : googleResults
+
+      const searchInPagesResults = await this.searchInPages({
+        urls: resultsFromTrustedSources.map(x => x.url),
+        query,
+        context
+      })
+
+      return this.onSuccess(
+        { queries: [query] },
+        JSON.stringify(searchInPagesResults, null, 2),
+        rawParams,
+        context.variables
+      );
+    } catch (err) {
+      return this.onError(
+        { queries: [query] },
+        err.toString(),
+        rawParams,
+        context.variables
+      );
+    }
   }
 
   private onSuccess(
@@ -138,11 +125,11 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
       outputs: [
         {
           type: AgentOutputType.Success,
-          title: `Web search for '${params.query}'`,
+          title: `Web search for '${params.queries}'`,
           content: FUNCTION_CALL_SUCCESS_CONTENT(
             this.name,
             params,
-            `Found the following result for the web search: '${params.query}'` +
+            `Found the following result for the web search: '${params.queries}'` +
               `\n--------------\n` +
               `${result}\n` +
               `\n--------------\n`
@@ -153,7 +140,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
-          `Found the following result for the web search: '${params.query}'` +
+          `Found the following result for the web search: '${params.queries}'` +
             `\`\`\`\n` +
             `${result}\n` +
             `\`\`\``
@@ -172,7 +159,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
       outputs: [
         {
           type: AgentOutputType.Error,
-          title: `Web search for '${params.query}'`,
+          title: `Web search for '${params.queries}'`,
           content: FUNCTION_CALL_FAILED(
             params,
             this.name,
@@ -184,7 +171,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
-          `Error web searching for '${params.query}'\n` + 
+          `Error web searching for '${params.queries}'\n` + 
           `\`\`\`\n` +
           `${trimText(error, 300)}\n` +
           `\`\`\``
@@ -207,26 +194,66 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
     const urlsContents = await Promise.all(params.urls.map(async url => {
       try {
         const response = await this.processWebpage(url);
-        return response
+        return {
+          url,
+          response
+        }
       } catch(e) {
         params.context.logger.error(`Failed to process ${url}`)
-        return ""
+        return {
+          url,
+          response: ""
+        }
       }
     }))
 
-    const webpagesChunks = urlsContents.flatMap(webpageContent =>
-      TextChunker.fixedCharacterLength(webpageContent, { chunkLength: 500, overlap: 100 })
-    )
+    const webpagesChunks = urlsContents.map(webpageContent => ({
+      url: webpageContent.url,
+      chunks: TextChunker.fixedCharacterLength(webpageContent.response, { chunkLength: 550, overlap: 110 })
+    }))
 
-    const matches = await Rag.standard(params.context)
-      .addItems(webpagesChunks)
+    const results = await Promise.all(webpagesChunks.map(async (webpageChunks) => {
+      const items = webpageChunks.chunks.map((chunk) => ({
+        chunk,
+        url: webpageChunks.url,
+      }))
+
+      const matches = await Rag.standard<{ chunk: string; url: string }>(params.context)
+      .addItems(items)
+      .selector(x => x.chunk)
+      .query(params.query)
+      .recombine(ArrayRecombiner.standard({
+        limit: 4,
+        unique: true,
+      }));
+
+      return matches
+    }))
+
+    const otherResults = await Rag.standard<{ chunk: string; url: string }>(params.context)
+      .addItems(results.flat())
+      .selector(x => x.chunk)
       .query(params.query)
       .recombine(ArrayRecombiner.standard({
         limit: 10,
         unique: true,
+        sort: "index"
       }));
 
-    return matches;
+    const accumulatedResults = otherResults.reduce((prev, { chunk, url }) => {
+      if (prev[url]) {
+        prev[url] += "\n...\n" + chunk
+      } else {
+        prev[url] = chunk
+      }
+
+      return prev;
+    }, {} as Record<string, string>);
+
+    return Object.entries(accumulatedResults).map(([url, response]) => ({
+      url,
+      content: response
+    }))
   }
 
   private async processWebpage(url: string) {
@@ -254,7 +281,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
     return markdownText
   }
 
-  private async searchOnGoogle(query: string, apiKey: string, maxResults = 6) {
+  private async searchOnGoogle(query: string, apiKey: string, maxResults = 10) {
     const axiosClient = axios.create({
       baseURL: "https://serpapi.com",
     });
@@ -290,6 +317,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         title: result.title ?? "",
         url: result.link ?? "",
         description: result.snippet ?? "",
+        trustedSource: TRUSTED_SOURCES.some(x => result.link.includes(x))
       }));
 
     return result.slice(0, maxResults);

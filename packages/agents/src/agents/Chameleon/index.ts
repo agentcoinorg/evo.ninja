@@ -30,6 +30,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
   private previousPredictionVector: number[] | undefined;
   private loopCounter: number = 0;
   private previousAgent: Agent<unknown> | undefined;
+  private initializedAgents: Set<string> = new Set();
   private goal: string = "";
 
   constructor(
@@ -94,6 +95,11 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     const predictionVector = await this.createEmbeddingVector(prediction);
 
     const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(predictionVector, this.context);
+
+    if (!this.initializedAgents.has(agent.config.prompts.name)) {
+      this.initializedAgents.add(agent.config.prompts.name);
+      await agent.onFirstRun({ goal: this.goal }, chat);
+    }
 
     this.previousPrediction = prediction;
     this.previousPredictionVector = predictionVector;

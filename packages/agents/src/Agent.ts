@@ -10,7 +10,8 @@ import {
   ChatLogs,
   LlmModel,
   agentFunctionBaseToAgentFunction,
-  OpenAIEmbeddingAPI
+  OpenAIEmbeddingAPI,
+  Chat
 } from "@evo-ninja/agent-utils";
 import { ResultErr } from "@polywrap/result";
 import { AgentConfig } from "./AgentConfig";
@@ -82,6 +83,10 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
       this.context.logger.error(err);
       return ResultErr("Unrecoverable error encountered.");
     }
+  }
+
+  public onFirstRun(_: TRunArgs, chat: Chat): Promise<void> {
+    return Promise.resolve();
   }
 
   protected expression(msgs?: ChatMessage[]): LlmQuery {

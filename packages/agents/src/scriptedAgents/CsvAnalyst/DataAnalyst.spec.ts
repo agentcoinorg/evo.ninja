@@ -14,7 +14,7 @@ import * as rimraf from "rimraf";
 import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
-import { DataAnalystAgent } from "..";
+import { CsvAnalystAgent } from "..";
 import fs from "fs";
 import { AgentContext } from "@evo-ninja/agent-utils";
 import { Agent } from "../../Agent";
@@ -85,7 +85,7 @@ describe("Data Analyst Agent Test Suite", () => {
     }
 
     return {
-      agent: new DataAnalystAgent(
+      agent: new CsvAnalystAgent(
         new AgentContext(
           debugLlm,
           chat,
