@@ -107,7 +107,6 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
 
         Chunks: ${searchMatches.join("\n------------\n")}
       `)
-      .json(searchMatches)
       .line(`Specify if the information is incomplete but still return it`)
       .toString()
 
@@ -256,20 +255,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         sort: "index"
       }));
 
-    const accumulatedResults = otherResults.reduce((prev, { chunk, url }) => {
-      if (prev[url]) {
-        prev[url] += "\n...\n" + chunk
-      } else {
-        prev[url] = chunk
-      }
-
-      return prev;
-    }, {} as Record<string, string>);
-
-    return Object.entries(accumulatedResults).map(([url, response]) => ({
-      url,
-      content: response
-    }))
+    return otherResults.map(x => x.chunk)
   }
 
   private async processWebpage(url: string) {
