@@ -11,6 +11,7 @@ type AgentWithPrompts = {
   persona: string;
   agent: Agent<GoalRunArgs>;
 };
+let agentRag: StandardRagBuilder<AgentWithPrompts>;
 
 export const findBestAgent = async (
   query: string,
@@ -36,11 +37,13 @@ export const findBestAgent = async (
     };
   });
 
-  let agentRag: StandardRagBuilder<AgentWithPrompts> = Rag.standard<AgentWithPrompts>(context)
-    .addItems(agentsWithPrompts)
-    .selector(x => x.expertise)
-    .limit(1)
-    .onlyUnique();
+  if (!agentRag) {
+    agentRag = Rag.standard<AgentWithPrompts>(context)
+      .addItems(agentsWithPrompts)
+      .selector(x => x.expertise)
+      .limit(1)
+      .onlyUnique();
+  }
 
   const agents = await agentRag.query(query);
 
