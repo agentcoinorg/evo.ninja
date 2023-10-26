@@ -6,6 +6,7 @@ import { PlanWebResearchFunction } from "../../functions/PlanWebResearch";
 import { prompts } from "./prompts";
 import { ReadFileFunction } from "../../functions/ReadFile";
 import { WriteFileFunction } from "../../functions/WriteFile";
+import { ScrapeTableFunction } from "../../functions/ScrapeTable";
 import { ScrapeTextFunction } from "../../functions/ScrapeText";
 
 export class ResearcherAgent extends Agent {
@@ -16,6 +17,7 @@ export class ResearcherAgent extends Agent {
         [
           new PlanWebResearchFunction(context.llm, context.chat.tokenizer),
           new WebSearchFunction(context.llm, context.chat.tokenizer),
+          new ScrapeTableFunction(),
           new ScrapeTextFunction(),
           new ReadFileFunction(context.scripts),
           new WriteFileFunction(context.scripts),

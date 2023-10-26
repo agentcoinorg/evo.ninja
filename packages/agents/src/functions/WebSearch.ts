@@ -149,7 +149,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         If there are pieces or parts of the answer that could be replaced for more numerically precise parts of the information,
         for example: 31.2 billion is less precise than 31,198 million; then replace each part of the answer with the most precise
         from the information if available.
-      `).toString())
+      `).toString(), { model: "gpt-3.5-turbo-16k-0613" })
 
       console.log(analysisFromChunksJson)
 

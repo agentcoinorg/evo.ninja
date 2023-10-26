@@ -12,7 +12,7 @@ import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 import { Agent } from "../Agent";
 
 interface PlanWebResearchFuncParameters {
-  query: string;
+  goal: string;
 }
 
 export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearchFuncParameters> {
@@ -21,16 +21,16 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
   }
 
   name: string = "plan_webResearch";
-  description: string = `Plans how to research on the internet for a given query.`;
+  description: string = `Plans how to research on the internet for a given user goal.`;
   parameters: any = {
     type: "object",
     properties: {
-      query: {
+      goal: {
         type: "string",
-        description: "Query to plan the research for",
+        description: "The user's goal",
       },
     },
-    required: ["query"],
+    required: ["goal"],
     additionalProperties: false,
   };
 
@@ -44,14 +44,24 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
     ): Promise<AgentFunctionResult> => {
       try {
 
-        const resp = await this.askLlm(
-          this.getPlanningPrompt(params.query),
-          { model: "gpt-3.5-turbo-16k-0613" }
+        const getPlan = this.askLlm(
+          this.getPlanningPrompt(params.goal),
+          { model: "gpt-3.5-turbo-16k-0613", maxResponseTokens: 200 }
+        );
+
+        const getFormatting = this.askLlm(
+          this.getFormattingPrompt(params.goal),
+          { model: "gpt-3.5-turbo-16k-0613", maxResponseTokens: 200 }
+        );
+
+        const [plan, formatting] = await Promise.all(
+          [getPlan, getFormatting]
         );
 
         return this.onSuccess(
           params,
-          resp,
+          plan,
+          formatting,
           rawParams,
           context.variables
         );
@@ -68,7 +78,8 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
 
   private onSuccess(
     params: PlanWebResearchFuncParameters,
-    result: string,
+    plan: string,
+    formatting: string,
     rawParams: string | undefined,
     variables: AgentVariables
   ): AgentFunctionResult {
@@ -76,13 +87,17 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
       outputs: [
         {
           type: AgentOutputType.Success,
-          title: `Plan research for '${params.query}'`,
+          title: `Plan research for '${params.goal}'`,
           content: FUNCTION_CALL_SUCCESS_CONTENT(
             this.name,
             params,
-            `Found the following result for the web search: '${params.query}'` +
+            `Research Plan:` +
               `\n--------------\n` +
-              `${result}\n` +
+              plan +
+              `\n--------------\n` +
+              `Formatting Requirements:` +
+              `\n--------------\n` +
+              formatting +
               `\n--------------\n`
           ),
         },
@@ -91,9 +106,14 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
         ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
-          `Research plan: '${params.query}'` +
-            `${result}\n` +
-            `\`\`\``
+          `Research Plan:` +
+            `\n\`\`\`\n` +
+            plan +
+            `\n\`\`\`\n` +
+            `Formatting Requirements:` +
+            `\n\`\`\`\n` +
+            formatting +
+            `\n\`\`\`\n`
         ),
       ],
     };
@@ -109,7 +129,7 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
       outputs: [
         {
           type: AgentOutputType.Error,
-          title: `Plan research for '${params.query}'`,
+          title: `Plan research for '${params.goal}'`,
           content: FUNCTION_CALL_FAILED(
             params,
             this.name,
@@ -121,7 +141,7 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
         ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
-          `Error planning research for '${params.query}'\n` + 
+          `Error planning research for '${params.goal}'\n` + 
           `\`\`\`\n` +
           `${trimText(error, 300)}\n` +
           `\`\`\``
@@ -130,7 +150,7 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
     };
   }
 
-  private getPlanningPrompt(query: string): string {
+  private getPlanningPrompt(goal: string): string {
     return `You are a Research Planning agent tasked to receive a query and need to plan an internet search
 
     You will go through the following steps:
@@ -169,6 +189,10 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
     
     6. Be precise, and concise.
     
-    Here's the query you need to plan: ${query}`;
+    Here's the query you need to plan: ${goal}`;
+  }
+
+  private getFormattingPrompt(goal: string): string {
+    return `Given the following user goal, please identify any formatting requirements: ${goal}`;
   }
 }
