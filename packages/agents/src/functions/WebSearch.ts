@@ -73,7 +73,9 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
           .line(`Is it enough to answer: ${params.query}? If it is, state the answer and say "TRUE`)
           .toString()
 
-        const llmAnalysisResponse = await this.askLlm(googleResultsAnalysisPrompt)
+        const llmAnalysisResponse = await this.askLlm(googleResultsAnalysisPrompt, {
+          model: "gpt-3.5-turbo-16k-0613"
+        })
 
         if (llmAnalysisResponse.includes("TRUE")) {
           return this.onSuccess(
@@ -90,30 +92,53 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
           context
         })
 
+        console.log(searchMatches)
+
         const analyzeChunkMatchesPrompt = new Prompt()
         .text(`
           I will give you chunks of text from different webpages.
 
-          I want to extract ${params.query} from them. Keep in mind some information may not be properly formatted.
+          I want to extract ${params.query}. Keep in mind some information may not be properly formatted.
           Do your best to extract as much information as you can.
 
           Prioritize accuracy. Do not settle for the first piece of information found if there are more precise results available
           Example: "population of New York in 2020" and you get the following results:
           ["1.5 million",  "nearly 1.600.000", "1,611,989"], you will take "1,611,989"
 
-          Chunks:
+          I expect the answer with the best precision, even if not complete.
+
+          Chunks: ${searchMatches.join("\n------------\n")}
         `)
         .json(searchMatches)
         .line(`Specify if the information is incomplete but still return it`)
         .toString()
 
-        console.log(analyzeChunkMatchesPrompt)
+        // console.log(analyzeChunkMatchesPrompt)
 
-        const analysisFromChunks = await this.askLlm(analyzeChunkMatchesPrompt)
+        const analysisFromChunks = await this.askLlm(analyzeChunkMatchesPrompt, {
+          model: "gpt-3.5-turbo-16k-0613"
+        })
+
+        console.log(analysisFromChunks)
+        
+        const analysisFromChunksJson = await this.askLlm(new Prompt().text(`
+          Look at this answer: 
+          "${analysisFromChunks}"
+
+          Based on the following information:
+
+          "${searchMatches.join("\n------------\n")}"
+
+          If there are pieces or parts of the answer that could be replaced for more numerically precise parts of the information,
+          for example: 31.2 billion is less precise than 31,198 million; then replace each part of the answer with the most precise
+          from the information if available.
+        `).toString())
+
+        console.log(analysisFromChunksJson)
   
         return this.onSuccess(
           params,
-          analysisFromChunks,
+          "JSON.stringify(searchMatches, null, 2)",
           rawParams,
           context.variables
         );
@@ -214,19 +239,31 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
       }
     }))
 
-    const webpagesChunks = urlsContents.flatMap(webpageContent =>
-      TextChunker.fixedCharacterLength(webpageContent, { chunkLength: 500, overlap: 100 })
+    const webpagesChunks = urlsContents.map(webpageContent =>
+      TextChunker.fixedCharacterLength(webpageContent, { chunkLength: 550, overlap: 110 })
     )
 
-    const matches = await Rag.standard(params.context)
-      .addItems(webpagesChunks)
+    const results = await Promise.all(webpagesChunks.map(async (webpageChunks) => {
+      const matches = await Rag.standard(params.context)
+      .addItems(webpageChunks)
       .query(params.query)
       .recombine(ArrayRecombiner.standard({
-        limit: 10,
+        limit: 4,
         unique: true,
       }));
 
-    return matches;
+      return matches
+    }))
+
+    const otherResults = await Rag.standard(params.context)
+      .addItems(results.flat())
+      .query(params.query)
+      .recombine(ArrayRecombiner.standard({
+        limit: 15,
+        unique: true,
+      }));
+
+    return otherResults;
   }
 
   private async processWebpage(url: string) {

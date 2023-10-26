@@ -84,7 +84,7 @@ describe("WebSearch function", () => {
 
     console.time('websearch');
     const result = await websearch({
-      query: "What is the annual revenue of Tesla Inc. from 2003 to 2023"
+      query: "What is the annual revenue of Tesla Inc. from 2003 to 2023?"
     })
     console.timeEnd('websearch')
 
