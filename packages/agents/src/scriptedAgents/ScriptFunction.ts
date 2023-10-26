@@ -52,7 +52,7 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, rawParams || params),
+        ChatMessageBuilder.functionCall(this.name, rawParams || JSON.stringify(params)),
         ChatMessageBuilder.functionCallResult(this.name, `Error: ${error}`)
       ]
     }

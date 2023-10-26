@@ -8,16 +8,17 @@ import {
   InMemoryWorkspace,
   Scripts,
   WrapClient,
-  LlmQuery
+  LlmQuery,
+  charsToTokens, 
+  tokensToChars,
+  Rag,
 } from "@evo-ninja/agent-utils";
 import dotenv from "dotenv";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import path from "path";
 import { Prompt } from "../agents/Chameleon/Prompt";
-import { Rag } from "../agents/Chameleon/Rag";
-import { charsToTokens, previewChunks, tokensToChars } from "../agents/Chameleon/helpers";
 import fs from "fs";
-import { AgentContext } from "../AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
 import { LlmModel } from "@evo-ninja/agent-utils";
 
 dotenv.config({
@@ -59,8 +60,8 @@ describe('LLM Test Suite', () => {
     );
     const chat = new Chat(cl100k_base);
 
-    const maxCharsToUse = maxContextChars(llm) * 0.4;
-    const charsForPreview = maxCharsToUse * 0.7;
+    const maxTokensToUse = maxContextTokens(llm) * 0.4;
+    const tokensForPreview = maxTokensToUse * 0.7;
     const query = "The assistant should execute the function call to perform a web search for 'Tesla Inc. revenue from 2003 to 2023'.";
 
     const text = fs.readFileSync(__dirname + "/revenue.txt", "utf-8");
@@ -73,7 +74,7 @@ describe('LLM Test Suite', () => {
         query, 
         context,
         {
-          charLimit: charsForPreview,
+          tokenLimit: tokensForPreview,
           surroundingCharacters: 750,
           chunkLength: 100,
           overlap: 15
@@ -98,7 +99,7 @@ describe('LLM Test Suite', () => {
           IMPORTANT: Respond only with the new content!"`
         ).toString();
 
-      const outputTokens = charsToTokens(maxCharsToUse * 0.25);
+      const outputTokens = Math.floor(maxTokensToUse * 0.25)
       console.log("Input tokens", chat.tokenizer.encode(prompt).length);
       console.log("Output tokens", outputTokens);
       

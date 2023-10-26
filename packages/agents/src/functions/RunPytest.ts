@@ -1,11 +1,11 @@
 import {
+  AgentContext,
   AgentFunctionResult,
   AgentOutputType,
   ChatMessageBuilder,
 } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { Agent } from "../Agent";
-import { AgentContext } from "../AgentContext";
 
 interface FunctionParams {
   filename: string;
@@ -58,6 +58,8 @@ export class RunPytest extends AgentFunctionBase<FunctionParams> {
           ],
         };
       } else {
+        console.log("this is the response broder");
+        console.log(response);
         if (response.stdout == "Timeout achieved") {
           return {
             outputs: [
@@ -96,7 +98,7 @@ export class RunPytest extends AgentFunctionBase<FunctionParams> {
 
 const extractErrors = (errorsMessage: string) => {
   const pattern =
-    /(?<=^={3,} FAILURES ={3,}\n)[\s\S]*?(?=\n^={3,} short test summary info)/gm;
+    /(?<=^={3,} (FAILURES|ERRORS) ={3,}\n)[\s\S]*?(?=\n^={3,} short test summary info)/gm;
 
   const match = errorsMessage.match(pattern);
   if (match) {

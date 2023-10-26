@@ -1,5 +1,5 @@
 import { prompts } from "./prompts";
-import { AgentContext } from "../../AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
 import { Agent } from "../../Agent";
 import { AgentConfig } from "../../AgentConfig";
 import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";

@@ -1,7 +1,7 @@
 import { ReadFileFunction } from "../../functions/ReadFile";
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
 import { RunAndAnalysePythonTestFunction } from "../../functions/RunAndAnalysePythonTest";
-import { AgentContext } from "../../AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
 import { Agent } from "../../Agent";
 import { AgentConfig } from "../../AgentConfig";
 import { SummarizeDirectoryFunction } from "../../functions/SummarizeDirectory";

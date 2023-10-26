@@ -5,26 +5,30 @@ import {
 } from ".";
 import {
   MessageChunker,
-  LocalVectorDB,
-  LocalCollection,
   BaseDocumentMetadata,
   AgentVariables,
   PriorityContainer
 } from "../../";
 
-import { v4 as uuid } from "uuid";
+import { Rag } from "../../rag/Rag";
+import { AgentContext } from "../../agent/AgentContext";
+import { StandardRagBuilder } from "../../rag/StandardRagBuilder";
+import { MessageRecombiner } from "../../chunking/MessageRecombiner";
 
-type MsgIdx = number;
+export type MsgIdx = number;
 
 interface Chunk {
   msgIdx: MsgIdx;
 }
 
-type ChunkIdx = number;
+export type ChunkIdx = number;
 
-interface DocumentMetadata extends BaseDocumentMetadata {
+export type MessageChunk = {
+  json: string;
   tokens: number;
-}
+  chunkIdx: ChunkIdx;
+  msgIdx: MsgIdx;
+};
 
 export class ContextualizedChat {
 
@@ -33,31 +37,29 @@ export class ContextualizedChat {
     "temporary": []
   };
 
-  private _collections: Record<ChatLogType, LocalCollection<DocumentMetadata>>;
+  private _rags: Record<ChatLogType, StandardRagBuilder<MessageChunk>>;
 
   private _functionCallResultFirstChunks: Record<ChunkIdx, {
     text: string,
-    metadata: DocumentMetadata
+    metadata: BaseDocumentMetadata
   }> = {};
 
-  private _lastTwoMsgs: Record<ChatLogType, PriorityContainer<{
-    text: string;
-    metadata: DocumentMetadata;
-    msgIdx: MsgIdx;
-  }>> = {
-    "persistent": new PriorityContainer(2, (a, b) => b.msgIdx - a.msgIdx),
-    "temporary": new PriorityContainer(2, (a, b) => b.msgIdx - a.msgIdx),
+  private _lastTwoMsgs: Record<ChatLogType, PriorityContainer<ChunkIdx>> = {
+    "persistent": new PriorityContainer(2, (a, b) => b - a),
+    "temporary": new PriorityContainer(2, (a, b) => b - a),
   };
 
   constructor(
+    _context: AgentContext,
     private _rawChat: Chat,
     private _chunker: MessageChunker,
-    db: LocalVectorDB,
     private _variables: AgentVariables
   ) {
-    this._collections = {
-      persistent: db.addCollection<DocumentMetadata>(uuid()),
-      temporary: db.addCollection<DocumentMetadata>(uuid())
+    this._rags = {
+      persistent: Rag.standard<MessageChunk>(_context)
+        .selector(x => x.json),
+      temporary: Rag.standard<MessageChunk>(_context)
+        .selector(x => x.json)  
     };
   }
 
@@ -65,36 +67,42 @@ export class ContextualizedChat {
     return this._rawChat;
   }
 
-  async contextualize(context: string, tokenLimits: Record<ChatLogType, number>): Promise<Chat> {
+  async contextualize(contextVector: number[], tokenLimits: Record<ChatLogType, number>): Promise<Chat> {
     // Ensure all new messages have been processed
-    await this._processNewMessages();
+    this._processNewMessages();
 
     // Aggregate all "persistent" chunks
     const persistentSmallChunks = this._aggregateSmallChunks(
       "persistent",
       tokenLimits["persistent"]
     );
-    const persistentLargeChunks = await this._contextualizeChunks(
-      context,
-      "persistent",
-      tokenLimits["persistent"] - persistentSmallChunks.tokens
-    );
 
-    // Aggregate all "temporary" chunks
-    const temporaryChunks = await this._contextualizeChunks(
-      context,
-      "temporary",
-      tokenLimits["temporary"]
-    );
+    const persistentLargeChunks = await this._rags["persistent"]
+      .query(contextVector)
+      .recombine(MessageRecombiner.standard(
+        tokenLimits["persistent"] - persistentSmallChunks.tokens,
+        this._rawChat.chatLogs,
+        "persistent",
+        this._lastTwoMsgs["persistent"].getItems()
+      ));
+
+    const temporaryChunks = await this._rags["temporary"]
+      .query(contextVector)
+      .recombine(MessageRecombiner.standard(
+        tokenLimits["temporary"],
+        this._rawChat.chatLogs,
+        "temporary",
+        this._lastTwoMsgs["persistent"].getItems()
+      ));
 
     // Sort persistent and temporary chunks
     const sorted = {
       persistent: [...persistentSmallChunks.chunks, ...persistentLargeChunks].sort(
         (a, b) => a.chunkIdx - b.chunkIdx
-      ).map((x) => x.msg),
+      ).map((x) => JSON.parse(x.json) as ChatMessage),
       temporary: temporaryChunks.sort(
         (a, b) => a.chunkIdx - b.chunkIdx
-      ).map((x) => x.msg)
+      ).map((x) => JSON.parse(x.json) as ChatMessage)
     };
 
     // Post-process the resulting message log,
@@ -109,148 +117,45 @@ export class ContextualizedChat {
   }
 
   private _aggregateSmallChunks(type: ChatLogType, tokenLimit: number): {
-    chunks: {
-      msg: ChatMessage;
-      chunkIdx: ChunkIdx;
-    }[];
+    chunks: MessageChunk[]
     tokens: number;
   } {
-    const chunks: { msg: ChatMessage; chunkIdx: ChunkIdx; }[] = [];
     const chatLog = this._rawChat.chatLogs;
     const smallChunkIdxs = getSmallChunks(this._chunks[type]);
     let tokenCounter = 0;
+    
+    const chunks: MessageChunk[] = [];
 
-    const addChunk = (chunkIdx: ChunkIdx): boolean => {
+    for (const chunkIdx of smallChunkIdxs) {
       const chunk = this._chunks[type][chunkIdx];
-      const msgIdx = chunk.msgIdx;
-      const msg = chatLog.getMsg(type, msgIdx);
+      const msg = chatLog.getMsg(type, chunk.msgIdx);
 
       if (!msg) {
         throw Error("Incorrect msg index, this should never happen.");
       }
 
-      const tokens = chatLog.getMsgTokens(type, msgIdx);
+      const tokens = chatLog.getMsgTokens(type, chunk.msgIdx);
       if (tokenCounter + tokens > tokenLimit) {
-        return false;
-      }
-      chunks.push({ msg, chunkIdx });
-      tokenCounter += tokens;
-      return true;
-    };
-
-    for (const smallChunkIdx of smallChunkIdxs) {
-      if (!addChunk(smallChunkIdx)) {
         break;
       }
+      chunks.push({
+        json: JSON.stringify(msg),
+        tokens,
+        chunkIdx,
+        msgIdx: chunk.msgIdx
+      });
+      tokenCounter += tokens;
     }
 
     return { chunks, tokens: tokenCounter };
   }
 
-  private async _contextualizeChunks(
-    context: string,
-    type: ChatLogType,
-    tokenLimit: number
-  ): Promise<{ msg: ChatMessage; chunkIdx: ChunkIdx; }[]> {
-
-    // Aggregate as many as possible
-    const chunks: { msg: ChatMessage; chunkIdx: ChunkIdx; }[] = [];
-    const chunksAdded: Set<ChunkIdx> = new Set();
-    const msgsAdded: Record<MsgIdx, number> = {};
-    let tokenCounter = 0;
-
-    const addChunk = (chunkText: string, metadata: DocumentMetadata): boolean => {
-      if (tokenCounter + metadata.tokens > tokenLimit) {
-        return false;
-      }
-
-      const chunkIdx = metadata.index;
-      const chunk = this._chunks[type][chunkIdx];
-
-      // Only add up to 4 chunks per message
-      if (!msgsAdded[chunk.msgIdx]) {
-        msgsAdded[chunk.msgIdx] = 0;
-      }
-      if (msgsAdded[chunk.msgIdx] >= 4) {
-        return true;
-      }
-      msgsAdded[chunk.msgIdx] += 1;
-
-      const msg = JSON.parse(chunkText) as ChatMessage;
-
-      // Track the chunk index
-      if (chunksAdded.has(chunkIdx)) {
-        return true;
-      } else {
-        chunksAdded.add(chunkIdx);
-      }
-
-      chunks.push({ msg, chunkIdx });
-      tokenCounter += metadata.tokens;
-
-      if ((msg.role === "assistant" && msg.function_call) || msg.role === "function") {
-        // Ensure function call + results are always added together.
-        // We must traverse the chunk array to find the nearest neighbor
-        const direction = msg.role === "assistant" ? 1 : -1;
-        const search = msg.role === "assistant" ? "function" : "assistant";
-        let funcChunkIdx: number | undefined = undefined;
-        let nextChunkIdx = chunkIdx + direction;
-        while (!funcChunkIdx) {
-          if (this._chunks[type].length >= nextChunkIdx || nextChunkIdx < 0) {
-            break;
-          }
-
-          const msg = this._rawChat.chatLogs.getMsg(
-            type, this._chunks[type][nextChunkIdx].msgIdx
-          );
-
-          if (msg?.role === search) {
-            // We found it
-            funcChunkIdx = nextChunkIdx;
-          } else {
-            nextChunkIdx += direction;
-          }
-        }
-
-        if (!funcChunkIdx || chunksAdded.has(funcChunkIdx)) return true;
-
-        const firstChunk = this._functionCallResultFirstChunks[funcChunkIdx];
-        return addChunk(firstChunk.text, firstChunk.metadata);
-      }
-
-      return true;
-    }
-
-    // Start by always adding the last 2 messages to the chat (1st chunk)
-    for (const lastMsg of this._lastTwoMsgs[type].getItems()) {
-      addChunk(lastMsg.text, lastMsg.metadata);
-    }
-
-    // Search the collection for relevant chunks
-    const results = await this._collections[type].search(context);
-
-    for (const result of results) {
-      const chunkText = result.text();
-      const metadata = result.metadata();
-
-      if (!metadata) {
-        throw Error("metadata is missing, this should never happen")
-      }
-
-      if (!addChunk(chunkText, metadata)) {
-        break;
-      }
-    }
-
-    return chunks;
+  private async _processNewMessages() {
+    this._processNewMessagesByType("persistent");
+    this._processNewMessagesByType("temporary");
   }
 
-  private async _processNewMessages(): Promise<void> {
-    await this._processNewMessagesByType("persistent");
-    await this._processNewMessagesByType("temporary");
-  }
-
-  private async _processNewMessagesByType(type: ChatLogType): Promise<void> {
+  private _processNewMessagesByType(type: ChatLogType) {
     const messages = this._rawChat.chatLogs.get(type).msgs;
 
     // If no messages exist
@@ -268,11 +173,11 @@ export class ContextualizedChat {
     // Process all messages from lastProcessedIdx -> messages.length
     for (let i = lastProcessedIdx + 1; i < messages.length; ++i) {
       const message = messages[i];
-      await this._processNewMessage(message, i, type);
+      this._processNewMessage(message, i, type);
     }
   }
 
-  private async _processNewMessage(message: ChatMessage, msgIdx: number, type: ChatLogType): Promise<void> {
+  private _processNewMessage(message: ChatMessage, msgIdx: number, type: ChatLogType) {
 
     const newChunks: string[] = [];
 
@@ -322,30 +227,27 @@ export class ContextualizedChat {
       return;
     }
 
-    // Create an array of chunk document metadata
-    const metadatas: DocumentMetadata[] = newChunks.map((chunk, index) => ({
-      index: startChunkIdx + index,
-      tokens: this._rawChat.tokenizer.encode(chunk).length
-    }));
-
-    // Add the chunks to the vectordb collection
-    await this._collections[type].add(newChunks, metadatas);
+    // Add the chunks to the rag
+    this._rags[type].addItems(
+      newChunks.map((chunk, index) => ({
+        chunkIdx: startChunkIdx + index,
+        msgIdx,
+        tokens: this._rawChat.tokenizer.encode(chunk).length,
+        json: chunk
+      }))
+    );
 
     // If the message is a function call or result,
     // store the first chunk's text so we can easily retrieve it
     if (message.role === "function" || message.function_call) {
       this._functionCallResultFirstChunks[startChunkIdx] = {
         text: newChunks[0],
-        metadata: metadatas[0]
+        metadata: { index: startChunkIdx }
       };
     }
 
-    // Keep track of the 2 most recent (temporary) messages
-    this._lastTwoMsgs[type].addItem({
-      text: newChunks[0],
-      metadata: metadatas[0],
-      msgIdx: msgIdx
-    });
+    // Keep track of the 2 most recent messages
+    this._lastTwoMsgs[type].addItem(startChunkIdx);
 
     return;
   }

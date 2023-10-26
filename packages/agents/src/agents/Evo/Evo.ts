@@ -3,12 +3,11 @@ import {
   AgentOutput,
   RunResult
 } from "@evo-ninja/agent-utils";
-import { AgentContext } from "../../AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
 import {
   DataAnalystAgent,
   DeveloperAgent,
   ResearcherAgent,
-  ScribeAgent
 } from "../../scriptedAgents";
 import { DelegateAgentFunction } from "../../functions/DelegateScriptedAgent";
 import { VerifyGoalAchievedFunction } from "../../functions/VerifyGoalAchieved";
@@ -32,7 +31,6 @@ export class Evo extends Agent {
       ResearcherAgent,
       DataAnalystAgent,
       ScripterAgent,
-      ScribeAgent
     ].map(agentClass => () => new agentClass(context.cloneEmpty()));
 
     super(
