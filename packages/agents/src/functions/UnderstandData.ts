@@ -1,6 +1,7 @@
 import { ReadDirectoryFunction } from "./ReadDirectory";
 import { ReadAndAnalyzeCSVDataFunction } from "./ReadAndAnalyzeCSVData";
 import { AgentFunctionBase } from "../AgentFunctionBase";
+import { CsvJoinableColumnsFunction } from "./CsvJoinableColumns";
 import { Agent } from "../Agent";
 import { AgentFunctionResult, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 
@@ -56,9 +57,30 @@ export class UnderstandDataFunction extends AgentFunctionBase<UnderstandDataPara
 
     const readAndAnalyzeCSVData = new ReadAndAnalyzeCSVDataFunction().buildExecutor(agent);
 
-    return files.map((file) => readAndAnalyzeCSVData({
+    const analyzes = files.map((file) => readAndAnalyzeCSVData({
       path: file.name,
       question: goal
     }));
+
+    const csvFiles = files.filter((x) => x.name.endsWith(".csv"));
+    const csvJoinableColumns = new CsvJoinableColumnsFunction(
+      agent.context.scripts
+    ).buildExecutor(agent);
+    const calls = [];
+
+    // Generate all combinations of pairs of csv files
+    for (let i = 0; i < csvFiles.length; i++) {
+      for (let j = i + 1; j < csvFiles.length; j++) {
+        // Permutations of the pair
+        const csvI = csvFiles[i].name;
+        const csvJ = csvFiles[j].name;
+        calls.push(csvJoinableColumns({ csv1: csvI, csv2: csvJ }));
+      }
+    }
+
+    return [
+      ...analyzes,
+      ...calls
+    ];
   }
 }

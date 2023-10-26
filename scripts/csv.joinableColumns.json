@@ -1,0 +1,6 @@
+{
+  "name": "csv.joinableColumns",
+  "description": "Determine which columns in two CSVs can be joined",
+  "arguments": "{ csv1: string, csv2: string }",
+  "code": "./csv.joinableColumns.js"
+}
