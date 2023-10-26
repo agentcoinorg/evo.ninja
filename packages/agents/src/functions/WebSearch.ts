@@ -24,6 +24,11 @@ export interface WebSearchFuncParameters {
 }
 
 const FETCH_WEBPAGE_TIMEOUT = 4000
+const TRUSTED_SOURCES = [
+  "wikipedia",
+  "statista",
+  "macrotrends"
+]
 
 export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParameters> {
   constructor(
@@ -84,8 +89,12 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         context.env.SERP_API_KEY
       );
 
+      const containsTrustedSource = googleResults.some(x => x.trustedSource)
+      const resultsFromTrustedSources = containsTrustedSource ? googleResults
+      .filter(x => x.trustedSource) : googleResults
+
       const searchInPagesResults = await this.searchInPages({
-        urls: googleResults.map(x => x.url),
+        urls: resultsFromTrustedSources.map(x => x.url),
         query,
         context
       })
@@ -272,7 +281,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
     return markdownText
   }
 
-  private async searchOnGoogle(query: string, apiKey: string, maxResults = 6) {
+  private async searchOnGoogle(query: string, apiKey: string, maxResults = 10) {
     const axiosClient = axios.create({
       baseURL: "https://serpapi.com",
     });
@@ -308,6 +317,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         title: result.title ?? "",
         url: result.link ?? "",
         description: result.snippet ?? "",
+        trustedSource: TRUSTED_SOURCES.some(x => result.link.includes(x))
       }));
 
     return result.slice(0, maxResults);
