@@ -53,13 +53,10 @@ export class MessageRecombiner {
         tokenCount += chunk.tokens;
 
         // Ensure that the first chunk is always added
-        let prevChunkIdx = chunkIdx - 1;
-        let firstChunkIdx = undefined;
-        while (prevChunkIdx > -1 && originalItems[prevChunkIdx].msgIdx === chunk.msgIdx) {
-          firstChunkIdx = prevChunkIdx;
-          prevChunkIdx -= 1;
-        }
-        if (firstChunkIdx) {
+        const firstChunkIdx = originalItems.slice(0, chunkIdx)
+          .findIndex(item => item.msgIdx === chunk.msgIdx);
+
+        if (firstChunkIdx !== -1) {
           addChunk(firstChunkIdx);
         }
 
