@@ -106,40 +106,6 @@ export class ContextualizedChat {
     return chat;
   }
 
-  private _aggregateSmallChunks(type: ChatLogType, tokenLimit: number): {
-    chunks: MessageChunk[]
-    tokens: number;
-  } {
-    const chatLog = this._rawChat.chatLogs;
-    const smallChunkIdxs = getSmallChunks(this._chunks[type]);
-    let tokenCounter = 0;
-    
-    const chunks: MessageChunk[] = [];
-
-    for (const chunkIdx of smallChunkIdxs) {
-      const chunk = this._chunks[type][chunkIdx];
-      const msg = chatLog.getMsg(type, chunk.msgIdx);
-
-      if (!msg) {
-        throw Error("Incorrect msg index, this should never happen.");
-      }
-
-      const tokens = chatLog.getMsgTokens(type, chunk.msgIdx);
-      if (tokenCounter + tokens > tokenLimit) {
-        break;
-      }
-      chunks.push({
-        json: JSON.stringify(msg),
-        tokens,
-        chunkIdx,
-        msgIdx: chunk.msgIdx
-      });
-      tokenCounter += tokens;
-    }
-
-    return { chunks, tokens: tokenCounter };
-  }
-
   private async _processNewMessages() {
     this._processNewMessagesByType("persistent");
     this._processNewMessagesByType("temporary");
@@ -249,25 +215,6 @@ function getLastProcessedMessageIndex(chunks: Chunk[]): number {
 
   // Return the message index of the last metadata
   return chunks[lastIdx].msgIdx;
-}
-
-function getSmallChunks(chunks: Chunk[]): ChunkIdx[] {
-  const smallChunksIdxs: ChunkIdx[] = [];
-  let prevMsgIdx = -1;
-
-  // Iterate through and grab all unique msg indexes.
-  // If a msg is not small, it will be chunked,
-  // meaning more than one index will exist
-  for (let i = 0; i < chunks.length; ++i) {
-    const currMsgIdx = chunks[i].msgIdx;
-    const nextMsgIdx = i + 1 < chunks.length ? chunks[i + 1] : -1;
-    if (currMsgIdx !== prevMsgIdx && currMsgIdx !== nextMsgIdx) {
-      // We've found a unique index with no siblings, it is small
-      smallChunksIdxs.push(i);
-    }
-  }
-
-  return smallChunksIdxs;
 }
 
 function postProcessMessages(messages: ChatMessage[]): ChatMessage[] {
