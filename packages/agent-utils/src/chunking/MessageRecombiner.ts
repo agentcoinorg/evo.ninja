@@ -52,9 +52,17 @@ export class MessageRecombiner {
         chunks.push(chunk);
         tokenCount += chunk.tokens;
 
+        // Ensure that the first chunk is always added
+        const firstChunkIdx = originalItems.slice(0, chunkIdx)
+          .findIndex(item => item.msgIdx === chunk.msgIdx);
+
+        if (firstChunkIdx !== -1) {
+          addChunk(firstChunkIdx);
+        }
+
+        // Ensure that function call + result messages
+        // are always added as a pair to the chat
         if (!recursive) {
-          // Ensure that function call + result messages
-          // are always added as a pair to the chat
           const funcPairChunk = tryGetFunctionMessagePair(
             chunk,
             chunkIdx,
