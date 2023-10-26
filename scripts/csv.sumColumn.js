@@ -23,11 +23,14 @@ function parseCSV(data) {
 }
 
 const { rows } = parseCSV(csv);
+const [header, ...otherRows] = rows;
+const columnIndex = header.indexOf(columnName);
+
 let sum = 0;
 
 // Start from 1 if there's a header row
-for (let i = withHeader ? 1 : 0; i < rows.length; i++) {
-  const value = parseFloat(rows[i][columnIndex]);
+for (let i = 0; i < otherRows.length; i++) {
+  const value = parseFloat(otherRows[i][columnIndex]);
   if (!isNaN(value)) {
     sum += value;
   }
