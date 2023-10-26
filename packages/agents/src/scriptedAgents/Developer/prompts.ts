@@ -19,6 +19,8 @@ import pytest
 def test_function_name_to_be_tested():
     # tests should be here
 \`\`\`
+Remember that you must do unit tests, if you are told that the implementation will be tested through a CLI process,
+you still make unit tests without adding complex logic
 You will always make sure that the implementation and tests are created before running tests with function runPytest
 You must not interact with the user or ask question for clarification. Solve the task to the best of your abilities.`,
     },
