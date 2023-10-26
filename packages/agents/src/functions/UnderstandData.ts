@@ -1,5 +1,5 @@
 import { ReadDirectoryFunction } from "./ReadDirectory";
-import { ReadAndAnalyzeDataFunction } from "./ReadAndAnalyzeData";
+import { ReadAndAnalyzeCSVDataFunction } from "./ReadAndAnalyzeCSVData";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { CsvJoinableColumnsFunction } from "./CsvJoinableColumns";
 import { Agent } from "../Agent";
@@ -55,9 +55,9 @@ export class UnderstandDataFunction extends AgentFunctionBase<UnderstandDataPara
     const files = workspace.readdirSync("./")
       .filter((x) => x.type === "file");
 
-    const readAndAnalyzeData = new ReadAndAnalyzeDataFunction().buildExecutor(agent);
+    const readAndAnalyzeCSVData = new ReadAndAnalyzeCSVDataFunction().buildExecutor(agent);
 
-    const analyzes = files.map((file) => readAndAnalyzeData({
+    const analyzes = files.map((file) => readAndAnalyzeCSVData({
       path: file.name,
       question: goal
     }));
