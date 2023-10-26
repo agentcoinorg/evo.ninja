@@ -43,7 +43,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         items: {
             type: "string"
         },
-        description: "Queries to search the web for in parallel",
+        description: "Queries with all details to search the web for in parallel",
       },
     },
     required: ["queries"],
