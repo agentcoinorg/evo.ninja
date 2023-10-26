@@ -3,12 +3,12 @@ import { AgentFunctionBase } from "../AgentFunctionBase";
 import { Agent } from "../Agent";
 import { AgentFunctionResult, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 
-interface ReadAndAnalyzeDataParameters {
+interface ReadAndAnalyzeCSVDataParameters {
   path: string;
   question: string;
 }
 
-export class ReadAndAnalyzeDataFunction extends AgentFunctionBase<ReadAndAnalyzeDataParameters> {
+export class ReadAndAnalyzeCSVDataFunction extends AgentFunctionBase<ReadAndAnalyzeCSVDataParameters> {
   name: string = "readAndAnalyzeCSVData";
   description: string = "Read and analyze CSV datasets to answer questions. Returns a comprehensive summary of all relevant details. Only use on CSV files"
   parameters: any = {
@@ -27,8 +27,8 @@ export class ReadAndAnalyzeDataFunction extends AgentFunctionBase<ReadAndAnalyze
     additionalProperties: false
   }
 
-  buildExecutor(agent: Agent<unknown>): (params: ReadAndAnalyzeDataParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
-    return async (params: ReadAndAnalyzeDataParameters, rawParams?: string): Promise<AgentFunctionResult> => {
+  buildExecutor(agent: Agent<unknown>): (params: ReadAndAnalyzeCSVDataParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
+    return async (params: ReadAndAnalyzeCSVDataParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       const analyzeData = new AnalyzeDataFunction(agent.context.llm, agent.context.chat.tokenizer);
 
       const data = agent.context.workspace.readFileSync(params.path);
