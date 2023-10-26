@@ -7,17 +7,18 @@ import { CsvSortByColumnFunction } from "../../functions/CsvSortByColumn";
 import { CsvSumColumnFunction } from "../../functions/CsvSumColumn";
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { prompts } from "./prompts";
-import { AgentContext } from "@evo-ninja/agent-utils";
+import { AgentContext, Chat } from "@evo-ninja/agent-utils";
 import { AgentConfig } from "../../AgentConfig";
-import { Agent } from "../../Agent";
+import { Agent, GoalRunArgs } from "../../Agent";
 
-export class DataAnalystAgent extends Agent {
+export class CsvAnalystAgent extends Agent {
+  private understand: UnderstandDataFunction;
+
   constructor(context: AgentContext) {
     super(
       new AgentConfig(
         () => prompts,
         [
-          new UnderstandDataFunction(),
           new CsvAddColumnFunction(context.scripts, true),
           new CsvFilterRowsFunction(context.scripts, true),
           new CsvJoinByColumnFunction(context.scripts, true),
@@ -30,5 +31,10 @@ export class DataAnalystAgent extends Agent {
       ),
       context
     );
+    this.understand = new UnderstandDataFunction();
+  }
+
+  public override async onFirstRun(args: GoalRunArgs, chat: Chat): Promise<void> {
+    await this.executeFunction(this.understand, args, chat);
   }
 }

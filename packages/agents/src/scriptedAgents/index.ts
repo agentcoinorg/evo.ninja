@@ -1,6 +1,6 @@
 export * from "./Developer"
 export * from "./Researcher"
 export * from "./Planner"
-export * from "./DataAnalyst"
+export * from "./CsvAnalyst"
 export * from "./GoalVerifier"
 export * from "./Synthesizer"

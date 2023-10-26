@@ -3,20 +3,20 @@ import { AgentFunctionBase } from "../AgentFunctionBase";
 import { Agent } from "../Agent";
 import { AgentFunctionResult, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 
-interface ReadAndAnalyzeCSVDataParameters {
+interface ReadAndAnalyzeFileParameters {
   path: string;
   question: string;
 }
 
-export class ReadAndAnalyzeCSVDataFunction extends AgentFunctionBase<ReadAndAnalyzeCSVDataParameters> {
-  name: string = "readAndAnalyzeCSVData";
-  description: string = "Read and analyze CSV datasets to answer questions. Returns a comprehensive summary of all relevant details. Only use on CSV files"
+export class ReadAndAnalyzeFileFunction extends AgentFunctionBase<ReadAndAnalyzeFileParameters> {
+  name: string = "readAndAnalyzeFile";
+  description: string = "Read and analyze files to answer questions. Returns a comprehensive summary of all relevant details."
   parameters: any = {
     type: "object",
     properties: {
       path: {
         type: "string",
-        description: "path to the data file"
+        description: "path to the file"
       },
       question: {
         type: "string",
@@ -27,20 +27,20 @@ export class ReadAndAnalyzeCSVDataFunction extends AgentFunctionBase<ReadAndAnal
     additionalProperties: false
   }
 
-  buildExecutor(agent: Agent<unknown>): (params: ReadAndAnalyzeCSVDataParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
-    return async (params: ReadAndAnalyzeCSVDataParameters, rawParams?: string): Promise<AgentFunctionResult> => {
+  buildExecutor(agent: Agent<unknown>): (params: ReadAndAnalyzeFileParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
+    return async (params: ReadAndAnalyzeFileParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       const analyzeData = new AnalyzeDataFunction(agent.context.llm, agent.context.chat.tokenizer);
 
       const data = agent.context.workspace.readFileSync(params.path);
       const summary = await analyzeData.analyze({ data, question: params.question }, agent.context);
-      const variable = agent.context.variables.save("dataFile", data);
+      const variable = agent.context.variables.save("fileData", data);
 
       return {
         outputs: [],
         messages: [
           ChatMessageBuilder.functionCall(this.name, params),
-          ChatMessageBuilder.functionCallResult(this.name, `\${${variable}}`),
-          ChatMessageBuilder.functionCallResult(this.name, `Data File Stored in Variable: \${${variable}}\nData Summary:\n\`\`\`\n${summary}\n\`\`\``),
+          ChatMessageBuilder.functionCallResult(this.name, `File Data Stored in Variable: \${${variable}}\nData Summary:\n\`\`\`\n${summary}\n\`\`\``),
+          ChatMessageBuilder.functionCallResult(this.name, `\${${variable}}`)
         ]
       };
     }

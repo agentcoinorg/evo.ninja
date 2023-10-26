@@ -10,13 +10,16 @@ import {
   ChatLogs,
   LlmModel,
   agentFunctionBaseToAgentFunction,
-  OpenAIEmbeddingAPI
+  OpenAIEmbeddingAPI,
+  Chat,
+  executeAgentFunction
 } from "@evo-ninja/agent-utils";
 import { ResultErr } from "@polywrap/result";
 import { AgentConfig } from "./AgentConfig";
 import { AgentContext } from "@evo-ninja/agent-utils";
 import { ExecuteAgentFunctionCalled } from "@evo-ninja/agent-utils";
 import { Prompt } from "./agents/Chameleon/Prompt";
+import { AgentFunctionBase } from "./AgentFunctionBase";
 
 export type GoalRunArgs = {
   goal: string;
@@ -82,6 +85,29 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
       this.context.logger.error(err);
       return ResultErr("Unrecoverable error encountered.");
     }
+  }
+
+  public onFirstRun(_: TRunArgs, chat: Chat): Promise<void> {
+    return Promise.resolve();
+  }
+
+  protected async executeFunction(func: AgentFunctionBase<unknown>, args: any, chat: Chat): Promise<void> {
+    const fn = agentFunctionBaseToAgentFunction(this)(func);
+    const { result } = await executeAgentFunction([args, fn], JSON.stringify(args), this.context);
+
+    // Save large results as variables
+    for (const message of result.messages) {
+      if (message.role !== "function") {
+        continue;
+      }
+      const functionResult = message.content || "";
+      if (result.storeInVariable || this.context.variables.shouldSave(functionResult)) {
+        const varName = this.context.variables.save(func.name, functionResult);
+        message.content = `\${${varName}}`;
+      }
+    }
+
+    result.messages.forEach(x => chat.temporary(x));
   }
 
   protected expression(msgs?: ChatMessage[]): LlmQuery {

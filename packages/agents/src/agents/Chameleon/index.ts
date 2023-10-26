@@ -27,9 +27,9 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
   private _cChat: ContextualizedChat;
   private _chunker: MessageChunker;
   private previousPrediction: string | undefined;
-  private previousPredictionVector: number[] | undefined;
   private loopCounter: number = 0;
   private previousAgent: Agent<unknown> | undefined;
+  private initializedAgents: Set<string> = new Set();
   private goal: string = "";
 
   constructor(
@@ -68,18 +68,17 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     const { chat } = this.context;
     const { messages } = chat.chatLogs;
 
-    if (this.previousPrediction && this.previousPredictionVector) {
-      // This will shorten only new messages (since the rest were already shortened)
-      await this.shortenLargeMessages(this.previousPrediction, this.previousPredictionVector);
-    }
-
     const prediction = (!this.previousPrediction || this.loopCounter % 2 === 0) ?
       await this.predictBestNextStep(messages, this.previousAgent, this.previousPrediction ? "SUCCESS": undefined) :
       this.previousPrediction;
 
     this.loopCounter += 1;
 
-    if (prediction === "SUCCESS") {
+    if (
+      prediction === "SUCCESS" ||
+      prediction.includes("\"SUCCESS\"") ||
+      prediction.includes("goal has been achieved")
+    ) {
       return {
         logs: chat.chatLogs,
         agentFunctions: [],
@@ -95,12 +94,18 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
 
     const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(predictionVector, this.context);
 
+    if (!this.initializedAgents.has(agent.config.prompts.name)) {
+      this.initializedAgents.add(agent.config.prompts.name);
+      await agent.onFirstRun({ goal: this.goal }, chat);
+    }
+
     this.previousPrediction = prediction;
-    this.previousPredictionVector = predictionVector;
     this.previousAgent = agent;
     console.log("Prediction: ", prediction);
 
-    const contextualizedChat = await this.contextualizeChat(predictionVector);
+    const contextualizedChat = await this.contextualizeChat(
+      await this.createEmbeddingVector(`${persona}\n${prediction}`)
+    );
 
     const logs = insertPersonaAsFirstMsg(persona, contextualizedChat.chatLogs, chat.tokenizer);
 
@@ -149,55 +154,6 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
       }
     );
   };
-
-  // TODO: explore removing this
-  private async shortenLargeMessages(query: string, queryVector: number[]): Promise<void> {
-    for(let i = 0; i < this.context.chat.chatLogs.messages.length ; i++) {
-      const message = this.context.chat.chatLogs.messages[i];
-      if (i <= 3 || !this.isLargeMsg(message)) {
-      } else {
-        message.content = await this.advancedFilterText(message.content ?? "", query, queryVector);
-      }
-    }
-  }
-
-  // TODO: try using same ContextualizeChat logic for chunking and summarizing?
-  private async advancedFilterText(text: string, query: string, queryVector: number[]): Promise<string> {
-    const maxTokensToUse = this.maxContextTokens() * 0.45;
-    const tokensForPreview = maxTokensToUse * 0.7;
-
-    const bigPreview = await Rag.filterWithSurroundingText(
-      text, 
-      queryVector, 
-      this.context,
-      {
-        tokenLimit: tokensForPreview,
-        surroundingCharacters: 750,
-        chunkLength: 100,
-        overlap: 15
-      });
-
-      const prompt = new Prompt()
-        .text("Assistant's next step:")
-        .line(x => x.block(query))
-        .line("Result:")
-        .line(x => x.block(bigPreview))
-        .line(`
-          Imagine you are an expert content reducer. 
-          Above are the snippets of the content result from the assistant's next step.
-          Rewrite the content to convey the relevant information that the assistant wanted.
-          Merge the snippets into a coherent content result.
-          Filter out unecessary information.
-          Do not summarize or add new information.
-          Make sure you keep all the information and all the data that the assistant wanted.
-          IMPORTANT: Respond only with the new content!"`
-        ).toString();
-
-    const outputTokens = Math.floor(maxTokensToUse * 0.25);
-    const filteredText = await this.askLlm(prompt, { maxResponseTokens: outputTokens, model: "gpt-3.5-turbo-16k-0613" });
-
-    return filteredText;
-  }
 
   private maxContextChars(): number {
     return tokensToChars(this.maxContextTokens());
