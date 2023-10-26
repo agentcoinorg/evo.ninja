@@ -2,12 +2,12 @@ import { ChatMessage } from "@evo-ninja/agent-utils";
 import { GoalRunArgs } from "../../Agent";
 
 export const prompts = {
-  name: "Scribe",
-  expertise: `excels at writing, reading, and formatting text.`,
+  name: "Synthesizer",
+  expertise: `Reads text files, analyzing and gathering data and information from text files, generating summaries and reports, and analyzing text.`,
   initialMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
     {
       role: "user",
-      content: `You are a generalist scribe. Pay close attention to formatting details.`,
+      content: `You are a reader and synthsizer agent. Your job is to read text files, analyze text file contents`,
     },
     {
       role: "user",

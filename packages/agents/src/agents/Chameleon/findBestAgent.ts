@@ -2,7 +2,7 @@ import { FunctionDefinition } from "@evo-ninja/agent-utils";
 import { Agent, GoalRunArgs } from "../../Agent";
 import { AgentContext } from "../../AgentContext";
 import { AgentFunctionBase } from "../../AgentFunctionBase";
-import { DeveloperAgent, ResearcherAgent, DataAnalystAgent } from "../../scriptedAgents";
+import { DeveloperAgent, ResearcherAgent, DataAnalystAgent, SynthsizerAgent } from "../../scriptedAgents";
 import { Rag } from "./Rag";
 import { StandardRagBuilder } from "./StandardRagBuilder";
 
@@ -11,7 +11,6 @@ type AgentWithPrompts = {
   persona: string;
   agent: Agent<GoalRunArgs>;
 };
-let agentRag: StandardRagBuilder<AgentWithPrompts>;
 
 export const findBestAgent = async (
   query: string,
@@ -26,6 +25,7 @@ export const findBestAgent = async (
     DeveloperAgent,
     DataAnalystAgent,
     ResearcherAgent,
+    SynthsizerAgent,
   ].map(agentClass => new agentClass(context.cloneEmpty()));
 
   const agentsWithPrompts = allAgents.map(agent => {
@@ -36,13 +36,11 @@ export const findBestAgent = async (
     };
   });
 
-  if (!agentRag) {
-    agentRag = Rag.standard<AgentWithPrompts>(context)
-      .addItems(agentsWithPrompts)
-      .selector(x => x.expertise)
-      .limit(1)
-      .onlyUnique();
-  }
+  let agentRag: StandardRagBuilder<AgentWithPrompts> = Rag.standard<AgentWithPrompts>(context)
+    .addItems(agentsWithPrompts)
+    .selector(x => x.expertise)
+    .limit(1)
+    .onlyUnique();
 
   const agents = await agentRag.query(query);
 
