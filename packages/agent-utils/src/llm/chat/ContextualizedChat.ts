@@ -71,16 +71,10 @@ export class ContextualizedChat {
     // Ensure all new messages have been processed
     this._processNewMessages();
 
-    // Aggregate all "persistent" chunks
-    const persistentSmallChunks = this._aggregateSmallChunks(
-      "persistent",
-      tokenLimits["persistent"]
-    );
-
     const persistentLargeChunks = await this._rags["persistent"]
       .query(contextVector)
       .recombine(MessageRecombiner.standard(
-        tokenLimits["persistent"] - persistentSmallChunks.tokens,
+        tokenLimits["persistent"],
         this._rawChat.chatLogs,
         "persistent",
         this._lastTwoMsgs["persistent"].getItems()
@@ -97,12 +91,8 @@ export class ContextualizedChat {
 
     // Sort persistent and temporary chunks
     const sorted = {
-      persistent: [...persistentSmallChunks.chunks, ...persistentLargeChunks].sort(
-        (a, b) => a.chunkIdx - b.chunkIdx
-      ).map((x) => JSON.parse(x.json) as ChatMessage),
-      temporary: temporaryChunks.sort(
-        (a, b) => a.chunkIdx - b.chunkIdx
-      ).map((x) => JSON.parse(x.json) as ChatMessage)
+      persistent: persistentLargeChunks.map((x) => JSON.parse(x.json) as ChatMessage),
+      temporary: temporaryChunks.map((x) => JSON.parse(x.json) as ChatMessage)
     };
 
     // Post-process the resulting message log,
@@ -219,12 +209,6 @@ export class ContextualizedChat {
     // Add message index pointers for each new chunk
     for (const _ of newChunks) {
       chunks.push({ msgIdx });
-    }
-
-    // If we're processing persistent messages,
-    // and it isn't a large message, early out
-    if (type === "persistent" && newChunks.length === 1) {
-      return;
     }
 
     // Add the chunks to the rag

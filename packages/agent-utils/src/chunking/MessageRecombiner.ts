@@ -1,7 +1,6 @@
 import { LocalDocument } from "../embeddings";
 import { MessageChunk, MsgIdx, ChunkIdx, ChatMessage, ChatLogs, ChatLogType } from "../llm";
 import { Recombiner } from "../rag/StandardRagBuilder";
-import { PriorityContainer } from "../utils";
 
 export class MessageRecombiner {
   static standard(
@@ -78,12 +77,29 @@ export class MessageRecombiner {
         return true;
       }
 
-      // Add any initial chunks
-      for (const initChunk of initChunks) {
-        addChunk(initChunk);
+      const iterator = await results();
+
+      //Add all small persistent chunks
+      const smallPersistentChunks = [];
+      let lastMsgIndex = -1;
+      for (const chunk of originalItems) {
+        if (chunk.msgIdx !== lastMsgIndex) {
+          smallPersistentChunks.push(chunk);
+          lastMsgIndex = chunk.msgIdx;
+        } else {
+          smallPersistentChunks.pop();
+          break;
+        }
+      }
+      
+      for (const chunk of smallPersistentChunks) {
+        addChunk(chunk.chunkIdx);
       }
 
-      const iterator = await results();
+      // Add any initial chunks
+      for (const chunk of initChunks) {
+        addChunk(chunk);
+      }
 
       for await (const result of iterator) {
         const chunkIdx = result.metadata().index;
