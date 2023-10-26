@@ -3,7 +3,7 @@ import {
   AgentOutput,
   RunResult
 } from "@evo-ninja/agent-utils";
-import { AgentContext } from "../../AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
 import {
   DataAnalystAgent,
   DeveloperAgent,

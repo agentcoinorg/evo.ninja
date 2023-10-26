@@ -7,7 +7,7 @@ import { CsvSortByColumnFunction } from "../../functions/CsvSortByColumn";
 import { CsvSumColumnFunction } from "../../functions/CsvSumColumn";
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { prompts } from "./prompts";
-import { AgentContext } from "../../AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
 import { AgentConfig } from "../../AgentConfig";
 import { Agent } from "../../Agent";
 

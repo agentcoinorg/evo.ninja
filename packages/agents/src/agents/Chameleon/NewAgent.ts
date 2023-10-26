@@ -6,7 +6,7 @@ import {
   FunctionDefinition,
   RunResult,
 } from "@evo-ninja/agent-utils";
-import { AgentContext } from "../../AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
 import { Agent } from "../../Agent";
 import { AgentConfig } from "../../AgentConfig";
 import { ResultErr } from "@polywrap/result";

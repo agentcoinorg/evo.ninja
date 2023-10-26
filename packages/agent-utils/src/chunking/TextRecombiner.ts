@@ -1,46 +1,59 @@
 import { BaseDocumentMetadata, LocalDocument } from "../embeddings";
+import { Tokenizer } from "../llm";
+import { Recombiner } from "../rag/StandardRagBuilder";
 import { LazyArray } from "../utils/LazyArray";
 
 export class TextRecombiner {
-  static surroundingText(
+  static surroundingTextWithPreview(
     surroundingCharacters: number, 
+    separator: string,
+    tokenLimit: number, 
+    tokenizer: Tokenizer,
     overlap?: number, 
-  ): <TMetadata extends BaseDocumentMetadata>(results: LazyArray<{item: string, doc: LocalDocument<TMetadata> }>, originalItems: string[]) => LazyArray<string> {
+  ): Recombiner<string, string> {
     const halfSurroundChars = Math.floor(surroundingCharacters / 2);
     
-    return <TMetadata extends BaseDocumentMetadata>(results: LazyArray<{item: string, doc: LocalDocument<TMetadata> }>, originalItems: string[]): LazyArray<string> => {
-      const promise = results.then(results => {
-        const docs = results.map(x => x.doc);
-  
-        const surroundedResults = docs.map(result => {
-          const resultIndex = result.metadata()!.index;
-    
-          const textBehind = getTextFromPriorChunks({
-            originalItems,
-            currentIndex: resultIndex,
-            overlap: overlap ?? 0,
-            characterLimit: halfSurroundChars,
-          })
-    
-          const textForward = getTextFromNextChunks({
-            originalItems,
-            currentIndex: resultIndex,
-            overlap: overlap ?? 0,
-            characterLimit: halfSurroundChars,
-          })
-    
-          const withSurrounding = [textBehind, result.text(), textForward].join("")
+    return async (results: () => Promise<AsyncGenerator<LocalDocument<{ index: number }>>>, originalItems: string[]): Promise<string> => {
+      const iterator = await results();
 
-          return {
-            match: result,
-            withSurrounding
-          };
+      let text = "";
+
+      for await (const result of iterator) {
+        const resultIndex = result.metadata()!.index;
+
+        const textBehind = getTextFromPriorChunks({
+          originalItems,
+          currentIndex: resultIndex,
+          overlap: overlap ?? 0,
+          characterLimit: halfSurroundChars,
         })
-    
-        return surroundedResults.map(x => x.withSurrounding);
-      });
   
-      return new LazyArray(promise);
+        const textForward = getTextFromNextChunks({
+          originalItems,
+          currentIndex: resultIndex,
+          overlap: overlap ?? 0,
+          characterLimit: halfSurroundChars,
+        })
+  
+        const surrounding = [textBehind, result.text(), textForward].join("")
+
+        let newText = text;
+        if (newText === "") {
+          newText += surrounding;
+        } else {
+          newText += separator + surrounding;
+        }
+
+        const tokenCount = tokenizer.encode(newText).length;
+
+        if (tokenCount > tokenLimit) {
+          break;
+        }
+    
+        text = newText;
+      }
+
+      return text;
     };
   }
 }

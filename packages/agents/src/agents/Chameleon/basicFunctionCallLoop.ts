@@ -1,6 +1,6 @@
 import { Chat, AgentFunction, ExecuteAgentFunctionCalled, ExecuteAgentFunctionResult, AGENT_SPEAK_RESPONSE, AgentOutput, RunResult, processFunctionAndArgs, AgentOutputType, executeAgentFunction, ChatMessage, ChatLogs, FunctionDefinition } from "@evo-ninja/agent-utils";
 import { ResultErr, ResultOk } from "@polywrap/result";
-import { AgentContext } from "../../AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
 
 export async function* basicFunctionCallLoop(
   context: AgentContext,
