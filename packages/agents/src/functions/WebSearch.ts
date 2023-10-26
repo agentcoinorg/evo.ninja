@@ -17,7 +17,6 @@ import { Agent } from "../Agent";
 import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 import TurndownService from "turndown";
 import { load } from "cheerio";
-import { Prompt } from "../agents/Chameleon/Prompt";
 
 export interface WebSearchFuncParameters {
   queries: string[];
@@ -91,7 +90,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
 
       const containsTrustedSource = googleResults.some(x => x.trustedSource)
       const resultsFromTrustedSources = containsTrustedSource ? googleResults
-      .filter(x => x.trustedSource) : googleResults
+      .filter(x => x.trustedSource) : googleResults.slice(0, 4)
 
       const searchInPagesResults = await this.searchInPages({
         urls: resultsFromTrustedSources.map(x => x.url),
@@ -281,7 +280,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
     return markdownText
   }
 
-  private async searchOnGoogle(query: string, apiKey: string, maxResults = 10) {
+  private async searchOnGoogle(query: string, apiKey: string) {
     const axiosClient = axios.create({
       baseURL: "https://serpapi.com",
     });
@@ -320,6 +319,6 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         trustedSource: TRUSTED_SOURCES.some(x => result.link.includes(x))
       }));
 
-    return result.slice(0, maxResults);
+    return result;
   }
 }
