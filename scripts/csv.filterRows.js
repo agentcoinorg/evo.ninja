@@ -31,20 +31,16 @@ const { rows, delimiter } = parseCSV(csv);
 // Separate header from the rest of the rows
 let resultRows = [];
 
-if (withHeader) {
-  const [header, ...otherRows] = rows;
+const [header, ...otherRows] = rows;
 
-  const filteredRows = otherRows.filter(row =>
-    row[columnIndex].includes(searchString)
-  );
+const columnIndex = header.indexOf(columnName);
 
-  // Add the header back to the top
-  resultRows = [header].concat(filteredRows);
-} else {
-  resultRows = rows.filter(row =>
-    row[columnIndex].includes(searchString)
-  );
-}
+const filteredRows = otherRows.filter(row =>
+  row[columnIndex].includes(filterValue)
+);
+
+// Add the header back to the top
+resultRows = [header].concat(filteredRows);
 
 const result = serializeCSV(resultRows, delimiter);
 
