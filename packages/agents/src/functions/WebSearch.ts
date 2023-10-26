@@ -87,11 +87,16 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
       const googleResultsAnalysisPrompt = new Prompt()
         .line(`Look at this information:`)
         .json(googleResults)
-        .line(`Is it enough to answer: ${query}? If it is, state the answer and say "TRUE`)
+        .line(`
+        Is it enough to answer: ${query}? If it is, state the answer and say "TRUE
+        DO NOT SETTLE FOR THE FIRST PIECE OF INFORMATION FOUND IF THERE ARE MORE PRECISE RESULTS AVAILABLE.
+        Prioritize decimal precision, if you see a number like 1.5 billion or 1,500 million, and later 1,511 million; take 1,511 milion.
+        `)
         .toString()
 
       const llmAnalysisResponse = await this.askLlm(googleResultsAnalysisPrompt, {
-        model: "gpt-3.5-turbo-16k-0613"
+        model: "gpt-3.5-turbo-16k-0613",
+        maxResponseTokens: 200
       })
 
       if (llmAnalysisResponse.includes("TRUE")) {
@@ -137,26 +142,26 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         maxResponseTokens: 200
       })
 
-      console.log(analysisFromChunks)
+      // console.log(analysisFromChunks)
       
-      const analysisFromChunksJson = await this.askLlm(new Prompt().text(`
-        Look at this answer: 
-        "${analysisFromChunks}"
+      // const analysisFromChunksJson = await this.askLlm(new Prompt().text(`
+      //   Look at this answer: 
+      //   "${analysisFromChunks}"
 
-        Based on the following information:
+      //   Based on the following information:
 
-        "${searchMatches.join("\n------------\n")}"
+      //   "${searchMatches.join("\n------------\n")}"
 
-        If there are pieces or parts of the answer that could be replaced for more numerically precise parts of the information,
-        for example: 31.2 billion is less precise than 31,198 million; then replace each part of the answer with the most precise
-        from the information if available.
-      `).toString(), { model: "gpt-3.5-turbo-16k-0613" })
+      //   If there are pieces or parts of the answer that could be replaced for more numerically precise parts of the information,
+      //   for example: 31.2 billion is less precise than 31,198 million; then replace each part of the answer with the most precise
+      //   from the information if available.
+      // `).toString(), { model: "gpt-3.5-turbo-16k-0613" })
 
-      console.log(analysisFromChunksJson)
+      console.log(analysisFromChunks)
 
       return this.onSuccess(
         { queries: [query] },
-        JSON.stringify(searchMatches, null, 2),
+        analysisFromChunks,
         rawParams,
         context.variables
       );

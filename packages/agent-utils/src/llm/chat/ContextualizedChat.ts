@@ -92,7 +92,7 @@ export class ContextualizedChat {
         tokenLimits["temporary"],
         this._rawChat.chatLogs,
         "temporary",
-        this._lastTwoMsgs["persistent"].getItems()
+        this._lastTwoMsgs["temporary"].getItems()
       ));
 
     // Sort persistent and temporary chunks
