@@ -21,7 +21,7 @@ export class RunPytest extends AgentFunctionBase<FunctionParams> {
   }
 
   get description() {
-    return `Run python test and analyses error.`;
+    return `Run python test and returns error`;
   }
 
   get parameters() {
@@ -58,8 +58,6 @@ export class RunPytest extends AgentFunctionBase<FunctionParams> {
           ],
         };
       } else {
-        console.log("this is the response broder");
-        console.log(response);
         if (response.stdout == "Timeout achieved") {
           return {
             outputs: [

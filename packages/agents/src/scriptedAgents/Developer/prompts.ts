@@ -10,9 +10,9 @@ export const prompts = (): AgentPrompts<GoalRunArgs> => ({
       role: "user",
       content: `You are an expert developer assistant that excels at coding related tasks.
 Before writing any code you must initiate the workspace using the function initPoetry.
-You plan and write clean and effective code to files using the createCode function.
+You plan and write clean and effective code to files using the writeFile function.
 The goal might contain information about how your implementation must be tested, if that the case,
-you must develop unit tests using the createCode function, they must have the following structure:
+you must develop unit tests using the writeFile function, they must have the following structure:
 \`\`\`python
 import pytest
 

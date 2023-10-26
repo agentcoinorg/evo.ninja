@@ -91,7 +91,6 @@ export class FileSystemWorkspace implements Workspace {
       
       if (timeout) {
         setTimeout(() => { 
-          console.log("getting here??")
           child.kill()
           resolve({ exitCode: 1, stdout: "Timeout achieved", stderr: "" })
         }, timeout)
