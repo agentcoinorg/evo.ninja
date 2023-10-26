@@ -21,7 +21,9 @@ export const prompts = {
 
       4. If the research verification says the data is incomplete, search for the missing data. If you still cannot find it, consider it unavailable and don't fail; just return it.
 
-      5. Use scrape_text for getting all the text from a webpage, but not for searching for specific information.`,
+      5. Use scrape_text for getting all the text from a webpage, but not for searching for specific information.
+      
+      6. RESPECT USER'S DESIRED FORMAT`,
     },
     { role: "user", content: goal },
   ],

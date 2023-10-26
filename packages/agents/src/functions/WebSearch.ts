@@ -89,19 +89,35 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         context.env.SERP_API_KEY
       );
 
-      const containsTrustedSource = googleResults.some(x => x.trustedSource)
-      const resultsFromTrustedSources = containsTrustedSource ? googleResults
-      .filter(x => x.trustedSource) : googleResults
-
-      const searchInPagesResults = await this.searchInPages({
-        urls: resultsFromTrustedSources.map(x => x.url),
+      const searchMatches = await this.searchInPages({
+        urls: googleResults.map(x => x.url),
         query,
         context
       })
 
+      const analyzeChunkMatchesPrompt = new Prompt()
+      .text(`
+        I will give you chunks of text from different webpages.
+
+        I want to extract ${query}. Keep in mind some information may not be properly formatted.
+        Do your best to extract as much information as you can.
+
+        Prioritize decimal precision. Aim for answers with 3 decimal places, if possible; if not settle for 2 decimal places.
+        Only take 1 decimal or rounded numbers when absolutely necessary.
+
+        Chunks: ${searchMatches.join("\n------------\n")}
+      `)
+      .json(searchMatches)
+      .line(`Specify if the information is incomplete but still return it`)
+      .toString()
+
+      const analysisFromChunks = await this.askLlm(analyzeChunkMatchesPrompt, {
+        maxResponseTokens: 200
+      })
+
       return this.onSuccess(
         { queries: [query] },
-        JSON.stringify(searchInPagesResults, null, 2),
+        analysisFromChunks,
         rawParams,
         context.variables
       );

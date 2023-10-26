@@ -147,7 +147,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
           Consider the above chat between a user and assistant.
           Consider that if information needs to be used, and it is not in the chat, it must be searched or read.
           In your expert opinion, what is the best next step for the assistant?
-          ${terminationStr && this.goal.length < 350 ? `If you are 100% sure the user's goal has been achieved, simply respond with "${terminationStr}". The user's goal is: "${this.goal}"` : ""}`
+          ${terminationStr && this.goal.length < 350 ? `If you are 100% sure the user's goal has been achieved, simply respond with "${terminationStr}". The user's goal is: "${this.goal}". If the user asks for an output file, has it been written?` : ""}`
         ),
       {
         model: "gpt-3.5-turbo-16k-0613"
