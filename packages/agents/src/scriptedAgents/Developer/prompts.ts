@@ -8,7 +8,7 @@ export const prompts = (
   readFileFn: AgentFunctionBase<any>,
 ): AgentPrompts<GoalRunArgs> => ({
   name: "Developer",
-  expertise: `building software projects with one or more files.`,
+  expertise: `Building software projects with one or more files. Writing and testing code`,
   initialMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
     { 
       role: "user", 
