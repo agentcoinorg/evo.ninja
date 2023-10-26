@@ -1,5 +1,5 @@
 import { Agent } from "../../Agent";
-import { AgentContext } from "../../AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
 import { AgentConfig } from "../../AgentConfig";
 import { WebSearchFunction } from "../../functions/WebSearch";
 import { PlanWebResearchFunction } from "../../functions/PlanWebResearch";
