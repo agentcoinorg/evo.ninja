@@ -1,10 +1,9 @@
-import { AgentOutputType, trimText, ChatMessageBuilder, AgentFunctionResult, AgentVariables } from "@evo-ninja/agent-utils"
+import { AgentOutputType, trimText, ChatMessageBuilder, AgentFunctionResult } from "@evo-ninja/agent-utils"
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 import { Agent } from "../Agent";
 
 interface ReadDirectoryFuncParameters { 
   path: string;
-  encoding: string;
 };
 
 export class ReadDirectoryFunction extends ScriptFunction<ReadDirectoryFuncParameters> {
@@ -21,20 +20,19 @@ export class ReadDirectoryFunction extends ScriptFunction<ReadDirectoryFuncParam
     additionalProperties: false
   };
 
-  onSuccess(agent: Agent, params: ReadDirectoryFuncParameters, rawParams: string | undefined, result: string, variables: AgentVariables): AgentFunctionResult {
+  onSuccess(agent: Agent, params: ReadDirectoryFuncParameters, rawParams: string | undefined, result: string): AgentFunctionResult {
     return {
       outputs: [
         {
           type: AgentOutputType.Success,
           title: `[${agent.config.prompts.name}] ${this.name}`,
           content: `${params.path}\n` +
-            `${params.encoding}\n` +
             `${trimText(result, 200)}`
         }
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(this.name, result, variables)
+        ChatMessageBuilder.functionCallResult(this.name, result)
       ]
     }
   }

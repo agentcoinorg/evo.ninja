@@ -1,18 +1,16 @@
-import { ChatLogs, ChatMessage } from "../ChatLogs";
-import { LlmApi } from "../LlmApi";
-import { Tokenizer } from "../Tokenizer";
+import { ChatLogs, ChatMessage, Tokenizer, LlmApi, LlmModel } from "../";
 
 export class LlmQuery {
-  constructor(private readonly llm: LlmApi, private tokenizer: Tokenizer, private logs: ChatLogs) {}
+  constructor(private readonly llm: LlmApi, private tokenizer: Tokenizer, private logs: ChatLogs = new ChatLogs()) {}
 
-  async content(): Promise<string> {
-    const response = await this.response();
+  async content(opts?: { maxResponseTokens?: number, model?: LlmModel }): Promise<string> {
+    const response = await this.response(opts);
 
     return response?.content ?? "";
   }
-  
-  async response(): Promise<ChatMessage | undefined> {
-    const response = await this.llm.getResponse(this.logs);
+
+  async response(opts?: { maxResponseTokens?: number, model?: LlmModel }): Promise<ChatMessage | undefined> {
+    const response = await this.llm.getResponse(this.logs, undefined, opts);
   
     if (!response || !response.content) {
       throw new Error("No response from LLM");
@@ -20,11 +18,32 @@ export class LlmQuery {
     
     this.logs.add(
       "temporary", 
-      { 
-        tokens: this.tokenizer.encode(response.content).length,
-        msgs: [{ role: response.role, content: response.content }]
-      });
+      [{ role: response.role, content: response.content }],
+      [this.tokenizer.encode(response.content).length]
+    );
 
     return response;
+  }
+
+  async ask(question: string, opts?: { maxResponseTokens?: number, model?: LlmModel }): Promise<string> {
+    this.logs.add(
+      "temporary", 
+      [{ role: "user", content: question }],
+      [this.tokenizer.encode(question).length]
+    );
+
+    const response = await this.llm.getResponse(this.logs, undefined, { max_tokens: opts?.maxResponseTokens, model: opts?.model});
+  
+    if (!response || !response.content) {
+      throw new Error("No response from LLM");
+    }
+    
+    this.logs.add(
+      "temporary", 
+      [{ role: response.role, content: response.content }],
+      [this.tokenizer.encode(response.content).length]
+    );
+
+    return response?.content ?? "";
   }
 }

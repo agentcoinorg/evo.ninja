@@ -1,7 +1,7 @@
-import { LlmApi, Tokenizer, LlmQueryBuilder, AgentOutput } from "@evo-ninja/agent-utils";
+import { LlmApi, Tokenizer, LlmQueryBuilder, AgentOutput, LlmModel } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "./AgentFunctionBase";
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
-import { AgentContext } from "./AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
 import { Agent } from "./Agent";
 
 export abstract class LlmAgentFunctionBase<TParams> extends AgentFunctionBase<TParams> {
@@ -13,11 +13,11 @@ export abstract class LlmAgentFunctionBase<TParams> extends AgentFunctionBase<TP
     return new LlmQueryBuilder(this.llm, this.tokenizer);
   }
 
-  protected askLlm(question: string): Promise<string> {
+  protected askLlm(question: string, opts?: { maxResponseTokens?: number, model?: LlmModel }): Promise<string> {
     return this.queryBuilder()
       .persistent("user", question)
       .build()
-      .content();
+      .content(opts);
   }
 
   protected async askAgent<TRunArgs>(

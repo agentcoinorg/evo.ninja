@@ -116,13 +116,19 @@ export class InMemoryFS {
     }
   }
 
-  rmdirSync(dirPath: string): void {
-      const path = dirPath.split("/");
-      const [parentDir, dirName] = this.navigateToPath(path);
-      if (!parentDir.getDirectory(dirName)) {
-        throw new Error(`Directory not found: ${dirPath}`);
-      }
-      parentDir.removeEntry(dirName);
+  rmdirSync(dirPath: string, opt: { recursive: boolean }): void {
+    const path = dirPath.split("/");
+    const [parentDir, dirName] = this.navigateToPath(path);
+    const dir = parentDir.getDirectory(dirName);
+    if (!dir) {
+      throw new Error(`Directory not found: ${dirPath}`);
+    }
+
+    if (!opt.recursive && dir.getEntries().length > 0) {
+      throw new Error(`Directory not empty: ${dirPath}`);
+    }
+
+    parentDir.removeEntry(dirName);
   }
 
   existsSync(pathStr: string): boolean {

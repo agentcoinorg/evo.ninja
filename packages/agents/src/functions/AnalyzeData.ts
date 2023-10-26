@@ -1,9 +1,11 @@
-import { AgentFunctionResult, ChatMessageBuilder, LlmApi, Tokenizer } from "@evo-ninja/agent-utils";
+import { AgentFunctionResult, ChatMessageBuilder, LlmApi, Tokenizer, CsvChunker, Rag, AgentContext, ArrayRecombiner } from "@evo-ninja/agent-utils";
 import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 import { Agent } from "../Agent";
+import { Prompt } from "../agents/Chameleon/Prompt";
 
 interface AnalyzeDataParameters {
   data: string;
+  question: string;
 }
 
 export class AnalyzeDataFunction extends LlmAgentFunctionBase<AnalyzeDataParameters> {
@@ -19,47 +21,59 @@ export class AnalyzeDataFunction extends LlmAgentFunctionBase<AnalyzeDataParamet
       data: {
         type: "string",
         description: "The datasets to be analyzed"
+      },
+      question: {
+        type: "string",
+        description: "the question your analysis is trying to answer"
       }
     },
-    required: ["data"],
+    required: ["data", "question"],
     additionalProperties: false
   };
 
+  async analyze(params: AnalyzeDataParameters, context: AgentContext): Promise<string> {
+    const chunks = CsvChunker.newlinesWithHeader(
+      params.data,
+      { chunkLength: 20, overlap: 2 }
+    );
+
+    const relevantChunks = await Rag.standard(context)
+      .addItems(chunks)
+      .query(params.question)
+      .recombine(ArrayRecombiner.standard({ 
+        limit: 3, 
+        sort: "index" 
+      }));
+
+    let prompt = new Prompt();
+
+    for (let i = 0; i < relevantChunks.length; ++i) {
+      const chunk = relevantChunks[i];
+      prompt = prompt.line(`Chunk #${i}`).block(chunk);
+    }
+
+    prompt = prompt.line(`
+      Consider the above chunks of CSV data.
+      Detail any column names & data formats used.
+      Summarize the semantic meaning of the chunks.
+      Tailor your response to the following question:
+    `).line(params.question).line("BE VERY TERSE IN YOUR RESPONSE.");
+
+    return await this.askLlm(prompt.toString(), {
+      model: "gpt-3.5-turbo-16k-0613",
+      maxResponseTokens: 100
+    });
+  }
+
   buildExecutor({ context }: Agent<unknown>): (params: AnalyzeDataParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
     return async (params: AnalyzeDataParameters, rawParams?: string): Promise<AgentFunctionResult> => {
-      const fuzTokens = 200;
-      const maxTokens = this.llm.getMaxContextTokens() - fuzTokens;
-
-      const prompt = (summary: string | undefined) => {
-        return `Your job is to analyze data. You will summarize the dataset provided in a way that includes all unique details.\n
-                ${summary ? `An existing summary exists, please add all new details found to it.\n\`\`\`\n${summary}\n\`\`\`\n` : ``}`;
-      }
-      const appendData = (prompt: string, chunk: string) => {
-        return `${prompt}\nData:\n\`\`\`\n${chunk}\n\`\`\``;
-      }
-
-      let summary: string | undefined = undefined;
-
-      const len = params.data.length;
-      let idx = 0;
-
-      while (idx < len) {
-        const promptStr = prompt(summary);
-        const propmtTokens = this.tokenizer.encode(promptStr).length;
-        const chunkTokens = (maxTokens - propmtTokens);
-        const chunk = params.data.substring(idx, Math.min(idx + chunkTokens, len));
-        idx += chunkTokens;
-
-        const promptFinal = appendData(promptStr, chunk);
-
-        summary = await this.askLlm(promptFinal);
-      }
+      const summary = await this.analyze(params, context);
 
       return {
         outputs: [],
         messages: [
           ChatMessageBuilder.functionCall(this.name, rawParams),
-          ...ChatMessageBuilder.functionCallResultWithVariables(this.name, summary || "", context.variables)
+          ChatMessageBuilder.functionCallResult(this.name, summary)
         ]
       };
     }

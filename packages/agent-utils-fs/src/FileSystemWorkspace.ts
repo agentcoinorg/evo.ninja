@@ -64,6 +64,11 @@ export class FileSystemWorkspace implements Workspace {
     fs.mkdirSync(absPath, { recursive: true });
   }
 
+  rmdirSync(subpath: string, opts?: { recursive: boolean }): void {
+    const absPath = this.toWorkspacePath(subpath);
+    fs.rmdirSync(absPath, opts);
+  }
+
   readdirSync(subpath: string): DirectoryEntry[] {
     const absPath = this.toWorkspacePath(subpath);
     return fs.readdirSync(absPath, { withFileTypes: true })
@@ -76,13 +81,20 @@ export class FileSystemWorkspace implements Workspace {
     fs.appendFileSync(absPath, data);
   }
 
-  async exec(command: string, args?: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
+  async exec(command: string, args?: string[], timeout?: number): Promise<{ exitCode: number; stdout: string; stderr: string }> {
     return await new Promise((resolve, reject) => {
       const toExec = args ? `${command} ${args.join(" ")}` : command;
       const child = spawn(toExec, { cwd: this._workspacePath });
 
       let stdout = "";
       let stderr = "";
+      
+      if (timeout) {
+        setTimeout(() => { 
+          child.kill()
+          resolve({ exitCode: 1, stdout: "Timeout achieved", stderr: "" })
+        }, timeout)
+      }
 
       child.on("error", (error: Error) => {
         reject(error);

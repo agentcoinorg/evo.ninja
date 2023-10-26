@@ -1,24 +1,25 @@
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
-export class CsvFilterRowsFunction extends ScriptFunction<{ csvData: string, columnIndex: number, searchString: string, withHeader: boolean }> {
+export class CsvFilterRowsFunction extends ScriptFunction<{ csv: string, columnName: string, filterValue: string }> {
   name: string = "csv_filterRows";
   parameters: any = {
     type: "object",
     properties: { 
-      csvData: {
+      csv: {
         type: "string"
       },
-      columnIndex: {
-        type: "number"
-      },
-      searchString: {
+      columnName: {
         type: "string"
       },
-      withHeader: {
-        type: "boolean"
+      filterValue: {
+        type: "string"
+      },
+      outputFile: {
+        type: "string",
+        description: "Write the result to a file"
       }
     },
-    required: ["csvData", "columnIndex", "searchString", "withHeader"],
+    required: ["csv", "columnName", "filterValue", "withHeader"],
     additionalProperties: false
   };
 }

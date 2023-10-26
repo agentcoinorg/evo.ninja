@@ -1,4 +1,4 @@
-import { LlmApi, LlmOptions, ChatLogs, ChatMessage } from ".";
+import { LlmApi, LlmOptions, ChatLogs, ChatMessage, LlmModel } from ".";
 import { Logger } from "../";
 
 import {
@@ -30,7 +30,7 @@ export class OpenAI implements LlmApi {
 
   constructor(
     private _apiKey: string,
-    private _defaultModel: string,
+    private _defaultModel: LlmModel,
     private _defaultMaxTokens: number,
     private _defaultMaxResponseTokens: number,
     private _logger: Logger,
@@ -64,8 +64,9 @@ export class OpenAI implements LlmApi {
       const completion = await this._createChatCompletion({
         messages: chatLog.messages,
         functions: functionDefinitions,
-        temperature: options ? options.temperature : 0,
-        max_tokens: options ? options.max_tokens : this._defaultMaxResponseTokens
+        temperature: options?.temperature || 0,
+        max_tokens: options?.max_tokens || this._defaultMaxResponseTokens,
+        model: options?.model || this._defaultModel
       });
 
       if (completion.data.choices.length < 1) {
@@ -112,7 +113,7 @@ export class OpenAI implements LlmApi {
 
   private _createChatCompletion(options: {
     messages: ChatCompletionRequestMessage[];
-    model?: string;
+    model?: LlmModel;
     functions?: FunctionDefinition[];
   } & LlmOptions) {
     return this._api.createChatCompletion({

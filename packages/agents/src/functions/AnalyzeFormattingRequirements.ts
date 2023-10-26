@@ -34,7 +34,7 @@ export class AnalyzeFormattingRequirementsFunction extends LlmAgentFunctionBase<
         outputs: [],
         messages: [
           ChatMessageBuilder.functionCall(this.name, rawParams),
-          ...ChatMessageBuilder.functionCallResultWithVariables(this.name, resp, context.variables)
+          ChatMessageBuilder.functionCallResult(this.name, resp)
         ]
       };
     }

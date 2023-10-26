@@ -1,2 +1,1 @@
-agbenchmark --nc --test=Search
-agbenchmark --nc --test=BasicRetrieval
+agbenchmark --nc --test=ReadFile

@@ -14,7 +14,7 @@ interface InitPoetryFuncParameters {}
 
 export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParameters> {
 
-  name: string = "cmd_initPoetry";
+  name: string = "initPoetry";
   description: string = `Initialize a Python Poetry environment in the workspace.`;
   parameters: any = {"type": "object", "properties": {}};
 
@@ -43,10 +43,9 @@ export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParamete
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           this.name,
-          "Initialized Python Poetry Environment. You can now execute `poetry run [command] [args]` in the shell.",
-          variables
+          "Initialized Python Poetry Environment. You can now execute `poetry run [command] [args]` in the shell."
         ),
       ]
     }
@@ -63,10 +62,9 @@ export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParamete
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           this.name,
-          `Failed to init poetry: ${error}.`,
-          variables
+          `Failed to init poetry: ${error}.`
         ),
       ]
     }

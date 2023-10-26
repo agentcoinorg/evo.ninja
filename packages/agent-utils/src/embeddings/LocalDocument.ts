@@ -4,7 +4,19 @@ import { Workspace } from "../sys";
 const VECTOR_FILENAME = "vector.json"
 const DOCUMENT_FILENAME = "document.json"
 
-export class LocalDocument {
+export interface BaseDocumentMetadata {
+  index: number;
+}
+
+export interface LocalDocumentData<TMetadata extends BaseDocumentMetadata = BaseDocumentMetadata> {
+  id: string;
+  text: string;
+  metadata: TMetadata;
+}
+
+export class LocalDocument<TMetadata extends BaseDocumentMetadata = BaseDocumentMetadata> {
+  private _data: LocalDocumentData<TMetadata>;
+
   constructor(
     readonly id: string,
     private config: {
@@ -27,22 +39,26 @@ export class LocalDocument {
   }
 
   text(): string {
-    const documentPath = path.join(this.config.uri, DOCUMENT_FILENAME)
-
-    if (!this.config.workspace.existsSync(documentPath)) {
-      throw new Error(`Document file for '${this.id}' does not exist: ${documentPath}. Did you forget to call .save()?`)
+    if (!this._data) {
+      this.loadData()
     }
 
-    const documentFileContent = this.config.workspace.readFileSync(documentPath)
-    const document: { id: string; text: string; } = JSON.parse(documentFileContent)
+    return this._data.text
+  }
 
-    return document.text
+  metadata(): TMetadata {
+    if (!this._data) {
+      this.loadData()
+    }
+
+    return this._data.metadata
   }
 
   save({
     text,
+    metadata,
     vector,
-  }: { text: string, vector: number[] }): void {
+  }: { text: string; metadata?: TMetadata; vector: number[]; }): void {
     const docPath = this.config.uri
 
     const vectorPath = path.join(docPath, VECTOR_FILENAME)
@@ -57,9 +73,31 @@ export class LocalDocument {
       vector,
     }))
 
-    this.config.workspace.writeFileSync(documentPath, JSON.stringify({
+    if (!metadata) {
+      metadata = {
+        index: this.config.workspace.readdirSync(docPath).length - 1,
+      } as TMetadata
+    }
+
+    const documentData: LocalDocumentData = {
       id: this.id,
       text,
-    }))
+      metadata
+    }
+
+    this.config.workspace.writeFileSync(documentPath, JSON.stringify(documentData))
+  }
+
+  private loadData() {
+    const documentPath = path.join(this.config.uri, DOCUMENT_FILENAME)
+
+    if (!this.config.workspace.existsSync(documentPath)) {
+      throw new Error(`Document file for '${this.id}' does not exist: ${documentPath}. Did you forget to call .save()?`)
+    }
+
+    const documentFileContent = this.config.workspace.readFileSync(documentPath)
+    const document: LocalDocumentData<TMetadata> = JSON.parse(documentFileContent)
+
+    this._data = document
   }
 }

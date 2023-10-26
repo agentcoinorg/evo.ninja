@@ -3,10 +3,10 @@ import {
   Scripts,
   OpenAI,
   Chat,
-  ContextWindow,
   LlmApi,
   ConsoleLogger,
   Logger,
+  SubWorkspace
 } from "@evo-ninja/agent-utils";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
@@ -16,7 +16,8 @@ import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import fs from "fs";
 import { Evo } from "./Evo";
-import { AgentContext } from "../../AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
+import { LlmModel } from "@evo-ninja/agent-utils";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -52,7 +53,7 @@ function createEvo(
 
   const llm: LlmApi = new OpenAI(
     env.OPENAI_API_KEY,
-    env.GPT_MODEL,
+    env.GPT_MODEL as LlmModel,
     env.CONTEXT_WINDOW_TOKENS,
     env.MAX_RESPONSE_TOKENS,
     logger
@@ -63,14 +64,14 @@ function createEvo(
   );
   const debugLlm = new DebugLlmApi(debugLog, llm);
 
-  const contextWindow = new ContextWindow(llm);
-  const chat = new Chat(cl100k_base, contextWindow, logger);
+  const chat = new Chat(cl100k_base);
 
   const scriptsDir = path.join(rootDir, "scripts");
   const scriptsWorkspace = new FileSystemWorkspace(scriptsDir);
   const scripts = new Scripts(scriptsWorkspace, "./");
 
   const workspace = new FileSystemWorkspace(testCaseDir);
+  const internals = new SubWorkspace(".evo", workspace);
 
   for (const filePath of pathsForFilesToInclude) {
     if (!fs.existsSync(filePath)) {
@@ -84,10 +85,11 @@ function createEvo(
   return {
     agent: new Evo(
       new AgentContext(
-        debugLlm, 
-        chat, 
-        logger, 
-        workspace, 
+        debugLlm,
+        chat,
+        logger,
+        workspace,
+        internals,
         env,
         scripts,
       )

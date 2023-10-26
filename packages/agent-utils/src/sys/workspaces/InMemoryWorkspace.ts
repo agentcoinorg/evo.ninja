@@ -24,6 +24,10 @@ export class InMemoryWorkspace implements Workspace {
     this.fs.mkdirSync(subpath, opts);
   }
 
+  rmdirSync(subpath: string, opts: { recursive: boolean }): void {
+    this.fs.rmdirSync(subpath, opts);
+  }
+
   readdirSync(subpath: string): DirectoryEntry[] {
     return this.fs.readdirSync(subpath)
       .filter((d) => !d.name.startsWith("."));
@@ -33,7 +37,7 @@ export class InMemoryWorkspace implements Workspace {
     this.fs.appendFileSync(subpath, data);
   }
 
-  async exec(command: string, args?: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
+  async exec(command: string, args?: string[], timeout?: number): Promise<{ exitCode: number; stdout: string; stderr: string }> {
     throw new Error("Executing commands is not supported in this application environment.");
   }
 }

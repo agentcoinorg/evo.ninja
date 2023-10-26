@@ -1,4 +1,4 @@
-import { AgentContext, Evo } from "@evo-ninja/agents";
+import { ChameleonAgent, GoalRunArgs } from "@evo-ninja/agents";
 import {
   Env,
   OpenAI,
@@ -9,10 +9,12 @@ import {
   Timeout,
   Workspace,
   LlmApi,
-  ContextWindow,
   ChatLogType,
   ChatMessage,
   ChatLog,
+  RunnableAgent,
+  LlmModel,
+  AgentContext,
 } from "@evo-ninja/agent-utils";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
 import { FileSystemWorkspace, FileLogger } from "@evo-ninja/agent-utils-fs";
@@ -35,7 +37,7 @@ const prompt = (query: string) =>
   new Promise<string>((resolve) => rl.question(query, resolve));
 
 export interface App {
-  evo: Evo;
+  evo: RunnableAgent<GoalRunArgs>;
   logger: Logger;
   fileLogger: FileLogger;
   consoleLogger: ConsoleLogger;
@@ -49,7 +51,10 @@ export interface AppConfig {
   rootDir?: string;
   debug?: boolean;
   messagesPath?: string;
-  userWorkspace?: Workspace;
+  customWorkspace?: {
+    path: string;
+    workspace: Workspace;
+  }
 }
 
 const getMessagesFromPath = (path: string): { type: ChatLogType, msgs: ChatMessage[]}[] => {
@@ -74,12 +79,22 @@ export function createApp(config?: AppConfig): App {
   const env = new Env(process.env as Record<string, string>);
   const workspacePath = path.join(rootDir, "sessions", sessionName);
 
-  // .evo directory
-  const evoInternalsPath = path.join(workspacePath, ".evo");
-  const evoInternalsWorkspace = new FileSystemWorkspace(evoInternalsPath);
+  // User Workspace
+  const userWorkspace =
+    config?.customWorkspace ?
+    config.customWorkspace.workspace :
+    new FileSystemWorkspace(workspacePath);
+
+  // Internals Workspace (.evo directory)
+  const internals = new FileSystemWorkspace(
+    config?.customWorkspace ?
+      path.join(config.customWorkspace.path, ".evo") :
+      path.join(workspacePath, ".evo")
+  );
 
   // Chat Log File
-  const fileLogger = new FileLogger(evoInternalsWorkspace.toWorkspacePath("chat.md"));
+  // TODO: simply pass the workspace to the file logger
+  const fileLogger = new FileLogger(path.join(workspacePath, ".evo", "chat.md"));
 
   // Logger
   const consoleLogger = new ConsoleLogger();
@@ -99,19 +114,14 @@ export function createApp(config?: AppConfig): App {
   // LLM
   let llm: LlmApi = new OpenAI(
     env.OPENAI_API_KEY,
-    env.GPT_MODEL,
+    env.GPT_MODEL as LlmModel,
     env.CONTEXT_WINDOW_TOKENS,
     env.MAX_RESPONSE_TOKENS,
     logger
   );
 
-  // User Workspace
-  const userWorkspace =
-    config?.userWorkspace ?? new FileSystemWorkspace(workspacePath);
-
   // Chat
-  const contextWindow = new ContextWindow(llm);
-  const chat = new Chat(cl100k_base, contextWindow, logger);
+  const chat = new Chat(cl100k_base);
 
   if (config?.messagesPath) {
     const msgPath = path.join(rootDir, config.messagesPath)
@@ -125,19 +135,20 @@ export function createApp(config?: AppConfig): App {
   let debugLog: DebugLog | undefined;
 
   if (config?.debug) {
-    debugLog = new DebugLog(evoInternalsWorkspace);
+    debugLog = new DebugLog(internals);
 
     // Wrap the LLM API
     llm = new DebugLlmApi(debugLog, llm);
   }
 
   // Evo
-  const evo = new Evo(
+  const evo = new ChameleonAgent(
     new AgentContext(
       llm,
       chat,
       logger,
       userWorkspace,
+      internals,
       env,
       scripts,
     ),

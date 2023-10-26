@@ -99,10 +99,9 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           this.name,
-          result,
-          variables
+          result
         ),
       ]
     }
@@ -119,7 +118,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           this.name,
           `Error executing script '${scriptName}'\n` + 
           `\`\`\`\n` +
@@ -130,8 +129,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
                 ? trimText(JSON.stringify(error, null, 2), 300)
                 : "Unknown error"
             }\n` +
-          `\`\`\``,
-          variables
+          `\`\`\``
         ),
       ]
     }

@@ -2,6 +2,7 @@ import { Workspace } from "../sys";
 import { LocalCollection } from "./LocalCollection";
 import { EmbeddingApi } from "./EmbeddingApi";
 import path from "path-browserify";
+import { BaseDocumentMetadata } from "./LocalDocument";
 
 export class LocalVectorDB {
   constructor(
@@ -10,8 +11,8 @@ export class LocalVectorDB {
     private embeddingApi: EmbeddingApi,
   ) {}
 
-  addCollection(name: string): LocalCollection {
-    const collection = new LocalCollection(
+  addCollection<TMetadata extends BaseDocumentMetadata = BaseDocumentMetadata>(name: string): LocalCollection<TMetadata> {
+    const collection = new LocalCollection<TMetadata>(
       path.join(this.uri, name),
       this.embeddingApi,
       this.workspace,
@@ -21,7 +22,20 @@ export class LocalVectorDB {
     return collection
   }
 
-  listCollections(): LocalCollection[] {
+  removeCollection(name: string): void {
+    try {
+
+      const collection = new LocalCollection(
+        path.join(this.uri, name),
+        this.embeddingApi,
+        this.workspace,
+      )
+  
+      collection.delete();
+    } catch {}
+  }
+
+  listCollections<TMetadata extends BaseDocumentMetadata = BaseDocumentMetadata>(): LocalCollection<TMetadata>[] {
     const names = this.workspace.readdirSync(this.uri).map(entry => entry.name)
     return names.map(name => new LocalCollection(
       path.join(this.uri, name),

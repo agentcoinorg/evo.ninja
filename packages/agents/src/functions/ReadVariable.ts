@@ -1,4 +1,4 @@
-import { AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder, readVariableResultMessage } from "@evo-ninja/agent-utils";
+import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder, readVariableResultMessage } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../AgentFunctionBase";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { Agent } from "../Agent";
@@ -40,7 +40,7 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
     return async (params: ReadVarFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       const variable = context.variables.get(params.name);
       if (!variable) {
-        return this.onError(params, rawParams, context.variables);
+        return this.onError(params, rawParams);
       }
 
       return this.onSuccess(params, rawParams, variable);
@@ -70,7 +70,7 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
     }
   }
 
-  private onError(params: ReadVarFuncParameters, rawParams: string | undefined, variables: AgentVariables): AgentFunctionResult {
+  private onError(params: ReadVarFuncParameters, rawParams: string | undefined): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -81,10 +81,9 @@ export class ReadVariableFunction extends AgentFunctionBase<ReadVarFuncParameter
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(
+        ChatMessageBuilder.functionCallResult(
           this.name,
-          `Error: Variable \${${params.name}} not found.`,
-          variables
+          `Error: Variable \${${params.name}} not found.`
         )
       ]
     }

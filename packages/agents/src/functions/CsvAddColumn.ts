@@ -1,11 +1,11 @@
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
 
-export class CsvAddColumnFunction extends ScriptFunction<{ csvData: string, column: string, values: string[] }> {
+export class CsvAddColumnFunction extends ScriptFunction<{ csv: string, column: string, values: string[] }> {
   name: string = "csv_addColumn";
   parameters: any = {
     type: "object",
     properties: { 
-      csvData: {
+      csv: {
           type: "string"
       },
       column: {
@@ -16,9 +16,13 @@ export class CsvAddColumnFunction extends ScriptFunction<{ csvData: string, colu
           items: {
               type: "string"
           }
+      },
+      outputFile: {
+          type: "string",
+          description: "Write the result to a file"
       }
     },
-    required: ["csvData", "column", "values"],
+    required: ["csv", "column", "values"],
     additionalProperties: false
   };
 }

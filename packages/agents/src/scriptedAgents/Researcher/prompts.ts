@@ -1,23 +1,29 @@
-import { GoalRunArgs } from "../../Agent";
-import { AgentPrompts } from "../../AgentPrompts";
 import { ChatMessage } from "@evo-ninja/agent-utils";
+import { GoalRunArgs } from "../../Agent";
 
-export const prompts: AgentPrompts<GoalRunArgs> = {
+export const prompts = {
   name: "Researcher",
-  expertise: `excels at parsing text, comprehending details, and synthesized insights tailored to user specifications. Has access to the filesystem and the internet.`,
+  expertise: `Searching the internet, comprehending details, and finding information or.`,
   initialMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
     {
       role: "user",
-      content: `You are a researcher of information. You will receive a user query and you need to perform research to answer it.
+      content: `You are an advanced web information retriever. You will receive a goal and need to perform research to answer it.
+      1. You **MUST** first plan your research.
 
-      1. Start by gathering information. Focus on any data sources the user tells you about (files, websites, etc).
+      2. For each step, you will web search for results. You can perform queries in parllel.
 
-      2. If the user's questions can be answered without accessing the internet, do not. Only go to the internet if necessary or
-      explicitely asked.
+        Do NOT perform yearly individual searches unless absolutely required. This wastes resources and time. Always aim for consolidated data over a range of years.
+
+        Example of undesired behavior: Searching "US births 2019", then "US births 2020", then "US births 2021"...
+        Desired behavior: Searching "US births from 2019 to 2021"
 
       3. If by searching for something specific you find something else that is relevant, state it and consider it.
 
-      4. Call agent_onGoalAchieved with the results of your research. Include information about any files you may have written containing your findings.`,
+      4. If the research verification says the data is incomplete, search for the missing data. If you still cannot find it, consider it unavailable and don't fail; just return it.
+
+      5. Use scrape_text for getting all the text from a webpage, but not for searching for specific information.
+      
+      6. RESPECT USER'S DESIRED FORMAT`,
     },
     { role: "user", content: goal },
   ],

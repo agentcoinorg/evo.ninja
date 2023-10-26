@@ -1,6 +1,6 @@
 {
   "name": "csv.sumColumn",
   "description": "Sum a column of a CSV",
-  "arguments": "{ csvData: string, columnIndex: number, hasHeader: boolean }",
+  "arguments": "{ csv: string, columnName: string }",
   "code": "./csv.sumColumn.js"
 }

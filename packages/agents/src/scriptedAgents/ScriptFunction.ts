@@ -1,7 +1,6 @@
 import {
   AgentFunctionResult,
   AgentOutputType,
-  AgentVariables,
   ChatMessageBuilder,
   JsEngine,
   JsEngine_GlobalVar,
@@ -12,7 +11,7 @@ import { AgentFunctionBase } from "../AgentFunctionBase";
 import { Agent } from "../Agent";
 
 export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams> {
-  constructor(private readonly scripts: Scripts) {
+  constructor(private scripts: Scripts, private storeInVariable?: boolean) {
     super();
   }
 
@@ -27,7 +26,7 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
     return script.description;
   }
 
-  onSuccess(agent: Agent, params: any, rawParams: string | undefined, result: string, variables: AgentVariables): AgentFunctionResult {
+  onSuccess(agent: Agent, params: any, rawParams: string | undefined, result: string): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -37,13 +36,14 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(this.name, result, variables)
-      ]
+        ChatMessageBuilder.functionCall(this.name, rawParams || params),
+        ChatMessageBuilder.functionCallResult(this.name, result)
+      ],
+      storeInVariable: this.storeInVariable
     }
   }
 
-  onFailure(agent: Agent, params: any, rawParams: string | undefined, error: string, variables: AgentVariables): AgentFunctionResult {
+  onFailure(agent: Agent, params: any, rawParams: string | undefined, error: string): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -52,8 +52,8 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, rawParams),
-        ...ChatMessageBuilder.functionCallResultWithVariables(this.name, `Error: ${error}`, variables)
+        ChatMessageBuilder.functionCall(this.name, rawParams || JSON.stringify(params)),
+        ChatMessageBuilder.functionCallResult(this.name, `Error: ${error}`)
       ]
     }
   }
@@ -65,7 +65,7 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
       const script = context.scripts.getScriptByName(scriptName);
 
       if (!script) {
-        return this.onFailure(agent, params, rawParams, `Unable to find the script ${scriptName}`, context.variables);
+        return this.onFailure(agent, params, rawParams, `Unable to find the script ${scriptName}`);
       }
 
       const globals: JsEngine_GlobalVar[] = Object.entries(params).map(
@@ -86,15 +86,15 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
           const jsPromiseOutput = context.client.jsPromiseOutput;
           if (jsPromiseOutput.ok) {
             const result = typeof jsPromiseOutput.value !== "string" ? JSON.stringify(jsPromiseOutput.value) : jsPromiseOutput.value;
-            return this.onSuccess(agent, params, rawParams, result, context.variables);
+            return this.onSuccess(agent, params, rawParams, result);
           } else {
-            return this.onFailure(agent, params, rawParams, jsPromiseOutput.error.message, context.variables);
+            return this.onFailure(agent, params, rawParams, jsPromiseOutput.error.message);
           }
         } else {
-          return this.onFailure(agent, params, rawParams, result.value.error.toString(), context.variables);
+          return this.onFailure(agent, params, rawParams, result.value.error.toString());
         }
       } else {
-        return this.onFailure(agent, params, rawParams,result.error?.toString() ?? "Unknown error", context.variables);
+        return this.onFailure(agent, params, rawParams,result.error?.toString() ?? "Unknown error");
       }
     };
   }

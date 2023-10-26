@@ -3,10 +3,10 @@ import {
   Scripts,
   OpenAI,
   Chat,
-  ContextWindow,
   LlmApi,
   ConsoleLogger,
   Logger,
+  SubWorkspace
 } from "@evo-ninja/agent-utils";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
@@ -16,8 +16,9 @@ import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import { PlannerAgent } from "..";
 import * as fs from "fs";
-import { AgentContext } from "../../AgentContext";
 import { Agent } from "../../Agent";
+import { LlmModel } from "@evo-ninja/agent-utils";
+import { AgentContext } from "@evo-ninja/agent-utils/build/agent/AgentContext";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -50,7 +51,7 @@ describe('Planner Agent Test Suite', () => {
 
     const llm: LlmApi = new OpenAI(
       env.OPENAI_API_KEY,
-      env.GPT_MODEL,
+      env.GPT_MODEL as LlmModel,
       env.CONTEXT_WINDOW_TOKENS,
       env.MAX_RESPONSE_TOKENS,
       logger
@@ -61,8 +62,7 @@ describe('Planner Agent Test Suite', () => {
     );
     const debugLlm = new DebugLlmApi(debugLog, llm);
 
-    const contextWindow = new ContextWindow(llm);
-    const chat = new Chat(cl100k_base, contextWindow, logger);
+    const chat = new Chat(cl100k_base);
 
     const scriptsDir = path.join(rootDir, "scripts");
     const scriptsWorkspace = new FileSystemWorkspace(
@@ -71,6 +71,7 @@ describe('Planner Agent Test Suite', () => {
     const scripts = new Scripts(scriptsWorkspace, "./");
 
     const workspace = new FileSystemWorkspace(testCaseDir);
+    const internals = new SubWorkspace(".evo", workspace);
 
     for (const filePath of pathsForFilesToInclude) {
       if (!fs.existsSync(filePath)) {
@@ -88,6 +89,7 @@ describe('Planner Agent Test Suite', () => {
           chat,
           logger,
           workspace,
+          internals,
           env,
           scripts,
         )
