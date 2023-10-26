@@ -1,12 +1,14 @@
 import { LocalDocument } from "../embeddings";
 import { MessageChunk, MsgIdx, ChunkIdx, ChatMessage, ChatLogs, ChatLogType } from "../llm";
 import { Recombiner } from "../rag/StandardRagBuilder";
+import { PriorityContainer } from "../utils";
 
 export class MessageRecombiner {
   static standard(
     tokenLimit: number,
     chatLogs: ChatLogs,
-    chatLogType: ChatLogType
+    chatLogType: ChatLogType,
+    initChunks: ChunkIdx[]
   ): Recombiner<MessageChunk, MessageChunk[]> {
 
     return async (
@@ -66,6 +68,11 @@ export class MessageRecombiner {
         }
 
         return true;
+      }
+
+      // Add any initial chunks
+      for (const initChunk of initChunks) {
+        addChunk(initChunk);
       }
 
       const iterator = await results();

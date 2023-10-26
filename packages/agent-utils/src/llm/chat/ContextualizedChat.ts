@@ -44,13 +44,9 @@ export class ContextualizedChat {
     metadata: BaseDocumentMetadata
   }> = {};
 
-  private _lastTwoMsgs: Record<ChatLogType, PriorityContainer<{
-    text: string;
-    metadata: BaseDocumentMetadata;
-    msgIdx: MsgIdx;
-  }>> = {
-    "persistent": new PriorityContainer(2, (a, b) => b.msgIdx - a.msgIdx),
-    "temporary": new PriorityContainer(2, (a, b) => b.msgIdx - a.msgIdx),
+  private _lastTwoMsgs: Record<ChatLogType, PriorityContainer<ChunkIdx>> = {
+    "persistent": new PriorityContainer(2, (a, b) => b - a),
+    "temporary": new PriorityContainer(2, (a, b) => b - a),
   };
 
   constructor(
@@ -86,7 +82,8 @@ export class ContextualizedChat {
       .recombine(MessageRecombiner.standard(
         tokenLimits["persistent"] - persistentSmallChunks.tokens,
         this._rawChat.chatLogs,
-        "persistent"
+        "persistent",
+        this._lastTwoMsgs["persistent"].getItems()
       ));
 
     const temporaryChunks = await this._rags["temporary"]
@@ -94,7 +91,8 @@ export class ContextualizedChat {
       .recombine(MessageRecombiner.standard(
         tokenLimits["temporary"],
         this._rawChat.chatLogs,
-        "temporary"
+        "temporary",
+        this._lastTwoMsgs["persistent"].getItems()
       ));
 
     // Sort persistent and temporary chunks
@@ -248,12 +246,8 @@ export class ContextualizedChat {
       };
     }
 
-    // Keep track of the 2 most recent (temporary) messages
-    this._lastTwoMsgs[type].addItem({
-      text: newChunks[0],
-      metadata: { index: startChunkIdx },
-      msgIdx: msgIdx
-    });
+    // Keep track of the 2 most recent messages
+    this._lastTwoMsgs[type].addItem(startChunkIdx);
 
     return;
   }
