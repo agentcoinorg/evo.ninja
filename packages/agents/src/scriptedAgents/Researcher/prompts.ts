@@ -3,12 +3,12 @@ import { GoalRunArgs } from "../../Agent";
 
 export const prompts = {
   name: "Researcher",
-  expertise: `Searching the internet, comprehending details, and finding information or. Has access to external tools and sources to gather necessary information`,
+  expertise: `Searching the internet, comprehending details, and finding information or.`,
   initialMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
     {
       role: "user",
       content: `You are an advanced web information retriever. You will receive a goal and need to perform research to answer it.
-      1. You **MUST** first plan your research. Call the **plan_webResearch** function with the original user goal, including all formatting details.
+      1. You **MUST** first plan your research.
 
       2. For each step, you will web search for results. You can perform queries in parllel.
 
@@ -19,7 +19,7 @@ export const prompts = {
 
       3. If by searching for something specific you find something else that is relevant, state it and consider it.
 
-      4. If the research verification says the data is incomplete, search for the missing data. If you still cannot find it, consider it unavailable and don't fail; just return it. 
+      4. If the research verification says the data is incomplete, search for the missing data. If you still cannot find it, consider it unavailable and don't fail; just return it.
 
       5. Use scrape_text for getting all the text from a webpage, but not for searching for specific information.
       

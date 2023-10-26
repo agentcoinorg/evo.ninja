@@ -24,6 +24,11 @@ export interface WebSearchFuncParameters {
 }
 
 const FETCH_WEBPAGE_TIMEOUT = 4000
+const TRUSTED_SOURCES = [
+  "wikipedia",
+  "statista",
+  "macrotrends"
+]
 
 export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParameters> {
   constructor(
@@ -205,20 +210,33 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
     const urlsContents = await Promise.all(params.urls.map(async url => {
       try {
         const response = await this.processWebpage(url);
-        return response
+        return {
+          url,
+          response
+        }
       } catch(e) {
         params.context.logger.error(`Failed to process ${url}`)
-        return ""
+        return {
+          url,
+          response: ""
+        }
       }
     }))
 
-    const webpagesChunks = urlsContents.map(webpageContent =>
-      TextChunker.fixedCharacterLength(webpageContent, { chunkLength: 550, overlap: 110 })
-    )
+    const webpagesChunks = urlsContents.map(webpageContent => ({
+      url: webpageContent.url,
+      chunks: TextChunker.fixedCharacterLength(webpageContent.response, { chunkLength: 550, overlap: 110 })
+    }))
 
     const results = await Promise.all(webpagesChunks.map(async (webpageChunks) => {
-      const matches = await Rag.standard(params.context)
-      .addItems(webpageChunks)
+      const items = webpageChunks.chunks.map((chunk) => ({
+        chunk,
+        url: webpageChunks.url,
+      }))
+
+      const matches = await Rag.standard<{ chunk: string; url: string }>(params.context)
+      .addItems(items)
+      .selector(x => x.chunk)
       .query(params.query)
       .recombine(ArrayRecombiner.standard({
         limit: 4,
@@ -228,15 +246,30 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
       return matches
     }))
 
-    const otherResults = await Rag.standard(params.context)
+    const otherResults = await Rag.standard<{ chunk: string; url: string }>(params.context)
       .addItems(results.flat())
+      .selector(x => x.chunk)
       .query(params.query)
       .recombine(ArrayRecombiner.standard({
-        limit: 15,
+        limit: 10,
         unique: true,
+        sort: "index"
       }));
 
-    return otherResults;
+    const accumulatedResults = otherResults.reduce((prev, { chunk, url }) => {
+      if (prev[url]) {
+        prev[url] += "\n...\n" + chunk
+      } else {
+        prev[url] = chunk
+      }
+
+      return prev;
+    }, {} as Record<string, string>);
+
+    return Object.entries(accumulatedResults).map(([url, response]) => ({
+      url,
+      content: response
+    }))
   }
 
   private async processWebpage(url: string) {
@@ -264,7 +297,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
     return markdownText
   }
 
-  private async searchOnGoogle(query: string, apiKey: string, maxResults = 6) {
+  private async searchOnGoogle(query: string, apiKey: string, maxResults = 10) {
     const axiosClient = axios.create({
       baseURL: "https://serpapi.com",
     });
@@ -300,6 +333,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         title: result.title ?? "",
         url: result.link ?? "",
         description: result.snippet ?? "",
+        trustedSource: TRUSTED_SOURCES.some(x => result.link.includes(x))
       }));
 
     return result.slice(0, maxResults);
