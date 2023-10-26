@@ -2,7 +2,7 @@ import { FunctionDefinition } from "@evo-ninja/agent-utils";
 import { Agent, GoalRunArgs } from "../../Agent";
 import { AgentContext } from "../../AgentContext";
 import { AgentFunctionBase } from "../../AgentFunctionBase";
-import { DeveloperAgent, ResearcherAgent, DataAnalystAgent, SynthsizerAgent } from "../../scriptedAgents";
+import { DeveloperAgent, ResearcherAgent, DataAnalystAgent, SynthesizerAgent } from "../../scriptedAgents";
 import { Rag } from "./Rag";
 import { StandardRagBuilder } from "./StandardRagBuilder";
 
@@ -26,7 +26,7 @@ export const findBestAgent = async (
     DeveloperAgent,
     DataAnalystAgent,
     ResearcherAgent,
-    SynthsizerAgent,
+    SynthesizerAgent,
   ].map(agentClass => new agentClass(context.cloneEmpty()));
 
   const agentsWithPrompts = allAgents.map(agent => {

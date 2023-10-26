@@ -5,7 +5,7 @@ import { AgentContext } from "../../AgentContext";
 import { AgentConfig } from "../../AgentConfig";
 import { prompts } from "./prompts";
 
-export class SynthsizerAgent extends Agent {
+export class SynthesizerAgent extends Agent {
   constructor(context: AgentContext) {
 
     super(
