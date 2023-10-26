@@ -8,14 +8,15 @@ import {
   LlmQuery,
   LlmQueryBuilderV2,
   ChatLogs,
-  LlmModel
+  LlmModel,
+  agentFunctionBaseToAgentFunction,
+  OpenAIEmbeddingAPI
 } from "@evo-ninja/agent-utils";
 import { ResultErr } from "@polywrap/result";
 import { AgentConfig } from "./AgentConfig";
-import { AgentContext } from "./AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
 import { ExecuteAgentFunctionCalled } from "@evo-ninja/agent-utils";
 import { Prompt } from "./agents/Chameleon/Prompt";
-import { agentFunctionBaseToAgentFunction } from "./agents/Chameleon/helpers";
 
 export type GoalRunArgs = {
   goal: string;
@@ -93,5 +94,15 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
 
   protected askLlm(query: string | Prompt, opts?: { maxResponseTokens?: number, model?: LlmModel }): Promise<string> {
     return this.expression().ask(query.toString(), opts);
+  }
+ 
+  protected async createEmbeddingVector(text: string): Promise<number[]> {
+    const embeddingApi = new OpenAIEmbeddingAPI(
+      this.context.env.OPENAI_API_KEY,
+      this.context.logger,
+      this.context.chat.tokenizer
+    );
+
+    return (await embeddingApi.createEmbeddings(text))[0].embedding;
   }
 }

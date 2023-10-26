@@ -1,6 +1,6 @@
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
 import { ReadFileFunction } from "../../functions/ReadFile";
-import { AgentContext } from "../../AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
 import { prompts } from "./prompts";
 import { ChatMessage } from "@evo-ninja/agent-utils";
 import { Agent } from "../../Agent";

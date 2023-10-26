@@ -1,21 +1,22 @@
-import { FunctionDefinition } from "@evo-ninja/agent-utils";
+import { FunctionDefinition, Rag, ArrayRecombiner, InMemoryWorkspace } from "@evo-ninja/agent-utils";
 import { Agent, GoalRunArgs } from "../../Agent";
-import { AgentContext } from "../../AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "../../AgentFunctionBase";
-import { DeveloperAgent, ResearcherAgent, DataAnalystAgent, SynthesizerAgent } from "../../scriptedAgents";
-import { Rag } from "./Rag";
-import { StandardRagBuilder } from "./StandardRagBuilder";
+import { DeveloperAgent, ResearcherAgent, DataAnalystAgent, WebResearcherAgent } from "../../scriptedAgents";
 
 type AgentWithPrompts = {
   expertise: string;
   persona: string;
   agent: Agent<GoalRunArgs>;
 };
-let agentRag: StandardRagBuilder<AgentWithPrompts>;
+
+const workspace = new InMemoryWorkspace();
+const AGENT_COLLECTION_NAME = "agents-for-prediction";
+let isDbInitialized = false;
 
 export const findBestAgent = async (
-  query: string,
-  context: AgentContext,
+  queryOrVector: string | number[], 
+  context: AgentContext
 ): Promise<[
   Agent<unknown>,
   FunctionDefinition[],
@@ -37,15 +38,25 @@ export const findBestAgent = async (
     };
   });
 
-  if (!agentRag) {
-    agentRag = Rag.standard<AgentWithPrompts>(context)
-      .addItems(agentsWithPrompts)
+  let rag;
+
+  if (!isDbInitialized) {
+    rag = await Rag.standard<AgentWithPrompts>(context, AGENT_COLLECTION_NAME, workspace)
       .selector(x => x.expertise)
-      .limit(1)
-      .onlyUnique();
+      .addItems(agentsWithPrompts)
+      .forceAddItemsToCollection();
+    
+    isDbInitialized = true;
+  } else {
+    rag = Rag.standard<AgentWithPrompts>(context, AGENT_COLLECTION_NAME, workspace, agentsWithPrompts)
+      .selector(x => x.expertise);
   }
 
-  const agents = await agentRag.query(query);
+  const agents = await rag
+    .query(queryOrVector)
+    .recombine(ArrayRecombiner.standard({
+      limit: 1,
+    }));
 
   console.log("Selected agents: ", agents.map(x => x.agent.config.prompts.name));
 

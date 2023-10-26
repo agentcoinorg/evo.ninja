@@ -7,27 +7,27 @@ import {
   Timeout,
   Tokenizer,
   Workspace,
-  LocalVectorDB,
-  OpenAIEmbeddingAPI,
   ContextualizedChat,
   Chat,
+  agentFunctionBaseToAgentFunction,
+  tokensToChars,
+  Rag,
   AgentOutput
 } from "@evo-ninja/agent-utils";
 import { Agent } from "../../Agent";
-import { AgentContext } from "../../AgentContext";
+import { AgentContext } from "@evo-ninja/agent-utils";
 import { agentPrompts, prompts } from "./prompts";
 import { GoalRunArgs } from "../../Agent";
 import { AgentConfig } from "../../AgentConfig";
-import { Rag } from "./Rag";
 import { Prompt } from "./Prompt";
 import { NewAgent } from "./NewAgent";
-import { agentFunctionBaseToAgentFunction, charsToTokens, tokensToChars } from "./helpers";
 import { findBestAgent } from "./findBestAgent";
 
 export class ChameleonAgent extends NewAgent<GoalRunArgs> {
   private _cChat: ContextualizedChat;
   private _chunker: MessageChunker;
   private previousPrediction: string | undefined;
+  private previousPredictionVector: number[] | undefined;
   private loopCounter: number = 0;
   private previousAgent: Agent<unknown> | undefined;
   private goal: string = "";
@@ -46,15 +46,10 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
       context,
     );
     this._chunker = new MessageChunker({ maxChunkSize: context.variables.saveThreshold });
-    const embeddingApi = new OpenAIEmbeddingAPI(
-      this.context.env.OPENAI_API_KEY,
-      this.context.logger,
-      this.context.chat.tokenizer
-    );
     this._cChat = new ContextualizedChat(
+      this.context,
       this.context.chat,
       this._chunker,
-      new LocalVectorDB(this.context.internals, "cchat", embeddingApi),
       context.variables
     );
   }
@@ -73,14 +68,16 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     const { chat } = this.context;
     const { messages } = chat.chatLogs;
 
-    if (this.previousPrediction) {
+    if (this.previousPrediction && this.previousPredictionVector) {
       // This will shorten only new messages (since the rest were already shortened)
-      await this.shortenLargeMessages(this.previousPrediction);
+      await this.shortenLargeMessages(this.previousPrediction, this.previousPredictionVector);
     }
 
     const prediction = (!this.previousPrediction || this.loopCounter % 2 === 0) ?
       await this.predictBestNextStep(messages, this.previousAgent, this.previousPrediction ? "SUCCESS": undefined) :
       this.previousPrediction;
+
+    this.loopCounter += 1;
 
     if (prediction === "SUCCESS") {
       return {
@@ -94,15 +91,16 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
       };
     }
 
-    this.loopCounter += 1;
+    const predictionVector = await this.createEmbeddingVector(prediction);
 
-    const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(prediction, this.context);
+    const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(predictionVector, this.context);
 
     this.previousPrediction = prediction;
+    this.previousPredictionVector = predictionVector;
     this.previousAgent = agent;
     console.log("Prediction: ", prediction);
 
-    const contextualizedChat = await this.contextualizeChat(persona, prediction);
+    const contextualizedChat = await this.contextualizeChat(predictionVector);
 
     const logs = insertPersonaAsFirstMsg(persona, contextualizedChat.chatLogs, chat.tokenizer);
 
@@ -113,8 +111,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     }
   }
 
-  private async contextualizeChat(persona: string, prediction: string): Promise<Chat> {
-    const context = `${persona}\n${prediction}`;
+  private async contextualizeChat(predictionVector: number[]): Promise<Chat> {
     const maxContextTokens = this.context.llm.getMaxContextTokens();
     const maxResponseTokens = this.context.llm.getMaxResponseTokens();
     // TODO: remove this once we properly track function definition tokens
@@ -122,7 +119,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
     const maxChatTokens = maxContextTokens - maxResponseTokens - fuzz;
 
     return await this._cChat.contextualize(
-      context, {
+      predictionVector, {
         persistent: maxChatTokens * 0.25,
         temporary: maxChatTokens * 0.75
       }
@@ -154,27 +151,27 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
   };
 
   // TODO: explore removing this
-  private async shortenLargeMessages(query: string): Promise<void> {
+  private async shortenLargeMessages(query: string, queryVector: number[]): Promise<void> {
     for(let i = 0; i < this.context.chat.chatLogs.messages.length ; i++) {
       const message = this.context.chat.chatLogs.messages[i];
       if (i <= 3 || !this.isLargeMsg(message)) {
       } else {
-        message.content = await this.advancedFilterText(message.content ?? "", query);
+        message.content = await this.advancedFilterText(message.content ?? "", query, queryVector);
       }
     }
   }
 
   // TODO: try using same ContextualizeChat logic for chunking and summarizing?
-  private async advancedFilterText(text: string, query: string): Promise<string> {
-    const maxCharsToUse = this.maxContextChars() * 0.45;
-    const charsForPreview = maxCharsToUse * 0.7;
+  private async advancedFilterText(text: string, query: string, queryVector: number[]): Promise<string> {
+    const maxTokensToUse = this.maxContextTokens() * 0.45;
+    const tokensForPreview = maxTokensToUse * 0.7;
 
     const bigPreview = await Rag.filterWithSurroundingText(
       text, 
-      query, 
+      queryVector, 
       this.context,
       {
-        charLimit: charsForPreview,
+        tokenLimit: tokensForPreview,
         surroundingCharacters: 750,
         chunkLength: 100,
         overlap: 15
@@ -196,14 +193,8 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
           IMPORTANT: Respond only with the new content!"`
         ).toString();
 
-    const outputTokens = charsToTokens(maxCharsToUse * 0.25);
+    const outputTokens = Math.floor(maxTokensToUse * 0.25);
     const filteredText = await this.askLlm(prompt, { maxResponseTokens: outputTokens, model: "gpt-3.5-turbo-16k-0613" });
-
-    console.log("filteredText", filteredText);
-    console.log("maxCharsToUse", maxCharsToUse);
-    console.log("charsForPreview", charsForPreview);
-    console.log("output tokens", outputTokens);
-    console.log("filteredText.length", filteredText.length);
 
     return filteredText;
   }
@@ -215,7 +206,6 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
   private maxContextTokens(): number {
     return this.context.llm.getMaxContextTokens() ?? 8000;
   }
-
 
   isLargeMsg = (message: ChatMessage): boolean => {
     return !!message.content && message.content.length > this.maxContextChars() * 0.0625;
