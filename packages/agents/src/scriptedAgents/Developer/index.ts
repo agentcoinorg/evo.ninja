@@ -1,36 +1,23 @@
-import { WriteFileFunction } from "../../functions/WriteFile";
 import { ReadFileFunction } from "../../functions/ReadFile";
-import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
-import { RunAndAnalysePythonTestFunction } from "../../functions/RunAndAnalysePythonTest";
 import { AgentContext } from "@evo-ninja/agent-utils";
 import { Agent } from "../../Agent";
 import { AgentConfig } from "../../AgentConfig";
-import { SummarizeDirectoryFunction } from "../../functions/SummarizeDirectory";
 import { InitPoetryFunction } from "../../functions/InitPoetry";
 import { prompts } from "./prompts";
+import { RunPytest } from "../../functions/RunPytest";
+import { WriteFileFunction } from "../../functions/WriteFile";
 
 export class DeveloperAgent extends Agent {
   constructor(context: AgentContext) {
-    const writeFileFn = new WriteFileFunction(context.scripts);
-    const readFileFn = new ReadFileFunction(context.scripts);
-    const readDirectoryFn = new ReadDirectoryFunction(context.scripts);
-    const pythonTestAnalyserFn = new RunAndAnalysePythonTestFunction();
-    const summarizeDirectoryFn = new SummarizeDirectoryFunction(context.llm, context.chat.tokenizer);
-    const initPoetryFn = new InitPoetryFunction();
-
     super(
       new AgentConfig(
-        () => prompts(writeFileFn, readFileFn),
+        () => prompts(),
         [
-          writeFileFn,
-          readFileFn,
-          new ReadDirectoryFunction(context.scripts),
-          new RunAndAnalysePythonTestFunction(),
-          readDirectoryFn,
-          pythonTestAnalyserFn,
-          summarizeDirectoryFn,
-          initPoetryFn
-        ], 
+          new WriteFileFunction(context.scripts),
+          new ReadFileFunction(context.scripts),
+          new RunPytest(),
+          new InitPoetryFunction(),
+        ],
         context.scripts
       ),
       context

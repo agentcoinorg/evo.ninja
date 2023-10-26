@@ -14,7 +14,7 @@ interface InitPoetryFuncParameters {}
 
 export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParameters> {
 
-  name: string = "cmd_initPoetry";
+  name: string = "initPoetry";
   description: string = `Initialize a Python Poetry environment in the workspace.`;
   parameters: any = {"type": "object", "properties": {}};
 
