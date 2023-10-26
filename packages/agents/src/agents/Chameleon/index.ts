@@ -80,7 +80,7 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
 
     this.loopCounter += 1;
 
-    if (prediction === "SUCCESS") {
+    if (prediction === "SUCCESS" || prediction.includes("\"SUCCESS\"")) {
       return {
         logs: chat.chatLogs,
         agentFunctions: [],

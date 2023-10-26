@@ -112,7 +112,7 @@ const runTest = async (
 ): Promise<{ exitCode: number; stdout: string; stderr: string }> => {
   try {
     const result = await context.workspace.exec(
-      "poetry run pytest",
+      "poetry run pytest -v",
       undefined,
       10000
     );
