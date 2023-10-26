@@ -9,18 +9,18 @@ import {
   trimText,
   Rag,
   ArrayRecombiner,
+  AgentContext
 } from "@evo-ninja/agent-utils";
 import axios from "axios";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { Agent } from "../Agent";
 import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 import TurndownService from "turndown";
-import { AgentContext } from "@evo-ninja/agent-utils";
 import { load } from "cheerio";
 import { Prompt } from "../agents/Chameleon/Prompt";
 
 export interface WebSearchFuncParameters {
-  query: string;
+  queries: string[];
 }
 
 const FETCH_WEBPAGE_TIMEOUT = 4000
@@ -34,123 +34,139 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
   }
 
   name: string = "web_search";
-  description: string = `Searches the web for a given query.`;
+  description: string = `Searches the web for multiple queries.`;
   parameters: any = {
     type: "object",
     properties: {
-      query: {
-        type: "string",
-        description: "Query to search the web for",
+      queries: {
+        type: "array",
+        items: {
+            type: "string"
+        },
+        description: "Queries to search the web for in parallel",
       },
     },
-    required: ["query"],
+    required: ["queries"],
     additionalProperties: false,
   };
 
-  buildExecutor({ context }: Agent<unknown>): (
+  buildExecutor(agent: Agent<unknown>): (
     params: WebSearchFuncParameters,
     rawParams?: string
   ) => Promise<AgentFunctionResult> {
     return async (
-      params: WebSearchFuncParameters,
-      rawParams?: string
+      params: WebSearchFuncParameters
     ): Promise<AgentFunctionResult> => {
-      try {
-        if (!context.env.SERP_API_KEY) {
-          throw new Error(
-            "SERP_API_KEY environment variable is required to use the websearch plugin. See env.template for help"
-          );
-        }
-
-        const googleResults = await this.searchOnGoogle(
-          params.query,
-          context.env.SERP_API_KEY
+      const searches = [];
+      for (const query of params.queries) {
+        searches.push(
+          this.runQuery(agent, query, JSON.stringify({ queries: [query] }))
         );
+      }
+      const results = await Promise.all(searches);
+      return {
+        outputs: results.flatMap((x) => x.outputs),
+        messages: results.flatMap((x) => x.messages)
+      };
+    };
+  }
 
-        const googleResultsAnalysisPrompt = new Prompt()
-          .line(`Look at this information:`)
-          .json(googleResults)
-          .line(`Is it enough to answer: ${params.query}? If it is, state the answer and say "TRUE`)
-          .toString()
+  private async runQuery({ context }: Agent<unknown>, query: string, rawParams?: string): Promise<AgentFunctionResult> {
+    try {
+      if (!context.env.SERP_API_KEY) {
+        throw new Error(
+          "SERP_API_KEY environment variable is required to use the websearch plugin. See env.template for help"
+        );
+      }
 
-        const llmAnalysisResponse = await this.askLlm(googleResultsAnalysisPrompt, {
-          model: "gpt-3.5-turbo-16k-0613"
-        })
+      const googleResults = await this.searchOnGoogle(
+        query,
+        context.env.SERP_API_KEY
+      );
 
-        if (llmAnalysisResponse.includes("TRUE")) {
-          return this.onSuccess(
-            params,
-            llmAnalysisResponse,
-            rawParams,
-            context.variables
-          );
-        }
-
-        const searchMatches = await this.searchInPages({
-          urls: googleResults.map(x => x.url),
-          query: params.query,
-          context
-        })
-
-        console.log(searchMatches)
-
-        const analyzeChunkMatchesPrompt = new Prompt()
-        .text(`
-          I will give you chunks of text from different webpages.
-
-          I want to extract ${params.query}. Keep in mind some information may not be properly formatted.
-          Do your best to extract as much information as you can.
-
-          Prioritize accuracy. Do not settle for the first piece of information found if there are more precise results available
-          Example: "population of New York in 2020" and you get the following results:
-          ["1.5 million",  "nearly 1.600.000", "1,611,989"], you will take "1,611,989"
-
-          I expect the answer with the best precision, even if not complete.
-
-          Chunks: ${searchMatches.join("\n------------\n")}
-        `)
-        .json(searchMatches)
-        .line(`Specify if the information is incomplete but still return it`)
+      const googleResultsAnalysisPrompt = new Prompt()
+        .line(`Look at this information:`)
+        .json(googleResults)
+        .line(`Is it enough to answer: ${query}? If it is, state the answer and say "TRUE`)
         .toString()
 
-        // console.log(analyzeChunkMatchesPrompt)
+      const llmAnalysisResponse = await this.askLlm(googleResultsAnalysisPrompt, {
+        model: "gpt-3.5-turbo-16k-0613"
+      })
 
-        const analysisFromChunks = await this.askLlm(analyzeChunkMatchesPrompt, {
-          model: "gpt-3.5-turbo-16k-0613"
-        })
-
-        console.log(analysisFromChunks)
-        
-        const analysisFromChunksJson = await this.askLlm(new Prompt().text(`
-          Look at this answer: 
-          "${analysisFromChunks}"
-
-          Based on the following information:
-
-          "${searchMatches.join("\n------------\n")}"
-
-          If there are pieces or parts of the answer that could be replaced for more numerically precise parts of the information,
-          for example: 31.2 billion is less precise than 31,198 million; then replace each part of the answer with the most precise
-          from the information if available.
-        `).toString())
-
-        console.log(analysisFromChunksJson)
-  
+      if (llmAnalysisResponse.includes("TRUE")) {
         return this.onSuccess(
-          params,
-          "JSON.stringify(searchMatches, null, 2)",
-          rawParams,
-          context.variables
-        );
-      } catch (err) {
-        return this.onError(
-          params,
-          err.toString(),
+          { queries: [query] },
+          llmAnalysisResponse,
           rawParams,
           context.variables
         );
       }
-    };
+
+      const searchMatches = await this.searchInPages({
+        urls: googleResults.map(x => x.url),
+        query,
+        context
+      })
+
+      console.log(searchMatches)
+
+      const analyzeChunkMatchesPrompt = new Prompt()
+      .text(`
+        I will give you chunks of text from different webpages.
+
+        I want to extract ${query}. Keep in mind some information may not be properly formatted.
+        Do your best to extract as much information as you can.
+
+        Prioritize accuracy. Do not settle for the first piece of information found if there are more precise results available
+        Example: "population of New York in 2020" and you get the following results:
+        ["1.5 million",  "nearly 1.600.000", "1,611,989"], you will take "1,611,989"
+
+        I expect the answer with the best precision, even if not complete.
+
+        Chunks: ${searchMatches.join("\n------------\n")}
+      `)
+      .json(searchMatches)
+      .line(`Specify if the information is incomplete but still return it`)
+      .toString()
+
+      // console.log(analyzeChunkMatchesPrompt)
+
+      const analysisFromChunks = await this.askLlm(analyzeChunkMatchesPrompt, {
+        model: "gpt-3.5-turbo-16k-0613"
+      })
+
+      console.log(analysisFromChunks)
+      
+      const analysisFromChunksJson = await this.askLlm(new Prompt().text(`
+        Look at this answer: 
+        "${analysisFromChunks}"
+
+        Based on the following information:
+
+        "${searchMatches.join("\n------------\n")}"
+
+        If there are pieces or parts of the answer that could be replaced for more numerically precise parts of the information,
+        for example: 31.2 billion is less precise than 31,198 million; then replace each part of the answer with the most precise
+        from the information if available.
+      `).toString())
+
+      console.log(analysisFromChunksJson)
+
+      return this.onSuccess(
+        { queries: [query] },
+        JSON.stringify(searchMatches, null, 2),
+        rawParams,
+        context.variables
+      );
+    } catch (err) {
+      return this.onError(
+        { queries: [query] },
+        err.toString(),
+        rawParams,
+        context.variables
+      );
+    }
   }
 
   private onSuccess(
@@ -163,11 +179,11 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
       outputs: [
         {
           type: AgentOutputType.Success,
-          title: `Web search for '${params.query}'`,
+          title: `Web search for '${params.queries}'`,
           content: FUNCTION_CALL_SUCCESS_CONTENT(
             this.name,
             params,
-            `Found the following result for the web search: '${params.query}'` +
+            `Found the following result for the web search: '${params.queries}'` +
               `\n--------------\n` +
               `${result}\n` +
               `\n--------------\n`
@@ -178,7 +194,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
-          `Found the following result for the web search: '${params.query}'` +
+          `Found the following result for the web search: '${params.queries}'` +
             `\`\`\`\n` +
             `${result}\n` +
             `\`\`\``
@@ -197,7 +213,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
       outputs: [
         {
           type: AgentOutputType.Error,
-          title: `Web search for '${params.query}'`,
+          title: `Web search for '${params.queries}'`,
           content: FUNCTION_CALL_FAILED(
             params,
             this.name,
@@ -209,7 +225,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
-          `Error web searching for '${params.query}'\n` + 
+          `Error web searching for '${params.queries}'\n` + 
           `\`\`\`\n` +
           `${trimText(error, 300)}\n` +
           `\`\`\``

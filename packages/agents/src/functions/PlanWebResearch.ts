@@ -44,8 +44,11 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
     ): Promise<AgentFunctionResult> => {
       try {
 
-        const resp = await this.askLlm(this.getPlanningPrompt(params.query));
-        
+        const resp = await this.askLlm(
+          this.getPlanningPrompt(params.query),
+          { model: "gpt-3.5-turbo-16k-0613" }
+        );
+
         return this.onSuccess(
           params,
           resp,
