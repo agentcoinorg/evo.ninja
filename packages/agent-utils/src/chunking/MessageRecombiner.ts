@@ -79,23 +79,25 @@ export class MessageRecombiner {
 
       const iterator = await results();
 
-      //Add all small persistent chunks
-      const smallPersistentChunks = [];
-      let lastMsgIndex = -1;
-      for (const chunk of originalItems) {
-        if (chunk.msgIdx !== lastMsgIndex) {
-          smallPersistentChunks.push(chunk);
-          lastMsgIndex = chunk.msgIdx;
-        } else {
-          smallPersistentChunks.pop();
-          break;
+      if (chatLogType === "persistent") {
+        //Add all small persistent chunks
+        const smallPersistentChunks = [];
+        let lastMsgIndex = -1;
+        for (const chunk of originalItems) {
+          if (chunk.msgIdx !== lastMsgIndex) {
+            smallPersistentChunks.push(chunk);
+            lastMsgIndex = chunk.msgIdx;
+          } else {
+            smallPersistentChunks.pop();
+            break;
+          }
+        }
+
+        for (const chunk of smallPersistentChunks) {
+          addChunk(chunk.chunkIdx);
         }
       }
       
-      for (const chunk of smallPersistentChunks) {
-        addChunk(chunk.chunkIdx);
-      }
-
       // Add any initial chunks
       for (const chunk of initChunks) {
         addChunk(chunk);
