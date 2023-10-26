@@ -115,6 +115,13 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
             formatting +
             `\n\`\`\`\n`
         ),
+        ChatMessageBuilder.functionCallResult(
+          this.name,
+          `Formatting Requirements:` +
+            `\n\`\`\`\n` +
+            formatting +
+            `\n\`\`\`\n`
+        ),
       ],
     };
   }
@@ -151,7 +158,35 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
   }
 
   private getPlanningPrompt(goal: string): string {
-    return `You are a Research Planning agent tasked to receive a query and need to plan an internet search
+    return `1. **Break Down the Question**: 
+       - Divide big questions into smaller, related parts.
+       - Example: Instead of "Votes of last US presidential winner?", ask:
+         a. "When was the last US presidential election?"
+         b. "Who won that election?"
+         c. "How many votes did the winner get?"
+       - If one search is enough, leave the question as is.
+
+    2. **Keep Important Details**:
+       - When asking follow-up questions, always include important details from previous questions.
+       - Example: For "Email of CTO of 'XYZ Tech'?", ask:
+         a. "Who's the CTO of 'XYZ Tech'?"
+         b. "What's {CTO}'s email at 'XYZ Tech'?"
+    
+    3. **Avoid Year-by-Year Searches**:
+       - Don't search for each year individually. Look for grouped data.
+       - Instead of searching "US births 2019", "US births 2020", etc., ask for "US births from 2019 to 2021".
+    
+    4. **Use Current Year**:
+       - If you need the current year in a search, use ${new Date().getFullYear()}.
+    
+    5. **Explain Your Steps**:
+       - Tell us how you came up with your plan.
+    
+    6. **Be Clear and Brief**:
+       - Aim for accuracy and keep it short.
+       
+    Here's the query you need to plan: ${goal}`;
+    /*return `You are a Research Planning agent tasked to receive a query and need to plan an internet search
 
     You will go through the following steps:
     
@@ -184,12 +219,12 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
     Desired behavior: Searching "US births from 2019 to 2021".
 
     4. Always assume ${new Date().getFullYear()} as the present year, in case searches require to find certain information until the present year.
-    
+
     5. Always provide step by step reasoning for your plan,
-    
+
     6. Be precise, and concise.
-    
-    Here's the query you need to plan: ${goal}`;
+
+    Here's the query you need to plan: ${goal}`;*/
   }
 
   private getFormattingPrompt(goal: string): string {

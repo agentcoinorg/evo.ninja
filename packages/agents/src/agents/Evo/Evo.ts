@@ -5,7 +5,7 @@ import {
 } from "@evo-ninja/agent-utils";
 import { AgentContext } from "@evo-ninja/agent-utils";
 import {
-  DataAnalystAgent,
+  CsvAnalystAgent,
   DeveloperAgent,
   ResearcherAgent,
 } from "../../scriptedAgents";
@@ -29,7 +29,7 @@ export class Evo extends Agent {
     delegatedAgents = delegatedAgents ?? [
       DeveloperAgent,
       ResearcherAgent,
-      DataAnalystAgent,
+      CsvAnalystAgent,
       ScripterAgent,
     ].map(agentClass => () => new agentClass(context.cloneEmpty()));
 

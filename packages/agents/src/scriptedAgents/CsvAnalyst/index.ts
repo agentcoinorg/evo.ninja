@@ -11,7 +11,7 @@ import { AgentContext } from "@evo-ninja/agent-utils";
 import { AgentConfig } from "../../AgentConfig";
 import { Agent } from "../../Agent";
 
-export class DataAnalystAgent extends Agent {
+export class CsvAnalystAgent extends Agent {
   constructor(context: AgentContext) {
     super(
       new AgentConfig(

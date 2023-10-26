@@ -133,7 +133,8 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
       // console.log(analyzeChunkMatchesPrompt)
 
       const analysisFromChunks = await this.askLlm(analyzeChunkMatchesPrompt, {
-        model: "gpt-3.5-turbo-16k-0613"
+        model: "gpt-3.5-turbo-16k-0613",
+        maxResponseTokens: 200
       })
 
       console.log(analysisFromChunks)

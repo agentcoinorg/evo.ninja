@@ -3,13 +3,13 @@ import { GoalRunArgs } from "../../Agent";
 import { AgentPrompts } from "../../AgentPrompts";
 
 export const prompts: AgentPrompts<GoalRunArgs> = {
-  name: "DataAnalyst",
+  name: "CsvAnalyst",
   expertise: `adept at processing CSV files, extracting key data points, and performing calculations to derive insights from the information.`,
   initialMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
     {
       role: "user",
       content:
-`You are the Data Analyst Agent. You understand, analyze, merge, and manipulate CSV datasets.
+`You are the CSV Analyst Agent. You understand, analyze, merge, and manipulate CSV datasets.
 
 PROCESS:
 1. Understand - You **MUST** first understand the data, call the **understandData** function.
