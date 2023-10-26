@@ -137,18 +137,24 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
       previousAgent.config.prompts.initialMessages({ goal: "" }).slice(0, -1) :
       [{ role: "user", content: prompts.generalAgentPersona }];
 
+    let chat = new Prompt()
+      .json([
+        ...agentPersona,
+        ...messages
+      ]).toString();
+    let instruction = new Prompt(`
+      Consider the above chat between a user and assistant.
+      Consider that if information needs to be used, and it is not in the chat, it must be searched or read.
+      In your expert opinion, what is the best next step for the assistant?
+      ${terminationStr && this.goal.length < 350 ? `If you are 100% sure the user's goal has been achieved, simply respond with "${terminationStr}". The user's goal is: "${this.goal}". If the user asks for an output file, has it been written?` : ""}`
+    ).toString();
+
+    chat = chat.slice(0, this.maxContextChars() * 0.95 - instruction.length - 3000); 
+
     return await this.askLlm(
       new Prompt()
-        .json([
-          ...agentPersona,
-          ...messages
-        ])
-        .line(`
-          Consider the above chat between a user and assistant.
-          Consider that if information needs to be used, and it is not in the chat, it must be searched or read.
-          In your expert opinion, what is the best next step for the assistant?
-          ${terminationStr && this.goal.length < 350 ? `If you are 100% sure the user's goal has been achieved, simply respond with "${terminationStr}". The user's goal is: "${this.goal}". If the user asks for an output file, has it been written?` : ""}`
-        ),
+        .text(chat)
+        .line(instruction),
       {
         model: "gpt-3.5-turbo-16k-0613"
       }
@@ -161,10 +167,6 @@ export class ChameleonAgent extends NewAgent<GoalRunArgs> {
 
   private maxContextTokens(): number {
     return this.context.llm.getMaxContextTokens() ?? 8000;
-  }
-
-  isLargeMsg = (message: ChatMessage): boolean => {
-    return !!message.content && message.content.length > this.maxContextChars() * 0.0625;
   }
 }
 

@@ -9,6 +9,7 @@ export const prompts = (): AgentPrompts<GoalRunArgs> => ({
     {
       role: "user",
       content: `You are an expert developer assistant that excels at coding related tasks.
+You *MUST* take careful consideration of the user's goal and all it's requirements.
 Before writing any code you must initiate the workspace using the function initPoetry.
 You plan and write clean and effective code to files using the writeFile function.
 The goal might contain information about how your implementation must be tested, if that the case,
