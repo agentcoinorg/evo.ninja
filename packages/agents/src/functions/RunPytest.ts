@@ -58,10 +58,7 @@ export class RunPytest extends AgentFunctionBase<FunctionParams> {
           ],
         };
       } else {
-        if (
-          response.stdout ==
-          "Test have reached timeout. Maybe there's an infinite loop in the code"
-        ) {
+        if (response.stdout == "Timeout achieved") {
           return {
             outputs: [
               {
@@ -73,7 +70,7 @@ export class RunPytest extends AgentFunctionBase<FunctionParams> {
               ChatMessageBuilder.functionCall(this.name, params),
               ChatMessageBuilder.functionCallResult(
                 this.name,
-                "Test have reached timeout. Maybe there's an infinite loop in the code"
+                "Test have reached timeout. Maybe there's an infinite loop in the code. Please review and fix"
               ),
             ],
           };
@@ -113,38 +110,19 @@ const extractErrors = (errorsMessage: string) => {
 const runTest = async (
   context: AgentContext
 ): Promise<{ exitCode: number; stdout: string; stderr: string }> => {
-  const loopGuard = new Promise((_, reject) =>
-    setTimeout(() => {
-      reject(
-        new Error(
-          "10 seconds timeout reached on test. Maybe you have an infinite loop?"
-        )
-      );
-    }, 10000)
-  );
   try {
-    const result = await Promise.race([
-      context.workspace.exec("poetry run pytest"),
-      loopGuard,
-    ]);
+    const result = await context.workspace.exec(
+      "poetry run pytest",
+      undefined,
+      10000
+    );
+
     return result as { exitCode: number; stdout: string; stderr: string };
   } catch (e) {
-    if (
-      e.message ==
-      "10 seconds timeout reached on test. Maybe you have an infinite loop?"
-    ) {
-      return {
-        exitCode: 1,
-        stdout:
-          "Test have reached timeout. Maybe there's an infinite loop in the code",
-        stderr: "",
-      };
-    } else {
-      return {
-        exitCode: 1,
-        stdout: "Error thrown from tests: " + e.message,
-        stderr: "",
-      };
-    }
+    return {
+      exitCode: 1,
+      stdout: "Error thrown from tests: " + e.message,
+      stderr: "",
+    };
   }
 };
