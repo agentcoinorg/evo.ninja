@@ -3,7 +3,7 @@
 kill $(lsof -t -i :8000)
 
 if [ ! -f .env ]; then
-  cp .env.example .env
+  cp .env.template .env
   echo "Please add your api keys to the .env file."
 fi
 yarn
