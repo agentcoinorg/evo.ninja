@@ -15,7 +15,7 @@ import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/S
 import { Agent } from "../Agent";
 import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
 import { Prompt } from "../agents/Chameleon/Prompt";
-import { searchOnGoogle, processWebpage } from "../utils";
+import { searchOnGoogle, processWebpage } from "./utils";
 
 export interface WebSearchFuncParameters {
   queries: string[];

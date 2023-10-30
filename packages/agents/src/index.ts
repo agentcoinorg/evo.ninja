@@ -4,4 +4,4 @@ export * from "./Agent";
 export * from "./AgentConfig";
 export * from "./AgentPrompts";
 export * from "./functions";
-export * from "./utils";
+export * from "./functions/utils";
