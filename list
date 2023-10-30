@@ -1,0 +1,17 @@
+- remove dead code
+  - keep scripter & scriptwriter
+- reduce duplicate code
+- fix any lingering "TODO"s
+- add linting for improved code styling
+- ensure there is unified architecture being used and no arbitrary forks in how things are done
+- agents
+  - merge chameleon classes / files with the old ones
+  - simplify agents directories, remove scripted agents and put into agents
+    - move utils into a sub-folder (helps with simplifying structure and readability)
+    - move things into utils, should just be agents, functions, utils
+  - remove usage of "scripted" and "sub" agent
+- dev-agent
+  - improve the prompt
+  - improve its functionality for the browser
+- merge in-memory FS and in-memory workspace
+- consolidate the LLM query builder implementations

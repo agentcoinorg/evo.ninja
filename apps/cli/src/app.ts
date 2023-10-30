@@ -57,6 +57,7 @@ export interface AppConfig {
   }
 }
 
+// TODO: make this a separate utility
 const getMessagesFromPath = (path: string): { type: ChatLogType, msgs: ChatMessage[]}[] => {
   const messagesString = readFileSync(path, "utf-8")
   const messages: Record<ChatLogType, ChatLog> = JSON.parse(messagesString)
@@ -66,6 +67,8 @@ const getMessagesFromPath = (path: string): { type: ChatLogType, msgs: ChatMessa
   }))
 }
 
+// TODO: move defaults to their own file(s)
+// NOTE: a lot is happening in this function
 export function createApp(config?: AppConfig): App {
   const rootDir = config?.rootDir
     ? path.resolve(config?.rootDir)
@@ -82,6 +85,7 @@ export function createApp(config?: AppConfig): App {
   // User Workspace
   const userWorkspace =
     config?.customWorkspace ?
+    // NOTE: this is weird naming
     config.customWorkspace.workspace :
     new FileSystemWorkspace(workspacePath);
 
@@ -97,6 +101,7 @@ export function createApp(config?: AppConfig): App {
   const fileLogger = new FileLogger(path.join(workspacePath, ".evo", "chat.md"));
 
   // Logger
+  // NOTE: could be simplified, lots of code for simple setup
   const consoleLogger = new ConsoleLogger();
   const logger = new Logger([fileLogger, consoleLogger], {
     promptUser: prompt,
@@ -143,6 +148,8 @@ export function createApp(config?: AppConfig): App {
 
   // Evo
   const evo = new ChameleonAgent(
+    // NOTE: creating an evo instance is very arduious,
+    // we should have a default config (or a builder)
     new AgentContext(
       llm,
       chat,
