@@ -7,8 +7,7 @@ import { ReadFileFunction } from "../../functions/ReadFile";
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { ReadDirectoryFunction } from "../../functions/ReadDirectory";
 import { prompts } from "./prompts";
-import { Agent } from "../../Agent";
-import { AgentConfig } from "../../AgentConfig";
+import { Agent, AgentConfig } from "../utils";
 
 export class ScripterAgent extends Agent {
   constructor(context: AgentContext) {

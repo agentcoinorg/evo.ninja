@@ -12,10 +12,8 @@ import {
   AgentContext
 } from "@evo-ninja/agent-utils";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
-import { Agent } from "../Agent";
-import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
-import { Prompt } from "../agents/Chameleon/Prompt";
-import { searchOnGoogle, processWebpage } from "./utils";
+import { Agent, Prompt } from "../agents/utils";
+import { LlmAgentFunctionBase, processWebpage, searchOnGoogle } from "./utils";
 
 export interface WebSearchFuncParameters {
   queries: string[];

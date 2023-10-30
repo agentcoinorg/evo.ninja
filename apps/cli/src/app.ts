@@ -1,4 +1,4 @@
-import { ChameleonAgent, GoalRunArgs } from "@evo-ninja/agents";
+import { ChameleonAgent } from "@evo-ninja/agents";
 import {
   Env,
   OpenAI,
@@ -23,6 +23,7 @@ import readline from "readline";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import { readFileSync } from "fs-extra";
+import { GoalRunArgs } from "@evo-ninja/agents/build/agents/utils";
 
 dotenv.config({
   path: path.join(__dirname, "../../../.env"),

@@ -2,8 +2,8 @@ import { ReadDirectoryFunction } from "./ReadDirectory";
 import { ReadAndAnalyzeFileFunction } from "./ReadAndAnalyzeFile";
 import { AnalyzeSoftwareRequirementsFunction } from "./AnalyzeSoftwareRequirements";
 import { PlanSoftwareRoadmapFunction } from "./PlanSoftwareRoadmap";
-import { AgentFunctionBase } from "../AgentFunctionBase";
-import { Agent } from "../Agent";
+import { AgentFunctionBase } from "./utils";
+import { Agent } from "../agents/utils";
 import { AgentFunctionResult, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 
 interface PlanDevelopmentParameters {

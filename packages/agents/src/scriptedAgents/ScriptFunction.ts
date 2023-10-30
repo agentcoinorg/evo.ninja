@@ -7,8 +7,8 @@ import {
   Scripts,
   shimCode
 } from "@evo-ninja/agent-utils"
-import { AgentFunctionBase } from "../AgentFunctionBase";
-import { Agent } from "../Agent";
+import { Agent } from "../agents/utils";
+import { AgentFunctionBase } from "../functions/utils";
 
 export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams> {
   constructor(private scripts: Scripts, private storeInVariable?: boolean) {

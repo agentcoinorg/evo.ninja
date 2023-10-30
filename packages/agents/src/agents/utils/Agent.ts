@@ -18,8 +18,8 @@ import { ResultErr } from "@polywrap/result";
 import { AgentConfig } from "./AgentConfig";
 import { AgentContext } from "@evo-ninja/agent-utils";
 import { ExecuteAgentFunctionCalled } from "@evo-ninja/agent-utils";
-import { Prompt } from "./agents/Chameleon/Prompt";
-import { AgentFunctionBase } from "./AgentFunctionBase";
+import { Prompt } from "./Prompt";
+import { AgentFunctionBase } from "../../functions/utils";
 
 export type GoalRunArgs = {
   goal: string;

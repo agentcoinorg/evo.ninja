@@ -16,10 +16,10 @@ import {
 import dotenv from "dotenv";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import path from "path";
-import { Prompt } from "../agents/Chameleon/Prompt";
 import fs from "fs";
 import { AgentContext } from "@evo-ninja/agent-utils";
 import { LlmModel } from "@evo-ninja/agent-utils";
+import { Prompt } from "../agents/utils";
 
 dotenv.config({
   path: path.join(__dirname, "../../../../.env")

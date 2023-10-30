@@ -1,8 +1,8 @@
 import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder, Script } from "@evo-ninja/agent-utils";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { createScriptWriter } from "../agents/ScriptWriter/utils";
-import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
-import { Agent } from "../Agent";
+import { LlmAgentFunctionBase } from "./utils";
+import { Agent } from "../agents/utils";
 
 interface CreateScriptFuncParameters { 
   namespace: string;

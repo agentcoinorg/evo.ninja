@@ -1,5 +1,5 @@
 import { ChatMessage } from "@evo-ninja/agent-utils";
-import { GoalRunArgs } from "../../Agent";
+import { GoalRunArgs } from "../../agents/utils";
 
 export const prompts = {
   name: "Synthesizer",

@@ -1,6 +1,6 @@
 import { AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder, trimText } from "@evo-ninja/agent-utils";
-import { AgentFunctionBase } from "../AgentFunctionBase";
-import { Agent } from "../Agent";
+import { Agent } from "../agents/utils";
+import { AgentFunctionBase } from "./utils";
 
 interface WriteScriptFuncParameters { 
   namespace: string, 

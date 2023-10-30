@@ -1,6 +1,6 @@
 import { AgentOutputType, trimText, ChatMessageBuilder, AgentFunctionResult, Scripts } from "@evo-ninja/agent-utils"
 import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
-import { Agent } from "../Agent";
+import { Agent } from "../agents/utils";
 
 interface ReadFileFuncParameters { 
   path: string;

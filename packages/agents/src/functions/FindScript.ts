@@ -1,7 +1,7 @@
 import { AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder, Script, Scripts } from "@evo-ninja/agent-utils";
-import { AgentFunctionBase } from "../AgentFunctionBase";
+import { AgentFunctionBase } from "./utils";
 import { FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
-import { Agent } from "../Agent";
+import { Agent } from "../agents/utils";
 
 interface FindScriptFuncParameters { 
   namespace: string, 

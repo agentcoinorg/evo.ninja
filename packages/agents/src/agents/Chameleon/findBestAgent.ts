@@ -1,8 +1,8 @@
 import { FunctionDefinition, Rag, ArrayRecombiner, InMemoryWorkspace } from "@evo-ninja/agent-utils";
-import { Agent, GoalRunArgs } from "../../Agent";
 import { AgentContext } from "@evo-ninja/agent-utils";
-import { AgentFunctionBase } from "../../AgentFunctionBase";
+import { AgentFunctionBase } from "../../functions/utils";
 import { DeveloperAgent, ResearcherAgent, CsvAnalystAgent, SynthesizerAgent } from "../../scriptedAgents";
+import { Agent, GoalRunArgs } from "../utils/Agent";
 
 type AgentWithPrompts = {
   expertise: string;

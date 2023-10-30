@@ -1,9 +1,8 @@
 import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder, trimText } from "@evo-ninja/agent-utils";
 import { load } from "cheerio";
-import { Agent } from "../Agent";
-import { AgentFunctionBase } from "../AgentFunctionBase";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
-import { fetchHTML } from "./utils";
+import { Agent } from "../agents/utils";
+import { AgentFunctionBase, fetchHTML } from "./utils";
 
 interface ScrapeTableFuncParameters {
   url: string;

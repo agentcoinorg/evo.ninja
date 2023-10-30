@@ -1,7 +1,7 @@
 import { ChatMessage } from "@evo-ninja/agent-utils";
-import { AgentFunctionBase } from "../../AgentFunctionBase";
-import { GoalRunArgs } from "../../Agent";
-import { AgentPrompts } from "../../AgentPrompts";
+import { AgentFunctionBase } from "../../functions/utils";
+import { GoalRunArgs } from "../../agents/utils";
+import { AgentPrompts } from "../../agents/utils";
 
 export const agentPrompts = ( 
   onGoalAchievedFn: AgentFunctionBase<any>,

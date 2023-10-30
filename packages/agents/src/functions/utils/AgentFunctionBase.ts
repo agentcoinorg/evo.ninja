@@ -1,5 +1,5 @@
 import { AgentFunctionResult, FunctionDefinition } from "@evo-ninja/agent-utils"
-import { Agent } from "./Agent";
+import { Agent } from "../../agents/utils";
 
 export abstract class AgentFunctionBase<TParams> {
   abstract get name(): string;

@@ -1,6 +1,6 @@
 import { AgentFunctionResult, ChatMessageBuilder, LlmApi, Tokenizer } from "@evo-ninja/agent-utils";
-import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
-import { Agent } from "../Agent";
+import { LlmAgentFunctionBase } from "./utils";
+import { Agent } from "../agents/utils";
 
 interface AnalyzeSoftwareRequirementsParameters {
   goal: string;

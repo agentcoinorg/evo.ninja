@@ -1,8 +1,7 @@
 import { prompts } from "./prompts";
 import { AgentContext } from "@evo-ninja/agent-utils";
-import { Agent } from "../../Agent";
-import { AgentConfig } from "../../AgentConfig";
 import { OnGoalAchievedFunction } from "../../functions/OnGoalAchieved";
+import { Agent, AgentConfig } from "../../agents/utils";
 
 export class PlannerAgent extends Agent {
   constructor(context: AgentContext) {

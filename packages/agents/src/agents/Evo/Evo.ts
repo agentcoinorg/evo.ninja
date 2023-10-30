@@ -13,8 +13,7 @@ import { DelegateAgentFunction } from "../../functions/DelegateScriptedAgent";
 import { VerifyGoalAchievedFunction } from "../../functions/VerifyGoalAchieved";
 import { prompts } from "./prompts";
 import { ScripterAgent } from "../Scripter";
-import { Agent, GoalRunArgs } from "../../Agent";
-import { AgentConfig } from "../../AgentConfig";
+import { Agent, AgentConfig, GoalRunArgs } from "../utils";
 
 export type AgentOrFactory = (Agent | (() => Agent));
 

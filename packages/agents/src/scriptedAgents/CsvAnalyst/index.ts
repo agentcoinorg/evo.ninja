@@ -8,8 +8,7 @@ import { CsvSumColumnFunction } from "../../functions/CsvSumColumn";
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { prompts } from "./prompts";
 import { AgentContext, Chat } from "@evo-ninja/agent-utils";
-import { AgentConfig } from "../../AgentConfig";
-import { Agent, GoalRunArgs } from "../../Agent";
+import { Agent, AgentConfig, GoalRunArgs } from "../../agents/utils";
 
 export class CsvAnalystAgent extends Agent {
   private understand: UnderstandDataFunction;

@@ -17,8 +17,8 @@ import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import { CsvAnalystAgent } from "..";
 import fs from "fs";
 import { AgentContext } from "@evo-ninja/agent-utils";
-import { Agent } from "../../Agent";
 import { LlmModel } from "@evo-ninja/agent-utils";
+import { Agent } from "../../agents/utils";
 
 const rootDir = path.join(__dirname, "../../../../../");
 

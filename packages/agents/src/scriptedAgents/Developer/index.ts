@@ -1,11 +1,10 @@
 import { ReadFileFunction } from "../../functions/ReadFile";
 import { AgentContext } from "@evo-ninja/agent-utils";
-import { Agent } from "../../Agent";
-import { AgentConfig } from "../../AgentConfig";
 import { InitPoetryFunction } from "../../functions/InitPoetry";
 import { prompts } from "./prompts";
 import { RunPytest } from "../../functions/RunPytest";
 import { WriteFileFunction } from "../../functions/WriteFile";
+import { Agent, AgentConfig } from "../../agents/utils";
 
 export class DeveloperAgent extends Agent {
   constructor(context: AgentContext) {

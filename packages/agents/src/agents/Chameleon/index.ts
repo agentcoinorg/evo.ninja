@@ -14,12 +14,9 @@ import {
   Rag,
   AgentOutput
 } from "@evo-ninja/agent-utils";
-import { Agent } from "../../Agent";
 import { AgentContext } from "@evo-ninja/agent-utils";
 import { agentPrompts, prompts } from "./prompts";
-import { GoalRunArgs } from "../../Agent";
-import { AgentConfig } from "../../AgentConfig";
-import { Prompt } from "./Prompt";
+import { Agent, AgentConfig, GoalRunArgs, Prompt } from "../../agents/utils";
 import { NewAgent } from "./NewAgent";
 import { findBestAgent } from "./findBestAgent";
 

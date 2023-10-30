@@ -7,10 +7,9 @@ import {
   RunResult,
 } from "@evo-ninja/agent-utils";
 import { AgentContext } from "@evo-ninja/agent-utils";
-import { Agent } from "../../Agent";
-import { AgentConfig } from "../../AgentConfig";
 import { ResultErr } from "@polywrap/result";
 import { basicFunctionCallLoop } from "./basicFunctionCallLoop";
+import { Agent, AgentConfig } from "../utils";
 
 export abstract class NewAgent<TRunArgs> extends Agent<TRunArgs> {
   constructor(

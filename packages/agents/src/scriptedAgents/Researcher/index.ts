@@ -1,6 +1,4 @@
-import { Agent, GoalRunArgs } from "../../Agent";
 import { AgentContext, Chat } from "@evo-ninja/agent-utils";
-import { AgentConfig } from "../../AgentConfig";
 import { WebSearchFunction } from "../../functions/WebSearch";
 import { PlanWebResearchFunction } from "../../functions/PlanWebResearch";
 import { prompts } from "./prompts";
@@ -8,6 +6,7 @@ import { ReadFileFunction } from "../../functions/ReadFile";
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { ScrapeTableFunction } from "../../functions/ScrapeTable";
 import { ScrapeTextFunction } from "../../functions/ScrapeText";
+import { Agent, AgentConfig, GoalRunArgs } from "../../agents/utils";
 
 export class ResearcherAgent extends Agent {
   private plan: PlanWebResearchFunction;

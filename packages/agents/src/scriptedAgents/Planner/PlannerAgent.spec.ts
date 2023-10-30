@@ -16,9 +16,9 @@ import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import { PlannerAgent } from "..";
 import * as fs from "fs";
-import { Agent } from "../../Agent";
 import { LlmModel } from "@evo-ninja/agent-utils";
 import { AgentContext } from "@evo-ninja/agent-utils/build/agent/AgentContext";
+import { Agent } from "../../agents/utils";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
