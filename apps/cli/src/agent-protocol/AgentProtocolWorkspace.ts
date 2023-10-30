@@ -74,12 +74,17 @@ export class AgentProtocolWorkspace implements Workspace {
   }
 
   appendFileSync(subpath: string, data: string): void {
-    const artifact = this._artifactLog.get(subpath);
+    let artifact = this._artifactLog.get(subpath);
     if (!artifact) {
-      throw new Error(`Artifact with subpath: ${subpath} not found`);
+      this.writeFileSync(subpath, data);
+      return;
     }
     artifact.data += data;
     this._fsWorkspace.appendFileSync(subpath, data);
+  }
+
+  rmSync(subpath: string): void {
+    this._fsWorkspace.rmSync(subpath);
   }
 
   getArtifacts(): Artifact[] {
