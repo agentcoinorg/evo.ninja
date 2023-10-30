@@ -1,7 +1,7 @@
 import { AgentOutputType, ChatMessageBuilder, AgentOutput, AgentFunctionResult, ChatMessage, LlmApi, Tokenizer } from "@evo-ninja/agent-utils"
-import { GoalVerifierAgent } from "../scriptedAgents";
 import { Agent } from "../agents/utils";
 import { LlmAgentFunctionBase } from "./utils";
+import { GoalVerifierAgent } from "../agents";
 
 interface FunctionParams {
 }

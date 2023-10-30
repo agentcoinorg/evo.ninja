@@ -14,11 +14,11 @@ import * as rimraf from "rimraf";
 import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
-import { DeveloperAgent } from "../../scriptedAgents";
 import fs from "fs";
 import { AgentContext } from "@evo-ninja/agent-utils";
 import { LlmModel } from "@evo-ninja/agent-utils";
 import { Agent } from "../utils";
+import { DeveloperAgent } from ".";
 
 const rootDir = path.join(__dirname, "../../../../../");
 

@@ -31,7 +31,7 @@ export class DelegateAgentFunction<
   }
 
   get name() {
-    return this.delegateScriptedAgentFnName(this._name)
+    return this.delegateAgentFnName(this._name)
   }
   get description(): string {
     return `Delegate a task to "${this._name}" with expertise in "${this._expertise}". Provide all the required information to fully complete the task.`;
@@ -54,19 +54,19 @@ export class DelegateAgentFunction<
 
   buildExecutor({ context }: Agent<unknown>) {
     return async (params: DelegateAgentParams, rawParams?: string): Promise<AgentFunctionResult> => {
-      const scriptedAgent = typeof this.delegatedAgent === "function" ?
+      const delegatedAgentInst = typeof this.delegatedAgent === "function" ?
         this.delegatedAgent() :
         this.delegatedAgent;
 
       const result = await this.askAgent(
-        scriptedAgent,
+        delegatedAgentInst,
         { goal: `Task: ${params.task}${params.context ? `\nContext: ${params.context}` : ""}` },
         context
       );
 
       if (!result.ok) {
         return this.onFailure(
-          scriptedAgent.config.prompts.name,
+          delegatedAgentInst.config.prompts.name,
           params,
           rawParams,
           result.error
@@ -74,7 +74,7 @@ export class DelegateAgentFunction<
       }
 
       return this.onSuccess(
-        scriptedAgent.config.prompts.name,
+        delegatedAgentInst.config.prompts.name,
         rawParams,
         result.value.messages,
         result.value.output,
@@ -89,13 +89,13 @@ export class DelegateAgentFunction<
         result
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.delegateScriptedAgentFnName(name), rawParams),
+        ChatMessageBuilder.functionCall(this.delegateAgentFnName(name), rawParams),
         ...messages.map(x => ({
           role: "assistant",
           content: x,
         }) as ChatMessage),
         ChatMessageBuilder.functionCallResult(
-          this.delegateScriptedAgentFnName(name),
+          this.delegateAgentFnName(name),
           result.content || "Successfully accomplished the task."
         )
       ]
@@ -112,16 +112,16 @@ export class DelegateAgentFunction<
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.delegateScriptedAgentFnName(name), rawParams),
+        ChatMessageBuilder.functionCall(this.delegateAgentFnName(name), rawParams),
         ChatMessageBuilder.functionCallResult(
-          this.delegateScriptedAgentFnName(name),
+          this.delegateAgentFnName(name),
           `Error: ${error}`
         )
       ]
     }
   }
 
-  private delegateScriptedAgentFnName(agent: string) {
+  private delegateAgentFnName(agent: string) {
     return `delegate${agent}`;
   }
 }

@@ -4,16 +4,14 @@ import {
   RunResult
 } from "@evo-ninja/agent-utils";
 import { AgentContext } from "@evo-ninja/agent-utils";
-import {
-  CsvAnalystAgent,
-  DeveloperAgent,
-  ResearcherAgent,
-} from "../../scriptedAgents";
-import { DelegateAgentFunction } from "../../functions/DelegateScriptedAgent";
+import { DelegateAgentFunction } from "../../functions/DelegateAgentFunction";
 import { VerifyGoalAchievedFunction } from "../../functions/VerifyGoalAchieved";
 import { prompts } from "./prompts";
 import { ScripterAgent } from "../Scripter";
 import { Agent, AgentConfig, GoalRunArgs } from "../utils";
+import { CsvAnalystAgent } from "../CsvAnalyst";
+import { DeveloperAgent } from "../Developer";
+import { ResearcherAgent } from "../Researcher";
 
 export type AgentOrFactory = (Agent | (() => Agent));
 
