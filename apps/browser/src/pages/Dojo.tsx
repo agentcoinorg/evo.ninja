@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 
-import { AgentBaseContext, Evo } from '@evo-ninja/agents';
 import * as EvoCore from "@evo-ninja/agent-utils";
 import { InMemoryFile } from '@nerfzael/memory-fs';
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
@@ -15,6 +14,9 @@ import Chat, { ChatMessage } from "../components/Chat/Chat";
 import { MarkdownLogger } from '../sys/logger';
 import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
 import { onGoalAchievedScript, onGoalFailedScript, speakScript } from '../scripts';
+import { AgentContext } from '@evo-ninja/agent-utils';
+import { Evo } from '@evo-ninja/agents';
+import { SubWorkspace } from '@evo-ninja/agent-utils';
 
 
 function addScript(script: {name: string, definition: string, code: string}, scriptsWorkspace: EvoCore.Workspace) {
@@ -61,7 +63,7 @@ function Dojo() {
       return;
     }
 
-    setScripts(items.map(x => new InMemoryFile(x, new TextEncoder().encode(scriptsWorkspace.readFileSync(x)) || "")));
+    setScripts(items.map(x => new InMemoryFile(x.name, new TextEncoder().encode(scriptsWorkspace.readFileSync(x.name)) || "")));
   }, [scriptsWorkspace]);
 
   function checkForUserFiles() {
@@ -179,7 +181,7 @@ function Dojo() {
 
       const llm = new EvoCore.OpenAI(
         env.OPENAI_API_KEY,
-        env.GPT_MODEL,
+        env.GPT_MODEL as EvoCore.LlmModel,
         env.CONTEXT_WINDOW_TOKENS,
         env.MAX_RESPONSE_TOKENS,
         logger
@@ -187,19 +189,20 @@ function Dojo() {
 
       const userWorkspace = new EvoCore.InMemoryWorkspace();
       setUserWorkspace(userWorkspace);
-      const contextWindow = new EvoCore.ContextWindow(llm);
+
+      const internals = new SubWorkspace(".evo", userWorkspace);
+      
       const chat = new EvoCore.Chat(
         cl100k_base,
-        contextWindow,
-        logger
       );
 
       setEvo(new Evo(
-        new AgentBaseContext(
+        new AgentContext(
           llm,
           chat,
           logger,
           userWorkspace,
+          internals,
           env,
           scripts,
         )

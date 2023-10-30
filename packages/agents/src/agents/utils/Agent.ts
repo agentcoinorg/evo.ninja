@@ -6,7 +6,7 @@ import {
   RunResult,
   basicFunctionCallLoop,
   LlmQuery,
-  LlmQueryBuilderV2,
+  LlmQueryBuilder,
   ChatLogs,
   LlmModel,
   agentFunctionBaseToAgentFunction,
@@ -100,16 +100,16 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
     result.messages.forEach(x => chat.temporary(x));
   }
 
-  protected expression(msgs?: ChatMessage[]): LlmQuery {
+  protected query(msgs?: ChatMessage[]): LlmQuery {
     return new LlmQuery(this.context.llm, this.context.chat.tokenizer, ChatLogs.from(msgs ?? [], [], this.context.chat.tokenizer));
   }
 
-  protected expressionBuilder(msgs?: ChatMessage[]): LlmQueryBuilderV2 {
-    return new LlmQueryBuilderV2(this.context.llm, this.context.chat.tokenizer, msgs);
+  protected queryBuilder(msgs?: ChatMessage[]): LlmQueryBuilder {
+    return new LlmQueryBuilder(this.context.llm, this.context.chat.tokenizer, msgs);
   }
 
   protected askLlm(query: string | Prompt, opts?: { maxResponseTokens?: number, model?: LlmModel }): Promise<string> {
-    return this.expression().ask(query.toString(), opts);
+    return this.query().ask(query.toString(), opts);
   }
  
   protected async createEmbeddingVector(text: string): Promise<number[]> {

@@ -15,7 +15,7 @@ export abstract class LlmAgentFunctionBase<TParams> extends AgentFunctionBase<TP
 
   protected askLlm(question: string, opts?: { maxResponseTokens?: number, model?: LlmModel }): Promise<string> {
     return this.queryBuilder()
-      .persistent("user", question)
+      .message("user", question)
       .build()
       .content(opts);
   }

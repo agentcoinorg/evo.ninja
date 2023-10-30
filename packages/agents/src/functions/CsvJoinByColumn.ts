@@ -1,4 +1,4 @@
-import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
+import { ScriptFunction } from "./utils";
 
 export class CsvJoinByColumnFunction extends ScriptFunction<{ csv1: string, csv2: string, joinColumnName: string }> {
   name: string = "csv_joinByColumn";

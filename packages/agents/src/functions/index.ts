@@ -9,7 +9,7 @@ export * from './CsvJoinableColumns';
 export * from './CsvOrderColumns';
 export * from './CsvSortByColumn';
 export * from './CsvSumColumn';
-export * from './DelegateScriptedAgent';
+export * from './DelegateAgentFunction';
 export * from './ExecuteScript';
 export * from './FindScript';
 export * from './InitPoetry';

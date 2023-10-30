@@ -15,6 +15,7 @@ import {
   RunnableAgent,
   LlmModel,
   AgentContext,
+  SubWorkspace,
 } from "@evo-ninja/agent-utils";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
 import { FileSystemWorkspace, FileLogger } from "@evo-ninja/agent-utils-fs";
@@ -87,10 +88,11 @@ export function createApp(config?: AppConfig): App {
     new FileSystemWorkspace(workspacePath);
 
   // Internals Workspace (.evo directory)
-  const internals = new FileSystemWorkspace(
+  const internals = new SubWorkspace(
     config?.customWorkspace ?
-      path.join(config.customWorkspace.path, ".evo") :
-      path.join(workspacePath, ".evo")
+    path.join(config.customWorkspace.path, ".evo") :
+    path.join(workspacePath, ".evo"), 
+    userWorkspace
   );
 
   // Chat Log File
