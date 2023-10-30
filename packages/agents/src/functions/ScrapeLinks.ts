@@ -1,4 +1,4 @@
-import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
+import { ScriptFunction } from "./utils";
 
 export class ScrapeLinksFunction extends ScriptFunction<{ url: string }> {
   name: string = "web_scrapeLinks";

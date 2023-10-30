@@ -17,10 +17,9 @@ import {
 import { AgentContext } from "@evo-ninja/agent-utils";
 import { agentPrompts, prompts } from "./prompts";
 import { Agent, AgentConfig, GoalRunArgs, Prompt } from "../../agents/utils";
-import { NewAgent } from "./NewAgent";
 import { findBestAgent } from "./findBestAgent";
 
-export class ChameleonAgent extends NewAgent<GoalRunArgs> {
+export class ChameleonAgent extends Agent<GoalRunArgs> {
   private _cChat: ContextualizedChat;
   private _chunker: MessageChunker;
   private previousPrediction: string | undefined;

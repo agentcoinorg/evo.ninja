@@ -4,7 +4,7 @@ import { InitPoetryFunction } from "../../functions/InitPoetry";
 import { prompts } from "./prompts";
 import { RunPytest } from "../../functions/RunPytest";
 import { WriteFileFunction } from "../../functions/WriteFile";
-import { Agent, AgentConfig } from "../../agents/utils";
+import { Agent, AgentConfig } from "../utils";
 
 export class DeveloperAgent extends Agent {
   constructor(context: AgentContext) {

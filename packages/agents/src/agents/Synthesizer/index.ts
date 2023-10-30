@@ -2,7 +2,7 @@ import { WriteFileFunction } from "../../functions/WriteFile";
 import { ReadFileFunction } from "../../functions/ReadFile";
 import { AgentContext } from "@evo-ninja/agent-utils";
 import { prompts } from "./prompts";
-import { Agent, AgentConfig } from "../../agents/utils";
+import { Agent, AgentConfig } from "../utils";
 
 export class SynthesizerAgent extends Agent {
   constructor(context: AgentContext) {
