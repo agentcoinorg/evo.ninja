@@ -1,3 +1,4 @@
+import path from "path-browserify";
 import { DirectoryEntry, Workspace } from "./Workspace";
 
 export class InMemoryWorkspace implements Workspace {
