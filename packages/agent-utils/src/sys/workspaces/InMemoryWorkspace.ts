@@ -1,7 +1,28 @@
+import path from "path-browserify";
 import { DirectoryEntry, Workspace } from "./Workspace";
 
 export class InMemoryWorkspace implements Workspace {
   private root: InMemoryDir = new InMemoryDir("");
+
+  constructor(
+    private _workspacePath?: string
+  ) {
+    if (!this._workspacePath) {
+      return;
+    }
+    // Fully resolve the workspace path
+    this._workspacePath = path.resolve(
+      this._workspacePath
+    );
+
+    // Initialize the directory
+    if (!this.existsSync(this._workspacePath)) {
+      this.mkdirSync(
+        this._workspacePath,
+        { recursive: true }
+      );
+    }
+  }
 
   async exec(command: string, args?: string[], timeout?: number): Promise<{ exitCode: number; stdout: string; stderr: string }> {
     throw new Error("Executing commands is not supported in this application environment.");
