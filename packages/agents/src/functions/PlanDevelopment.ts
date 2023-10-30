@@ -4,7 +4,7 @@ import { AnalyzeSoftwareRequirementsFunction } from "./AnalyzeSoftwareRequiremen
 import { PlanSoftwareRoadmapFunction } from "./PlanSoftwareRoadmap";
 import { AgentFunctionBase } from "./utils";
 import { Agent } from "../agents/utils";
-import { AgentFunctionResult, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+import { AgentFunctionResult, ChatMessageBuilder } from "@/agent-core";
 
 interface PlanDevelopmentParameters {
   goal: string;

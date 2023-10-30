@@ -1,9 +1,9 @@
 import { Configuration, OpenAIApi } from "openai";
 import { EmbeddingApi, EmbeddingCreationResult } from "./EmbeddingApi";
-import { ILogger } from "../sys";
 import { OpenAIError, cleanOpenAIError } from "../utils/openai";
 import { Tokenizer } from "../llm";
 import { splitArray } from "./utils";
+import { ILogger } from "@evo-ninja/agent-utils";
 
 export const DEFAULT_ADA_CONFIG = {
   model: "text-embedding-ada-002",

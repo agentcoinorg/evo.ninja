@@ -1,4 +1,4 @@
-import { AgentOutputType, ChatMessageBuilder, AgentOutput, AgentFunctionResult, ChatMessage, AgentVariables, LlmApi, Tokenizer } from "@evo-ninja/agent-utils"
+import { AgentOutputType, ChatMessageBuilder, AgentOutput, AgentFunctionResult, ChatMessage, AgentVariables, LlmApi, Tokenizer } from "@/agent-core"
 import { LlmAgentFunctionBase } from "./utils";
 import { Agent } from "../agents/utils";
 

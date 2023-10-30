@@ -1,7 +1,7 @@
 import { Timer } from "./Timer";
 import { DebugLlmReq } from "./DebugLlmReq";
-
-import { ChatLogs, ChatMessage, Workspace, PriorityContainer } from "@evo-ninja/agent-utils";
+import { Workspace } from "@evo-ninja/agent-utils";
+import { PriorityContainer, ChatMessage, ChatLogs } from "@/agent-core";
 
 interface DebugGoal {
   prompt: string;

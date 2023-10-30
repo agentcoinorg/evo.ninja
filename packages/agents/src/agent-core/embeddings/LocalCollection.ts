@@ -2,9 +2,9 @@ import { EmbeddingApi } from "./EmbeddingApi";
 import { normalize, normalizedCosineSimilarity } from "./utils";
 import { LocalDocumentStore } from "./LocalDocumentStore";
 import { BaseDocumentMetadata, LocalDocument } from "./LocalDocument";
-import { Workspace } from "../sys";
 import path from "path-browserify";
 import { getTextFromNextChunks, getTextFromPriorChunks, sortDocumentsByIndex } from "../chunking/utils";
+import { Workspace } from "@evo-ninja/agent-utils";
 
 export class LocalCollection<TMetadata extends BaseDocumentMetadata = BaseDocumentMetadata> {
   private documentStore: LocalDocumentStore<TMetadata>;

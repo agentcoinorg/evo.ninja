@@ -1,5 +1,5 @@
+import { Workspace } from "@evo-ninja/agent-utils";
 import { Chunker } from "./Chunker";
-import { Workspace } from "../sys";
 
 interface DirectoryChunkerInput {
   workspace: Workspace;

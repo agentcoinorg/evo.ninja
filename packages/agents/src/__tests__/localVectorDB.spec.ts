@@ -1,6 +1,5 @@
-import { LocalVectorDB } from "../embeddings/LocalVectorDB"
-import { OpenAIEmbeddingAPI } from "../embeddings/OpenAIEmbeddingApi"
-import { ConsoleLogger, Env, InMemoryWorkspace } from "../sys"
+import { LocalVectorDB, OpenAIEmbeddingAPI } from "@/agent-core";
+import { InMemoryWorkspace, Env, ConsoleLogger } from "@evo-ninja/agent-utils";
 import dotenv from "dotenv";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import path from "path";

@@ -1,22 +1,18 @@
 import {
-  Env,
-  Scripts,
   OpenAI,
   Chat,
   LlmApi,
-  ConsoleLogger,
-  Logger,
-  SubWorkspace
-} from "@evo-ninja/agent-utils";
+} from "@/agent-core";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
-import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
 import * as rimraf from "rimraf";
 import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import { ScripterAgent } from ".";
-import { AgentContext } from "@evo-ninja/agent-utils";
-import { LlmModel } from "@evo-ninja/agent-utils";
+import { AgentContext } from "@/agent-core";
+import { LlmModel } from "@/agent-core";
+import { ConsoleLogger, Env, Logger, Scripts, SubWorkspace } from "@evo-ninja/agent-utils";
+import { DebugLlmApi, DebugLog } from "@/agent-debug";
 
 const rootDir = path.join(__dirname, "../../../../../");
 

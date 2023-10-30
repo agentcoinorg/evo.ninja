@@ -1,7 +1,7 @@
 import { DebugLog } from "./DebugLog";
 import { Timer } from "./Timer";
 
-import { LlmApi, LlmOptions, ChatLogs, ChatMessage } from "@evo-ninja/agent-utils";
+import { LlmApi, LlmOptions, ChatLogs, ChatMessage } from "@/agent-core";
 
 export class DebugLlmApi implements LlmApi {
   constructor(

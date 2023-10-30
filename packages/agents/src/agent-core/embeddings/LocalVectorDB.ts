@@ -1,8 +1,8 @@
-import { Workspace } from "../sys";
 import { LocalCollection } from "./LocalCollection";
 import { EmbeddingApi } from "./EmbeddingApi";
 import path from "path-browserify";
 import { BaseDocumentMetadata } from "./LocalDocument";
+import { Workspace } from "@evo-ninja/agent-utils";
 
 export class LocalVectorDB {
   constructor(

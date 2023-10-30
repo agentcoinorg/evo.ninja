@@ -1,4 +1,4 @@
-import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder, readVariableResultMessage } from "@evo-ninja/agent-utils";
+import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder, readVariableResultMessage } from "@/agent-core";
 import { AgentFunctionBase } from "./utils";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { Agent } from "../agents/utils";

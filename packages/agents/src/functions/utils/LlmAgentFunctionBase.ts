@@ -1,8 +1,7 @@
-import { LlmApi, Tokenizer, LlmQueryBuilder, AgentOutput, LlmModel } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "./AgentFunctionBase";
 import { Result, ResultErr, ResultOk } from "@polywrap/result";
-import { AgentContext } from "@evo-ninja/agent-utils";
 import { Agent } from "../../agents/utils";
+import { AgentContext, AgentOutput, LlmApi, LlmModel, LlmQueryBuilder, Tokenizer } from "@/agent-core";
 
 export abstract class LlmAgentFunctionBase<TParams> extends AgentFunctionBase<TParams> {
   constructor(protected llm: LlmApi, protected tokenizer: Tokenizer) {

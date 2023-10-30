@@ -16,7 +16,6 @@
   },
   "dependencies": {
     "@evo-ninja/agents": "~0.1.0",
-    "@evo-ninja/agent-debug": "~0.1.0",
     "@evo-ninja/agent-utils": "~0.1.0",
     "@evo-ninja/agent-utils-fs": "~0.1.0",
     "agent-protocol": "1.0.1",

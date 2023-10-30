@@ -1,6 +1,5 @@
+import { Logger, Workspace, Env, Scripts, WrapClient, agentPlugin } from "@evo-ninja/agent-utils";
 import { LlmApi, Chat } from "../llm";
-import { Scripts, WrapClient, agentPlugin } from "../scripts";
-import { Logger, Workspace, Env } from "../sys";
 import { AgentVariables } from "./AgentVariables";
 
 export class AgentContext {

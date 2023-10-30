@@ -1,6 +1,5 @@
+import { ChatLogs, ChatMessage } from "@/agent-core";
 import { Timer } from "./Timer";
-
-import { ChatLogs, ChatMessage } from "@evo-ninja/agent-utils";
 
 export class DebugLlmReq {
   constructor(
