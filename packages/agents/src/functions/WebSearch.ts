@@ -11,24 +11,15 @@ import {
   ArrayRecombiner,
   AgentContext
 } from "@evo-ninja/agent-utils";
-import axios from "axios";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { Agent } from "../Agent";
 import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
-import TurndownService from "turndown";
-import { load } from "cheerio";
 import { Prompt } from "../agents/Chameleon/Prompt";
+import { searchOnGoogle, processWebpage } from "../utils";
 
 export interface WebSearchFuncParameters {
   queries: string[];
 }
-
-const FETCH_WEBPAGE_TIMEOUT = 4000
-const TRUSTED_SOURCES = [
-  "wikipedia",
-  "statista",
-  "macrotrends"
-]
 
 export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParameters> {
   constructor(
@@ -84,7 +75,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         );
       }
 
-      const googleResults = await this.searchOnGoogle(
+      const googleResults = await searchOnGoogle(
         query,
         context.env.SERP_API_KEY
       );
@@ -195,20 +186,10 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
     };
   }
 
-  private fetchHTML(url: string) {
-    return axios.get(url, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (X11; Linux x86_64; rv:107.0) Gecko/20100101 Firefox/107.0",
-      },
-      timeout: FETCH_WEBPAGE_TIMEOUT,
-    });
-  }
-
   private async searchInPages(params: { urls: string[], query: string, context: AgentContext }) {
     const urlsContents = await Promise.all(params.urls.map(async url => {
       try {
-        const response = await this.processWebpage(url);
+        const response = await processWebpage(url);
         return {
           url,
           response
@@ -256,72 +237,5 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
       }));
 
     return otherResults.map(x => x.chunk)
-  }
-
-  private async processWebpage(url: string) {
-    const response = await this.fetchHTML(url);
-    const $ = load(response.data);
-
-    $('script').remove();
-    $('style').remove();
-    $('noscript').remove();
-    $('link').remove();
-    $('head').remove();
-    $('image').remove();
-    $('img').remove();
-
-    const html = $.html()
-
-    const turndownService = new TurndownService();
-    const markdownText = turndownService
-      .turndown(html)
-      .split("\n")
-      .map(x => x.trim())
-      .join("\n")
-      .replaceAll("\n", "  ")
-
-    return markdownText
-  }
-
-  private async searchOnGoogle(query: string, apiKey: string, maxResults = 10) {
-    const axiosClient = axios.create({
-      baseURL: "https://serpapi.com",
-    });
-
-    const searchQuery = encodeURI(query);
-    const urlParams = new URLSearchParams({
-      engine: "google",
-      q: searchQuery,
-      location_requested: "United States",
-      location_used: "United States",
-      google_domain: "google.com",
-      hl: "en",
-      gl: "us",
-      device: "desktop",
-      api_key: apiKey,
-    });
-
-    const { data } = await axiosClient.get<{
-      organic_results: {
-        title: string;
-        link: string;
-        snippet: string;
-        snippet_highlighted_words: string[];
-      }[];
-    }>(`/search?${urlParams.toString()}`, {
-      headers: {
-        Accept: "application/json",
-      },
-    });
-
-    const result = data.organic_results
-      .map((result) => ({
-        title: result.title ?? "",
-        url: result.link ?? "",
-        description: result.snippet ?? "",
-        trustedSource: TRUSTED_SOURCES.some(x => result.link.includes(x))
-      }));
-
-    return result.slice(0, maxResults);
   }
 }
