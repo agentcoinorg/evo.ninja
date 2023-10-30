@@ -12,7 +12,9 @@ import {
   agentFunctionBaseToAgentFunction,
   OpenAIEmbeddingAPI,
   Chat,
-  executeAgentFunction
+  executeAgentFunction,
+  FunctionDefinition,
+  AgentFunction
 } from "@evo-ninja/agent-utils";
 import { ResultErr } from "@polywrap/result";
 import { AgentConfig } from "./AgentConfig";
@@ -38,19 +40,11 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
   public async* run(
     args: TRunArgs,
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
-    return yield* this.runWithChat([
-      // Add an extra prompt informing agent about variable usage
-      {
-        role: "system",
-        content: `Variables are annotated using the \${variable-name} syntax. Variables can be used as function argument using the \${variable-name} syntax. Variables are created as needed, and do not exist unless otherwise stated.`
-      },
-      ...this.config.prompts.initialMessages(args)
-    ]);
+    this.initializeChat(args);
+    return yield* this.runWithChat();
   }
 
-  public async* runWithChat(
-    messages: ChatMessage[],
-  ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
+  public async* runWithChat(): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
     if (this.config.timeout) {
       setTimeout(
@@ -59,10 +53,6 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
       );
     }
     try {
-      for (const message of messages) {
-        chat.persistent(message);
-      }
-
       // Add functions to chat
       this.config.functions.forEach((fn) => {
         chat.addFunction(fn.getDefinition());
@@ -74,12 +64,12 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
 
       return yield* basicFunctionCallLoop(
         this.context,
-        this.config.functions.map(agentFunctionBaseToAgentFunction(this)),
         (functionCalled: ExecuteAgentFunctionCalled) => {
           return this.config.shouldTerminate(functionCalled);
         },
         this.config.prompts.loopPreventionPrompt,
-        this.config.prompts.agentSpeakPrompt
+        this.config.prompts.agentSpeakPrompt,
+        this.beforeLlmResponse.bind(this)
       );
     } catch (err) {
       this.context.logger.error(err);
@@ -130,5 +120,21 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
     );
 
     return (await embeddingApi.createEmbeddings(text))[0].embedding;
+  }
+
+  protected initializeChat(args: TRunArgs) {
+    this.context.chat.persistent("system", `Variables are annotated using the \${variable-name} syntax. Variables can be used as function argument using the \${variable-name} syntax. Variables are created as needed, and do not exist unless otherwise stated.`);
+    
+    for (const message of this.config.prompts.initialMessages(args)) {
+      this.context.chat.persistent(message.role, message.content ?? "");
+    }
+  }
+
+  protected async beforeLlmResponse(): Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[]}> {
+    return {
+      logs: this.context.chat.chatLogs,
+      agentFunctions: this.config.functions.map(x => x.getDefinition()),
+      allFunctions: this.config.functions.map(agentFunctionBaseToAgentFunction(this))
+    }
   }
 }
