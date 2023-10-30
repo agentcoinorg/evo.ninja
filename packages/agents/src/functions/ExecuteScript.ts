@@ -1,8 +1,8 @@
 import {  AgentFunctionResult, AgentOutputType, AgentVariables, ChatMessageBuilder, JsEngine, JsEngine_GlobalVar, shimCode, trimText } from "@evo-ninja/agent-utils";
 import JSON5 from "json5";
-import { AgentFunctionBase } from "../AgentFunctionBase";
+import { AgentFunctionBase } from "./utils";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
-import { Agent } from "../Agent";
+import { Agent } from "../agents/utils";
 
 interface ExecuteScriptFuncParameters { 
   namespace: string;

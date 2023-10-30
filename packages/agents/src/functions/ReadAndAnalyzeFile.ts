@@ -1,6 +1,6 @@
 import { AnalyzeDataFunction } from "./AnalyzeData";
-import { AgentFunctionBase } from "../AgentFunctionBase";
-import { Agent } from "../Agent";
+import { AgentFunctionBase } from "./utils";
+import { Agent } from "../agents/utils";
 import { AgentFunctionResult, ChatMessageBuilder } from "@evo-ninja/agent-utils";
 
 interface ReadAndAnalyzeFileParameters {

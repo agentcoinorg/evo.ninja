@@ -1,34 +1,33 @@
-import { RunResult } from "./RunnableAgent";
-import { AgentOutput, AgentOutputType } from "./AgentOutput";
-import { AgentFunction } from "./AgentFunction";
-import {
-  ExecuteAgentFunctionCalled,
-  ExecuteAgentFunctionResult,
-  executeAgentFunction,
-  processFunctionAndArgs
-} from "./processFunctionArgs";
-import { Chat, ChatMessage, LlmApi } from "../llm";
-
 import { ResultErr, ResultOk } from "@polywrap/result";
+import { ChatLogs, FunctionDefinition, Chat, ChatMessage } from "../llm";
+import { AgentFunction } from "./AgentFunction";
+import { AgentOutput, AgentOutputType } from "./AgentOutput";
+import { RunResult } from "./RunnableAgent";
+import { ExecuteAgentFunctionCalled, ExecuteAgentFunctionResult, processFunctionAndArgs, executeAgentFunction } from "./processFunctionArgs";
 import { AGENT_SPEAK_RESPONSE } from "./prompts";
-import {AgentVariables} from "./AgentVariables";
+import { AgentContext } from "./AgentContext";
 
-export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, chat: Chat, variables: AgentVariables }>(
-  context: TContext,
-  agentFunctions: AgentFunction<TContext>[],
+export async function* basicFunctionCallLoop(
+  context: AgentContext,
   shouldTerminate: (
     functionCalled: ExecuteAgentFunctionCalled,
     result: ExecuteAgentFunctionResult["result"]
   ) => boolean,
   loopPreventionPrompt: string,
-  agentSpeakPrompt: string = AGENT_SPEAK_RESPONSE
+  agentSpeakPrompt: string = AGENT_SPEAK_RESPONSE,
+  beforeLlmResponse: () => Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[], finalOutput?: AgentOutput }>,
 ): AsyncGenerator<AgentOutput, RunResult, string | undefined>
 {
   const { llm, chat } = context;
 
   while (true) {
-    const functionDefinitions = agentFunctions.map(f => f.definition);
-    const response = await llm.getResponse(chat.chatLogs, functionDefinitions);
+    const { logs, agentFunctions, allFunctions, finalOutput } = await beforeLlmResponse();
+
+    if (finalOutput) {
+      return ResultOk(finalOutput);
+    }
+
+    const response = await llm.getResponse(logs, agentFunctions);
 
     if (!response) {
       return ResultErr("No response from LLM.");
@@ -37,7 +36,7 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
     if (response.function_call) {
       const { name, arguments: args } = response.function_call;
 
-      const sanitizedFunctionAndArgs = processFunctionAndArgs(name, args, agentFunctions, context.variables)
+      const sanitizedFunctionAndArgs = processFunctionAndArgs(name, args, allFunctions, context.variables)
       if (!sanitizedFunctionAndArgs.ok) {
         chat.temporary(response);
         chat.temporary("system", sanitizedFunctionAndArgs.error);
@@ -46,6 +45,18 @@ export async function* basicFunctionCallLoop<TContext extends { llm: LlmApi, cha
       }
 
       const { result, functionCalled } = await executeAgentFunction(sanitizedFunctionAndArgs.value, args, context)
+
+      // Save large results as variables
+      for (const message of result.messages) {
+        if (message.role !== "function") {
+          continue;
+        }
+        const functionResult = message.content || "";
+        if (result.storeInVariable || context.variables.shouldSave(functionResult)) {
+          const varName = context.variables.save(name || "", functionResult);
+          message.content = `\${${varName}}`;
+        }
+      }
 
       result.messages.forEach(x => chat.temporary(x));
       const terminate = functionCalled && shouldTerminate(functionCalled, result);

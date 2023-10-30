@@ -1,7 +1,7 @@
 import { AgentFunctionResult, ChatMessageBuilder, LlmApi, Tokenizer } from "@evo-ninja/agent-utils";
 import { DirectoryChunker } from "@evo-ninja/agent-utils";
-import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
-import { Agent } from "../Agent";
+import { Agent } from "../agents/utils";
+import { LlmAgentFunctionBase } from "./utils";
 
 interface SummarizeDirectoryParameters {
   subDirectory?: string;

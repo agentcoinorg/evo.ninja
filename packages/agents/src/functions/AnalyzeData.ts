@@ -1,7 +1,6 @@
 import { AgentFunctionResult, ChatMessageBuilder, LlmApi, Tokenizer, CsvChunker, Rag, AgentContext, ArrayRecombiner } from "@evo-ninja/agent-utils";
-import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
-import { Agent } from "../Agent";
-import { Prompt } from "../agents/Chameleon/Prompt";
+import { LlmAgentFunctionBase } from "./utils";
+import { Agent, Prompt } from "../agents/utils";
 
 interface AnalyzeDataParameters {
   data: string;
@@ -52,12 +51,15 @@ export class AnalyzeDataFunction extends LlmAgentFunctionBase<AnalyzeDataParamet
       prompt = prompt.line(`Chunk #${i}`).block(chunk);
     }
 
-    prompt = prompt.line(`
-      Consider the above chunks of CSV data.
-      Detail any column names & data formats used.
-      Summarize the semantic meaning of the chunks.
-      Tailor your response to the following question:
-    `).line(params.question).line("BE VERY TERSE IN YOUR RESPONSE.");
+    prompt = prompt
+      .line(`
+        Consider the above chunks of CSV data.
+        Detail any column names & data formats used.
+        Summarize the semantic meaning of the chunks.
+        Tailor your response to the following question:
+      `)
+      .line(params.question)
+      .line("BE VERY TERSE IN YOUR RESPONSE.");
 
     return await this.askLlm(prompt.toString(), {
       model: "gpt-3.5-turbo-16k-0613",

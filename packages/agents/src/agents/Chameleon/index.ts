@@ -14,16 +14,12 @@ import {
   Rag,
   AgentOutput
 } from "@evo-ninja/agent-utils";
-import { Agent } from "../../Agent";
 import { AgentContext } from "@evo-ninja/agent-utils";
 import { agentPrompts, prompts } from "./prompts";
-import { GoalRunArgs } from "../../Agent";
-import { AgentConfig } from "../../AgentConfig";
-import { Prompt } from "./Prompt";
-import { NewAgent } from "./NewAgent";
+import { Agent, AgentConfig, GoalRunArgs, Prompt } from "../../agents/utils";
 import { findBestAgent } from "./findBestAgent";
 
-export class ChameleonAgent extends NewAgent<GoalRunArgs> {
+export class ChameleonAgent extends Agent<GoalRunArgs> {
   private _cChat: ContextualizedChat;
   private _chunker: MessageChunker;
   private previousPrediction: string | undefined;

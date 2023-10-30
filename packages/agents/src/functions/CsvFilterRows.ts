@@ -1,4 +1,4 @@
-import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
+import { ScriptFunction } from "./utils";
 
 export class CsvFilterRowsFunction extends ScriptFunction<{ csv: string, columnName: string, filterValue: string }> {
   name: string = "csv_filterRows";

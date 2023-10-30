@@ -1,4 +1,4 @@
-import { ChameleonAgent, GoalRunArgs } from "@evo-ninja/agents";
+import { ChameleonAgent } from "@evo-ninja/agents";
 import {
   Env,
   OpenAI,
@@ -15,6 +15,7 @@ import {
   RunnableAgent,
   LlmModel,
   AgentContext,
+  SubWorkspace,
 } from "@evo-ninja/agent-utils";
 import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
 import { FileSystemWorkspace, FileLogger } from "@evo-ninja/agent-utils-fs";
@@ -23,6 +24,7 @@ import readline from "readline";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import { readFileSync } from "fs-extra";
+import { GoalRunArgs } from "@evo-ninja/agents/build/agents/utils";
 
 dotenv.config({
   path: path.join(__dirname, "../../../.env"),
@@ -86,10 +88,11 @@ export function createApp(config?: AppConfig): App {
     new FileSystemWorkspace(workspacePath);
 
   // Internals Workspace (.evo directory)
-  const internals = new FileSystemWorkspace(
+  const internals = new SubWorkspace(
     config?.customWorkspace ?
-      path.join(config.customWorkspace.path, ".evo") :
-      path.join(workspacePath, ".evo")
+    path.join(config.customWorkspace.path, ".evo") :
+    path.join(workspacePath, ".evo"), 
+    userWorkspace
   );
 
   // Chat Log File

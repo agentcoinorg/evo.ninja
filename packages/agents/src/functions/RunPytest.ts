@@ -4,8 +4,8 @@ import {
   AgentOutputType,
   ChatMessageBuilder,
 } from "@evo-ninja/agent-utils";
-import { AgentFunctionBase } from "../AgentFunctionBase";
-import { Agent } from "../Agent";
+import { AgentFunctionBase } from "./utils";
+import { Agent } from "../agents/utils";
 
 interface FunctionParams {
   filename: string;

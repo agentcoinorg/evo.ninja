@@ -1,9 +1,9 @@
 import { ReadDirectoryFunction } from "./ReadDirectory";
 import { ReadAndAnalyzeCSVDataFunction } from "./ReadAndAnalyzeCSVData";
-import { AgentFunctionBase } from "../AgentFunctionBase";
 import { CsvJoinableColumnsFunction } from "./CsvJoinableColumns";
-import { Agent } from "../Agent";
 import { AgentFunctionResult, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+import { Agent } from "../agents/utils";
+import { AgentFunctionBase } from "./utils";
 
 interface UnderstandDataParameters {
   goal: string;
