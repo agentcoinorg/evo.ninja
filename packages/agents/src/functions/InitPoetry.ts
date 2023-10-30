@@ -7,7 +7,7 @@ import {
 } from "@evo-ninja/agent-utils";
 import { AgentFunctionBase } from "./utils";
 import { FUNCTION_CALL_SUCCESS_CONTENT, FUNCTION_CALL_FAILED} from "../agents/Scripter/utils";
-import path from "path";
+import path from "path-browserify";
 import { Agent } from "../agents/utils";
 
 interface InitPoetryFuncParameters {}
