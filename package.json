@@ -22,7 +22,7 @@
     "build:agent-utils-fs": "yarn workspace @evo-ninja/agent-utils-fs run build",
     "build:agent-debug": "yarn workspace @evo-ninja/agent-debug run build",
     "build:agents": "yarn workspace @evo-ninja/agents run build",
-    "build:cli": "yarn workspace evo-ninja run build",
+    "build:cli": "yarn workspace evo-ninja run build && yarn workspace @evo-ninja/playground run build",
     "build:browser": "yarn workspace @evo-ninja/ui run build"
   },
   "devDependencies": {
