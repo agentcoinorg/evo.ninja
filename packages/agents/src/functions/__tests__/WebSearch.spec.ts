@@ -17,7 +17,7 @@ import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import { AgentContext } from "@evo-ninja/agent-utils";
 import { WebSearchFuncParameters, WebSearchFunction } from "../WebSearch";
 import { LlmModel } from "@evo-ninja/agent-utils";
-import { ResearcherAgent } from "../../scriptedAgents";
+import { ResearcherAgent } from "../../agents";
 
 const rootDir = path.join(__dirname, "../../../../../");
 

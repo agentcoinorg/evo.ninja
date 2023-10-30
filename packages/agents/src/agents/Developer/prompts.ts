@@ -1,5 +1,5 @@
 import { ChatMessage } from "@evo-ninja/agent-utils";
-import { AgentPrompts, GoalRunArgs } from "../../agents/utils";
+import { AgentPrompts, GoalRunArgs } from "../utils";
 
 export const prompts = (): AgentPrompts<GoalRunArgs> => ({
   name: "Developer",
