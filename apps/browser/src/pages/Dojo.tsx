@@ -16,6 +16,7 @@ import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
 import { onGoalAchievedScript, onGoalFailedScript, speakScript } from '../scripts';
 import { AgentContext } from '@evo-ninja/agent-utils';
 import { Evo } from '@evo-ninja/agents';
+import { SubWorkspace } from '@evo-ninja/agent-utils';
 
 
 function addScript(script: {name: string, definition: string, code: string}, scriptsWorkspace: EvoCore.Workspace) {
@@ -189,8 +190,7 @@ function Dojo() {
       const userWorkspace = new EvoCore.InMemoryWorkspace();
       setUserWorkspace(userWorkspace);
 
-      // Internals Workspace (.evo directory)
-      const internals = new EvoCore.InMemoryWorkspace(".evo");
+      const internals = new SubWorkspace(".evo", userWorkspace);
       
       const chat = new EvoCore.Chat(
         cl100k_base,
