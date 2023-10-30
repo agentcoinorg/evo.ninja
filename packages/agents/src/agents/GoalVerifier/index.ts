@@ -3,7 +3,7 @@ import { ReadFileFunction } from "../../functions/ReadFile";
 import { AgentContext } from "@evo-ninja/agent-utils";
 import { prompts } from "./prompts";
 import { ChatMessage } from "@evo-ninja/agent-utils";
-import { Agent, AgentConfig } from "../../agents/utils";
+import { Agent, AgentConfig } from "../utils";
 
 export interface GoalVerifierRunArgs {
   messagesToVerify: ChatMessage[]

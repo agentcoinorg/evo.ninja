@@ -6,7 +6,7 @@ import { ReadFileFunction } from "../../functions/ReadFile";
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { ScrapeTableFunction } from "../../functions/ScrapeTable";
 import { ScrapeTextFunction } from "../../functions/ScrapeText";
-import { Agent, AgentConfig, GoalRunArgs } from "../../agents/utils";
+import { Agent, AgentConfig, GoalRunArgs } from "../utils";
 
 export class ResearcherAgent extends Agent {
   private plan: PlanWebResearchFunction;
