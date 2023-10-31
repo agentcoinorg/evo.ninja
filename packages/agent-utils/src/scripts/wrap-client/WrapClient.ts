@@ -255,23 +255,4 @@ export class WrapClient extends PolywrapClient {
 
     super(builder.build());
   }
-
-  async invoke<TData = unknown, TUri extends Uri | string = string>(options: InvokerOptions<TUri>): Promise<InvokeResult<TData>> {
-    // measure time
-    const start = Date.now();
-
-    const result = await super.invoke<TData>(options as any);
-
-    // log invocation
-
-    const time = Date.now() - start;
-
-    const uri = typeof options.uri === "string" ? options.uri : options.uri.toString();
-
-    const logMessage = `INVOKED ${uri} (${time}ms)`;
-
-    console.log(logMessage);
-
-    return result;
-  }
 }
