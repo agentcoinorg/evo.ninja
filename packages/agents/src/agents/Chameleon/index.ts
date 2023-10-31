@@ -97,7 +97,8 @@ export class ChameleonAgent extends Agent<GoalRunArgs> {
 
     this.previousPrediction = prediction;
     this.previousAgent = agent;
-
+    console.log("Prediction: ", prediction);
+    
     const contextualizedChat = await this.contextualizeChat(
       await this.createEmbeddingVector(`${persona}\n${prediction}`)
     );
