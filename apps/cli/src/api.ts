@@ -50,10 +50,7 @@ async function taskHandler(
   );
   const app = createApp({
     rootDir,
-    customWorkspace: {
-      workspace: customWorkspace,
-      path: customWorkspacePath
-    },
+    customWorkspace,
     sessionName: id,
     debug: true,
   });
@@ -82,8 +79,7 @@ async function taskHandler(
         ? response.value.message
         : "No Message";
 
-    customWorkspace.writeArtifacts();
-    const artifacts = customWorkspace.getArtifacts();
+    const artifacts = customWorkspace.artifacts
     customWorkspace.cleanArtifacts();
 
     if (response.done) {
