@@ -5,7 +5,8 @@
   "main": "./build/index.js",
   "scripts": {
     "build": "rimraf build && tsc",
-    "test": "jest --runInBand --verbose --rootDir . --config ../../jest.config.js"
+    "test": "jest --runInBand --verbose --rootDir . --config ../../jest.config.js",
+    "lint": "eslint --color -c ../../.eslintrc.js src/"
   },
   "_moduleAliases": {
     "@/agent-core": "build/agent-core"
