@@ -9,7 +9,8 @@
     "codegen:shims": "rollup -c",
     "codegen:js-engine": "polywrap codegen -m ./src/scripts/js-engine/polywrap.yaml --codegen-dir ./src/scripts/js-engine/types",
     "codegen:agent-plugin": "polywrap codegen -m ./src/scripts/agent-plugin/polywrap.yaml --codegen-dir ./src/scripts/agent-plugin/types",
-    "test": "jest --runInBand --verbose --rootDir . --config ../../jest.config.js"
+    "test": "jest --runInBand --verbose --rootDir . --config ../../jest.config.js",
+    "lint": "eslint --color -c ../../.eslintrc.js src/"
   },
   "dependencies": {
     "@polywrap/client-js": "~0.12.0",

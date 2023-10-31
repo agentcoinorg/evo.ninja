@@ -4,7 +4,8 @@
   "license": "MIT",
   "main": "./build/index.js",
   "scripts": {
-    "build": "rimraf build && tsc"
+    "build": "rimraf build && tsc",
+    "lint": "eslint --color -c ../../.eslintrc.js src/"
   },
   "dependencies": {
     "@evo-ninja/agent-utils": "~0.1.0"

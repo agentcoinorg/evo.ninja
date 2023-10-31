@@ -4,7 +4,7 @@
   "workspaces": {
     "packages": [
       "packages/*",
-      "apps/*"
+      "apps/cli/*"
     ],
     "nohoist": ["gpt-tokenizer"]
   },
@@ -14,18 +14,24 @@
   "scripts": {
     "reset": "yarn clean && yarn && yarn build",
     "clean": "npx rimraf ./node_modules ./*/**/node_modules ./*/**/yarn.lock ./*/**/build",
+    "build": "npx turbo build",
+    "build:browser": "yarn workspace @evo-ninja/ui run build",
     "start": "yarn workspace evo-ninja run start",
     "start:browser": "yarn workspace @evo-ninja/ui run start",
     "start:api": "yarn workspace evo-ninja run start:api",
-    "build": "yarn build:agent-utils && yarn build:agent-debug && yarn build:agents && yarn build:cli",
-    "build:agent-utils": "yarn workspace @evo-ninja/agent-utils run build && yarn build:agent-utils-fs",
-    "build:agent-utils-fs": "yarn workspace @evo-ninja/agent-utils-fs run build",
-    "build:agent-debug": "yarn workspace @evo-ninja/agent-debug run build",
-    "build:agents": "yarn workspace @evo-ninja/agents run build",
-    "build:cli": "yarn workspace evo-ninja run build",
-    "build:browser": "yarn workspace @evo-ninja/ui run build"
+    "lint": "npx turbo lint",
+    "lint:fix": "npx turbo lint -- --fix"
   },
   "devDependencies": {
-    "rimraf": "~5.0.1"
+    "@typescript-eslint/eslint-plugin": "4.11.1",
+    "@typescript-eslint/parser": "4.11.1",
+    "eslint": "7.16.0",
+    "eslint-config-prettier": "7.1.0",
+    "eslint-plugin-import": "2.22.1",
+    "eslint-plugin-json": "3.0.0",
+    "eslint-plugin-prettier": "3.4.0",
+    "prettier": "2.2.1",
+    "rimraf": "~5.0.1",
+    "turbo": "1.10.16"
   }
 }

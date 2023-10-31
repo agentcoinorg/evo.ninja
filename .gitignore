@@ -9,6 +9,7 @@ chats
 .logs
 .tests
 db
+.turbo
 
 !/benchmarks/agbenchmark_config/config.json
 /benchmarks/agbenchmark_config
