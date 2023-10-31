@@ -9,7 +9,7 @@ export class InMemoryWorkspace implements Workspace {
   }
 
   mkdirSync(subpath: string, opt: { recursive: boolean } = { recursive: false }): void {
-    const path = subpath.split("/");
+    const path = this.toWorkspacePathSegments(subpath);
 
     if (opt.recursive) {
       let currentDir = this.root;
@@ -30,7 +30,7 @@ export class InMemoryWorkspace implements Workspace {
   }
 
   rmdirSync(subpath: string, opt: { recursive: boolean }): void {
-    const path = subpath.split("/");
+    const path = this.toWorkspacePathSegments(subpath);
     const [parentDir, dirName] = this.navigateToPath(path);
     const dir = parentDir.getDirectory(dirName);
     if (!dir) {
@@ -45,7 +45,7 @@ export class InMemoryWorkspace implements Workspace {
   }
 
   readdirSync(subpath: string): DirectoryEntry[] {
-    const path = subpath.split("/");
+    const path = this.toWorkspacePathSegments(subpath);
     let currentDir: InMemoryDir;
 
     if (path.length === 1 && path[0] === "") {
@@ -68,13 +68,13 @@ export class InMemoryWorkspace implements Workspace {
   }
 
   writeFileSync(filePath: string, data: string): void {
-    const path = filePath.split("/");
+    const path = this.toWorkspacePathSegments(filePath);
     const [parentDir, fileName] = this.navigateToPath(path);
     parentDir.addEntry(new InMemoryFile(fileName, data));
   }
 
   readFileSync(filePath: string): string {
-    const path = filePath.split("/");
+    const path = this.toWorkspacePathSegments(filePath);
     const [parentDir, fileName] = this.navigateToPath(path);
     const file = parentDir.getFile(fileName);
     if (!file) {
@@ -84,7 +84,7 @@ export class InMemoryWorkspace implements Workspace {
   }
 
   rmSync(filePath: string): void {
-    const path = filePath.split("/");
+    const path = this.toWorkspacePathSegments(filePath);
     const [parentDir, fileName] = this.navigateToPath(path);
     const file = parentDir.getFile(fileName);
     if (!file) {
@@ -95,7 +95,7 @@ export class InMemoryWorkspace implements Workspace {
 
   existsSync(pathStr: string): boolean {
     try {
-      const path = pathStr.split("/");
+      const path = this.toWorkspacePathSegments(pathStr);
       const [parentDir, name] = this.navigateToPath(path);
       return parentDir.getFile(name) !== undefined || parentDir.getDirectory(name) !== undefined;
     } catch (error) {
@@ -104,10 +104,10 @@ export class InMemoryWorkspace implements Workspace {
   }
 
   renameSync(oldPath: string, newPath: string): void {
-    const oldPathSegments = oldPath.split("/");
+    const oldPathSegments = this.toWorkspacePathSegments(oldPath);
     const [oldParentDir, oldName] = this.navigateToPath(oldPathSegments);
 
-    const newPathSegments = newPath.split("/");
+    const newPathSegments = this.toWorkspacePathSegments(newPath);
     const [newParentDir, newName] = this.navigateToPath(newPathSegments);
 
     const item = oldParentDir.getFile(oldName) || oldParentDir.getDirectory(oldName);
@@ -125,7 +125,7 @@ export class InMemoryWorkspace implements Workspace {
   }
 
   appendFileSync(subpath: string, data: string): void {
-    const pathSegments = subpath.split("/");
+    const pathSegments = this.toWorkspacePathSegments(subpath);
     const [parentDir, fileName] = this.navigateToPath(pathSegments);
     
     let file = parentDir.getFile(fileName);
@@ -138,19 +138,29 @@ export class InMemoryWorkspace implements Workspace {
     }
   }
 
-  private navigateToPath(path: string[]): [InMemoryDir, string] {
+  private navigateToPath(pathSegments: string[]): [InMemoryDir, string] {
     let currentDir = this.root;
-    for (let i = 0; i < path.length - 1; i++) {
-      if (path[i] === "." || path[i] === "./") {
+    for (let i = 0; i < pathSegments.length - 1; i++) {
+      if (pathSegments[i] === "") {
         continue;
       }
-      const nextDir = currentDir.getDirectory(path[i]);
+      const nextDir = currentDir.getDirectory(pathSegments[i]);
       if (!nextDir) {
-        throw new Error(`Path not found: ${path.slice(0, i + 1).join("/")}`);
+        throw new Error(`Path not found: ${pathSegments.slice(0, i + 1).join("/")}`);
       }
       currentDir = nextDir;
     }
-    return [currentDir, path[path.length - 1]];
+    return [currentDir, pathSegments[pathSegments.length - 1]];
+  }
+
+  private toWorkspacePath(subpath: string): string {
+    return path.resolve("/", subpath);
+  }
+
+  private toWorkspacePathSegments(subpath: string): string[] {
+    return this.toWorkspacePath(subpath)
+      .split("/")
+      .slice(1);
   }
 }
 
