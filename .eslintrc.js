@@ -10,7 +10,7 @@ module.exports = {
       files: ["*.ts"],
       parser: "@typescript-eslint/parser",
       parserOptions: {
-        project: ["tsconfig.json", "./packages/**/tsconfig.json"],
+        project: ["tsconfig.json", "./packages/**/tsconfig.json"]
       },
       plugins: [
         "eslint-plugin-import",
@@ -37,8 +37,6 @@ module.exports = {
             ],
             format: ["camelCase"], leadingUnderscore: "allow"
           },
-          //wrap host methods doesn't satisfy neither camel or snake
-          {selector: ["objectLiteralMethod", "typeMethod"], filter: {regex: "^_wrap_.*", match: true}, format: null},
           //variable must be in camel or upper case
           {selector: "variable", format: ["camelCase", "UPPER_CASE"], leadingUnderscore: "allow"},
           //classes and types must be in PascalCase
@@ -67,33 +65,6 @@ module.exports = {
           }
         ],
         "@typescript-eslint/explicit-module-boundary-types": "error",
-        "@typescript-eslint/member-ordering": [
-          "error", {
-            classes: {
-              order: "as-written",
-              memberTypes: [
-                // Constructors
-                "public-constructor",
-                "protected-constructor",
-                "private-constructor",
-
-                // Methods
-                "public-static-method",
-                "public-abstract-method",
-                "public-instance-method",
-                "public-decorated-method",
-                "protected-static-method",
-                "protected-abstract-method",
-                "protected-instance-method",
-                "protected-decorated-method",
-                "private-static-method",
-                "private-abstract-method",
-                "private-instance-method",
-                "private-decorated-method",
-              ],
-            },
-          },
-        ],
         "@typescript-eslint/no-explicit-any": "error",
         "@typescript-eslint/no-require-imports": "error",
         "@typescript-eslint/no-unused-vars": ["error", {
