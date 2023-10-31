@@ -53,10 +53,7 @@ export interface AppConfig {
   rootDir?: string;
   debug?: boolean;
   messagesPath?: string;
-  customWorkspace?: {
-    path: string;
-    workspace: Workspace;
-  }
+  customWorkspace?: Workspace;
 }
 
 const getMessagesFromPath = (path: string): { type: ChatLogType, msgs: ChatMessage[]}[] => {
@@ -79,24 +76,15 @@ export function createApp(config?: AppConfig): App {
   }-${date.getDate()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`;
   const sessionName = config?.sessionName ?? defaultSessionName;
   const env = new Env(process.env as Record<string, string>);
-  const workspacePath = path.join(rootDir, "sessions", sessionName);
+  const sessionPath = path.join(rootDir, "sessions", sessionName);
 
   // User Workspace
-  const userWorkspace =
-    config?.customWorkspace ?
-    config.customWorkspace.workspace :
-    new FileSystemWorkspace(workspacePath);
+  const userWorkspace = config?.customWorkspace ?? new FileSystemWorkspace(sessionPath);
 
   // Internals Workspace (.evo directory)
-  const internals = new SubWorkspace(
-    config?.customWorkspace ?
-    path.join(config.customWorkspace.path, ".evo") :
-    path.join(workspacePath, ".evo"), 
-    userWorkspace
-  );
+  const internals = new SubWorkspace(".evo", userWorkspace);
 
   // Chat Log File
-  // TODO: simply pass the workspace to the file logger
   const fileLogger = new FileLogger("chat.md", internals);
 
   // Logger
