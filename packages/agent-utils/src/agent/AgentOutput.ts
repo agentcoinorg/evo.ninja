@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 export const AgentOutputType = {
   Success: "success",
   Error: "error",
@@ -6,7 +7,8 @@ export const AgentOutputType = {
   Message: "message",
 } as const;
 
-export type AgentOutputType = typeof AgentOutputType[keyof typeof AgentOutputType];
+export type AgentOutputType =
+  (typeof AgentOutputType)[keyof typeof AgentOutputType];
 
 export interface AgentOutput {
   type: AgentOutputType;

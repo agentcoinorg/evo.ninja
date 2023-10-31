@@ -1,5 +1,6 @@
 import { LlmApi, LlmOptions, ChatLogs, ChatMessage, LlmModel } from ".";
 import { Logger } from "../";
+import { cleanOpenAIError } from "../utils/openai";
 
 import {
   ChatCompletionRequestMessage,
@@ -9,11 +10,10 @@ import {
   OpenAIApi,
   ChatCompletionFunctions,
 } from "openai";
-import { cleanOpenAIError } from "../utils/openai";
 
 export {
   ChatCompletionResponseMessage as OpenAIResponse,
-  ChatCompletionRequestMessageFunctionCall as OpenAIFunctionCall
+  ChatCompletionRequestMessageFunctionCall as OpenAIFunctionCall,
 };
 
 interface OpenAIError {
@@ -37,7 +37,7 @@ export class OpenAI implements LlmApi {
     private _maxRateLimitRetries: number = 5
   ) {
     this._configuration = new Configuration({
-    apiKey: this._apiKey
+      apiKey: this._apiKey,
     });
     this._api = new OpenAIApi(this._configuration);
   }
@@ -66,7 +66,7 @@ export class OpenAI implements LlmApi {
         functions: functionDefinitions,
         temperature: options?.temperature || 0,
         max_tokens: options?.max_tokens || this._defaultMaxResponseTokens,
-        model: options?.model || this._defaultModel
+        model: options?.model || this._defaultModel,
       });
 
       if (completion.data.choices.length < 1) {
@@ -77,7 +77,11 @@ export class OpenAI implements LlmApi {
 
       if (!choice.message) {
         throw Error(
-          `Chat completion message was undefined: ${JSON.stringify(choice, null, 2)}`
+          `Chat completion message was undefined: ${JSON.stringify(
+            choice,
+            null,
+            2
+          )}`
         );
       }
 
@@ -91,7 +95,9 @@ export class OpenAI implements LlmApi {
 
         // If a rate limit error is thrown
         if (maybeOpenAiError.status === 429) {
-          this._logger.warning("Warning: OpenAI rate limit exceeded, sleeping for 15 seconds.");
+          this._logger.warning(
+            "Warning: OpenAI rate limit exceeded, sleeping for 15 seconds."
+          );
 
           // Try again after a short sleep
           await new Promise((resolve) => setTimeout(resolve, 15000));
@@ -111,18 +117,20 @@ export class OpenAI implements LlmApi {
     }
   }
 
-  private _createChatCompletion(options: {
-    messages: ChatCompletionRequestMessage[];
-    model?: LlmModel;
-    functions?: FunctionDefinition[];
-  } & LlmOptions) {
+  private _createChatCompletion(
+    options: {
+      messages: ChatCompletionRequestMessage[];
+      model?: LlmModel;
+      functions?: FunctionDefinition[];
+    } & LlmOptions
+  ) {
     return this._api.createChatCompletion({
       messages: options.messages,
       model: options.model || this._defaultModel,
       functions: options.functions,
       function_call: options.functions ? "auto" : undefined,
       temperature: options.temperature || 0,
-      max_tokens: options.max_tokens
+      max_tokens: options.max_tokens,
     });
   }
 }

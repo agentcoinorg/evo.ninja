@@ -1,13 +1,19 @@
 import { DebugLog } from "./DebugLog";
 import { Timer } from "./Timer";
 
-import { LlmApi, LlmOptions, ChatLogs, ChatMessage } from "@evo-ninja/agent-utils";
+import {
+  LlmApi,
+  LlmOptions,
+  ChatLogs,
+  ChatMessage,
+  FunctionDefinition,
+} from "@evo-ninja/agent-utils";
 
 export class DebugLlmApi implements LlmApi {
   constructor(
     public debugLog: DebugLog,
-    public llm: LlmApi,
-  ) { }
+    public llm: LlmApi
+  ) {}
 
   getMaxContextTokens(): number {
     return this.llm.getMaxContextTokens();
@@ -23,7 +29,7 @@ export class DebugLlmApi implements LlmApi {
 
   async getResponse(
     chatLogs: ChatLogs,
-    functionDefinitions: any[],
+    functionDefinitions: FunctionDefinition[],
     options?: LlmOptions | undefined
   ): Promise<ChatMessage | undefined> {
     const time = new Timer();
@@ -36,11 +42,7 @@ export class DebugLlmApi implements LlmApi {
     );
 
     time.end();
-    this.debugLog.stepLlmReq(
-      time,
-      chatLogs.clone(),
-      resp
-    );
+    this.debugLog.stepLlmReq(time, chatLogs.clone(), resp);
 
     return resp;
   }

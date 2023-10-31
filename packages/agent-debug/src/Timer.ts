@@ -18,7 +18,7 @@ export class Timer {
   duration(): number {
     const start = this._start;
     const end = this._end === 0 && this._start > 0 ? Date.now() : this._end;
-    return (end - start) + this._add;;
+    return end - start + this._add;
   }
 
   getHHMMSS(): string {

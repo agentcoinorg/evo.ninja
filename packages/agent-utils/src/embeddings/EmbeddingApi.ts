@@ -4,5 +4,7 @@ export interface EmbeddingCreationResult {
 }
 
 export interface EmbeddingApi {
-  createEmbeddings: (input: string | string[]) => Promise<EmbeddingCreationResult[]>
+  createEmbeddings: (
+    input: string | string[]
+  ) => Promise<EmbeddingCreationResult[]>;
 }

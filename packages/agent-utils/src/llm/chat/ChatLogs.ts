@@ -5,9 +5,7 @@ import { ChatCompletionRequestMessage as ChatMessage } from "openai";
 
 export { ChatMessage };
 
-export type ChatLogType =
-  | "persistent"
-  | "temporary";
+export type ChatLogType = "persistent" | "temporary";
 
 export interface ChatLog {
   tokens: number;
@@ -21,25 +19,29 @@ export interface ChatFunctions {
 
 export class ChatLogs {
   private _logs: Record<ChatLogType, ChatLog> = {
-    "persistent": {
+    persistent: {
       tokens: 0,
       msgs: [],
     },
-    "temporary": {
+    temporary: {
       tokens: 0,
       msgs: [],
     },
   };
   private _tokensPerMsg: Record<ChatLogType, number[]> = {
-    "persistent": [],
-    "temporary": []
+    persistent: [],
+    temporary: [],
   };
   private _functions: ChatFunctions = {
     tokens: 0,
-    definitions: []
+    definitions: [],
   };
 
-  constructor(logs?: Record<ChatLogType, ChatLog>, tokensPerMsg?: Record<ChatLogType, number[]>, functions?: ChatFunctions) {
+  constructor(
+    logs?: Record<ChatLogType, ChatLog>,
+    tokensPerMsg?: Record<ChatLogType, number[]>,
+    functions?: ChatFunctions
+  ) {
     if (logs) {
       this._logs = logs;
     }
@@ -52,16 +54,15 @@ export class ChatLogs {
   }
 
   get tokens(): number {
-    return this._logs["persistent"].tokens +
+    return (
+      this._logs["persistent"].tokens +
       this._logs["temporary"].tokens +
-      this._functions.tokens;
+      this._functions.tokens
+    );
   }
 
   get messages(): ChatMessage[] {
-    return [
-      ...this._logs["persistent"].msgs,
-      ...this._logs["temporary"].msgs
-    ];
+    return [...this._logs["persistent"].msgs, ...this._logs["temporary"].msgs];
   }
 
   public get(type: ChatLogType): ChatLog {
@@ -90,7 +91,12 @@ export class ChatLogs {
     this._logs[type].msgs.push(...msgs);
   }
 
-  public insert(type: ChatLogType, msgs: ChatMessage[], tokens: number[], index: number) {
+  public insert(
+    type: ChatLogType,
+    msgs: ChatMessage[],
+    tokens: number[],
+    index: number
+  ) {
     this._logs[type].tokens += tokens.reduce((acc, cur) => acc + cur, 0);
     this._tokensPerMsg[type].splice(index, 0, ...tokens);
     this._logs[type].msgs.splice(index, 0, ...msgs);
@@ -124,29 +130,38 @@ export class ChatLogs {
       msgs: this._logs,
       functions: {
         tokens: this._functions.tokens,
-        names: this._functions.definitions.map((d) => d.name)
-      }
+        names: this._functions.definitions.map((d) => d.name),
+      },
     };
   }
 
-  static from(persistentMsgs: ChatMessage[], temporaryMsgs: ChatMessage[], tokenizer: Tokenizer): ChatLogs {
-    const persistentTokens = persistentMsgs
-      .map(x => x.content ? tokenizer.encode(x.content).length : 0);
-    const temporaryTokens = persistentMsgs
-      .map(x => x.content ? tokenizer.encode(x.content).length : 0);
+  static from(
+    persistentMsgs: ChatMessage[],
+    temporaryMsgs: ChatMessage[],
+    tokenizer: Tokenizer
+  ): ChatLogs {
+    const persistentTokens = persistentMsgs.map((x) =>
+      x.content ? tokenizer.encode(x.content).length : 0
+    );
+    const temporaryTokens = persistentMsgs.map((x) =>
+      x.content ? tokenizer.encode(x.content).length : 0
+    );
 
-    return new ChatLogs({
-      "persistent": {
-        tokens: persistentTokens.reduce((a, b) => a + b, 0),
-        msgs: persistentMsgs
+    return new ChatLogs(
+      {
+        persistent: {
+          tokens: persistentTokens.reduce((a, b) => a + b, 0),
+          msgs: persistentMsgs,
+        },
+        temporary: {
+          tokens: temporaryTokens.reduce((a, b) => a + b, 0),
+          msgs: temporaryMsgs,
+        },
       },
-      "temporary": {
-        tokens: temporaryTokens.reduce((a, b) => a + b, 0),
-        msgs: temporaryMsgs
+      {
+        persistent: persistentTokens,
+        temporary: temporaryTokens,
       }
-    }, {
-      "persistent": persistentTokens,
-      "temporary": temporaryTokens
-    });
+    );
   }
 }

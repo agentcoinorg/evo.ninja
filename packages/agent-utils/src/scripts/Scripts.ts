@@ -14,7 +14,7 @@ export class Scripts {
   constructor(
     private _workspace: Workspace,
     private _directory?: string
-  ) { }
+  ) {}
 
   static searchScripts(query: string, scripts: Script[]): Script[] {
     const fuse = new Fuse(scripts, {
@@ -22,18 +22,18 @@ export class Scripts {
       threshold: 0.4,
       isCaseSensitive: false,
       shouldSort: true,
-      keys: [
-        "name",
-        "description"
-      ]
+      keys: ["name", "description"],
     });
 
-    return Array.from(new Set(
-      query.split(" ")
-      .map((q) => fuse.search(q))
-      .flat()
-      .map((x) => x.item)
-    ));
+    return Array.from(
+      new Set(
+        query
+          .split(" ")
+          .map((q) => fuse.search(q))
+          .flat()
+          .map((x) => x.item)
+      )
+    );
   }
 
   searchAllScripts(query: string): Script[] {
@@ -42,8 +42,11 @@ export class Scripts {
 
   getAllScripts(): Script[] {
     const ops: Script[] = [];
-    this._workspace.readdirSync(this._toSubpath(""))
-      .filter(file => file.type === "file" && path.extname(file.name) === ".json")
+    this._workspace
+      .readdirSync(this._toSubpath(""))
+      .filter(
+        (file) => file.type === "file" && path.extname(file.name) === ".json"
+      )
       .map((file) => file.name)
       .forEach((file) => {
         const script = JSON.parse(
@@ -65,16 +68,11 @@ export class Scripts {
   }
 
   getScriptByName(name: string): Script | undefined {
-    return this.getAllScripts().find(
-      (op) => op.name === name
-    );
+    return this.getAllScripts().find((op) => op.name === name);
   }
 
   addScript(name: string, script: Script) {
-    this._workspace.writeFileSync(
-      this._toSubpath(`${name}.js`),
-      script.code
-    );
+    this._workspace.writeFileSync(this._toSubpath(`${name}.js`), script.code);
     script.code = `./${name}.js`;
     this._workspace.writeFileSync(
       this._toSubpath(`${name}.json`),

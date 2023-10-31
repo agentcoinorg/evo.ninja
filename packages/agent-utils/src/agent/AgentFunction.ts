@@ -9,7 +9,7 @@ export type AgentFunctionResult = {
 
 export interface AgentFunction<TContext> {
   definition: FunctionDefinition;
-  buildExecutor(
+  buildExecutor<TParams>(
     context: TContext
-  ): (params: any, rawParams?: string) => Promise<AgentFunctionResult>;
+  ): (params: TParams, rawParams?: string) => Promise<AgentFunctionResult>;
 }

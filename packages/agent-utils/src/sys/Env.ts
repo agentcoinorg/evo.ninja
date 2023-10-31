@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+
 export class Env {
   public readonly OPENAI_API_KEY: string;
   public readonly GPT_MODEL: string;
@@ -11,7 +13,7 @@ export class Env {
       GPT_MODEL,
       CONTEXT_WINDOW_TOKENS,
       MAX_RESPONSE_TOKENS,
-      SERP_API_KEY
+      SERP_API_KEY,
     } = envVars;
 
     if (!OPENAI_API_KEY) {
@@ -33,7 +35,7 @@ export class Env {
       GPT_MODEL,
       CONTEXT_WINDOW_TOKENS: Number(CONTEXT_WINDOW_TOKENS),
       MAX_RESPONSE_TOKENS: Number(MAX_RESPONSE_TOKENS),
-      SERP_API_KEY
+      SERP_API_KEY,
     };
   }
 }

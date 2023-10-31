@@ -1,146 +1,146 @@
 /// NOTE: This is an auto-generated file.
 ///       All modifications will be overwritten.
-import { WrapManifest } from "@polywrap/wrap-manifest-types-js"
+import { WrapManifest } from "@polywrap/wrap-manifest-types-js";
 
 export const manifest: WrapManifest = {
   name: "agent-plugin",
   type: "plugin",
   version: "0.1",
   abi: {
-  "moduleType": {
-    "kind": 128,
-    "methods": [
-      {
-        "arguments": [
-          {
-            "kind": 34,
-            "name": "message",
-            "required": true,
-            "scalar": {
-              "kind": 4,
-              "name": "message",
-              "required": true,
-              "type": "String"
+    moduleType: {
+      kind: 128,
+      methods: [
+        {
+          arguments: [
+            {
+              kind: 34,
+              name: "message",
+              required: true,
+              scalar: {
+                kind: 4,
+                name: "message",
+                required: true,
+                type: "String",
+              },
+              type: "String",
             },
-            "type": "String"
-          }
-        ],
-        "kind": 64,
-        "name": "speak",
-        "required": true,
-        "return": {
-          "kind": 34,
-          "name": "speak",
-          "required": true,
-          "scalar": {
-            "kind": 4,
-            "name": "speak",
-            "required": true,
-            "type": "String"
-          },
-          "type": "String"
-        },
-        "type": "Method"
-      },
-      {
-        "arguments": [
-          {
-            "kind": 34,
-            "name": "message",
-            "required": true,
-            "scalar": {
-              "kind": 4,
-              "name": "message",
-              "required": true,
-              "type": "String"
+          ],
+          kind: 64,
+          name: "speak",
+          required: true,
+          return: {
+            kind: 34,
+            name: "speak",
+            required: true,
+            scalar: {
+              kind: 4,
+              name: "speak",
+              required: true,
+              type: "String",
             },
-            "type": "String"
-          }
-        ],
-        "kind": 64,
-        "name": "ask",
-        "required": true,
-        "return": {
-          "kind": 34,
-          "name": "ask",
-          "required": true,
-          "scalar": {
-            "kind": 4,
-            "name": "ask",
-            "required": true,
-            "type": "String"
+            type: "String",
           },
-          "type": "String"
+          type: "Method",
         },
-        "type": "Method"
-      },
-      {
-        "arguments": [
-          {
-            "kind": 34,
-            "name": "message",
-            "required": true,
-            "scalar": {
-              "kind": 4,
-              "name": "message",
-              "required": true,
-              "type": "String"
+        {
+          arguments: [
+            {
+              kind: 34,
+              name: "message",
+              required: true,
+              scalar: {
+                kind: 4,
+                name: "message",
+                required: true,
+                type: "String",
+              },
+              type: "String",
             },
-            "type": "String"
-          }
-        ],
-        "kind": 64,
-        "name": "onGoalAchieved",
-        "required": true,
-        "return": {
-          "kind": 34,
-          "name": "onGoalAchieved",
-          "required": true,
-          "scalar": {
-            "kind": 4,
-            "name": "onGoalAchieved",
-            "required": true,
-            "type": "Boolean"
-          },
-          "type": "Boolean"
-        },
-        "type": "Method"
-      },
-      {
-        "arguments": [
-          {
-            "kind": 34,
-            "name": "message",
-            "required": true,
-            "scalar": {
-              "kind": 4,
-              "name": "message",
-              "required": true,
-              "type": "String"
+          ],
+          kind: 64,
+          name: "ask",
+          required: true,
+          return: {
+            kind: 34,
+            name: "ask",
+            required: true,
+            scalar: {
+              kind: 4,
+              name: "ask",
+              required: true,
+              type: "String",
             },
-            "type": "String"
-          }
-        ],
-        "kind": 64,
-        "name": "onGoalFailed",
-        "required": true,
-        "return": {
-          "kind": 34,
-          "name": "onGoalFailed",
-          "required": true,
-          "scalar": {
-            "kind": 4,
-            "name": "onGoalFailed",
-            "required": true,
-            "type": "Boolean"
+            type: "String",
           },
-          "type": "Boolean"
+          type: "Method",
         },
-        "type": "Method"
-      }
-    ],
-    "type": "Module"
+        {
+          arguments: [
+            {
+              kind: 34,
+              name: "message",
+              required: true,
+              scalar: {
+                kind: 4,
+                name: "message",
+                required: true,
+                type: "String",
+              },
+              type: "String",
+            },
+          ],
+          kind: 64,
+          name: "onGoalAchieved",
+          required: true,
+          return: {
+            kind: 34,
+            name: "onGoalAchieved",
+            required: true,
+            scalar: {
+              kind: 4,
+              name: "onGoalAchieved",
+              required: true,
+              type: "Boolean",
+            },
+            type: "Boolean",
+          },
+          type: "Method",
+        },
+        {
+          arguments: [
+            {
+              kind: 34,
+              name: "message",
+              required: true,
+              scalar: {
+                kind: 4,
+                name: "message",
+                required: true,
+                type: "String",
+              },
+              type: "String",
+            },
+          ],
+          kind: 64,
+          name: "onGoalFailed",
+          required: true,
+          return: {
+            kind: 34,
+            name: "onGoalFailed",
+            required: true,
+            scalar: {
+              kind: 4,
+              name: "onGoalFailed",
+              required: true,
+              type: "Boolean",
+            },
+            type: "Boolean",
+          },
+          type: "Method",
+        },
+      ],
+      type: "Module",
+    },
+    version: "0.1",
   },
-  "version": "0.1"
-}
-}
+};

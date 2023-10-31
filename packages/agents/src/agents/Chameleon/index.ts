@@ -9,15 +9,14 @@ import {
   Workspace,
   ContextualizedChat,
   Chat,
-  agentFunctionBaseToAgentFunction,
   tokensToChars,
-  Rag,
   AgentOutput
 } from "@evo-ninja/agent-utils";
 import { AgentContext } from "@evo-ninja/agent-utils";
 import { agentPrompts, prompts } from "./prompts";
-import { Agent, AgentConfig, GoalRunArgs, Prompt } from "../../agents/utils";
 import { findBestAgent } from "./findBestAgent";
+import { Agent, AgentConfig, GoalRunArgs, Prompt } from "../utils";
+import { agentFunctionBaseToAgentFunction } from "../../functions/utils";
 
 export class ChameleonAgent extends Agent<GoalRunArgs> {
   private _cChat: ContextualizedChat;

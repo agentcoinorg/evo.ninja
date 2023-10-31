@@ -1,13 +1,16 @@
-import {  LocalDocument } from "../embeddings";
+import { LocalDocument } from "../embeddings";
 import { Recombiner } from "../rag/StandardRagBuilder";
 
 export class ArrayRecombiner {
   static standard<TItem>(opt: {
-    limit?: number,
-    sort?: "index" | "relevance",
-    unique?: boolean,
+    limit?: number;
+    sort?: "index" | "relevance";
+    unique?: boolean;
   }): Recombiner<TItem, TItem[]> {
-    return async (results: () => Promise<AsyncGenerator<LocalDocument<{ index: number }>>>, originalItems: TItem[]): Promise<TItem[]> => {
+    return async (
+      results: () => Promise<AsyncGenerator<LocalDocument<{ index: number }>>>,
+      originalItems: TItem[]
+    ): Promise<TItem[]> => {
       const iterator = await results();
 
       const itemMap = new Map<string, number>();
@@ -16,7 +19,7 @@ export class ArrayRecombiner {
       for await (const result of iterator) {
         const index = result.metadata()!.index;
         const text = result.text();
-        
+
         if (opt.unique && itemMap.has(text)) {
           continue;
         }
@@ -32,11 +35,12 @@ export class ArrayRecombiner {
         });
       }
 
-      const sorted = opt.sort && opt.sort === "index"
-        ? items.sort((a, b) => a.index - b.index)
-        : items;
+      const sorted =
+        opt.sort && opt.sort === "index"
+          ? items.sort((a, b) => a.index - b.index)
+          : items;
 
-      return sorted.map(x => x.item);
+      return sorted.map((x) => x.item);
     };
   }
 }

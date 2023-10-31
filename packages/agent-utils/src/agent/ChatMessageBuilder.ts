@@ -8,7 +8,10 @@ export class ChatMessageBuilder {
     };
   }
 
-  static functionCall<TFuncParams>(funcName: string, params: TFuncParams): ChatMessage {
+  static functionCall<TFuncParams>(
+    funcName: string,
+    params: TFuncParams
+  ): ChatMessage {
     if (params === undefined || params === null) {
       params = {} as any;
     }
@@ -18,10 +21,8 @@ export class ChatMessageBuilder {
       content: "",
       function_call: {
         name: funcName,
-        arguments: typeof params === "string" ?
-          params :
-          JSON.stringify(params)
-      }
+        arguments: typeof params === "string" ? params : JSON.stringify(params),
+      },
     };
   }
 
@@ -29,7 +30,7 @@ export class ChatMessageBuilder {
     return {
       role: "function",
       name: funcName,
-      content: result
+      content: result,
     };
   }
 }

@@ -3,7 +3,7 @@ import {
   UNDEFINED_FUNCTION_ARGS,
   UNDEFINED_FUNCTION_NAME,
   UNPARSABLE_FUNCTION_ARGS,
-  UNKNOWN_VARIABLE_NAME
+  UNKNOWN_VARIABLE_NAME,
 } from "./prompts";
 import { AgentFunction, AgentFunctionResult } from "./AgentFunction";
 import { AgentVariables } from "./AgentVariables";
@@ -25,7 +25,7 @@ export type ExecuteAgentFunction = <TContext>(
   func: AgentFunction<TContext>,
   args: unknown,
   context: TContext,
-  agentFunctions: AgentFunction<TContext>[],
+  agentFunctions: AgentFunction<TContext>[]
 ) => Promise<ExecuteAgentFunctionResult>;
 
 export function processFunctionAndArgs<TContext>(
@@ -74,7 +74,7 @@ export function processFunctionAndArgs<TContext>(
       }
     }
     return ResultOk([parsedArgs, func]);
-  } catch(err: any) {
+  } catch (err: any) {
     return ResultErr(UNPARSABLE_FUNCTION_ARGS(name, args, err));
   }
 }

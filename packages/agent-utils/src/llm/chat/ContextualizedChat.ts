@@ -1,15 +1,10 @@
-import {
-  Chat,
-  ChatLogType,
-  ChatMessage
-} from ".";
+import { Chat, ChatLogType, ChatMessage } from ".";
 import {
   MessageChunker,
   BaseDocumentMetadata,
   AgentVariables,
-  PriorityContainer
+  PriorityContainer,
 } from "../../";
-
 import { Rag } from "../../rag/Rag";
 import { AgentContext } from "../../agent/AgentContext";
 import { StandardRagBuilder } from "../../rag/StandardRagBuilder";
@@ -31,22 +26,24 @@ export type MessageChunk = {
 };
 
 export class ContextualizedChat {
-
   private _chunks: Record<ChatLogType, Chunk[]> = {
-    "persistent": [],
-    "temporary": []
+    persistent: [],
+    temporary: [],
   };
 
   private _rags: Record<ChatLogType, StandardRagBuilder<MessageChunk>>;
 
-  private _functionCallResultFirstChunks: Record<ChunkIdx, {
-    text: string,
-    metadata: BaseDocumentMetadata
-  }> = {};
+  private _functionCallResultFirstChunks: Record<
+    ChunkIdx,
+    {
+      text: string;
+      metadata: BaseDocumentMetadata;
+    }
+  > = {};
 
   private _lastTwoMsgs: Record<ChatLogType, PriorityContainer<ChunkIdx>> = {
-    "persistent": new PriorityContainer(2, (a, b) => b - a),
-    "temporary": new PriorityContainer(2, (a, b) => b - a),
+    persistent: new PriorityContainer(2, (a, b) => b - a),
+    temporary: new PriorityContainer(2, (a, b) => b - a),
   };
 
   constructor(
@@ -56,10 +53,8 @@ export class ContextualizedChat {
     private _variables: AgentVariables
   ) {
     this._rags = {
-      persistent: Rag.standard<MessageChunk>(_context)
-        .selector(x => x.json),
-      temporary: Rag.standard<MessageChunk>(_context)
-        .selector(x => x.json)  
+      persistent: Rag.standard<MessageChunk>(_context).selector((x) => x.json),
+      temporary: Rag.standard<MessageChunk>(_context).selector((x) => x.json),
     };
   }
 
@@ -67,32 +62,41 @@ export class ContextualizedChat {
     return this._rawChat;
   }
 
-  async contextualize(contextVector: number[], tokenLimits: Record<ChatLogType, number>): Promise<Chat> {
+  async contextualize(
+    contextVector: number[],
+    tokenLimits: Record<ChatLogType, number>
+  ): Promise<Chat> {
     // Ensure all new messages have been processed
     this._processNewMessages();
 
     const persistentLargeChunks = await this._rags["persistent"]
       .query(contextVector)
-      .recombine(MessageRecombiner.standard(
-        tokenLimits["persistent"],
-        this._rawChat.chatLogs,
-        "persistent",
-        this._lastTwoMsgs["persistent"].getItems()
-      ));
+      .recombine(
+        MessageRecombiner.standard(
+          tokenLimits["persistent"],
+          this._rawChat.chatLogs,
+          "persistent",
+          this._lastTwoMsgs["persistent"].getItems()
+        )
+      );
 
     const temporaryChunks = await this._rags["temporary"]
       .query(contextVector)
-      .recombine(MessageRecombiner.standard(
-        tokenLimits["temporary"],
-        this._rawChat.chatLogs,
-        "temporary",
-        this._lastTwoMsgs["temporary"].getItems()
-      ));
+      .recombine(
+        MessageRecombiner.standard(
+          tokenLimits["temporary"],
+          this._rawChat.chatLogs,
+          "temporary",
+          this._lastTwoMsgs["temporary"].getItems()
+        )
+      );
 
     // Sort persistent and temporary chunks
     const sorted = {
-      persistent: persistentLargeChunks.map((x) => JSON.parse(x.json) as ChatMessage),
-      temporary: temporaryChunks.map((x) => JSON.parse(x.json) as ChatMessage)
+      persistent: persistentLargeChunks.map(
+        (x) => JSON.parse(x.json) as ChatMessage
+      ),
+      temporary: temporaryChunks.map((x) => JSON.parse(x.json) as ChatMessage),
     };
 
     // Post-process the resulting message log,
@@ -133,8 +137,11 @@ export class ContextualizedChat {
     }
   }
 
-  private _processNewMessage(message: ChatMessage, msgIdx: number, type: ChatLogType) {
-
+  private _processNewMessage(
+    message: ChatMessage,
+    msgIdx: number,
+    type: ChatLogType
+  ) {
     const newChunks: string[] = [];
 
     // If the message contains a variable, load the variable's data
@@ -153,9 +160,11 @@ export class ContextualizedChat {
     if (this._chunker.shouldChunk(message)) {
       // If it was a variable, prepend its name
       if (isVariable) {
-        newChunks.push(...this._chunker.chunk(message).map(
-          (chunk, index) => variableChunkText(chunk, index, varName)
-        ));
+        newChunks.push(
+          ...this._chunker
+            .chunk(message)
+            .map((chunk, index) => variableChunkText(chunk, index, varName))
+        );
       } else {
         newChunks.push(...this._chunker.chunk(message));
       }
@@ -183,7 +192,7 @@ export class ContextualizedChat {
         chunkIdx: startChunkIdx + index,
         msgIdx,
         tokens: this._rawChat.tokenizer.encode(chunk).length,
-        json: chunk
+        json: chunk,
       }))
     );
 
@@ -192,7 +201,7 @@ export class ContextualizedChat {
     if (message.role === "function" || message.function_call) {
       this._functionCallResultFirstChunks[startChunkIdx] = {
         text: newChunks[0],
-        metadata: { index: startChunkIdx }
+        metadata: { index: startChunkIdx },
       };
     }
 
@@ -219,12 +228,11 @@ function getLastProcessedMessageIndex(chunks: Chunk[]): number {
 
 function postProcessMessages(messages: ChatMessage[]): ChatMessage[] {
   const result: ChatMessage[] = [];
-  const varChunkPrefix = "Variable \"\${";
+  const varChunkPrefix = 'Variable "${';
   const varNameRegex = /\$\{([^}]+)\}/;
   let prevVarName: undefined | string = undefined;
 
   for (const message of messages) {
-
     // Detect variable preview messages
     let varName: undefined | string = undefined;
     if (message.content?.startsWith(varChunkPrefix)) {
@@ -244,7 +252,7 @@ function postProcessMessages(messages: ChatMessage[]): ChatMessage[] {
     if (prevVarName && !varName) {
       // Append a helpful message
       const lastMessage = result.at(-1) as ChatMessage;
-      lastMessage.content += `\nThe above function result was too large, so it was stored in the variable \"\${${prevVarName}}\".`
+      lastMessage.content += `\nThe above function result was too large, so it was stored in the variable \"\${${prevVarName}}\".`;
     }
 
     prevVarName = varName;
@@ -253,10 +261,15 @@ function postProcessMessages(messages: ChatMessage[]): ChatMessage[] {
   return result;
 }
 
-function variableChunkText(chunk: string | ChatMessage, index: number, varName: string): string {
-  const message = typeof chunk === "string" ? JSON.parse(chunk) as ChatMessage : chunk;
+function variableChunkText(
+  chunk: string | ChatMessage,
+  index: number,
+  varName: string
+): string {
+  const message =
+    typeof chunk === "string" ? (JSON.parse(chunk) as ChatMessage) : chunk;
   return JSON.stringify({
     ...message,
-    content: `Variable "${varName}" chunk #${index}\n\`\`\`\n${message.content}\n\`\`\``
+    content: `Variable "${varName}" chunk #${index}\n\`\`\`\n${message.content}\n\`\`\``,
   });
 }

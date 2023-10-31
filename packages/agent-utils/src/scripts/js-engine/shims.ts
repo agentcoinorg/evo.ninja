@@ -1,6 +1,5 @@
 import { globalToShimVarNameMap } from "./shims/globals";
-export const packagesShim = 
-`'use strict';
+export const packagesShim = `'use strict';
 
 // HACK: This is a hack because undefined, null, and functions are not supported by the JS Engine
 function clean(obj, root = true) {
@@ -457,7 +456,9 @@ const globalToShimVarNameMap = {
 export const shimCode = (code: string) => `
   ${packagesShim}
 
-  ${Object.entries(globalToShimVarNameMap).map(([global, shim]) => `var ${global} = ${shim};`).join("\n")}
+  ${Object.entries(globalToShimVarNameMap)
+    .map(([global, shim]) => `var ${global} = ${shim};`)
+    .join("\n")}
 
   const __temp = (async function () { 
   ${code}
@@ -467,4 +468,4 @@ export const shimCode = (code: string) => `
           __wrap_subinvoke("plugin/result", "err", { error: clean(error) })
         });
   clean(__temp)
-`
+`;

@@ -9,7 +9,6 @@ import {
   LlmQueryBuilder,
   ChatLogs,
   LlmModel,
-  agentFunctionBaseToAgentFunction,
   OpenAIEmbeddingAPI,
   Chat,
   executeAgentFunction,
@@ -21,7 +20,7 @@ import { AgentConfig } from "./AgentConfig";
 import { AgentContext } from "@evo-ninja/agent-utils";
 import { ExecuteAgentFunctionCalled } from "@evo-ninja/agent-utils";
 import { Prompt } from "./Prompt";
-import { AgentFunctionBase } from "../../functions/utils";
+import { AgentFunctionBase, agentFunctionBaseToAgentFunction } from "../../functions/utils";
 
 export type GoalRunArgs = {
   goal: string;

@@ -1,5 +1,12 @@
 import { LocalDocument } from "../embeddings";
-import { MessageChunk, MsgIdx, ChunkIdx, ChatMessage, ChatLogs, ChatLogType } from "../llm";
+import {
+  MessageChunk,
+  MsgIdx,
+  ChunkIdx,
+  ChatMessage,
+  ChatLogs,
+  ChatLogType,
+} from "../llm";
 import { Recombiner } from "../rag/StandardRagBuilder";
 
 export class MessageRecombiner {
@@ -9,10 +16,9 @@ export class MessageRecombiner {
     chatLogType: ChatLogType,
     initChunks: ChunkIdx[]
   ): Recombiner<MessageChunk, MessageChunk[]> {
-
     return async (
       results: () => Promise<AsyncGenerator<LocalDocument<{ index: number }>>>,
-      originalItems: MessageChunk[],
+      originalItems: MessageChunk[]
     ): Promise<MessageChunk[]> => {
       if (calculateTotalTokens(originalItems) < tokenLimit) {
         return originalItems;
@@ -22,9 +28,13 @@ export class MessageRecombiner {
       const chunksAdded: Set<ChunkIdx> = new Set();
       const msgsAdded: Record<MsgIdx, number> = {};
       let tokenCount = 0;
-      const canAddTokens = (tokens: number) => tokenCount + tokens <= tokenLimit;
+      const canAddTokens = (tokens: number) =>
+        tokenCount + tokens <= tokenLimit;
 
-      const addChunk = (chunkIdx: ChunkIdx, recursive: boolean = false): boolean => {
+      const addChunk = (
+        chunkIdx: ChunkIdx,
+        recursive: boolean = false
+      ): boolean => {
         const chunk = originalItems[chunkIdx];
 
         // Only add a chunk once
@@ -52,8 +62,9 @@ export class MessageRecombiner {
         tokenCount += chunk.tokens;
 
         // Ensure that the first chunk is always added
-        const firstChunkIdx = originalItems.slice(0, chunkIdx)
-          .findIndex(item => item.msgIdx === chunk.msgIdx);
+        const firstChunkIdx = originalItems
+          .slice(0, chunkIdx)
+          .findIndex((item) => item.msgIdx === chunk.msgIdx);
 
         if (firstChunkIdx !== -1) {
           addChunk(firstChunkIdx);
@@ -75,12 +86,12 @@ export class MessageRecombiner {
         }
 
         return true;
-      }
+      };
 
       const iterator = await results();
 
       if (chatLogType === "persistent") {
-        //Add all small persistent chunks
+        // Add all small persistent chunks
         const smallPersistentChunks = [];
         let lastMsgIndex = -1;
         for (const chunk of originalItems) {
@@ -97,7 +108,7 @@ export class MessageRecombiner {
           addChunk(chunk.chunkIdx);
         }
       }
-      
+
       // Add any initial chunks
       for (const chunk of initChunks) {
         addChunk(chunk);
@@ -108,8 +119,7 @@ export class MessageRecombiner {
         addChunk(chunkIdx);
       }
 
-      return chunks
-        .sort((a, b) => a.chunkIdx - b.chunkIdx);
+      return chunks.sort((a, b) => a.chunkIdx - b.chunkIdx);
     };
   }
 }
@@ -127,7 +137,10 @@ const tryGetFunctionMessagePair = (
 ): ChunkIdx | undefined => {
   const msg = JSON.parse(chunk.json) as ChatMessage;
 
-  if ((msg.role === "assistant" && msg.function_call) || msg.role === "function") {
+  if (
+    (msg.role === "assistant" && msg.function_call) ||
+    msg.role === "function"
+  ) {
     // Ensure function call + results are always added together.
     // We must traverse the chunk array to find the nearest neighbor
     const direction = msg.role === "assistant" ? 1 : -1;
@@ -159,4 +172,4 @@ const tryGetFunctionMessagePair = (
   }
 
   return undefined;
-}
+};

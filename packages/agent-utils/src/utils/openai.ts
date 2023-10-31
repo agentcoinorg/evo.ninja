@@ -4,14 +4,13 @@ export interface OpenAIError {
   data: unknown;
 }
 
-export const cleanOpenAIError = (error: unknown): Partial<OpenAIError> | unknown => {
-  let errorData: Partial<OpenAIError> = { };
-  let errorObj = error as Record<string, unknown>;
+export const cleanOpenAIError = (
+  error: unknown
+): Partial<OpenAIError> | unknown => {
+  const errorData: Partial<OpenAIError> = {};
+  const errorObj = error as Record<string, unknown>;
 
-  if (
-    typeof error === "object" &&
-    errorObj.message
-  ) {
+  if (typeof error === "object" && errorObj.message) {
     if (errorObj.response) {
       const responseObj = errorObj.response as Record<string, unknown>;
       errorData.status = responseObj.status as number | undefined;
@@ -25,4 +24,4 @@ export const cleanOpenAIError = (error: unknown): Partial<OpenAIError> | unknown
   } else {
     return error;
   }
-}
+};

@@ -1,10 +1,19 @@
-export const previewChunks = (chunks: string[], charLimit: number): string => joinUnderCharLimit(chunks, charLimit - "...\n".length, "\n...\n")
-export const limitChunks = (chunks: string[], charLimit: number): string[] => getUnderCharLimit(chunks, charLimit)
+export const previewChunks = (chunks: string[], charLimit: number): string =>
+  joinUnderCharLimit(chunks, charLimit - "...\n".length, "\n...\n");
 
-export const tokensToChars = (tokenCnt: number) => tokenCnt * 4;
-export const charsToTokens = (charCnt: number) => Math.floor(charCnt / 4);
+export const limitChunks = (chunks: string[], charLimit: number): string[] =>
+  getUnderCharLimit(chunks, charLimit);
 
-const joinUnderCharLimit = (chunks: string[], characterLimit: number, separator: string): string => {
+export const tokensToChars = (tokenCnt: number): number => tokenCnt * 4;
+
+export const charsToTokens = (charCnt: number): number =>
+  Math.floor(charCnt / 4);
+
+const joinUnderCharLimit = (
+  chunks: string[],
+  characterLimit: number,
+  separator: string
+): string => {
   let result = "";
 
   for (const chunk of chunks) {
@@ -20,9 +29,12 @@ const joinUnderCharLimit = (chunks: string[], characterLimit: number, separator:
   }
 
   return result;
-}
+};
 
-const getUnderCharLimit = (chunks: string[], characterLimit: number): string[] => {
+const getUnderCharLimit = (
+  chunks: string[],
+  characterLimit: number
+): string[] => {
   let totalLength = 0;
   const newChunks = [];
   for (const chunk of chunks) {
@@ -37,4 +49,4 @@ const getUnderCharLimit = (chunks: string[], characterLimit: number): string[] =
     totalLength += chunk.length;
   }
   return newChunks;
-}
+};

@@ -12,9 +12,14 @@ export class AgentContext {
     public readonly internals: Workspace,
     public readonly env: Env,
     public readonly scripts: Scripts,
-    public readonly client: WrapClient = new WrapClient(workspace, logger, agentPlugin({ logger }), env),
+    public readonly client: WrapClient = new WrapClient(
+      workspace,
+      logger,
+      agentPlugin({ logger }),
+      env
+    ),
     public readonly variables: AgentVariables = new AgentVariables()
-  ) { }
+  ) {}
 
   cloneEmpty(): AgentContext {
     return new AgentContext(

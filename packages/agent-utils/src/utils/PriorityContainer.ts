@@ -4,7 +4,7 @@ export class PriorityContainer<T> {
   constructor(
     private maxSize: number,
     private compareFn: (a: T, b: T) => number
-  ) { }
+  ) {}
 
   addItem(item: T): void {
     this.items.push(item);

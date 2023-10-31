@@ -1,7 +1,12 @@
 import { Timer } from "./Timer";
 import { DebugLlmReq } from "./DebugLlmReq";
 
-import { ChatLogs, ChatMessage, Workspace, PriorityContainer } from "@evo-ninja/agent-utils";
+import {
+  ChatLogs,
+  ChatMessage,
+  Workspace,
+  PriorityContainer,
+} from "@evo-ninja/agent-utils";
 
 interface DebugGoal {
   prompt: string;
@@ -23,14 +28,12 @@ export class DebugLog {
     prompt: "",
     time: new Timer(),
     tokens: 0,
-    llmReqs: 0
+    llmReqs: 0,
   };
   private steps: DebugStep[] = [];
   private longestLlmReqs: PriorityContainer<DebugLlmReq>;
 
-  constructor(
-    public workspace: Workspace
-  ) {
+  constructor(public workspace: Workspace) {
     this.longestLlmReqs = new PriorityContainer<DebugLlmReq>(
       5,
       (a, b) => b.time.duration() - a.time.duration()
@@ -42,10 +45,7 @@ export class DebugLog {
   }
 
   save(): void {
-    this.workspace.writeFileSync(
-      "debug.json",
-      this.toString()
-    );
+    this.workspace.writeFileSync("debug.json", this.toString());
     this.workspace.writeFileSync(
       "perf.json",
       JSON.stringify(this.longestLlmReqs.getItems(), null, 2)
@@ -67,7 +67,7 @@ export class DebugLog {
     const step: DebugStep = {
       time: new Timer(),
       llmTime: new Timer(),
-      llmReqs: []
+      llmReqs: [],
     };
     step.time.start();
     this.steps.push(step);

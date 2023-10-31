@@ -4,34 +4,27 @@ import path from "path-browserify";
 import spawn from "spawn-command";
 
 export class FileSystemWorkspace implements Workspace {
-  constructor(
-    private _workspacePath: string
-  ) {
+  constructor(private _workspacePath: string) {
     // Fully resolve the workspace path
-    this._workspacePath = path.resolve(
-      this._workspacePath
-    );
+    this._workspacePath = path.resolve(this._workspacePath);
 
     // Initialize the directory
     if (!fs.existsSync(this._workspacePath)) {
-      fs.mkdirSync(
-        this._workspacePath,
-        { recursive: true }
-      );
+      fs.mkdirSync(this._workspacePath, { recursive: true });
     }
   }
 
   toWorkspacePath(subpath: string): string {
     const absPath = path.resolve(
-      !subpath.startsWith(this._workspacePath) ?
-        path.join(this._workspacePath, subpath) :
-        subpath
+      !subpath.startsWith(this._workspacePath)
+        ? path.join(this._workspacePath, subpath)
+        : subpath
     );
 
     if (absPath.indexOf(this._workspacePath) !== 0) {
       throw Error(
         `Path must be within workspace directory. Path: ${subpath}\n` +
-        `Workspace: ${this._workspacePath}`
+          `Workspace: ${this._workspacePath}`
       );
     }
 
@@ -71,9 +64,13 @@ export class FileSystemWorkspace implements Workspace {
 
   readdirSync(subpath: string): DirectoryEntry[] {
     const absPath = this.toWorkspacePath(subpath);
-    return fs.readdirSync(absPath, { withFileTypes: true })
+    return fs
+      .readdirSync(absPath, { withFileTypes: true })
       .filter((d) => !d.name.startsWith("."))
-      .map((d) => ({ name: d.name, type: d.isDirectory() ? "directory" : "file" }));
+      .map((d) => ({
+        name: d.name,
+        type: d.isDirectory() ? "directory" : "file",
+      }));
   }
 
   appendFileSync(subpath: string, data: string): void {
@@ -86,19 +83,23 @@ export class FileSystemWorkspace implements Workspace {
     fs.rmSync(absPath);
   }
 
-  async exec(command: string, args?: string[], timeout?: number): Promise<{ exitCode: number; stdout: string; stderr: string }> {
+  async exec(
+    command: string,
+    args?: string[],
+    timeout?: number
+  ): Promise<{ exitCode: number; stdout: string; stderr: string }> {
     return await new Promise((resolve, reject) => {
       const toExec = args ? `${command} ${args.join(" ")}` : command;
       const child = spawn(toExec, { cwd: this._workspacePath });
 
       let stdout = "";
       let stderr = "";
-      
+
       if (timeout) {
-        setTimeout(() => { 
-          child.kill()
-          resolve({ exitCode: 1, stdout: "Timeout achieved", stderr: "" })
-        }, timeout)
+        setTimeout(() => {
+          child.kill();
+          resolve({ exitCode: 1, stdout: "Timeout achieved", stderr: "" });
+        }, timeout);
       }
 
       child.on("error", (error: Error) => {

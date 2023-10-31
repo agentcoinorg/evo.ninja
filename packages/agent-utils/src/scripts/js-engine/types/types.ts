@@ -2,11 +2,7 @@
 import * as Types from "./";
 
 // @ts-ignore
-import {
-  CoreClient,
-  InvokeResult,
-  Uri,
-} from "@polywrap/core-js";
+import { CoreClient, InvokeResult, Uri } from "@polywrap/core-js";
 import { PolywrapClient } from "@polywrap/client-js";
 
 export type UInt = number;
@@ -62,7 +58,7 @@ export class JsEngine {
   constructor(
     client?: CoreClient,
     env?: Record<string, unknown>,
-    uri?: string,
+    uri?: string
   ) {
     this._defaultClient = this._getClient(client);
     this._defaultEnv = this._getEnv(env);
@@ -89,7 +85,9 @@ export class JsEngine {
     return uri || this._defaultUri || this._getDefaultUri();
   }
 
-  private _getEnv(env?: Record<string, unknown>): Record<string, unknown> | undefined {
+  private _getEnv(
+    env?: Record<string, unknown>
+  ): Record<string, unknown> | undefined {
     return env || this._defaultEnv || this._getDefaultEnv();
   }
 
@@ -107,7 +105,7 @@ export class JsEngine {
     args: JsEngine_Module_Args_eval,
     client?: CoreClient,
     env?: Record<string, unknown>,
-    uri?: string,
+    uri?: string
   ): Promise<InvokeResult<Types.JsEngine_EvalResult>> {
     const _client = this._getClient(client);
     const _env = this._getEnv(env);
@@ -116,16 +114,16 @@ export class JsEngine {
     return _client.invoke<Types.JsEngine_EvalResult>({
       uri: Uri.from(_uri),
       method: "eval",
-      args: (args as unknown) as Record<string, unknown>,
+      args: args as unknown as Record<string, unknown>,
       env: _env,
     });
-  };
+  }
 
   async evalWithGlobals(
     args: JsEngine_Module_Args_evalWithGlobals,
     client?: CoreClient,
     env?: Record<string, unknown>,
-    uri?: string,
+    uri?: string
   ): Promise<InvokeResult<Types.JsEngine_EvalResult>> {
     const _client = this._getClient(client);
     const _env = this._getEnv(env);
@@ -134,10 +132,10 @@ export class JsEngine {
     return _client.invoke<Types.JsEngine_EvalResult>({
       uri: Uri.from(_uri),
       method: "evalWithGlobals",
-      args: (args as unknown) as Record<string, unknown>,
+      args: args as unknown as Record<string, unknown>,
       env: _env,
     });
-  };
-};
+  }
+}
 
 /// Imported Modules END ///

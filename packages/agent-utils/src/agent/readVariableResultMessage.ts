@@ -1,8 +1,13 @@
-export function readVariableResultMessage(varName: string, value: string | undefined, start: number, count: number, maxVarLength: number) {
-  if (!value || value === "\"undefined\"") {
+export function readVariableResultMessage(
+  varName: string,
+  value: string | undefined,
+  start: number,
+  count: number,
+  maxVarLength: number
+) {
+  if (!value || value === '"undefined"') {
     return `Variable \${${varName}} is undefined`;
-  }
-  else {
+  } else {
     let warn = "";
     if (count > maxVarLength) {
       warn = `Warning: maximum read length is ${maxVarLength} bytes, result will be shortened.`;

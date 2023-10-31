@@ -1,14 +1,18 @@
-import path from "path-browserify";
 import { DirectoryEntry, Workspace } from "./Workspace";
 
 export class InMemoryWorkspace implements Workspace {
   private root: InMemoryDir = new InMemoryDir("");
 
-  async exec(command: string, args?: string[], timeout?: number): Promise<{ exitCode: number; stdout: string; stderr: string }> {
-    throw new Error("Executing commands is not supported in this application environment.");
+  async exec(): Promise<{ exitCode: number; stdout: string; stderr: string }> {
+    throw new Error(
+      "Executing commands is not supported in this application environment."
+    );
   }
 
-  mkdirSync(subpath: string, opt: { recursive: boolean } = { recursive: false }): void {
+  mkdirSync(
+    subpath: string,
+    opt: { recursive: boolean } = { recursive: false }
+  ): void {
     const path = subpath.split("/");
 
     if (opt.recursive) {
@@ -59,11 +63,15 @@ export class InMemoryWorkspace implements Workspace {
       currentDir = directory;
     }
 
-    return currentDir.getEntries()
-      .map((x) => ({
-        name: x.name,
-        type: x.type
-      } as DirectoryEntry))
+    return currentDir
+      .getEntries()
+      .map(
+        (x) =>
+          ({
+            name: x.name,
+            type: x.type,
+          }) as DirectoryEntry
+      )
       .filter((d) => !d.name.startsWith("."));
   }
 
@@ -97,7 +105,10 @@ export class InMemoryWorkspace implements Workspace {
     try {
       const path = pathStr.split("/");
       const [parentDir, name] = this.navigateToPath(path);
-      return parentDir.getFile(name) !== undefined || parentDir.getDirectory(name) !== undefined;
+      return (
+        parentDir.getFile(name) !== undefined ||
+        parentDir.getDirectory(name) !== undefined
+      );
     } catch (error) {
       return false;
     }
@@ -110,7 +121,8 @@ export class InMemoryWorkspace implements Workspace {
     const newPathSegments = newPath.split("/");
     const [newParentDir, newName] = this.navigateToPath(newPathSegments);
 
-    const item = oldParentDir.getFile(oldName) || oldParentDir.getDirectory(oldName);
+    const item =
+      oldParentDir.getFile(oldName) || oldParentDir.getDirectory(oldName);
     if (!item) {
       throw new Error(`Path not found: ${oldPath}`);
     }
@@ -127,8 +139,8 @@ export class InMemoryWorkspace implements Workspace {
   appendFileSync(subpath: string, data: string): void {
     const pathSegments = subpath.split("/");
     const [parentDir, fileName] = this.navigateToPath(pathSegments);
-    
-    let file = parentDir.getFile(fileName);
+
+    const file = parentDir.getFile(fileName);
     if (file) {
       // If file exists, append data
       file.write(file.read() + data);
@@ -160,7 +172,7 @@ class InMemoryFile implements DirectoryEntry {
   constructor(
     public readonly name: string,
     private _data: string
-  ) { }
+  ) {}
 
   read(): string {
     return this._data;
@@ -177,7 +189,7 @@ class InMemoryDir implements DirectoryEntry {
   constructor(
     public readonly name: string,
     private _entries: Map<string, InMemoryFile | InMemoryDir> = new Map()
-  ) { }
+  ) {}
 
   addEntry(entry: InMemoryFile | InMemoryDir): void {
     this._entries.set(entry.name, entry);
@@ -207,6 +219,6 @@ class InMemoryDir implements DirectoryEntry {
   }
 
   getEntries(): (InMemoryFile | InMemoryDir)[] {
-    return Array.from(this._entries.values())
+    return Array.from(this._entries.values());
   }
 }

@@ -1,9 +1,4 @@
-import {
-  Tokenizer,
-  ChatLogs,
-  ChatMessage,
-  ChatLogType,
-} from "./";
+import { Tokenizer, ChatLogs, ChatMessage, ChatLogType } from "./";
 import { FunctionDefinition } from "../";
 
 import { ChatCompletionRequestMessageRoleEnum } from "openai";
@@ -13,9 +8,7 @@ export type ChatRole = ChatCompletionRequestMessageRoleEnum;
 export class Chat {
   protected _chatLogs: ChatLogs;
 
-  constructor(
-    protected _tokenizer: Tokenizer,
-  ) {
+  constructor(protected _tokenizer: Tokenizer) {
     this._chatLogs = new ChatLogs();
   }
 
@@ -35,11 +28,8 @@ export class Chat {
     return this._chatLogs.messages;
   }
 
-  public add(
-    type: ChatLogType,
-    msg: ChatMessage | ChatMessage[]
-  ) {
-    let msgs = Array.isArray(msg) ? msg : [msg];
+  public add(type: ChatLogType, msg: ChatMessage | ChatMessage[]) {
+    const msgs = Array.isArray(msg) ? msg : [msg];
 
     for (const msg of msgs) {
       const tokens = this._tokenizer.encode(JSON.stringify(msg)).length;
@@ -47,19 +37,14 @@ export class Chat {
     }
   }
 
-  public persistent(
-    role: ChatRole,
-    content: string
-  ): string | undefined 
-  public persistent(
-    msg: ChatMessage
-  ): string | undefined 
+  public persistent(role: ChatRole, content: string): string | undefined;
+  public persistent(msg: ChatMessage): string | undefined;
   public persistent(
     roleOrMsg: ChatRole | ChatMessage,
     content?: string
   ): string | undefined {
-    switch(typeof roleOrMsg) {
-      case "string": 
+    switch (typeof roleOrMsg) {
+      case "string":
         this.add("persistent", { role: roleOrMsg as ChatRole, content });
         return content;
       case "object":
@@ -70,18 +55,13 @@ export class Chat {
     }
   }
 
-  public temporary(
-    role: ChatRole,
-    content?: string
-  ): string | undefined;
-  public temporary(
-    msg: ChatMessage
-  ): string | undefined;
+  public temporary(role: ChatRole, content?: string): string | undefined;
+  public temporary(msg: ChatMessage): string | undefined;
   public temporary(
     roleOrMsg: ChatRole | ChatMessage,
     content?: string
   ): string | undefined {
-    switch(typeof roleOrMsg) {
+    switch (typeof roleOrMsg) {
       case "string":
         this.add("temporary", { role: roleOrMsg as ChatRole, content });
         return content;

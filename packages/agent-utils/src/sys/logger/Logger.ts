@@ -19,36 +19,33 @@ export class Logger implements ILogger {
   constructor(
     protected _loggers: ILogger[],
     protected _callbacks: LoggerCallbacks
-  ) { }
+  ) {}
 
-  info(info: string) {
+  info(info: string): void {
     this._loggers.forEach((l) => l.info(info));
   }
 
-  notice(msg: string) {
+  notice(msg: string): void {
     this._loggers.forEach((l) => l.notice(msg));
   }
 
-  success(msg: string) {
+  success(msg: string): void {
     this._loggers.forEach((l) => l.success(msg));
   }
 
-  warning(msg: string) {
+  warning(msg: string): void {
     this._loggers.forEach((l) => l.warning(msg));
   }
 
-  error(msg: string, error?: unknown) {
+  error(msg: string, error?: unknown): void {
     if (!error) {
       this._loggers.forEach((l) => l.error(msg));
       return;
     }
 
     let errorStr: string = "";
-    let errorObj = error as Record<string, unknown>;
-    if (
-      typeof error === "object" &&
-      errorObj.message
-    ) {
+    const errorObj = error as Record<string, unknown>;
+    if (typeof error === "object" && errorObj.message) {
       if (errorObj.response) {
         const responseObj = errorObj.response as Record<string, unknown>;
         const status = responseObj.status || "N/A";
@@ -69,24 +66,29 @@ export class Logger implements ILogger {
   }
 
   async logHeader(): Promise<void> {
+    // eslint-disable-next-line
     const logger = this;
 
     return new Promise<void>((resolve, reject) => {
-      figlet.text("Evo.Ninja", {
-        font: "Doom",
-        horizontalLayout: "default",
-        verticalLayout: "default",
-        whitespaceBreak: true
-      }, function(err: Error | null, data?: string) {
-        if (err) {
-          logger.error("Something went wrong...", err);
-          reject(err);
-          return;
+      figlet.text(
+        "Evo.Ninja",
+        {
+          font: "Doom",
+          horizontalLayout: "default",
+          verticalLayout: "default",
+          whitespaceBreak: true,
+        },
+        function (err: Error | null, data?: string) {
+          if (err) {
+            logger.error("Something went wrong...", err);
+            reject(err);
+            return;
+          }
+          logger.info("```\n" + data + "\n```\n");
+          logger.info("Support: https://discord.gg/ZUSDVhA2Vz");
+          resolve();
         }
-        logger.info("```\n" + data + "\n```\n");
-        logger.info("Support: https://discord.gg/ZUSDVhA2Vz");
-        resolve();
-      });
+      );
     });
   }
 }

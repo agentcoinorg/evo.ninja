@@ -6,7 +6,7 @@ export class SubWorkspace implements Workspace {
   constructor(
     public readonly subpath: string,
     public readonly workspace: Workspace
-  ) { }
+  ) {}
 
   writeFileSync(subpath: string, data: string): void {
     this.workspace.writeFileSync(this.toSubpath(subpath), data);
@@ -21,13 +21,13 @@ export class SubWorkspace implements Workspace {
   }
 
   renameSync(oldPath: string, newPath: string): void {
-    this.workspace.renameSync(
-      this.toSubpath(oldPath),
-      this.toSubpath(newPath)
-    );
+    this.workspace.renameSync(this.toSubpath(oldPath), this.toSubpath(newPath));
   }
 
-  mkdirSync(subpath: string, opts: { recursive: boolean } = { recursive: false }): void {
+  mkdirSync(
+    subpath: string,
+    opts: { recursive: boolean } = { recursive: false }
+  ): void {
     this.workspace.mkdirSync(this.toSubpath(subpath), opts);
   }
 
@@ -47,7 +47,10 @@ export class SubWorkspace implements Workspace {
     this.workspace.rmSync(this.toSubpath(subpath));
   }
 
-  async exec(command: string, args?: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
+  async exec(
+    command: string,
+    args?: string[]
+  ): Promise<{ exitCode: number; stdout: string; stderr: string }> {
     return this.workspace.exec(command, args);
   }
 

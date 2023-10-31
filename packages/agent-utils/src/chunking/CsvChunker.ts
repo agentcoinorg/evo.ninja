@@ -1,5 +1,8 @@
 export class CsvChunker {
-  static newlinesWithHeader(csvData: string, opts: { chunkLength: number, overlap: number }): string[] {
+  static newlinesWithHeader(
+    csvData: string,
+    opts: { chunkLength: number; overlap: number }
+  ): string[] {
     const { chunkLength, overlap } = opts;
 
     if (chunkLength <= overlap) {
@@ -18,10 +21,7 @@ export class CsvChunker {
 
     while (startIndex < rows.length) {
       const endIndex = startIndex + chunkLength;
-      const chunk = [
-        header,
-        ...rows.slice(startIndex, endIndex)
-      ].join("\n");
+      const chunk = [header, ...rows.slice(startIndex, endIndex)].join("\n");
       chunks.push(chunk);
       startIndex = endIndex - overlap;
     }

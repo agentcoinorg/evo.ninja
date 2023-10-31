@@ -1,4 +1,4 @@
-import { AgentFunctionResult, FunctionDefinition } from "@evo-ninja/agent-utils"
+import { AgentFunctionResult, FunctionDefinition, AgentContext } from "@evo-ninja/agent-utils"
 import { Agent } from "../../agents/utils";
 
 export abstract class AgentFunctionBase<TParams> {
@@ -16,3 +16,16 @@ export abstract class AgentFunctionBase<TParams> {
     };
   }
 }
+
+export const agentFunctionBaseToAgentFunction = <TRunArgs>(
+  agent: Agent<TRunArgs>
+) => {
+  return (fn: AgentFunctionBase<unknown>) => {
+    return {
+      definition: fn.getDefinition(),
+      buildExecutor: (_: AgentContext) => {
+        return fn.buildExecutor(agent);
+      },
+    };
+  };
+};

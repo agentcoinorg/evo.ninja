@@ -4,7 +4,7 @@ import {
   Args_onGoalFailed,
   Args_speak,
   Module,
-  manifest
+  manifest,
 } from "./types";
 import { AGENT_SPEAK_RESPONSE, Logger } from "../../";
 
@@ -46,8 +46,5 @@ export class AgentPlugin extends Module<AgentPluginConfig> {
 export const agentPlugin: PluginFactory<AgentPluginConfig> = (
   config: AgentPluginConfig
 ) => {
-  return new PluginPackage(
-    new AgentPlugin(config),
-    manifest
-  );
+  return new PluginPackage(new AgentPlugin(config), manifest);
 };

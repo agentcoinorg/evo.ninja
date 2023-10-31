@@ -7,7 +7,7 @@ export class DebugLlmReq {
     public time: Timer,
     public chatLogs: ChatLogs,
     public response?: ChatMessage
-  ) { }
+  ) {}
 
   get tokens(): number {
     return this.chatLogs.tokens;

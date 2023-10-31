@@ -4,20 +4,18 @@ import { ChatMessage } from "../../llm";
 import chalk from "chalk";
 
 export class ConsoleLogger implements ILogger {
-  constructor() { }
+  constructor() {}
 
   info(info: string): void {
     console.log(info);
   }
 
   message(msg: ChatMessage): void {
-    const roleUpper = msg.role[0].toUpperCase() + (
-      msg.role.length > 1 ? msg.role.substring(1) : ""
-    );
+    const roleUpper =
+      msg.role[0].toUpperCase() +
+      (msg.role.length > 1 ? msg.role.substring(1) : "");
 
-    this.info(
-      `${roleUpper}: ${chalk.blue(msg.content)}`
-    );
+    this.info(`${roleUpper}: ${chalk.blue(msg.content)}`);
   }
 
   action(msg: ChatMessage): void {
