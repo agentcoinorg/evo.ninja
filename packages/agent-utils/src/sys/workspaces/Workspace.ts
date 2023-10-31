@@ -8,6 +8,7 @@ export interface Workspace {
   readFileSync(subpath: string): string;
   existsSync(subpath: string): boolean;
   renameSync(oldPath: string, newPath: string): void;
+  rmSync(subpath: string): void;
   mkdirSync(subpath: string, opts?: { recursive: boolean }): void;
   rmdirSync(subpath: string, opts?: { recursive: boolean }): void;
   readdirSync(subpath: string): DirectoryEntry[];

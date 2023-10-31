@@ -81,6 +81,11 @@ export class FileSystemWorkspace implements Workspace {
     fs.appendFileSync(absPath, data);
   }
 
+  rmSync(subpath: string): void {
+    const absPath = this.toWorkspacePath(subpath);
+    fs.rmSync(absPath);
+  }
+
   async exec(command: string, args?: string[], timeout?: number): Promise<{ exitCode: number; stdout: string; stderr: string }> {
     return await new Promise((resolve, reject) => {
       const toExec = args ? `${command} ${args.join(" ")}` : command;

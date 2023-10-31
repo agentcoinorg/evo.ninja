@@ -43,6 +43,10 @@ export class SubWorkspace implements Workspace {
     this.workspace.appendFileSync(this.toSubpath(subpath), data);
   }
 
+  rmSync(subpath: string): void {
+    this.workspace.rmSync(this.toSubpath(subpath));
+  }
+
   async exec(command: string, args?: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
     return this.workspace.exec(command, args);
   }

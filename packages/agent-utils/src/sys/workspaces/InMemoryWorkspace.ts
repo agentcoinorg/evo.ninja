@@ -83,6 +83,16 @@ export class InMemoryWorkspace implements Workspace {
     return file.read();
   }
 
+  rmSync(filePath: string): void {
+    const path = filePath.split("/");
+    const [parentDir, fileName] = this.navigateToPath(path);
+    const file = parentDir.getFile(fileName);
+    if (!file) {
+      throw new Error(`File not found: ${filePath}`);
+    }
+    parentDir.removeEntry(fileName);
+  }
+
   existsSync(pathStr: string): boolean {
     try {
       const path = pathStr.split("/");

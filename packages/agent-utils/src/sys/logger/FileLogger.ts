@@ -1,25 +1,26 @@
-import { ILogger } from "@evo-ninja/agent-utils";
-import fs from "fs";
 import path from "path-browserify";
+import { Workspace } from "../workspaces";
+import { ILogger } from "./Logger";
 
 export class FileLogger implements ILogger {
   constructor(
-    private _filePath: string
+    private _filePath: string,
+    private _workspace: Workspace
   ) {
     // Make the log directory if it doesn't exist
     const logDir = path.dirname(this._filePath);
-    if (!fs.existsSync(logDir)) {
-      fs.mkdirSync(logDir, { recursive: true });
+    if (!_workspace.existsSync(logDir)) {
+      _workspace.mkdirSync(logDir, { recursive: true });
     }
 
     // Delete the file if it exists
-    if (fs.existsSync(this._filePath)) {
-      fs.rmSync(this._filePath);
+    if (_workspace.existsSync(this._filePath)) {
+      _workspace.rmSync(this._filePath);
     }
   }
 
   info(info: string): void {
-    fs.appendFileSync(this._filePath, info + "\n\n");
+    this._workspace.appendFileSync(this._filePath, info + "\n\n");
   }
 
   notice(msg: string): void {
