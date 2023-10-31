@@ -1,4 +1,4 @@
-import { AgentOutputType } from "@evo-ninja/agent-utils"
+import { AgentOutputType } from "@/agent-core"
 import { ScriptFunction } from "./utils";
 import { Agent } from "../agents/utils";
 

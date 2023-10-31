@@ -1,25 +1,19 @@
 import {
   OpenAI,
   Chat,
-  ConsoleLogger,
-  Logger,
-  Env,
   LlmApi,
-  InMemoryWorkspace,
-  Scripts,
-  WrapClient,
   LlmQuery,
-  charsToTokens, 
   tokensToChars,
   Rag,
-} from "@evo-ninja/agent-utils";
+} from "@/agent-core";
 import dotenv from "dotenv";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import path from "path";
 import fs from "fs";
-import { AgentContext } from "@evo-ninja/agent-utils";
-import { LlmModel } from "@evo-ninja/agent-utils";
+import { AgentContext } from "@/agent-core";
+import { LlmModel } from "@/agent-core";
 import { Prompt } from "../agents/utils";
+import { ConsoleLogger, Logger, Env, InMemoryWorkspace, Scripts, WrapClient } from "@evo-ninja/agent-utils";
 
 dotenv.config({
   path: path.join(__dirname, "../../../../.env")

@@ -1,7 +1,7 @@
 import { AnalyzeDataFunction } from "./AnalyzeData";
 import { AgentFunctionBase } from "./utils";
 import { Agent } from "../agents/utils";
-import { AgentFunctionResult, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+import { AgentFunctionResult, ChatMessageBuilder } from "@/agent-core";
 
 interface ReadAndAnalyzeCSVDataParameters {
   path: string;

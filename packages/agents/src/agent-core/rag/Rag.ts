@@ -1,7 +1,7 @@
 import { StandardRagBuilder } from "./StandardRagBuilder";
 import { AgentContext } from "../agent/AgentContext";
 import { TextChunker, TextRecombiner } from "../chunking";
-import { Workspace } from "../sys";
+import { Workspace } from "@evo-ninja/agent-utils";
 
 export class Rag {
   static standard<TItem = string>(context: AgentContext, collectionName?: string, workspace?: Workspace, items?: TItem[]): StandardRagBuilder<TItem> {

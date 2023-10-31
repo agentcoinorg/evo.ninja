@@ -1,4 +1,4 @@
-import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@/agent-core";
 import { AgentFunctionBase } from "./utils";
 
 interface ThinkFuncParameters { 

@@ -1,4 +1,4 @@
-import { AgentContext, Chat } from "@evo-ninja/agent-utils";
+import { AgentContext, Chat } from "@/agent-core";
 import { WebSearchFunction } from "../../functions/WebSearch";
 import { PlanWebResearchFunction } from "../../functions/PlanWebResearch";
 import { prompts } from "./prompts";

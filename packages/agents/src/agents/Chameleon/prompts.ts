@@ -1,4 +1,4 @@
-import { ChatMessage } from "@evo-ninja/agent-utils";
+import { ChatMessage } from "@/agent-core";
 import { AgentFunctionBase } from "../../functions/utils";
 import { GoalRunArgs } from "../../agents/utils";
 import { AgentPrompts } from "../../agents/utils";

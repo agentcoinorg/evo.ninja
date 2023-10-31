@@ -4,20 +4,18 @@ import {
   ChatMessage,
   FunctionDefinition,
   MessageChunker,
-  Timeout,
   Tokenizer,
-  Workspace,
   ContextualizedChat,
   Chat,
   agentFunctionBaseToAgentFunction,
   tokensToChars,
-  Rag,
-  AgentOutput
-} from "@evo-ninja/agent-utils";
-import { AgentContext } from "@evo-ninja/agent-utils";
+  AgentOutput,
+  AgentContext
+} from "@/agent-core";
 import { agentPrompts, prompts } from "./prompts";
 import { Agent, AgentConfig, GoalRunArgs, Prompt } from "../../agents/utils";
 import { findBestAgent } from "./findBestAgent";
+import { Timeout, Workspace } from "@evo-ninja/agent-utils";
 
 export class ChameleonAgent extends Agent<GoalRunArgs> {
   private _cChat: ContextualizedChat;

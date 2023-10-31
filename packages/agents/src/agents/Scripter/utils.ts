@@ -1,4 +1,4 @@
-import { trimText } from "@evo-ninja/agent-utils";
+import { trimText } from "@/agent-core";
 
 export const FUNCTION_CALL_SUCCESS_CONTENT = (fnName: string, params: any, result: string) => 
   `## Function Call:\n` + 

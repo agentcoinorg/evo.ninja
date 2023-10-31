@@ -1,6 +1,6 @@
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { ReadFileFunction } from "../../functions/ReadFile";
-import { AgentContext } from "@evo-ninja/agent-utils";
+import { AgentContext } from "@/agent-core";
 import { prompts } from "./prompts";
 import { Agent, AgentConfig } from "../utils";
 

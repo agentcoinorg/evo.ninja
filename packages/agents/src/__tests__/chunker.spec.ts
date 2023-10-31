@@ -1,10 +1,8 @@
+import { CsvChunker, LocalCollection, LocalVectorDB, OpenAIEmbeddingAPI, TextChunker } from "@/agent-core";
+import { ConsoleLogger, Env, InMemoryWorkspace } from "@evo-ninja/agent-utils";
 import dotenv from "dotenv";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import path from "path";
-import { OpenAIEmbeddingAPI, LocalVectorDB, LocalCollection } from "../embeddings";
-import { InMemoryWorkspace, Env, ConsoleLogger } from "../sys";
-import { TextChunker } from "../chunking/TextChunker";
-import { CsvChunker } from "../chunking/CsvChunker";
 
 dotenv.config({
   path: path.join(__dirname, "../../../../.env")

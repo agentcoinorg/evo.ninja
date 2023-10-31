@@ -2,13 +2,10 @@ import {
   AgentFunctionResult,
   AgentOutputType,
   ChatMessageBuilder,
-  JsEngine,
-  JsEngine_GlobalVar,
-  Scripts,
-  shimCode
-} from "@evo-ninja/agent-utils"
+} from "@/agent-core"
 import { Agent } from "../../agents/utils";
 import { AgentFunctionBase } from "./AgentFunctionBase";
+import { JsEngine, JsEngine_GlobalVar, Scripts, shimCode } from "@evo-ninja/agent-utils";
 
 export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams> {
   constructor(private scripts: Scripts, private storeInVariable?: boolean) {

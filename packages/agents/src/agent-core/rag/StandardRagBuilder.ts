@@ -1,7 +1,7 @@
 import { v4 as uuid } from "uuid";
 import { AgentContext } from "../agent/AgentContext";
 import { LocalCollection, OpenAIEmbeddingAPI, LocalVectorDB, LocalDocument } from "../embeddings";
-import { Workspace } from "../sys";
+import { Workspace } from "@evo-ninja/agent-utils";
 
 export type Recombiner<TItem, TRecombine> = (results: () => Promise<AsyncGenerator<LocalDocument<{ index: number }>>>, originalItems: TItem[]) => Promise<TRecombine>;
 

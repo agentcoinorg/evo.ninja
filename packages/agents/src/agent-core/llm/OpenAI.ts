@@ -1,5 +1,4 @@
 import { LlmApi, LlmOptions, ChatLogs, ChatMessage, LlmModel } from ".";
-import { Logger } from "../";
 
 import {
   ChatCompletionRequestMessage,
@@ -10,6 +9,7 @@ import {
   ChatCompletionFunctions,
 } from "openai";
 import { cleanOpenAIError } from "../utils/openai";
+import { Logger } from "@evo-ninja/agent-utils";
 
 export {
   ChatCompletionResponseMessage as OpenAIResponse,

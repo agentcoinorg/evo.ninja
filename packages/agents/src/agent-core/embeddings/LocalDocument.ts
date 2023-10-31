@@ -1,5 +1,5 @@
+import { Workspace } from "@evo-ninja/agent-utils";
 import path from "path-browserify";
-import { Workspace } from "../sys";
 
 const VECTOR_FILENAME = "vector.json"
 const DOCUMENT_FILENAME = "document.json"

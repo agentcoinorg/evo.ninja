@@ -1,7 +1,6 @@
 import {
   RunnableAgent,
   ChatMessage,
-  Workspace,
   AgentOutput,
   RunResult,
   basicFunctionCallLoop,
@@ -15,13 +14,14 @@ import {
   executeAgentFunction,
   FunctionDefinition,
   AgentFunction
-} from "@evo-ninja/agent-utils";
+} from "@/agent-core";
 import { ResultErr } from "@polywrap/result";
 import { AgentConfig } from "./AgentConfig";
-import { AgentContext } from "@evo-ninja/agent-utils";
-import { ExecuteAgentFunctionCalled } from "@evo-ninja/agent-utils";
+import { AgentContext } from "@/agent-core";
+import { ExecuteAgentFunctionCalled } from "@/agent-core";
 import { Prompt } from "./Prompt";
 import { AgentFunctionBase } from "../../functions/utils";
+import { Workspace } from "@evo-ninja/agent-utils";
 
 export type GoalRunArgs = {
   goal: string;

@@ -1,5 +1,5 @@
-import { AgentFunctionResult, ChatMessageBuilder, LlmApi, Tokenizer } from "@evo-ninja/agent-utils";
-import { DirectoryChunker } from "@evo-ninja/agent-utils";
+import { AgentFunctionResult, ChatMessageBuilder, LlmApi, Tokenizer } from "@/agent-core";
+import { DirectoryChunker } from "@/agent-core";
 import { Agent } from "../agents/utils";
 import { LlmAgentFunctionBase } from "./utils";
 

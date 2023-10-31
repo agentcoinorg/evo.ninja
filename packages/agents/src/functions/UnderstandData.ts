@@ -1,7 +1,7 @@
 import { ReadDirectoryFunction } from "./ReadDirectory";
 import { ReadAndAnalyzeCSVDataFunction } from "./ReadAndAnalyzeCSVData";
 import { CsvJoinableColumnsFunction } from "./CsvJoinableColumns";
-import { AgentFunctionResult, ChatMessageBuilder } from "@evo-ninja/agent-utils";
+import { AgentFunctionResult, ChatMessageBuilder } from "@/agent-core";
 import { Agent } from "../agents/utils";
 import { AgentFunctionBase } from "./utils";
 

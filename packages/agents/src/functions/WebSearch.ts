@@ -1,16 +1,4 @@
-import {
-  AgentFunctionResult,
-  AgentOutputType,
-  AgentVariables,
-  ChatMessageBuilder,
-  LlmApi,
-  TextChunker,
-  Tokenizer,
-  trimText,
-  Rag,
-  ArrayRecombiner,
-  AgentContext
-} from "@evo-ninja/agent-utils";
+import { AgentContext, AgentFunctionResult, AgentOutputType, AgentVariables, ArrayRecombiner, ChatMessageBuilder, LlmApi, Rag, TextChunker, Tokenizer, trimText } from "@/agent-core";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { Agent, Prompt } from "../agents/utils";
 import { LlmAgentFunctionBase, processWebpage, searchOnGoogle } from "./utils";

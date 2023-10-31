@@ -1,6 +1,6 @@
+import { Scripts } from "@evo-ninja/agent-utils";
 import dotenv from "dotenv";
 import path from "path";
-import { Scripts } from "../scripts";
 
 dotenv.config({
   path: path.join(__dirname, "../../../../.env")

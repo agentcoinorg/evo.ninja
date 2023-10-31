@@ -1,7 +1,7 @@
-import { Workspace } from "../sys";
 import path from "path-browserify";
 import { v4 as uuid } from "uuid";
 import { BaseDocumentMetadata, LocalDocument } from "./LocalDocument";
+import { Workspace } from "@evo-ninja/agent-utils";
 
 export class LocalDocumentStore<TMetadata extends BaseDocumentMetadata = BaseDocumentMetadata> {
   constructor(

@@ -1,4 +1,4 @@
-import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder, trimText } from "@evo-ninja/agent-utils";
+import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder, trimText } from "@/agent-core";
 import { load } from "cheerio";
 import { Agent } from "../agents/utils";
 import { AgentFunctionBase } from "./utils";

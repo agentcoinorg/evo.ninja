@@ -1,9 +1,8 @@
 import {
-  Timeout,
   AgentOutput,
   RunResult
-} from "@evo-ninja/agent-utils";
-import { AgentContext } from "@evo-ninja/agent-utils";
+} from "@/agent-core";
+import { AgentContext } from "@/agent-core";
 import { DelegateAgentFunction } from "../../functions/DelegateAgentFunction";
 import { VerifyGoalAchievedFunction } from "../../functions/VerifyGoalAchieved";
 import { prompts } from "./prompts";
@@ -12,6 +11,7 @@ import { Agent, AgentConfig, GoalRunArgs } from "../utils";
 import { CsvAnalystAgent } from "../CsvAnalyst";
 import { DeveloperAgent } from "../Developer";
 import { ResearcherAgent } from "../Researcher";
+import { Timeout } from "@evo-ninja/agent-utils";
 
 export type AgentOrFactory = (Agent | (() => Agent));
 

@@ -3,7 +3,7 @@ import {
   AgentFunctionResult,
   AgentOutputType,
   ChatMessageBuilder,
-} from "@evo-ninja/agent-utils";
+} from "@/agent-core";
 import { AgentFunctionBase } from "./utils";
 import { Agent } from "../agents/utils";
 
