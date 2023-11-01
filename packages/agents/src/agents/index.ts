@@ -1,5 +1,4 @@
 export * from "./Evo";
-export * from "./Chameleon";
 export * from "./ScriptWriter"
 export * from "./Developer"
 export * from "./Researcher"
