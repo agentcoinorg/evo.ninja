@@ -10,16 +10,16 @@ To get started using evo.ninja simply head to our [website](https://evo.ninja), 
 
 ## How it works
 
-What makes evo.ninja special is that it evolves itself in real-time, based on the tasks at hand. Evo utilizes pre-defined agent personas that are tailored to specific domains of tasks. Each iteration of evo's execution loop it will select and adopts the persona that fits the task at hand best.
+What makes evo.ninja special is that it evolves itself in real-time, based on the tasks at hand. Evo utilizes pre-defined agent personas that are tailored to specific domains of tasks. Each iteration of evo's execution loop it will select and adopt the persona that fits the task at hand best.
 
 ### Agent Personas
 
-| Agent | Description |
+| Agent | Expertise |
 |-|-|
-| 📝[Synthesizer](./packages/agents/src/agents/Synthesizer/index.ts) | An assistant that handle files in workspace |
-| #️⃣ [Csv Analyst](./packages/agents/src/agents/CsvAnalyst/index.ts) | An expert analyzing and modifying CSV datasets. |
-| 🌐 [Researcher](./packages/agents/src/agents/Researcher/index.ts) | Advanced web information retriever that allows to do complex research in the internet. |
-| 💻 [Developer](./packages/agents/src/agents/Developer/index.ts) | A developer assistant that excels at coding related tasks with access to the file system. It plans and writes clean and effective code to files. |
+| 📝[Synthesizer](./packages/agents/src/agents/Synthesizer/index.ts) | "Reads text files, analyzing and gathering data and information from text files, generating summaries and reports, and analyzing text." |
+| #️⃣ [Csv Analyst](./packages/agents/src/agents/CsvAnalyst/index.ts) | "Adept at reading CSV files, searching for data, extracting key data points, calculating amounts, and derive insights from CSV files." |
+| 🌐 [Researcher](./packages/agents/src/agents/Researcher/index.ts) | "Searching the internet, comprehending details, and finding information." |
+| 💻 [Developer](./packages/agents/src/agents/Developer/index.ts) | "Architect and build complex software. specialized in python." |
 
 ### Execution Loop
 
