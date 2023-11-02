@@ -4,8 +4,7 @@
   "workspaces": {
     "packages": [
       "packages/*",
-      "apps/cli",
-      "apps/browser"
+      "apps/*"
     ],
     "nohoist": ["gpt-tokenizer"]
   },
