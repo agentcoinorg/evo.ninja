@@ -9,7 +9,6 @@
     ],
     "downlevelIteration": true,
     "experimentalDecorators": true,
-    "moduleResolution": "node",
     "declaration": true,
     "preserveSymlinks": true,
     "preserveWatchOutput": true,
@@ -19,10 +18,21 @@
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noUnusedLocals": false,
-    "module": "commonjs",
+    "module": "ESNext",
     "sourceMap": true,
-    "target": "es2015",
+    "target": "ES2020",
+    "strictNullChecks": true,
+    "useDefineForClassFields": true,
+    "skipLibCheck": true,
+    "include": ["src"],
+    "references": [{ "path": "./tsconfig.node.json" }],
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
-    "strictNullChecks": true
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
   }
 }
