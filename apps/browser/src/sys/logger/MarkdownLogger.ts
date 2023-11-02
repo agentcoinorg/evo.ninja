@@ -1,4 +1,5 @@
-import { ILogger, ChatMessage } from "@evo-ninja/agent-utils";
+import { ILogger } from "@evo-ninja/agent-utils";
+import { ChatMessage } from "@evo-ninja/agents";
 
 export interface MarkdownLoggerConfig {
   onLog(markdown: string, color?: string): void;

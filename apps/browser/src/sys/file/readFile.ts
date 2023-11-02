@@ -1,13 +1,13 @@
 import { InMemoryFile } from "@nerfzael/memory-fs";
 
 export const readFile = (file: File): Promise<InMemoryFile> => {
-  return new Promise<InMemoryFile>((resolve, reject) => {
+  return new Promise<InMemoryFile>((resolve, _) => {
     const reader = new FileReader();
-    reader.onload = async (e: any) => {
-      const text = e.target.result;
+    reader.onload = async (e: ProgressEvent<FileReader>) => {
+      const text = e.target?.result;
 
       resolve({
-        path: (file as any)["path"],
+        path: file.webkitRelativePath,
         content: text,
       } as InMemoryFile);
     };
