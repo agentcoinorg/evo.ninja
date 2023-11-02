@@ -10,5 +10,5 @@ try {
   const response = await axios.get(url, { params });
   return response.data[currency].usd;
 } catch (error) {
-  throw new Error(`Could not fetch price for ${currency}: ${error.message}`);
+  throw new Error("Could not fetch price for " + currency + ": " + error.message);
 }

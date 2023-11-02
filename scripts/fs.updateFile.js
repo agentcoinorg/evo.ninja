@@ -1,7 +1,7 @@
 const fs = require("fs");
 try {
   if (!fs.existsSync(path)) {
-    throw new Error(`File does not exist at ${path}`);
+    throw new Error("File does not exist at " + path);
   }
   const originalContent = fs.readFileSync(path, "utf-8");
   const lines = originalContent.split("\n");
@@ -27,5 +27,5 @@ try {
 
   fs.writeFileSync(path, newContent, "utf-8");
 } catch (error) {
-  throw new Error(`Failed to write file: ${error.message}`);
+  throw new Error("Failed to write file: " + error.message);
 }

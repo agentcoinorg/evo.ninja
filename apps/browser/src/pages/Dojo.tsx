@@ -12,12 +12,10 @@ import Sidebar from "../components/Sidebar/Sidebar";
 import Chat, { ChatMessage } from "../components/Chat/Chat";
 import { MarkdownLogger } from '../sys/logger';
 import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
-// import { onGoalAchievedScript, onGoalFailedScript, speakScript } from '../scripts';
 import {
   AgentContext,
   Evo,
   SubWorkspace,
-  Workspace,
   InMemoryWorkspace,
   Logger,
   ConsoleLogger,
@@ -168,10 +166,6 @@ function Dojo() {
       });
 
       const scriptsWorkspace = createInBrowserScripts();
-      // const scriptsWorkspace = new InMemoryWorkspace();
-      // addScript(onGoalAchievedScript, scriptsWorkspace);
-      // addScript(onGoalFailedScript, scriptsWorkspace);
-      // addScript(speakScript, scriptsWorkspace);
 
       const scripts = new Scripts(
         scriptsWorkspace
