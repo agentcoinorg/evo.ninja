@@ -16,17 +16,20 @@ import { onGoalAchievedScript, onGoalFailedScript, speakScript } from '../script
 import {
   AgentContext,
   Evo,
-  SubWorkspace,
-  Workspace,
-  InMemoryWorkspace,
-  Logger,
-  ConsoleLogger,
-  Scripts,
-  Env,
   OpenAI,
   LlmModel,
   Chat as EvoChat
 } from '@evo-ninja/agents';
+import {
+  Logger,
+  ConsoleLogger,
+  Workspace,
+  InMemoryWorkspace,
+  Env,
+  SubWorkspace,
+  Scripts,
+} from '@evo-ninja/agent-utils';
+
 
 function addScript(script: {name: string, definition: string, code: string}, scriptsWorkspace: Workspace) {
   scriptsWorkspace.writeFileSync(`${script.name}.json`, script.definition);
@@ -110,37 +113,39 @@ function Dojo() {
     checkForUserFiles();
   }, [uploadedFiles]);
 
-  const onConfigSaved = (apiKey: string, model: string) => {
+  const onConfigSaved = (apiKey: string, model: string, serpApiKey: string) => {
+    let configComplete = true;
+
     if (!apiKey) {
       localStorage.removeItem("openai-api-key");
       setApiKey(null);
-      setConfigOpen(true);
+      configComplete = false;
     } else {
       localStorage.setItem("openai-api-key", apiKey);
-      setConfigOpen(false);
       setApiKey(apiKey);
     }
 
-    if(!model) {
-      localStorage.removeItem("opeanai-model");
+    if (!model) {
+      localStorage.removeItem("openai-model");
       setModel(null);
-      setConfigOpen(true);
+      configComplete = false;
     } else {
       localStorage.setItem("openai-model", model);
       setModel(model);
-      setConfigOpen(false);
     }
 
     if (!serpApiKey) {
       localStorage.removeItem("serp-api-key");
       setSerpApiKey(null);
-      setConfigOpen(true);
+      configComplete = false;
     } else {
       localStorage.setItem("serp-api-key", serpApiKey);
-      setConfigOpen(false);
       setSerpApiKey(serpApiKey);
     }
-  }
+
+    setConfigOpen(!configComplete); // Only close the modal if all configuration is complete
+}
+
 
   useEffect(() => {
     try {
