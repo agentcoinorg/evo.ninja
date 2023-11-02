@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 
-import * as EvoCore from "@evo-ninja/agent-utils";
+import * as EvoCore from "@evo-ninja/agents";
+import * as EvoUtils from "@evo-ninja/agent-utils";
 import { InMemoryFile } from '@nerfzael/memory-fs';
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 import clsx from 'clsx';
@@ -14,12 +15,11 @@ import Chat, { ChatMessage } from "../components/Chat/Chat";
 import { MarkdownLogger } from '../sys/logger';
 import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
 import { onGoalAchievedScript, onGoalFailedScript, speakScript } from '../scripts';
-import { AgentContext } from '@evo-ninja/agent-utils';
-import { Evo } from '@evo-ninja/agents';
-import { SubWorkspace } from '@evo-ninja/agent-utils';
+import { AgentContext, Evo } from '@evo-ninja/agents';
+import { SubWorkspace, Workspace } from '@evo-ninja/agent-utils';
 
 
-function addScript(script: {name: string, definition: string, code: string}, scriptsWorkspace: EvoCore.Workspace) {
+function addScript(script: {name: string, definition: string, code: string}, scriptsWorkspace: Workspace) {
   scriptsWorkspace.writeFileSync(`${script.name}.json`, script.definition);
   scriptsWorkspace.writeFileSync(`${script.name}.js`, script.code);
 }
@@ -42,8 +42,8 @@ function Dojo() {
   const [scripts, setScripts] = useState<InMemoryFile[]>([]);
   const [userFiles, setUserFiles] = useState<InMemoryFile[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<InMemoryFile[]>([]);
-  const [userWorkspace, setUserWorkspace] = useState<EvoCore.InMemoryWorkspace | undefined>(undefined);
-  const [scriptsWorkspace, setScriptsWorkspace] = useState<EvoCore.InMemoryWorkspace | undefined>(undefined);
+  const [userWorkspace, setUserWorkspace] = useState<EvoUtils.InMemoryWorkspace | undefined>(undefined);
+  const [scriptsWorkspace, setScriptsWorkspace] = useState<EvoUtils.InMemoryWorkspace | undefined>(undefined);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [goalEnded, setGoalEnded] = useState<boolean>(false);
 
@@ -150,26 +150,26 @@ function Dojo() {
           });
         }
       });
-      const logger = new EvoCore.Logger([
+      const logger = new EvoUtils.Logger([
         markdownLogger,
-        new EvoCore.ConsoleLogger()
+        new EvoUtils.ConsoleLogger()
       ], {
         promptUser: () => Promise.resolve("N/A"),
         logUserPrompt: () => {}
       });
 
-      const scriptsWorkspace = new EvoCore.InMemoryWorkspace();
+      const scriptsWorkspace = new EvoUtils.InMemoryWorkspace();
       addScript(onGoalAchievedScript, scriptsWorkspace);
       addScript(onGoalFailedScript, scriptsWorkspace);
       addScript(speakScript, scriptsWorkspace);
 
-      const scripts = new EvoCore.Scripts(
+      const scripts = new EvoUtils.Scripts(
         scriptsWorkspace
       );
 
       setScriptsWorkspace(scriptsWorkspace);
 
-      const env = new EvoCore.Env(
+      const env = new EvoUtils.Env(
         {
           "OPENAI_API_KEY": apiKey,
           "GPT_MODEL": model,
@@ -187,7 +187,7 @@ function Dojo() {
         logger
       );
 
-      const userWorkspace = new EvoCore.InMemoryWorkspace();
+      const userWorkspace = new EvoUtils.InMemoryWorkspace();
       setUserWorkspace(userWorkspace);
 
       const internals = new SubWorkspace(".evo", userWorkspace);
