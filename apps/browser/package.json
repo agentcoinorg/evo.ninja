@@ -37,7 +37,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "prebuild": "node src/scripts.template.js",
+    "prebuild": "node scripts/scripts.template.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "npx prettier . --write"

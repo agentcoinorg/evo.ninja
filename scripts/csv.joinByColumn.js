@@ -35,7 +35,7 @@ function joinCSVs(csv1, csv2, columnName) {
   const joinIndex2 = rows2[0].indexOf(columnName);
 
   if (joinIndex1 === -1 || joinIndex2 === -1) {
-    throw new Error("Join column " + columnName + " not found in one of the CSVs.");
+    throw new Error(`Join column "${columnName}" not found in one of the CSVs.`);
   }
 
   // Extract headers
@@ -72,7 +72,7 @@ function joinCSVs(csv1, csv2, columnName) {
   const serializedDataRows = serializeCSV(combinedDataRows, delimiter);
 
   // Return the concatenated serialized CSV
-  return serializedHeaders + "\n" + serializedDataRows;
+  return `${serializedHeaders}\n${serializedDataRows}`;
 }
 
 const result = joinCSVs(csv1, csv2, joinColumnName);
