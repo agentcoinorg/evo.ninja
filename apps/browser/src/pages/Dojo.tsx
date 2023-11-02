@@ -16,20 +16,17 @@ import { onGoalAchievedScript, onGoalFailedScript, speakScript } from '../script
 import {
   AgentContext,
   Evo,
+  SubWorkspace,
+  Workspace,
+  InMemoryWorkspace,
+  Logger,
+  ConsoleLogger,
+  Scripts,
+  Env,
   OpenAI,
   LlmModel,
   Chat as EvoChat
 } from '@evo-ninja/agents';
-import {
-  Logger,
-  ConsoleLogger,
-  Workspace,
-  InMemoryWorkspace,
-  Env,
-  SubWorkspace,
-  Scripts,
-} from '@evo-ninja/agent-utils';
-
 
 function addScript(script: {name: string, definition: string, code: string}, scriptsWorkspace: Workspace) {
   scriptsWorkspace.writeFileSync(`${script.name}.json`, script.definition);
@@ -143,7 +140,8 @@ function Dojo() {
       setSerpApiKey(serpApiKey);
     }
 
-    setConfigOpen(!configComplete); // Only close the modal if all configuration is complete
+    // Only close the modal if all configuration is complete
+    setConfigOpen(!configComplete);
 }
 
 
