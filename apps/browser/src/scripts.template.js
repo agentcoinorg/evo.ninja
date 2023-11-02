@@ -34,7 +34,7 @@ const scripts = uniqueFilesWithoutExtension.map((name) => {
 
 const templateFile = `import { InMemoryWorkspace, Workspace } from "@evo-ninja/agent-utils";
 
-export function createInBrowserScripts(): Workspace {
+export function createInBrowserScripts(): InMemoryWorkspace {
   const workspace = new InMemoryWorkspace();
 
   const availableScripts = [
