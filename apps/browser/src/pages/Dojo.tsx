@@ -167,7 +167,6 @@ function Dojo() {
         new ConsoleLogger()
       ], {
         promptUser: () => Promise.resolve("N/A"),
-        logUserPrompt: () => {}
       });
 
       const scriptsWorkspace = new InMemoryWorkspace();

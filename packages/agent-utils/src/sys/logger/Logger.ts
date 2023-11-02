@@ -10,7 +10,6 @@ export interface ILogger {
 
 export interface LoggerCallbacks {
   promptUser: (query: string) => Promise<string>;
-  logUserPrompt: (response: string) => void;
 }
 
 export class Logger implements ILogger {
@@ -63,9 +62,7 @@ export class Logger implements ILogger {
   }
 
   async prompt(query: string): Promise<string> {
-    const response = await this._callbacks.promptUser(query);
-    this._callbacks.logUserPrompt(response);
-    return response;
+    return this._callbacks.promptUser(query);
   }
 
   async logHeader(): Promise<void> {

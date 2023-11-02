@@ -69,7 +69,7 @@ Run evo in the terminal:
 - `-d, --debug` - Emit debug logs within the `./sessions/${session}/.evo/...` directory.
 
 ### Session Workspace
-Once the evo.ninja CLI is run, there will be a `./sessions` directory created, with named sessions within it. This is the root directory for the agent, and only files within this directory will be read and written by the agent.
+Once the evo.ninja CLI is run, there will be a `./sessions` directory created, with named sessions within it. This is the root directory for the agent, and only files within this directory will be read and written by the agent. There exists a `.evo/` directory within each session workspace, where internal logs are kept, including a `chat.md` file that's provides a markdown version of the agent's output. Use `--debug` to get a raw debug log emitted here as well.
 
 ## UI
 

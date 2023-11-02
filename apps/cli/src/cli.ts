@@ -36,7 +36,7 @@ export async function cli(): Promise<void> {
   let goal: string | undefined = program.args[0]
 
   if (!goal && !options.messages) {
-    goal = await app.logger.prompt("Enter your goal: ");
+    goal = await app.logger.prompt("Enter your goal");
   }
 
   app.debugLog?.goalStart(goal);
