@@ -71,15 +71,22 @@ export async function cli(): Promise<void> {
   app.debugLog?.goalEnd();
 };
 
+let firstGoalEntered = false;
+
 // Loop to handle multiple goals
 while (true) {
-  let goal = program.args.shift(); // Get the next goal from the args array
+  let goal: string;
 
-  if (!goal) {
-    goal = await app.logger.prompt("Enter your next goal: ");
-    if (!goal) break; // Exit if no goal is provided
+  if (!firstGoalEntered) {
+    goal = await app.logger.prompt("Enter your goal: "); // Prompt for the first goal
+    firstGoalEntered = true; // Set this to ensure we don't ask to enter the goal again
+  } else {
+    goal = await app.logger.prompt("Provide feedback: "); // Prompt for feedback after the first goal
   }
 
+  if (!goal) break; // Exit if no goal or feedback is provided
+
+  console.log(`Goal: ${goal}`);
   await handleGoal(goal);
 }
 
