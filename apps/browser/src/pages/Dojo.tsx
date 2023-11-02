@@ -110,37 +110,40 @@ function Dojo() {
     checkForUserFiles();
   }, [uploadedFiles]);
 
-  const onConfigSaved = (apiKey: string, model: string) => {
+  const onConfigSaved = (apiKey: string, model: string, serpApiKey: string) => {
+    let configComplete = true;
+
     if (!apiKey) {
       localStorage.removeItem("openai-api-key");
       setApiKey(null);
-      setConfigOpen(true);
+      configComplete = false;
     } else {
       localStorage.setItem("openai-api-key", apiKey);
-      setConfigOpen(false);
       setApiKey(apiKey);
     }
 
-    if(!model) {
-      localStorage.removeItem("opeanai-model");
+    if (!model) {
+      localStorage.removeItem("openai-model");
       setModel(null);
-      setConfigOpen(true);
+      configComplete = false;
     } else {
       localStorage.setItem("openai-model", model);
       setModel(model);
-      setConfigOpen(false);
     }
 
     if (!serpApiKey) {
       localStorage.removeItem("serp-api-key");
       setSerpApiKey(null);
-      setConfigOpen(true);
+      configComplete = false;
     } else {
       localStorage.setItem("serp-api-key", serpApiKey);
-      setConfigOpen(false);
       setSerpApiKey(serpApiKey);
     }
-  }
+
+    // Only close the modal if all configuration is complete
+    setConfigOpen(!configComplete);
+}
+
 
   useEffect(() => {
     try {

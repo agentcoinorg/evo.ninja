@@ -3,11 +3,11 @@ import React, { useState } from "react";
 import "./DojoConfig.css";
 import { defaultModel, supportedModels } from "../../supportedModels";
 
-export interface DojoConfigProps {
+interface DojoConfigProps {
   apiKey: string | null;
-  serpApiKey: string | null;
   model: string | null;
-  onConfigSaved: (apiKey: string, model: string) => void;
+  serpApiKey: string | null;
+  onConfigSaved: (apiKey: string, model: string, serpApiKey: string) => void;
 }
 
 function DojoConfig(props: DojoConfigProps) {
@@ -33,7 +33,7 @@ function DojoConfig(props: DojoConfigProps) {
           className="DojoConfig__Select"
         >
           {supportedModels.map((m) => (
-            <option value={m}>{m}</option>
+            <option key={m} value={m}>{m}</option>
           ))}
         </select>
         <h3>Please enter your Serp API key</h3>
@@ -45,7 +45,7 @@ function DojoConfig(props: DojoConfigProps) {
         />
         <button
           className="DojoConfig__Btn"
-          onClick={() => onConfigSaved(apiKey, model)}
+          onClick={() => onConfigSaved(apiKey, model, serpApiKey)}
         >
           Save
         </button>
