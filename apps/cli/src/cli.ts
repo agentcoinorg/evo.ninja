@@ -1,11 +1,9 @@
 import { createApp } from "./app";
-
 import { Logger, Timeout } from "@evo-ninja/agent-utils";
 import { program } from "commander";
 
 export async function cli(): Promise<void> {
   program
-    .argument("[goal]", "Goal to be achieved")
     .option("-s, --session <name>")
     .option("-t, --timeout <seconds>")
     .option("-r, --root <path>")
@@ -18,8 +16,8 @@ export async function cli(): Promise<void> {
   const timeout = new Timeout(
     options.timeout,
     (logger: Logger): void => {
-      logger.error("Agent has timeout");
-      process.exit(0);
+      logger.error("Agent has timed out");
+      process.exit(1);
     },
   );
 
@@ -28,27 +26,21 @@ export async function cli(): Promise<void> {
     rootDir: options.root,
     debug: options.debug,
     messagesPath: options.messages,
-    sessionName: options.session
+    sessionName: options.session,
   });
 
   await app.logger.logHeader();
 
-  let goal: string | undefined = program.args[0]
+  // Refactored goal handling into a separate async function
+  async function handleGoal(goal: string) {
+    app.debugLog?.goalStart(goal);
 
-  if (!goal && !options.messages) {
-    goal = await app.logger.prompt("Enter your goal: ");
-  }
+    let iterator = options.messages ? app.evo.runWithChat([...app.chat.messages]) : app.evo.run({ goal });
 
-  app.debugLog?.goalStart(goal);
-
-  let iterator = options.messages ? app.evo.runWithChat([...app.chat.messages]) : app.evo.run({ goal });
-
-  while(true) {
-    app.debugLog?.stepStart();
-
-    const response = await iterator.next();
-
-    app.debugLog?.stepEnd();
+    while (true) {
+      app.debugLog?.stepStart();
+      const response = await iterator.next();
+      app.debugLog?.stepEnd();
 
     const logMessage = (message: any) => {
       const messageStr = `${message.title}\n${message.content}`;
@@ -77,15 +69,28 @@ export async function cli(): Promise<void> {
   }
 
   app.debugLog?.goalEnd();
+};
 
-  return Promise.resolve();
+// Loop to handle multiple goals
+while (true) {
+  let goal = program.args.shift(); // Get the next goal from the args array
+
+  if (!goal) {
+    goal = await app.logger.prompt("Enter your next goal: ");
+    if (!goal) break; // Exit if no goal is provided
+  }
+
+  await handleGoal(goal);
+}
+
+return Promise.resolve();
 }
 
 cli()
-  .then(() => {
-    process.exit();
-  })
-  .catch((err) => {
-    console.error(err);
-    process.abort();
-  });
+.then(() => {
+  process.exit(0);
+})
+.catch((err) => {
+  console.error(err);
+  process.abort();
+});
