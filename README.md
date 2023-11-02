@@ -26,7 +26,9 @@ What makes evo.ninja special is that it evolves itself in real-time, based on th
 1. **Predict Next Step:** For each iteration of the execution loop, Evo starts by making an informed prediction about what the best-next-step should be.
 2. **Select Best Agent:** Based on this prediction, Evo selects a best-fit agent persona.
 3. **Contextualize Chat History:** Based on the prediction from step 1, and the agent persona in step 2, the complete chat history is "contextualized" and only the most relevant messages are used for the final evaluation step.
-4. **Evaluate and Execute:** Using a smart LLM (GPT-4), a final evaluation step is run to determine what function call should be executed in order to achieve the user's goal. Once the function call has been executed, the response is stored, and the loop repeats itself until the user's goal has been accomplished.
+4. **Evaluate and Execute:** A final evaluation step is run to determine what agent function is executed to try and further achieve the user's goal.
+
+These 4 steps run in a loop continuously until it is determined the user's goal has been achieved.
 
 ## Setup
 
