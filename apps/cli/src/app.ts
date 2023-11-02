@@ -1,4 +1,4 @@
-import { AgentContext, ChameleonAgent, Chat, ChatLog, ChatLogType, ChatMessage, DebugLlmApi, DebugLog, GoalRunArgs, LlmApi, LlmModel, OpenAI, RunnableAgent } from "@evo-ninja/agents";
+import { AgentContext, Evo, Chat, ChatLog, ChatLogType, ChatMessage, DebugLlmApi, DebugLog, GoalRunArgs, LlmApi, LlmModel, OpenAI, RunnableAgent } from "@evo-ninja/agents";
 import {
   Env,
   Scripts,
@@ -123,7 +123,7 @@ export function createApp(config?: AppConfig): App {
   }
 
   // Evo
-  const evo = new ChameleonAgent(
+  const evo = new Evo(
     new AgentContext(
       llm,
       chat,
