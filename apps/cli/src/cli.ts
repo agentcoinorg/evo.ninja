@@ -51,7 +51,7 @@ export async function cli(): Promise<void> {
     app.debugLog?.stepEnd();
 
     const logMessage = (message: any) => {
-      const messageStr = `${message.title}\n${message.content}`;
+      const messageStr = `${message.title}  \n${message.content}`;
       app.fileLogger.info(`# Evo:\n${messageStr}`);
       app.consoleLogger.info(`Evo: ${messageStr}`);
       app.debugLog?.stepLog(message);

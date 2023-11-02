@@ -20,22 +20,22 @@ export class FileLogger implements ILogger {
   }
 
   info(info: string): void {
-    this._workspace.appendFileSync(this._filePath, info + "\n\n");
+    this._workspace.appendFileSync(this._filePath, info + "  \n");
   }
 
   notice(msg: string): void {
-    this.info(msg + "\n  \n");
+    this.info(msg + "  \n");
   }
 
   success(msg: string): void {
-    this.info(msg + "\n  \n");
+    this.info(msg + "  \n");
   }
 
   warning(msg: string): void {
-    this.info(msg + "\n  \n");
+    this.info(msg + "  \n");
   }
 
   error(msg: string): void {
-    this.info(msg + "\n  \n");
+    this.info(msg + "  \n");
   }
 }
