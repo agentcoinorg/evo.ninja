@@ -2,23 +2,42 @@
 
 ![](https://hackmd.io/_uploads/ByWjLKAhn.png)
 
-[Discord](https://discord.gg/X7ystzGcf5) | [Website](https://evo.ninja)
-Give this repo a star if you use it! :star: 
+[Discord](https://discord.gg/X7ystzGcf5) | [Website](https://evo.ninja) | Give the repo a :star: !  
 
-## Welcome to evo.ninja 
+## Welcome!
 
-Dive in to explore the capabilities and features provided by this agent.
+To get started using evo.ninja simply head to our [website](https://evo.ninja), or to build and run from source follow these [setup instructions](#setup).
+
+## How it works
+
+What makes evo.ninja special is that it evolves itself in real-time, based on the tasks at hand. Evo utilizes pre-defined agent personas that are tailored to specific domains of tasks. Each iteration of evo's execution loop it will select and adopts the persona that fits the task at hand best.
+
+### Agent Personas
+
+| Agent | Description |
+|-|-|
+| 📝[Synthesizer](./packages/agents/src/agents/Synthesizer/index.ts) | An assistant that handle files in workspace |
+| #️⃣ [Csv Analyst](./packages/agents/src/agents/CsvAnalyst/index.ts) | An expert analyzing and modifying CSV datasets. |
+| 🌐 [Researcher](./packages/agents/src/agents/Researcher/index.ts) | Advanced web information retriever that allows to do complex research in the internet. |
+| 💻 [Developer](./packages/agents/src/agents/Developer/index.ts) | A developer assistant that excels at coding related tasks with access to the file system. It plans and writes clean and effective code to files. |
+
+### Execution Loop
+
+1. **Predict Next Step:** For each iteration of the execution loop, Evo starts by making an informed prediction about what the best-next-step should be.
+2. **Select Best Agent:** Based on this prediction, Evo selects a best-fit agent persona.
+3. **Contextualize Chat History:** Based on the prediction from step 1, and the agent persona in step 2, the complete chat history is "contextualized" and only the most relevant messages are used for the final evaluation step.
+4. **Evaluate and Execute:** Using a smart LLM (GPT-4), a final evaluation step is run to determine what function call should be executed in order to achieve the user's goal. Once the function call has been executed, the response is stored, and the loop repeats itself until the user's goal has been accomplished.
 
 ## Setup
 
-#### Pre-Requisites
+### Pre-Requisites
 Please install the following:
 - [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 - [nodejs](https://nodejs.org/en/download/package-manager#alpine-linux)
 - [yarn](https://classic.yarnpkg.com/lang/en/docs/install/#debian-stable)
 - [nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-#### Installation
+### Installation
 1. Clone the repository 
     > `git clone https://github.com/polywrap/evo.ninja`
 2. Copy the `.env.template` file and rename it to `.env`.  
@@ -26,10 +45,7 @@ Please install the following:
 3. Find the line that says OPENAI_API_KEY=, and add your unique OpenAI API Key
 `OPENAI_API_KEY=sk-...`
 4. Find the line that says SERP_API_KEY=, and add your unique SERP API Key.
-`SERP_API_KEY=b071...`
-
-    *Get it from https://serpapi.com
-
+`SERP_API_KEY=b071...` (see https://serpapi.com)
 5. Use the correct version of Node.JS
     > `nvm install && nvm use`
 6. Install all dependencies & build project
@@ -37,11 +53,7 @@ Please install the following:
 
 Now you're ready to go! You can run Evo through CLI or using the UI
 
-## Usage
-
-There's two ways to interact with evo, it can be through the CLI or using the UI
-
-#### CLI
+## CLI
 
 You can just run evo by doing:
 > `yarn start`
@@ -54,43 +66,11 @@ You can also pass a goal on startup:
 - Timeout (-t | --timeout): Seconds to timeout
 - Debug logs (-d | --debug): Creates a `debug.json` file where the LLM requests are added 
 
-
-#### UI
-
-Just run:
-> `yarn build:browser && yarn start:browser`
-
-
-### Examples
-Now you can try any goal you'd like Evo to do like the followings:
-- `Create one piece of SVG art and save it as art.svg`
-- `Divide 590 by 204 and save it to a file named output.txt`
-- `Create a CSV file named output.txt with the numbers from 1 to 10 and verify the content`
-- `Write the word Washington to the file called output.txt`
-- `Calculate the (590 * 204) + (1000 / 2) - 42`
-- `Fetch the price of ethereum, bitcoin and dogecoin and save them in a file named crypto.csv`
-
 ### Workspace
 Once evo.ninja is run, there will be a `./sessions` directory created.
 This is the root directory for the agent. Any files will be read & written from this directory.
 
+## UI
 
-## How it works
-
-Evo consist on multiple subagents which are specialized and are able to execute task in specific domains.
-
-It first does an LLM interaction to predict what the next step should be, based on goal & previous messages.
-
-Then, given the prediction of what should be done, it decides which specialized agent must be used; this decision is made based on the expertise + the function calls available of each specialized agent.
-
-Once the agent has been selected, it does a second LLM call to know which function call it should execute, in order to achieve the goal asked; once the function call has been executed, the response is stored in the chat and the process is repeated until Evo knows that the goal has been accomplished
-
-### Available Agents
-
-| Agent                                                               | Description |
-|---------------------------------------------------------------------|-------------|
-|  🥷 [Evo](https://github.com/polywrap/evo.ninja/tree/dev/packages/agents/src/agents/Evo)                                                            | An assistant designed to achieve user goals. Predicts what the next step should be and find the best agent to execute the goal |
-| #️⃣ [Csv Analyst](https://github.com/polywrap/evo.ninja/tree/dev/packages/agents/src/agents/CsvAnalyst)                                                    | An expert analyzing and modifying CSV datasets. |
-| 💻 [Developer](https://github.com/polywrap/evo.ninja/tree/dev/packages/agents/src/agents/Developer)                                                      | A developer assistant that excels at coding related tasks with access to the file system. It plans and writes clean and effective code to files. |
-| 🌐 [Researcher](https://github.com/polywrap/evo.ninja/tree/dev/packages/agents/src/agents/Researcher)                                                     | Advanced web information retriever that allows to do complex research in the internet. |
-| 📝[Synthesizer](https://github.com/polywrap/evo.ninja/tree/dev/packages/agents/src/agents/Synthesizer)                                                    | An assistant that handle files in workspace |
+Just run:
+> `yarn start:browser`
