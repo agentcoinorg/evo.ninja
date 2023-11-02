@@ -2,95 +2,77 @@
 
 ![](https://hackmd.io/_uploads/ByWjLKAhn.png)
 
-[Discord](https://discord.gg/X7ystzGcf5) | [Website](https://evo.ninja)
-Give this repo a star if you use it! :star: 
+[Discord](https://discord.gg/X7ystzGcf5) | [Website](https://evo.ninja) | Give the repo a :star: !  
 
-## Welcome to evo.ninja
+## Welcome!
 
-**The AI that evolves in real-time.** 
+To get started using evo.ninja simply head to our [website](https://evo.ninja), or to build and run from source follow these [setup instructions](#setup).
 
-It executes scripts to achieve a goal. It is capable of using fuzzy search to find and execute any script in its library. Scripts are namespaced JavaScript functions with typed arguments and a description. If it can not find a script, it will write one itself.
+## How it works
 
-Dive in to explore the capabilities and features provided by this agent.
-Before you can run evo.ninja, ensure you have Node.js and yarn installed.
+What makes evo.ninja special is that it adapts itself in real-time, based on the tasks at hand. Evo utilizes pre-defined agent personas that are tailored to specific domains of tasks. Each iteration of evo's execution loop it will select and adopt the persona that fits the task at hand best.
 
-## Examples
-- `Create one piece of SVG art and save it as art.svg`
-- `Divide 590 by 204 and save it to a file named output.txt`
-- `Create a CSV file named output.txt with the numbers from 1 to 10 and verify the content`
-- `Write the word Washington to the file called output.txt`
-- `Calculate the (590 * 204) + (1000 / 2) - 42`
-- `Fetch the price of ethereum, bitcoin and dogecoin and save them in a file named crypto.csv`
+### Agent Personas
 
-## Getting Started
+| Agent | Expertise |
+|-|-|
+| 📝[Synthesizer](./packages/agents/src/agents/Synthesizer/index.ts) | "Reads text files, analyzing and gathering data and information from text files, generating summaries and reports, and analyzing text." |
+| #️⃣ [Csv Analyst](./packages/agents/src/agents/CsvAnalyst/index.ts) | "Adept at reading CSV files, searching for data, extracting key data points, calculating amounts, and derive insights from CSV files." |
+| 🌐 [Researcher](./packages/agents/src/agents/Researcher/index.ts) | "Searching the internet, comprehending details, and finding information." |
+| 💻 [Developer](./packages/agents/src/agents/Developer/index.ts) | "Architect and build complex software. specialized in python." |
+
+### Execution Loop
+
+1. **Predict Next Step:** For each iteration of the execution loop, Evo starts by making an informed prediction about what the best-next-step should be.
+2. **Select Best Agent:** Based on this prediction, Evo selects a best-fit agent persona.
+3. **Contextualize Chat History:** Based on the prediction from step 1, and the agent persona in step 2, the complete chat history is "contextualized" and only the most relevant messages are used for the final evaluation step.
+4. **Evaluate and Execute:** A final evaluation step is run to determine what agent function is executed to try and further achieve the user's goal.
+
+These 4 steps run in a loop continuously until it is determined the user's goal has been achieved.
+
+## Setup
+
 ### Pre-Requisites
 Please install the following:
 - [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
-- [nodejs & npm](https://nodejs.org/en/download/package-manager#alpine-linux)
+- [nodejs](https://nodejs.org/en/download/package-manager#alpine-linux)
 - [yarn](https://classic.yarnpkg.com/lang/en/docs/install/#debian-stable)
 - [nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-### Setup
-1. Clone the repository
-`git clone https://github.com/polywrap/evo.ninja`
-2. Copy the `.env.template` file and rename it to `.env`
-`cp .env.template .env`
+### Installation
+1. Clone the repository 
+    > `git clone https://github.com/polywrap/evo.ninja`
+2. Copy the `.env.template` file and rename it to `.env`.  
+    > `cp .env.template .env`
 3. Find the line that says OPENAI_API_KEY=, and add your unique OpenAI API Key
 `OPENAI_API_KEY=sk-...`
-4. Use the correct version of Node.JS
-`nvm install && nvm use`
-5. Install all dependencies
-`yarn install`
-6. Build all packages
-`yarn build`
-7. Run evo.ninja!
-`yarn start`
+4. Find the line that says SERP_API_KEY=, and add your unique SERP API Key.
+`SERP_API_KEY=b071...` (see https://serpapi.com)
+5. Use the correct version of Node.JS
+    > `nvm install && nvm use`
+6. Install all dependencies & build project
+    > `yarn && yarn build`
 
-Optional: You can also pass a goal on startup:
-    `yarn start '<your main goal here>'`
-    
-NOTE: Please remember that this is a prototype. Its main purpose is to demonstrate how agent can self-learn.
+Now you're ready to go! You can run Evo through CLI or using the UI
 
-## Workspace
-Once evo.ninja is run, there will be a `./workspace` directory created. This is the root directory for the agent. Any files will be read & written from this directory.
+## CLI
 
-## Collaborating
-We are eager to work with the community to continue improving this agent, and building more wraps. If you're interested in contributing, we welcome pull-requests! Here are some ways you can contribute:
+You can just run evo by doing:
+> `yarn start`
 
-- **Bug Fixes:** If you spot a bug or an error, feel free to fix it and submit a PR. Please include a description of the bug and how your code fixes it.
-- **Feature Additions:** We are open to new features! If you have an idea, please share it on our [discord](https://discord.com/invite/Z5m88a5qWu), or make an issue in this repo.
-- **Documentation:** Good documentation makes for a good project. If you spot areas in our docs that can be improved, or if something is not documented and should be, feel free to make these changes.
+You can also pass a goal on startup:
+> `yarn start '<your main goal here>'`
 
-Remember, the best way to submit these changes is via a pull-request. If you're new to Github, you can learn about PRs [here](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests).
+**Accepted arguments**:
+- Session folder (-s | --session): To allow evo to access custom files at start, you can create a new folder in `./sessions/CUSTOM_NAME` and add all the files you need; then you can run `yarn start -s CUSTOM_NAME`; Evo will use this folder as its session folder.
+- Timeout (-t | --timeout): Seconds to timeout
+- Debug logs (-d | --debug): Creates a `debug.json` file where the LLM requests are added 
 
-Also, please feel free to join our [discord](https://discord.com/invite/Z5m88a5qWu) and discuss your ideas or ask any questions. We are an open, welcoming community and we'd love to hear from you!
+### Workspace
+Once evo.ninja is run, there will be a `./sessions` directory created.
+This is the root directory for the agent. Any files will be read & written from this directory.
 
-## Benchmarks
-In order to run Agent Protocol Benchmarks you must have all pre-requisites mentioned above, as well as:
-- [python](https://www.python.org/downloads/)
-- [poetry](https://python-poetry.org/docs/#installation)
+## UI
 
-If you haven't fetched the submodules you can do it by doing the command:
-> `git submodule update --init`
-
-If you have already fetched the submodules and need to update it, you can run:
-> `git submodule update --recursive`
-
-Then, in one terminal you must start the Agent Protocol HTTP Server: `yarn start:api`; in another terminal you must go to `benchmarks` folder and run:
-
-```
-poetry shell
-poetry install
-agbenchmark --cutoff=300
-``````
-
-**Note: If you have an existing environment and you have updated the git submodule its recommended that you delete the environment and create a new one by doing:**
-
-```shell
-$ poetry env list
-myenv-dL2uBROB-py3.10 (Activated)
-
-$ poetry env remove myenv-dL2uBROB-py3.10
-```
-
-This will run the `agbenchmark` framework against the API of the [Agent Protocol](https://github.com/AI-Engineers-Foundation/agent-protocol-sdk-js). And will set a timeout of 5 minutes per task; if you'd like to run just one test in particular you can just add the flag `--test=TestCaseName`
+Just run:
+> `yarn start:browser`
