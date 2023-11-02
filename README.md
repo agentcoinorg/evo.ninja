@@ -73,24 +73,3 @@ Now you can try any goal you'd like Evo to do like the followings:
 ### Workspace
 Once evo.ninja is run, there will be a `./sessions` directory created.
 This is the root directory for the agent. Any files will be read & written from this directory.
-
-
-## How it works
-
-Evo consist on multiple subagents which are specialized and are able to execute task in specific domains.
-
-It first does an LLM interaction to predict what the next step should be, based on goal & previous messages.
-
-Then, given the prediction of what should be done, it decides which specialized agent must be used; this decision is made based on the expertise + the function calls available of each specialized agent.
-
-Once the agent has been selected, it does a second LLM call to know which function call it should execute, in order to achieve the goal asked; once the function call has been executed, the response is stored in the chat and the process is repeated until Evo knows that the goal has been accomplished
-
-### Available Agents
-
-| Agent                                                               | Description |
-|---------------------------------------------------------------------|-------------|
-|  🥷 [Evo](https://github.com/polywrap/evo.ninja/tree/dev/packages/agents/src/agents/Evo)                                                            | An assistant designed to achieve user goals. Predicts what the next step should be and find the best agent to execute the goal |
-| #️⃣ [Csv Analyst](https://github.com/polywrap/evo.ninja/tree/dev/packages/agents/src/agents/CsvAnalyst)                                                    | An expert analyzing and modifying CSV datasets. |
-| 💻 [Developer](https://github.com/polywrap/evo.ninja/tree/dev/packages/agents/src/agents/Developer)                                                      | A developer assistant that excels at coding related tasks with access to the file system. It plans and writes clean and effective code to files. |
-| 🌐 [Researcher](https://github.com/polywrap/evo.ninja/tree/dev/packages/agents/src/agents/Researcher)                                                     | Advanced web information retriever that allows to do complex research in the internet. |
-| 📝[Synthesizer](https://github.com/polywrap/evo.ninja/tree/dev/packages/agents/src/agents/Synthesizer)                                                    | An assistant that handle files in workspace |
