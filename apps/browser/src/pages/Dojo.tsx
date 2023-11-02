@@ -12,12 +12,10 @@ import Sidebar from "../components/Sidebar/Sidebar";
 import Chat, { ChatMessage } from "../components/Chat/Chat";
 import { MarkdownLogger } from '../sys/logger';
 import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
-import { onGoalAchievedScript, onGoalFailedScript, speakScript } from '../scripts';
 import {
   AgentContext,
   Evo,
   SubWorkspace,
-  Workspace,
   InMemoryWorkspace,
   Logger,
   ConsoleLogger,
@@ -27,11 +25,8 @@ import {
   LlmModel,
   Chat as EvoChat
 } from '@evo-ninja/agents';
+import { createInBrowserScripts } from '../scripts';
 
-function addScript(script: {name: string, definition: string, code: string}, scriptsWorkspace: Workspace) {
-  scriptsWorkspace.writeFileSync(`${script.name}.json`, script.definition);
-  scriptsWorkspace.writeFileSync(`${script.name}.js`, script.code);
-}
 
 function Dojo() {
   const [apiKey, setApiKey] = useState<string | null>(
@@ -170,10 +165,7 @@ function Dojo() {
         logUserPrompt: () => {}
       });
 
-      const scriptsWorkspace = new InMemoryWorkspace();
-      addScript(onGoalAchievedScript, scriptsWorkspace);
-      addScript(onGoalFailedScript, scriptsWorkspace);
-      addScript(speakScript, scriptsWorkspace);
+      const scriptsWorkspace = createInBrowserScripts();
 
       const scripts = new Scripts(
         scriptsWorkspace
