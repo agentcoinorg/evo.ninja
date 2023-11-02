@@ -10,7 +10,7 @@ To get started using evo.ninja simply head to our [website](https://evo.ninja), 
 
 ## How it works
 
-What makes evo.ninja special is that it evolves itself in real-time, based on the tasks at hand. Evo utilizes pre-defined agent personas that are tailored to specific domains of tasks. Each iteration of evo's execution loop it will select and adopt the persona that fits the task at hand best.
+What makes evo.ninja special is that it adapts itself in real-time, based on the tasks at hand. Evo utilizes pre-defined agent personas that are tailored to specific domains of tasks. Each iteration of evo's execution loop it will select and adopt the persona that fits the task at hand best.
 
 ### Agent Personas
 
