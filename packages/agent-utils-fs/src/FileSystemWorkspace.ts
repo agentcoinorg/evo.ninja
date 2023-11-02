@@ -1,23 +1,20 @@
 import { Workspace, DirectoryEntry } from "@evo-ninja/agent-utils";
 import fs from "fs";
-import path from "path-browserify";
+import path from "path";
 import spawn from "spawn-command";
 
 export class FileSystemWorkspace implements Workspace {
-  constructor(
-    private _workspacePath: string
-  ) {
-    // Fully resolve the workspace path
-    this._workspacePath = path.resolve(
-      this._workspacePath
-    );
+  constructor(private _workspacePath: string) {
+    // Ensure the workspace path is an absolute path
+    if (!path.isAbsolute(this._workspacePath)) {
+      throw new Error("Workspace path must be an absolute path");
+    }
+
+    console.log(`Creating workspace directory: ${this._workspacePath}`);
 
     // Initialize the directory
     if (!fs.existsSync(this._workspacePath)) {
-      fs.mkdirSync(
-        this._workspacePath,
-        { recursive: true }
-      );
+      fs.mkdirSync(this._workspacePath, { recursive: true });
     }
   }
 
