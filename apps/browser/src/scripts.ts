@@ -16,6 +16,9 @@ export function createInBrowserScripts(): InMemoryWorkspace {
     csvSumColumn,
     readFile,
     writeFile,
+    readDirectory,
+    webSearch,
+    webFuzzySearch
   ];
 
   availableScripts.forEach((script) => addScript(script, workspace));
@@ -580,5 +583,63 @@ const csvSumColumn = {
   }
   
   return sum;
+`,
+};
+
+const readDirectory = {
+  name: "fs.readDirectory",
+  definition: `{
+    "name": "fs.readDirectory",
+    "description": "Reads the contents of the directory",
+    "arguments": "{ path: string }",
+    "code": "./fs.readDirectory.js"
+  }`,
+  code: `const fs = require('fs');
+  try {
+    const data = fs.readdirSync(path);
+    return data;
+  } catch (error) {
+    throw error;
+  }`,
+};
+
+const webSearch = {
+  name: "web.search",
+  definition: `{
+    "name": "web.search",
+    "description": "Searches the web for a given query, scrapes the results and returns them as a JSON string (tags: http, google)",
+    "arguments": "{ query: string }",
+    "code": "./web.search.js"
+  }`,
+  code: `
+const result = __wrap_subinvoke(
+  "plugin/websearch",
+  "search",
+  { query }
+)
+if (!result.ok) {
+  throw result.error;
+}
+return result.value;
+`,
+};
+
+const webFuzzySearch = {
+  name: "web.fuzzySearch",
+  definition: `{
+  "name": "web.fuzzySearch",
+  "description": "The fuzzy search function conducts a targeted search on a web page, using a text query comprised of specific keywords. Unlike broad or naive search methods, this function employs advanced algorithms to find close matches, even if they're not exact. This ensures a higher likelihood of retrieving relevant and precise information. When crafting your query, prioritize using distinct keywords to optimize the accuracy of the search results.",
+  "arguments": "{ url: string, queryKeywords: string[] }",
+  "code": "./web.fuzzySearch.js"
+}`,
+  code: `const result = __wrap_subinvoke(
+  "plugin/fuzzySearch",
+  "search",
+  { url, queryKeywords }
+)
+if (!result.ok) {
+  throw result.error;
+}
+return result.value;
 `,
 };
