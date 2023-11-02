@@ -86,7 +86,6 @@ while (true) {
 
   if (!goal) break; // Exit if no goal or feedback is provided
 
-  console.log(`Goal: ${goal}`);
   await handleGoal(goal);
 }
 
