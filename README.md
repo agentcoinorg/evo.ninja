@@ -57,20 +57,19 @@ Now you're ready to go! You can run Evo through CLI or using the UI
 
 ## CLI
 
-You can just run evo by doing:
+Run evo in the terminal:
 > `yarn start`
 
-You can also pass a goal on startup:
-> `yarn start '<your main goal here>'`
+**Arguments:**
+- `[goal]` - Goal to be achieved
 
-**Accepted arguments**:
-- Session folder (-s | --session): To allow evo to access custom files at start, you can create a new folder in `./sessions/CUSTOM_NAME` and add all the files you need; then you can run `yarn start -s CUSTOM_NAME`; Evo will use this folder as its session folder.
-- Timeout (-t | --timeout): Seconds to timeout
-- Debug logs (-d | --debug): Creates a `debug.json` file where the LLM requests are added 
+**Options:**
+- `-s, --session <name>` - Name of the session within the `./sessions/...` directory.
+- `-t, --timeout <seconds>` - Specify a timeout, used to terminate the process after a specified number of seconds.
+- `-d, --debug` - Emit debug logs within the `./sessions/${session}/.evo/...` directory.
 
-### Workspace
-Once evo.ninja is run, there will be a `./sessions` directory created.
-This is the root directory for the agent. Any files will be read & written from this directory.
+### Session Workspace
+Once the evo.ninja CLI is run, there will be a `./sessions` directory created, with named sessions within it. This is the root directory for the agent, and only files within this directory will be read and written by the agent.
 
 ## UI
 
