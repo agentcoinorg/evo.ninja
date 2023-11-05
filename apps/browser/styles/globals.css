@@ -13,3 +13,7 @@ html {
 code {
   @apply font-mono;
 }
+
+#root {
+  @apply h-full;
+}

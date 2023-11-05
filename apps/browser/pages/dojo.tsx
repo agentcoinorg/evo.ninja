@@ -1,17 +1,17 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
-import { InMemoryFile } from '@nerfzael/memory-fs';
+import { InMemoryFile } from "@nerfzael/memory-fs";
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
-import clsx from 'clsx';
+import clsx from "clsx";
 
 // import './Dojo.css';
 
-import DojoConfig from "../components/DojoConfig/DojoConfig";
-import DojoError from "../components/DojoError/DojoError";
-import Sidebar from "../components/Sidebar/Sidebar";
-import Chat, { ChatMessage } from "../components/Chat/Chat";
-import { MarkdownLogger } from '../sys/logger';
-import { updateWorkspaceFiles } from '../updateWorkspaceFiles';
+import DojoConfig from "../src/components/DojoConfig/DojoConfig";
+import DojoError from "../src/components/DojoError/DojoError";
+import Sidebar from "../src/components/Sidebar/Sidebar";
+import Chat, { ChatMessage } from "../src/components/Chat/Chat";
+import { MarkdownLogger } from "../src/sys/logger";
+import { updateWorkspaceFiles } from "../src/updateWorkspaceFiles";
 import {
   AgentContext,
   Evo,
@@ -23,10 +23,9 @@ import {
   Env,
   OpenAI,
   LlmModel,
-  Chat as EvoChat
-} from '@evo-ninja/agents';
-import { createInBrowserScripts } from '../scripts';
-
+  Chat as EvoChat,
+} from "@evo-ninja/agents";
+import { createInBrowserScripts } from "../src/scripts";
 
 function Dojo() {
   const [apiKey, setApiKey] = useState<string | null>(
@@ -46,13 +45,17 @@ function Dojo() {
   const [scripts, setScripts] = useState<InMemoryFile[]>([]);
   const [userFiles, setUserFiles] = useState<InMemoryFile[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<InMemoryFile[]>([]);
-  const [userWorkspace, setUserWorkspace] = useState<InMemoryWorkspace | undefined>(undefined);
-  const [scriptsWorkspace, setScriptsWorkspace] = useState<InMemoryWorkspace | undefined>(undefined);
+  const [userWorkspace, setUserWorkspace] = useState<
+    InMemoryWorkspace | undefined
+  >(undefined);
+  const [scriptsWorkspace, setScriptsWorkspace] = useState<
+    InMemoryWorkspace | undefined
+  >(undefined);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [goalEnded, setGoalEnded] = useState<boolean>(false);
 
   useEffect(() => {
-    if(window.innerWidth <= 1024){
+    if (window.innerWidth <= 1024) {
       setSidebarOpen(false);
     }
   }, []);
@@ -67,7 +70,16 @@ function Dojo() {
       return;
     }
 
-    setScripts(items.map(x => new InMemoryFile(x.name, new TextEncoder().encode(scriptsWorkspace.readFileSync(x.name)) || "")));
+    setScripts(
+      items.map(
+        (x) =>
+          new InMemoryFile(
+            x.name,
+            new TextEncoder().encode(scriptsWorkspace.readFileSync(x.name)) ||
+              ""
+          )
+      )
+    );
   }, [scriptsWorkspace]);
 
   function checkForUserFiles() {
@@ -85,10 +97,7 @@ function Dojo() {
   }
 
   function onMessage(message: ChatMessage) {
-    setMessages((messages) => [
-      ...messages,
-      message
-    ]);
+    setMessages((messages) => [...messages, message]);
     checkForUserFiles();
     checkForScriptFiles();
   }
@@ -99,7 +108,10 @@ function Dojo() {
     }
 
     for (const file of uploadedFiles) {
-      userWorkspace.writeFileSync(file.path, new TextDecoder().decode(file.content));
+      userWorkspace.writeFileSync(
+        file.path,
+        new TextDecoder().decode(file.content)
+      );
     }
 
     checkForUserFiles();
@@ -137,8 +149,7 @@ function Dojo() {
 
     // Only close the modal if all configuration is complete
     setConfigOpen(!configComplete);
-}
-
+  };
 
   useEffect(() => {
     try {
@@ -153,35 +164,28 @@ function Dojo() {
           onMessage({
             user: "evo",
             title: markdown,
-            color
+            color,
           });
-        }
+        },
       });
-      const logger = new Logger([
-        markdownLogger,
-        new ConsoleLogger()
-      ], {
+      const logger = new Logger([markdownLogger, new ConsoleLogger()], {
         promptUser: () => Promise.resolve("N/A"),
-        logUserPrompt: () => {}
+        logUserPrompt: () => {},
       });
 
       const scriptsWorkspace = createInBrowserScripts();
 
-      const scripts = new Scripts(
-        scriptsWorkspace
-      );
+      const scripts = new Scripts(scriptsWorkspace);
 
       setScriptsWorkspace(scriptsWorkspace);
 
-      const env = new Env(
-        {
-          "OPENAI_API_KEY": apiKey,
-          "GPT_MODEL": model,
-          "CONTEXT_WINDOW_TOKENS": "8000",
-          "MAX_RESPONSE_TOKENS": "2000",
-          "SERP_API_KEY": serpApiKey || undefined,
-        }
-      );
+      const env = new Env({
+        OPENAI_API_KEY: apiKey,
+        GPT_MODEL: model,
+        CONTEXT_WINDOW_TOKENS: "8000",
+        MAX_RESPONSE_TOKENS: "2000",
+        SERP_API_KEY: serpApiKey || undefined,
+      });
 
       const llm = new OpenAI(
         env.OPENAI_API_KEY,
@@ -196,50 +200,74 @@ function Dojo() {
 
       const internals = new SubWorkspace(".evo", userWorkspace);
 
-      const chat = new EvoChat(
-        cl100k_base,
-      );
+      const chat = new EvoChat(cl100k_base);
 
-      setEvo(new Evo(
-        new AgentContext(
-          llm,
-          chat,
-          logger,
-          userWorkspace,
-          internals,
-          env,
-          scripts,
+      setEvo(
+        new Evo(
+          new AgentContext(
+            llm,
+            chat,
+            logger,
+            userWorkspace,
+            internals,
+            env,
+            scripts
+          )
         )
-      ));
+      );
     } catch (err) {
       setDojoError(err);
     }
-  }, [apiKey, model, serpApiKey])
+  }, [apiKey, model, serpApiKey]);
 
-  const sidebarContainerClassNames = clsx(["w-full lg:w-auto lg:max-w-md relative", {
-    "hidden": !sidebarOpen
-  }]);
+  const sidebarContainerClassNames = clsx([
+    "relative w-full lg:w-auto lg:max-w-md",
+    {
+      hidden: !sidebarOpen,
+    },
+  ]);
 
-  const chatContainerClassNames = clsx(["grow relative", {
-    "max-lg:hidden": sidebarOpen
-  }]);
+  const chatContainerClassNames = clsx([
+    "relative grow",
+    {
+      "max-lg:hidden": sidebarOpen,
+    },
+  ]);
 
   return (
     <div className="Dojo">
-      {(!apiKey || configOpen) &&
+      {(!apiKey || configOpen) && (
         <DojoConfig
           apiKey={apiKey}
           model={model}
           serpApiKey={serpApiKey}
           onConfigSaved={onConfigSaved}
         />
-      }
+      )}
       <div className={sidebarContainerClassNames}>
-        <Sidebar onSidebarToggleClick={() => {setSidebarOpen(!sidebarOpen)}} onSettingsClick={() => setConfigOpen(true)} scripts={scripts} userFiles={userFiles} uploadUserFiles={setUploadedFiles} />
+        <Sidebar
+          onSidebarToggleClick={() => {
+            setSidebarOpen(!sidebarOpen);
+          }}
+          onSettingsClick={() => setConfigOpen(true)}
+          scripts={scripts}
+          userFiles={userFiles}
+          uploadUserFiles={setUploadedFiles}
+        />
       </div>
       <div className={chatContainerClassNames}>
         <>
-          {evo && <Chat evo={evo} onMessage={onMessage} messages={messages} goalEnded={goalEnded} onSidebarToggleClick={() => {setSidebarOpen(!sidebarOpen)}}/>}
+          {evo && (
+            <Chat
+              evo={evo}
+              onMessage={onMessage}
+              messages={messages}
+              goalEnded={goalEnded}
+              onSidebarToggleClick={() => {
+                setSidebarOpen(!sidebarOpen);
+              }}
+            />
+          )}
           {dojoError && <DojoError error={dojoError} />}
         </>
       </div>

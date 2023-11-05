@@ -4,6 +4,7 @@ const defaultTheme = require('tailwindcss/defaultTheme')
 module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
+    "./pages/**/*.{js,jsx,ts,tsx}",
     "./public/**/*.{html,css}"
   ],
   theme: {
@@ -23,7 +24,7 @@ module.exports = {
         }
       },
       backgroundImage: {
-        "landing-bg": `url('/public/wallpaper.png')`
+        "landing-bg": `url('../public/wallpaper.png')`
       },
       backgroundSize: {
         "landing-bg": `461px 250px`

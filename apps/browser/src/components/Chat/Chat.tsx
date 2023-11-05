@@ -7,7 +7,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
 import { faThumbsUp, faThumbsDown, faChevronDown, faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 
-import "./Chat.css";
 import MenuIcon from "../MenuIcon";
 
 export interface ChatMessage {
@@ -206,13 +205,13 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
 
     const blob = new Blob([exportedContent], { type: 'text/plain;charset=utf-8' });
     const href = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = href;
+    // const link = document.createElement('a');
+    // link.href = href;
     // Include the date-time stamp in the filename
-    link.download = `evo-ninja-${dateTimeStamp}.md`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // link.download = `evo-ninja-${dateTimeStamp}.md`;
+    // document.body.appendChild(link);
+    // link.click();
+    // document.body.removeChild(link);
   };
 
   return (

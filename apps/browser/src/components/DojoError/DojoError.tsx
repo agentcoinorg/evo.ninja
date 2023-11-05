@@ -1,6 +1,6 @@
 import React from "react";
 
-import "./DojoError.css";
+// import "./DojoError.css";
 
 export interface DojoErrorProps {
   error: unknown;

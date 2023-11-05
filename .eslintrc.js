@@ -130,6 +130,10 @@ module.exports = {
     {
       files: ["*.json"],
       extends: ["plugin:json/recommended"],
+    },
+    {
+      files: ["*.tsx"],
+      extends: ["plugin:@next/next/recommended"],
     }
   ]
 };

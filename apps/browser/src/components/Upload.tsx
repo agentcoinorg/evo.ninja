@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload } from '@fortawesome/free-solid-svg-icons';
 import { useDropzone } from "react-dropzone";
 import { readFile } from '../sys/file';
-import '../App.css';
+// import '../App.css';
 import { InMemoryFile } from '@nerfzael/memory-fs';
 
 interface UploadProps {
