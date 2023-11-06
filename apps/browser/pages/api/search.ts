@@ -14,6 +14,6 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>
 ) {
-  const results = await searchOnGoogle(req.query.query, req.query.apiKey);
+  const results = await searchOnGoogle(req.query.query as string, req.query.apiKey as string);
   res.status(200).json({ googleResults: results });
 }

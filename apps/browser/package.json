@@ -20,8 +20,7 @@
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
     "react-markdown": "^8.0.7",
-    "react-modal": "3.16.1",
-    "react-router-dom": "~6.15.0"
+    "react-modal": "3.16.1"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "14.0.1",
@@ -31,7 +30,6 @@
     "@types/react-modal": "3.16.0",
     "autoprefixer": "10.4.16",
     "handlebars": "4.7.8",
-    "prettier": "3.0.3",
     "prettier-plugin-tailwindcss": "^0.5.4",
     "postcss": "8.4.31",
     "tailwindcss": "^3.3.3",
@@ -41,19 +39,7 @@
     "build": "next build",
     "dev": "next dev",
     "prebuild": "node scripts/scripts.template.js",
-    "lint": "npx prettier . --write",
+    "lint": "prettier . --write",
     "start": "next start"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
   }
 }

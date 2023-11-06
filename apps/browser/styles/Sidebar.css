@@ -4,7 +4,7 @@ h3 {
 }
 
 .Sidebar {
-  @apply box-border flex w-full h-full flex-col items-center overflow-auto p-4;
+  @apply box-border flex h-full w-full flex-col items-center overflow-auto p-4;
 }
 
 .Content {

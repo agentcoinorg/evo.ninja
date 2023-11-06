@@ -23,11 +23,11 @@
 }
 
 .SamplePrompts {
-  @apply grid grid-rows-2 absolute bottom-0 w-full p-2.5 mb-32;
+  @apply absolute bottom-0 mb-32 grid w-full grid-rows-2 p-2.5;
 }
 
 .SamplePromptCard {
-  @apply bg-neutral-800 text-neutral-50 border border-neutral-500 rounded-xl p-2.5 m-1 cursor-pointer transition-all text-left text-xs hover:border-red-500;
+  @apply m-1 cursor-pointer rounded-xl border border-neutral-500 bg-neutral-800 p-2.5 text-left text-xs text-neutral-50 transition-all hover:border-red-500;
 }
 
 .Messages {
@@ -99,7 +99,7 @@
 }
 
 .Chat__Container {
-  @apply p-4 flex gap-4 items-center justify-center;
+  @apply flex items-center justify-center gap-4 p-4;
 }
 
 .Chat__Btn {
@@ -125,7 +125,10 @@
   border: 1px solid #2b2b30;
   border-radius: 10px;
   cursor: pointer;
-  transition: background-color 0.3s ease-in-out, opacity 0.3s ease-in-out, border-color 0.3s ease-in-out;
+  transition:
+    background-color 0.3s ease-in-out,
+    opacity 0.3s ease-in-out,
+    border-color 0.3s ease-in-out;
   opacity: 0.8;
   margin-top: 55px;
   margin-right: 18px;
@@ -143,7 +146,7 @@
   display: flex;
   align-items: flex-start; /* Align items at the start of the flex container */
   justify-content: space-between;
-  position: relative; 
+  position: relative;
 }
 
 .LinkIcon {
@@ -151,4 +154,3 @@
   top: 12px; /* Position from the top */
   right: 12px; /* Position from the right */
 }
-

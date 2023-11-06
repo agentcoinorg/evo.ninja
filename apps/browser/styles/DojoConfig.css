@@ -3,7 +3,7 @@
 }
 
 .DojoConfig-container {
-  @apply fixed left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col gap-4 rounded-lg bg-neutral-900 p-12 text-neutral-50 w-96;
+  @apply fixed left-1/2 top-1/2 flex w-96 -translate-x-1/2 -translate-y-1/2 flex-col gap-4 rounded-lg bg-neutral-900 p-12 text-neutral-50;
 }
 
 .DojoConfig__Btn {

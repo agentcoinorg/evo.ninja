@@ -37,10 +37,6 @@ function Dojo() {
     serpApiKey: null,
     loaded: false,
   });
-  // const [apiKey, setApiKey] = useState<string | null>(null);
-  // const [model, setModel] = useState<string | null>(null);
-  // const [serpApiKey, setSerpApiKey] = useState<string | null>(null);
-
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [configOpen, setConfigOpen] = useState(false);
   const [dojoError, setDojoError] = useState<unknown | undefined>(undefined);
