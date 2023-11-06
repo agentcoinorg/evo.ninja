@@ -22,6 +22,18 @@
   @apply absolute right-2.5 top-2.5 m-2.5 cursor-pointer text-2xl text-orange-600 transition-colors hover:text-orange-700;
 }
 
+.WelcomeMessage {
+  @apply flex flex-col items-center justify-center gap-2.5 p-5;
+}
+
+.WelcomeMessage__Title {
+  @apply text-2xl font-bold;
+}
+
+.WelcomeMessage__Content {
+  @apply mt-2.5 text-sm text-gray-400;
+}
+
 .SamplePrompts {
   @apply absolute bottom-0 mb-32 grid w-full grid-rows-2 p-2.5;
 }
@@ -154,3 +166,4 @@
   top: 12px; /* Position from the top */
   right: 12px; /* Position from the right */
 }
+

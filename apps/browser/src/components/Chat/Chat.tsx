@@ -24,6 +24,23 @@ export interface ChatProps {
   onSidebarToggleClick: () => void;
 }
 
+
+const WelcomeMessage: React.FC = () => {
+  return (
+    <div className="WelcomeMessage">
+      <div className="WelcomeMessage__Title"><h1>Welcome to Evo Ninja!</h1></div>
+      <div className="WelcomeMessage__Content">
+        <p>
+        Evo is a general agent that can do anything for you by changing personas based on the task it needs to do. You can use it to write code, automate tasks, or even write a book. Just tell Evo what you want to do and it will write the code for you.
+          Evo Ninja is powered by <a href="https://openai.com/blog/openai-api/" target="_blank" rel="noopener noreferrer">OpenAI's API</a> and <a href="
+          https://www.evo.ninja/" target="_blank" rel="noopener noreferrer">Evo</a>, a community of AI agents that collaborate with humans to solve problems.
+        </p>
+      </div>
+    </div>
+  );
+}
+  
+
 const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSidebarToggleClick }: ChatProps) => {
   const samplePrompts = [
     "Fetch the price of ethereum, bitcoin and dogecoin and save them in a file named crypto.csv",
@@ -221,6 +238,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
       </div>
       {showPrompts && (
         <div className="SamplePrompts">
+          <WelcomeMessage />
           {samplePrompts.map((prompt, index) => (
             <div 
               key={index} 

@@ -25,7 +25,11 @@ h3 {
 
 .Scripts,
 .Workspace {
-  @apply my-4 box-border w-full rounded bg-neutral-900 p-4 text-neutral-50;
+  @apply my-4 box-border w-full rounded bg-neutral-900 p-4 text-neutral-50 ;
+}
+
+.Scripts__Files {
+  @apply flex flex-col max-h-64 overflow-y-auto rounded-lg bg-opacity-80 gap-0 scrollbar;
 }
 
 .File,
@@ -37,6 +41,7 @@ h3 {
 .Workspace {
   @apply border border-neutral-500 bg-neutral-900 text-white;
 }
+
 
 .UploadButton {
   @apply my-4 inline-block h-9 cursor-pointer rounded-xl border-none bg-orange-600 px-6 py-2.5 text-center text-neutral-900 shadow-md outline-none transition-all hover:bg-orange-700;
@@ -68,4 +73,25 @@ h3 {
 
 .BuiltWithLove {
   @apply text-neutral-50;
+}
+
+
+.scrollbar::-webkit-scrollbar {
+  width: 10px; /* width of the entire scrollbar */
+}
+
+.scrollbar::-webkit-scrollbar-track {
+  background: transparent; /* color of the tracking area */
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5); /* color of the scroll thumb */
+  border-radius: 20px; /* roundness of the scroll thumb */
+  border: 3px solid transparent; /* creates padding around scroll thumb */
+}
+
+/* For Firefox */
+.scrollbar {
+  scrollbar-width: thin; /* "auto" or "thin" */
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent; /* thumb and track color */
 }

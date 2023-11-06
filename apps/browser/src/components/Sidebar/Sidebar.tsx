@@ -52,13 +52,18 @@ const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles, onSideb
         </div>
         <img src="avatar-name.png" alt="Main Logo" className="Logo" />
         <div className="Scripts">
-        <h3>
+          <div className="Scripts__Title">
+           <h3>
             <FontAwesomeIcon icon={faUserNinja} /> SCRIPTS
           </h3>
+          </div>
+          <div className="Scripts__Files">
           {Object.keys(scriptsGrouped).map((name, i) => (
             <File key={i} files={scriptsGrouped[name]} showExtension={false} />
           ))}
+          </div>
         </div>
+
         <Upload className="Workspace" onUpload={uploadUserFiles}>
           <h3>
             <FontAwesomeIcon icon={faFolder} style={{ marginRight: "10px" }} /> WORKSPACE
