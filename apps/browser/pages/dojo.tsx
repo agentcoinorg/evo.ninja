@@ -240,7 +240,7 @@ function Dojo() {
   ]);
 
   return (
-    <div className="Dojo">
+    <div className="flex h-full animate-landing-bg bg-neutral-800 bg-landing-bg bg-repeat text-center text-neutral-400">
       {(dojoConfig.loaded && !dojoConfig.openAiApiKey || configOpen) && (
         <DojoConfig
           apiKey={dojoConfig.openAiApiKey}

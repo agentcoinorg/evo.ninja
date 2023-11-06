@@ -43,24 +43,24 @@ const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles, onSideb
   }
 
   return (
-    <div className="Sidebar">
-      <div className="Content">
+    <div className="box-border flex h-full w-full flex-col items-center overflow-auto p-4">
+      <div className="flex h-auto w-full flex-col items-center">
         <div className="lg:hidden flex justify-end w-full">
           <div className="cursor-pointer flex gap-2" onClick={onSidebarToggleClick}>
             <span>Close menu</span><CloseIcon></CloseIcon>
           </div>
         </div>
-        <img src="avatar-name.png" alt="Main Logo" className="Logo" />
-        <div className="Scripts">
-        <h3>
+        <img src="avatar-name.png" alt="Main Logo" className="mb-5 w-full max-w-sm" />
+        <div className="my-4 p-4 w-full rounded bg-neutral-900 text-neutral-50 border border-neutral-500">
+        <h3 className="text-lg font-semibold">
             <FontAwesomeIcon icon={faUserNinja} /> SCRIPTS
           </h3>
           {Object.keys(scriptsGrouped).map((name, i) => (
             <File key={i} files={scriptsGrouped[name]} showExtension={false} />
           ))}
         </div>
-        <Upload className="Workspace" onUpload={uploadUserFiles}>
-          <h3>
+        <Upload className="flex h-auto w-full flex-col justify-between" onUpload={uploadUserFiles}>
+          <h3 className="text-lg font-semibold">
             <FontAwesomeIcon icon={faFolder} style={{ marginRight: "10px" }} /> WORKSPACE
           </h3>
           <div>
@@ -71,7 +71,7 @@ const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles, onSideb
           {
             userFiles.length !== 0 && (
               <button 
-                className="DownloadButton" 
+                className="my-4 inline-block h-9 cursor-pointer rounded-xl border-none bg-orange-600 px-6 py-2.5 text-center text-neutral-900 shadow-md outline-none transition-all hover:bg-orange-700" 
                 title="Download" 
                 onClick={downloadUserFiles}>
                 <FontAwesomeIcon icon={faDownload} />  Download
@@ -79,10 +79,11 @@ const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles, onSideb
             )
           }
         </Upload>
-        <footer className="Footer">
-          <div className="Polywrap">
-            <span className="BuiltWithLove">Built with love by</span>
+        <footer className="my-8 box-border flex w-10/12 flex-col gap-4">
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-neutral-50">Built with love by</span>
             <a
+              className="text-white"
               href="https://polywrap.io"
               target="_blank"
               rel="noopener noreferrer"
@@ -90,11 +91,11 @@ const Sidebar = ({ onSettingsClick, scripts, userFiles, uploadUserFiles, onSideb
               <img
                 src="polywrap-logo.png"
                 alt="Image Banner"
-                className="ImageBanner"
+                className="w-full max-w-[250px]"
               />
             </a>
           </div>
-          <div className="Footer__Links">
+          <div className="flex cursor-pointer justify-between text-lg text-white opacity-80 transition-all hover:opacity-100">
             <a
               href="https://twitter.com/evo_ninja_ai"
               target="_blank"
