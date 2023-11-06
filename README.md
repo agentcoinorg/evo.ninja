@@ -8,6 +8,14 @@
 
 To get started using evo.ninja simply head to our [website](https://evo.ninja), or to build and run from source follow these [setup instructions](#setup).
 
+## Need Help?
+
+Join our [Discord community](https://discord.gg/X7ystzGcf5) for support and discussions.
+
+[![Join us on Discord](https://invidget.switchblade.xyz/X7ystzGcf5)](https://discord.gg/X7ystzGcf5)
+
+If you have questions or encounter issues, please don't hesitate to [create a new issue](https://github.com/polywrap/evo.ninja/issues/new/choose) to get support.
+
 ## How it works
 
 What makes evo.ninja special is that it adapts itself in real-time, based on the tasks at hand. Evo utilizes pre-defined agent personas that are tailored to specific domains of tasks. Each iteration of evo's execution loop it will select and adopt the persona that fits the task at hand best.
