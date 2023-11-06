@@ -10,7 +10,6 @@ import { faUserNinja, faFolder } from "@fortawesome/free-solid-svg-icons";
 import Upload from "../Upload";
 import File from "../File/File";
 
-// import "./Sidebar.css";
 import { downloadFilesAsZip } from "../../sys/file/downloadFilesAsZip";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import CloseIcon from "../CloseIcon";

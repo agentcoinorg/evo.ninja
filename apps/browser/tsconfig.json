@@ -22,8 +22,9 @@
     "incremental": true
   },
   "include": [
-    "src"
-, "pages/_app.tsx"  ],
+    "src",
+    "pages"
+  ],
   "exclude": [
     "node_modules"
   ]

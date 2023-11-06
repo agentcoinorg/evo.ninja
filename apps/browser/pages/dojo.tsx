@@ -4,8 +4,6 @@ import { InMemoryFile } from "@nerfzael/memory-fs";
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 import clsx from "clsx";
 
-// import './Dojo.css';
-
 import DojoConfig from "../src/components/DojoConfig/DojoConfig";
 import DojoError from "../src/components/DojoError/DojoError";
 import Sidebar from "../src/components/Sidebar/Sidebar";
@@ -28,15 +26,20 @@ import {
 import { createInBrowserScripts } from "../src/scripts";
 
 function Dojo() {
-  const [apiKey, setApiKey] = useState<string | null>(
-    localStorage.getItem("openai-api-key")
-  );
-  const [model, setModel] = useState<string | null>(
-    localStorage.getItem("openai-model")
-  );
-  const [serpApiKey, setSerpApiKey] = useState<string | null>(
-    localStorage.getItem("serp-api-key")
-  );
+  const [dojoConfig, setDojoConfig] = useState<{
+    openAiApiKey: string | null;
+    model: string | null;
+    serpApiKey: string | null;
+    loaded: boolean;
+  }>({
+    openAiApiKey: null,
+    model: null,
+    serpApiKey: null,
+    loaded: false,
+  });
+  // const [apiKey, setApiKey] = useState<string | null>(null);
+  // const [model, setModel] = useState<string | null>(null);
+  // const [serpApiKey, setSerpApiKey] = useState<string | null>(null);
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [configOpen, setConfigOpen] = useState(false);
@@ -58,6 +61,12 @@ function Dojo() {
     if (window.innerWidth <= 1024) {
       setSidebarOpen(false);
     }
+    setDojoConfig({
+      openAiApiKey: localStorage.getItem("openai-api-key"),
+      model: localStorage.getItem("openai-model"),
+      serpApiKey: localStorage.getItem("serp-api-key"),
+      loaded: true
+    });
   }, []);
 
   useEffect(() => {
@@ -122,29 +131,29 @@ function Dojo() {
 
     if (!apiKey) {
       localStorage.removeItem("openai-api-key");
-      setApiKey(null);
+      setDojoConfig({ ...dojoConfig, openAiApiKey: null});
       configComplete = false;
     } else {
       localStorage.setItem("openai-api-key", apiKey);
-      setApiKey(apiKey);
+      setDojoConfig({ ...dojoConfig, openAiApiKey: apiKey});
     }
 
     if (!model) {
       localStorage.removeItem("openai-model");
-      setModel(null);
+      setDojoConfig({ ...dojoConfig, model: null});
       configComplete = false;
     } else {
       localStorage.setItem("openai-model", model);
-      setModel(model);
+      setDojoConfig({ ...dojoConfig, model });
     }
 
     if (!serpApiKey) {
       localStorage.removeItem("serp-api-key");
-      setSerpApiKey(null);
+      setDojoConfig({ ...dojoConfig, serpApiKey: null});
       configComplete = false;
     } else {
       localStorage.setItem("serp-api-key", serpApiKey);
-      setSerpApiKey(serpApiKey);
+      setDojoConfig({ ...dojoConfig, serpApiKey });
     }
 
     // Only close the modal if all configuration is complete
@@ -153,7 +162,7 @@ function Dojo() {
 
   useEffect(() => {
     try {
-      if (!apiKey || !model) {
+      if (dojoConfig.loaded && (!dojoConfig.openAiApiKey || !dojoConfig.model)) {
         setConfigOpen(true);
         return;
       }
@@ -180,11 +189,11 @@ function Dojo() {
       setScriptsWorkspace(scriptsWorkspace);
 
       const env = new Env({
-        OPENAI_API_KEY: apiKey,
-        GPT_MODEL: model,
+        OPENAI_API_KEY: dojoConfig.openAiApiKey as string,
+        GPT_MODEL: dojoConfig.model as string,
         CONTEXT_WINDOW_TOKENS: "8000",
         MAX_RESPONSE_TOKENS: "2000",
-        SERP_API_KEY: serpApiKey || undefined,
+        SERP_API_KEY: dojoConfig.serpApiKey || undefined,
       });
 
       const llm = new OpenAI(
@@ -218,7 +227,7 @@ function Dojo() {
     } catch (err) {
       setDojoError(err);
     }
-  }, [apiKey, model, serpApiKey]);
+  }, [dojoConfig]);
 
   const sidebarContainerClassNames = clsx([
     "relative w-full lg:w-auto lg:max-w-md",
@@ -236,11 +245,11 @@ function Dojo() {
 
   return (
     <div className="Dojo">
-      {(!apiKey || configOpen) && (
+      {(dojoConfig.loaded && !dojoConfig.openAiApiKey || configOpen) && (
         <DojoConfig
-          apiKey={apiKey}
-          model={model}
-          serpApiKey={serpApiKey}
+          apiKey={dojoConfig.openAiApiKey}
+          model={dojoConfig.model}
+          serpApiKey={dojoConfig.serpApiKey}
           onConfigSaved={onConfigSaved}
         />
       )}

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-// import "./DojoConfig.css";
 import { defaultModel, supportedModels } from "../../supportedModels";
 
 interface DojoConfigProps {

@@ -1,17 +1,21 @@
-import React from 'react';
-import type { AppProps } from 'next/app'
+import React, { useEffect } from "react";
+import type { AppProps } from "next/app";
 
-// window.Buffer = window.Buffer || require("buffer").Buffer;
+import '../styles/globals.css'
+import '../styles/Landing.css'
+import '../styles/Dojo.css'
+import '../styles/DojoConfig.css'
+import '../styles/File.css'
+import '../styles/DojoError.css'
+import '../styles/Sidebar.css'
+import '../styles/Chat.css'
 
-// const root = ReactDOM.createRoot(
-//   document.getElementById('root') as HTMLElement
-// );
-// root.render(
-//   <React.StrictMode>
-//     <App />
-//   </React.StrictMode>
-// );
- 
+
 export default function EvoApp({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />
+  useEffect(() => {
+    if (window) {
+      window.Buffer = window.Buffer || require("buffer").Buffer;
+    }
+  }, []);
+  return <Component {...pageProps} />;
 }
