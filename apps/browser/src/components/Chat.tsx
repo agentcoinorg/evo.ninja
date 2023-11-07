@@ -2,12 +2,12 @@ import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef } from "
 import { Evo } from "@evo-ninja/agents";
 import ReactMarkdown from "react-markdown";
 
-import { trackMessageSent, trackThumbsFeedback} from '../googleAnalytics';
+import { trackMessageSent, trackThumbsFeedback} from './googleAnalytics';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
-import { faThumbsUp, faThumbsDown, faChevronDown, faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
+import { faThumbsUp, faThumbsDown, faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 
-import MenuIcon from "../MenuIcon";
+import MenuIcon from "./MenuIcon";
 import clsx from "clsx";
 
 export interface ChatMessage {

@@ -13,19 +13,6 @@ module.exports = {
         sans: ["Exo", ...defaultTheme.fontFamily.sans],
         mono: ["Source Code Pro", ...defaultTheme.fontFamily.mono]
       },
-      animation: {
-        "landing-bg": "landing-bg 5s linear infinite"
-      },
-      keyframes: {
-        "landing-bg": {
-          "100%": {
-            "background-position": "0 250px"
-          }
-        }
-      },
-      backgroundImage: {
-        "landing-bg": `url('../public/wallpaper.png')`
-      },
       backgroundSize: {
         "landing-bg": `461px 250px`
       },

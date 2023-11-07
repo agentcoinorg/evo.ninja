@@ -7,12 +7,12 @@ import {
 } from "@fortawesome/free-brands-svg-icons";
 import { faCog, faDownload } from "@fortawesome/free-solid-svg-icons";
 import { faFolder } from "@fortawesome/free-solid-svg-icons";
-import Upload from "../Upload";
-import File from "../File/File";
+import Upload from "./Upload";
+import File from "./File";
 
-import { downloadFilesAsZip } from "../../sys/file/downloadFilesAsZip";
+import { downloadFilesAsZip } from "../sys/file/downloadFilesAsZip";
 import { InMemoryFile } from "@nerfzael/memory-fs";
-import CloseIcon from "../CloseIcon";
+import CloseIcon from "./CloseIcon";
 
 export interface SidebarProps {
   onSettingsClick: () => void;

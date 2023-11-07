@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { defaultModel, supportedModels } from "../../supportedModels";
+import { defaultModel, supportedModels } from "../supportedModels";
 
 interface DojoConfigProps {
   apiKey: string | null;

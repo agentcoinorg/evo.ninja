@@ -4,10 +4,10 @@ import { InMemoryFile } from "@nerfzael/memory-fs";
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 import clsx from "clsx";
 
-import DojoConfig from "../src/components/DojoConfig/DojoConfig";
-import DojoError from "../src/components/DojoError/DojoError";
-import Sidebar from "../src/components/Sidebar/Sidebar";
-import Chat, { ChatMessage } from "../src/components/Chat/Chat";
+import DojoConfig from "../src/components/DojoConfig";
+import DojoError from "../src/components/DojoError";
+import Sidebar from "../src/components/Sidebar";
+import Chat, { ChatMessage } from "../src/components/Chat";
 import { MarkdownLogger } from "../src/sys/logger";
 import { updateWorkspaceFiles } from "../src/updateWorkspaceFiles";
 import {
@@ -226,7 +226,7 @@ function Dojo() {
   }, [dojoConfig]);
 
   return (
-    <div className="flex h-full animate-landing-bg bg-neutral-800 bg-landing-bg bg-repeat text-center text-neutral-400">
+    <div className="flex h-full bg-neutral-800 bg-landing-bg bg-repeat text-center text-neutral-400">
       {(dojoConfig.loaded && !dojoConfig.openAiApiKey || configOpen) && (
         <DojoConfig
           apiKey={dojoConfig.openAiApiKey}
