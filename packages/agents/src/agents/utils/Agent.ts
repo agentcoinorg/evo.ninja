@@ -1,7 +1,6 @@
 import {
   RunnableAgent,
   ChatMessage,
-  Workspace,
   AgentOutput,
   RunResult,
   basicFunctionCallLoop,
@@ -15,13 +14,14 @@ import {
   executeAgentFunction,
   FunctionDefinition,
   AgentFunction
-} from "@evo-ninja/agent-utils";
+} from "@/agent-core";
 import { ResultErr } from "@polywrap/result";
 import { AgentConfig } from "./AgentConfig";
-import { AgentContext } from "@evo-ninja/agent-utils";
-import { ExecuteAgentFunctionCalled } from "@evo-ninja/agent-utils";
+import { AgentContext } from "@/agent-core";
+import { ExecuteAgentFunctionCalled } from "@/agent-core";
 import { Prompt } from "./Prompt";
 import { AgentFunctionBase } from "../../functions/utils";
+import { Workspace } from "@evo-ninja/agent-utils";
 
 export type GoalRunArgs = {
   goal: string;
@@ -38,14 +38,12 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
   }
 
   public async* run(
-    args: TRunArgs,
+    args: TRunArgs
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     this.initializeChat(args);
-    return yield* this.runWithChat();
-  }
 
-  public async* runWithChat(): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
+
     if (this.config.timeout) {
       setTimeout(
         this.config.timeout.callback,

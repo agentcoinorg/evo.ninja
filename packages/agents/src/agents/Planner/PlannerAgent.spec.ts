@@ -1,24 +1,20 @@
 import {
-  Env,
-  Scripts,
   OpenAI,
   Chat,
   LlmApi,
-  ConsoleLogger,
-  Logger,
-  SubWorkspace
-} from "@evo-ninja/agent-utils";
-import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
-import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
+  AgentContext,
+} from "@/agent-core";
 import * as rimraf from "rimraf";
 import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import * as fs from "fs";
-import { LlmModel } from "@evo-ninja/agent-utils";
-import { AgentContext } from "@evo-ninja/agent-utils/build/agent/AgentContext";
+import { LlmModel } from "@/agent-core";
 import { Agent } from "../utils";
 import { PlannerAgent } from ".";
+import { Env, Logger, ConsoleLogger, Scripts, SubWorkspace } from "@evo-ninja/agent-utils";
+import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
+import { DebugLlmApi, DebugLog } from "@/agent-debug";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -44,9 +40,6 @@ describe('Planner Agent Test Suite', () => {
       promptUser: () => {
         throw Error("promptUser not supported.");
       },
-      logUserPrompt: () => {
-        throw Error("logUserPrompt not supported.");
-      }
     });
 
     const llm: LlmApi = new OpenAI(

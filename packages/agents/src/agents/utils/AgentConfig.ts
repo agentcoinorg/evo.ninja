@@ -1,7 +1,8 @@
+import { Scripts, Timeout } from "@evo-ninja/agent-utils";
 import { OnGoalAchievedFunction, OnGoalFailedFunction } from "../../functions";
 import { AgentFunctionBase } from "../../functions/utils";
 import { AgentPrompts } from "./AgentPrompts";
-import { ExecuteAgentFunctionCalled, Scripts, Timeout } from "@evo-ninja/agent-utils";
+import { ExecuteAgentFunctionCalled } from "@/agent-core";
 
 export class AgentConfig<TRunArgs> {
   readonly shouldTerminate: (functionCalled: ExecuteAgentFunctionCalled) => boolean;

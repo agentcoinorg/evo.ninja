@@ -2,13 +2,10 @@ import {
   AgentFunctionResult,
   AgentOutputType,
   ChatMessageBuilder,
-  JsEngine,
-  JsEngine_GlobalVar,
-  Scripts,
-  shimCode
-} from "@evo-ninja/agent-utils"
+} from "@/agent-core"
 import { Agent } from "../../agents/utils";
 import { AgentFunctionBase } from "./AgentFunctionBase";
+import { JsEngine, JsEngine_GlobalVar, Scripts, shimCode } from "@evo-ninja/agent-utils";
 
 export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams> {
   constructor(private scripts: Scripts, private storeInVariable?: boolean) {
@@ -32,7 +29,7 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
         {
           type: AgentOutputType.Success,
           title: `[${agent.config.prompts.name}] ${this.name}`,
-          content: `${params.query}`
+          content: `\`\`\`\n${rawParams || JSON.stringify(params, null, 2)}\n\`\`\``
         }
       ],
       messages: [
@@ -48,7 +45,8 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
       outputs: [
         {
           type: AgentOutputType.Error,
-          title: `[${agent.config.prompts.name}] Error in ${this.name}: ${error}`
+          title: `[${agent.config.prompts.name}] Error in ${this.name}`,
+          content: error
         }
       ],
       messages: [

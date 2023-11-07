@@ -1,9 +1,9 @@
-import { ChatMessage } from "@evo-ninja/agent-utils";
+import { ChatMessage } from "@/agent-core";
 import { GoalRunArgs } from "../utils";
 
 export const prompts = {
   name: "Researcher",
-  expertise: `Searching the internet, comprehending details, and finding information or.`,
+  expertise: `Searching the internet, comprehending details, and finding information.`,
   initialMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
     {
       role: "user",

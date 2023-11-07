@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body,
+#__next,
+html {
+  @apply h-full font-sans;
+}
+
+code {
+  @apply font-mono;
+}
+
+#root {
+  @apply h-full;
+}

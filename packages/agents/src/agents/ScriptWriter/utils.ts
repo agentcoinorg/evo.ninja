@@ -1,6 +1,7 @@
-import { Chat, InMemoryWorkspace } from "@evo-ninja/agent-utils";
+import { Chat } from "@/agent-core";
 import { ScriptWriter } from "./ScriptWriter";
-import { AgentContext } from "@evo-ninja/agent-utils";
+import { AgentContext } from "@/agent-core";
+import { InMemoryWorkspace } from "@evo-ninja/agent-utils";
 
 export const createScriptWriter = (context: AgentContext): ScriptWriter => {
   const workspace = new InMemoryWorkspace();

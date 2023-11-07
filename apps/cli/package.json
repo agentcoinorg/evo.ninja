@@ -12,11 +12,11 @@
     "start:api": "ts-node src/api.ts",
     "build": "rimraf build && tsc --project tsconfig.build.json",
     "test": "jest --passWithNoTests --runInBand --verbose --rootDir . --config ../../jest.config.js",
-    "test:script": "ts-node ./src/__tests__/runners/script-js.ts"
+    "test:script": "ts-node ./src/__tests__/runners/script-js.ts",
+    "lint": "eslint --color -c ../../.eslintrc.js src/"
   },
   "dependencies": {
     "@evo-ninja/agents": "~0.1.0",
-    "@evo-ninja/agent-debug": "~0.1.0",
     "@evo-ninja/agent-utils": "~0.1.0",
     "@evo-ninja/agent-utils-fs": "~0.1.0",
     "agent-protocol": "1.0.1",

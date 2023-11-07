@@ -1,7 +1,12 @@
 {
   "extends": "../../tsconfig",
   "compilerOptions": {
-    "outDir": "build"
+    "outDir": "build",
+    "baseUrl": ".",
+    "paths": {
+      "@/agent-core": ["../../node_modules/@evo-ninja/agents/build/agent-core"],
+      "@/agent-debug": ["../../node_modules/@evo-ninja/agents/build/agent-debug"],
+    }
   },
   "include": [
     "./src/**/*.ts"

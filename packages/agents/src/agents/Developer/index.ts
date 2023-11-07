@@ -1,5 +1,5 @@
 import { ReadFileFunction } from "../../functions/ReadFile";
-import { AgentContext } from "@evo-ninja/agent-utils";
+import { AgentContext } from "@/agent-core";
 import { InitPoetryFunction } from "../../functions/InitPoetry";
 import { prompts } from "./prompts";
 import { RunPytest } from "../../functions/RunPytest";

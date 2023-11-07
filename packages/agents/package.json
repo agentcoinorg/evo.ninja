@@ -4,27 +4,31 @@
   "license": "MIT",
   "main": "./build/index.js",
   "scripts": {
-    "build": "rimraf build && tsc",
-    "test": "jest --runInBand --verbose --rootDir . --config ../../jest.config.js"
+    "build": "rimraf build && rollup -c",
+    "test": "jest --runInBand --verbose --rootDir . --config ../../jest.config.js",
+    "lint": "eslint --color -c ../../.eslintrc.js src/"
   },
   "dependencies": {
     "@evo-ninja/agent-utils": "~0.1.0",
     "@polywrap/result": "~0.12.0",
+    "cheerio": "^1.0.0-rc.12",
     "json5": "^2.2.3",
     "openai": "~3.3.0",
-    "turndown": "7.1.2",
-    "cheerio": "^1.0.0-rc.12"
+    "turndown": "7.1.2"
   },
   "devDependencies": {
-    "@evo-ninja/agent-debug": "~0.1.0",
     "@evo-ninja/agent-utils-fs": "~0.1.0",
+    "@rollup/plugin-typescript": "^11.1.2",
+    "@rollup/plugin-json": "^6.0.1",
     "@types/jest": "29.5.0",
+    "@types/turndown": "5.0.3",
     "gpt-tokenizer": "~2.1.1",
     "jest": "29.5.0",
+    "module-alias": "2.2.3",
     "rimraf": "~5.0.1",
+    "rollup-plugin-tsconfig-paths": "^1.5.2",
     "ts-jest": "29.1.1",
     "ts-node": "10.9.1",
-    "typescript": "4.9.5",
-    "@types/turndown": "5.0.3"
+    "typescript": "4.9.5"
   }
 }

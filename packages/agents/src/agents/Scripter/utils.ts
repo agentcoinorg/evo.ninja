@@ -1,11 +1,11 @@
-import { trimText } from "@evo-ninja/agent-utils";
+import { trimText } from "@/agent-core";
 
 export const FUNCTION_CALL_SUCCESS_CONTENT = (fnName: string, params: any, result: string) => 
-  `## Function Call:\n` + 
+  `### Function Call:\n` + 
   `\`\`\`javascript\n` + 
   `${fnName}(${JSON.stringify(params, null, 2)})\n` + 
   `\`\`\`\n` +
-  `## Result\n` + 
+  `### Result\n` + 
   `\`\`\`\n` + 
   `${result}\n` +
   `\`\`\``;

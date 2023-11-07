@@ -6,7 +6,7 @@ import {
   Module,
   manifest
 } from "./types";
-import { AGENT_SPEAK_RESPONSE, Logger } from "../../";
+import { Logger } from "../../";
 
 import { PluginFactory, PluginPackage } from "@polywrap/plugin-js";
 
@@ -24,7 +24,7 @@ export class AgentPlugin extends Module<AgentPluginConfig> {
 
   public speak(args: Args_speak): string {
     this._logger.success(args.message);
-    return AGENT_SPEAK_RESPONSE;
+    return "";
   }
 
   public async ask(args: Args_ask): Promise<string> {

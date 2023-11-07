@@ -1,24 +1,20 @@
 import {
-  Env,
-  Scripts,
   OpenAI,
   Chat,
   LlmApi,
-  ConsoleLogger,
-  Logger,
-  SubWorkspace
-} from "@evo-ninja/agent-utils";
-import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
-import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
+  AgentContext, 
+  LlmModel
+} from "@/agent-core";
 import * as rimraf from "rimraf";
 import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import fs from "fs";
-import { AgentContext } from "@evo-ninja/agent-utils";
-import { LlmModel } from "@evo-ninja/agent-utils";
 import { Agent } from "../utils";
 import { CsvAnalystAgent } from ".";
+import { Env, Logger, ConsoleLogger, Scripts, SubWorkspace } from "@evo-ninja/agent-utils";
+import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
+import { DebugLlmApi, DebugLog } from "@/agent-debug";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -45,9 +41,6 @@ describe("Data Analyst Agent Test Suite", () => {
     const logger = new Logger([new ConsoleLogger()], {
       promptUser: () => {
         throw Error("promptUser not supported.");
-      },
-      logUserPrompt: () => {
-        throw Error("logUserPrompt not supported.");
       },
     });
 

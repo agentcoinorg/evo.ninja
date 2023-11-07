@@ -1,6 +1,6 @@
 {
     "name":"agent.onGoalFailed",
     "description":"Informs the user that the agent could not achieve the goal.",
-    "arguments":"None",
+    "arguments":"{ message: string }",
     "code":"./agent.onGoalFailed.js"
 }
