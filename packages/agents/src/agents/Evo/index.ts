@@ -48,6 +48,21 @@ export class Evo extends Agent<GoalRunArgs> {
     );
   }
 
+  public reset() {
+    this.previousPrediction = undefined;
+    this.loopCounter = 0;
+    this.previousAgent = undefined;
+    this.initializedAgents = new Set();
+    this.goal = "";
+    this.context.chat = this.context.chat.cloneEmpty();
+    this._cChat = new ContextualizedChat(
+      this.context,
+      this.context.chat,
+      this._chunker,
+      this.context.variables
+    );
+  }
+
   protected initializeChat(args: GoalRunArgs): void {
     const { chat } = this.context;
 

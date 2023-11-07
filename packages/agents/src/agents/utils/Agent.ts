@@ -38,14 +38,12 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
   }
 
   public async* run(
-    args: TRunArgs,
+    args: TRunArgs
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     this.initializeChat(args);
-    return yield* this.runWithChat();
-  }
 
-  public async* runWithChat(): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     const { chat } = this.context;
+
     if (this.config.timeout) {
       setTimeout(
         this.config.timeout.callback,
