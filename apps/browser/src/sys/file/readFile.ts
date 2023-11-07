@@ -5,9 +5,8 @@ export const readFile = (file: File): Promise<InMemoryFile> => {
     const reader = new FileReader();
     reader.onload = async (e: ProgressEvent<FileReader>) => {
       const text = e.target?.result;
-
       resolve({
-        path: file.webkitRelativePath,
+        path: (file as unknown as { path: string }).path,
         content: text,
       } as InMemoryFile);
     };
