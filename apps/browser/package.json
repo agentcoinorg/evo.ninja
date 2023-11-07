@@ -11,7 +11,6 @@
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@headlessui/react": "^1.7.17",
     "@nerfzael/memory-fs": "0.1.1",
-    "@tailwindcss/typography": "0.5.10",
     "buffer": "6.0.3",
     "clsx": "^2.0.0",
     "file-saver": "^2.0.5",
