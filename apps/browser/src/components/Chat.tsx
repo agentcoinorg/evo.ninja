@@ -26,7 +26,6 @@ export interface ChatProps {
   onSidebarToggleClick: () => void;
 }
 
-
 const WelcomeMessage: React.FC = () => {
   return (
     <div className="WelcomeMessage">
@@ -41,7 +40,6 @@ const WelcomeMessage: React.FC = () => {
     </div>
   );
 }
-  
 
 const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSidebarToggleClick }: ChatProps) => {
   const samplePrompts = [
