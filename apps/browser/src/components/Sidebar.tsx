@@ -18,14 +18,14 @@ import SidebarIcon from "./SidebarIcon";
 export interface SidebarProps {
   onSettingsClick: () => void;
   userFiles: InMemoryFile[];
-  uploadUserFiles: (files: InMemoryFile[]) => void;
+  onUploadFiles: (files: InMemoryFile[]) => void;
   onSidebarToggleClick: () => void;
 }
 
 const Sidebar = ({
   onSettingsClick,
   userFiles,
-  uploadUserFiles,
+  onUploadFiles,
   onSidebarToggleClick,
 }: SidebarProps) => {
   function downloadUserFiles() {
@@ -56,7 +56,7 @@ const Sidebar = ({
 
         <Upload
           className="flex h-auto max-h-96 w-full flex-col justify-between overflow-y-auto rounded border border-neutral-500 bg-neutral-900 p-4 text-neutral-50"
-          onUpload={uploadUserFiles}
+          onUploadFiles={onUploadFiles}
         >
           <h3 className="text-lg font-semibold">
             <FontAwesomeIcon icon={faFolder} style={{ marginRight: "10px" }} />{" "}

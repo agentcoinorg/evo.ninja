@@ -164,7 +164,7 @@ export class InMemoryWorkspace implements Workspace {
   }
 }
 
-class InMemoryFile implements DirectoryEntry {
+export class InMemoryFile implements DirectoryEntry {
   public readonly type = "file";
 
   constructor(
@@ -181,7 +181,7 @@ class InMemoryFile implements DirectoryEntry {
   }
 }
 
-class InMemoryDir implements DirectoryEntry {
+export class InMemoryDir implements DirectoryEntry {
   public readonly type = "directory";
 
   constructor(
