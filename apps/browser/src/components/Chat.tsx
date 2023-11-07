@@ -1,6 +1,7 @@
 import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef } from "react";
 import { Evo } from "@evo-ninja/agents";
 import ReactMarkdown from "react-markdown";
+import FileSaver from "file-saver";
 
 import { trackMessageSent, trackThumbsFeedback} from './googleAnalytics';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -102,7 +103,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
       }
 
       let messageLog = messages;
-
+      let stepCounter = 1
       while (evoRunning) {
         if (pausedRef.current || goalEndedRef.current) {
           setStopped(true);
@@ -113,9 +114,24 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
 
         const response = await evoItr.next();
 
+        if (response.done) {
+          onMessage({
+            title: "## Goal Achieved",
+            user: "evo"
+          })
+          setEvoRunning(false);
+          setSending(false);
+          break
+        }
+
+        onMessage({
+          title: `## Step ${stepCounter}`,
+          user: "evo"
+        })
+
         if (!response.done) {
           const evoMessage = {
-            title: response.value.title,
+            title: `### Action executed:\n${response.value.title}`,
             content: response.value.content,
             user: "evo"
           };
@@ -125,11 +141,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
           }
         }
 
-        if (response.done) {
-          setEvoRunning(false);
-          setSending(false); // Reset the sending state when done
-          return Promise.resolve();
-        }
+        stepCounter++
       }
       return Promise.resolve();
     }
@@ -183,7 +195,6 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
   };
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    console.log(`handleChange: ${event}`);
     setMessage(event.target.value);
   };
 
@@ -207,33 +218,33 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
     }
   };
 
-  const exportChatHistory = (format: 'md') => {
-    let exportedContent = '';
-    if (format === 'md') {
-      exportedContent = messages.map((msg) => {
-        return `# ${msg.user.toUpperCase()}\n${msg.title}\n${msg.content}\n---\n`;
-      }).join('\n');
-    }
+  const exportChatHistory = () => {
+    const exportedContent = messages.map((msg, i, msgs) => {
+      if (msg.user === "user") {
+        return `# User\n**Goal:** ${msg.title}\n`
+      } else {
+        const logMessage = `${msg.title} \n${msg.content ?? ""}`
+        // We only append # Evo into the first message from Evo
+        if (msgs.slice(0, i).some(m => m.user === "evo")) {
+          return logMessage
+        } else {
+          return `# Evo\n` + logMessage
+        }
+      }
+    }).join('\n');
 
     // Generate a date-time stamp
     const date = new Date();
     const dateTimeStamp = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}_${date.getHours().toString().padStart(2, '0')}-${date.getMinutes().toString().padStart(2, '0')}-${date.getSeconds().toString().padStart(2, '0')}`;
 
     const blob = new Blob([exportedContent], { type: 'text/plain;charset=utf-8' });
-    const href = URL.createObjectURL(blob);
-    // const link = document.createElement('a');
-    // link.href = href;
-    // Include the date-time stamp in the filename
-    // link.download = `evo-ninja-${dateTimeStamp}.md`;
-    // document.body.appendChild(link);
-    // link.click();
-    // document.body.removeChild(link);
+    FileSaver.saveAs(blob, `evo-ninja-${dateTimeStamp}.md`)
   };
 
   return (
     <div className="flex h-full flex-col bg-[#0A0A0A] text-white">
       <div>
-        <FontAwesomeIcon className="absolute right-2.5 top-2.5 m-2.5 cursor-pointer text-2xl text-orange-600 transition-colors hover:text-orange-700" icon={faMarkdown} onClick={() => exportChatHistory('md')} />
+        <FontAwesomeIcon className="absolute right-2.5 top-2.5 m-2.5 cursor-pointer text-2xl text-orange-600 transition-colors hover:text-orange-700" icon={faMarkdown} onClick={exportChatHistory} />
       </div>
       {showPrompts && (
         <div className="SamplePrompts">
@@ -263,21 +274,9 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
               } 
               onClick={() => setClickedMsgIndex(index === clickedMsgIndex ? null : index)}
             >
-              <div>
-                {
-                  clickedMsgIndex === index 
-                    ? (
-                      <>
-                        <div>{msg.title}</div>
-                        <ReactMarkdown>{msg.content ?? ""}</ReactMarkdown>
-                      </>
-                    )
-                    : (
-                      <>
-                        <div>{msg.title}</div>
-                      </>
-                    )
-                }
+              <div className="prose prose-invert">
+                <ReactMarkdown>{msg.title}</ReactMarkdown>
+                <ReactMarkdown>{msg.content ?? ""}</ReactMarkdown>
               </div>
             </div>
           </div>
