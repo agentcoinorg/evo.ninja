@@ -232,7 +232,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
 
   return (
     <div className="flex h-full flex-col bg-[#0A0A0A] text-white">
-      <div className="flex justify-between items-center p-4">
+      <div className="flex justify-between items-center p-4 border-b-2 border-neutral-700">
         <div className="h-14 p-4 text-lg text-white cursor-pointer hover:opacity-100 opacity-80 transition-all" onClick={onSidebarToggleClick}>
           { sidebarOpen ? <></>: <SidebarIcon /> }
         </div>
