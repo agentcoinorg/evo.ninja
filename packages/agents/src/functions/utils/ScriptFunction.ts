@@ -92,7 +92,7 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
           return this.onFailure(agent, params, rawParams, result.value.error.toString());
         }
       } else {
-        return this.onFailure(agent, params, rawParams,result.error?.toString() ?? "Unknown error");
+        return this.onFailure(agent, params, rawParams, result.error?.toString() ?? "Unknown error");
       }
     };
   }

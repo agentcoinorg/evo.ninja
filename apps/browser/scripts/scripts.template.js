@@ -27,7 +27,7 @@ const scripts = uniqueFilesWithoutExtension.map((name) => {
   return {
     name,
     definition,
-    code: code.toString().replaceAll("`", "\\`").replaceAll("$", "\\$"),
+    code: code.toString().replaceAll("\\", "\\\\").replaceAll("`", "\\`").replaceAll("$", "\\$"),
     variableName,
   };
 });

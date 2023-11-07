@@ -5,10 +5,13 @@ export const readFile = (file: File): Promise<InMemoryFile> => {
     const reader = new FileReader();
     reader.onload = async (e: ProgressEvent<FileReader>) => {
       const text = e.target?.result;
-      resolve({
-        path: (file as unknown as { path: string }).path,
-        content: text,
-      } as InMemoryFile);
+      const content = !text ? undefined :
+        typeof text === "string" ? (new TextEncoder()).encode(text) :
+        new Uint8Array(text);
+      resolve(new InMemoryFile(
+        (file as unknown as { path: string }).path,
+        content,
+      ));
     };
 
     reader.readAsArrayBuffer(file);
