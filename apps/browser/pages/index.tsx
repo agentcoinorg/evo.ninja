@@ -208,7 +208,7 @@ function Dojo() {
           }}
           onSettingsClick={() => setConfigOpen(true)}
           userFiles={userFiles}
-          uploadUserFiles={setUploadedFiles}
+          onUploadFiles={setUploadedFiles}
         />
       </div>
       <div className={clsx("relative grow border-l-2 border-neutral-700", {
@@ -224,6 +224,7 @@ function Dojo() {
               onSidebarToggleClick={() => {
                 setSidebarOpen(!sidebarOpen);
               }}
+              onUploadFiles={setUploadedFiles}
             />
           )}
           {dojoError && <DojoError error={dojoError} />}

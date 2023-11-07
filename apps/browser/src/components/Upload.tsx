@@ -8,10 +8,10 @@ import clsx from 'clsx';
 
 interface UploadProps {
   className?: string
-  onUpload: (files: InMemoryFile[]) => void
+  onUploadFiles: (files: InMemoryFile[]) => void
 }
 
-function Upload({ className, onUpload, children }: PropsWithChildren<UploadProps>) {
+function Upload({ className, onUploadFiles, children }: PropsWithChildren<UploadProps>) {
   const [showUpload, setShowUpload] = useState(false);
   const { acceptedFiles, getRootProps, getInputProps, isDragAccept, open } =
     useDropzone({ noClick: true });
@@ -25,12 +25,12 @@ function Upload({ className, onUpload, children }: PropsWithChildren<UploadProps
           })
         );
 
-        onUpload(result);
+        onUploadFiles(result);
 
         setShowUpload(false);
       }
     })();
-  }, [acceptedFiles, onUpload]);
+  }, [acceptedFiles, onUploadFiles]);
 
   return (
     <div

@@ -4,9 +4,11 @@ import ReactMarkdown from "react-markdown";
 import FileSaver from "file-saver";
 
 import { trackMessageSent, trackThumbsFeedback} from './googleAnalytics';
+import { ExamplePrompt, examplePrompts } from "../examplePrompts";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
 import { faThumbsUp, faThumbsDown, faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
+import { InMemoryFile } from "@nerfzael/memory-fs";
 
 import MenuIcon from "./MenuIcon";
 import clsx from "clsx";
@@ -24,6 +26,7 @@ export interface ChatProps {
   messages: ChatMessage[];
   goalEnded: boolean;
   onSidebarToggleClick: () => void;
+  onUploadFiles: (files: InMemoryFile[]) => void;
 }
 
 const WelcomeMessage: React.FC = () => {
@@ -41,15 +44,7 @@ const WelcomeMessage: React.FC = () => {
   );
 }
 
-const samplePrompts = [
-  "Who are the two hosts of the Latent Space podcast? Write their names to a file.",
-  "How much was spent on utilities within these CSVs?",
-
-  "Write a paper about toast and save it as toast.md",
-  "How do I cook spaghetti? Write down the recipe to spaghetti.txt",
-];
-
-const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSidebarToggleClick }: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSidebarToggleClick, onUploadFiles }: ChatProps) => {
 
   const [message, setMessage] = useState<string>("");
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
@@ -170,12 +165,16 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
     setTrackUser(false); // User did not accept disclaimer, disable tracking
   };
 
-  const handleSamplePromptClick = async (prompt: string) => {
-    setMessage(prompt);  // Set the message
+  const handleSamplePromptClick = async (prompt: ExamplePrompt) => {
+    if (prompt.files) {
+      onUploadFiles(prompt.files);
+    }
+    setMessage(prompt.prompt);
+    handleSend(prompt.prompt);
   };
-  const handleSend = async () => {
+  const handleSend = async (newMessage?: string) => {
     onMessage({
-      title: message,
+      title: newMessage || message,
       user: "user"
     });
     setSending(true);
@@ -184,7 +183,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
     setEvoRunning(true);
 
     if (trackUser) { // Only track if user accepted the disclaimer
-      trackMessageSent(message); 
+      trackMessageSent(newMessage || message); 
     }
   };
 
@@ -251,13 +250,13 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
       {showPrompts && (
         <div className="SamplePrompts">
           <WelcomeMessage />
-          {samplePrompts.map((prompt, index) => (
+          {examplePrompts.map((prompt, index) => (
             <div 
-              key={index} 
-              className="SamplePromptCard" 
+              key={index}
+              className="SamplePromptCard"
               onClick={() => handleSamplePromptClick(prompt)}
             >
-              {prompt}
+              {prompt.prompt}
             </div>
           ))}
         </div>
@@ -313,13 +312,13 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
       </div>
       {showPrompts && (
         <div className="grid w-full grid-rows-2 p-2.5 py-16">
-          {samplePrompts.map((prompt, index) => (
+          {examplePrompts.map((prompt, index) => (
             <div 
               key={index} 
               className="m-1 cursor-pointer rounded-xl border border-neutral-500 bg-neutral-800 p-2.5 text-left text-xs text-neutral-50 transition-all hover:border-red-500" 
               onClick={() => handleSamplePromptClick(prompt)}
             >
-              {prompt}
+              {prompt.prompt}
             </div>
           ))}
         </div>
