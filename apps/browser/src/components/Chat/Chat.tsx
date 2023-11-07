@@ -216,7 +216,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
   };
 
   return (
-    <div className="flex h-full flex-col bg-neutral-800 text-white">
+    <div className="flex h-full flex-col bg-[#0A0A0A] text-white">
       <div>
         <FontAwesomeIcon className="absolute right-2.5 top-2.5 m-2.5 cursor-pointer text-2xl text-orange-600 transition-colors hover:text-orange-700" icon={faMarkdown} onClick={() => exportChatHistory('md')} />
       </div>
