@@ -25,6 +25,23 @@ export interface ChatProps {
   onSidebarToggleClick: () => void;
 }
 
+
+const WelcomeMessage: React.FC = () => {
+  return (
+    <div className="WelcomeMessage">
+      <div className="WelcomeMessage__Title"><h1>Welcome to Evo Ninja!</h1></div>
+      <div className="WelcomeMessage__Content">
+        <p>
+        Evo is a general agent that can do anything for you by changing personas based on the task it needs to do. You can use it to write code, automate tasks, or even write a book. Just tell Evo what you want and it do it for you.
+          Evo is powered by <a href="https://openai.com/blog/openai-api/" target="_blank" rel="noopener noreferrer">OpenAI's API</a>, <a href="
+          https://polywrap.io/" target="_blank" rel="noopener noreferrer">Polywrap</a>, and a community of AI agents that collaborate with humans to solve problems.
+        </p>
+      </div>
+    </div>
+  );
+}
+  
+
 const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSidebarToggleClick }: ChatProps) => {
   const samplePrompts = [
     "Fetch the price of ethereum, bitcoin and dogecoin and save them in a file named crypto.csv",
@@ -220,6 +237,20 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
       <div>
         <FontAwesomeIcon className="absolute right-2.5 top-2.5 m-2.5 cursor-pointer text-2xl text-orange-600 transition-colors hover:text-orange-700" icon={faMarkdown} onClick={() => exportChatHistory('md')} />
       </div>
+      {showPrompts && (
+        <div className="SamplePrompts">
+          <WelcomeMessage />
+          {samplePrompts.map((prompt, index) => (
+            <div 
+              key={index} 
+              className="SamplePromptCard" 
+              onClick={() => handleSamplePromptClick(prompt)}
+            >
+              {prompt}
+            </div>
+          ))}
+        </div>
+      )}
       <div className="flex-1 overflow-auto p-5 text-left">
         {messages.map((msg, index) => (
           <div key={index} className={`${msg.user}`}>

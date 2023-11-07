@@ -48,6 +48,7 @@ const Sidebar = ({
           alt="Main Logo"
           className="mb-5 w-full max-w-sm"
         />
+
         <Upload
           className="flex h-auto max-h-96 w-full flex-col justify-between overflow-y-auto rounded border border-neutral-500 bg-neutral-900 p-4 text-neutral-50"
           onUpload={uploadUserFiles}
