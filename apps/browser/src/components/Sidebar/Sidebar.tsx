@@ -58,7 +58,7 @@ const Sidebar = ({
           </h3>
           <div>
             {userFiles.map((file, i) => (
-              <File key={i} files={[file]} showExtension={true} />
+              <File key={i} file={file}  />
             ))}
           </div>
           {userFiles.length !== 0 && (
