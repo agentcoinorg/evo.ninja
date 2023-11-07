@@ -1,6 +1,7 @@
 import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef } from "react";
 import { Evo } from "@evo-ninja/agents";
 import ReactMarkdown from "react-markdown";
+import FileSaver from "file-saver";
 
 import { trackMessageSent, trackThumbsFeedback} from './googleAnalytics';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -222,14 +223,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
     const dateTimeStamp = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}_${date.getHours().toString().padStart(2, '0')}-${date.getMinutes().toString().padStart(2, '0')}-${date.getSeconds().toString().padStart(2, '0')}`;
 
     const blob = new Blob([exportedContent], { type: 'text/plain;charset=utf-8' });
-    const href = URL.createObjectURL(blob);
-    // const link = document.createElement('a');
-    // link.href = href;
-    // Include the date-time stamp in the filename
-    // link.download = `evo-ninja-${dateTimeStamp}.md`;
-    // document.body.appendChild(link);
-    // link.click();
-    // document.body.removeChild(link);
+    FileSaver.saveAs(blob, `evo-ninja-${dateTimeStamp}.md`)
   };
 
   return (
