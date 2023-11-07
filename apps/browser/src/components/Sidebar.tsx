@@ -1,7 +1,6 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faTwitter,
   faDiscord,
   faGithub,
 } from "@fortawesome/free-brands-svg-icons";
@@ -89,15 +88,9 @@ const Sidebar = ({
             />
           </a>
         </div>
-        <div className="flex cursor-pointer justify-between text-lg text-white opacity-80 transition-all hover:opacity-100">
+        <div className="flex justify-between text-lg text-white">
           <a
-            href="https://twitter.com/evo_ninja_ai"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <FontAwesomeIcon icon={faTwitter} />
-          </a>
-          <a
+            className="cursor-pointer opacity-80 transition-all hover:opacity-100"
             href="https://discord.gg/r3rwh69cCa"
             target="_blank"
             rel="noopener noreferrer"
@@ -105,13 +98,17 @@ const Sidebar = ({
             <FontAwesomeIcon icon={faDiscord} />
           </a>
           <a
+            className="cursor-pointer opacity-80 transition-all hover:opacity-100"
             href="https://github.com/polywrap/evo.ninja"
             target="_blank"
             rel="noopener noreferrer"
           >
             <FontAwesomeIcon icon={faGithub} />
           </a>
-          <a onClick={onSettingsClick}>
+          <a
+            className="cursor-pointer opacity-80 transition-all hover:opacity-100"
+            onClick={onSettingsClick}
+          >
             <FontAwesomeIcon icon={faCog} />
           </a>
         </div>
