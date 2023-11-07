@@ -42,11 +42,15 @@ const Sidebar = ({
             <CloseIcon></CloseIcon>
           </div>
         </div>
-        <img
-          src="avatar-name.png"
-          alt="Main Logo"
-          className="mb-5 w-full max-w-sm"
-        />
+        <div className="flex justify-between text-lg text-white gap-4">
+          <a
+            className="cursor-pointer opacity-80 transition-all hover:opacity-100"
+            onClick={onSettingsClick}
+          >
+            <FontAwesomeIcon icon={faCog} />
+          </a>
+          Settings
+        </div>
 
         <Upload
           className="flex h-auto max-h-96 w-full flex-col justify-between overflow-y-auto rounded border border-neutral-500 bg-neutral-900 p-4 text-neutral-50"
@@ -72,47 +76,30 @@ const Sidebar = ({
           )}
         </Upload>
       </div>
-      <footer className="my-8 box-border flex w-10/12 flex-col gap-4">
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-neutral-50">Built with love by</span>
-          <a
-            className="text-white"
-            href="https://polywrap.io"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <img
-              src="polywrap-logo.png"
-              alt="Image Banner"
-              className="w-full max-w-[250px]"
-            />
-          </a>
+        <div className="box-border flex justify-center w-10/12 flex-col gap-2">
+          <div className="flex justify-center">
+            <img className="max-w-[16rem]" src="avatar-name.png" alt="Main Logo" />
+          </div>
+          <div className="flex justify-center text-lg text-white gap-4">
+            <a
+              className="cursor-pointer opacity-80 transition-all hover:opacity-100"
+              href="https://discord.gg/r3rwh69cCa"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FontAwesomeIcon icon={faDiscord} title="Support & Feedback" />
+            </a>
+            <div className="pointer-events-none">|</div>
+            <a
+              className="cursor-pointer opacity-80 transition-all hover:opacity-100"
+              href="https://github.com/polywrap/evo.ninja"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FontAwesomeIcon icon={faGithub} title="Star us on GitHub" />
+            </a>
+          </div>
         </div>
-        <div className="flex justify-between text-lg text-white">
-          <a
-            className="cursor-pointer opacity-80 transition-all hover:opacity-100"
-            href="https://discord.gg/r3rwh69cCa"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <FontAwesomeIcon icon={faDiscord} />
-          </a>
-          <a
-            className="cursor-pointer opacity-80 transition-all hover:opacity-100"
-            href="https://github.com/polywrap/evo.ninja"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <FontAwesomeIcon icon={faGithub} />
-          </a>
-          <a
-            className="cursor-pointer opacity-80 transition-all hover:opacity-100"
-            onClick={onSettingsClick}
-          >
-            <FontAwesomeIcon icon={faCog} />
-          </a>
-        </div>
-      </footer>
     </div>
   );
 };
