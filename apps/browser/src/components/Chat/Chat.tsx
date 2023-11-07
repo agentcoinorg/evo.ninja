@@ -7,8 +7,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
 import { faThumbsUp, faThumbsDown, faChevronDown, faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 
-import "./Chat.css";
 import MenuIcon from "../MenuIcon";
+import clsx from "clsx";
 
 export interface ChatMessage {
   title: string;
@@ -206,41 +206,32 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
 
     const blob = new Blob([exportedContent], { type: 'text/plain;charset=utf-8' });
     const href = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = href;
+    // const link = document.createElement('a');
+    // link.href = href;
     // Include the date-time stamp in the filename
-    link.download = `evo-ninja-${dateTimeStamp}.md`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // link.download = `evo-ninja-${dateTimeStamp}.md`;
+    // document.body.appendChild(link);
+    // link.click();
+    // document.body.removeChild(link);
   };
 
   return (
-    <div className="Chat">
-      <div >
-        <FontAwesomeIcon className="Chat__Export" icon={faMarkdown} onClick={() => exportChatHistory('md')} />
+    <div className="flex h-full flex-col bg-[#0A0A0A] text-white">
+      <div>
+        <FontAwesomeIcon className="absolute right-2.5 top-2.5 m-2.5 cursor-pointer text-2xl text-orange-600 transition-colors hover:text-orange-700" icon={faMarkdown} onClick={() => exportChatHistory('md')} />
       </div>
-      {showPrompts && (
-        <div className="SamplePrompts">
-          {samplePrompts.map((prompt, index) => (
-            <div 
-              key={index} 
-              className="SamplePromptCard" 
-              onClick={() => handleSamplePromptClick(prompt)}
-            >
-              {prompt}
-            </div>
-          ))}
-        </div>
-      )}
-      <div className="Messages">
-      {messages.map((msg, index) => (
-          <div key={index} className={`MessageContainer ${msg.user}`}>
+      <div className="flex-1 overflow-auto p-5 text-left">
+        {messages.map((msg, index) => (
+          <div key={index} className={`${msg.user}`}>
             {index === 0 || messages[index - 1].user !== msg.user ? (
               <div className="SenderName">{msg.user.toUpperCase()}</div>
             ) : null}
             <div 
-              className={`Message ${msg.user} ${clickedMsgIndex === index ? "active" : ""}`} 
+              className={clsx(
+                "my-1 rounded border border-transparent px-4 py-2.5 transition-all hover:border-orange-600",
+                msg.user === "user" ? "bg-blue-500": "bg-neutral-900",
+                clickedMsgIndex === index ? "border-orange-600" : "")
+              } 
               onClick={() => setClickedMsgIndex(index === clickedMsgIndex ? null : index)}
             >
               <div>
@@ -263,22 +254,23 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
           </div>
         ))}
         {goalEnded && (
-          <div className="FeedbackContainer">
-            <div className="FeedbackTitle">Provide Feedback</div>
-            <div className="FeedbackButtons">
+          <div className="my-4 flex flex-col items-center">
+            <div className="mb-2 text-xl">Provide Feedback</div>
+            <div className="flex justify-center gap-4">
               <FontAwesomeIcon 
                 icon={faThumbsUp} 
                 onClick={handleThumbsUp} 
-                className={hasUpvoted ? 'UpvoteActive' : ''} 
+                className={clsx(hasUpvoted ? 'text-orange-600' : '')} 
               />
               <FontAwesomeIcon 
                 icon={faThumbsDown} 
                 onClick={handleThumbsDown} 
-                className={hasDownvoted ? 'DownvoteActive' : ''} 
+                className={clsx(hasUpvoted ? 'text-orange-600' : '')} 
               />
             </div>
-            <div className="DetailedFeedback">
+            <div>
               <a
+                className="mt-2.5 inline-block text-orange-600 underline"
                 href="https://forms.gle/nidFArD7aPzYL5PQ7"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -289,13 +281,26 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
           </div>
         )}
       </div>
-      <div className="Chat__Container">
+      {showPrompts && (
+        <div className="grid w-full grid-rows-2 p-2.5 py-16">
+          {samplePrompts.map((prompt, index) => (
+            <div 
+              key={index} 
+              className="m-1 cursor-pointer rounded-xl border border-neutral-500 bg-neutral-800 p-2.5 text-left text-xs text-neutral-50 transition-all hover:border-red-500" 
+              onClick={() => handleSamplePromptClick(prompt)}
+            >
+              {prompt}
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="flex items-center justify-center gap-4 p-4 border-t-2 border-neutral-700">
         {showDisclaimer && (
-          <div className="DisclaimerRibbon">
+          <div className="absolute bottom-0 z-50 flex w-4/5 items-center justify-around rounded-t-lg border-2 border-red-500 bg-black p-2.5 text-center text-xs text-white">
             🧠 Hey there! Mind sharing your prompts to help make Evo even better?
-            <div className="ButtonWrapper">
-              <span className="CloseDisclaimer" onClick={handleCloseDisclaimer}>Accept</span>
-              <span className="CloseWithoutTracking" onClick={handleCloseWithoutTracking}>Decline</span>
+            <div className="flex gap-2.5">
+              <span className="cursor-pointer px-5 py-2.5 font-bold text-red-500" onClick={handleCloseDisclaimer}>Accept</span>
+              <span className="cursor-pointer px-5 py-2.5 font-bold text-white" onClick={handleCloseWithoutTracking}>Decline</span>
             </div>
           </div>
         )}
@@ -308,14 +313,14 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
           onChange={handleChange}
           onKeyPress={handleKeyPress}
           placeholder="Enter your main goal here..."
-          className="Chat__Input"
+          className="mr-2.5 flex-1 rounded border border-neutral-400 bg-neutral-900 p-2.5 text-neutral-50 outline-none transition-all"
           disabled={sending || showDisclaimer} // Disable input while sending or if disclaimer is shown
         />
         {evoRunning && (
           <>
             {
               !paused && (
-                <button className="Chat__Btn" onClick={handlePause} disabled={!evoRunning || paused}>
+                <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-700" onClick={handlePause} disabled={!evoRunning || paused}>
                 Pause
                 </button>
               )
@@ -324,13 +329,13 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
               paused && (
                 <>
                   {!stopped && (
-                     <button className="Chat__Btn" disabled={true}>
+                     <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-700" disabled={true}>
                      Pausing
                      </button>
                   )}
 
                   {stopped && (
-                     <button className="Chat__Btn" onClick={handleContinue} disabled={evoRunning && !paused}>
+                     <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-700" onClick={handleContinue} disabled={evoRunning && !paused}>
                      Paused
                      </button>
                   )}
@@ -341,21 +346,24 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
         )}
 
         {evoRunning ? (
-          <div className="Spinner" />
+          <div className="h-9 w-9 animate-spin rounded-full border-4 border-black/10 border-l-red-500" />
         ) : (
-          <button className="Chat__Btn" onClick={handleSend} disabled={evoRunning || sending}>
+          <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-700" onClick={handleSend} disabled={evoRunning || sending}>
             Start
           </button>
         )}
       </div>
 
       {showEvoNetPopup && (
-        <div className="PopupCard" onClick={() => window.open('https://forms.gle/Wsjanqiw68DwCLTA9', '_blank')}>
-          <div className="PopupContent">
+        <div
+          className="fixed top-0 right-0 w-[300px] bg-[#121212] text-[#f5f5f5] shadow-md border border-[#2b2b30] rounded-lg cursor-pointer transition-opacity duration-300 ease-in-out opacity-80 mt-[55px] mr-[18px] hover:border-[#ff572e] hover:opacity-100"
+          onClick={() => window.open('https://forms.gle/Wsjanqiw68DwCLTA9', '_blank')}
+        >
+          <div className="p-3 text-left text-xs flex items-start justify-between relative">
             <a href="https://forms.gle/Wsjanqiw68DwCLTA9" target="_blank" rel="noopener noreferrer">
               <p>Join Evo-Net! <br /> A community where script writers and AI agents collab on AI tools for specialized tasks.</p>
             </a>
-            <div className="LinkIcon">
+            <div className="absolute top-3 right-3">
               <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
             </div>
           </div>
