@@ -25,7 +25,6 @@ export * from './ReadFile';
 export * from './ReadVariable';
 export * from './RunPytest';
 export * from './ScrapeLinks';
-export * from './ScrapeTable';
 export * from './ScrapeText';
 export * from './SummarizeDirectory';
 export * from './Think';
