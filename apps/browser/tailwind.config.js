@@ -28,6 +28,9 @@ module.exports = {
       },
       backgroundSize: {
         "landing-bg": `461px 250px`
+      },
+      colors: {
+        'opacity-black': 'hsla(0, 0%, 9%, 0.8)'
       }
     },
   },

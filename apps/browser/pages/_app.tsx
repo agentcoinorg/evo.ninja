@@ -3,6 +3,7 @@ import type { AppProps } from "next/app";
 import { Exo } from "next/font/google"
 
 import '../styles/globals.css'
+import clsx from "clsx";
 
 const exo = Exo({
   subsets: ["latin"]
@@ -15,7 +16,7 @@ export default function EvoApp({ Component, pageProps }: AppProps) {
     }
   }, []);
   return (
-    <div className={exo.className}>
+    <div className={clsx(exo.className, "h-full")}>
       <Component {...pageProps} />
     </div>
   )

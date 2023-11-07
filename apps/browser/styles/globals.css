@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 body,
+#__next,
 html {
   @apply h-full font-sans;
 }

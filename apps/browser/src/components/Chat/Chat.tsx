@@ -216,33 +216,20 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
   };
 
   return (
-    <div className="flex h-full w-4/5 flex-col bg-neutral-800 text-white">
-      <div >
+    <div className="flex h-full flex-col bg-neutral-800 text-white">
+      <div>
         <FontAwesomeIcon className="absolute right-2.5 top-2.5 m-2.5 cursor-pointer text-2xl text-orange-600 transition-colors hover:text-orange-700" icon={faMarkdown} onClick={() => exportChatHistory('md')} />
       </div>
-      {showPrompts && (
-        <div className="absolute bottom-0 mb-32 grid w-full grid-rows-2 p-2.5">
-          {samplePrompts.map((prompt, index) => (
-            <div 
-              key={index} 
-              className="m-1 cursor-pointer rounded-xl border border-neutral-500 bg-neutral-800 p-2.5 text-left text-xs text-neutral-50 transition-all hover:border-red-500" 
-              onClick={() => handleSamplePromptClick(prompt)}
-            >
-              {prompt}
-            </div>
-          ))}
-        </div>
-      )}
-      <div className="flex-1 overflow-auto border-b border-b-neutral-700 p-5 text-left">
-      {messages.map((msg, index) => (
+      <div className="flex-1 overflow-auto p-5 text-left">
+        {messages.map((msg, index) => (
           <div key={index} className={`${msg.user}`}>
             {index === 0 || messages[index - 1].user !== msg.user ? (
               <div className="SenderName">{msg.user.toUpperCase()}</div>
             ) : null}
             <div 
               className={clsx(
-                "my-1 rounded border border-transparent bg-neutral-900 px-4 py-2.5 text-neutral-50 transition-all hover:border-orange-600",
-                msg.user ? "bg-blue-500 text-neutral-50": "",
+                "my-1 rounded border border-transparent px-4 py-2.5 transition-all hover:border-orange-600",
+                msg.user === "user" ? "bg-blue-500": "bg-neutral-900",
                 clickedMsgIndex === index ? "border-orange-600" : "")
               } 
               onClick={() => setClickedMsgIndex(index === clickedMsgIndex ? null : index)}
@@ -294,7 +281,20 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
           </div>
         )}
       </div>
-      <div className="flex items-center justify-center gap-4 p-4">
+      {showPrompts && (
+        <div className="grid w-full grid-rows-2 p-2.5 py-16">
+          {samplePrompts.map((prompt, index) => (
+            <div 
+              key={index} 
+              className="m-1 cursor-pointer rounded-xl border border-neutral-500 bg-neutral-800 p-2.5 text-left text-xs text-neutral-50 transition-all hover:border-red-500" 
+              onClick={() => handleSamplePromptClick(prompt)}
+            >
+              {prompt}
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="flex items-center justify-center gap-4 p-4 border-t-2 border-neutral-700">
         {showDisclaimer && (
           <div className="absolute bottom-0 z-50 flex w-4/5 items-center justify-around rounded-t-lg border-2 border-red-500 bg-black p-2.5 text-center text-xs text-white">
             🧠 Hey there! Mind sharing your prompts to help make Evo even better?

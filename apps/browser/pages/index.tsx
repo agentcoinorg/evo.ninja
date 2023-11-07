@@ -3,8 +3,9 @@ import { useRouter } from "next/router";
 
 function Landing() {
   const router = useRouter();
+
   return (
-    <div className="animate-landing-bg bg-landing-bg bg-repeat text-center text-neutral-400">
+    <div className="animate-landing-bg bg-landing-bg bg-repeat text-center text-neutral-400 ">
       <div className="bg-neutral-900/70 text-center text-white">
         <header className="flex min-h-screen items-center justify-center text-3xl font-semibold text-white">
           <section className="absolute right-0 top-0 mr-12 flex h-16 items-center gap-6">
@@ -34,7 +35,10 @@ function Landing() {
             <h1>evo.ninja</h1>
             <img src="avatar.png" alt="Evo" width={200} />
             <h2>The AI that evolves in real-time</h2>
-            <button onClick={() => router.push("/dojo")}>Enter Dojo</button>
+            <button
+              className="cursor-pointer rounded border-none bg-slate-900 px-5 py-2.5 text-white transition-colors hover:bg-slate-700"
+              onClick={() => router.push("/dojo")}
+            >Enter Dojo</button>
           </section>
         </header>
       </div>
