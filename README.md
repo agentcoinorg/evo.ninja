@@ -2,7 +2,7 @@
 
 ![](https://hackmd.io/_uploads/ByWjLKAhn.png)
 
-[Discord](https://discord.gg/X7ystzGcf5) | [Website](https://evo.ninja) | Give the repo a :star: !  
+[Discord](https://discord.gg/r3rwh69cCa) | [Website](https://evo.ninja) | Give the repo a :star: !  
 
 ## Welcome!
 
@@ -10,9 +10,9 @@ To get started using evo.ninja simply head to our [website](https://evo.ninja), 
 
 ## Need Help?
 
-Join our [Discord community](https://discord.gg/X7ystzGcf5) for support and discussions.
+Join our [Discord community](https://discord.gg/r3rwh69cCa) for support and discussions.
 
-[![Join us on Discord](https://invidget.switchblade.xyz/X7ystzGcf5)](https://discord.gg/X7ystzGcf5)
+[![Join us on Discord](https://invidget.switchblade.xyz/X7ystzGcf5)](https://discord.gg/r3rwh69cCa)
 
 If you have questions or encounter issues, please don't hesitate to [create a new issue](https://github.com/polywrap/evo.ninja/issues/new/choose) to get support.
 

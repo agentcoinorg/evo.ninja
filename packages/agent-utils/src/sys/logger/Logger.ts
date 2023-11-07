@@ -81,7 +81,7 @@ export class Logger implements ILogger {
           return;
         }
         logger.info("```\n" + data + "\n```\n");
-        logger.info("Support: https://discord.gg/ZUSDVhA2Vz");
+        logger.info("Support: https://discord.gg/r3rwh69cCa");
         resolve();
       });
     });

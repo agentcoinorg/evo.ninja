@@ -98,7 +98,7 @@ const Sidebar = ({
             <FontAwesomeIcon icon={faTwitter} />
           </a>
           <a
-            href="https://discord.gg/X7ystzGcf5"
+            href="https://discord.gg/r3rwh69cCa"
             target="_blank"
             rel="noopener noreferrer"
           >
