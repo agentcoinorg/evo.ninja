@@ -268,21 +268,9 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
               } 
               onClick={() => setClickedMsgIndex(index === clickedMsgIndex ? null : index)}
             >
-              <div>
-                {
-                  clickedMsgIndex === index 
-                    ? (
-                      <>
-                        <div>{msg.title}</div>
-                        <ReactMarkdown>{msg.content ?? ""}</ReactMarkdown>
-                      </>
-                    )
-                    : (
-                      <>
-                        <div>{msg.title}</div>
-                      </>
-                    )
-                }
+              <div className="prose prose-invert">
+                <ReactMarkdown>{msg.title}</ReactMarkdown>
+                <ReactMarkdown>{msg.content ?? ""}</ReactMarkdown>
               </div>
             </div>
           </div>
