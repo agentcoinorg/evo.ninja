@@ -1,5 +1,6 @@
 import { createApp } from "./app";
 import { Logger, Timeout } from "@evo-ninja/agent-utils";
+import { AgentOutput } from "@evo-ninja/agents";
 import { program } from "commander";
 
 export async function cli(): Promise<void> {
@@ -8,7 +9,6 @@ export async function cli(): Promise<void> {
     .option("-t, --timeout <seconds>")
     .option("-r, --root <path>")
     .option("-d, --debug")
-    .option("-m, --messages <path>")
     .parse();
 
   const options = program.opts();
@@ -25,78 +25,80 @@ export async function cli(): Promise<void> {
     timeout,
     rootDir: options.root,
     debug: options.debug,
-    messagesPath: options.messages,
     sessionName: options.session,
   });
 
   await app.logger.logHeader();
 
-  // Refactored goal handling into a separate async function
   async function handleGoal(goal: string) {
     app.debugLog?.goalStart(goal);
 
-    let iterator = options.messages ? app.evo.runWithChat([...app.chat.messages]) : app.evo.run({ goal });
+    let iterator = app.evo.run({ goal });
+    let stepCounter = 1;
 
     while (true) {
       app.debugLog?.stepStart();
+      app.logger.info(`## Step ${stepCounter}\n`)
       const response = await iterator.next();
       app.debugLog?.stepEnd();
 
-    const logMessage = (message: any) => {
-      const messageStr = `${message.title}\n${message.content}`;
-      app.fileLogger.info(`# Evo:\n${messageStr}`);
-      app.consoleLogger.info(`Evo: ${messageStr}`);
-      app.debugLog?.stepLog(message);
-    }
-
-    const logError = (error: string) => {
-      app.logger.error(error ?? "Unknown error");
-      app.debugLog?.stepError(error);
-    }
-
-    if (response.done) {
-      if (!response.value.ok) {
-        logError(response.value.error ?? "Unknown error");
-      } else {
-        logMessage(response.value.value);
+      const logMessage = (message: AgentOutput) => {
+        const messageStr = `${message.title}  \n${message.content ?? ""}`;
+        app.logger.info(`### Action executed:\n${messageStr}`);
+        app.debugLog?.stepLog(messageStr);
       }
-      break;
+
+      const logError = (error: string) => {
+        app.logger.error(error);
+        app.debugLog?.stepError(error);
+      }
+
+      if (response.done) {
+        if (!response.value.ok) {
+          logError(response.value.error ?? "Unknown error");
+        } else {
+          logMessage(response.value.value);
+        }
+        break;
+      }
+
+      if (response.value && response.value) {
+        logMessage(response.value);
+      }
+      stepCounter++
     }
 
-    if (response.value && response.value) {
-      logMessage(response.value);
+    app.debugLog?.goalEnd();
+    return Promise.resolve();
+  }
+
+  let goal: string | undefined = program.args[0];
+  let goalCounter = 0;
+
+  while (true) {
+    if (!goal) {
+      goal = await app.logger.prompt("Enter your goal");
+    } else if (goalCounter === 0) {
+      app.fileLogger.info("# User\n **Enter your goal:** " + goal);
+    } else {
+      goal = await app.logger.prompt("Enter another goal");
+      app.evo.reset();
     }
+
+    if (!goal || goal.toLocaleLowerCase() === "exit") break;
+
+    ++goalCounter;
+    await handleGoal(goal);
   }
 
-  app.debugLog?.goalEnd();
-};
-
-let firstGoalEntered = false;
-
-// Loop to handle multiple goals
-while (true) {
-  let goal: string;
-
-  if (!firstGoalEntered) {
-    goal = await app.logger.prompt("Enter your goal: "); // Prompt for the first goal
-    firstGoalEntered = true; // Set this to ensure we don't ask to enter the goal again
-  } else {
-    goal = await app.logger.prompt("Provide feedback: "); // Prompt for feedback after the first goal
-  }
-
-  if (!goal) break; // Exit if no goal or feedback is provided
-
-  await handleGoal(goal);
-}
-
-return Promise.resolve();
+  return Promise.resolve();
 }
 
 cli()
-.then(() => {
-  process.exit(0);
-})
-.catch((err) => {
-  console.error(err);
-  process.abort();
-});
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error(err);
+    process.abort();
+  });

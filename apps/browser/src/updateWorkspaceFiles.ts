@@ -1,14 +1,14 @@
 import { Workspace } from "@evo-ninja/agent-utils";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 
-export function updateWorkspaceFiles(workspace: Workspace, files: InMemoryFile[], setFiles: (files: InMemoryFile[]) => void) {
+export function updateWorkspaceFiles(workspace: Workspace, files: InMemoryFile[], setFiles: (files: InMemoryFile[]) => void): void {
   const items = workspace.readdirSync("");
   if (!items) {
     return;
   }
 
-  //Compare workspace files to files
-  //If different, update files
+  // Compare workspace files to files
+  // If different, update files
   let isDifferent = false;
   if (items.length !== files.length) {
     isDifferent = true;

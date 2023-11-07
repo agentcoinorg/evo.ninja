@@ -13,7 +13,8 @@ export class AgentProtocolWorkspace implements Workspace {
   }
 
   get artifacts(): Artifact[] {
-    return Array.from(this._artifactLog.values());
+    return Array.from(this._artifactLog.values())
+      .filter((x) => !x.relative_path?.startsWith("."));
   }
 
   cleanArtifacts(): void {
