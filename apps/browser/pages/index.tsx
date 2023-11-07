@@ -232,6 +232,7 @@ function Dojo() {
                 onMessage={onMessage}
                 messages={messages}
                 goalEnded={goalEnded}
+                sidebarOpen={sidebarOpen}
                 onSidebarToggleClick={() => {
                   setSidebarOpen(!sidebarOpen);
                 }}

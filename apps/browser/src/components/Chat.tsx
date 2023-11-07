@@ -10,6 +10,7 @@ import { faThumbsUp, faThumbsDown, faArrowUpRightFromSquare } from '@fortawesome
 
 import MenuIcon from "./MenuIcon";
 import clsx from "clsx";
+import SidebarIcon from "./SidebarIcon";
 
 export interface ChatMessage {
   title: string;
@@ -23,10 +24,11 @@ export interface ChatProps {
   onMessage: (message: ChatMessage) => void;
   messages: ChatMessage[];
   goalEnded: boolean;
+  sidebarOpen: boolean;
   onSidebarToggleClick: () => void;
 }
   
-const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSidebarToggleClick }: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSidebarToggleClick, sidebarOpen }: ChatProps) => {
   const samplePrompts = [
     "Fetch the price of ethereum, bitcoin and dogecoin and save them in a file named crypto.csv",
     "Calculate the factorial of 38 and save it to a file factorial.txt",
@@ -228,8 +230,11 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
 
   return (
     <div className="flex h-full flex-col bg-[#0A0A0A] text-white">
-      <div>
-        <FontAwesomeIcon className="absolute right-2.5 top-2.5 m-2.5 cursor-pointer text-2xl text-orange-600 transition-colors hover:text-orange-700" icon={faMarkdown} onClick={exportChatHistory} />
+      <div className="flex justify-between items-center p-4">
+        <div className="h-14 p-4 text-lg text-white cursor-pointer hover:opacity-100 opacity-80 transition-all" onClick={onSidebarToggleClick}>
+          { sidebarOpen ? <></>: <SidebarIcon /> }
+        </div>
+        <FontAwesomeIcon className="cursor-pointer text-2xl text-orange-600 transition-colors hover:text-orange-700" icon={faMarkdown} onClick={exportChatHistory} />
       </div>
       <div className="flex-1 overflow-auto p-5 text-left">
         {messages.map((msg, index) => (
@@ -303,9 +308,6 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
             </div>
           </div>
         )}
-        <div className="cursor-pointer" onClick={onSidebarToggleClick}>
-          <MenuIcon></MenuIcon>
-        </div>
         <input
           type="text"
           value={message}

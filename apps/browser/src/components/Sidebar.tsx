@@ -12,6 +12,8 @@ import File from "./File";
 import { downloadFilesAsZip } from "../sys/file/downloadFilesAsZip";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import CloseIcon from "./CloseIcon";
+import MenuIcon from "./MenuIcon";
+import SidebarIcon from "./SidebarIcon";
 
 export interface SidebarProps {
   onSettingsClick: () => void;
@@ -42,14 +44,14 @@ const Sidebar = ({
             <CloseIcon></CloseIcon>
           </div>
         </div>
-        <div className="flex justify-between text-lg text-white gap-4">
-          <a
-            className="cursor-pointer opacity-80 transition-all hover:opacity-100"
-            onClick={onSettingsClick}
-          >
+        <div className="flex items-center gap-3 w-full">
+          <div className="flex flex-1 justify-center h-14 items-center rounded border border-neutral-500 p-3 text-lg text-white gap-4 cursor-pointer hover:opacity-100 opacity-80 transition-all" onClick={onSettingsClick}>
             <FontAwesomeIcon icon={faCog} />
-          </a>
-          Settings
+            Settings
+          </div>
+          <div className="rounded border border-neutral-500 h-14 p-4 text-lg text-white gap-4 cursor-pointer hover:opacity-100 opacity-80 transition-all" onClick={onSidebarToggleClick}>
+            <SidebarIcon />
+          </div>
         </div>
 
         <Upload
