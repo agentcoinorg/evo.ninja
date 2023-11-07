@@ -18,10 +18,14 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Set up Node.js 18.15
-      uses: actions/setup-node@v1
+    - name: Read .nvmrc
+      run: echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_OUTPUT
+      id: nvm
+
+    - name: Setup Node.js
+      uses: actions/setup-node@master
       with:
-        node-version: 18.15
+        node-version: '${{ steps.nvm.outputs.NVMRC }}'
 
     - name: Install dependencies
       run: yarn

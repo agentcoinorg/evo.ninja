@@ -2,6 +2,7 @@ import { AgentContext, AgentFunctionResult, AgentOutputType, AgentVariables, Arr
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { Agent, Prompt } from "../agents/utils";
 import { LlmAgentFunctionBase, processWebpage, searchOnGoogle } from "./utils";
+import axios from "axios"
 
 export interface WebSearchFuncParameters {
   queries: string[];
@@ -61,10 +62,20 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         );
       }
 
-      const googleResults = await searchOnGoogle(
-        query,
-        context.env.SERP_API_KEY
-      );
+      let googleResults;
+      if (typeof window === "object") {
+        const results = await axios.get<{
+          googleResults: {
+            title: string;
+            url: string;
+            description: string;
+            trustedSource: boolean;
+          }[];
+        }>(`/api/search?query=${query}&apiKey=${context.env.SERP_API_KEY}`);
+        googleResults = results.data.googleResults;
+      } else {
+        googleResults = await searchOnGoogle(query, context.env.SERP_API_KEY);
+      }
 
       const searchMatches = await this.searchInPages({
         urls: googleResults.map(x => x.url),
@@ -175,7 +186,13 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
   private async searchInPages(params: { urls: string[], query: string, context: AgentContext }) {
     const urlsContents = await Promise.all(params.urls.map(async url => {
       try {
-        const response = await processWebpage(url);
+        let response: string;
+        if (typeof window === "object") {
+          const result = await axios.get<{ text: string }>(`/api/process-web-page?url=${url}`)
+          response = result.data.text
+        } else {
+          response = await processWebpage(url);
+        }
         return {
           url,
           response
