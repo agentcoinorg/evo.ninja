@@ -3,7 +3,7 @@
 }
 
 .Sidebar {
-  @apply border-r-2 border-r-neutral-700 bg-neutral-900/80 text-neutral-50;
+  @apply h-full border-r-2 border-r-neutral-700 bg-neutral-900/80 text-neutral-50;
 }
 
 .Chat {

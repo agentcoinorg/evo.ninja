@@ -52,7 +52,7 @@ h3 {
 }
 
 .Footer {
-  @apply my-8 box-border flex w-10/12 flex-col gap-4;
+  @apply  box-border flex w-10/12 flex-col gap-4;
 }
 
 .Footer a {
