@@ -3,12 +3,10 @@ import React, { useState, useEffect } from "react";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 import clsx from "clsx";
-
 import DojoConfig from "../src/components/DojoConfig";
 import DojoError from "../src/components/DojoError";
 import Sidebar from "../src/components/Sidebar";
 import Chat, { ChatMessage } from "../src/components/Chat";
-import { MarkdownLogger } from "../src/sys/logger";
 import { updateWorkspaceFiles } from "../src/updateWorkspaceFiles";
 import {
   AgentContext,
@@ -24,6 +22,7 @@ import {
   Chat as EvoChat,
 } from "@evo-ninja/agents";
 import { createInBrowserScripts } from "../src/scripts";
+import { BrowserLogger } from "../src/sys/logger";
 
 function Dojo() {
   const [dojoConfig, setDojoConfig] = useState<{
@@ -41,13 +40,9 @@ function Dojo() {
   const [configOpen, setConfigOpen] = useState(false);
   const [dojoError, setDojoError] = useState<unknown | undefined>(undefined);
   const [evo, setEvo] = useState<Evo | undefined>(undefined);
-  const [scripts, setScripts] = useState<InMemoryFile[]>([]);
   const [userFiles, setUserFiles] = useState<InMemoryFile[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<InMemoryFile[]>([]);
   const [userWorkspace, setUserWorkspace] = useState<
-    InMemoryWorkspace | undefined
-  >(undefined);
-  const [scriptsWorkspace, setScriptsWorkspace] = useState<
     InMemoryWorkspace | undefined
   >(undefined);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -66,28 +61,6 @@ function Dojo() {
     });
   }, []);
 
-  useEffect(() => {
-    if (!evo || !scriptsWorkspace) {
-      return;
-    }
-
-    const items = scriptsWorkspace.readdirSync("");
-    if (!items) {
-      return;
-    }
-
-    setScripts(
-      items.map(
-        (x) =>
-          new InMemoryFile(
-            x.name,
-            new TextEncoder().encode(scriptsWorkspace.readFileSync(x.name)) ||
-              ""
-          )
-      )
-    );
-  }, [scriptsWorkspace]);
-
   function checkForUserFiles() {
     if (!evo || !userWorkspace) {
       return;
@@ -95,17 +68,9 @@ function Dojo() {
     updateWorkspaceFiles(userWorkspace, userFiles, setUserFiles);
   }
 
-  function checkForScriptFiles() {
-    if (!evo || !scriptsWorkspace) {
-      return;
-    }
-    updateWorkspaceFiles(scriptsWorkspace, scripts, setScripts);
-  }
-
   function onMessage(message: ChatMessage) {
     setMessages((messages) => [...messages, message]);
     checkForUserFiles();
-    checkForScriptFiles();
   }
 
   useEffect(() => {
@@ -165,24 +130,20 @@ function Dojo() {
       }
       setDojoError(undefined);
 
-      const markdownLogger = new MarkdownLogger({
-        onLog: (markdown: string, color?: string) => {
+      const browserLogger = new BrowserLogger({
+        onLog: (message: string) => {
           onMessage({
             user: "evo",
-            title: markdown,
-            color,
+            title: message,
           });
         },
       });
-      const logger = new Logger([markdownLogger, new ConsoleLogger()], {
+      const logger = new Logger([browserLogger, new ConsoleLogger()], {
         promptUser: () => Promise.resolve("N/A")
       });
 
       const scriptsWorkspace = createInBrowserScripts();
-
       const scripts = new Scripts(scriptsWorkspace);
-
-      setScriptsWorkspace(scriptsWorkspace);
 
       const env = new Env({
         OPENAI_API_KEY: dojoConfig.openAiApiKey as string,

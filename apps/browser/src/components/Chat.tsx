@@ -105,7 +105,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
       }
 
       let messageLog = messages;
-
+      let stepCount = 1
       while (evoRunning) {
         if (pausedRef.current || goalEndedRef.current) {
           setStopped(true);
@@ -114,11 +114,15 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
 
         setStopped(false);
 
+        onMessage({
+          title: `## Step ${stepCount}`,
+          user: "evo"
+        })
         const response = await evoItr.next();
 
         if (!response.done) {
           const evoMessage = {
-            title: response.value.title,
+            title: `### Action executed:\n${response.value.title}`,
             content: response.value.content,
             user: "evo"
           };
@@ -131,8 +135,9 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
         if (response.done) {
           setEvoRunning(false);
           setSending(false); // Reset the sending state when done
-          return Promise.resolve();
+          break
         }
+        stepCount++
       }
       return Promise.resolve();
     }
@@ -186,7 +191,6 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
   };
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    console.log(`handleChange: ${event}`);
     setMessage(event.target.value);
   };
 
@@ -210,13 +214,20 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
     }
   };
 
-  const exportChatHistory = (format: 'md') => {
-    let exportedContent = '';
-    if (format === 'md') {
-      exportedContent = messages.map((msg) => {
-        return `# ${msg.user.toUpperCase()}\n${msg.title}\n${msg.content}\n---\n`;
-      }).join('\n');
-    }
+  const exportChatHistory = () => {
+    const exportedContent = messages.map((msg, i, msgs) => {
+      if (msg.user === "user") {
+        return `# User\n**Goal:** ${msg.title}\n`
+      } else {
+        const logMessage = `${msg.title} \n${msg.content ?? ""}`
+        // We only append # Evo into the first message from Evo
+        if (msgs.slice(0, i).some(m => m.user === "evo")) {
+          return logMessage
+        } else {
+          return `# Evo\n` + logMessage
+        }
+      }
+    }).join('\n');
 
     // Generate a date-time stamp
     const date = new Date();
@@ -229,7 +240,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
   return (
     <div className="flex h-full flex-col bg-[#0A0A0A] text-white">
       <div>
-        <FontAwesomeIcon className="absolute right-2.5 top-2.5 m-2.5 cursor-pointer text-2xl text-orange-600 transition-colors hover:text-orange-700" icon={faMarkdown} onClick={() => exportChatHistory('md')} />
+        <FontAwesomeIcon className="absolute right-2.5 top-2.5 m-2.5 cursor-pointer text-2xl text-orange-600 transition-colors hover:text-orange-700" icon={faMarkdown} onClick={exportChatHistory} />
       </div>
       {showPrompts && (
         <div className="SamplePrompts">
