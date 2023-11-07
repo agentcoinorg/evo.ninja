@@ -1,7 +1,7 @@
 import { AnalyzeDataFunction } from "./AnalyzeData";
 import { AgentFunctionBase } from "./utils";
 import { Agent } from "../agents/utils";
-import { AgentFunctionResult, ChatMessageBuilder } from "@/agent-core";
+import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder } from "@/agent-core";
 
 interface ReadAndAnalyzeCSVDataParameters {
   path: string;
@@ -36,7 +36,13 @@ export class ReadAndAnalyzeCSVDataFunction extends AgentFunctionBase<ReadAndAnal
       const variable = agent.context.variables.save("dataFile", data);
 
       return {
-        outputs: [],
+        outputs: [
+          {
+            type: AgentOutputType.Success,
+            title: `[${agent.config.prompts.name}] ${this.name}`,
+            content: `Data File Stored in Variable: \${${variable}}\nData Summary:\n\`\`\`\n${summary}\n\`\`\``
+          }
+        ],
         messages: [
           ChatMessageBuilder.functionCall(this.name, params),
           ChatMessageBuilder.functionCallResult(this.name, `\${${variable}}`),

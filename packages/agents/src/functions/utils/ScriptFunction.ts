@@ -29,7 +29,7 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
         {
           type: AgentOutputType.Success,
           title: `[${agent.config.prompts.name}] ${this.name}`,
-          content: rawParams || JSON.stringify(params, null, 2)
+          content: `\`\`\`\n${rawParams || JSON.stringify(params, null, 2)}\n\`\`\``
         }
       ],
       messages: [

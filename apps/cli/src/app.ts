@@ -4,7 +4,6 @@ import {
   Scripts,
   ConsoleLogger,
   Logger,
-  ILogger,
   Timeout,
   Workspace,
   SubWorkspace,

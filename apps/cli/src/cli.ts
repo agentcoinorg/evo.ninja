@@ -57,7 +57,7 @@ export async function cli(): Promise<void> {
 
     app.debugLog?.stepEnd();
     const logMessage = (message: AgentOutput) => {
-      const messageStr = `${message.title}  \n${message.content}`;
+      const messageStr = `${message.title}  \n${message.content ?? ""}`;
       app.logger.info(`### Action executed:\n${messageStr}`);
       app.debugLog?.stepLog(messageStr);
     }
