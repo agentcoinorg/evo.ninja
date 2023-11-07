@@ -29,7 +29,7 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
         {
           type: AgentOutputType.Success,
           title: `[${agent.config.prompts.name}] ${this.name}`,
-          content: `${params.query}`
+          content: `\`\`\`\n${rawParams || JSON.stringify(params, null, 2)}\n\`\`\``
         }
       ],
       messages: [
@@ -45,7 +45,8 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
       outputs: [
         {
           type: AgentOutputType.Error,
-          title: `[${agent.config.prompts.name}] Error in ${this.name}: ${error}`
+          title: `[${agent.config.prompts.name}] Error in ${this.name}`,
+          content: error
         }
       ],
       messages: [

@@ -51,6 +51,7 @@ function Dojo() {
     InMemoryWorkspace | undefined
   >(undefined);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  // TODO: setGoalEnded is unused?
   const [goalEnded, setGoalEnded] = useState<boolean>(false);
 
   useEffect(() => {
@@ -174,8 +175,7 @@ function Dojo() {
         },
       });
       const logger = new Logger([markdownLogger, new ConsoleLogger()], {
-        promptUser: () => Promise.resolve("N/A"),
-        logUserPrompt: () => {},
+        promptUser: () => Promise.resolve("N/A")
       });
 
       const scriptsWorkspace = createInBrowserScripts();
@@ -225,22 +225,8 @@ function Dojo() {
     }
   }, [dojoConfig]);
 
-  const sidebarContainerClassNames = clsx([
-    "relative w-full lg:w-auto lg:max-w-md",
-    {
-      hidden: !sidebarOpen,
-    },
-  ]);
-
-  const chatContainerClassNames = clsx([
-    "relative grow",
-    {
-      "max-lg:hidden": sidebarOpen,
-    },
-  ]);
-
   return (
-    <div className="Dojo">
+    <div className="flex h-full animate-landing-bg bg-neutral-800 bg-landing-bg bg-repeat text-center text-neutral-400">
       {(dojoConfig.loaded && !dojoConfig.openAiApiKey || configOpen) && (
         <DojoConfig
           apiKey={dojoConfig.openAiApiKey}
@@ -249,18 +235,24 @@ function Dojo() {
           onConfigSaved={onConfigSaved}
         />
       )}
-      <div className={sidebarContainerClassNames}>
+      <div className={clsx(
+        "relative w-full lg:w-auto lg:max-w-md",
+        {
+          hidden: !sidebarOpen,
+        },
+      )}>
         <Sidebar
           onSidebarToggleClick={() => {
             setSidebarOpen(!sidebarOpen);
           }}
           onSettingsClick={() => setConfigOpen(true)}
-          scripts={scripts}
           userFiles={userFiles}
           uploadUserFiles={setUploadedFiles}
         />
       </div>
-      <div className={chatContainerClassNames}>
+      <div className={clsx("relative grow border-l-2 border-neutral-700", {
+        "max-lg:hidden": sidebarOpen,
+      })}>
         <>
           {evo && (
             <Chat

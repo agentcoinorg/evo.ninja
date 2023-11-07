@@ -86,6 +86,8 @@ export class Evo extends Agent<GoalRunArgs> {
 
     const predictionVector = await this.createEmbeddingVector(prediction);
 
+    this.context.logger.info("### Prediction:\n-> " + prediction);
+
     const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(predictionVector, this.context);
 
     if (!this.initializedAgents.has(agent.config.prompts.name)) {
@@ -95,8 +97,7 @@ export class Evo extends Agent<GoalRunArgs> {
 
     this.previousPrediction = prediction;
     this.previousAgent = agent;
-    console.log("Prediction: ", prediction);
-    
+
     const contextualizedChat = await this.contextualizeChat(
       await this.createEmbeddingVector(`${persona}\n${prediction}`)
     );

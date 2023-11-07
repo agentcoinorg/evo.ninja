@@ -25,8 +25,14 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-const prompt = (query: string) =>
-  new Promise<string>((resolve) => rl.question(query, resolve));
+const prompt = (fileLogger: FileLogger) => (query: string) =>
+  new Promise<string>((resolve) => {
+    const callback = (answer: string) => {
+      fileLogger.info(`# User\n**${query}:** ${answer}`);
+      resolve(answer);
+    }
+    rl.question(`${query}: `, callback)
+  });
 
 export interface App {
   evo: RunnableAgent<GoalRunArgs>;
@@ -80,10 +86,7 @@ export function createApp(config?: AppConfig): App {
   // Logger
   const consoleLogger = new ConsoleLogger();
   const logger = new Logger([fileLogger, consoleLogger], {
-    promptUser: prompt,
-    logUserPrompt: (response: string) => {
-      fileLogger.info(`#User:\n${response}`);
-    },
+    promptUser: prompt(fileLogger),
   });
 
   // Scripts

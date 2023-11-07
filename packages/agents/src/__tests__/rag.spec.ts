@@ -37,9 +37,6 @@ describe('LLM Test Suite', () => {
       consoleLogger
     ], {
       promptUser: async () => "",
-      logUserPrompt: (response: string) => {
-        consoleLogger.info(`#User:\n${response}`);
-      }
     })
     const env = new Env(
       process.env as Record<string, string>

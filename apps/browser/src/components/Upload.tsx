@@ -4,6 +4,7 @@ import { faUpload } from '@fortawesome/free-solid-svg-icons';
 import { useDropzone } from "react-dropzone";
 import { readFile } from '../sys/file';
 import { InMemoryFile } from '@nerfzael/memory-fs';
+import clsx from 'clsx';
 
 interface UploadProps {
   className?: string
@@ -31,16 +32,18 @@ function Upload({ className, onUpload, children }: PropsWithChildren<UploadProps
     })();
   }, [acceptedFiles, onUpload]);
 
-  const dropHover = isDragAccept ? " drop-hover" : "";
-
   return (
     <div
       {...getRootProps({
-        className: `dropzone ${dropHover} ${className}`,
+        className: clsx(
+          'dropzone',
+          isDragAccept ? " border-2 border-dashed border-blue-200 bg-neutral-50" : "",
+          className
+        ),
       })}
     >
       {(isDragAccept || showUpload) && (
-        <div className="inner-dropzone">
+        <div className="p-5">
           <input {...getInputProps()} />
           <p>
             Drag &quot;n&quot; drop the build folder here, or click to
@@ -52,7 +55,7 @@ function Upload({ className, onUpload, children }: PropsWithChildren<UploadProps
         <>
           {children}
           <button 
-            className="UploadButton" 
+            className="my-4 inline-block h-9 cursor-pointer rounded-xl border-none bg-orange-600 px-6 py-2.5 text-center text-neutral-900 shadow-md outline-none transition-all hover:bg-orange-700" 
             title="Upload files" 
             onClick={open}>
             <FontAwesomeIcon icon={faUpload} /> Upload
