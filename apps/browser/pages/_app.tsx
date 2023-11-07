@@ -6,7 +6,7 @@ import "../styles/globals.css";
 import clsx from "clsx";
 import Script from "next/script";
 
-const exo = Exo({
+export const EXO_FONT = Exo({
   subsets: ["latin"],
 });
 
@@ -17,7 +17,7 @@ export default function EvoApp({ Component, pageProps }: AppProps) {
     }
   }, []);
   return (
-    <div className={clsx(exo.className, "h-full")}>
+    <div className={clsx(EXO_FONT.className, "h-full")}>
       <Script
         strategy="lazyOnload"
         src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID}`}
