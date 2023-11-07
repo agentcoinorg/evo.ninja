@@ -198,7 +198,6 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
           response
         }
       } catch(e) {
-        params.context.logger.error(`Failed to process ${url}`)
         return {
           url,
           response: ""

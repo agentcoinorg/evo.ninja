@@ -40,9 +40,6 @@ describe('Planner Agent Test Suite', () => {
       promptUser: () => {
         throw Error("promptUser not supported.");
       },
-      logUserPrompt: () => {
-        throw Error("logUserPrompt not supported.");
-      }
     });
 
     const llm: LlmApi = new OpenAI(

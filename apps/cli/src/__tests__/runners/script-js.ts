@@ -44,7 +44,6 @@ export async function runScriptJs(
 
   const logger = new Logger([new ConsoleLogger()], {
     promptUser: () => Promise.resolve("N/A"),
-    logUserPrompt: () => {}
   });
   const client = new WrapClient(workspace, logger);
 

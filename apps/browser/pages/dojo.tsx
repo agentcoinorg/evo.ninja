@@ -175,8 +175,7 @@ function Dojo() {
         },
       });
       const logger = new Logger([markdownLogger, new ConsoleLogger()], {
-        promptUser: () => Promise.resolve("N/A"),
-        logUserPrompt: () => {},
+        promptUser: () => Promise.resolve("N/A")
       });
 
       const scriptsWorkspace = createInBrowserScripts();

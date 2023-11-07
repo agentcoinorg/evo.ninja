@@ -62,7 +62,7 @@ export const findBestAgent = async (
       limit: 1,
     }));
 
-  console.log("Selected agents: ", agents.map(x => x.agent.config.prompts.name));
+  context.logger.info("### Selected agent:\n-> " + agents.map(x => x.agent.config.prompts.name)[0]);
 
   const agentWithPrompt = agents[0];
 
