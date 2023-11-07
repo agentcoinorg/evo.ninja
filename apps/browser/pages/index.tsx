@@ -22,6 +22,7 @@ import {
   Chat as EvoChat,
 } from "@evo-ninja/agents";
 import { createInBrowserScripts } from "../src/scripts";
+import WelcomeModal, { WELCOME_MODAL_SEEN_STORAGE_KEY } from "../src/components/WelcomeModal";
 import { BrowserLogger } from "../src/sys/logger";
 
 function Dojo() {
@@ -36,6 +37,7 @@ function Dojo() {
     serpApiKey: null,
     loaded: false,
   });
+  const [welcomeModalOpen, setWelcomeModalOpen] = useState<boolean>(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [configOpen, setConfigOpen] = useState(false);
   const [dojoError, setDojoError] = useState<unknown | undefined>(undefined);
@@ -60,6 +62,14 @@ function Dojo() {
       loaded: true
     });
   }, []);
+
+  useEffect(() => {
+    const firstVisit = localStorage.getItem(WELCOME_MODAL_SEEN_STORAGE_KEY);
+    if (!firstVisit) {
+      localStorage.setItem(WELCOME_MODAL_SEEN_STORAGE_KEY, "true");
+      setWelcomeModalOpen(true);
+    }
+  }, [])
 
   function checkForUserFiles() {
     if (!evo || !userWorkspace) {
@@ -139,7 +149,7 @@ function Dojo() {
         },
       });
       const logger = new Logger([browserLogger, new ConsoleLogger()], {
-        promptUser: () => Promise.resolve("N/A")
+        promptUser: () => Promise.resolve("N/A"),
       });
 
       const scriptsWorkspace = createInBrowserScripts();
@@ -187,50 +197,56 @@ function Dojo() {
   }, [dojoConfig]);
 
   return (
-    <div className="flex h-full bg-neutral-800 bg-landing-bg bg-repeat text-center text-neutral-400">
-      {(dojoConfig.loaded && !dojoConfig.openAiApiKey || configOpen) && (
-        <DojoConfig
-          apiKey={dojoConfig.openAiApiKey}
-          model={dojoConfig.model}
-          serpApiKey={dojoConfig.serpApiKey}
-          onConfigSaved={onConfigSaved}
-        />
-      )}
-      <div className={clsx(
-        "relative w-full lg:w-auto lg:max-w-md",
-        {
-          hidden: !sidebarOpen,
-        },
-      )}>
-        <Sidebar
-          onSidebarToggleClick={() => {
-            setSidebarOpen(!sidebarOpen);
-          }}
-          onSettingsClick={() => setConfigOpen(true)}
-          userFiles={userFiles}
-          onUploadFiles={setUploadedFiles}
-        />
+    <>
+      <div className="flex h-full bg-neutral-800 bg-landing-bg bg-repeat text-center text-neutral-400">
+        {(dojoConfig.loaded && !dojoConfig.openAiApiKey || configOpen) && (
+          <DojoConfig
+            apiKey={dojoConfig.openAiApiKey}
+            model={dojoConfig.model}
+            serpApiKey={dojoConfig.serpApiKey}
+            onConfigSaved={onConfigSaved}
+          />
+        )}
+        <div className={clsx(
+          "relative w-full lg:w-auto lg:max-w-md",
+          {
+            hidden: !sidebarOpen,
+          },
+        )}>
+          <Sidebar
+            onSidebarToggleClick={() => {
+              setSidebarOpen(!sidebarOpen);
+            }}
+            onSettingsClick={() => setConfigOpen(true)}
+            userFiles={userFiles}
+            onUploadFiles={setUploadedFiles}
+          />
+        </div>
+        <div className={clsx("relative grow border-l-2 border-neutral-700", {
+          "max-lg:hidden": sidebarOpen,
+        })}>
+          <>
+            {evo && (
+              <Chat
+                evo={evo}
+                onMessage={onMessage}
+                messages={messages}
+                goalEnded={goalEnded}
+                sidebarOpen={sidebarOpen}
+                onSidebarToggleClick={() => {
+                  setSidebarOpen(!sidebarOpen);
+                }}
+                onUploadFiles={setUploadedFiles}
+              />
+            )}
+            {dojoError && <DojoError error={dojoError} />}
+          </>
+        </div>
       </div>
-      <div className={clsx("relative grow border-l-2 border-neutral-700", {
-        "max-lg:hidden": sidebarOpen,
-      })}>
-        <>
-          {evo && (
-            <Chat
-              evo={evo}
-              onMessage={onMessage}
-              messages={messages}
-              goalEnded={goalEnded}
-              onSidebarToggleClick={() => {
-                setSidebarOpen(!sidebarOpen);
-              }}
-              onUploadFiles={setUploadedFiles}
-            />
-          )}
-          {dojoError && <DojoError error={dojoError} />}
-        </>
-      </div>
-    </div>
+      <WelcomeModal isOpen={welcomeModalOpen} onClose={() => {
+        setWelcomeModalOpen(false);
+      }} />
+    </>
   );
 }
 

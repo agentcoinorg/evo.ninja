@@ -12,6 +12,7 @@ import { InMemoryFile } from "@nerfzael/memory-fs";
 
 import MenuIcon from "./MenuIcon";
 import clsx from "clsx";
+import SidebarIcon from "./SidebarIcon";
 
 export interface ChatMessage {
   title: string;
@@ -25,26 +26,12 @@ export interface ChatProps {
   onMessage: (message: ChatMessage) => void;
   messages: ChatMessage[];
   goalEnded: boolean;
+  sidebarOpen: boolean;
   onSidebarToggleClick: () => void;
   onUploadFiles: (files: InMemoryFile[]) => void;
 }
 
-const WelcomeMessage: React.FC = () => {
-  return (
-    <div className="WelcomeMessage">
-      <div className="WelcomeMessage__Title"><h1>Welcome to Evo Ninja!</h1></div>
-      <div className="WelcomeMessage__Content">
-        <p>
-        Evo is a general agent that can do anything for you by changing personas based on the task it needs to do. You can use it to write code, automate tasks, or even write a book. Just tell Evo what you want and it do it for you.
-          Evo is powered by <a href="https://openai.com/blog/openai-api/" target="_blank" rel="noopener noreferrer">OpenAI's API</a>, <a href="
-          https://polywrap.io/" target="_blank" rel="noopener noreferrer">Polywrap</a>, and a community of AI agents that collaborate with humans to solve problems.
-        </p>
-      </div>
-    </div>
-  );
-}
-
-const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSidebarToggleClick, onUploadFiles }: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSidebarToggleClick, sidebarOpen, onUploadFiles }: ChatProps) => {
 
   const [message, setMessage] = useState<string>("");
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
@@ -172,6 +159,9 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
     setMessage(prompt.prompt);
     handleSend(prompt.prompt);
   };
+  const handleStart = async () => {
+    handleSend();
+  }
   const handleSend = async (newMessage?: string) => {
     onMessage({
       title: newMessage || message,
@@ -244,23 +234,12 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
 
   return (
     <div className="flex h-full flex-col bg-[#0A0A0A] text-white">
-      <div>
-        <FontAwesomeIcon className="absolute right-2.5 top-2.5 m-2.5 cursor-pointer text-2xl text-orange-600 transition-colors hover:text-orange-700" icon={faMarkdown} onClick={exportChatHistory} />
-      </div>
-      {showPrompts && (
-        <div className="SamplePrompts">
-          <WelcomeMessage />
-          {examplePrompts.map((prompt, index) => (
-            <div 
-              key={index}
-              className="SamplePromptCard"
-              onClick={() => handleSamplePromptClick(prompt)}
-            >
-              {prompt.prompt}
-            </div>
-          ))}
+      <div className="flex justify-between items-center p-4 border-b-2 border-neutral-700">
+        <div className="h-14 p-4 text-lg text-white cursor-pointer hover:opacity-100 opacity-80 transition-all" onClick={onSidebarToggleClick}>
+          { sidebarOpen ? <></>: <SidebarIcon /> }
         </div>
-      )}
+        <FontAwesomeIcon className="cursor-pointer text-2xl text-orange-600 transition-colors hover:text-orange-700" icon={faMarkdown} onClick={exportChatHistory} />
+      </div>
       <div className="flex-1 overflow-auto p-5 text-left">
         {messages.map((msg, index) => (
           <div key={index} className={`${msg.user}`}>
@@ -333,9 +312,6 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
             </div>
           </div>
         )}
-        <div className="cursor-pointer" onClick={onSidebarToggleClick}>
-          <MenuIcon></MenuIcon>
-        </div>
         <input
           type="text"
           value={message}
@@ -377,7 +353,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
         {evoRunning ? (
           <div className="h-9 w-9 animate-spin rounded-full border-4 border-black/10 border-l-red-500" />
         ) : (
-          <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-700" onClick={handleSend} disabled={evoRunning || sending}>
+          <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-700" onClick={handleStart} disabled={evoRunning || sending}>
             Start
           </button>
         )}
