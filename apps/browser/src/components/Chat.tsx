@@ -103,7 +103,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
       }
 
       let messageLog = messages;
-      let stepCount = 1
+      let stepCounter = 1
       while (evoRunning) {
         if (pausedRef.current || goalEndedRef.current) {
           setStopped(true);
@@ -112,11 +112,22 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
 
         setStopped(false);
 
+        const response = await evoItr.next();
+
+        if (response.done) {
+          onMessage({
+            title: "## Goal Achieved",
+            user: "evo"
+          })
+          setEvoRunning(false);
+          setSending(false);
+          break
+        }
+
         onMessage({
-          title: `## Step ${stepCount}`,
+          title: `## Step ${stepCounter}`,
           user: "evo"
         })
-        const response = await evoItr.next();
 
         if (!response.done) {
           const evoMessage = {
@@ -130,12 +141,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
           }
         }
 
-        if (response.done) {
-          setEvoRunning(false);
-          setSending(false); // Reset the sending state when done
-          break
-        }
-        stepCount++
+        stepCounter++
       }
       return Promise.resolve();
     }
