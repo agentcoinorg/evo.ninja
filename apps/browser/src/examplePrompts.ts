@@ -574,6 +574,6 @@ export const examplePrompts: ExamplePrompt[]  = [
     prompt: "How much was spent on utilities within these CSVs? Write the result to a file.",
     files: [file1Csv, file2Csv]
   },
-  { prompt: "Who were the starting 5 players on the Chicago Bulls the year Micheal Jordan retired? Write their names to a file." },
+  { prompt: "How many people were born in the last US election year? Write the results to a file." },
   { prompt: "Who are the two hosts of the Latent Space podcast? Write their names to a file." },
 ];
