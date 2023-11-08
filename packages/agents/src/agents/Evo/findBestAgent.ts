@@ -30,6 +30,10 @@ export const findBestAgent = async (
 ]> => {
   const allAgents: Agent[] = [
     DalleAgent,
+    CsvAnalystAgent,
+    DeveloperAgent,
+    ResearcherAgent,
+    SynthesizerAgent,
   ].map(agentClass => new agentClass(context.cloneEmpty()));
 
   const agentsWithPrompts = allAgents.map(agent => {
