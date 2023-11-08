@@ -1,3 +1,5 @@
 const fs = require("fs");
 
-fs.copyFileSync("../../.env", ".env.local");
+if (fs.existsSync("../../.env")) {
+  fs.copyFileSync("../../.env", ".env.local");
+}
