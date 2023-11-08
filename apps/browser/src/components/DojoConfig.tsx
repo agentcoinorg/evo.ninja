@@ -5,13 +5,11 @@ import { defaultModel, supportedModels } from "../supportedModels";
 interface DojoConfigProps {
   apiKey: string | null;
   model: string | null;
-  serpApiKey: string | null;
-  onConfigSaved: (apiKey: string, model: string, serpApiKey: string) => void;
+  onConfigSaved: (apiKey: string, model: string) => void;
 }
 
 function DojoConfig(props: DojoConfigProps) {
   const [apiKey, setApiKey] = useState<string>(props.apiKey || "");
-  const [serpApiKey, setSerpApiKey] = useState<string>(props.serpApiKey || "");
   const [model, setModel] = useState<string>(props.model || defaultModel);
   const { onConfigSaved } = props;
 
@@ -36,15 +34,9 @@ function DojoConfig(props: DojoConfigProps) {
           ))}
         </select>
         <h3 className="text-lg font-semibold">Please enter your Serp API key</h3>
-        <input
-          className="rounded border border-neutral-600 bg-neutral-950 p-2.5 text-neutral-50 outline-none transition-all"
-          type="text"
-          value={serpApiKey}
-          onChange={(e) => setSerpApiKey(e.target.value)}
-        />
         <button
           className="cursor-pointer rounded-xl border-none bg-orange-600 p-2.5 text-white transition-all hover:bg-orange-700"
-          onClick={() => onConfigSaved(apiKey, model, serpApiKey)}
+          onClick={() => onConfigSaved(apiKey, model)}
         >
           Save
         </button>

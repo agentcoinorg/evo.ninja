@@ -40,7 +40,9 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "prebuild": "node scripts/scripts.template.js",
+    "prebuild": "yarn build:scripts && yarn build:env",
+    "build:scripts": "node scripts/build.scripts.js",
+    "build:env": "node scripts/build.env.js",
     "lint": "prettier . --write",
     "start": "next start"
   }

@@ -56,12 +56,6 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
 
   private async runQuery({ context }: Agent<unknown>, query: string, rawParams?: string): Promise<AgentFunctionResult> {
     try {
-      if (!context.env.SERP_API_KEY) {
-        throw new Error(
-          "SERP_API_KEY environment variable is required to use the websearch plugin. See env.template for help"
-        );
-      }
-
       let googleResults;
       if (typeof window === "object") {
         const results = await axios.get<{
@@ -71,9 +65,14 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
             description: string;
             trustedSource: boolean;
           }[];
-        }>(`/api/search?query=${query}&apiKey=${context.env.SERP_API_KEY}`);
+        }>(`/api/search?query=${query}`);
         googleResults = results.data.googleResults;
       } else {
+        if (!context.env.SERP_API_KEY) {
+          throw new Error(
+            "SERP_API_KEY environment variable is required to use the websearch plugin. See env.template for help"
+          );
+        }
         googleResults = await searchOnGoogle(query, context.env.SERP_API_KEY);
       }
 

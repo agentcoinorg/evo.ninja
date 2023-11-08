@@ -29,12 +29,10 @@ function Dojo() {
   const [dojoConfig, setDojoConfig] = useState<{
     openAiApiKey: string | null;
     model: string | null;
-    serpApiKey: string | null;
     loaded: boolean;
   }>({
     openAiApiKey: null,
     model: null,
-    serpApiKey: null,
     loaded: false,
   });
   const [welcomeModalOpen, setWelcomeModalOpen] = useState<boolean>(false);
@@ -58,7 +56,6 @@ function Dojo() {
     setDojoConfig({
       openAiApiKey: localStorage.getItem("openai-api-key"),
       model: localStorage.getItem("openai-model"),
-      serpApiKey: localStorage.getItem("serp-api-key"),
       loaded: true
     });
   }, []);
@@ -98,7 +95,7 @@ function Dojo() {
     checkForUserFiles();
   }, [uploadedFiles]);
 
-  const onConfigSaved = (apiKey: string, model: string, serpApiKey: string) => {
+  const onConfigSaved = (apiKey: string, model: string) => {
     let configComplete = true;
 
     if (!apiKey) {
@@ -117,15 +114,6 @@ function Dojo() {
     } else {
       localStorage.setItem("openai-model", model);
       setDojoConfig({ ...dojoConfig, model });
-    }
-
-    if (!serpApiKey) {
-      localStorage.removeItem("serp-api-key");
-      setDojoConfig({ ...dojoConfig, serpApiKey: null});
-      configComplete = false;
-    } else {
-      localStorage.setItem("serp-api-key", serpApiKey);
-      setDojoConfig({ ...dojoConfig, serpApiKey });
     }
 
     // Only close the modal if all configuration is complete
@@ -160,7 +148,6 @@ function Dojo() {
         GPT_MODEL: dojoConfig.model as string,
         CONTEXT_WINDOW_TOKENS: "8000",
         MAX_RESPONSE_TOKENS: "2000",
-        SERP_API_KEY: dojoConfig.serpApiKey || undefined,
       });
 
       const llm = new OpenAI(
@@ -203,7 +190,6 @@ function Dojo() {
           <DojoConfig
             apiKey={dojoConfig.openAiApiKey}
             model={dojoConfig.model}
-            serpApiKey={dojoConfig.serpApiKey}
             onConfigSaved={onConfigSaved}
           />
         )}
