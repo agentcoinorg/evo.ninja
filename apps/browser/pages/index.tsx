@@ -28,14 +28,12 @@ import { BrowserLogger } from "../src/sys/logger";
 function Dojo() {
   const [dojoConfig, setDojoConfig] = useState<{
     openAiApiKey: string | null;
-    model: string | null;
-    serpApiKey: string | null;
     loaded: boolean;
+    complete: boolean;
   }>({
     openAiApiKey: null,
-    model: null,
-    serpApiKey: null,
     loaded: false,
+    complete: false
   });
   const [welcomeModalOpen, setWelcomeModalOpen] = useState<boolean>(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -55,11 +53,12 @@ function Dojo() {
     if (window.innerWidth <= 1024) {
       setSidebarOpen(false);
     }
+    const openAiApiKey = localStorage.getItem("openai-api-key");
+    const complete = !!openAiApiKey;
     setDojoConfig({
-      openAiApiKey: localStorage.getItem("openai-api-key"),
-      model: localStorage.getItem("openai-model"),
-      serpApiKey: localStorage.getItem("serp-api-key"),
-      loaded: true
+      openAiApiKey,
+      loaded: true,
+      complete
     });
   }, []);
 
@@ -98,44 +97,28 @@ function Dojo() {
     checkForUserFiles();
   }, [uploadedFiles]);
 
-  const onConfigSaved = (apiKey: string, model: string, serpApiKey: string) => {
-    let configComplete = true;
+  const onConfigSaved = (apiKey: string) => {
+    let complete = true;
+    let openAiApiKey = apiKey;
 
-    if (!apiKey) {
+    if (!openAiApiKey) {
+      complete = false;
       localStorage.removeItem("openai-api-key");
-      setDojoConfig({ ...dojoConfig, openAiApiKey: null});
-      configComplete = false;
     } else {
-      localStorage.setItem("openai-api-key", apiKey);
-      setDojoConfig({ ...dojoConfig, openAiApiKey: apiKey});
+      localStorage.setItem("openai-api-key", openAiApiKey);
     }
 
-    if (!model) {
-      localStorage.removeItem("openai-model");
-      setDojoConfig({ ...dojoConfig, model: null});
-      configComplete = false;
-    } else {
-      localStorage.setItem("openai-model", model);
-      setDojoConfig({ ...dojoConfig, model });
-    }
-
-    if (!serpApiKey) {
-      localStorage.removeItem("serp-api-key");
-      setDojoConfig({ ...dojoConfig, serpApiKey: null});
-      configComplete = false;
-    } else {
-      localStorage.setItem("serp-api-key", serpApiKey);
-      setDojoConfig({ ...dojoConfig, serpApiKey });
-    }
-
-    // Only close the modal if all configuration is complete
-    setConfigOpen(!configComplete);
+    setDojoConfig({
+      openAiApiKey,
+      loaded: true,
+      complete
+    });
+    setConfigOpen(false);
   };
 
   useEffect(() => {
     try {
-      if (dojoConfig.loaded && (!dojoConfig.openAiApiKey || !dojoConfig.model)) {
-        setConfigOpen(true);
+      if (!dojoConfig.loaded || !dojoConfig.complete) {
         return;
       }
       setDojoError(undefined);
@@ -157,10 +140,9 @@ function Dojo() {
 
       const env = new Env({
         OPENAI_API_KEY: dojoConfig.openAiApiKey as string,
-        GPT_MODEL: dojoConfig.model as string,
+        GPT_MODEL: "gpt-4-0613",
         CONTEXT_WINDOW_TOKENS: "8000",
         MAX_RESPONSE_TOKENS: "2000",
-        SERP_API_KEY: dojoConfig.serpApiKey || undefined,
       });
 
       const llm = new OpenAI(
@@ -199,11 +181,9 @@ function Dojo() {
   return (
     <>
       <div className="flex h-full bg-neutral-800 bg-landing-bg bg-repeat text-center text-neutral-400">
-        {(dojoConfig.loaded && !dojoConfig.openAiApiKey || configOpen) && (
+        {(((dojoConfig.loaded && !dojoConfig.complete) || configOpen) && !welcomeModalOpen) && (
           <DojoConfig
             apiKey={dojoConfig.openAiApiKey}
-            model={dojoConfig.model}
-            serpApiKey={dojoConfig.serpApiKey}
             onConfigSaved={onConfigSaved}
           />
         )}
