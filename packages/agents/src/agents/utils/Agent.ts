@@ -124,7 +124,7 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
     this.context.chat.persistent("system", `Variables are annotated using the \${variable-name} syntax. Variables can be used as function argument using the \${variable-name} syntax. Variables are created as needed, and do not exist unless otherwise stated.`);
     
     for (const message of this.config.prompts.initialMessages(args)) {
-      this.context.chat.persistent(message.role, message.content as string ?? "");
+      this.context.chat.persistent(message.role, message.content ?? "");
     }
   }
 

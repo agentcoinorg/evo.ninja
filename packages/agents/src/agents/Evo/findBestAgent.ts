@@ -37,7 +37,7 @@ export const findBestAgent = async (
   const agentsWithPrompts = allAgents.map(agent => {
     return {
       expertise: agent.config.prompts.expertise + "\n" + agent.config.functions.map(x => x.name).join("\n"),
-      persona: agent.config.prompts.initialMessages({ goal: "" })[0].content as string ?? "",
+      persona: agent.config.prompts.initialMessages({ goal: "" })[0].content ?? "",
       agent,
     };
   });
