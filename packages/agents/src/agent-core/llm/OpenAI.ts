@@ -25,7 +25,8 @@ export class OpenAI implements LlmApi {
     private _maxRateLimitRetries: number = 5
   ) {
     this._api = new OpenAIApi({
-      apiKey: this._apiKey
+      apiKey: this._apiKey,
+      dangerouslyAllowBrowser: true
     });
   }
 

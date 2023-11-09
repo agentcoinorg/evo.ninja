@@ -27,7 +27,8 @@ export class OpenAIEmbeddingAPI implements EmbeddingApi {
     private _maxRateLimitRetries: number = 5
   ) {
     this.api = new OpenAIApi({
-      apiKey: this.apiKey
+      apiKey: this.apiKey,
+      dangerouslyAllowBrowser: true
     });
   }
 
