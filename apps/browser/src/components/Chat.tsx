@@ -10,7 +10,6 @@ import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import { faThumbsUp, faThumbsDown, faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 import { InMemoryFile } from "@nerfzael/memory-fs";
 
-import MenuIcon from "./MenuIcon";
 import clsx from "clsx";
 import SidebarIcon from "./SidebarIcon";
 
@@ -254,7 +253,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
                 "my-1 rounded border border-transparent px-4 py-2.5 transition-all hover:border-orange-600",
                 msg.user === "user" ? "bg-blue-500": "bg-neutral-900",
                 clickedMsgIndex === index ? "border-orange-600" : "")
-              } 
+              }
               onClick={() => setClickedMsgIndex(index === clickedMsgIndex ? null : index)}
             >
               <div className="prose prose-invert">
@@ -297,7 +296,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
           {examplePrompts.map((prompt, index) => (
             <div 
               key={index} 
-              className="m-1 cursor-pointer rounded-xl border border-neutral-500 bg-neutral-800 p-2.5 text-left text-xs text-neutral-50 transition-all hover:border-red-500" 
+              className="m-1 cursor-pointer rounded-xl border border-neutral-500 bg-neutral-800 p-2.5 text-left text-xs text-neutral-50 transition-all hover:border-orange-500" 
               onClick={() => handleSamplePromptClick(prompt)}
             >
               {prompt.prompt}
@@ -307,10 +306,10 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
       )}
       <div className="flex items-center justify-center gap-4 p-4 self-center w-[100%] max-w-[56rem]">
         {showDisclaimer && (
-          <div className="absolute bottom-0 z-50 flex w-4/5 items-center justify-around rounded-t-lg border-2 border-red-500 bg-black p-2.5 text-center text-xs text-white">
+          <div className="absolute bottom-0 z-50 flex w-4/5 items-center justify-around rounded-t-lg border-2 border-orange-600 bg-black p-2.5 text-center text-xs text-white self-center w-[100%] max-w-[56rem]">
             🧠 Hey there! Mind sharing your prompts to help make Evo even better?
             <div className="flex gap-2.5">
-              <span className="cursor-pointer px-5 py-2.5 font-bold text-red-500" onClick={handleCloseDisclaimer}>Accept</span>
+              <span className="cursor-pointer px-5 py-2.5 font-bold text-orange-500" onClick={handleCloseDisclaimer}>Accept</span>
               <span className="cursor-pointer px-5 py-2.5 font-bold text-white" onClick={handleCloseWithoutTracking}>Decline</span>
             </div>
           </div>
@@ -328,7 +327,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
           <>
             {
               !paused && (
-                <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-700" onClick={handlePause} disabled={!evoRunning || paused}>
+                <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" onClick={handlePause} disabled={!evoRunning || paused}>
                 Pause
                 </button>
               )
@@ -337,13 +336,13 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
               paused && (
                 <>
                   {!stopped && (
-                     <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-700" disabled={true}>
+                     <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" disabled={true}>
                      Pausing
                      </button>
                   )}
 
                   {stopped && (
-                     <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-700" onClick={handleContinue} disabled={evoRunning && !paused}>
+                     <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" onClick={handleContinue} disabled={evoRunning && !paused}>
                      Paused
                      </button>
                   )}
@@ -354,9 +353,9 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
         )}
 
         {evoRunning ? (
-          <div className="h-9 w-9 animate-spin rounded-full border-4 border-black/10 border-l-red-500" />
+          <div className="h-9 w-9 animate-spin rounded-full border-4 border-black/10 border-l-orange-600" />
         ) : (
-          <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-700" onClick={handleStart} disabled={evoRunning || sending}>
+          <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" onClick={handleStart} disabled={evoRunning || sending}>
             Start
           </button>
         )}

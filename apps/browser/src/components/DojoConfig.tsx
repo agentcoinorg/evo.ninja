@@ -20,7 +20,7 @@ function DojoConfig(props: DojoConfigProps) {
           onChange={(e) => setApiKey(e.target.value)}
         />
         <button
-          className="cursor-pointer rounded-xl border-none bg-orange-600 p-2.5 text-white transition-all hover:bg-orange-700"
+          className="cursor-pointer rounded-xl border-none bg-orange-600 p-2.5 text-white transition-all hover:bg-orange-500"
           onClick={() => onConfigSaved(apiKey)}
         >
           Save

@@ -25,9 +25,9 @@ code {
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-orange-500 rounded;
+  @apply bg-orange-600 rounded;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-orange-600 rounded;
+  @apply bg-orange-500 rounded;
 }
