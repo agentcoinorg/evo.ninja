@@ -53,7 +53,7 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
     try {
       // Add functions to chat
       this.config.functions.forEach((fn) => {
-        chat.addFunction({ type: "function", function: fn.getDefinition() });
+        chat.addFunction(fn.getDefinition());
       });
 
       if (this.config.timeout) {
@@ -79,13 +79,13 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
     return Promise.resolve();
   }
 
-  protected async executeFunction(toolId: string, func: AgentFunctionBase<unknown>, args: any, chat: Chat): Promise<void> {
+  protected async executeFunction(func: AgentFunctionBase<unknown>, args: any, chat: Chat): Promise<void> {
     const fn = agentFunctionBaseToAgentFunction(this)(func);
-    const { result } = await executeAgentFunction(toolId, [args, fn], JSON.stringify(args), this.context);
+    const { result } = await executeAgentFunction([args, fn], JSON.stringify(args), this.context);
 
     // Save large results as variables
     for (const message of result.messages) {
-      if (message.role !== "tool") {
+      if (message.role !== "function") {
         continue;
       }
       const functionResult = message.content || "";
@@ -131,7 +131,7 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
   protected async beforeLlmResponse(): Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[]}> {
     return {
       logs: this.context.chat.chatLogs,
-      agentFunctions: this.config.functions.map(x => ({ type: "function", function: x.getDefinition() })),
+      agentFunctions: this.config.functions.map(x => x.getDefinition()),
       allFunctions: this.config.functions.map(agentFunctionBaseToAgentFunction(this))
     }
   }

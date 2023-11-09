@@ -29,13 +29,13 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
     additionalProperties: false
   };
 
-  buildExecutor({ context, config }: Agent<unknown>): (toolId: string, params: ExecuteScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
-    return async (toolId: string, params: ExecuteScriptFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
+  buildExecutor({ context, config }: Agent<unknown>): (params: ExecuteScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
+    return async (params: ExecuteScriptFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       try {
         const script = context.scripts.getScriptByName(params.namespace);
 
         if (!script) {
-          return this.onError(toolId, params.namespace, this.scriptNotFound(params), params, rawParams, context.variables);
+          return this.onError(params.namespace, this.scriptNotFound(params), params, rawParams, context.variables);
         }
 
         let args: unknown;
@@ -55,7 +55,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
             }
           }
         } catch {
-          return this.onError(toolId, params.namespace, this.invalidExecuteScriptArgs(params), params, rawParams, context.variables);
+          return this.onError(params.namespace, this.invalidExecuteScriptArgs(params), params, rawParams, context.variables);
         }
 
         const globals: JsEngine_GlobalVar[] =
@@ -75,17 +75,17 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
         return result.ok
           ? result.value.error == null
             ? context.client.jsPromiseOutput.ok
-              ? this.onSuccess(toolId, params.namespace, context.client.jsPromiseOutput.value, params, rawParams, context.variables)
-              : this.onError(toolId, params.namespace, JSON.stringify(context.client.jsPromiseOutput.error), params, rawParams, context.variables)
-            : this.onError(toolId, params.namespace, result.value.error, params, rawParams, context.variables)
-          : this.onError(toolId, params.namespace, result.error?.toString(), params, rawParams, context.variables);
+              ? this.onSuccess(params.namespace, context.client.jsPromiseOutput.value, params, rawParams, context.variables)
+              : this.onError(params.namespace, JSON.stringify(context.client.jsPromiseOutput.error), params, rawParams, context.variables)
+            : this.onError(params.namespace, result.value.error, params, rawParams, context.variables)
+          : this.onError(params.namespace, result.error?.toString(), params, rawParams, context.variables);
       } catch (e: any) {
-        return this.onError(toolId, params.namespace, e.toString(), params, rawParams, context.variables);
+        return this.onError(params.namespace, e.toString(), params, rawParams, context.variables);
       }
     };
   }
 
-  private onSuccess(toolId: string, scriptName: string, result: any, params: ExecuteScriptFuncParameters, rawParams: string | undefined, variables: AgentVariables): AgentFunctionResult {
+  private onSuccess(scriptName: string, result: any, params: ExecuteScriptFuncParameters, rawParams: string | undefined, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -99,7 +99,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
           result
@@ -108,7 +108,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
     }
   }
 
-  private onError(toolId: string, scriptName: string, error: string | undefined, params: ExecuteScriptFuncParameters, rawParams: string | undefined, variables: AgentVariables) {
+  private onError(scriptName: string, error: string | undefined, params: ExecuteScriptFuncParameters, rawParams: string | undefined, variables: AgentVariables) {
     return {
       outputs: [
         {
@@ -118,7 +118,7 @@ export class ExecuteScriptFunction extends AgentFunctionBase<ExecuteScriptFuncPa
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
           `Error executing script '${scriptName}'\n` + 

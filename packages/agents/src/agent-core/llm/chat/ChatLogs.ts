@@ -127,7 +127,7 @@ export class ChatLogs {
       msgs: this._logs,
       functions: {
         tokens: this._functions.tokens,
-        names: this._functions.definitions.map((d) => d.function.name)
+        names: this._functions.definitions.map((d) => d.name)
       }
     };
   }

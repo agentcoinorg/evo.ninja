@@ -25,8 +25,8 @@ export class PlanDevelopmentFunction extends AgentFunctionBase<PlanDevelopmentPa
     additionalProperties: false
   }
 
-  buildExecutor(agent: Agent<unknown>): (toolId: string, params: PlanDevelopmentParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
-    return async (toolId: string, params: PlanDevelopmentParameters, rawParams?: string): Promise<AgentFunctionResult> => {
+  buildExecutor(agent: Agent<unknown>): (params: PlanDevelopmentParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
+    return async (params: PlanDevelopmentParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       const readDirectory = new ReadDirectoryFunction(
         agent.context.scripts
       ).buildExecutor(agent);
@@ -47,12 +47,12 @@ export class PlanDevelopmentFunction extends AgentFunctionBase<PlanDevelopmentPa
       //   - read directory
       //   - read and analyze all files
       const plan = Promise.all([
-        analyzeRequirements(toolId, { goal: params.goal }),
-        planRoadmap(toolId, { goal: params.goal })
+        analyzeRequirements({ goal: params.goal }),
+        planRoadmap({ goal: params.goal })
       ]);
       const understand: AgentFunctionResult[] = await Promise.all([
-        readDirectory(toolId, { path: "./" }),
-        ...this.readAndAnalyzeFiles(agent, params.goal, toolId),
+        readDirectory({ path: "./" }),
+        ...this.readAndAnalyzeFiles(agent, params.goal),
       ]);
       const results = [
         ...(await plan),
@@ -62,7 +62,7 @@ export class PlanDevelopmentFunction extends AgentFunctionBase<PlanDevelopmentPa
       return {
         outputs: results.flatMap((x) => x.outputs),
         messages: [
-          ChatMessageBuilder.functionCall(toolId, this.name, params),
+          ChatMessageBuilder.functionCall(this.name, params),
           ChatMessageBuilder.functionCallResult(this.name, "Understanding data..."),
           ...results.flatMap((x) => x.messages)
         ]
@@ -70,14 +70,14 @@ export class PlanDevelopmentFunction extends AgentFunctionBase<PlanDevelopmentPa
     }
   }
 
-  readAndAnalyzeFiles(agent: Agent<unknown>, goal: string, toolId: string): Promise<AgentFunctionResult>[] {
+  readAndAnalyzeFiles(agent: Agent<unknown>, goal: string): Promise<AgentFunctionResult>[] {
     const workspace = agent.context.workspace;
     const files = workspace.readdirSync("./")
       .filter((x) => x.type === "file");
 
     const readAndAnalyzeFile = new ReadAndAnalyzeFileFunction().buildExecutor(agent);
 
-    const analyzes = files.map((file) => readAndAnalyzeFile(toolId, {
+    const analyzes = files.map((file) => readAndAnalyzeFile({
       path: file.name,
       question: goal
     }));

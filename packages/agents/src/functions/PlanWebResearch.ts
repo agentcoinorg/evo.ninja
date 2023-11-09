@@ -35,12 +35,10 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
   };
 
   buildExecutor({ context }: Agent<unknown>): (
-    toolId: string,
     params: PlanWebResearchFuncParameters,
     rawParams?: string
   ) => Promise<AgentFunctionResult> {
     return async (
-      toolId: string,
       params: PlanWebResearchFuncParameters,
       rawParams?: string
     ): Promise<AgentFunctionResult> => {
@@ -48,12 +46,12 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
 
         const getPlan = this.askLlm(
           this.getPlanningPrompt(params.goal),
-          { model: "gpt-3.5-turbo-16k-0613", maxResponseTokens: 200 }
+          { model: "gpt-3.5-turbo-16k", maxResponseTokens: 200 }
         );
 
         const getFormatting = this.askLlm(
           this.getFormattingPrompt(params.goal),
-          { model: "gpt-3.5-turbo-16k-0613", maxResponseTokens: 200 }
+          { model: "gpt-3.5-turbo-16k", maxResponseTokens: 200 }
         );
 
         const [plan, formatting] = await Promise.all(
@@ -61,7 +59,6 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
         );
 
         return this.onSuccess(
-          toolId,
           params,
           plan,
           formatting,
@@ -70,7 +67,6 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
         );
       } catch (err) {
         return this.onError(
-          toolId,
           params,
           err.toString(),
           rawParams,
@@ -81,7 +77,6 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
   }
 
   private onSuccess(
-    toolId: string,
     params: PlanWebResearchFuncParameters,
     plan: string,
     formatting: string,
@@ -108,7 +103,7 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
         },
       ],
       messages: [
-        ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
           `Research Plan:` +
@@ -132,7 +127,6 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
   }
 
   private onError(
-    toolId: string,
     params: PlanWebResearchFuncParameters,
     error: string,
     rawParams: string | undefined,
@@ -151,7 +145,7 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
         },
       ],
       messages: [
-        ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
           `Error planning research for '${params.goal}'\n` + 

@@ -34,18 +34,16 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
   };
 
   buildExecutor(agent: Agent<unknown>): (
-    toolId: string,
     params: WebSearchFuncParameters,
     rawParams?: string
   ) => Promise<AgentFunctionResult> {
     return async (
-      toolId: string,
       params: WebSearchFuncParameters
     ): Promise<AgentFunctionResult> => {
       const searches = [];
       for (const query of params.queries) {
         searches.push(
-          this.runQuery(agent, query, toolId, JSON.stringify({ queries: [query] }))
+          this.runQuery(agent, query, JSON.stringify({ queries: [query] }))
         );
       }
       const results = await Promise.all(searches);
@@ -56,7 +54,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
     };
   }
 
-  private async runQuery({ context }: Agent<unknown>, query: string, toolId: string, rawParams?: string): Promise<AgentFunctionResult> {
+  private async runQuery({ context }: Agent<unknown>, query: string, rawParams?: string): Promise<AgentFunctionResult> {
     try {
       let googleResults;
       if (typeof window === "object") {
@@ -108,7 +106,6 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         analysisFromChunks,
         rawParams,
         context.variables,
-        toolId
       );
     } catch (err) {
       return this.onError(
@@ -116,7 +113,6 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         err.toString(),
         rawParams,
         context.variables,
-        toolId
       );
     }
   }
@@ -126,7 +122,6 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
     result: string,
     rawParams: string | undefined,
     variables: AgentVariables,
-    toolId: string
   ): AgentFunctionResult {
     return {
       outputs: [
@@ -144,7 +139,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         },
       ],
       messages: [
-        ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
           `Found the following result for the web search: '${params.queries}'` +
@@ -161,7 +156,6 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
     error: string,
     rawParams: string | undefined,
     variables: AgentVariables,
-    toolId: string
   ) {
     return {
       outputs: [
@@ -176,7 +170,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         },
       ],
       messages: [
-        ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
           `Error web searching for '${params.queries}'\n` + 

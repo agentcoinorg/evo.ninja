@@ -160,7 +160,7 @@ export class Evo extends Agent<GoalRunArgs> {
           ${terminationStr && this.goal.length < 350 ? `If you are 100% sure the user's goal has been achieved, simply respond with "${terminationStr}". The user's goal is: "${this.goal}". If the user asks for an output file, has it been written?` : ""}`
         ),
       {
-        model: "gpt-3.5-turbo-16k-0613"
+        model: "gpt-3.5-turbo-16k"
       }
     );
   };

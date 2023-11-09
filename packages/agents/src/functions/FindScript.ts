@@ -32,21 +32,21 @@ export class FindScriptFunction extends AgentFunctionBase<FindScriptFuncParamete
     additionalProperties: false
   };
 
-  buildExecutor({ context }: Agent<unknown>): (toolId: string, params: FindScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
-    return async (toolId: string, params: FindScriptFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
+  buildExecutor({ context }: Agent<unknown>): (params: FindScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
+    return async (params: FindScriptFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       const candidates = this.scripts.searchAllScripts(
         `${params.namespace} ${params.description}`
       ).slice(0, 5);
 
       if (candidates.length === 0) {
-        return this.onError(toolId, params, rawParams, context.variables)
+        return this.onError(params, rawParams, context.variables)
       }
     
-      return this.onSuccess(toolId, params, rawParams, candidates, context.variables);
+      return this.onSuccess(params, rawParams, candidates, context.variables);
     };
   }
 
-  private onSuccess(toolId: string, params: FindScriptFuncParameters, rawParams: string | undefined, candidates: Script[], variables: AgentVariables): AgentFunctionResult {
+  private onSuccess(params: FindScriptFuncParameters, rawParams: string | undefined, candidates: Script[], variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -63,7 +63,7 @@ export class FindScriptFunction extends AgentFunctionBase<FindScriptFuncParamete
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
           `Found the following results for script '${params.namespace}'\n` + 
@@ -74,7 +74,7 @@ export class FindScriptFunction extends AgentFunctionBase<FindScriptFuncParamete
     }
   }
 
-  private onError(toolId: string, params: FindScriptFuncParameters, rawParams: string | undefined, variables: AgentVariables) {
+  private onError(params: FindScriptFuncParameters, rawParams: string | undefined, variables: AgentVariables) {
     return {
       outputs: [
         {
@@ -88,7 +88,7 @@ export class FindScriptFunction extends AgentFunctionBase<FindScriptFuncParamete
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
           `Found no results for script '${params.namespace}'. Try creating the script instead.`,

@@ -11,7 +11,7 @@ interface OpenAIError {
   data: unknown;
 }
 
-export type FunctionDefinition = ChatCompletionTool;
+export type FunctionDefinition = ChatCompletionTool.Function;
 
 export class OpenAI implements LlmApi {
   private _api: OpenAIApi;
@@ -50,7 +50,7 @@ export class OpenAI implements LlmApi {
     try {
       const completion = await this._createChatCompletion({
         messages: chatLog.messages as ChatCompletionMessageParam[],
-        functions: functionDefinitions || [],
+        functions: functionDefinitions,
         temperature: options?.temperature || 0,
         max_tokens: options?.max_tokens || this._defaultMaxResponseTokens,
         model: options?.model || this._defaultModel
@@ -101,13 +101,13 @@ export class OpenAI implements LlmApi {
   private _createChatCompletion(options: {
     messages: ChatCompletionMessageParam[],
     model?: LlmModel;
-    functions: FunctionDefinition[];
+    functions?: FunctionDefinition[];
   } & LlmOptions) {
     return this._api.chat.completions.create({
       messages: options.messages,
       model: options.model || this._defaultModel,
-      tools: options.functions,
-      tool_choice: options.functions ? "auto" : undefined,
+      functions: options.functions,
+      function_call: options.functions ? "auto" : undefined,
       temperature: options.temperature || 0,
       max_tokens: options.max_tokens
     });

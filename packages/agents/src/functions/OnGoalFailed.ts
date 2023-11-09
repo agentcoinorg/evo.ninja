@@ -21,7 +21,7 @@ export class OnGoalFailedFunction extends ScriptFunction<{}> {
     additionalProperties: false
   };
 
-  onSuccess(_: string, agent: Agent, params: OnGoalFailedFuncParameters, rawParams: string | undefined, result: string) {
+  onSuccess(agent: Agent, params: OnGoalFailedFuncParameters, rawParams: string | undefined, result: string) {
     return {
       outputs: [
         {
@@ -34,7 +34,7 @@ export class OnGoalFailedFunction extends ScriptFunction<{}> {
     }
   }
 
-  onFailure(_: string, agent: Agent, params: OnGoalFailedFuncParameters, rawParams: string | undefined, error: string) {
+  onFailure(agent: Agent, params: OnGoalFailedFuncParameters, rawParams: string | undefined, error: string) {
     return {
       outputs: [
         {

@@ -21,13 +21,13 @@ export class VerifyGoalAchievedFunction extends LlmAgentFunctionBase<FunctionPar
     additionalProperties: false
   };
 
-  onSuccess(toolId: string, name: string, rawParams: string | undefined, messages: string[], result: AgentOutput): AgentFunctionResult {
+  onSuccess(name: string, rawParams: string | undefined, messages: string[], result: AgentOutput): AgentFunctionResult {
     return {
       outputs: [
         result
       ],
       messages: [
-        ChatMessageBuilder.functionCall(toolId, name, rawParams),
+        ChatMessageBuilder.functionCall(name, rawParams),
         ...messages.map(x => ({
           role: "assistant",
           content: x,
@@ -40,7 +40,7 @@ export class VerifyGoalAchievedFunction extends LlmAgentFunctionBase<FunctionPar
     }
   }
 
-  onFailure(toolId: string, name: string, params: any, rawParams: string | undefined, error: string | undefined): AgentFunctionResult {
+  onFailure(name: string, params: any, rawParams: string | undefined, error: string | undefined): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -50,7 +50,7 @@ export class VerifyGoalAchievedFunction extends LlmAgentFunctionBase<FunctionPar
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(toolId, name, rawParams),
+        ChatMessageBuilder.functionCall(name, rawParams),
         ChatMessageBuilder.functionCallResult(
           name,
           `Error: ${error}`
@@ -60,7 +60,7 @@ export class VerifyGoalAchievedFunction extends LlmAgentFunctionBase<FunctionPar
   }
 
   buildExecutor({ context }: Agent<unknown>) {
-    return async (toolId: string, params: FunctionParams, rawParams?: string): Promise<AgentFunctionResult> => {
+    return async (params: FunctionParams, rawParams?: string): Promise<AgentFunctionResult> => {
       const result = await this.askAgent(
         new GoalVerifierAgent(context.cloneEmpty()), 
         { messagesToVerify: context.chat.messages },
@@ -69,7 +69,6 @@ export class VerifyGoalAchievedFunction extends LlmAgentFunctionBase<FunctionPar
 
       if (!result.ok) {
         return this.onFailure(
-          toolId,
           this.name,
           params,
           rawParams,
@@ -77,7 +76,6 @@ export class VerifyGoalAchievedFunction extends LlmAgentFunctionBase<FunctionPar
         );
       } else {
         return this.onSuccess(
-          toolId,
           this.name,
           rawParams,
           [],

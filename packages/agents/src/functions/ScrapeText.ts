@@ -26,9 +26,8 @@ export class ScrapeTextFunction extends AgentFunctionBase<{ url: string }> {
     additionalProperties: false
   };
 
-  buildExecutor(_: Agent<unknown>): (toolId: string, params: { url: string; }, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
+  buildExecutor(_: Agent<unknown>): (params: { url: string; }, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
     return async (
-      toolId: string,
       params: ScrapeTextFuncParameters,
       rawParams?: string
     ): Promise<AgentFunctionResult> => {
@@ -39,14 +38,12 @@ export class ScrapeTextFunction extends AgentFunctionBase<{ url: string }> {
           params,
           JSON.stringify(response),
           rawParams,
-          toolId
         );
       } catch (err) {
         return this.onError(
           params,
           err.toString(),
           rawParams,
-          toolId
         );
       }
     };
@@ -90,7 +87,6 @@ export class ScrapeTextFunction extends AgentFunctionBase<{ url: string }> {
     params: ScrapeTextFuncParameters,
     result: string,
     rawParams: string | undefined,
-    toolId: string
   ): AgentFunctionResult {
     return {
       outputs: [
@@ -108,7 +104,7 @@ export class ScrapeTextFunction extends AgentFunctionBase<{ url: string }> {
         },
       ],
       messages: [
-        ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
           `Scrape text from '${params.url}'` +
@@ -124,7 +120,6 @@ export class ScrapeTextFunction extends AgentFunctionBase<{ url: string }> {
     params: ScrapeTextFuncParameters,
     error: string,
     rawParams: string | undefined,
-    toolId: string
   ) {
     return {
       outputs: [
@@ -139,7 +134,7 @@ export class ScrapeTextFunction extends AgentFunctionBase<{ url: string }> {
         },
       ],
       messages: [
-        ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
           `Error scraping text from '${params.url}'\n` + 

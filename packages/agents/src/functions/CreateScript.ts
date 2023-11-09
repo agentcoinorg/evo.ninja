@@ -34,10 +34,10 @@ export class CreateScriptFunction extends LlmAgentFunctionBase<CreateScriptFuncP
     additionalProperties: false
   };
 
-  buildExecutor({ context }: Agent<unknown>): (toolId: string, params: CreateScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
-    return async (toolId: string, params: CreateScriptFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
+  buildExecutor({ context }: Agent<unknown>): (params: CreateScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
+    return async (params: CreateScriptFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       if (params.namespace.startsWith("agent.")) {
-        return this.onErrorCannotCreateScriptsOnAgentNamespace(toolId, params, rawParams);
+        return this.onErrorCannotCreateScriptsOnAgentNamespace(params, rawParams);
       }
       context.logger.notice(`Creating script '${params.namespace}'...`);
 
@@ -54,7 +54,7 @@ export class CreateScriptFunction extends LlmAgentFunctionBase<CreateScriptFuncP
       );
 
       if (!result.ok) {
-        return this.onErrorCreateScript(toolId, params, rawParams, result.error?.toString() || "Unknown error");
+        return this.onErrorCreateScript(params, rawParams, result.error?.toString() || "Unknown error");
       }
 
       const index = writer.workspace.readFileSync("index.js");
@@ -67,11 +67,11 @@ export class CreateScriptFunction extends LlmAgentFunctionBase<CreateScriptFuncP
       };
       context.scripts.addScript(params.namespace, script);
 
-      return this.onSuccess(toolId, script, params, rawParams);
+      return this.onSuccess(script, params, rawParams);
     };
   }
 
-  private onSuccess(toolId: string, script: Script, params: CreateScriptFuncParameters, rawParams: string | undefined): AgentFunctionResult {
+  private onSuccess(script: Script, params: CreateScriptFuncParameters, rawParams: string | undefined): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -88,13 +88,13 @@ export class CreateScriptFunction extends LlmAgentFunctionBase<CreateScriptFuncP
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(this.name, `Script '${script.name}' created.`)
       ]
     }
   }
 
-  private onErrorCannotCreateScriptsOnAgentNamespace(toolId: string, params: CreateScriptFuncParameters,  rawParams: string | undefined) {
+  private onErrorCannotCreateScriptsOnAgentNamespace(params: CreateScriptFuncParameters,  rawParams: string | undefined) {
     return {
       outputs: [
         {
@@ -108,7 +108,7 @@ export class CreateScriptFunction extends LlmAgentFunctionBase<CreateScriptFuncP
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
           `Error: Scripts in the 'agent' namespace cannot be created. Try searching for an existing script instead.`
@@ -117,7 +117,7 @@ export class CreateScriptFunction extends LlmAgentFunctionBase<CreateScriptFuncP
     }
   }
 
-  private onErrorCreateScript(toolId: string, params: CreateScriptFuncParameters, rawParams: string | undefined, error: string) {
+  private onErrorCreateScript(params: CreateScriptFuncParameters, rawParams: string | undefined, error: string) {
     return {
       outputs: [
         {
@@ -131,7 +131,7 @@ export class CreateScriptFunction extends LlmAgentFunctionBase<CreateScriptFuncP
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
+        ChatMessageBuilder.functionCall(this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
           `Error trying to create the script: ${error}.`

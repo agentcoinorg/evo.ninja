@@ -1,5 +1,6 @@
 import {
   ChatCompletionAssistantMessageParam,
+  ChatCompletionFunctionMessageParam,
   ChatCompletionToolMessageParam,
 } from "openai/resources";
 import { ChatMessage } from "../llm";
@@ -13,6 +14,35 @@ export class ChatMessageBuilder {
   }
 
   static functionCall<TFuncParams>(
+    funcName: string,
+    params: TFuncParams
+  ): ChatCompletionAssistantMessageParam {
+    if (params === undefined || params === null) {
+      params = {} as any;
+    }
+
+    return {
+      role: "assistant",
+      content: "",
+      function_call: {
+        name: funcName,
+        arguments: typeof params === "string" ? params : JSON.stringify(params),
+      },
+    };
+  }
+
+  static functionCallResult(
+    funcName: string,
+    result: string
+  ): ChatCompletionFunctionMessageParam {
+    return {
+      role: "function",
+      name: funcName,
+      content: result,
+    };
+  }
+
+  static toolCall<TFuncParams>(
     toolId: string,
     funcName: string,
     params: TFuncParams
@@ -38,14 +68,14 @@ export class ChatMessageBuilder {
     };
   }
 
-  static functionCallResult(
-    result: string,
-    toolId: string
+  static toolCallResult(
+    toolId: string,
+    result: string
   ): ChatCompletionToolMessageParam {
     return {
       tool_call_id: toolId,
       role: "tool",
-      content: result
+      content: result,
     };
   }
 }

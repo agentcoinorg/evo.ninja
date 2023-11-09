@@ -71,19 +71,19 @@ export class AnalyzeDataFunction extends LlmAgentFunctionBase<AnalyzeDataParamet
       .line("BE VERY TERSE IN YOUR RESPONSE.");
 
     return await this.askLlm(prompt.toString(), {
-      model: "gpt-3.5-turbo-16k-0613",
+      model: "gpt-3.5-turbo-16k",
       maxResponseTokens: 100
     });
   }
 
-  buildExecutor({ context }: Agent<unknown>): (toolId: string, params: AnalyzeDataParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
-    return async (tooldId: string, params: AnalyzeDataParameters, rawParams?: string): Promise<AgentFunctionResult> => {
+  buildExecutor({ context }: Agent<unknown>): (params: AnalyzeDataParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
+    return async (params: AnalyzeDataParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       const summary = await this.analyze(params, context);
 
       return {
         outputs: [],
         messages: [
-          ChatMessageBuilder.functionCall(tooldId, this.name, rawParams),
+          ChatMessageBuilder.functionCall(this.name, rawParams),
           ChatMessageBuilder.functionCallResult(this.name, summary)
         ]
       };

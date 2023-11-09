@@ -28,6 +28,6 @@ export class ResearcherAgent extends Agent {
   }
 
   public override async onFirstRun(args: GoalRunArgs, chat: Chat): Promise<void> {
-    // await this.executeFunction(this.plan, args, chat);
+    await this.executeFunction(this.plan, args, chat);
   }
 }
