@@ -6,7 +6,7 @@ import FileSaver from "file-saver";
 import { trackMessageSent, trackThumbsFeedback} from './googleAnalytics';
 import { ExamplePrompt, examplePrompts } from "../examplePrompts";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload } from "@fortawesome/free-solid-svg-icons";
+import { faDownload, faQuestion, faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
 import { faThumbsUp, faThumbsDown, faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 import { InMemoryFile } from "@nerfzael/memory-fs";
 
@@ -304,7 +304,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
           ))}
         </div>
       )}
-      <div className="flex items-center justify-center gap-4 p-4 self-center w-[100%] max-w-[56rem]">
+      <div className="flex items-center justify-center gap-4 p-4 mb-4 self-center w-[100%] max-w-[56rem]">
         {showDisclaimer && (
           <div className="absolute bottom-0 z-50 flex w-4/5 items-center justify-around rounded-t-lg border-2 border-orange-600 bg-black p-2.5 text-center text-xs text-white self-center w-[100%] max-w-[56rem]">
             🧠 Hey there! Mind sharing your prompts to help make Evo even better?
@@ -376,6 +376,14 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
           </div>
         </div>
       )}
+      <a
+        className="cursor-pointer fixed bottom-0 right-0 mx-4 my-2"
+        href="https://discord.gg/r3rwh69cCa"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <FontAwesomeIcon icon={faQuestionCircle} title="Questions?" />
+      </a>
     </div>
   );
 };
