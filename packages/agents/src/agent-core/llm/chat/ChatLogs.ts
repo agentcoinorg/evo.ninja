@@ -1,9 +1,12 @@
 import { Tokenizer } from "./";
 import { FunctionDefinition } from "../";
+import { ChatCompletionMessageParam } from "openai/resources";
 
-import { ChatCompletionRequestMessage as ChatMessage } from "openai";
-
-export { ChatMessage };
+// Evo doesn't support image from the user as input right now,
+// so we override the content to always be string
+export type ChatMessage = Omit<ChatCompletionMessageParam, "content"> & {
+  content: string | null
+}
 
 export type ChatLogType =
   | "persistent"
@@ -124,16 +127,16 @@ export class ChatLogs {
       msgs: this._logs,
       functions: {
         tokens: this._functions.tokens,
-        names: this._functions.definitions.map((d) => d.name)
+        names: this._functions.definitions.map((d) => d.function.name)
       }
     };
   }
 
   static from(persistentMsgs: ChatMessage[], temporaryMsgs: ChatMessage[], tokenizer: Tokenizer): ChatLogs {
     const persistentTokens = persistentMsgs
-      .map(x => x.content ? tokenizer.encode(x.content).length : 0);
+      .map(x => x.content ? tokenizer.encode(x.content as string).length : 0);
     const temporaryTokens = persistentMsgs
-      .map(x => x.content ? tokenizer.encode(x.content).length : 0);
+      .map(x => x.content ? tokenizer.encode(x.content as string).length : 0);
 
     return new ChatLogs({
       "persistent": {

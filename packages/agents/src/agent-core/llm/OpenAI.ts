@@ -1,20 +1,9 @@
-import { LlmApi, LlmOptions, ChatLogs, ChatMessage, LlmModel } from ".";
-
-import {
-  ChatCompletionRequestMessage,
-  ChatCompletionResponseMessage,
-  ChatCompletionRequestMessageFunctionCall,
-  Configuration,
-  OpenAIApi,
-  ChatCompletionFunctions,
-} from "openai";
+import { LlmApi, LlmOptions, ChatLogs, LlmModel } from ".";
 import { cleanOpenAIError } from "../utils/openai";
-import { Logger } from "@evo-ninja/agent-utils";
 
-export {
-  ChatCompletionResponseMessage as OpenAIResponse,
-  ChatCompletionRequestMessageFunctionCall as OpenAIFunctionCall
-};
+import OpenAIApi from "openai";
+import { Logger } from "@evo-ninja/agent-utils";
+import { ChatCompletionMessage, ChatCompletionMessageParam, ChatCompletionTool } from "openai/resources";
 
 interface OpenAIError {
   status: number;
@@ -22,10 +11,9 @@ interface OpenAIError {
   data: unknown;
 }
 
-export type FunctionDefinition = ChatCompletionFunctions;
+export type FunctionDefinition = ChatCompletionTool;
 
 export class OpenAI implements LlmApi {
-  private _configuration: Configuration;
   private _api: OpenAIApi;
 
   constructor(
@@ -36,10 +24,9 @@ export class OpenAI implements LlmApi {
     private _logger: Logger,
     private _maxRateLimitRetries: number = 5
   ) {
-    this._configuration = new Configuration({
-    apiKey: this._apiKey
+    this._api = new OpenAIApi({
+      apiKey: this._apiKey
     });
-    this._api = new OpenAIApi(this._configuration);
   }
 
   getMaxContextTokens() {
@@ -59,21 +46,21 @@ export class OpenAI implements LlmApi {
     functionDefinitions?: FunctionDefinition[],
     options?: LlmOptions,
     tries?: number
-  ): Promise<ChatMessage | undefined> {
+  ): Promise<ChatCompletionMessage | undefined> {
     try {
       const completion = await this._createChatCompletion({
-        messages: chatLog.messages,
-        functions: functionDefinitions,
+        messages: chatLog.messages as ChatCompletionMessageParam[],
+        functions: functionDefinitions || [],
         temperature: options?.temperature || 0,
         max_tokens: options?.max_tokens || this._defaultMaxResponseTokens,
         model: options?.model || this._defaultModel
       });
 
-      if (completion.data.choices.length < 1) {
+      if (completion.choices.length < 1) {
         throw Error("Chat completion choices length was 0...");
       }
 
-      const choice = completion.data.choices[0];
+      const choice = completion.choices[0];
 
       if (!choice.message) {
         throw Error(
@@ -112,15 +99,15 @@ export class OpenAI implements LlmApi {
   }
 
   private _createChatCompletion(options: {
-    messages: ChatCompletionRequestMessage[];
+    messages: ChatCompletionMessageParam[],
     model?: LlmModel;
-    functions?: FunctionDefinition[];
+    functions: FunctionDefinition[];
   } & LlmOptions) {
-    return this._api.createChatCompletion({
+    return this._api.chat.completions.create({
       messages: options.messages,
       model: options.model || this._defaultModel,
-      functions: options.functions,
-      function_call: options.functions ? "auto" : undefined,
+      tools: options.functions,
+      tool_choice: options.functions ? "auto" : undefined,
       temperature: options.temperature || 0,
       max_tokens: options.max_tokens
     });

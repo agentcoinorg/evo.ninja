@@ -18,17 +18,17 @@ export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParamete
   description: string = `Initialize a Python Poetry environment in the workspace.`;
   parameters: any = {"type": "object", "properties": {}};
 
-  buildExecutor({ context }: Agent<unknown>): (params: InitPoetryFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
-    return async (params: InitPoetryFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
+  buildExecutor({ context }: Agent<unknown>): (toolId: string, params: InitPoetryFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
+    return async (toolId: string, params: InitPoetryFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       const result = await this.poetryInit(context.workspace);
       if (result.exitCode !== 0) {
-        return this.onError(result.stderr, params, rawParams, context.variables);
+        return this.onError(toolId, result.stderr, params, rawParams, context.variables);
       }
-      return this.onSuccess(params, rawParams, context.variables);
+      return this.onSuccess(toolId, params, rawParams, context.variables);
     };
   }
 
-  private onSuccess(params: InitPoetryFuncParameters, rawParams: string | undefined, variables: AgentVariables): AgentFunctionResult {
+  private onSuccess(toolId: string, params: InitPoetryFuncParameters, rawParams: string | undefined, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -42,7 +42,7 @@ export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParamete
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, rawParams),
+        ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
           "Initialized Python Poetry Environment. You can now execute `poetry run [command] [args]` in the shell."
@@ -51,7 +51,7 @@ export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParamete
     }
   }
 
-  private onError(error: string, params: InitPoetryFuncParameters, rawParams: string | undefined, variables: AgentVariables): AgentFunctionResult {
+  private onError(toolId: string, error: string, params: InitPoetryFuncParameters, rawParams: string | undefined, variables: AgentVariables): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -61,7 +61,7 @@ export class InitPoetryFunction extends AgentFunctionBase<InitPoetryFuncParamete
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, rawParams),
+        ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
           `Failed to init poetry: ${error}.`

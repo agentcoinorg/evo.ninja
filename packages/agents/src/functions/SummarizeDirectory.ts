@@ -26,8 +26,8 @@ export class SummarizeDirectoryFunction extends LlmAgentFunctionBase<SummarizeDi
     additionalProperties: false
   };
 
-  buildExecutor({ context }: Agent<unknown>): (params: SummarizeDirectoryParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
-    return async (params: SummarizeDirectoryParameters, rawParams?: string): Promise<AgentFunctionResult> => {
+  buildExecutor({ context }: Agent<unknown>): (toolId: string, params: SummarizeDirectoryParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
+    return async (toolId: string, params: SummarizeDirectoryParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       const prompt = (summary: string | undefined, chunk: string) =>
         `Your job is to summarize the contents of the following files. In this summary please structure your response on a per-file basis. NOTE: some files have been chunked, line numbers are annotated.\n
         ${summary ? `An existing summary already exists, you MUST modify this to contain all new details, WITHOUT LOOSING INFORMATION already present within the summary.\n\`\`\`${summary}\`\`\`\n`: ""}
@@ -50,7 +50,7 @@ export class SummarizeDirectoryFunction extends LlmAgentFunctionBase<SummarizeDi
       return {
         outputs: [],
         messages: [
-          ChatMessageBuilder.functionCall(this.name, rawParams),
+          ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
           ChatMessageBuilder.functionCallResult(this.name, summary || "")
         ]
       };

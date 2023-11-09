@@ -11,5 +11,5 @@ export interface AgentFunction<TContext> {
   definition: FunctionDefinition;
   buildExecutor(
     context: TContext
-  ): (params: any, rawParams?: string) => Promise<AgentFunctionResult>;
+  ): (toolId: string, params: any, rawParams?: string) => Promise<AgentFunctionResult>;
 }

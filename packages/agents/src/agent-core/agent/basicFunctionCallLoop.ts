@@ -33,42 +33,43 @@ export async function* basicFunctionCallLoop(
       return ResultErr("No response from LLM.");
     }
 
-    if (response.function_call) {
-      const { name, arguments: args } = response.function_call;
-
-      const sanitizedFunctionAndArgs = processFunctionAndArgs(name, args, allFunctions, context.variables)
-      if (!sanitizedFunctionAndArgs.ok) {
-        chat.temporary(response);
-        chat.temporary("system", sanitizedFunctionAndArgs.error);
-        yield { type: AgentOutputType.Error, title: `Failed to sanitize function ${name} with args ${args}. Error: ${sanitizedFunctionAndArgs.error}`, content: sanitizedFunctionAndArgs.error } as AgentOutput;
-        continue;
-      }
-
-      const { result, functionCalled } = await executeAgentFunction(sanitizedFunctionAndArgs.value, args, context)
-
-      // Save large results as variables
-      for (const message of result.messages) {
-        if (message.role !== "function") {
+    if (response.tool_calls) {
+      for (let toolCall of response.tool_calls) {
+        const { id, function: fn } = toolCall
+        const { name, arguments: fnArgs } = fn
+        const sanitizedFunctionAndArgs = processFunctionAndArgs(name, fnArgs, allFunctions, context.variables)
+        if (!sanitizedFunctionAndArgs.ok) {
+          chat.temporary(response);
+          chat.temporary("system", sanitizedFunctionAndArgs.error);
+          yield { type: AgentOutputType.Error, title: `Failed to sanitize function ${name} with args ${fnArgs}. Error: ${sanitizedFunctionAndArgs.error}`, content: sanitizedFunctionAndArgs.error } as AgentOutput;
           continue;
         }
-        const functionResult = message.content || "";
-        if (result.storeInVariable || context.variables.shouldSave(functionResult)) {
-          const varName = context.variables.save(name || "", functionResult);
-          message.content = `\${${varName}}`;
+  
+        const { result, functionCalled } = await executeAgentFunction(id, sanitizedFunctionAndArgs.value, fnArgs, context)
+  
+        // Save large results as variables
+        for (const message of result.messages) {
+          if (message.role !== "tool") {
+            continue;
+          }
+          const functionResult = message.content || "";
+          if (result.storeInVariable || context.variables.shouldSave(functionResult)) {
+            const varName = context.variables.save(name || "", functionResult);
+            message.content = `\${${varName}}`;
+          }
         }
-      }
-
-      result.messages.forEach(x => chat.temporary(x));
-      const terminate = functionCalled && shouldTerminate(functionCalled, result);
-
-      for (let i = 0; i < result.outputs.length; i++) {
-        const output = result.outputs[i];
-
-        if (i === result.outputs.length - 1 && terminate) {
-          return ResultOk(output);
+  
+        result.messages.forEach(x => chat.temporary(x));
+        const terminate = functionCalled && shouldTerminate(functionCalled, result);
+        for (let i = 0; i < result.outputs.length; i++) {
+          const output = result.outputs[i];
+  
+          if (i === result.outputs.length - 1 && terminate) {
+            return ResultOk(output);
+          }
+  
+          yield output;
         }
-
-        yield output;
       }
     } else {
       yield* _preventLoopAndSaveMsg(chat, response, loopPreventionPrompt, agentSpeakPrompt);

@@ -36,6 +36,7 @@ export class RunPytest extends AgentFunctionBase<FunctionParams> {
 
   buildExecutor({ context }: Agent<unknown>) {
     return async (
+      toolId: string,
       params: FunctionParams,
       rawParams?: string
     ): Promise<AgentFunctionResult> => {
@@ -50,7 +51,7 @@ export class RunPytest extends AgentFunctionBase<FunctionParams> {
             },
           ],
           messages: [
-            ChatMessageBuilder.functionCall(this.name, params),
+            ChatMessageBuilder.functionCall(toolId, this.name, params),
             ChatMessageBuilder.functionCallResult(
               this.name,
               "Succesfully ran test"
@@ -67,7 +68,7 @@ export class RunPytest extends AgentFunctionBase<FunctionParams> {
               },
             ],
             messages: [
-              ChatMessageBuilder.functionCall(this.name, params),
+              ChatMessageBuilder.functionCall(toolId, this.name, params),
               ChatMessageBuilder.functionCallResult(
                 this.name,
                 "Test have reached timeout. Maybe there's an infinite loop in the code. Please review and fix"
@@ -84,7 +85,7 @@ export class RunPytest extends AgentFunctionBase<FunctionParams> {
               },
             ],
             messages: [
-              ChatMessageBuilder.functionCall(this.name, params),
+              ChatMessageBuilder.functionCall(toolId, this.name, params),
               ChatMessageBuilder.functionCallResult(this.name, errorMessages),
             ],
           };

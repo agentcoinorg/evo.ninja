@@ -53,7 +53,7 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
     try {
       // Add functions to chat
       this.config.functions.forEach((fn) => {
-        chat.addFunction(fn.getDefinition());
+        chat.addFunction({ type: "function", function: fn.getDefinition() });
       });
 
       if (this.config.timeout) {
@@ -79,13 +79,13 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
     return Promise.resolve();
   }
 
-  protected async executeFunction(func: AgentFunctionBase<unknown>, args: any, chat: Chat): Promise<void> {
+  protected async executeFunction(toolId: string, func: AgentFunctionBase<unknown>, args: any, chat: Chat): Promise<void> {
     const fn = agentFunctionBaseToAgentFunction(this)(func);
-    const { result } = await executeAgentFunction([args, fn], JSON.stringify(args), this.context);
+    const { result } = await executeAgentFunction(toolId, [args, fn], JSON.stringify(args), this.context);
 
     // Save large results as variables
     for (const message of result.messages) {
-      if (message.role !== "function") {
+      if (message.role !== "tool") {
         continue;
       }
       const functionResult = message.content || "";
@@ -124,14 +124,14 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
     this.context.chat.persistent("system", `Variables are annotated using the \${variable-name} syntax. Variables can be used as function argument using the \${variable-name} syntax. Variables are created as needed, and do not exist unless otherwise stated.`);
     
     for (const message of this.config.prompts.initialMessages(args)) {
-      this.context.chat.persistent(message.role, message.content ?? "");
+      this.context.chat.persistent(message.role, message.content as string ?? "");
     }
   }
 
   protected async beforeLlmResponse(): Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[]}> {
     return {
       logs: this.context.chat.chatLogs,
-      agentFunctions: this.config.functions.map(x => x.getDefinition()),
+      agentFunctions: this.config.functions.map(x => ({ type: "function", function: x.getDefinition() })),
       allFunctions: this.config.functions.map(agentFunctionBaseToAgentFunction(this))
     }
   }

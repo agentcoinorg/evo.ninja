@@ -76,14 +76,14 @@ export class AnalyzeDataFunction extends LlmAgentFunctionBase<AnalyzeDataParamet
     });
   }
 
-  buildExecutor({ context }: Agent<unknown>): (params: AnalyzeDataParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
-    return async (params: AnalyzeDataParameters, rawParams?: string): Promise<AgentFunctionResult> => {
+  buildExecutor({ context }: Agent<unknown>): (toolId: string, params: AnalyzeDataParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
+    return async (tooldId: string, params: AnalyzeDataParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       const summary = await this.analyze(params, context);
 
       return {
         outputs: [],
         messages: [
-          ChatMessageBuilder.functionCall(this.name, rawParams),
+          ChatMessageBuilder.functionCall(tooldId, this.name, rawParams),
           ChatMessageBuilder.functionCallResult(this.name, summary)
         ]
       };

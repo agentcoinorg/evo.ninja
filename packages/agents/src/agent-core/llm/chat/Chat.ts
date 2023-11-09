@@ -1,21 +1,13 @@
-import {
-  Tokenizer,
-  ChatLogs,
-  ChatMessage,
-  ChatLogType,
-} from "./";
+import { Tokenizer, ChatLogs, ChatMessage, ChatLogType } from "./";
 import { FunctionDefinition } from "../";
+import { ChatCompletionRole } from "openai/resources";
 
-import { ChatCompletionRequestMessageRoleEnum } from "openai";
-
-export type ChatRole = ChatCompletionRequestMessageRoleEnum;
+export type ChatRole = ChatCompletionRole;
 
 export class Chat {
   protected _chatLogs: ChatLogs;
 
-  constructor(
-    protected _tokenizer: Tokenizer,
-  ) {
+  constructor(protected _tokenizer: Tokenizer) {
     this._chatLogs = new ChatLogs();
   }
 
@@ -35,10 +27,7 @@ export class Chat {
     return this._chatLogs.messages;
   }
 
-  public add(
-    type: ChatLogType,
-    msg: ChatMessage | ChatMessage[]
-  ) {
+  public add(type: ChatLogType, msg: ChatMessage | ChatMessage[]) {
     let msgs = Array.isArray(msg) ? msg : [msg];
 
     for (const msg of msgs) {
@@ -47,24 +36,24 @@ export class Chat {
     }
   }
 
-  public persistent(
-    role: ChatRole,
-    content: string
-  ): string | undefined 
+  public persistent(role: ChatRole, content: string): string | undefined;
   public persistent(
     msg: ChatMessage
-  ): string | undefined 
+  ): string | undefined;
   public persistent(
     roleOrMsg: ChatRole | ChatMessage,
     content?: string
   ): string | undefined {
-    switch(typeof roleOrMsg) {
-      case "string": 
-        this.add("persistent", { role: roleOrMsg as ChatRole, content });
+    switch (typeof roleOrMsg) {
+      case "string":
+        this.add("persistent", {
+          role: roleOrMsg as "system" | "user" | "assistant",
+          content: content ?? null,
+        });
         return content;
       case "object":
         this.add("persistent", roleOrMsg as ChatMessage);
-        return roleOrMsg.content;
+        return roleOrMsg.content || undefined;
       default:
         throw new Error(`Invalid type for roleOrMsg: ${typeof roleOrMsg}`);
     }
@@ -83,11 +72,11 @@ export class Chat {
   ): string | undefined {
     switch(typeof roleOrMsg) {
       case "string":
-        this.add("temporary", { role: roleOrMsg as ChatRole, content });
+        this.add("temporary", { role: roleOrMsg as "system" | "user", content: content ?? null });
         return content;
       case "object":
         this.add("temporary", roleOrMsg as ChatMessage);
-        return roleOrMsg.content;
+        return roleOrMsg.content || undefined;
       default:
         throw new Error(`Invalid type for roleOrMsg: ${typeof roleOrMsg}`);
     }

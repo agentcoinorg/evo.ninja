@@ -35,10 +35,12 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
   };
 
   buildExecutor({ context }: Agent<unknown>): (
+    toolId: string,
     params: PlanWebResearchFuncParameters,
     rawParams?: string
   ) => Promise<AgentFunctionResult> {
     return async (
+      toolId: string,
       params: PlanWebResearchFuncParameters,
       rawParams?: string
     ): Promise<AgentFunctionResult> => {
@@ -59,6 +61,7 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
         );
 
         return this.onSuccess(
+          toolId,
           params,
           plan,
           formatting,
@@ -67,6 +70,7 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
         );
       } catch (err) {
         return this.onError(
+          toolId,
           params,
           err.toString(),
           rawParams,
@@ -77,6 +81,7 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
   }
 
   private onSuccess(
+    toolId: string,
     params: PlanWebResearchFuncParameters,
     plan: string,
     formatting: string,
@@ -103,7 +108,7 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
         },
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, rawParams),
+        ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
           `Research Plan:` +
@@ -127,6 +132,7 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
   }
 
   private onError(
+    toolId: string,
     params: PlanWebResearchFuncParameters,
     error: string,
     rawParams: string | undefined,
@@ -145,7 +151,7 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
         },
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, rawParams),
+        ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
         ChatMessageBuilder.functionCallResult(
           this.name,
           `Error planning research for '${params.goal}'\n` + 

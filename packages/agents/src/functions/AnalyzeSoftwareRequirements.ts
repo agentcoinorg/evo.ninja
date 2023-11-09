@@ -25,15 +25,15 @@ export class AnalyzeSoftwareRequirementsFunction extends LlmAgentFunctionBase<An
     additionalProperties: false
   };
 
-  buildExecutor({ context }: Agent<unknown>): (params: AnalyzeSoftwareRequirementsParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
-    return async (params: AnalyzeSoftwareRequirementsParameters, rawParams?: string): Promise<AgentFunctionResult> => {
+  buildExecutor({ context }: Agent<unknown>): (toolId: string, params: AnalyzeSoftwareRequirementsParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
+    return async (toolId: string, params: AnalyzeSoftwareRequirementsParameters, rawParams?: string): Promise<AgentFunctionResult> => {
 
       const resp = await this.askLlm(`Given the following user goal, please identify any software requirements:\n\`\`\`\n${params.goal}\n\`\`\``);
 
       return {
         outputs: [],
         messages: [
-          ChatMessageBuilder.functionCall(this.name, rawParams),
+          ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
           ChatMessageBuilder.functionCallResult(this.name, resp)
         ]
       };

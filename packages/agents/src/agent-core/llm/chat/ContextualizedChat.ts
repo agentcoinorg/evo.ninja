@@ -138,7 +138,7 @@ export class ContextualizedChat {
     const newChunks: string[] = [];
 
     // If the message contains a variable, load the variable's data
-    const varName = message.content || "";
+    const varName = message.content as string || "";
     let isVariable = false;
 
     if (AgentVariables.hasSyntax(varName)) {
@@ -189,7 +189,7 @@ export class ContextualizedChat {
 
     // If the message is a function call or result,
     // store the first chunk's text so we can easily retrieve it
-    if (message.role === "function" || message.function_call) {
+    if (message.role === "function") {
       this._functionCallResultFirstChunks[startChunkIdx] = {
         text: newChunks[0],
         metadata: { index: startChunkIdx }

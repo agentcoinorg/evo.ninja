@@ -25,15 +25,15 @@ export class PlanSoftwareRoadmapFunction extends LlmAgentFunctionBase<PlanSoftwa
     additionalProperties: false
   };
 
-  buildExecutor({ context }: Agent<unknown>): (params: PlanSoftwareRoadmapParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
-    return async (params: PlanSoftwareRoadmapParameters, rawParams?: string): Promise<AgentFunctionResult> => {
+  buildExecutor({ context }: Agent<unknown>): (toolId: string, params: PlanSoftwareRoadmapParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
+    return async (toolId: string, params: PlanSoftwareRoadmapParameters, rawParams?: string): Promise<AgentFunctionResult> => {
 
       const resp = await this.askLlm(`Given the following user goal, please create a software development roadmap:\n\`\`\`\n${params.goal}\n\`\`\``);
 
       return {
         outputs: [],
         messages: [
-          ChatMessageBuilder.functionCall(this.name, rawParams),
+          ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
           ChatMessageBuilder.functionCallResult(this.name, resp)
         ]
       };

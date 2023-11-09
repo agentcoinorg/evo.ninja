@@ -1,3 +1,4 @@
+import { ChatCompletionMessage } from "openai/resources";
 import { ChatLogs, ChatMessage, FunctionDefinition } from ".";
 
 export declare const LlmRoles: {
@@ -29,5 +30,5 @@ export interface LlmApi {
     chatLog: ChatLogs,
     functionDefinitions?: FunctionDefinition[],
     options?: LlmOptions
-  ): Promise<ChatMessage | undefined>;
+  ): Promise<ChatCompletionMessage | undefined>;
 }

@@ -40,7 +40,7 @@ export class UpdateFileFunction extends ScriptFunction<UpdateFileFuncParameters>
     }
   }
 
-  onSuccess(agent: Agent<unknown>, params: UpdateFileFuncParameters, rawParams: string | undefined): AgentFunctionResult {
+  onSuccess(toolId: string, agent: Agent<unknown>, params: UpdateFileFuncParameters, rawParams: string | undefined): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -52,7 +52,7 @@ export class UpdateFileFunction extends ScriptFunction<UpdateFileFuncParameters>
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, rawParams),
+        ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
         ChatMessageBuilder.functionCallResult(this.name, "Successfully updated file.")
       ]
     }

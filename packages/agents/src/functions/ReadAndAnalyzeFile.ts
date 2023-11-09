@@ -27,8 +27,8 @@ export class ReadAndAnalyzeFileFunction extends AgentFunctionBase<ReadAndAnalyze
     additionalProperties: false
   }
 
-  buildExecutor(agent: Agent<unknown>): (params: ReadAndAnalyzeFileParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
-    return async (params: ReadAndAnalyzeFileParameters, rawParams?: string): Promise<AgentFunctionResult> => {
+  buildExecutor(agent: Agent<unknown>): (toolId: string, params: ReadAndAnalyzeFileParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
+    return async (toolId: string, params: ReadAndAnalyzeFileParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       const analyzeData = new AnalyzeDataFunction(agent.context.llm, agent.context.chat.tokenizer);
 
       const data = agent.context.workspace.readFileSync(params.path);
@@ -38,7 +38,7 @@ export class ReadAndAnalyzeFileFunction extends AgentFunctionBase<ReadAndAnalyze
       return {
         outputs: [],
         messages: [
-          ChatMessageBuilder.functionCall(this.name, params),
+          ChatMessageBuilder.functionCall(toolId, this.name, params),
           ChatMessageBuilder.functionCallResult(this.name, `File Data Stored in Variable: \${${variable}}\nData Summary:\n\`\`\`\n${summary}\n\`\`\``),
           ChatMessageBuilder.functionCallResult(this.name, `\${${variable}}`)
         ]

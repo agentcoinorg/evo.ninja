@@ -27,8 +27,8 @@ export class ReadAndAnalyzeCSVDataFunction extends AgentFunctionBase<ReadAndAnal
     additionalProperties: false
   }
 
-  buildExecutor(agent: Agent<unknown>): (params: ReadAndAnalyzeCSVDataParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
-    return async (params: ReadAndAnalyzeCSVDataParameters, rawParams?: string): Promise<AgentFunctionResult> => {
+  buildExecutor(agent: Agent<unknown>): (toolId: string, params: ReadAndAnalyzeCSVDataParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
+    return async (toolId: string, params: ReadAndAnalyzeCSVDataParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       const analyzeData = new AnalyzeDataFunction(agent.context.llm, agent.context.chat.tokenizer);
 
       const data = agent.context.workspace.readFileSync(params.path);
@@ -44,7 +44,7 @@ export class ReadAndAnalyzeCSVDataFunction extends AgentFunctionBase<ReadAndAnal
           }
         ],
         messages: [
-          ChatMessageBuilder.functionCall(this.name, params),
+          ChatMessageBuilder.functionCall(toolId, this.name, params),
           ChatMessageBuilder.functionCallResult(this.name, `\${${variable}}`),
           ChatMessageBuilder.functionCallResult(this.name, `Data File Stored in Variable: \${${variable}}\nData Summary:\n\`\`\`\n${summary}\n\`\`\``),
         ]

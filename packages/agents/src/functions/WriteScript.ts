@@ -44,31 +44,27 @@ export class WriteScriptFunction extends AgentFunctionBase<WriteScriptFuncParame
     additionalProperties: false
   };
 
-  buildExecutor({ context }: Agent<unknown>): (params: WriteScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
+  buildExecutor({ context }: Agent<unknown>): (toolId: string, params: WriteScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (
-      params: {
-        namespace: string,
-        description: string,
-        arguments: string,
-        code: string
-      },
+      toolId: string,
+      params: WriteScriptFuncParameters,
       rawParams?: string
     ): Promise<AgentFunctionResult> => {
       if (params.namespace.startsWith("agent.")) {
-        return this.onErrorCannotCreateInAgentNamespace(this.name, params, rawParams, context.variables);
+        return this.onErrorCannotCreateInAgentNamespace(toolId, this.name, params, rawParams, context.variables);
       }
 
       if (this.extractRequires(params.code).some(x => !WriteScriptFunction.allowedLibs.includes(x))) {
-        return this.onErrorCannotRequireLib(this.name, params, rawParams, context.variables);
+        return this.onErrorCannotRequireLib(toolId, this.name, params, rawParams, context.variables);
       }
 
       context.workspace.writeFileSync("index.js", params.code);
 
-      return this.onSuccess(params, rawParams, context.variables);
+      return this.onSuccess(params, rawParams, context.variables, toolId);
     };
   }
 
-  private onSuccess(params: WriteScriptFuncParameters, rawParams: string | undefined, variables: AgentVariables): AgentFunctionResult {
+  private onSuccess(params: WriteScriptFuncParameters, rawParams: string | undefined, variables: AgentVariables, toolId: string): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -78,7 +74,7 @@ export class WriteScriptFunction extends AgentFunctionBase<WriteScriptFuncParame
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, rawParams),
+        ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
         ChatMessageBuilder.functionCallResult(this.name, "Success."),
       ]
     }
@@ -109,7 +105,7 @@ export class WriteScriptFunction extends AgentFunctionBase<WriteScriptFuncParame
     return libraries;
   }
 
-  private onErrorCannotCreateInAgentNamespace(functionName: string, params: WriteScriptFuncParameters, rawParams: string | undefined, variables: AgentVariables) {
+  private onErrorCannotCreateInAgentNamespace(toolId: string, functionName: string, params: WriteScriptFuncParameters, rawParams: string | undefined, variables: AgentVariables) {
     return {
       outputs: [
         {
@@ -119,7 +115,7 @@ export class WriteScriptFunction extends AgentFunctionBase<WriteScriptFuncParame
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(functionName, rawParams),
+        ChatMessageBuilder.functionCall(toolId, functionName, rawParams),
         ChatMessageBuilder.functionCallResult(
           functionName,
           `Failed writing the function.\n` +
@@ -129,7 +125,7 @@ export class WriteScriptFunction extends AgentFunctionBase<WriteScriptFuncParame
     }
   }
 
-  private onErrorCannotRequireLib(functionName: string, params: WriteScriptFuncParameters, rawParams: string | undefined, variables: AgentVariables) {
+  private onErrorCannotRequireLib(toolId: string, functionName: string, params: WriteScriptFuncParameters, rawParams: string | undefined, variables: AgentVariables) {
     return {
       outputs: [
         {
@@ -139,7 +135,7 @@ export class WriteScriptFunction extends AgentFunctionBase<WriteScriptFuncParame
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(functionName, rawParams),
+        ChatMessageBuilder.functionCall(toolId, functionName, rawParams),
         ChatMessageBuilder.functionCallResult(
           functionName,
           `Cannot require libraries other than ${WriteScriptFunction.allowedLibs.join(", ")}.`

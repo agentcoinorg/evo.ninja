@@ -34,6 +34,6 @@ export class CsvAnalystAgent extends Agent {
   }
 
   public override async onFirstRun(args: GoalRunArgs, chat: Chat): Promise<void> {
-    await this.executeFunction(this.understand, args, chat);
+    // await this.executeFunction(this.understand, args, chat);
   }
 }

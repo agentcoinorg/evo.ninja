@@ -1,8 +1,6 @@
 import { AgentContext } from "@/agent-core";
 import { WriteScriptFunction } from "../../functions/WriteScript";
-import { ThinkFunction } from "../../functions/Think";
 import { prompts } from "./prompts";
-import { ReadVariableFunction } from "../../functions/ReadVariable";
 import { Agent, AgentConfig } from "../utils";
 
 export interface ScriptWriterRunArgs {
@@ -19,8 +17,6 @@ export class ScriptWriter extends Agent<ScriptWriterRunArgs> {
       new AgentConfig(
         () => prompts,
         [
-          new ReadVariableFunction(),
-          new ThinkFunction(), 
           writeScriptFn
         ], 
         context.scripts,

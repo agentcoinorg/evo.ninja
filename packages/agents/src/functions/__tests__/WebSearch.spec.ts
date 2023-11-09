@@ -62,7 +62,7 @@ describe("WebSearch function", () => {
     const func = new WebSearchFunction(llm, chat.tokenizer);
     const executor = func.buildExecutor(agent)
 
-    return (params: WebSearchFuncParameters) => executor(params, JSON.stringify(params))
+    return (params: WebSearchFuncParameters) => executor("", params, JSON.stringify(params))
   }
 
   test("Works", async () => {

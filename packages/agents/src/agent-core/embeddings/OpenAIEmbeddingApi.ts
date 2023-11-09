@@ -1,8 +1,9 @@
-import { Configuration, OpenAIApi } from "openai";
 import { EmbeddingApi, EmbeddingCreationResult } from "./EmbeddingApi";
 import { OpenAIError, cleanOpenAIError } from "../utils/openai";
 import { Tokenizer } from "../llm";
 import { splitArray } from "./utils";
+
+import OpenAIApi from "openai";
 import { ILogger } from "@evo-ninja/agent-utils";
 
 export const DEFAULT_ADA_CONFIG = {
@@ -12,7 +13,6 @@ export const DEFAULT_ADA_CONFIG = {
 }
 
 export class OpenAIEmbeddingAPI implements EmbeddingApi {
-  private configuration: Configuration;
   private api: OpenAIApi;
   
   constructor(
@@ -26,10 +26,9 @@ export class OpenAIEmbeddingAPI implements EmbeddingApi {
     } = DEFAULT_ADA_CONFIG,
     private _maxRateLimitRetries: number = 5
   ) {
-    this.configuration = new Configuration({
+    this.api = new OpenAIApi({
       apiKey: this.apiKey
     });
-    this.api = new OpenAIApi(this.configuration);
   }
 
   async createEmbeddings(input: string | string[], tries?: number): Promise<EmbeddingCreationResult[]> {
@@ -40,12 +39,12 @@ export class OpenAIEmbeddingAPI implements EmbeddingApi {
       const batchedInputs = splitArray(inputs, this.modelConfig.maxInputsPerRequest);
 
       const results = await Promise.all(batchedInputs.map(async (inputs) => {
-        const { data } = await this.api.createEmbedding({
+        const { data } = await this.api.embeddings.create({
           model: this.modelConfig.model,
           input: inputs,
         })
 
-        return data.data.map((innerData) => {
+        return data.map((innerData) => {
           return {
             embedding: innerData.embedding,
             input: inputs[innerData.index]

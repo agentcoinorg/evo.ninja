@@ -25,15 +25,15 @@ export class AnalyzeFormattingRequirementsFunction extends LlmAgentFunctionBase<
     additionalProperties: false
   };
 
-  buildExecutor({ context }: Agent<unknown>): (params: AnalyzeFormattingRequirementsParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
-    return async (params: AnalyzeFormattingRequirementsParameters, rawParams?: string): Promise<AgentFunctionResult> => {
+  buildExecutor({ context }: Agent<unknown>): (toolId: string, params: AnalyzeFormattingRequirementsParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
+    return async (toolId: string, params: AnalyzeFormattingRequirementsParameters, rawParams?: string): Promise<AgentFunctionResult> => {
 
       const resp = await this.askLlm(`Given the following user goal, please identify any formatting requirements:\n\`\`\`\n${params.goal}\n\`\`\``);
       
       return {
         outputs: [],
         messages: [
-          ChatMessageBuilder.functionCall(this.name, rawParams),
+          ChatMessageBuilder.functionCall(toolId, this.name, rawParams),
           ChatMessageBuilder.functionCallResult(this.name, resp)
         ]
       };

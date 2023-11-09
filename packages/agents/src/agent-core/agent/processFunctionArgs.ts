@@ -46,7 +46,7 @@ export function processFunctionAndArgs<TContext>(
   }
 
   // Find the agent function
-  const func = agentFunctions.find((f) => f.definition.name === name);
+  const func = agentFunctions.find((f) => f.definition.function.name === name);
   if (!func) {
     return ResultErr(FUNCTION_NOT_FOUND(name));
   }
@@ -80,15 +80,16 @@ export function processFunctionAndArgs<TContext>(
 }
 
 export const executeAgentFunction = async <TContext>(
+  toolId: string,
   [params, func]: [unknown, AgentFunction<TContext>],
   rawParams: string | undefined,
   context: TContext
 ): Promise<ExecuteAgentFunctionResult> => {
   const executor = func.buildExecutor(context);
   return {
-    result: await executor(params, rawParams),
+    result: await executor(toolId, params, rawParams),
     functionCalled: {
-      name: func.definition.name,
+      name: func.definition.function.name,
       params: rawParams,
     },
   };

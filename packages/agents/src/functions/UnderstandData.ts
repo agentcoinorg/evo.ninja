@@ -24,8 +24,8 @@ export class UnderstandDataFunction extends AgentFunctionBase<UnderstandDataPara
     additionalProperties: false
   }
 
-  buildExecutor(agent: Agent<unknown>): (params: UnderstandDataParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
-    return async (params: UnderstandDataParameters, rawParams?: string): Promise<AgentFunctionResult> => {
+  buildExecutor(agent: Agent<unknown>): (toolId: string, params: UnderstandDataParameters, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
+    return async (toolId: string, params: UnderstandDataParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       const readDirectory = new ReadDirectoryFunction(
         agent.context.scripts
       ).buildExecutor(agent);
@@ -35,14 +35,14 @@ export class UnderstandDataFunction extends AgentFunctionBase<UnderstandDataPara
       // - read directory
       // - read and analyze all files
       const results: AgentFunctionResult[] = await Promise.all([
-        readDirectory({ path: "./" }),
-        ...this.readAndAnalyzeFiles(agent, params.goal)
+        readDirectory(toolId, { path: "./" }),
+        ...this.readAndAnalyzeFiles(agent, params.goal, toolId)
       ]);
 
       return {
         outputs: results.flatMap((x) => x.outputs),
         messages: [
-          ChatMessageBuilder.functionCall(this.name, params),
+          ChatMessageBuilder.functionCall(toolId, this.name, params),
           ChatMessageBuilder.functionCallResult(this.name, "Understanding data..."),
           ...results.flatMap((x) => x.messages)
         ]
@@ -50,14 +50,14 @@ export class UnderstandDataFunction extends AgentFunctionBase<UnderstandDataPara
     }
   }
 
-  readAndAnalyzeFiles(agent: Agent<unknown>, goal: string): Promise<AgentFunctionResult>[] {
+  readAndAnalyzeFiles(agent: Agent<unknown>, goal: string, toolId: string): Promise<AgentFunctionResult>[] {
     const workspace = agent.context.workspace;
     const files = workspace.readdirSync("./")
       .filter((x) => x.type === "file");
 
     const readAndAnalyzeCSVData = new ReadAndAnalyzeCSVDataFunction().buildExecutor(agent);
 
-    const analyzes = files.map((file) => readAndAnalyzeCSVData({
+    const analyzes = files.map((file) => readAndAnalyzeCSVData(toolId, {
       path: file.name,
       question: goal
     }));
@@ -74,7 +74,7 @@ export class UnderstandDataFunction extends AgentFunctionBase<UnderstandDataPara
         // Permutations of the pair
         const csvI = csvFiles[i].name;
         const csvJ = csvFiles[j].name;
-        calls.push(csvJoinableColumns({ csv1: csvI, csv2: csvJ }));
+        calls.push(csvJoinableColumns(toolId, { csv1: csvI, csv2: csvJ }));
       }
     }
 

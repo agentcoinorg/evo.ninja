@@ -23,7 +23,7 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
     return script.description;
   }
 
-  onSuccess(agent: Agent, params: any, rawParams: string | undefined, result: string): AgentFunctionResult {
+  onSuccess(toolId: string, agent: Agent, params: any, rawParams: string | undefined, result: string): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -33,14 +33,14 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, rawParams || params),
+        ChatMessageBuilder.functionCall(toolId, this.name, rawParams || params),
         ChatMessageBuilder.functionCallResult(this.name, result)
       ],
       storeInVariable: this.storeInVariable
     }
   }
 
-  onFailure(agent: Agent, params: any, rawParams: string | undefined, error: string): AgentFunctionResult {
+  onFailure(toolId: string, agent: Agent, params: any, rawParams: string | undefined, error: string): AgentFunctionResult {
     return {
       outputs: [
         {
@@ -50,20 +50,20 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
         }
       ],
       messages: [
-        ChatMessageBuilder.functionCall(this.name, rawParams || JSON.stringify(params)),
+        ChatMessageBuilder.functionCall(toolId, this.name, rawParams || JSON.stringify(params)),
         ChatMessageBuilder.functionCallResult(this.name, `Error: ${error}`)
       ]
     }
   }
 
-  buildExecutor(agent: Agent<unknown>): (params: TParams, rawParams?: string) => Promise<AgentFunctionResult> {
+  buildExecutor(agent: Agent<unknown>): (toolId: string, params: TParams, rawParams?: string) => Promise<AgentFunctionResult> {
     const { context } = agent;
-    return async (params: any, rawParams?: string): Promise<AgentFunctionResult> => {
+    return async (toolId: string, params: any, rawParams?: string): Promise<AgentFunctionResult> => {
       const scriptName = this.name.split("_").join(".");
       const script = context.scripts.getScriptByName(scriptName);
 
       if (!script) {
-        return this.onFailure(agent, params, rawParams, `Unable to find the script ${scriptName}`);
+        return this.onFailure(toolId, agent, params, rawParams, `Unable to find the script ${scriptName}`);
       }
 
       const globals: JsEngine_GlobalVar[] = Object.entries(params).map(
@@ -84,15 +84,15 @@ export abstract class ScriptFunction<TParams> extends AgentFunctionBase<TParams>
           const jsPromiseOutput = context.client.jsPromiseOutput;
           if (jsPromiseOutput.ok) {
             const result = typeof jsPromiseOutput.value !== "string" ? JSON.stringify(jsPromiseOutput.value) : jsPromiseOutput.value;
-            return this.onSuccess(agent, params, rawParams, result);
+            return this.onSuccess(toolId, agent, params, rawParams, result);
           } else {
-            return this.onFailure(agent, params, rawParams, jsPromiseOutput.error.message);
+            return this.onFailure(toolId, agent, params, rawParams, jsPromiseOutput.error.message);
           }
         } else {
-          return this.onFailure(agent, params, rawParams, result.value.error.toString());
+          return this.onFailure(toolId, agent, params, rawParams, result.value.error.toString());
         }
       } else {
-        return this.onFailure(agent, params, rawParams, result.error?.toString() ?? "Unknown error");
+        return this.onFailure(toolId, agent, params, rawParams, result.error?.toString() ?? "Unknown error");
       }
     };
   }
