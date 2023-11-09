@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef } from "react";
+import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef, useCallback } from "react";
 import { Evo } from "@evo-ninja/agents";
 import ReactMarkdown from "react-markdown";
 import FileSaver from "file-saver";
@@ -6,11 +6,10 @@ import FileSaver from "file-saver";
 import { trackMessageSent, trackThumbsFeedback} from './googleAnalytics';
 import { ExamplePrompt, examplePrompts } from "../examplePrompts";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
+import { faDownload, faQuestion, faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
 import { faThumbsUp, faThumbsDown, faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 import { InMemoryFile } from "@nerfzael/memory-fs";
 
-import MenuIcon from "./MenuIcon";
 import clsx from "clsx";
 import SidebarIcon from "./SidebarIcon";
 
@@ -48,7 +47,8 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
     localStorage.getItem('trackUser') === 'true'
   );
   const [clickedMsgIndex, setClickedMsgIndex] = useState<number | null>(null);
-
+  const listContainerRef = useRef<HTMLDivElement | null>(null);
+  const [isAtBottom, setIsAtBottom] = useState(true);
   const [hasUpvoted, setHasUpvoted] = useState<boolean>(false);
   const [hasDownvoted, setHasDownvoted] = useState<boolean>(false);
   const [showEvoNetPopup, setShowEvoNetPopup] = useState<boolean>(false);
@@ -81,7 +81,8 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
 
       // Create a new iteration thread
       if (!evoItr) {
-        const goal = messages.filter((msg) => msg.user === "user")[0].title;
+        const userMsgs = messages.filter((msg) => msg.user === "user");
+        const goal = userMsgs[userMsgs.length - 1].title;
         setEvoItr(evo.run({ goal }));
         return Promise.resolve();
       }
@@ -105,6 +106,8 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
           })
           setEvoRunning(false);
           setSending(false);
+          setEvoItr(undefined);
+          evo.reset();
           break
         }
 
@@ -159,9 +162,11 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
     setMessage(prompt.prompt);
     handleSend(prompt.prompt);
   };
+
   const handleStart = async () => {
     handleSend();
   }
+
   const handleSend = async (newMessage?: string) => {
     onMessage({
       title: newMessage || message,
@@ -232,17 +237,55 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
     FileSaver.saveAs(blob, `evo-ninja-${dateTimeStamp}.md`)
   };
 
+  const handleScroll = useCallback(() => {
+    // Detect if the user is at the bottom of the list
+    const container = listContainerRef.current;
+    if (container) {
+      const isScrolledToBottom = container.scrollHeight - container.scrollTop <= container.clientHeight;
+      setIsAtBottom(isScrolledToBottom);
+    }
+  }, []);
+
+  useEffect(() => {
+    const container = listContainerRef.current;
+    if (container) {
+      // Add scroll event listener
+      container.addEventListener('scroll', handleScroll);
+    }
+
+    // Clean up listener
+    return () => {
+      if (container) {
+        container.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [handleScroll]);
+
+  useEffect(() => {
+    // If the user is at the bottom, scroll to the new item
+    if (isAtBottom) {
+      listContainerRef.current?.scrollTo({
+        top: listContainerRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  }, [messages, isAtBottom]);
+
   return (
     <div className="flex h-full flex-col bg-[#0A0A0A] text-white">
       <div className="flex justify-between items-center p-4 border-b-2 border-neutral-700">
         <div className="h-14 p-4 text-lg text-white cursor-pointer hover:opacity-100 opacity-80 transition-all" onClick={onSidebarToggleClick}>
           { sidebarOpen ? <></>: <SidebarIcon /> }
         </div>
-        <FontAwesomeIcon className="cursor-pointer text-2xl text-orange-600 transition-colors hover:text-orange-700" icon={faMarkdown} onClick={exportChatHistory} />
+        <FontAwesomeIcon className="cursor-pointer" icon={faDownload} onClick={exportChatHistory} />
       </div>
-      <div className="flex-1 overflow-auto p-5 text-left">
+      <div
+        ref={listContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-auto p-5 text-left items-center"
+      >
         {messages.map((msg, index) => (
-          <div key={index} className={`${msg.user}`}>
+          <div key={index} className={`${msg.user} m-auto self-center w-[100%] max-w-[56rem]`}>
             {index === 0 || messages[index - 1].user !== msg.user ? (
               <div className="SenderName">{msg.user.toUpperCase()}</div>
             ) : null}
@@ -251,7 +294,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
                 "my-1 rounded border border-transparent px-4 py-2.5 transition-all hover:border-orange-600",
                 msg.user === "user" ? "bg-blue-500": "bg-neutral-900",
                 clickedMsgIndex === index ? "border-orange-600" : "")
-              } 
+              }
               onClick={() => setClickedMsgIndex(index === clickedMsgIndex ? null : index)}
             >
               <div className="prose prose-invert">
@@ -290,11 +333,11 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
         )}
       </div>
       {showPrompts && (
-        <div className="grid w-full grid-rows-2 p-2.5 py-16">
+        <div className="grid w-full grid-rows-2 p-2.5 py-16 self-center w-[100%] max-w-[56rem]">
           {examplePrompts.map((prompt, index) => (
             <div 
               key={index} 
-              className="m-1 cursor-pointer rounded-xl border border-neutral-500 bg-neutral-800 p-2.5 text-left text-xs text-neutral-50 transition-all hover:border-red-500" 
+              className="m-1 cursor-pointer rounded-xl border border-neutral-500 bg-neutral-800 p-2.5 text-left text-xs text-neutral-50 transition-all hover:border-orange-500" 
               onClick={() => handleSamplePromptClick(prompt)}
             >
               {prompt.prompt}
@@ -302,12 +345,12 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
           ))}
         </div>
       )}
-      <div className="flex items-center justify-center gap-4 p-4 border-t-2 border-neutral-700">
+      <div className="flex items-center justify-center gap-4 p-4 mb-4 self-center w-[100%] max-w-[56rem]">
         {showDisclaimer && (
-          <div className="absolute bottom-0 z-50 flex w-4/5 items-center justify-around rounded-t-lg border-2 border-red-500 bg-black p-2.5 text-center text-xs text-white">
+          <div className="absolute bottom-0 z-50 flex w-4/5 items-center justify-around rounded-t-lg border-2 border-orange-600 bg-black p-2.5 text-center text-xs text-white self-center w-[100%] max-w-[56rem]">
             🧠 Hey there! Mind sharing your prompts to help make Evo even better?
             <div className="flex gap-2.5">
-              <span className="cursor-pointer px-5 py-2.5 font-bold text-red-500" onClick={handleCloseDisclaimer}>Accept</span>
+              <span className="cursor-pointer px-5 py-2.5 font-bold text-orange-500" onClick={handleCloseDisclaimer}>Accept</span>
               <span className="cursor-pointer px-5 py-2.5 font-bold text-white" onClick={handleCloseWithoutTracking}>Decline</span>
             </div>
           </div>
@@ -325,7 +368,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
           <>
             {
               !paused && (
-                <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-700" onClick={handlePause} disabled={!evoRunning || paused}>
+                <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" onClick={handlePause} disabled={!evoRunning || paused}>
                 Pause
                 </button>
               )
@@ -334,13 +377,13 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
               paused && (
                 <>
                   {!stopped && (
-                     <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-700" disabled={true}>
+                     <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" disabled={true}>
                      Pausing
                      </button>
                   )}
 
                   {stopped && (
-                     <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-700" onClick={handleContinue} disabled={evoRunning && !paused}>
+                     <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" onClick={handleContinue} disabled={evoRunning && !paused}>
                      Paused
                      </button>
                   )}
@@ -351,9 +394,9 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
         )}
 
         {evoRunning ? (
-          <div className="h-9 w-9 animate-spin rounded-full border-4 border-black/10 border-l-red-500" />
+          <div className="h-9 w-9 animate-spin rounded-full border-4 border-black/10 border-l-orange-600" />
         ) : (
-          <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-700" onClick={handleStart} disabled={evoRunning || sending}>
+          <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" onClick={handleStart} disabled={evoRunning || sending}>
             Start
           </button>
         )}
@@ -374,6 +417,14 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
           </div>
         </div>
       )}
+      <a
+        className="cursor-pointer fixed bottom-0 right-0 mx-4 my-2"
+        href="https://discord.gg/r3rwh69cCa"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <FontAwesomeIcon icon={faQuestionCircle} title="Questions?" />
+      </a>
     </div>
   );
 };
