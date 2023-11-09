@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef } from "react";
+import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef, useCallback } from "react";
 import { Evo } from "@evo-ninja/agents";
 import ReactMarkdown from "react-markdown";
 import FileSaver from "file-saver";
@@ -47,7 +47,8 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
     localStorage.getItem('trackUser') === 'true'
   );
   const [clickedMsgIndex, setClickedMsgIndex] = useState<number | null>(null);
-
+  const listContainerRef = useRef<HTMLDivElement | null>(null);
+  const [isAtBottom, setIsAtBottom] = useState(true);
   const [hasUpvoted, setHasUpvoted] = useState<boolean>(false);
   const [hasDownvoted, setHasDownvoted] = useState<boolean>(false);
   const [showEvoNetPopup, setShowEvoNetPopup] = useState<boolean>(false);
@@ -161,9 +162,11 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
     setMessage(prompt.prompt);
     handleSend(prompt.prompt);
   };
+
   const handleStart = async () => {
     handleSend();
   }
+
   const handleSend = async (newMessage?: string) => {
     onMessage({
       title: newMessage || message,
@@ -234,6 +237,40 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
     FileSaver.saveAs(blob, `evo-ninja-${dateTimeStamp}.md`)
   };
 
+  const handleScroll = useCallback(() => {
+    // Detect if the user is at the bottom of the list
+    const container = listContainerRef.current;
+    if (container) {
+      const isScrolledToBottom = container.scrollHeight - container.scrollTop <= container.clientHeight;
+      setIsAtBottom(isScrolledToBottom);
+    }
+  }, []);
+
+  useEffect(() => {
+    const container = listContainerRef.current;
+    if (container) {
+      // Add scroll event listener
+      container.addEventListener('scroll', handleScroll);
+    }
+
+    // Clean up listener
+    return () => {
+      if (container) {
+        container.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [handleScroll]);
+
+  useEffect(() => {
+    // If the user is at the bottom, scroll to the new item
+    if (isAtBottom) {
+      listContainerRef.current?.scrollTo({
+        top: listContainerRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  }, [messages, isAtBottom]);
+
   return (
     <div className="flex h-full flex-col bg-[#0A0A0A] text-white">
       <div className="flex justify-between items-center p-4 border-b-2 border-neutral-700">
@@ -242,7 +279,11 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
         </div>
         <FontAwesomeIcon className="cursor-pointer" icon={faDownload} onClick={exportChatHistory} />
       </div>
-      <div className="flex-1 overflow-auto p-5 text-left items-center">
+      <div
+        ref={listContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-auto p-5 text-left items-center"
+      >
         {messages.map((msg, index) => (
           <div key={index} className={`${msg.user} m-auto self-center w-[100%] max-w-[56rem]`}>
             {index === 0 || messages[index - 1].user !== msg.user ? (
