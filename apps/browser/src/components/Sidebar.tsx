@@ -12,7 +12,6 @@ import File from "./File";
 import { downloadFilesAsZip } from "../sys/file/downloadFilesAsZip";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import CloseIcon from "./CloseIcon";
-import MenuIcon from "./MenuIcon";
 import SidebarIcon from "./SidebarIcon";
 
 export interface SidebarProps {

@@ -6,7 +6,7 @@ import FileSaver from "file-saver";
 import { trackMessageSent, trackThumbsFeedback} from './googleAnalytics';
 import { ExamplePrompt, examplePrompts } from "../examplePrompts";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
+import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import { faThumbsUp, faThumbsDown, faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 import { InMemoryFile } from "@nerfzael/memory-fs";
 
@@ -81,7 +81,8 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
 
       // Create a new iteration thread
       if (!evoItr) {
-        const goal = messages.filter((msg) => msg.user === "user")[0].title;
+        const userMsgs = messages.filter((msg) => msg.user === "user");
+        const goal = userMsgs[userMsgs.length - 1].title;
         setEvoItr(evo.run({ goal }));
         return Promise.resolve();
       }
@@ -105,6 +106,8 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
           })
           setEvoRunning(false);
           setSending(false);
+          setEvoItr(undefined);
+          evo.reset();
           break
         }
 
@@ -238,11 +241,11 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
         <div className="h-14 p-4 text-lg text-white cursor-pointer hover:opacity-100 opacity-80 transition-all" onClick={onSidebarToggleClick}>
           { sidebarOpen ? <></>: <SidebarIcon /> }
         </div>
-        <FontAwesomeIcon className="cursor-pointer text-2xl text-orange-600 transition-colors hover:text-orange-700" icon={faMarkdown} onClick={exportChatHistory} />
+        <FontAwesomeIcon className="cursor-pointer" icon={faDownload} onClick={exportChatHistory} />
       </div>
-      <div className="flex-1 overflow-auto p-5 text-left">
+      <div className="flex-1 overflow-auto p-5 text-left items-center">
         {messages.map((msg, index) => (
-          <div key={index} className={`${msg.user}`}>
+          <div key={index} className={`${msg.user} m-auto self-center w-[100%] max-w-[56rem]`}>
             {index === 0 || messages[index - 1].user !== msg.user ? (
               <div className="SenderName">{msg.user.toUpperCase()}</div>
             ) : null}
@@ -290,7 +293,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
         )}
       </div>
       {showPrompts && (
-        <div className="grid w-full grid-rows-2 p-2.5 py-16">
+        <div className="grid w-full grid-rows-2 p-2.5 py-16 self-center w-[100%] max-w-[56rem]">
           {examplePrompts.map((prompt, index) => (
             <div 
               key={index} 
@@ -302,7 +305,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
           ))}
         </div>
       )}
-      <div className="flex items-center justify-center gap-4 p-4 border-t-2 border-neutral-700">
+      <div className="flex items-center justify-center gap-4 p-4 self-center w-[100%] max-w-[56rem]">
         {showDisclaimer && (
           <div className="absolute bottom-0 z-50 flex w-4/5 items-center justify-around rounded-t-lg border-2 border-red-500 bg-black p-2.5 text-center text-xs text-white">
             🧠 Hey there! Mind sharing your prompts to help make Evo even better?
