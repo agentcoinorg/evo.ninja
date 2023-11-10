@@ -12,7 +12,6 @@ import File from "./File";
 import { downloadFilesAsZip } from "../sys/file/downloadFilesAsZip";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import CloseIcon from "./CloseIcon";
-import MenuIcon from "./MenuIcon";
 import SidebarIcon from "./SidebarIcon";
 
 export interface SidebarProps {
@@ -69,7 +68,7 @@ const Sidebar = ({
           </div>
           {userFiles.length !== 0 && (
             <button
-              className="my-4 inline-block h-9 cursor-pointer rounded-xl border-none bg-orange-600 px-6 py-2.5 text-center text-neutral-900 shadow-md outline-none transition-all hover:bg-orange-700"
+              className="my-4 inline-block h-9 cursor-pointer rounded-xl border-none bg-orange-600 px-6 py-2.5 text-center text-neutral-900 shadow-md outline-none transition-all hover:bg-orange-500"
               title="Download"
               onClick={downloadUserFiles}
             >

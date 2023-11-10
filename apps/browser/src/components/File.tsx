@@ -27,13 +27,13 @@ const File = ({ file }: { file: FileType }) => {
   return (
     <>
       <div
-        className="my-2.5 flex w-auto cursor-pointer items-center justify-between rounded border-2 border-neutral-500 bg-neutral-900 p-2.5 hover:bg-orange-700"
+        className="my-2.5 flex w-auto cursor-pointer items-center justify-between rounded border-2 border-neutral-500 bg-neutral-900 p-2.5 hover:border-orange-600"
         onClick={handleClick}
       >
         {file.path}
       </div>
       <Modal
-        className="fixed left-1/2 top-1/2 box-border inline-block h-3/4 w-3/4 -translate-x-1/2 -translate-y-1/2 overflow-y-scroll break-words break-all border-2 border-neutral-700 bg-neutral-900 p-8 text-neutral-100 outline-none"
+        className="fixed left-1/2 top-1/2 box-border inline-block h-3/4 w-3/4 -translate-x-1/2 -translate-y-1/2 overflow-y-scroll break-words break-all border-2 border-neutral-600 bg-neutral-900 p-8 text-neutral-100 outline-none"
         isOpen={showContent}
         onRequestClose={handleClose}
         contentLabel="File Content"
@@ -45,7 +45,7 @@ const File = ({ file }: { file: FileType }) => {
         }}
       >
         <button
-          className="inline-block h-12 w-24 cursor-pointer rounded-xl border-none bg-orange-600 px-6 py-2.5 text-center text-neutral-900 shadow-md outline-none transition-all hover:bg-orange-700"
+          className="inline-block h-12 w-24 cursor-pointer rounded-xl border-none bg-orange-600 px-6 py-2.5 text-center text-neutral-900 shadow-md outline-none transition-all hover:bg-orange-500"
           onClick={handleClose}
         >
           Close
