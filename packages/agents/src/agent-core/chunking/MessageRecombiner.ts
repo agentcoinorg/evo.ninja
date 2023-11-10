@@ -127,7 +127,7 @@ const tryGetFunctionMessagePair = (
 ): ChunkIdx | undefined => {
   const msg = JSON.parse(chunk.json) as ChatMessage;
 
-  if ((msg.role === "assistant" && msg.function_call) || msg.role === "function") {
+  if ((msg.role === "assistant" && "function_call" in msg) || msg.role === "function") {
     // Ensure function call + results are always added together.
     // We must traverse the chunk array to find the nearest neighbor
     const direction = msg.role === "assistant" ? 1 : -1;

@@ -71,7 +71,7 @@ export class AnalyzeDataFunction extends LlmAgentFunctionBase<AnalyzeDataParamet
       .line("BE VERY TERSE IN YOUR RESPONSE.");
 
     return await this.askLlm(prompt.toString(), {
-      model: "gpt-3.5-turbo-16k-0613",
+      model: "gpt-3.5-turbo-16k",
       maxResponseTokens: 100
     });
   }

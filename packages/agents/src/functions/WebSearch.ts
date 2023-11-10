@@ -105,14 +105,14 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         { queries: [query] },
         analysisFromChunks,
         rawParams,
-        context.variables
+        context.variables,
       );
     } catch (err) {
       return this.onError(
         { queries: [query] },
         err.toString(),
         rawParams,
-        context.variables
+        context.variables,
       );
     }
   }
@@ -121,7 +121,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
     params: WebSearchFuncParameters,
     result: string,
     rawParams: string | undefined,
-    variables: AgentVariables
+    variables: AgentVariables,
   ): AgentFunctionResult {
     return {
       outputs: [
@@ -155,7 +155,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
     params: WebSearchFuncParameters,
     error: string,
     rawParams: string | undefined,
-    variables: AgentVariables
+    variables: AgentVariables,
   ) {
     return {
       outputs: [

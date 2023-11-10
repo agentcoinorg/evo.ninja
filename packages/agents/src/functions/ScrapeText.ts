@@ -26,7 +26,7 @@ export class ScrapeTextFunction extends AgentFunctionBase<{ url: string }> {
     additionalProperties: false
   };
 
-  buildExecutor(agent: Agent<unknown>): (params: { url: string; }, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
+  buildExecutor(_: Agent<unknown>): (params: { url: string; }, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
     return async (
       params: ScrapeTextFuncParameters,
       rawParams?: string
@@ -37,13 +37,13 @@ export class ScrapeTextFunction extends AgentFunctionBase<{ url: string }> {
         return this.onSuccess(
           params,
           JSON.stringify(response),
-          rawParams
+          rawParams,
         );
       } catch (err) {
         return this.onError(
           params,
           err.toString(),
-          rawParams
+          rawParams,
         );
       }
     };
@@ -86,7 +86,7 @@ export class ScrapeTextFunction extends AgentFunctionBase<{ url: string }> {
   private onSuccess(
     params: ScrapeTextFuncParameters,
     result: string,
-    rawParams: string | undefined
+    rawParams: string | undefined,
   ): AgentFunctionResult {
     return {
       outputs: [
@@ -119,7 +119,7 @@ export class ScrapeTextFunction extends AgentFunctionBase<{ url: string }> {
   private onError(
     params: ScrapeTextFuncParameters,
     error: string,
-    rawParams: string | undefined
+    rawParams: string | undefined,
   ) {
     return {
       outputs: [

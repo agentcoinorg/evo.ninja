@@ -46,12 +46,7 @@ export class WriteScriptFunction extends AgentFunctionBase<WriteScriptFuncParame
 
   buildExecutor({ context }: Agent<unknown>): (params: WriteScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (
-      params: {
-        namespace: string,
-        description: string,
-        arguments: string,
-        code: string
-      },
+      params: WriteScriptFuncParameters,
       rawParams?: string
     ): Promise<AgentFunctionResult> => {
       if (params.namespace.startsWith("agent.")) {

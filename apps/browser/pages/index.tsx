@@ -140,7 +140,7 @@ function Dojo() {
 
       const env = new Env({
         OPENAI_API_KEY: dojoConfig.openAiApiKey as string,
-        GPT_MODEL: "gpt-4-0613",
+        GPT_MODEL: "gpt-4" as LlmModel,
         CONTEXT_WINDOW_TOKENS: "8000",
         MAX_RESPONSE_TOKENS: "2000",
       });

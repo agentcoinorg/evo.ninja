@@ -1,3 +1,4 @@
+import { ChatCompletionMessage } from "openai/resources";
 import { DebugLog } from "./DebugLog";
 import { Timer } from "./Timer";
 
@@ -25,7 +26,7 @@ export class DebugLlmApi implements LlmApi {
     chatLogs: ChatLogs,
     functionDefinitions: any[],
     options?: LlmOptions | undefined
-  ): Promise<ChatMessage | undefined> {
+  ): Promise<ChatCompletionMessage | undefined> {
     const time = new Timer();
     time.start();
 

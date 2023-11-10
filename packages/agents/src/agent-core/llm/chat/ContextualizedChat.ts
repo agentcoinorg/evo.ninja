@@ -189,8 +189,8 @@ export class ContextualizedChat {
 
     // If the message is a function call or result,
     // store the first chunk's text so we can easily retrieve it
-    if (message.role === "function" || message.function_call) {
-      this._functionCallResultFirstChunks[startChunkIdx] = {
+    if (message.role === "function" || "function_call" in message) {
+        this._functionCallResultFirstChunks[startChunkIdx] = {
         text: newChunks[0],
         metadata: { index: startChunkIdx }
       };
