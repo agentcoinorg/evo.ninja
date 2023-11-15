@@ -24,6 +24,7 @@ import {
 import { createInBrowserScripts } from "../src/scripts";
 import WelcomeModal, { WELCOME_MODAL_SEEN_STORAGE_KEY } from "../src/components/WelcomeModal";
 import { BrowserLogger } from "../src/sys/logger";
+import { checkLlmModel } from "../src/checkLlmModel";
 
 function Dojo() {
   const [dojoConfig, setDojoConfig] = useState<{
@@ -117,65 +118,78 @@ function Dojo() {
   };
 
   useEffect(() => {
-    try {
-      if (!dojoConfig.loaded || !dojoConfig.complete) {
-        return;
-      }
-      setDojoError(undefined);
+    (async () => {
+      try {
+        if (!dojoConfig.loaded || !dojoConfig.complete) {
+          return;
+        }
+        setDojoError(undefined);
 
-      const browserLogger = new BrowserLogger({
-        onLog: (message: string) => {
-          onMessage({
-            user: "evo",
-            title: message,
-          });
-        },
-      });
-      const logger = new Logger([browserLogger, new ConsoleLogger()], {
-        promptUser: () => Promise.resolve("N/A"),
-      });
+        const browserLogger = new BrowserLogger({
+          onLog: (message: string) => {
+            onMessage({
+              user: "evo",
+              title: message,
+            });
+          },
+        });
+        const logger = new Logger([browserLogger, new ConsoleLogger()], {
+          promptUser: () => Promise.resolve("N/A"),
+        });
 
-      const scriptsWorkspace = createInBrowserScripts();
-      const scripts = new Scripts(scriptsWorkspace);
+        const scriptsWorkspace = createInBrowserScripts();
+        const scripts = new Scripts(scriptsWorkspace);
 
-      const env = new Env({
-        OPENAI_API_KEY: dojoConfig.openAiApiKey as string,
-        GPT_MODEL: "gpt-4" as LlmModel,
-        CONTEXT_WINDOW_TOKENS: "8000",
-        MAX_RESPONSE_TOKENS: "2000",
-      });
+        // Point by default to GPT-4 unless the given api key's account doesn't support it
+        let model = "gpt-4"
+        try {
+          model = await checkLlmModel(dojoConfig.openAiApiKey as string, model);
+        } catch (e: any) {
+          if (e.message.includes("Incorrect API key provided")) {
+            setDojoError("Open AI API key is not correct. Please make sure it has the correct format")
+            return
+          }
+        }
 
-      const llm = new OpenAI(
-        env.OPENAI_API_KEY,
-        env.GPT_MODEL as LlmModel,
-        env.CONTEXT_WINDOW_TOKENS,
-        env.MAX_RESPONSE_TOKENS,
-        logger
-      );
+        const env = new Env({
+          OPENAI_API_KEY: dojoConfig.openAiApiKey as string,
+          GPT_MODEL: model,
+          CONTEXT_WINDOW_TOKENS: "8000",
+          MAX_RESPONSE_TOKENS: "2000",
+        });
 
-      const userWorkspace = new InMemoryWorkspace();
-      setUserWorkspace(userWorkspace);
+        const llm = new OpenAI(
+          env.OPENAI_API_KEY,
+          env.GPT_MODEL as LlmModel,
+          env.CONTEXT_WINDOW_TOKENS,
+          env.MAX_RESPONSE_TOKENS,
+          logger
+        );
 
-      const internals = new SubWorkspace(".evo", userWorkspace);
+        const userWorkspace = new InMemoryWorkspace();
+        setUserWorkspace(userWorkspace);
 
-      const chat = new EvoChat(cl100k_base);
+        const internals = new SubWorkspace(".evo", userWorkspace);
 
-      setEvo(
-        new Evo(
-          new AgentContext(
-            llm,
-            chat,
-            logger,
-            userWorkspace,
-            internals,
-            env,
-            scripts
+        const chat = new EvoChat(cl100k_base);
+
+        setEvo(
+          new Evo(
+            new AgentContext(
+              llm,
+              chat,
+              logger,
+              userWorkspace,
+              internals,
+              env,
+              scripts
+            )
           )
-        )
-      );
-    } catch (err) {
-      setDojoError(err);
-    }
+        );
+      } catch (err) {
+        setDojoError(err);
+      }
+    })();
   }, [dojoConfig]);
 
   return (
@@ -206,7 +220,7 @@ function Dojo() {
           "max-lg:hidden": sidebarOpen,
         })}>
           <>
-            {evo && (
+            {dojoError ? <DojoError error={dojoError} /> : evo && (
               <Chat
                 evo={evo}
                 onMessage={onMessage}
@@ -219,7 +233,6 @@ function Dojo() {
                 onUploadFiles={setUploadedFiles}
               />
             )}
-            {dojoError && <DojoError error={dojoError} />}
           </>
         </div>
       </div>
