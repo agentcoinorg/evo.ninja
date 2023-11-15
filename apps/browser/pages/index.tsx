@@ -17,7 +17,7 @@ import {
   ConsoleLogger,
   Scripts,
   Env,
-  OpenAI,
+  OpenAIChatCompletion,
   LlmModel,
   Chat as EvoChat,
 } from "@evo-ninja/agents";
@@ -145,7 +145,7 @@ function Dojo() {
         MAX_RESPONSE_TOKENS: "2000",
       });
 
-      const llm = new OpenAI(
+      const llm = new OpenAIChatCompletion(
         env.OPENAI_API_KEY,
         env.GPT_MODEL as LlmModel,
         env.CONTEXT_WINDOW_TOKENS,

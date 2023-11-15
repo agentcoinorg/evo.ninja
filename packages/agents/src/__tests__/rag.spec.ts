@@ -1,10 +1,10 @@
 import {
-  OpenAI,
   Chat,
   LlmApi,
   LlmQuery,
   tokensToChars,
   Rag,
+  OpenAIChatCompletion,
 } from "@/agent-core";
 import dotenv from "dotenv";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
@@ -42,7 +42,7 @@ describe('LLM Test Suite', () => {
       process.env as Record<string, string>
     );
 
-    const llm = new OpenAI(
+    const llm = new OpenAIChatCompletion(
       env.OPENAI_API_KEY,
       env.GPT_MODEL as LlmModel,
       env.CONTEXT_WINDOW_TOKENS,

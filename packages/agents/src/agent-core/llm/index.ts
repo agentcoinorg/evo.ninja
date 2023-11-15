@@ -1,4 +1,4 @@
 export * from "./LlmApi";
-export * from "./OpenAI";
+export * from "./ChatCompletion";
 export * from "./chat";
 export * from "./query";
