@@ -12,14 +12,15 @@
     "@evo-ninja/agent-utils": "~0.1.0",
     "@polywrap/result": "~0.12.0",
     "cheerio": "^1.0.0-rc.12",
+    "fetch-blob": "^4.0.0",
     "json5": "^2.2.3",
     "openai": "4.16.1",
     "turndown": "7.1.2"
   },
   "devDependencies": {
     "@evo-ninja/agent-utils-fs": "~0.1.0",
-    "@rollup/plugin-typescript": "^11.1.2",
     "@rollup/plugin-json": "^6.0.1",
+    "@rollup/plugin-typescript": "^11.1.2",
     "@types/jest": "29.5.0",
     "@types/turndown": "5.0.3",
     "gpt-tokenizer": "~2.1.1",
