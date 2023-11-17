@@ -1,7 +1,7 @@
 import {
-  OpenAI,
   Chat,
   LlmApi,
+  OpenAIChatCompletion,
 } from "@/agent-core";
 import * as rimraf from "rimraf";
 import dotenv from "dotenv";
@@ -42,7 +42,7 @@ describe('Dev Agent Test Suite', () => {
       },
     });
 
-    const llm: LlmApi = new OpenAI(
+    const llm: LlmApi = new OpenAIChatCompletion(
       env.OPENAI_API_KEY,
       env.GPT_MODEL as LlmModel,
       env.CONTEXT_WINDOW_TOKENS,

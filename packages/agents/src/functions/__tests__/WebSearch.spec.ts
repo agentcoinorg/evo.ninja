@@ -4,7 +4,7 @@ import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import { WebSearchFuncParameters, WebSearchFunction } from "../WebSearch";
 import { ResearcherAgent } from "../../agents";
-import { AgentContext, AgentFunctionResult, Chat, LlmApi, LlmModel, OpenAI } from "@/agent-core";
+import { AgentContext, AgentFunctionResult, Chat, LlmApi, LlmModel, OpenAIChatCompletion } from "@/agent-core";
 import { Env, Logger, ConsoleLogger, Scripts, SubWorkspace } from "@evo-ninja/agent-utils";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 
@@ -30,7 +30,7 @@ describe("WebSearch function", () => {
       },
     });
 
-    const llm: LlmApi = new OpenAI(
+    const llm: LlmApi = new OpenAIChatCompletion(
       env.OPENAI_API_KEY,
       env.GPT_MODEL as LlmModel,
       env.CONTEXT_WINDOW_TOKENS,
