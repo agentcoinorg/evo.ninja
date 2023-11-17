@@ -12,7 +12,7 @@ To get started using evo.ninja simply head to our [website](https://evo.ninja), 
 
 Join our [Discord community](https://discord.gg/r3rwh69cCa) for support and discussions.
 
-[![Join us on Discord](https://invidget.switchblade.xyz/X7ystzGcf5)](https://discord.gg/r3rwh69cCa)
+[![Join us on Discord](https://invidget.switchblade.xyz/r3rwh69cCa)](https://discord.gg/r3rwh69cCa)
 
 If you have questions or encounter issues, please don't hesitate to [create a new issue](https://github.com/polywrap/evo.ninja/issues/new/choose) to get support.
 
