@@ -1,16 +1,16 @@
-import { ChatCompletionTool, ChatCompletionMessage } from "openai/resources";
 import { OpenAI } from "openai"
 import { Blob } from 'fetch-blob';
 import { File } from 'fetch-blob/file.js'
-import { LlmApi, LlmModel, LlmOptions } from "./LlmApi";
-import { ChatLogs } from "./chat";
-import { Logger, Workspace } from "@evo-ninja/agent-utils";
-import { RunSubmitToolOutputsParams } from "openai/resources/beta/threads/runs/runs";
+import { LlmApi, LlmOptions } from "./LlmApi";
+import { Workspace } from "@evo-ninja/agent-utils";
+import { RequiredActionFunctionToolCall, RunSubmitToolOutputsParams } from "openai/resources/beta/threads/runs/runs";
 import {
   Assistant,
   AssistantCreateParams,
 } from "openai/resources/beta/assistants/assistants";
 import { ThreadCreateParams } from "openai/resources/beta/threads/threads";
+import { ChatLogs } from "./chat";
+import { FunctionDefinition } from "./ChatCompletion";
 
 interface RunThreadOptions {
   assistantId: string;
@@ -27,15 +27,15 @@ interface AssistantOptions {
 
 export class OpenAIAssistants implements LlmApi {
   private _api: OpenAI;
+  private _id: string;
 
   constructor(
     private _apiKey: string,
-    private _defaultModel: LlmModel,
-    private _defaultMaxTokens: number,
-    private _defaultMaxResponseTokens: number,
-    private _logger: Logger,
-    private _maxRateLimitRetries: number = 5,
-    private _workspace: Workspace
+    private _workspace: Workspace,
+    private _config: {
+      pollingTimeout: number;
+    },
+    _id?: string,
   ) {
     this._api = new OpenAI({
       apiKey: this._apiKey,
@@ -53,102 +53,62 @@ export class OpenAIAssistants implements LlmApi {
     throw new Error("Method not implemented.");
   }
 
-  async getResponse(chatLog: ChatLogs, functionDefinitions?: ChatCompletionTool.Function[] | undefined, options?: LlmOptions | undefined): Promise<ChatCompletionMessage | undefined> {
-    let run = await this.runThread(options.threadId, this.assistant.id);
-    let initialMessages = await this.getMessages(run.thread_id);
-
-    while (run.status !== "completed") {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
-      run = await this.getRun(run.thread_id, run.id);
-
-      if (run.status === "requires_action" && run.required_action) {
-        const tools = run.required_action.submit_tool_outputs.tool_calls;
-        console.log(tools.map((t) => t.function.name));
-        try {
-          const results = await Promise.all(tools.map(executeFunction));
-          await this.processResults(run, results);
-        } catch (e) {
-          console.log("Error: ", e.message);
-        }
-      }
-
-      if (
-        run.status == "cancelled" ||
-        run.status == "failed" ||
-        run.status == "expired"
-      ) {
-        throw new Error(
-          "Run couldn't be completed because of status: " + run.status
-        );
-      }
-    }
-
-    // Wait until assistant writes a message in thread
-    let messages = await this.getMessages(run.thread_id);
-    const fetchLastMessage = async () => {
-      if (initialMessages.length == messages.length) {
-        await new Promise((resolve) => setTimeout(resolve, this.pollTimeout));
-        messages = await this.getMessages(run.thread_id);
-        if (messages.length != initialMessages.length) {
-          await fetchLastMessage();
-        } else {
-          return messages[0];
-        }
-      }
-      return messages[0];
-    };
-    return await fetchLastMessage();
+  private executeFunction = async (tool: RequiredActionFunctionToolCall): Promise<{ name: string; id: string; output?: string }> => {
+    throw new Error("Method not implemented.");
   }
 
-  // async getResponse(chatLog: ChatLogs, functionDefinitions?: ChatCompletionTool.Function[] | undefined, options?: LlmOptions | undefined): Promise<ChatCompletionMessage | undefined> {
-  //   if (options.goal) {
-  //     await this.addMessage(options.threadId, options.goal);
-  //   }
-  //   let run = await this.runThread(options.threadId, this.assistant.id);
-  //   let initialMessages = await this.getMessages(run.thread_id);
+  async getResponse(
+    chatLog: ChatLogs,
+    functionDefinitions?: FunctionDefinition[],
+    options?: LlmOptions
+  ) {
+    let run = await this.runThread(options.threadId, this._id);
 
-  //   while (run.status !== "completed") {
-  //     await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
-  //     run = await this.getRun(run.thread_id, run.id);
+    while (run.status !== "completed") {
+      if (["cancelled", "failed", "expired"].includes(run.status)) {
+        throw new Error("Run couldn't be completed because of status: " + run.status);
+      }
 
-  //     if (run.status === "requires_action" && run.required_action) {
-  //       const tools = run.required_action.submit_tool_outputs.tool_calls;
-  //       console.log(tools.map((t) => t.function.name));
-  //       try {
-  //         const results = await Promise.all(tools.map(executeFunction));
-  //         await this.processResults(run, results);
-  //       } catch (e) {
-  //         console.log("Error: ", e.message);
-  //       }
-  //     }
+      if (run.status === "requires_action") {
+        await this.handleRequiredAction(run);
+      }
 
-  //     if (
-  //       run.status == "cancelled" ||
-  //       run.status == "failed" ||
-  //       run.status == "expired"
-  //     ) {
-  //       throw new Error(
-  //         "Run couldn't be completed because of status: " + run.status
-  //       );
-  //     }
-  //   }
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      run = await this.runThread(options.threadId, this._id);
+    }
 
-  //   // Wait until assistant writes a message in thread
-  //   let messages = await this.getMessages(run.thread_id);
-  //   const fetchLastMessage = async () => {
-  //     if (initialMessages.length == messages.length) {
-  //       await new Promise((resolve) => setTimeout(resolve, this.pollTimeout));
-  //       messages = await this.getMessages(run.thread_id);
-  //       if (messages.length != initialMessages.length) {
-  //         await fetchLastMessage();
-  //       } else {
-  //         return messages[0];
-  //       }
-  //     }
-  //     return messages[0];
-  //   };
-  //   return await fetchLastMessage();
-  // }
+    return await this.waitForAssistantMessage(run.thread_id);
+  }
+
+  async handleRequiredAction(run: OpenAI.Beta.Threads.Runs.Run) {
+      if (!run.required_action) throw new Error("No required action");
+
+      const tools = run.required_action.submit_tool_outputs.tool_calls;
+
+      try {
+        const toolOutputs = await this.processToolCalls(tools);
+        await this._api.beta.threads.runs.submitToolOutputs(run.thread_id, run.id, { tool_outputs: toolOutputs });
+      } catch (e) {
+        console.log("Error: ", e.message);
+      }
+  }
+
+  async processToolCalls(tools: OpenAI.Beta.Threads.Runs.RequiredActionFunctionToolCall[]) {
+      const results = await Promise.all(tools.map(this.executeFunction));
+      return results.map(({ id, output }) => ({ tool_call_id: id, output }));
+  }
+
+  async waitForAssistantMessage(threadId: string): Promise<OpenAI.Beta.Threads.Messages.ThreadMessage> {
+    let messages = await this.getMessages(threadId);
+    let lastMessage = messages.slice(-1)[0];
+
+    if (lastMessage.role === "assistant") {
+      return lastMessage;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, this._config.pollingTimeout));
+    return await this.waitForAssistantMessage(threadId);
+  }
 
   async getAssistant(opts: {
     id?: string;
@@ -255,14 +215,7 @@ export class OpenAIAssistants implements LlmApi {
   
   async getMessages(threadId: string) {
     const messages = await this._api.beta.threads.messages.list(threadId);
-    return messages.data.flatMap((m) => m.content.map((c) => {
-      if (c.type === "text") {
-        return c.text;
-      }
-
-      // TODO: Handle image messages
-      throw new Error(`Unexpected message content type: ${c.type}`);
-    }));
+    return messages.data;
   };
   
   async getThread(threadId: string) {
