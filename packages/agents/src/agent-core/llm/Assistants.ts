@@ -52,9 +52,103 @@ export class OpenAIAssistants implements LlmApi {
   getModel(): string {
     throw new Error("Method not implemented.");
   }
-  getResponse(chatLog: ChatLogs, functionDefinitions?: ChatCompletionTool.Function[] | undefined, options?: LlmOptions | undefined): Promise<ChatCompletionMessage | undefined> {
-    throw new Error("Method not implemented.");
+
+  async getResponse(chatLog: ChatLogs, functionDefinitions?: ChatCompletionTool.Function[] | undefined, options?: LlmOptions | undefined): Promise<ChatCompletionMessage | undefined> {
+    let run = await this.runThread(options.threadId, this.assistant.id);
+    let initialMessages = await this.getMessages(run.thread_id);
+
+    while (run.status !== "completed") {
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
+      run = await this.getRun(run.thread_id, run.id);
+
+      if (run.status === "requires_action" && run.required_action) {
+        const tools = run.required_action.submit_tool_outputs.tool_calls;
+        console.log(tools.map((t) => t.function.name));
+        try {
+          const results = await Promise.all(tools.map(executeFunction));
+          await this.processResults(run, results);
+        } catch (e) {
+          console.log("Error: ", e.message);
+        }
+      }
+
+      if (
+        run.status == "cancelled" ||
+        run.status == "failed" ||
+        run.status == "expired"
+      ) {
+        throw new Error(
+          "Run couldn't be completed because of status: " + run.status
+        );
+      }
+    }
+
+    // Wait until assistant writes a message in thread
+    let messages = await this.getMessages(run.thread_id);
+    const fetchLastMessage = async () => {
+      if (initialMessages.length == messages.length) {
+        await new Promise((resolve) => setTimeout(resolve, this.pollTimeout));
+        messages = await this.getMessages(run.thread_id);
+        if (messages.length != initialMessages.length) {
+          await fetchLastMessage();
+        } else {
+          return messages[0];
+        }
+      }
+      return messages[0];
+    };
+    return await fetchLastMessage();
   }
+
+  // async getResponse(chatLog: ChatLogs, functionDefinitions?: ChatCompletionTool.Function[] | undefined, options?: LlmOptions | undefined): Promise<ChatCompletionMessage | undefined> {
+  //   if (options.goal) {
+  //     await this.addMessage(options.threadId, options.goal);
+  //   }
+  //   let run = await this.runThread(options.threadId, this.assistant.id);
+  //   let initialMessages = await this.getMessages(run.thread_id);
+
+  //   while (run.status !== "completed") {
+  //     await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
+  //     run = await this.getRun(run.thread_id, run.id);
+
+  //     if (run.status === "requires_action" && run.required_action) {
+  //       const tools = run.required_action.submit_tool_outputs.tool_calls;
+  //       console.log(tools.map((t) => t.function.name));
+  //       try {
+  //         const results = await Promise.all(tools.map(executeFunction));
+  //         await this.processResults(run, results);
+  //       } catch (e) {
+  //         console.log("Error: ", e.message);
+  //       }
+  //     }
+
+  //     if (
+  //       run.status == "cancelled" ||
+  //       run.status == "failed" ||
+  //       run.status == "expired"
+  //     ) {
+  //       throw new Error(
+  //         "Run couldn't be completed because of status: " + run.status
+  //       );
+  //     }
+  //   }
+
+  //   // Wait until assistant writes a message in thread
+  //   let messages = await this.getMessages(run.thread_id);
+  //   const fetchLastMessage = async () => {
+  //     if (initialMessages.length == messages.length) {
+  //       await new Promise((resolve) => setTimeout(resolve, this.pollTimeout));
+  //       messages = await this.getMessages(run.thread_id);
+  //       if (messages.length != initialMessages.length) {
+  //         await fetchLastMessage();
+  //       } else {
+  //         return messages[0];
+  //       }
+  //     }
+  //     return messages[0];
+  //   };
+  //   return await fetchLastMessage();
+  // }
 
   async getAssistant(opts: {
     id?: string;

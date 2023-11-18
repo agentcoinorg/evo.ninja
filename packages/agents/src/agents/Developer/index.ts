@@ -23,11 +23,3 @@ export class DeveloperAgent extends Agent {
     );
   }
 }
-
-/*public override async onFirstRun(args: GoalRunArgs, chat: Chat): Promise<void> {
-  await Promise.all([
-    this.executeFunction(new InitPoetryFunction(), {}, chat),
-    this.executeFunction(new PlanDevelopmentFunction(), args, chat)
-  ]);
-  return Promise.resolve();
-}*/
