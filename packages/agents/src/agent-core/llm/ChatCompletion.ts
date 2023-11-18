@@ -43,7 +43,7 @@ export class OpenAIChatCompletion implements LlmApi {
   }
 
   async getResponse(
-    chatLog: ChatLogs,
+    messages: { role: string; content: string | null }[],
     functionDefinitions?: FunctionDefinition[],
     options?: LlmOptions,
     tries?: number,
@@ -52,7 +52,7 @@ export class OpenAIChatCompletion implements LlmApi {
   ): Promise<ChatCompletionMessage | undefined> {
     try {
       const completion = await this._createChatCompletion({
-        messages: chatLog.messages as ChatCompletionMessageParam[],
+        messages: messages as ChatCompletionMessageParam[],
         functions: functionDefinitions,
         temperature: temperature ?? 0,
         max_tokens: max_tokens ?? this._defaultMaxResponseTokens,
@@ -88,7 +88,7 @@ export class OpenAIChatCompletion implements LlmApi {
 
           if (!tries || tries < this._maxRateLimitRetries) {
             return this.getResponse(
-              chatLog,
+              messages,
               functionDefinitions,
               options,
               tries === undefined ? 0 : ++tries

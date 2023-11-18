@@ -1,15 +1,11 @@
 import { OpenAI } from "openai"
-import { Blob } from 'fetch-blob';
-import { File } from 'fetch-blob/file.js'
 import { LlmApi, LlmModel, LlmOptions } from "./LlmApi";
-import { Workspace } from "@evo-ninja/agent-utils";
 import { RequiredActionFunctionToolCall, RunSubmitToolOutputsParams } from "openai/resources/beta/threads/runs/runs";
 import {
   Assistant,
   AssistantCreateParams,
 } from "openai/resources/beta/assistants/assistants";
 import { ThreadCreateParams } from "openai/resources/beta/threads/threads";
-import { ChatLogs } from "./chat";
 import { FunctionDefinition } from "./ChatCompletion";
 
 interface RunThreadOptions {
@@ -27,11 +23,9 @@ interface AssistantOptions {
 
 export class OpenAIAssistants implements LlmApi {
   private _api: OpenAI;
-  private _id: string;
 
   constructor(
     private _apiKey: string,
-    private _workspace: Workspace,
     private _defaultModel: LlmModel,
     private _pollingTimeout: number
   ) {
@@ -47,29 +41,6 @@ export class OpenAIAssistants implements LlmApi {
 
   private executeFunction = async (tool: RequiredActionFunctionToolCall): Promise<{ name: string; id: string; output?: string }> => {
     throw new Error("Method not implemented.");
-  }
-
-  async getResponse(
-    chatLog: ChatLogs,
-    functionDefinitions?: FunctionDefinition[],
-    options?: LlmOptions
-  ) {
-    let run = await this.runThread(options.threadId, this._id);
-
-    while (run.status !== "completed") {
-      if (["cancelled", "failed", "expired"].includes(run.status)) {
-        throw new Error("Run couldn't be completed because of status: " + run.status);
-      }
-
-      if (run.status === "requires_action") {
-        await this.handleRequiredAction(run);
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      run = await this.runThread(options.threadId, this._id);
-    }
-
-    return await this.waitForAssistantMessage(run.thread_id);
   }
 
   async handleRequiredAction(run: OpenAI.Beta.Threads.Runs.Run) {
@@ -193,11 +164,7 @@ export class OpenAIAssistants implements LlmApi {
     return thread;
   };
   
-  async addFile(args: { path: string; name: string }) {
-    const fileContent = this._workspace.readFileSync(args.path);
-    const blob = new Blob([fileContent], { type: 'text/plain' });
-    const file = new File([blob], args.name, { type: 'text/plain' })
-
+  async addFile(file: File) {
     const createdFile = await this._api.files.create({
       file,
       purpose: "assistants",

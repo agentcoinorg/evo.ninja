@@ -21,8 +21,22 @@ export async function* assistantsFunctionCallLoop(
   const { llm, chat } = context;
 
   while (true) {
-    let run = await this.runThread(options.threadId, this.assistant.id);
-    let initialMessages = await this.getMessages(run.thread_id);
+    let run = await this.runThread(options.threadId, this._id);
+
+    while (run.status !== "completed") {
+      if (["cancelled", "failed", "expired"].includes(run.status)) {
+        throw new Error("Run couldn't be completed because of status: " + run.status);
+      }
+
+      if (run.status === "requires_action") {
+        await this.handleRequiredAction(run);
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      run = await this.runThread(options.threadId, this._id);
+    }
+
+    return await this.waitForAssistantMessage(run.thread_id);
   }
 }
 

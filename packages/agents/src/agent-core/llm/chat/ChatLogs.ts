@@ -1,16 +1,16 @@
 import { Tokenizer } from "./";
 import { FunctionDefinition } from "../";
-import { ChatCompletionMessageParam } from "openai/resources";
-
-// Evo doesn't support image from the user as input right now,
-// so we override the content to always be string
-export type ChatMessage = Omit<ChatCompletionMessageParam, "content"> & {
-  content: string | null
-}
+import { ChatCompletionRole } from "openai/resources";
 
 export type ChatLogType =
   | "persistent"
   | "temporary";
+
+export interface ChatMessage {
+  role: ChatCompletionRole;
+  content: string | null;
+
+}
 
 export interface ChatLog {
   tokens: number;
@@ -22,24 +22,7 @@ export interface ChatFunctions {
   definitions: FunctionDefinition[];
 }
 
-export interface Chat {
-  tokens: number;
-  messages: ChatMessage[];
-  get(type: ChatLogType): ChatLog;
-  getMsg(type: ChatLogType, index: number): ChatMessage | undefined;
-  getMsgTokens(type: ChatLogType, index: number): number;
-  clone(): Chat;
-  toString(): string;
-  toJSON(): {
-    msgs: Record<ChatLogType, ChatLog>;
-    functions: {
-      tokens: number;
-      names: string[];
-    };
-  };
-}
-
-export class ChatLogs implements Chat {
+export class ChatLogs {
   private _logs: Record<ChatLogType, ChatLog> = {
     "persistent": {
       tokens: 0,
