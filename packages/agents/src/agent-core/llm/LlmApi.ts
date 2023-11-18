@@ -1,5 +1,5 @@
 import { ChatCompletionMessage } from "openai/resources";
-import { ChatLogs, ChatMessage, FunctionDefinition } from ".";
+import { ChatLogs, FunctionDefinition } from ".";
 
 export declare const LlmRoles: {
   readonly System: "system";
@@ -19,14 +19,10 @@ export declare const LlmModels: {
 export declare type LlmModel = typeof LlmModels[keyof typeof LlmModels];
 
 export interface LlmOptions {
-  temperature?: number;
-  max_tokens?: number;
   model?: LlmModel;
 }
 
 export interface LlmApi {
-  getMaxContextTokens(): number;
-  getMaxResponseTokens(): number;
   getModel(): string;
   getResponse(
     chatLog: ChatLogs,

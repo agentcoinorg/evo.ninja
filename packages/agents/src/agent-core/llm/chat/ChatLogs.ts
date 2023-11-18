@@ -22,7 +22,24 @@ export interface ChatFunctions {
   definitions: FunctionDefinition[];
 }
 
-export class ChatLogs {
+export interface Chat {
+  tokens: number;
+  messages: ChatMessage[];
+  get(type: ChatLogType): ChatLog;
+  getMsg(type: ChatLogType, index: number): ChatMessage | undefined;
+  getMsgTokens(type: ChatLogType, index: number): number;
+  clone(): Chat;
+  toString(): string;
+  toJSON(): {
+    msgs: Record<ChatLogType, ChatLog>;
+    functions: {
+      tokens: number;
+      names: string[];
+    };
+  };
+}
+
+export class ChatLogs implements Chat {
   private _logs: Record<ChatLogType, ChatLog> = {
     "persistent": {
       tokens: 0,

@@ -1,7 +1,7 @@
 import { OpenAI } from "openai"
 import { Blob } from 'fetch-blob';
 import { File } from 'fetch-blob/file.js'
-import { LlmApi, LlmOptions } from "./LlmApi";
+import { LlmApi, LlmModel, LlmOptions } from "./LlmApi";
 import { Workspace } from "@evo-ninja/agent-utils";
 import { RequiredActionFunctionToolCall, RunSubmitToolOutputsParams } from "openai/resources/beta/threads/runs/runs";
 import {
@@ -32,10 +32,8 @@ export class OpenAIAssistants implements LlmApi {
   constructor(
     private _apiKey: string,
     private _workspace: Workspace,
-    private _config: {
-      pollingTimeout: number;
-    },
-    _id?: string,
+    private _defaultModel: LlmModel,
+    private _pollingTimeout: number
   ) {
     this._api = new OpenAI({
       apiKey: this._apiKey,
@@ -43,14 +41,8 @@ export class OpenAIAssistants implements LlmApi {
     });
   }
   
-  getMaxContextTokens(): number {
-    throw new Error("Method not implemented.");
-  }
-  getMaxResponseTokens(): number {
-    throw new Error("Method not implemented.");
-  }
   getModel(): string {
-    throw new Error("Method not implemented.");
+    return this._defaultModel
   }
 
   private executeFunction = async (tool: RequiredActionFunctionToolCall): Promise<{ name: string; id: string; output?: string }> => {
@@ -106,7 +98,7 @@ export class OpenAIAssistants implements LlmApi {
       return lastMessage;
     }
 
-    await new Promise((resolve) => setTimeout(resolve, this._config.pollingTimeout));
+    await new Promise((resolve) => setTimeout(resolve, this._pollingTimeout));
     return await this.waitForAssistantMessage(threadId);
   }
 
@@ -150,7 +142,7 @@ export class OpenAIAssistants implements LlmApi {
       name,
       instructions: persona,
       tools,
-      model: "gpt-4-1106-preview",
+      model: this.getModel(),
       file_ids: fileIds,
     });
     console.log(`Assistant ${name} created`);
