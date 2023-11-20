@@ -17,7 +17,7 @@ dotenv.config({
 
 export async function cli(): Promise<void> {
   const consoleLogger = new ConsoleLogger();
-  const logger = new Logger([consoleLogger, consoleLogger], {
+  const logger = new Logger([consoleLogger], {
     promptUser: async () => "",
   });
   const env = new Env(process.env as Record<string, string>);

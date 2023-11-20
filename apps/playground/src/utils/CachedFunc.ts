@@ -2,12 +2,18 @@ import fs from "fs";
 import { Tokenizer } from "@evo-ninja/agents";
 import { LazyFunc } from "./LazyFunc";
 
+const CACHE_DIR = "../../workspace/.cache";
+
 export class CachedFunc<TRes> extends LazyFunc<TRes> {
-  constructor(private readonly id: string, func: () => TRes, private readonly tokenizer: Tokenizer) {
+  constructor(
+    private readonly id: string,
+    func: () => TRes,
+    private readonly tokenizer: Tokenizer
+  ) {
     super(func);
 
-    if (!fs.existsSync("../../workspace/.cache")) {
-      fs.mkdirSync("../../workspace/.cache", { recursive: true });
+    if (!fs.existsSync(CACHE_DIR)) {
+      fs.mkdirSync(CACHE_DIR, { recursive: true });
     }
   }
 
@@ -25,7 +31,7 @@ export class CachedFunc<TRes> extends LazyFunc<TRes> {
   }
 
   private async load(): Promise<SavedResult<TRes> | undefined> {
-    const path = `../../workspace/.cache/${this.id}.json`;
+    const path = `${CACHE_DIR}/${this.id}.json`;
     if (!fs.existsSync(path)) {
       return undefined;
     }
@@ -34,13 +40,20 @@ export class CachedFunc<TRes> extends LazyFunc<TRes> {
   }
 
   private async save(result: TRes, timeElapsedInSec: number): Promise<void> {
-    const path = `../../workspace/.cache/${this.id}.json`;
+    const path = `${CACHE_DIR}/${this.id}.json`;
 
-    fs.writeFileSync(path, JSON.stringify({
-      val: result,
-      timeElapsedInSec,
-      tokens: this.tokenizer.encode(JSON.stringify(result)).length,
-    }, null, 2));
+    fs.writeFileSync(
+      path,
+      JSON.stringify(
+        {
+          val: result,
+          timeElapsedInSec,
+          tokens: this.tokenizer.encode(JSON.stringify(result)).length,
+        },
+        null,
+        2
+      )
+    );
   }
 }
 
