@@ -6,7 +6,7 @@ import {
   DebugLog,
   LlmApi,
   LlmModel,
-  OpenAI
+  OpenAIChatCompletion
 } from "@evo-ninja/agents";
 import {
   Env,
@@ -94,7 +94,7 @@ export function createApp(config?: AppConfig): App {
   const scripts = new Scripts(scriptsWorkspace, "./");
 
   // LLM
-  let llm: LlmApi = new OpenAI(
+  let llm: LlmApi = new OpenAIChatCompletion(
     env.OPENAI_API_KEY,
     env.GPT_MODEL as LlmModel,
     env.CONTEXT_WINDOW_TOKENS,

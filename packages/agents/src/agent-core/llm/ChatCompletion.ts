@@ -13,7 +13,7 @@ interface OpenAIError {
 
 export type FunctionDefinition = ChatCompletionTool.Function;
 
-export class OpenAI implements LlmApi {
+export class OpenAIChatCompletion implements LlmApi {
   private _api: OpenAIApi;
 
   constructor(

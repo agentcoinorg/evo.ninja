@@ -1,11 +1,11 @@
 import {
-  OpenAI,
   Chat,
   ChatRole,
   ChatLogType,
   ChatLog,
   FunctionDefinition,
-  LlmModel
+  LlmModel,
+  OpenAIChatCompletion
 } from "@/agent-core";
 import { ConsoleLogger, Logger, Env } from "@evo-ninja/agent-utils";
 import dotenv from "dotenv";
@@ -57,7 +57,7 @@ describe('LLM Test Suite', () => {
       process.env as Record<string, string>
     );
 ``
-    const llm = new OpenAI(
+    const llm = new OpenAIChatCompletion(
       env.OPENAI_API_KEY,
       env.GPT_MODEL as LlmModel,
       env.CONTEXT_WINDOW_TOKENS,
