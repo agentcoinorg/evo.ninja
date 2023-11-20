@@ -5,6 +5,7 @@ import {
   LlmQuery,
   tokensToChars,
   Rag,
+  Prompt,
 } from "@/agent-core";
 import dotenv from "dotenv";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
@@ -12,7 +13,6 @@ import path from "path";
 import fs from "fs";
 import { AgentContext } from "@/agent-core";
 import { LlmModel } from "@/agent-core";
-import { Prompt } from "../agents/utils";
 import { ConsoleLogger, Logger, Env, InMemoryWorkspace, Scripts, WrapClient } from "@evo-ninja/agent-utils";
 
 dotenv.config({

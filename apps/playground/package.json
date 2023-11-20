@@ -10,12 +10,12 @@
   "scripts": {
     "start": "ts-node src/cli.ts",
     "build": "rimraf build && tsc --project tsconfig.build.json",
+    "watch": "npx nodemon --watch ./src --ext \".ts\" --exec \"ts-node src/cli.ts\"",
     "test": "jest --passWithNoTests --runInBand --verbose --rootDir . --config ../../jest.config.js",
     "test:script": "ts-node ./src/__tests__/runners/script-js.ts"
   },
   "dependencies": {
     "@evo-ninja/agents": "~0.1.0",
-    "@evo-ninja/agent-debug": "~0.1.0",
     "@evo-ninja/agent-utils": "~0.1.0",
     "@evo-ninja/agent-utils-fs": "~0.1.0",
     "agent-protocol": "1.0.1",

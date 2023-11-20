@@ -1,8 +1,10 @@
-import { Chat, ConsoleLogger, Env, LlmModel, Logger, OpenAI, Timeout } from "@evo-ninja/agent-utils";
-import { run } from "./playground";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import dotenv from "dotenv";
 import path from "path";
+import { ConsoleLogger, Logger, Env, InMemoryWorkspace, Scripts, WrapClient } from "@evo-ninja/agent-utils";
+import { OpenAI, LlmModel, Chat, AgentContext } from "@evo-ninja/agents";
+import { run } from "./demos/basic";
+import { LlmAdapter } from "./utils";
 
 dotenv.config({
   path: path.join(__dirname, "../../../.env"),
@@ -14,10 +16,7 @@ export async function cli(): Promise<void> {
     consoleLogger,
     consoleLogger
   ], {
-    promptUser: async () => "",
-    logUserPrompt: (response: string) => {
-      consoleLogger.info(`#User:\n${response}`);
-    }
+    promptUser: async () => ""
   })
   const env = new Env(
     process.env as Record<string, string>
@@ -31,8 +30,9 @@ export async function cli(): Promise<void> {
     logger
   );
   const chat = new Chat(cl100k_base);
+  const context = new AgentContext(llm, chat, logger, new InMemoryWorkspace(), new InMemoryWorkspace(), env, undefined as unknown as Scripts, undefined as unknown as WrapClient, undefined);
 
-  await run(llm, env, logger, chat);
+  await run(new LlmAdapter(context));
 
   return Promise.resolve();
 }

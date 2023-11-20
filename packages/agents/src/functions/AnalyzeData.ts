@@ -6,10 +6,11 @@ import {
   CsvChunker,
   Rag,
   AgentContext,
-  ArrayRecombiner
+  ArrayRecombiner,
+  Prompt
 } from "@/agent-core";
 import { LlmAgentFunctionBase } from "./utils";
-import { Agent, Prompt } from "../agents/utils";
+import { Agent } from "../agents/utils";
 
 interface AnalyzeDataParameters {
   data: string;

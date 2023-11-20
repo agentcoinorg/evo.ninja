@@ -10,10 +10,11 @@ import {
   agentFunctionBaseToAgentFunction,
   tokensToChars,
   AgentOutput,
-  AgentContext
+  AgentContext,
+  Prompt
 } from "@/agent-core";
 import { agentPrompts, prompts } from "./prompts";
-import { Agent, AgentConfig, GoalRunArgs, Prompt } from "../../agents/utils";
+import { Agent, AgentConfig, GoalRunArgs } from "../../agents/utils";
 import { findBestAgent } from "./findBestAgent";
 import { Timeout, Workspace } from "@evo-ninja/agent-utils";
 

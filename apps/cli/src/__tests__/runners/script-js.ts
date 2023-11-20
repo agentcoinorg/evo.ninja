@@ -68,7 +68,7 @@ const scriptName = args[2];
 const scriptPath = args.length > 2 ? args[3] : undefined;
 
 const workspace = new FileSystemWorkspace(
-  path.join(__dirname, "../../../../../workspace")
+  path.join(__dirname, "../../../../../../workspace")
 );
 const scripts = new Scripts(
   workspace,

@@ -13,13 +13,13 @@ import {
   Chat,
   executeAgentFunction,
   FunctionDefinition,
-  AgentFunction
+  AgentFunction,
+  Prompt
 } from "@/agent-core";
 import { ResultErr } from "@polywrap/result";
 import { AgentConfig } from "./AgentConfig";
 import { AgentContext } from "@/agent-core";
 import { ExecuteAgentFunctionCalled } from "@/agent-core";
-import { Prompt } from "./Prompt";
 import { AgentFunctionBase } from "../../functions/utils";
 import { Workspace } from "@evo-ninja/agent-utils";
 
