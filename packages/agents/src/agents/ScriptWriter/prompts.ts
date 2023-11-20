@@ -1,7 +1,7 @@
-import { ChatMessage } from "@evo-ninja/agent-utils";
+import { ChatMessage } from "@/agent-core";
 import { ScriptWriterRunArgs } from "./ScriptWriter";
 import { WriteScriptFunction } from "../../functions/WriteScript";
-import { AgentPrompts } from "../../AgentPrompts";
+import { AgentPrompts } from "../../agents/utils";
 
 export const prompts: AgentPrompts<ScriptWriterRunArgs> = {
   name: "ScriptWriter",

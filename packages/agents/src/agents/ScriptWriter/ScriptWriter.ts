@@ -1,10 +1,7 @@
-import { AgentContext } from "@evo-ninja/agent-utils";
+import { AgentContext } from "@/agent-core";
 import { WriteScriptFunction } from "../../functions/WriteScript";
-import { ThinkFunction } from "../../functions/Think";
 import { prompts } from "./prompts";
-import { AgentConfig } from "../../AgentConfig";
-import { Agent } from "../../Agent";
-import { ReadVariableFunction } from "../../functions/ReadVariable";
+import { Agent, AgentConfig } from "../utils";
 
 export interface ScriptWriterRunArgs {
   namespace: string;
@@ -20,8 +17,6 @@ export class ScriptWriter extends Agent<ScriptWriterRunArgs> {
       new AgentConfig(
         () => prompts,
         [
-          new ReadVariableFunction(),
-          new ThinkFunction(), 
           writeScriptFn
         ], 
         context.scripts,

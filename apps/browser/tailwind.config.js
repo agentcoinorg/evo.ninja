@@ -4,6 +4,7 @@ const defaultTheme = require('tailwindcss/defaultTheme')
 module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
+    "./pages/**/*.{js,jsx,ts,tsx}",
     "./public/**/*.{html,css}"
   ],
   theme: {
@@ -12,23 +13,15 @@ module.exports = {
         sans: ["Exo", ...defaultTheme.fontFamily.sans],
         mono: ["Source Code Pro", ...defaultTheme.fontFamily.mono]
       },
-      animation: {
-        "landing-bg": "landing-bg 5s linear infinite"
-      },
-      keyframes: {
-        "landing-bg": {
-          "100%": {
-            "background-position": "0 250px"
-          }
-        }
-      },
-      backgroundImage: {
-        "landing-bg": `url('/public/wallpaper.png')`
-      },
       backgroundSize: {
         "landing-bg": `461px 250px`
+      },
+      colors: {
+        'opacity-black': 'hsla(0, 0%, 9%, 0.8)'
       }
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
 }

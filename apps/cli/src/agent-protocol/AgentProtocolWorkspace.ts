@@ -2,48 +2,33 @@ import { DirectoryEntry, Workspace } from "@evo-ninja/agent-utils";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import { type Artifact, v4 as uuid } from "agent-protocol";
 import path from "path";
-import fs from "fs";
-
-interface ArtifactLog extends Artifact {
-  data: string;
-}
 
 export class AgentProtocolWorkspace implements Workspace {
-  private _artifactLog: Map<string, ArtifactLog>;
+  private _artifactLog: Map<string, Artifact>;
   private _fsWorkspace: FileSystemWorkspace;
 
-  constructor(private directoryPath: string) {
+  constructor(directoryPath: string) {
     this._artifactLog = new Map();
     this._fsWorkspace = new FileSystemWorkspace(directoryPath);
   }
 
+  get artifacts(): Artifact[] {
+    return Array.from(this._artifactLog.values())
+      .filter((x) => !x.relative_path?.startsWith("."));
+  }
+
+  cleanArtifacts(): void {
+    this._artifactLog = new Map();
+  }
+
   writeFileSync(subpath: string, data: string): void {
-    const artifact: ArtifactLog = {
-      file_name: path.basename(subpath),
-      agent_created: true,
-      artifact_id: uuid(),
-      relative_path:
-        path.dirname(subpath) === "." ? null : path.dirname(subpath),
-      created_at: Date.now().toString(),
-      data,
-    };
+    const artifact = createArtifact(subpath);
     this._artifactLog.set(subpath, artifact);
     this._fsWorkspace.writeFileSync(subpath, data);
   }
 
   readFileSync(subpath: string): string {
-    const text = this._fsWorkspace.readFileSync(subpath);
-    const artifact: ArtifactLog = {
-      file_name: path.basename(subpath),
-      agent_created: true,
-      artifact_id: uuid(),
-      relative_path:
-        path.dirname(subpath) === "." ? null : path.dirname(subpath),
-      created_at: Date.now().toString(),
-      data: text,
-    };
-    this._artifactLog.set(subpath, artifact);
-    return text;
+    return this._fsWorkspace.readFileSync(subpath);
   }
 
   existsSync(subpath: string): boolean {
@@ -51,13 +36,15 @@ export class AgentProtocolWorkspace implements Workspace {
   }
 
   renameSync(oldPath: string, newPath: string): void {
-    const artifact = this._artifactLog.get(oldPath);
-    if (!artifact) {
-      throw new Error(`Artifact with oldPath: ${oldPath} not found`);
+    let artifact = this._artifactLog.get(oldPath);
+    if (artifact) {
+      this._artifactLog.delete(oldPath);
+      artifact.file_name = newPath;
+      this._artifactLog.set(newPath, artifact);
+    } else {
+      artifact = createArtifact(newPath);
+      this._artifactLog.set(newPath, artifact);
     }
-    this._artifactLog.delete(oldPath);
-    artifact.file_name = newPath; // Update the filename in the artifact itself
-    this._artifactLog.set(newPath, artifact);
     this._fsWorkspace.renameSync(oldPath, newPath);
   }
 
@@ -74,52 +61,36 @@ export class AgentProtocolWorkspace implements Workspace {
   }
 
   appendFileSync(subpath: string, data: string): void {
-    const artifact = this._artifactLog.get(subpath);
-    if (!artifact) {
-      throw new Error(`Artifact with subpath: ${subpath} not found`);
-    }
-    artifact.data += data;
     this._fsWorkspace.appendFileSync(subpath, data);
-  }
-
-  getArtifacts(): Artifact[] {
-    const artifacts: ArtifactLog[] = [];
-
-    this.processArtifacts((artifact, filePath) => {
-      artifacts.push(artifact);
-    });
-
-    return artifacts;
-  }
-
-  writeArtifacts(): void {
-    if (!fs.existsSync(this.directoryPath)) {
-      throw new Error(
-        `Workspace directory path: ${this.directoryPath} does not exists`
-      );
+    let artifact = this._artifactLog.get(subpath);
+    if (!artifact) {
+      artifact = createArtifact(subpath);
+      this._artifactLog.set(subpath, artifact);
     }
-
-    this.processArtifacts((artifact, filePath) => {
-      fs.writeFileSync(filePath, artifact.data);
-    });
   }
 
-  cleanArtifacts(): void {
-    this._artifactLog = new Map();
+  rmSync(subpath: string): void {
+    const artifact = this._artifactLog.get(subpath);
+    if (artifact) {
+      this._artifactLog.delete(subpath);
+    }
+    this._fsWorkspace.rmSync(subpath);
   }
 
   async exec(command: string, args?: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
     return await this._fsWorkspace.exec(command, args);
   }
-
-  private processArtifacts(
-    callback: (artifact: ArtifactLog, filePath: string) => void
-  ): void {
-    this._artifactLog.forEach((artifact) => {
-      let artifactDirectoryPath = this.directoryPath;
-
-      const filePath = path.join(artifactDirectoryPath, artifact.file_name);
-      callback(artifact, filePath);
-    });
-  }
 }
+
+const createArtifact = (
+  filePath: string
+): Artifact => {
+  return {
+    artifact_id: uuid(),
+    agent_created: true,
+    file_name: path.basename(filePath),
+    relative_path:
+      path.dirname(filePath) === "." ? null : path.dirname(filePath),
+    created_at: Date.now().toString(),
+  };
+};

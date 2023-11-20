@@ -1,23 +1,12 @@
-import {
-  Env,
-  Scripts,
-  OpenAI,
-  Chat,
-  LlmApi,
-  ConsoleLogger,
-  Logger,
-  SubWorkspace,
-  AgentFunctionResult,
-} from "@evo-ninja/agent-utils";
-import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import * as rimraf from "rimraf";
 import dotenv from "dotenv";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
-import { AgentContext } from "@evo-ninja/agent-utils";
 import { WebSearchFuncParameters, WebSearchFunction } from "../WebSearch";
-import { LlmModel } from "@evo-ninja/agent-utils";
-import { ResearcherAgent } from "../../scriptedAgents";
+import { ResearcherAgent } from "../../agents";
+import { AgentContext, AgentFunctionResult, Chat, LlmApi, LlmModel, OpenAI } from "@/agent-core";
+import { Env, Logger, ConsoleLogger, Scripts, SubWorkspace } from "@evo-ninja/agent-utils";
+import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 
 const rootDir = path.join(__dirname, "../../../../../");
 
@@ -38,9 +27,6 @@ describe("WebSearch function", () => {
     const logger = new Logger([new ConsoleLogger()], {
       promptUser: () => {
         throw Error("promptUser not supported.");
-      },
-      logUserPrompt: () => {
-        throw Error("logUserPrompt not supported.");
       },
     });
 

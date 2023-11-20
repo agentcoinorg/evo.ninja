@@ -1,11 +1,9 @@
-import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder, trimText } from "@evo-ninja/agent-utils";
+import { AgentFunctionResult, AgentOutputType, ChatMessageBuilder, trimText } from "@/agent-core";
 import { load } from "cheerio";
-import axios from "axios";
-import { Agent } from "../Agent";
-import { AgentFunctionBase } from "../AgentFunctionBase";
+import { Agent } from "../agents/utils";
+import { AgentFunctionBase } from "./utils";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
-
-const FETCH_WEBPAGE_TIMEOUT = 8000
+import { fetchHTML } from "./utils";
 
 interface ScrapeTextFuncParameters {
   url: string;
@@ -28,7 +26,7 @@ export class ScrapeTextFunction extends AgentFunctionBase<{ url: string }> {
     additionalProperties: false
   };
 
-  buildExecutor(agent: Agent<unknown>): (params: { url: string; }, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
+  buildExecutor(_: Agent<unknown>): (params: { url: string; }, rawParams?: string | undefined) => Promise<AgentFunctionResult> {
     return async (
       params: ScrapeTextFuncParameters,
       rawParams?: string
@@ -39,30 +37,20 @@ export class ScrapeTextFunction extends AgentFunctionBase<{ url: string }> {
         return this.onSuccess(
           params,
           JSON.stringify(response),
-          rawParams
+          rawParams,
         );
       } catch (err) {
         return this.onError(
           params,
           err.toString(),
-          rawParams
+          rawParams,
         );
       }
     };
   }
 
-  private fetchHTML(url: string) {
-    return axios.get(url, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (X11; Linux x86_64; rv:107.0) Gecko/20100101 Firefox/107.0",
-      },
-      timeout: FETCH_WEBPAGE_TIMEOUT,
-    });
-  }
-
   private async processWebpage(url: string) {
-    const response = await this.fetchHTML(url);
+    const response = await fetchHTML(url);
     const html = response.data;
     const $ = load(html);
 
@@ -98,7 +86,7 @@ export class ScrapeTextFunction extends AgentFunctionBase<{ url: string }> {
   private onSuccess(
     params: ScrapeTextFuncParameters,
     result: string,
-    rawParams: string | undefined
+    rawParams: string | undefined,
   ): AgentFunctionResult {
     return {
       outputs: [
@@ -131,7 +119,7 @@ export class ScrapeTextFunction extends AgentFunctionBase<{ url: string }> {
   private onError(
     params: ScrapeTextFuncParameters,
     error: string,
-    rawParams: string | undefined
+    rawParams: string | undefined,
   ) {
     return {
       outputs: [

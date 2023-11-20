@@ -1,4 +1,4 @@
-import { ScriptFunction } from "../scriptedAgents/ScriptFunction"
+import { ScriptFunction } from "./utils";
 
 export class CsvSumColumnFunction extends ScriptFunction<{ csv: string, columnName: string }> {
   name: string = "csv_sumColumn";

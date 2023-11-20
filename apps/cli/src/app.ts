@@ -1,28 +1,28 @@
-import { ChameleonAgent, GoalRunArgs } from "@evo-ninja/agents";
+import {
+  AgentContext,
+  Evo,
+  Chat,
+  DebugLlmApi,
+  DebugLog,
+  LlmApi,
+  LlmModel,
+  OpenAI
+} from "@evo-ninja/agents";
 import {
   Env,
-  OpenAI,
-  Chat,
   Scripts,
   ConsoleLogger,
   Logger,
   Timeout,
   Workspace,
-  LlmApi,
-  ChatLogType,
-  ChatMessage,
-  ChatLog,
-  RunnableAgent,
-  LlmModel,
-  AgentContext,
+  SubWorkspace,
+  FileLogger,
 } from "@evo-ninja/agent-utils";
-import { DebugLog, DebugLlmApi } from "@evo-ninja/agent-debug";
-import { FileSystemWorkspace, FileLogger } from "@evo-ninja/agent-utils-fs";
+import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import dotenv from "dotenv";
 import readline from "readline";
 import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
-import { readFileSync } from "fs-extra";
 
 dotenv.config({
   path: path.join(__dirname, "../../../.env"),
@@ -33,11 +33,17 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-const prompt = (query: string) =>
-  new Promise<string>((resolve) => rl.question(query, resolve));
+const prompt = (fileLogger: FileLogger) => (query: string) =>
+  new Promise<string>((resolve) => {
+    const callback = (answer: string) => {
+      fileLogger.info(`# User\n**${query}:** ${answer}`);
+      resolve(answer);
+    }
+    rl.question(`${query}: `, callback)
+  });
 
 export interface App {
-  evo: RunnableAgent<GoalRunArgs>;
+  evo: Evo;
   logger: Logger;
   fileLogger: FileLogger;
   consoleLogger: ConsoleLogger;
@@ -50,20 +56,7 @@ export interface AppConfig {
   timeout?: Timeout;
   rootDir?: string;
   debug?: boolean;
-  messagesPath?: string;
-  customWorkspace?: {
-    path: string;
-    workspace: Workspace;
-  }
-}
-
-const getMessagesFromPath = (path: string): { type: ChatLogType, msgs: ChatMessage[]}[] => {
-  const messagesString = readFileSync(path, "utf-8")
-  const messages: Record<ChatLogType, ChatLog> = JSON.parse(messagesString)
-  return Object.entries(messages).map(([type, { msgs }]) => ({
-    type: type as ChatLogType,
-    msgs
-  }))
+  customWorkspace?: Workspace;
 }
 
 export function createApp(config?: AppConfig): App {
@@ -77,32 +70,21 @@ export function createApp(config?: AppConfig): App {
   }-${date.getDate()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`;
   const sessionName = config?.sessionName ?? defaultSessionName;
   const env = new Env(process.env as Record<string, string>);
-  const workspacePath = path.join(rootDir, "sessions", sessionName);
+  const sessionPath = path.join(rootDir, "sessions", sessionName);
 
   // User Workspace
-  const userWorkspace =
-    config?.customWorkspace ?
-    config.customWorkspace.workspace :
-    new FileSystemWorkspace(workspacePath);
+  const userWorkspace = config?.customWorkspace ?? new FileSystemWorkspace(sessionPath);
 
   // Internals Workspace (.evo directory)
-  const internals = new FileSystemWorkspace(
-    config?.customWorkspace ?
-      path.join(config.customWorkspace.path, ".evo") :
-      path.join(workspacePath, ".evo")
-  );
+  const internals = new SubWorkspace(".evo", userWorkspace);
 
   // Chat Log File
-  // TODO: simply pass the workspace to the file logger
-  const fileLogger = new FileLogger(path.join(workspacePath, ".evo", "chat.md"));
+  const fileLogger = new FileLogger("chat.md", internals);
 
   // Logger
   const consoleLogger = new ConsoleLogger();
   const logger = new Logger([fileLogger, consoleLogger], {
-    promptUser: prompt,
-    logUserPrompt: (response: string) => {
-      fileLogger.info(`#User:\n${response}`);
-    },
+    promptUser: prompt(fileLogger),
   });
 
   // Scripts
@@ -123,14 +105,6 @@ export function createApp(config?: AppConfig): App {
   // Chat
   const chat = new Chat(cl100k_base);
 
-  if (config?.messagesPath) {
-    const msgPath = path.join(rootDir, config.messagesPath)
-    const messages = getMessagesFromPath(msgPath)
-    for (let { type, msgs } of messages) {
-      chat.add(type, msgs)
-    }
-  }
-
   // Debug Logging
   let debugLog: DebugLog | undefined;
 
@@ -142,7 +116,7 @@ export function createApp(config?: AppConfig): App {
   }
 
   // Evo
-  const evo = new ChameleonAgent(
+  const evo = new Evo(
     new AgentContext(
       llm,
       chat,

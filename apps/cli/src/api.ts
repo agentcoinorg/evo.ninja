@@ -1,5 +1,6 @@
 import { AgentProtocolWorkspace } from "./agent-protocol";
 import { createApp } from "./app";
+import { AgentOutput } from "@evo-ninja/agents";
 
 import Agent, {
   StepHandler,
@@ -50,27 +51,51 @@ async function taskHandler(
   );
   const app = createApp({
     rootDir,
-    customWorkspace: {
-      workspace: customWorkspace,
-      path: customWorkspacePath
-    },
+    customWorkspace,
     sessionName: id,
     debug: true,
   });
 
-  const { logger, debugLog } = app;
-
-  logger.info("\n////////////////////////////////////////////");
-  logger.info(`Trying to achieve goal: ${input}\nTask with ID: ${id}`);
-  debugLog?.goalStart(input);
+  app.logger.info("\n////////////////////////////////////////////");
+  app.logger.info(`Trying to achieve goal: ${input}\nTask with ID: ${id}`);
+  app.debugLog?.goalStart(input);
 
   let iterator = app.evo.run({ goal: input });
 
   async function stepHandler(stepInput: StepInput | null): Promise<StepResult> {
-    logger.info(`Running step....`);
-    debugLog?.stepStart();
+    app.logger.info(`Running step....`);
+    app.debugLog?.stepStart();
     const response = await iterator.next(stepInput);
-    debugLog?.stepEnd();
+    app.debugLog?.stepEnd();
+
+    const logMessage = (message: AgentOutput) => {
+      const messageStr = `${message.title}  \n${message.content ?? ""}`;
+      app.logger.info(`### Action executed:\n${messageStr}`);
+      app.debugLog?.stepLog(messageStr);
+    }
+
+    const logError = (error: string) => {
+      app.logger.error(error);
+      app.debugLog?.stepError(error);
+    }
+
+    const artifacts = customWorkspace.artifacts
+    customWorkspace.cleanArtifacts();
+
+    if (response.done) {
+      if (!response.value.ok) {
+        logError(response.value.error ?? "Unknown error");
+      } else {
+        logMessage(response.value.value);
+      }
+      if (options.clean) {
+        app.logger.info("Removing generated scripts");
+        await removeNewScripts();
+      }
+      app.logger.info("////////////////////////////////////////////\n");
+    } else if (response.value && response.value) {
+      logMessage(response.value);
+    }
 
     const outputTitle =
       response.value && "title" in response.value
@@ -82,29 +107,6 @@ async function taskHandler(
         ? response.value.message
         : "No Message";
 
-    customWorkspace.writeArtifacts();
-    const artifacts = customWorkspace.getArtifacts();
-    customWorkspace.cleanArtifacts();
-
-    if (response.done) {
-      if (!response.value.ok) {
-        logger.error(response.value.error ?? "Unknown error");
-        debugLog?.stepError(response.value.error ?? "Unknown error");
-      } else {
-        logger.info(JSON.stringify(response.value.value) as any);
-        debugLog?.stepLog(response.value.value as any);
-      }
-      logger.info("Task is done");
-      if (options.clean) {
-        logger.info("Removing generated scripts");
-        await removeNewScripts();
-      }
-      logger.info("////////////////////////////////////////////\n");
-    }
-
-    if (outputMessage !== "No Message") {
-      logger.info(JSON.stringify(outputMessage));
-    }
     return {
       is_last: response.done,
       output: JSON.stringify(outputMessage),

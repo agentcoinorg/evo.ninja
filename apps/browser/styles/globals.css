@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body,
+#__next,
+html {
+  @apply h-full font-sans;
+}
+
+code {
+  @apply font-mono;
+}
+
+#root {
+  @apply h-full;
+}
+
+::-webkit-scrollbar {
+  @apply w-2 h-2 rounded;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-neutral-600;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-orange-600 rounded;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-orange-500 rounded;
+}

@@ -3,12 +3,12 @@ import {
   AgentOutputType,
   AgentVariables,
   ChatMessageBuilder,
-  Workspace
-} from "@evo-ninja/agent-utils";
-import { AgentFunctionBase } from "../AgentFunctionBase";
+} from "@/agent-core";
+import { AgentFunctionBase } from "./utils";
 import { FUNCTION_CALL_SUCCESS_CONTENT, FUNCTION_CALL_FAILED} from "../agents/Scripter/utils";
-import path from "path";
-import { Agent } from "../Agent";
+import path from "path-browserify";
+import { Agent } from "../agents/utils";
+import { Workspace } from "@evo-ninja/agent-utils";
 
 interface InitPoetryFuncParameters {}
 

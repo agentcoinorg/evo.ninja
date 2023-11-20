@@ -1,21 +1,8 @@
-import {
-  AgentFunctionResult,
-  AgentOutputType,
-  AgentVariables,
-  ChatMessageBuilder,
-  LlmApi,
-  TextChunker,
-  Tokenizer,
-  trimText,
-  Rag,
-  ArrayRecombiner,
-  AgentContext
-} from "@evo-ninja/agent-utils";
+import { AgentContext, AgentFunctionResult, AgentOutputType, AgentVariables, ArrayRecombiner, ChatMessageBuilder, LlmApi, Rag, TextChunker, Tokenizer, trimText } from "@/agent-core";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
-import { Agent } from "../Agent";
-import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
-import { Prompt } from "../agents/Chameleon/Prompt";
-import { searchOnGoogle, processWebpage } from "../utils";
+import { Agent, Prompt } from "../agents/utils";
+import { LlmAgentFunctionBase, processWebpage, searchOnGoogle } from "./utils";
+import axios from "axios"
 
 export interface WebSearchFuncParameters {
   queries: string[];
@@ -69,16 +56,25 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
 
   private async runQuery({ context }: Agent<unknown>, query: string, rawParams?: string): Promise<AgentFunctionResult> {
     try {
-      if (!context.env.SERP_API_KEY) {
-        throw new Error(
-          "SERP_API_KEY environment variable is required to use the websearch plugin. See env.template for help"
-        );
+      let googleResults;
+      if (typeof window === "object") {
+        const results = await axios.get<{
+          googleResults: {
+            title: string;
+            url: string;
+            description: string;
+            trustedSource: boolean;
+          }[];
+        }>(`/api/search?query=${query}`);
+        googleResults = results.data.googleResults;
+      } else {
+        if (!context.env.SERP_API_KEY) {
+          throw new Error(
+            "SERP_API_KEY environment variable is required to use the websearch plugin. See env.template for help"
+          );
+        }
+        googleResults = await searchOnGoogle(query, context.env.SERP_API_KEY);
       }
-
-      const googleResults = await searchOnGoogle(
-        query,
-        context.env.SERP_API_KEY
-      );
 
       const searchMatches = await this.searchInPages({
         urls: googleResults.map(x => x.url),
@@ -109,14 +105,14 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         { queries: [query] },
         analysisFromChunks,
         rawParams,
-        context.variables
+        context.variables,
       );
     } catch (err) {
       return this.onError(
         { queries: [query] },
         err.toString(),
         rawParams,
-        context.variables
+        context.variables,
       );
     }
   }
@@ -125,7 +121,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
     params: WebSearchFuncParameters,
     result: string,
     rawParams: string | undefined,
-    variables: AgentVariables
+    variables: AgentVariables,
   ): AgentFunctionResult {
     return {
       outputs: [
@@ -159,7 +155,7 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
     params: WebSearchFuncParameters,
     error: string,
     rawParams: string | undefined,
-    variables: AgentVariables
+    variables: AgentVariables,
   ) {
     return {
       outputs: [
@@ -189,13 +185,18 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
   private async searchInPages(params: { urls: string[], query: string, context: AgentContext }) {
     const urlsContents = await Promise.all(params.urls.map(async url => {
       try {
-        const response = await processWebpage(url);
+        let response: string;
+        if (typeof window === "object") {
+          const result = await axios.get<{ text: string }>(`/api/process-web-page?url=${url}`)
+          response = result.data.text
+        } else {
+          response = await processWebpage(url);
+        }
         return {
           url,
           response
         }
       } catch(e) {
-        params.context.logger.error(`Failed to process ${url}`)
         return {
           url,
           response: ""

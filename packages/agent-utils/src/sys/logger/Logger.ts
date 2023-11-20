@@ -1,11 +1,7 @@
-import { ChatMessage } from "../../llm";
-
 import figlet from "figlet";
 
 export interface ILogger {
   info: (info: string) => void;
-  message: (msg: ChatMessage) => void;
-  action: (msg: ChatMessage) => void;
   notice: (msg: string) => void;
   success: (msg: string) => void;
   warning: (msg: string) => void;
@@ -14,7 +10,6 @@ export interface ILogger {
 
 export interface LoggerCallbacks {
   promptUser: (query: string) => Promise<string>;
-  logUserPrompt: (response: string) => void;
 }
 
 export class Logger implements ILogger {
@@ -27,14 +22,6 @@ export class Logger implements ILogger {
 
   info(info: string) {
     this._loggers.forEach((l) => l.info(info));
-  }
-
-  message(msg: ChatMessage) {
-    this._loggers.forEach((l) => l.message(msg));
-  };
-
-  action(msg: ChatMessage) {
-    this._loggers.forEach((l) => l.action(msg));
   }
 
   notice(msg: string) {
@@ -75,9 +62,7 @@ export class Logger implements ILogger {
   }
 
   async prompt(query: string): Promise<string> {
-    const response = await this._callbacks.promptUser(query);
-    this._callbacks.logUserPrompt(response);
-    return response;
+    return this._callbacks.promptUser(query);
   }
 
   async logHeader(): Promise<void> {
@@ -96,7 +81,7 @@ export class Logger implements ILogger {
           return;
         }
         logger.info("```\n" + data + "\n```\n");
-        logger.info("Support: https://discord.gg/ZUSDVhA2Vz");
+        logger.info("Support: https://discord.gg/r3rwh69cCa");
         resolve();
       });
     });

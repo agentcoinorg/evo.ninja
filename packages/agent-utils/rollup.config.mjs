@@ -16,7 +16,7 @@ export default {
   plugins: [typescript(), commonjs(), resolve(), {
     renderChunk(code) {
       return `import { globalToShimVarNameMap } from "./shims/globals";
-export const packagesShim = \n\`${code.replaceAll("`", "\\`").replaceAll("$", "\\$")}\`;
+export const packagesShim = \n\`${code.replaceAll("\\", "\\\\").replaceAll("`", "\\`").replaceAll("$", "\\$")}\`;
 
 export const shimCode = (code: string) => \`
   \${packagesShim}

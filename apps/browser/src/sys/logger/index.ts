@@ -1,1 +1,1 @@
-export * from "./MarkdownLogger";
+export * from "./BrowserLogger";

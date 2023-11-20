@@ -1,15 +1,13 @@
 import {
   OpenAI,
   Chat,
-  ConsoleLogger,
-  Logger,
-  Env,
   ChatRole,
   ChatLogType,
   ChatLog,
   FunctionDefinition,
   LlmModel
-} from "@evo-ninja/agent-utils";
+} from "@/agent-core";
+import { ConsoleLogger, Logger, Env } from "@evo-ninja/agent-utils";
 import dotenv from "dotenv";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import path from "path";
@@ -54,9 +52,6 @@ describe('LLM Test Suite', () => {
       consoleLogger
     ], {
       promptUser: async () => "",
-      logUserPrompt: (response: string) => {
-        consoleLogger.info(`#User:\n${response}`);
-      }
     })
     const env = new Env(
       process.env as Record<string, string>

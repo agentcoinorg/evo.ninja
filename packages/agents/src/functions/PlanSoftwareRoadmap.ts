@@ -1,6 +1,6 @@
-import { AgentFunctionResult, ChatMessageBuilder, LlmApi, Tokenizer } from "@evo-ninja/agent-utils";
-import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
-import { Agent } from "../Agent";
+import { AgentFunctionResult, ChatMessageBuilder, LlmApi, Tokenizer } from "@/agent-core";
+import { LlmAgentFunctionBase } from "./utils";
+import { Agent } from "../agents/utils";
 
 interface PlanSoftwareRoadmapParameters {
   goal: string;

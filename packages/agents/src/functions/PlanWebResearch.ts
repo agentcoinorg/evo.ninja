@@ -6,10 +6,10 @@ import {
   LlmApi,
   Tokenizer,
   trimText,
-} from "@evo-ninja/agent-utils";
+} from "@/agent-core";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
-import { LlmAgentFunctionBase } from "../LlmAgentFunctionBase";
-import { Agent } from "../Agent";
+import { LlmAgentFunctionBase } from "./utils";
+import { Agent } from "../agents/utils";
 
 interface PlanWebResearchFuncParameters {
   goal: string;
@@ -46,12 +46,12 @@ export class PlanWebResearchFunction extends LlmAgentFunctionBase<PlanWebResearc
 
         const getPlan = this.askLlm(
           this.getPlanningPrompt(params.goal),
-          { model: "gpt-3.5-turbo-16k-0613", maxResponseTokens: 200 }
+          { model: "gpt-3.5-turbo-16k", maxResponseTokens: 200 }
         );
 
         const getFormatting = this.askLlm(
           this.getFormattingPrompt(params.goal),
-          { model: "gpt-3.5-turbo-16k-0613", maxResponseTokens: 200 }
+          { model: "gpt-3.5-turbo-16k", maxResponseTokens: 200 }
         );
 
         const [plan, formatting] = await Promise.all(

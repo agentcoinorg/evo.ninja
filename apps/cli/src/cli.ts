@@ -1,16 +1,14 @@
 import { createApp } from "./app";
-
 import { Logger, Timeout } from "@evo-ninja/agent-utils";
+import { AgentOutput } from "@evo-ninja/agents";
 import { program } from "commander";
 
 export async function cli(): Promise<void> {
   program
-    .argument("[goal]", "Goal to be achieved")
     .option("-s, --session <name>")
     .option("-t, --timeout <seconds>")
     .option("-r, --root <path>")
     .option("-d, --debug")
-    .option("-m, --messages <path>")
     .parse();
 
   const options = program.opts();
@@ -18,8 +16,8 @@ export async function cli(): Promise<void> {
   const timeout = new Timeout(
     options.timeout,
     (logger: Logger): void => {
-      logger.error("Agent has timeout");
-      process.exit(0);
+      logger.error("Agent has timed out");
+      process.exit(1);
     },
   );
 
@@ -27,63 +25,78 @@ export async function cli(): Promise<void> {
     timeout,
     rootDir: options.root,
     debug: options.debug,
-    messagesPath: options.messages,
-    sessionName: options.session
+    sessionName: options.session,
   });
 
   await app.logger.logHeader();
 
-  let goal: string | undefined = program.args[0]
+  async function handleGoal(goal: string) {
+    app.debugLog?.goalStart(goal);
 
-  if (!goal && !options.messages) {
-    goal = await app.logger.prompt("Enter your goal: ");
-  }
+    let iterator = app.evo.run({ goal });
+    let stepCounter = 1;
 
-  app.debugLog?.goalStart(goal);
+    while (true) {
+      app.debugLog?.stepStart();
+      app.logger.info(`## Step ${stepCounter}\n`)
+      const response = await iterator.next();
+      app.debugLog?.stepEnd();
 
-  let iterator = options.messages ? app.evo.runWithChat([...app.chat.messages]) : app.evo.run({ goal });
-
-  while(true) {
-    app.debugLog?.stepStart();
-
-    const response = await iterator.next();
-
-    app.debugLog?.stepEnd();
-
-    const logMessage = (message: any) => {
-      const messageStr = `${message.title}\n${message.content}`;
-      app.fileLogger.info(`# Evo:\n${messageStr}`);
-      app.consoleLogger.info(`Evo: ${messageStr}`);
-      app.debugLog?.stepLog(message);
-    }
-
-    const logError = (error: string) => {
-      app.logger.error(error ?? "Unknown error");
-      app.debugLog?.stepError(error);
-    }
-
-    if (response.done) {
-      if (!response.value.ok) {
-        logError(response.value.error ?? "Unknown error");
-      } else {
-        logMessage(response.value.value);
+      const logMessage = (message: AgentOutput) => {
+        const messageStr = `${message.title}  \n${message.content ?? ""}`;
+        app.logger.info(`### Action executed:\n${messageStr}`);
+        app.debugLog?.stepLog(messageStr);
       }
-      break;
+
+      const logError = (error: string) => {
+        app.logger.error(error);
+        app.debugLog?.stepError(error);
+      }
+
+      if (response.done) {
+        if (!response.value.ok) {
+          logError(response.value.error ?? "Unknown error");
+        } else {
+          logMessage(response.value.value);
+        }
+        break;
+      }
+
+      if (response.value && response.value) {
+        logMessage(response.value);
+      }
+      stepCounter++
     }
 
-    if (response.value && response.value) {
-      logMessage(response.value);
-    }
+    app.debugLog?.goalEnd();
+    return Promise.resolve();
   }
 
-  app.debugLog?.goalEnd();
+  let goal: string | undefined = program.args[0];
+  let goalCounter = 0;
+
+  while (true) {
+    if (!goal) {
+      goal = await app.logger.prompt("Enter your goal");
+    } else if (goalCounter === 0) {
+      app.fileLogger.info("# User\n **Enter your goal:** " + goal);
+    } else {
+      goal = await app.logger.prompt("Enter another goal");
+      app.evo.reset();
+    }
+
+    if (!goal || goal.toLocaleLowerCase() === "exit") break;
+
+    ++goalCounter;
+    await handleGoal(goal);
+  }
 
   return Promise.resolve();
 }
 
 cli()
   .then(() => {
-    process.exit();
+    process.exit(0);
   })
   .catch((err) => {
     console.error(err);
