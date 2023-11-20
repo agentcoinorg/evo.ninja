@@ -1,6 +1,6 @@
 import path from "path-browserify";
-import { Workspace } from "../../workspaces";
 import { ILogger } from "./Logger";
+import { Workspace } from "../workspaces";
 
 export class FileLogger implements ILogger {
   constructor(
