@@ -1,6 +1,6 @@
-import { AgentContext, AgentFunctionResult, AgentOutputType, AgentVariables, ArrayRecombiner, ChatMessageBuilder, LlmApi, Rag, TextChunker, Tokenizer, trimText } from "@/agent-core";
+import { AgentContext, AgentFunctionResult, AgentOutputType, AgentVariables, ArrayRecombiner, ChatMessageBuilder, LlmApi, Prompt, Rag, TextChunker, Tokenizer, trimText } from "@/agent-core";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
-import { Agent, Prompt } from "../agents/utils";
+import { Agent } from "../agents/utils";
 import { LlmAgentFunctionBase, processWebpage, searchOnGoogle } from "./utils";
 import axios from "axios"
 
