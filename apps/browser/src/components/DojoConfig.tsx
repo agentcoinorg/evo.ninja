@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useSession } from "next-auth/react"
 
 interface DojoConfigProps {
   apiKey: string | null;
@@ -6,9 +7,10 @@ interface DojoConfigProps {
 }
 
 function DojoConfig(props: DojoConfigProps) {
+  const { data: session } = useSession()
   const [apiKey, setApiKey] = useState<string>(props.apiKey || "");
   const { onConfigSaved } = props;
-
+  console.log(session)
   return (
     <div className="absolute inset-0 z-50 bg-neutral-900/80">
       <div className="fixed left-1/2 top-1/2 flex w-96 -translate-x-1/2 -translate-y-1/2 flex-col gap-4 rounded-lg bg-neutral-900 p-12 text-neutral-50">

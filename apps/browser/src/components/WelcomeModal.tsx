@@ -1,6 +1,7 @@
 import { Dialog, Transition } from '@headlessui/react'
 import clsx from 'clsx'
 import { Fragment } from 'react'
+import { signIn } from "next-auth/react"
 import { EXO_FONT } from '../../pages/_app'
 
 export const WELCOME_MODAL_SEEN_STORAGE_KEY = "welcome-modal-seen" 
@@ -37,13 +38,22 @@ export default function WelcomeModal({ isOpen, onClose }: { isOpen: boolean, onC
                     </p>
                   </div>
 
-                  <div className="mt-4 flex justify-center">
+                  {/* <div className="mt-4 flex justify-center">
                     <button
                       type="button"
                       className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500"
                       onClick={onClose}
                     >
                       Try it out
+                    </button>
+                  </div> */}
+                  <div className="mt-4 flex justify-center">
+                    <button
+                      type="button"
+                      className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500"
+                      onClick={() => signIn()}
+                    >
+                      Sign in
                     </button>
                   </div>
                 </Dialog.Panel>
