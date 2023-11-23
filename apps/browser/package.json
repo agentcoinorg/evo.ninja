@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@auth/supabase-adapter": "0.1.9",
     "@evo-ninja/agent-utils": "0.1.0",
     "@evo-ninja/agents": "0.1.0",
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
@@ -11,6 +12,7 @@
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@headlessui/react": "^1.7.17",
     "@nerfzael/memory-fs": "0.1.1",
+    "@supabase/supabase-js": "2.38.5",
     "buffer": "6.0.3",
     "clsx": "^2.0.0",
     "file-saver": "^2.0.5",

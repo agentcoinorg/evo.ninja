@@ -6,12 +6,13 @@ import FileSaver from "file-saver";
 import { trackMessageSent, trackThumbsFeedback} from './googleAnalytics';
 import { ExamplePrompt, examplePrompts } from "../examplePrompts";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload, faQuestion, faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
+import { faDownload, faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
 import { faThumbsUp, faThumbsDown, faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 import { InMemoryFile } from "@nerfzael/memory-fs";
-
+import { createClient } from "@supabase/supabase-js";
 import clsx from "clsx";
 import SidebarIcon from "./SidebarIcon";
+import { useSession } from "next-auth/react"
 
 export interface ChatMessage {
   title: string;
@@ -53,6 +54,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
   const [hasDownvoted, setHasDownvoted] = useState<boolean>(false);
   const [showEvoNetPopup, setShowEvoNetPopup] = useState<boolean>(false);
   const [showPrompts, setShowPrompts] = useState<boolean>(true);
+  const { data: session } = useSession()
 
   const pausedRef = useRef(paused);
   useEffect(() => {
@@ -164,6 +166,30 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
   };
 
   const handleStart = async () => {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL as string,
+      process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY as string
+    );
+    const promptsOfTodayFromUser = await supabase
+      .from("prompts")
+      .select()
+      .eq("user_email", session?.user?.email)
+      .eq("submission_date", '2023-11-23T18:24:02.036Z');
+      // .filter("user_email", "eq", session?.user?.email)
+      // .filter("submission_date", "eq", "2023-11-22T18:24:02.036Z")
+    console.log(promptsOfTodayFromUser)
+    // const promptAdded = await supabase
+    //   .from("prompts")
+    //   .insert({
+    //     user_email: session?.user?.email,
+    //     prompt: message,
+    //     submission_date: new Date().toISOString(),
+    //     usage_count: 1,
+    //   })
+    //   .select();
+    // console.log(promptAdded)
+    // supabase.
+    // const users = await supabase.from("users").select()
     handleSend();
   }
 
