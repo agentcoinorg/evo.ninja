@@ -1,13 +1,48 @@
 #!/bin/bash
 
-kill $(lsof -t -i :8000)
+# Ensure all commands are run within this script's directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+cd "$SCRIPT_DIR"
 
+# Kill any running API instances
+pid=$(lsof -t -i :8000)
+if [ ! -z "$pid" ]; then
+  kill $pid
+fi
+
+# Ensure an environment file exists
 if [ ! -f .env ]; then
   cp .env.template .env
-  echo "Please add your api keys to the .env file."
+  echo "Error: Please add your api keys to the .env file."
+  exit 1
 fi
+
+# Get the Node.js version
+node_version=$(node --version | cut -d 'v' -f 2)
+
+# Check if Node.js version is >= 20
+version_ge() { test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1"; }
+
+if version_ge "$node_version" "20"; then
+    echo "Node.js version ($node_version) is greater than or equal to 20."
+else
+    echo "Error: Node.js version ($node_version) is less than 20."
+    exit 1
+fi
+
+# Check if Yarn is installed
+if command -v yarn >/dev/null 2>&1; then
+    echo "Yarn is installed."
+else
+    echo "Error: Yarn is not installed."
+    exit 1
+fi
+
+# Install and build evo.ninja
 yarn
 yarn build
+
+# Start the API
 yarn start:api > /dev/null 2>&1 &
 
 # Disown the backgrounded process so it's not terminated when the script exits
