@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef, useCallback } from "react";
+import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef, useCallback, SetStateAction, Dispatch } from "react";
 import { Evo } from "@evo-ninja/agents";
 import ReactMarkdown from "react-markdown";
 import FileSaver from "file-saver";
@@ -30,9 +30,11 @@ export interface ChatProps {
   onSidebarToggleClick: () => void;
   onUploadFiles: (files: InMemoryFile[]) => void;
   setCapReached: () => boolean | void;
+  setSignInModalOpen: Dispatch<SetStateAction<boolean>>
+  loadedOpenAiApiKey: boolean
 }
 
-const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSidebarToggleClick, sidebarOpen, onUploadFiles, setCapReached }: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSidebarToggleClick, sidebarOpen, onUploadFiles, setCapReached, setSignInModalOpen, loadedOpenAiApiKey }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
   const [paused, setPaused] = useState<boolean>(false);
@@ -166,6 +168,11 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
   };
 
   const handleStart = async () => {
+    if (!loadedOpenAiApiKey && !session?.user) {
+      setSignInModalOpen(true)
+      return
+    }
+
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL as string,
       process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY as string

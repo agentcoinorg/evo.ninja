@@ -25,6 +25,7 @@ import { createInBrowserScripts } from "../src/scripts";
 import WelcomeModal, { WELCOME_MODAL_SEEN_STORAGE_KEY } from "../src/components/WelcomeModal";
 import { BrowserLogger } from "../src/sys/logger";
 import { checkLlmModel } from "../src/checkLlmModel";
+import SigninModal from "../src/components/SigninModal";
 
 function Dojo() {
   const [dojoConfig, setDojoConfig] = useState<{
@@ -37,6 +38,7 @@ function Dojo() {
     complete: false
   });
   const [welcomeModalOpen, setWelcomeModalOpen] = useState<boolean>(false);
+  const [signInModalOpen, setSignInModalOpen] = useState<boolean>(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [configOpen, setConfigOpen] = useState(false);
   const [dojoError, setDojoError] = useState<unknown | undefined>(undefined);
@@ -238,14 +240,15 @@ function Dojo() {
                     return true
                   }
                 }}
+                loadedOpenAiApiKey={!!dojoConfig.openAiApiKey}
+                setSignInModalOpen={setSignInModalOpen}
               />
             )}
           </>
         </div>
       </div>
-      <WelcomeModal isOpen={welcomeModalOpen} onClose={() => {
-        setWelcomeModalOpen(false);
-      }} />
+      <WelcomeModal isOpen={welcomeModalOpen} onClose={() => setWelcomeModalOpen(false)} />
+      <SigninModal isOpen={signInModalOpen} onClose={() => setSignInModalOpen(false)} onConfigSaved={onConfigSaved} />
     </>
   );
 }
