@@ -9,7 +9,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
 import { faThumbsUp, faThumbsDown, faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 import { InMemoryFile } from "@nerfzael/memory-fs";
-import { createClient } from "@supabase/supabase-js";
 import clsx from "clsx";
 import SidebarIcon from "./SidebarIcon";
 import { useSession } from "next-auth/react"
@@ -169,35 +168,34 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
 
   const handleStart = async () => {
     if (!loadedOpenAiApiKey && !session?.user) {
-      setSignInModalOpen(true)
-      return
+      setSignInModalOpen(true);
+      return;
     }
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-      process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY as string
-    );
-    const { data: prompts } = await supabase
-      .from("prompts")
-      .select()
-      .eq("user_email", session?.user?.email)
-      .eq("submission_date", new Date().toISOString());
+    if (!loadedOpenAiApiKey) {
+      const getPromptRequest = await fetch(
+        `/api/supabase/prompts?email=${session?.user?.email}`
+      );
+      const { prompts } = await getPromptRequest.json();
+      if (prompts?.length && prompts?.length >= 6) {
+        const capReached = setCapReached();
+        if (capReached) return;
+      } else {
+        const addPromptRequest = await fetch(`/api/supabase/prompts`, {
+          method: "POST",
+          body: JSON.stringify({
+            email: session?.user?.email,
+            message,
+          }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
 
-    if (prompts?.length && prompts?.length >= 5) {
-      const capReached = setCapReached()
-      if (capReached) return
-    } else {
-      const promptAdded = await supabase
-        .from("prompts")
-        .insert({
-          user_email: session?.user?.email,
-          prompt: message,
-          submission_date: new Date().toISOString(),
-        })
-        .select();
-
-      if (promptAdded.error) {
-        console.log("Error adding new prompt: ", promptAdded.error.message)
+        if (!addPromptRequest.ok) {
+          console.log("Error trying to add prompt request");
+          return
+        }
       }
     }
     handleSend();
