@@ -177,7 +177,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
         `/api/supabase/prompts?email=${session?.user?.email}`
       );
       const { prompts } = await getPromptRequest.json();
-      if (prompts?.length && prompts?.length >= 6) {
+      if (prompts?.length && prompts?.length >= 20) {
         const capReached = setCapReached();
         if (capReached) return;
       } else {

@@ -26,6 +26,7 @@ import WelcomeModal, { WELCOME_MODAL_SEEN_STORAGE_KEY } from "../src/components/
 import { BrowserLogger } from "../src/sys/logger";
 import { checkLlmModel } from "../src/checkLlmModel";
 import SigninModal from "../src/components/SigninModal";
+import { LlmProxy } from "../src/LlmProxy";
 
 function Dojo() {
   const [dojoConfig, setDojoConfig] = useState<{
@@ -154,19 +155,25 @@ function Dojo() {
         }
 
         const env = new Env({
-          OPENAI_API_KEY: dojoConfig.openAiApiKey as string || process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+          OPENAI_API_KEY: dojoConfig.openAiApiKey || "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",
           GPT_MODEL: model,
           CONTEXT_WINDOW_TOKENS: "8000",
           MAX_RESPONSE_TOKENS: "2000",
         });
 
-        const llm = new OpenAIChatCompletion(
-          env.OPENAI_API_KEY,
-          env.GPT_MODEL as LlmModel,
-          env.CONTEXT_WINDOW_TOKENS,
-          env.MAX_RESPONSE_TOKENS,
-          logger
-        );
+        const llm = dojoConfig.openAiApiKey
+          ? new OpenAIChatCompletion(
+              env.OPENAI_API_KEY,
+              env.GPT_MODEL as LlmModel,
+              env.CONTEXT_WINDOW_TOKENS,
+              env.MAX_RESPONSE_TOKENS,
+              logger
+            )
+          : new LlmProxy(
+              env.GPT_MODEL as LlmModel,
+              env.CONTEXT_WINDOW_TOKENS,
+              env.MAX_RESPONSE_TOKENS
+            );
 
         const userWorkspace = new InMemoryWorkspace();
         setUserWorkspace(userWorkspace);
