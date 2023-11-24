@@ -26,7 +26,7 @@ export default async function handler(
           });
         })
       );
-      return res.status(200).json({ embeddings })
+      return res.status(200).json({ embeddings: embeddings.flat() })
     } catch (e: any) {
       console.log(e)
       // Rate limit error
