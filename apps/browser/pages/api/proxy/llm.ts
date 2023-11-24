@@ -40,7 +40,6 @@ export default async function handler(
 
       return res.status(200).json({ message: choice.message });
     } catch (e: any) {
-      console.log(e)
       // Rate limit error
       if (e instanceof OpenAIApi.APIError && e.status === 429) {
         return res.status(429).json({
@@ -53,6 +52,6 @@ export default async function handler(
       });
     }
   } else {
-    throw new Error("Method: " + req.method + " not support for endpoint /api/llm/proxy")
+    throw new Error("Method: " + req.method + " not support for endpoint /api/proxy/llm")
   }
 }

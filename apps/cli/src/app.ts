@@ -6,7 +6,9 @@ import {
   DebugLog,
   LlmApi,
   LlmModel,
-  OpenAIChatCompletion
+  OpenAIChatCompletion,
+  OpenAIEmbeddingAPI,
+  DEFAULT_ADA_CONFIG
 } from "@evo-ninja/agents";
 import {
   Env,
@@ -115,10 +117,13 @@ export function createApp(config?: AppConfig): App {
     llm = new DebugLlmApi(debugLog, llm);
   }
 
+  const embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base, DEFAULT_ADA_CONFIG);
+
   // Evo
   const evo = new Evo(
     new AgentContext(
       llm,
+      embedding,
       chat,
       logger,
       userWorkspace,

@@ -25,7 +25,7 @@ export class LlmProxy implements LlmApi {
     functionDefinitions?: ChatCompletionTool.Function[] | undefined,
     _?: LlmOptions | undefined
   ): Promise<ChatCompletionMessage | undefined> {
-    const llmResponse = await fetch("/api/llm/proxy", {
+    const llmResponse = await fetch("/api/proxy/llm", {
       method: "POST",
       body: JSON.stringify({
         messages: chatLog.messages,

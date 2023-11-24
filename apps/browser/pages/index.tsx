@@ -20,6 +20,8 @@ import {
   OpenAIChatCompletion,
   LlmModel,
   Chat as EvoChat,
+  OpenAIEmbeddingAPI,
+  DEFAULT_ADA_CONFIG,
 } from "@evo-ninja/agents";
 import { createInBrowserScripts } from "../src/scripts";
 import WelcomeModal, { WELCOME_MODAL_SEEN_STORAGE_KEY } from "../src/components/WelcomeModal";
@@ -27,6 +29,7 @@ import { BrowserLogger } from "../src/sys/logger";
 import { checkLlmModel } from "../src/checkLlmModel";
 import SigninModal from "../src/components/SigninModal";
 import { LlmProxy } from "../src/LlmProxy";
+import { EmbeddingProxy } from "../src/EmbeddingProxy";
 
 function Dojo() {
   const [dojoConfig, setDojoConfig] = useState<{
@@ -155,7 +158,7 @@ function Dojo() {
         }
 
         const env = new Env({
-          OPENAI_API_KEY: dojoConfig.openAiApiKey || "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",
+          OPENAI_API_KEY: dojoConfig.openAiApiKey || " ",
           GPT_MODEL: model,
           CONTEXT_WINDOW_TOKENS: "8000",
           MAX_RESPONSE_TOKENS: "2000",
@@ -175,6 +178,10 @@ function Dojo() {
               env.MAX_RESPONSE_TOKENS
             );
 
+        const embedding = dojoConfig.openAiApiKey
+          ? new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base)
+          : new EmbeddingProxy(cl100k_base, DEFAULT_ADA_CONFIG);
+
         const userWorkspace = new InMemoryWorkspace();
         setUserWorkspace(userWorkspace);
 
@@ -186,6 +193,7 @@ function Dojo() {
           new Evo(
             new AgentContext(
               llm,
+              embedding,
               chat,
               logger,
               userWorkspace,
