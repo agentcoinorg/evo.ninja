@@ -49,6 +49,7 @@ function Dojo() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   // TODO: setGoalEnded is unused?
   const [goalEnded, setGoalEnded] = useState<boolean>(false);
+  const [capReached, setCapReached] = useState<boolean>(false)
 
   useEffect(() => {
     if (window.innerWidth <= 1024) {
@@ -108,23 +109,20 @@ function Dojo() {
     } else {
       localStorage.setItem("openai-api-key", openAiApiKey);
     }
-
+    
     setDojoConfig({
       openAiApiKey,
       loaded: true,
       complete
     });
+    setCapReached(false)
     setConfigOpen(false);
   };
 
   useEffect(() => {
     (async () => {
+      setDojoError(undefined);
       try {
-        if (!dojoConfig.loaded || !dojoConfig.complete) {
-          return;
-        }
-        setDojoError(undefined);
-
         const browserLogger = new BrowserLogger({
           onLog: (message: string) => {
             onMessage({
@@ -142,17 +140,19 @@ function Dojo() {
 
         // Point by default to GPT-4 unless the given api key's account doesn't support it
         let model = "gpt-4"
-        try {
-          model = await checkLlmModel(dojoConfig.openAiApiKey as string, model);
-        } catch (e: any) {
-          if (e.message.includes("Incorrect API key provided")) {
-            setDojoError("Open AI API key is not correct. Please make sure it has the correct format")
-            return
+        if (dojoConfig.openAiApiKey) {
+          try {
+            model = await checkLlmModel(dojoConfig.openAiApiKey as string, model);
+          } catch (e: any) {
+            if (e.message.includes("Incorrect API key provided")) {
+              setDojoError("Open AI API key is not correct. Please make sure it has the correct format")
+              return
+            }
           }
         }
 
         const env = new Env({
-          OPENAI_API_KEY: dojoConfig.openAiApiKey as string,
+          OPENAI_API_KEY: dojoConfig.openAiApiKey as string || process.env.NEXT_PUBLIC_OPENAI_API_KEY,
           GPT_MODEL: model,
           CONTEXT_WINDOW_TOKENS: "8000",
           MAX_RESPONSE_TOKENS: "2000",
@@ -195,10 +195,11 @@ function Dojo() {
   return (
     <>
       <div className="flex h-full bg-neutral-800 bg-landing-bg bg-repeat text-center text-neutral-400">
-        {(((dojoConfig.loaded && !dojoConfig.complete) || configOpen) && !welcomeModalOpen) && (
+        {(configOpen || capReached) && (
           <DojoConfig
             apiKey={dojoConfig.openAiApiKey}
             onConfigSaved={onConfigSaved}
+            capReached={capReached}
           />
         )}
         <div className={clsx(
@@ -231,6 +232,12 @@ function Dojo() {
                   setSidebarOpen(!sidebarOpen);
                 }}
                 onUploadFiles={setUploadedFiles}
+                setCapReached={() => {
+                  if (!dojoConfig.openAiApiKey) {
+                    setCapReached(true)
+                    return true
+                  }
+                }}
               />
             )}
           </>

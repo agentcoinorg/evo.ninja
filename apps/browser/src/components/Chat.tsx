@@ -29,10 +29,10 @@ export interface ChatProps {
   sidebarOpen: boolean;
   onSidebarToggleClick: () => void;
   onUploadFiles: (files: InMemoryFile[]) => void;
+  setCapReached: () => boolean | void;
 }
 
-const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSidebarToggleClick, sidebarOpen, onUploadFiles }: ChatProps) => {
-
+const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSidebarToggleClick, sidebarOpen, onUploadFiles, setCapReached }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
   const [paused, setPaused] = useState<boolean>(false);
@@ -170,28 +170,31 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
       process.env.NEXT_PUBLIC_SUPABASE_URL as string,
       process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY as string
     );
-    const promptsOfTodayFromUser = await supabase
+    const { data: prompts } = await supabase
       .from("prompts")
       .select()
       .eq("user_email", session?.user?.email)
-      .eq("submission_date", '2023-11-23T18:24:02.036Z');
-      // .filter("user_email", "eq", session?.user?.email)
-      // .filter("submission_date", "eq", "2023-11-22T18:24:02.036Z")
-    console.log(promptsOfTodayFromUser)
-    // const promptAdded = await supabase
-    //   .from("prompts")
-    //   .insert({
-    //     user_email: session?.user?.email,
-    //     prompt: message,
-    //     submission_date: new Date().toISOString(),
-    //     usage_count: 1,
-    //   })
-    //   .select();
-    // console.log(promptAdded)
-    // supabase.
-    // const users = await supabase.from("users").select()
+      .eq("submission_date", new Date().toISOString());
+
+    if (prompts?.length && prompts?.length >= 5) {
+      const capReached = setCapReached()
+      if (capReached) return
+    } else {
+      const promptAdded = await supabase
+        .from("prompts")
+        .insert({
+          user_email: session?.user?.email,
+          prompt: message,
+          submission_date: new Date().toISOString(),
+        })
+        .select();
+
+      if (promptAdded.error) {
+        console.log("Error adding new prompt: ", promptAdded.error.message)
+      }
+    }
     handleSend();
-  }
+  };
 
   const handleSend = async (newMessage?: string) => {
     onMessage({
