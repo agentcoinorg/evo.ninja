@@ -5,9 +5,10 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$SCRIPT_DIR"
 
 # Kill any running API instances
-pid=$(lsof -t -i :8000)
-if [ ! -z "$pid" ]; then
-  kill $pid
+PORT=8000
+PID=$(lsof -t -i :$PORT)
+if [ ! -z "$PID" ]; then
+  kill $PID
 fi
 
 # Ensure an environment file exists
@@ -44,6 +45,7 @@ yarn build
 
 # Start the API
 yarn start:api > /dev/null 2>&1 &
+echo "✓ evo.ninja running agent-protocol at localhost:$PORT"
 
 # Disown the backgrounded process so it's not terminated when the script exits
 disown
