@@ -3,7 +3,9 @@ import {
   LlmApi,
   AgentContext, 
   LlmModel,
-  OpenAIChatCompletion
+  OpenAIChatCompletion,
+  OpenAIEmbeddingAPI,
+  DEFAULT_ADA_CONFIG
 } from "@/agent-core";
 import * as rimraf from "rimraf";
 import dotenv from "dotenv";
@@ -65,6 +67,7 @@ describe("Data Analyst Agent Test Suite", () => {
 
     const workspace = new FileSystemWorkspace(testCaseDir);
     const internals = new SubWorkspace(".evo", workspace);
+    const embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base, DEFAULT_ADA_CONFIG);
 
     if (pathsForFilesToInclude) {
       for (const filePath of pathsForFilesToInclude) {
@@ -81,6 +84,7 @@ describe("Data Analyst Agent Test Suite", () => {
       agent: new CsvAnalystAgent(
         new AgentContext(
           debugLlm,
+          embedding,
           chat,
           logger,
           workspace,

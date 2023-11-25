@@ -1,7 +1,9 @@
 import {
   Chat,
+  DEFAULT_ADA_CONFIG,
   LlmApi,
   OpenAIChatCompletion,
+  OpenAIEmbeddingAPI,
 } from "@/agent-core";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import * as rimraf from "rimraf";
@@ -63,11 +65,13 @@ describe('Dev Agent Test Suite', () => {
 
     const workspace = new FileSystemWorkspace(testCaseDir);
     const internals = new SubWorkspace(".evo", workspace);
+    const embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base, DEFAULT_ADA_CONFIG);
 
     return {
       agent: new ScripterAgent(
         new AgentContext(
           debugLlm,
+          embedding,
           chat,
           logger,
           workspace,

@@ -6,6 +6,8 @@ import {
   Rag,
   Prompt,
   OpenAIChatCompletion,
+  OpenAIEmbeddingAPI,
+  DEFAULT_ADA_CONFIG,
 } from "@/agent-core";
 import dotenv from "dotenv";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
@@ -50,6 +52,7 @@ describe('LLM Test Suite', () => {
       logger
     );
     const chat = new Chat(cl100k_base);
+    const embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base, DEFAULT_ADA_CONFIG);
 
     const maxTokensToUse = maxContextTokens(llm) * 0.4;
     const tokensForPreview = maxTokensToUse * 0.7;
@@ -57,7 +60,7 @@ describe('LLM Test Suite', () => {
 
     const text = fs.readFileSync(__dirname + "/revenue.txt", "utf-8");
 
-    const context = new AgentContext(llm, chat, logger, new InMemoryWorkspace(), new InMemoryWorkspace(), env, undefined as unknown as Scripts, undefined as unknown as WrapClient, undefined);
+    const context = new AgentContext(llm, embedding, chat, logger, new InMemoryWorkspace(), new InMemoryWorkspace(), env, undefined as unknown as Scripts, undefined as unknown as WrapClient, undefined);
 
     for (let i = 0; i < 20; i++) {
       const bigPreview = await Rag.filterWithSurroundingText(
