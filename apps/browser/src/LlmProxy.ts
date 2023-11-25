@@ -2,6 +2,7 @@ import { ChatLogs, LlmApi, LlmOptions } from "@evo-ninja/agents";
 import { ChatCompletionMessage, ChatCompletionTool } from "openai/resources";
 
 export class LlmProxy implements LlmApi {
+  private MAX_RATE_LIMIT_RETRIES = 5;
   constructor(
     private _defaultModel: string,
     private _defaultMaxTokens: number,
@@ -23,7 +24,8 @@ export class LlmProxy implements LlmApi {
   async getResponse(
     chatLog: ChatLogs,
     functionDefinitions?: ChatCompletionTool.Function[] | undefined,
-    _?: LlmOptions | undefined
+    _?: LlmOptions | undefined,
+    tries?: number
   ): Promise<ChatCompletionMessage | undefined> {
     const llmResponse = await fetch("/api/proxy/llm", {
       method: "POST",
@@ -43,12 +45,19 @@ export class LlmProxy implements LlmApi {
 
     if (!llmResponse.ok) {
       if (llmResponse.status === 400) {
-        const error = await llmResponse.json()
-        throw Error("Error from OpenAI Chat completion: " + error.error)
+        const error = await llmResponse.json();
+        throw Error("Error from OpenAI Chat completion: " + error.error);
       }
       if (llmResponse.status === 429) {
         await new Promise((resolve) => setTimeout(resolve, 15000));
-        return this.getResponse(chatLog, functionDefinitions)
+        if (!tries || tries < this.MAX_RATE_LIMIT_RETRIES) {
+          return this.getResponse(
+            chatLog,
+            functionDefinitions,
+            undefined,
+            tries == undefined ? 0 : ++tries
+          );
+        }
       }
       throw Error("Error trying to get response from LLM");
     }

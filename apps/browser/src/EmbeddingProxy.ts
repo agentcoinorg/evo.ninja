@@ -6,6 +6,7 @@ import {
 } from "@evo-ninja/agents";
 
 export class EmbeddingProxy implements EmbeddingApi {
+  private MAX_RATE_LIMIT_RETRIES = 5;
   constructor(
     private tokenizer: Tokenizer,
     private config: {
@@ -16,7 +17,8 @@ export class EmbeddingProxy implements EmbeddingApi {
   ) {}
 
   public async createEmbeddings(
-    input: string | string[]
+    input: string | string[],
+    tries?: number
   ): Promise<EmbeddingCreationResult[]> {
     const inputs = Array.isArray(input) ? input : [input];
     for (const input of inputs) {
@@ -33,7 +35,7 @@ export class EmbeddingProxy implements EmbeddingApi {
       method: "POST",
       body: JSON.stringify({
         input: batchedInputs,
-        model: this.config.model
+        model: this.config.model,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -47,7 +49,9 @@ export class EmbeddingProxy implements EmbeddingApi {
       }
       if (embeddingResponse.status === 429) {
         await new Promise((resolve) => setTimeout(resolve, 15000));
-        return this.createEmbeddings(input);
+        if (!tries || tries < this.MAX_RATE_LIMIT_RETRIES) {
+          return this.createEmbeddings(input, tries == undefined ? 0 : ++tries);
+        }
       }
       throw Error("Error trying to get response from LLM");
     }
