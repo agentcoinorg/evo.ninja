@@ -39,7 +39,7 @@ export default function SigninModal({
                   )}
                 >
                   <Dialog.Title as="h3" className="text-lg font-semibold">
-                    Please add your OpenAI Api key
+                    Please add your OpenAI API key
                   </Dialog.Title>
                   <div className="flex justify-center items-center gap-2">
                     <input
