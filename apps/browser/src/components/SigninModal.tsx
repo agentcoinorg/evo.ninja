@@ -35,21 +35,21 @@ export default function SigninModal({
                 <Dialog.Panel
                   className={clsx(
                     EXO_FONT.className,
-                    "w-full max-w-md transform overflow-hidden rounded-2xl bg-neutral-800 p-6 text-left align-middle text-neutral-50 shadow-xl transition-all"
+                    "w-full max-w-sm transform overflow-hidden rounded-2xl bg-neutral-800 p-6 text-left align-middle text-neutral-50 shadow-xl transition-all flex flex-col items-center gap-4"
                   )}
                 >
                   <Dialog.Title as="h3" className="text-lg font-semibold">
-                    Please sign in or add your OpenAI Api key
+                    Please add your OpenAI Api key
                   </Dialog.Title>
-                  <div className="mt-4 flex justify-center">
+                  <div className="flex justify-center items-center gap-2">
                     <input
-                      className="rounded border border-neutral-600 bg-neutral-950 p-2.5 text-neutral-50 outline-none transition-all"
+                      className="rounded-xl border border-neutral-600 bg-neutral-950 p-2.5 text-neutral-50 outline-none transition-all"
                       type="text"
                       value={apiKey}
                       onChange={(e) => setApiKey(e.target.value)}
                     />
                     <button
-                      className="cursor-pointer rounded-xl border-none bg-orange-600 p-2.5 text-white transition-all hover:bg-orange-500"
+                      className="cursor-pointer rounded-xl border-none bg-orange-600 p-2.5 text-neutral-50 transition-all hover:bg-orange-500"
                       onClick={() => {
                         onConfigSaved(apiKey)
                         onClose()
@@ -58,11 +58,13 @@ export default function SigninModal({
                       Save
                     </button>
                   </div>
+                  <h3 className="flex justify-center items-center text-lg font-semibold">
                   - or -
-                  <div className="mt-4 flex justify-center">
+                  </h3>
+                  <div className="flex justify-center">
                     <button
                       type="button"
-                      className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500"
+                      className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-50 shadow-md outline-none transition-all hover:bg-orange-500"
                       onClick={() => signIn()}
                     >
                       Sign in
