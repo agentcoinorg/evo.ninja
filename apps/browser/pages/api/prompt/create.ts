@@ -15,24 +15,25 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (!(req.method === "POST")) {
-    return res.status(404);
+    return res.status(404).send({});
   }
   const session = await getServerSession(req, res, authOptions);
   if (!session) {
-    return res.status(401)
+    return res.status(401).send({})
   }
+
   const { data: prompts, error } = await supabase
-    .from("prompts")
-    .select()
-    .eq("user_email", session.user?.email)
-    .eq("submission_date", new Date().toISOString());
-
+  .from("prompts")
+  .select()
+  .eq("user_email", session.user?.email)
+  .eq("submission_date", new Date().toISOString());
+  
   if (error) {
-    return res.status(500);
+    return res.status(500).send({});
   }
-
+  
   if (prompts?.length && prompts.length >= PROMPTS_CAP) {
-    return res.status(403);
+    return res.status(403).send({});
   } else {
     const promptAdded = await supabase
       .from("prompts")
@@ -44,11 +45,9 @@ export default async function handler(
       .select()
       .single();
     if (promptAdded.error) {
-      return res.status(500).json({
-        error: promptAdded.error.message,
-      });
+      return res.status(500)
     }
-    return res.status(200).json({
+    return res.status(200).send({
       promptAdded: promptAdded.data,
     });
   }
