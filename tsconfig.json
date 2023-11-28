@@ -3,7 +3,7 @@
     "outDir": "build",
     "esModuleInterop": true,
     "lib": [
-      "es2021",
+      "ESNext",
       "es5",
       "dom"
     ],

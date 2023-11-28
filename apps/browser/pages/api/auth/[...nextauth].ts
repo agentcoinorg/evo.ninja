@@ -1,8 +1,17 @@
-import NextAuth, { Session, User } from "next-auth";
+import NextAuth, { DefaultSession, Session, User } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
 import { SupabaseAdapter } from "@auth/supabase-adapter";
 import jwt from "jsonwebtoken"
+
+declare module "next-auth" {
+  interface Session {
+    supabaseAccessToken?: string
+    user: {
+      address: string
+    } & DefaultSession["user"]
+  }
+}
 
 export const authOptions = {
   providers: [
