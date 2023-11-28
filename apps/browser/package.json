@@ -24,7 +24,8 @@
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
     "react-markdown": "^8.0.7",
-    "react-modal": "3.16.1"
+    "react-modal": "3.16.1",
+    "bullmq": "4.14.4"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "14.0.1",
