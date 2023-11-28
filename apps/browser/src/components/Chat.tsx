@@ -167,7 +167,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
   };
 
   const handleSend = async (newMessage?: string) => {
-    const authorized = await handlePromptAuth(message)
+    const authorized = await handlePromptAuth(newMessage ?? message)
     if (!authorized) {
       return
     }
