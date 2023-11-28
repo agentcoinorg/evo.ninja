@@ -25,7 +25,7 @@ export async function canUseSubsidy(
   const subsidizedCount = goal.data[subsidizedProp];
 
   if (subsidizedCount > SUBSIDY_CAP[subsidy]) {
-    console.log(`Subsity limit reached for '${subsidy}'`);
+    console.error(`Subsity limit reached for '${subsidy}'`);
     return false;
   }
 
@@ -35,7 +35,7 @@ export async function canUseSubsidy(
     .eq("id", goal.data.id);
 
   if (updateSubsidized.error) {
-    console.log(`Error updating ${subsidizedProp}: `, updateSubsidized.error);
+    console.error(`Error updating ${subsidizedProp}: `, updateSubsidized.error);
     return false;
   }
 

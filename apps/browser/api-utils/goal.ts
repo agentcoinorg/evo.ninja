@@ -15,12 +15,12 @@ export async function isGoalValid(
     .single();
 
   if (goal.error) {
-    console.log("Error fetching prompt: ", goal.error);
+    console.error("Error fetching prompt: ", goal.error);
     return false;
   }
 
   if (!goal.data.user_email) {
-    console.log("Goal without user is not valid");
+    console.error("Goal without user is not valid");
     return false;
   }
 

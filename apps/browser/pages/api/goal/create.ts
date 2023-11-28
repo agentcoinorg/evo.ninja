@@ -24,11 +24,12 @@ export default async function handler(
       .insert({
         prompt: req.body.message,
         submission_date: currentDate,
+        subsidized: false
       })
       .select()
       .single();
     if (goalAdded.error) {
-      console.log(goalAdded.error);
+      console.error(goalAdded.error);
       return res.status(500).send({});
     }
     return res.status(200).send({
@@ -51,7 +52,7 @@ export default async function handler(
     .eq("submission_date", currentDate);
 
   if (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).send({});
   }
 
@@ -65,12 +66,13 @@ export default async function handler(
       user_email: session.user?.email,
       prompt: req.body.message,
       submission_date: new Date().toISOString(),
+      subsidized: true
     })
     .select()
     .single();
 
   if (goalAdded.error) {
-    console.log(error);
+    console.error(goalAdded.error);
     return res.status(500).send({});
   }
   return res.status(200).send({

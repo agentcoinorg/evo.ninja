@@ -64,8 +64,7 @@ export default async function handler(
       return res.status(429).send({})
     }
 
-    console.log(e);
-
+    console.error(e);
     return res.status(500).send({})
   }
 }
