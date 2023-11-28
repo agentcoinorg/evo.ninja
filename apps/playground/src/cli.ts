@@ -7,8 +7,7 @@ import {
   Chat,
   AgentContext,
   OpenAIChatCompletion,
-  OpenAIEmbeddingAPI,
-  DEFAULT_ADA_CONFIG,
+  OpenAIEmbeddingAPI
 } from "@evo-ninja/agents";
 import { run } from "./demos/basic";
 import { LlmAdapter } from "./utils";
@@ -32,7 +31,7 @@ export async function cli(): Promise<void> {
     logger
   );
   const chat = new Chat(cl100k_base);
-  const embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base, DEFAULT_ADA_CONFIG);
+  const embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base);
   const context = new AgentContext(
     llm,
     embedding,

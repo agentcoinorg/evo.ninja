@@ -4,7 +4,6 @@ import {
   AgentContext,
   OpenAIChatCompletion,
   OpenAIEmbeddingAPI,
-  DEFAULT_ADA_CONFIG,
 } from "@/agent-core";
 import * as rimraf from "rimraf";
 import dotenv from "dotenv";
@@ -76,7 +75,7 @@ describe('Planner Agent Test Suite', () => {
       const fileContents = fs.readFileSync(filePath, "utf-8");
       workspace.writeFileSync(fileName, fileContents);
     }
-    const embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base, DEFAULT_ADA_CONFIG);
+    const embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base);
 
     return {
       agent: new PlannerAgent(

@@ -4,7 +4,7 @@ import path from "path";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
 import { WebSearchFuncParameters, WebSearchFunction } from "../WebSearch";
 import { ResearcherAgent } from "../../agents";
-import { AgentContext, AgentFunctionResult, Chat, DEFAULT_ADA_CONFIG, LlmApi, LlmModel, OpenAIChatCompletion, OpenAIEmbeddingAPI } from "@/agent-core";
+import { AgentContext, AgentFunctionResult, Chat, LlmApi, LlmModel, OpenAIChatCompletion, OpenAIEmbeddingAPI } from "@/agent-core";
 import { Env, Logger, ConsoleLogger, Scripts, SubWorkspace } from "@evo-ninja/agent-utils";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 
@@ -46,7 +46,7 @@ describe("WebSearch function", () => {
 
     const workspace = new FileSystemWorkspace(testCaseDir);
     const internals = new SubWorkspace(".evo", workspace);
-    const embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base, DEFAULT_ADA_CONFIG);
+    const embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base);
 
     const agent = new ResearcherAgent(
       new AgentContext(

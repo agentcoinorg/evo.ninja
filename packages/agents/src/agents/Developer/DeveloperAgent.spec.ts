@@ -1,6 +1,5 @@
 import {
   Chat,
-  DEFAULT_ADA_CONFIG,
   LlmApi,
   OpenAIChatCompletion,
   OpenAIEmbeddingAPI,
@@ -67,7 +66,7 @@ describe('Dev Agent Test Suite', () => {
 
     const workspace = new FileSystemWorkspace(testCaseDir);
     const internals = new SubWorkspace(".evo", workspace);
-    const embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base, DEFAULT_ADA_CONFIG);
+    const embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base);
 
     for (const filePath of pathsForFilesToInclude) {
       if (!fs.existsSync(filePath)) {
