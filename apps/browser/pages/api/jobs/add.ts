@@ -11,9 +11,9 @@ export default async function handler(
   console.log("Adding job to the queue");
 
   const data: EvoGoalJobData = {
-    goal: "This is a sample goal",
+    goal: "What is tesla's revenue 2022?",
   };
   await evoGoalQueue.add("evoGoalJob", data);
 
-  return res.status(200).json({ status: "Job added to the queue" });
+  return res.status(200).json({});
 }

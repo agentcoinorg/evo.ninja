@@ -6,6 +6,7 @@
     "@auth/supabase-adapter": "0.1.9",
     "@evo-ninja/agent-utils": "0.1.0",
     "@evo-ninja/agents": "0.1.0",
+    "@evo-ninja/agent-utils-fs": "~0.1.0",
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
     "@fortawesome/free-brands-svg-icons": "^6.4.2",
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
