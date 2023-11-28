@@ -231,7 +231,7 @@ function Dojo() {
         setSignInModalOpen(true);
         return false;
       } else {
-        const goalId = await AuthProxy.checkPrompt(message, () => { setCapReached(true) });
+        const goalId = await AuthProxy.checkGoal(message, true, () => { setCapReached(true) });
         if (goalId) {
           setGoalId(goalId)
         } else {

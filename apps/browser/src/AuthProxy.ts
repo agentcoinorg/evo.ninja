@@ -1,24 +1,26 @@
 export class AuthProxy {
-  public static async checkPrompt(
+  public static async checkGoal(
     message: string,
+    subsidize: boolean,
     setCapReached: () => void
   ): Promise<string | undefined> {
-    const getPromptRequest = await fetch(`/api/prompt/create`, {
+    const getGoalRequest = await fetch(`/api/goal/create`, {
       method: "POST",
       body: JSON.stringify({
         message,
+        subsidize
       }),
       headers: {
         "Content-Type": "application/json",
       },
     });
-    if (getPromptRequest.status === 403) {
+    if (getGoalRequest.status === 403) {
       setCapReached();
       return;
     }
-    if (getPromptRequest.status === 200) {
-      const { promptAdded } = await getPromptRequest.json();
-      return promptAdded.id;
+    if (getGoalRequest.status === 200) {
+      const { goalAdded } = await getGoalRequest.json();
+      return goalAdded.id;
     }
   }
 }

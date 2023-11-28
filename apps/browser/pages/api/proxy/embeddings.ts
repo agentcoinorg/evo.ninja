@@ -2,76 +2,46 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import OpenAIApi from "openai";
 import { authOptions } from "../auth/[...nextauth]";
 import { getServerSession } from "next-auth";
-import { supabase } from "../prompt/create";
-
-export const LLM_REQUESTS_CAP = 50;
-
-export const api = new OpenAIApi({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-export const validGoal = async (goalId: string) => {
-  if (!goalId) {
-    return false
-  }
-
-  const lastPrompt = await supabase
-    .from("prompts")
-    .select()
-    .eq("id", goalId)
-    .single();
-
-  if (lastPrompt.error) {
-    console.log("Error fetching prompt: ", lastPrompt.error);
-    return false;
-  }
-
-  if (!lastPrompt.data.user_email) {
-    console.log("Goal without user is not valid");
-    return false;
-  }
-
-  if (lastPrompt.data.llm_requests >= LLM_REQUESTS_CAP) {
-    console.log("LLM requests limit achieved");
-    return false;
-  }
-
-  const updatePrompt = await supabase
-    .from("prompts")
-    .update({ llm_requests: lastPrompt.data.llm_requests + 1 })
-    .eq("id", lastPrompt.data.id);
-
-  if (lastPrompt.error) {
-    console.log(
-      "Error updating last prompt llm requests: ",
-      updatePrompt.error
-    );
-    return false;
-  }
-
-  return true;
-};
+import { isGoalValid } from "../../../api-utils/goal";
+import { canUseSubsidy } from "../../../api-utils/subsidy";
+import { createSupabaseClient } from "../../../api-utils/supabase";
+import { createOpenAIApiClient } from "../../../api-utils/openai";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
-) {
+): Promise<void> {
   if (!(req.method === "POST")) {
     return res.status(404).send({});
   }
+  const goalId = req.body.goalId;
+
+  // Ensure the user is logged in
   const session = await getServerSession(req, res, authOptions);
-  if (!session) {
+  const email = session?.user?.email;
+  if (!session || !email) {
     return res.status(401).send({});
   }
-  const isValid = await validGoal(req.body.goalId);
+
+  const supabase = createSupabaseClient();
+  const openai = createOpenAIApiClient();
+
+  // Ensure the goal is being tracked, and we're able to continue
+  // subsidizing the goal's llm requests
+  const isValid = await isGoalValid(goalId, supabase);
   if (!isValid) {
     return res.status(403).send({});
   }
+  const canSubsidize = await canUseSubsidy("embedding", goalId, supabase);
+  if (!canSubsidize) {
+    return res.status(403).send({});
+  }
+
   const input: string[][] = req.body.input;
   try {
     const embeddings = await Promise.all(
       input.map(async (inputs) => {
-        const { data } = await api.embeddings.create({
+        const { data } = await openai.embeddings.create({
           model: req.body.model,
           input: inputs,
         });
