@@ -222,6 +222,7 @@ function Dojo() {
     const proxyLlm = new LlmProxy(evo.context.env.GPT_MODEL, evo.context.env.CONTEXT_WINDOW_TOKENS, evo.context.env.MAX_RESPONSE_TOKENS, goalId)
     evo.context.llm = proxyLlm
     evo.context.embedding = proxyEmbedding
+    evo.recreateContextualizedChat(evo.context)
   }, [goalId])
 
   const handlePromptAuth = async (message: string) => {

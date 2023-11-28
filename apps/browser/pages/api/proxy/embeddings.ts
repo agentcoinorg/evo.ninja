@@ -11,6 +11,10 @@ export const api = new OpenAIApi({
 });
 
 export const validGoal = async (goalId: string) => {
+  if (!goalId) {
+    return false
+  }
+
   const lastPrompt = await supabase
     .from("prompts")
     .select()
