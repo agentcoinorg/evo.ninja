@@ -9,15 +9,21 @@ export const useSupabase = () => {
 
   useEffect(() => {
     if (session && session.supabaseAccessToken) {
-      setSupabaseClient(createClient<Database>(
+      const supabase = createClient<Database>(
         process.env.NEXT_PUBLIC_SUPABASE_URL as string,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
         {
-          headers: {
-            Authorization: `Bearer ${(session).supabaseAccessToken}`,
+          global: {
+            headers: {
+              Authorization: `Bearer ${session.supabaseAccessToken}`,
+            },
           },
-        } as any
-      ))
+        }
+      );
+
+      const user = supabase.auth.getSession();
+      console.log(user)
+      setSupabaseClient(supabase)
     }
   }, [session])
 

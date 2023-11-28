@@ -26,11 +26,11 @@ export const authOptions = {
   ],
   adapter: SupabaseAdapter({
     url: process.env.SUPABASE_URL as string,
-    secret: process.env.SUPABASE_ANON_KEY as string
+    secret: process.env.SUPABASE_SERVICE_ROLE_KEY as string
   }),
   callbacks: {
     async session({ session, user }: { session: Session, user: User}) {
-      const signingSecret = process.env.SUPABASE_JWT_SECRET
+      const signingSecret = process.env.NEXTAUTH_SECRET
       
       if (signingSecret) {
         const payload = {
