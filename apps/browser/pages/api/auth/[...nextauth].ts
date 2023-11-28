@@ -8,7 +8,7 @@ declare module "next-auth" {
   interface Session {
     supabaseAccessToken?: string
     user: {
-      address: string
+      id: string
     } & DefaultSession["user"]
   }
 }
@@ -41,6 +41,7 @@ export const authOptions = {
           role: "authenticated",
         };
         session.supabaseAccessToken = jwt.sign(payload, signingSecret)
+        session.user.id = user.id
       }
       return session
     },

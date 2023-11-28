@@ -13,7 +13,22 @@ export const useChats = () => {
       (async () => {
         setLoading(true)
   
-        const fetchedChats = await supabase?.from('chats').select('*')
+        const fetchedChats = await supabase.client
+          .from('chats')
+          .select(`
+            id,
+            created_at,
+            user_id,
+            messages (
+              id,
+              role,
+              content,
+              created_at,
+              name,
+              function_call
+            )
+          `)
+          .eq("user_id", supabase.userId)
   
         setLoading(false)
         setError(fetchedChats?.error)

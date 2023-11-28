@@ -30,6 +30,7 @@ import { checkLlmModel } from "../src/checkLlmModel";
 import SigninModal from "../src/components/SigninModal";
 import { LlmProxy } from "../src/LlmProxy";
 import { EmbeddingProxy } from "../src/EmbeddingProxy";
+import { useChats } from "../src/supabase/queries/useChats";
 
 function Dojo() {
   const [dojoConfig, setDojoConfig] = useState<{

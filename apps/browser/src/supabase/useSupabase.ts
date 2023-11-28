@@ -5,7 +5,7 @@ import { Database } from "./types/database"
 
 export const useSupabase = () => {
   const { data: session } = useSession()
-  const [supabaseClient, setSupabaseClient] = useState<SupabaseClient<Database> | null>(null)
+  const [supabaseClient, setSupabaseClient] = useState<{ userId: string; client: SupabaseClient<Database>} | null>(null)
 
   useEffect(() => {
     if (session && session.supabaseAccessToken) {
@@ -21,9 +21,10 @@ export const useSupabase = () => {
         }
       );
 
-      const user = supabase.auth.getSession();
-      console.log(user)
-      setSupabaseClient(supabase)
+      setSupabaseClient({
+        client: supabase,
+        userId: session.user.id,
+      })
     }
   }, [session])
 
