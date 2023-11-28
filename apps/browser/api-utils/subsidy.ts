@@ -18,6 +18,11 @@ export async function canUseSubsidy(
     .eq("id", goalId)
     .single();
 
+  if (!goal.data.subsidized) {
+    console.error(`Goal is not subsidized.`);
+    return false;
+  }
+
   const subsidizedProp = subsidy === "llm" ?
     "subsidized_llm_req" :
     "subsidized_embedding_req";
