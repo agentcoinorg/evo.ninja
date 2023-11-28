@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import OpenAIApi from "openai";
 import { authOptions } from "../auth/[...nextauth]";
 import { getServerSession } from "next-auth";
-import { supabase } from "../supabase/prompts";
+import { supabase } from "../prompt/create";
 
 export const LLM_REQUESTS_CAP = 50;
 
@@ -20,6 +20,11 @@ export const validGoal = async (goalId: string) => {
   if (lastPrompt.error) {
     console.log("Error fetching prompt: ", lastPrompt.error);
     return false;
+  }
+
+  if (!lastPrompt.data.user_email) {
+    console.log("Goal without user is not valid")
+    return false
   }
 
   if (lastPrompt.data.llm_requests >= LLM_REQUESTS_CAP) {
@@ -50,7 +55,6 @@ export default async function handler(
   if (req.method === "POST") {
     const session = await getServerSession(req, res, authOptions);
     if (session) {
-      console.log(req.body)
       const isValid = await validGoal(req.body.goalId);
       if (!isValid) {
         return res.status(403).json({

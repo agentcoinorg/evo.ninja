@@ -1,12 +1,14 @@
-import { createClient } from "@supabase/supabase-js";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]";
+import { createClient } from "@supabase/supabase-js";
 
 export const supabase = createClient(
   process.env.SUPABASE_URL as string,
   process.env.SUPABASE_SERVICE_ROLE_KEY as string
 );
+
+const PROMPTS_CAP = 5;
 
 export default async function handler(
   req: NextApiRequest,
@@ -14,26 +16,22 @@ export default async function handler(
 ) {
   const session = await getServerSession(req, res, authOptions);
   if (!session) {
-    return res.status(401).json({
-      error: "User must be logged in",
-    });
+    return res.status(401).json({ message: "User must be logged in" });
   }
-  switch (req.method) {
-    case "GET":
-      const { data: prompts, error } = await supabase
-        .from("prompts")
-        .select()
-        .eq("user_email", session.user?.email)
-        .eq("submission_date", new Date().toISOString());
-      if (error) {
-        return res.status(500).json({
-          error: error.message,
-        });
-      }
-      return res.status(200).json({
-        prompts,
-      });
-    case "POST":
+  if (req.method === "POST") {
+    const { data: prompts, error } = await supabase
+      .from("prompts")
+      .select()
+      .eq("user_email", session.user?.email)
+      .eq("submission_date", new Date().toISOString());
+
+    if (error) {
+      return res.status(500);
+    }
+
+    if (prompts?.length && prompts.length >= PROMPTS_CAP) {
+      return res.status(403).json({ message: "Prompts cap reached" });
+    } else {
       const promptAdded = await supabase
         .from("prompts")
         .insert({
@@ -41,7 +39,8 @@ export default async function handler(
           prompt: req.body.message,
           submission_date: new Date().toISOString(),
         })
-        .select();
+        .select()
+        .single();
       if (promptAdded.error) {
         return res.status(500).json({
           error: promptAdded.error.message,
@@ -50,9 +49,8 @@ export default async function handler(
       return res.status(200).json({
         promptAdded: promptAdded.data,
       });
-    default:
-      return res.status(404).json({
-        message: `HTTP Method ${req.method} not supported in endpoint /api/supabase/prompts`,
-      });
+    }
+  } else {
+    return res.status(404);
   }
 }
