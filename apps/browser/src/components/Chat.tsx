@@ -11,7 +11,6 @@ import { faThumbsUp, faThumbsDown, faArrowUpRightFromSquare } from '@fortawesome
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import SidebarIcon from "./SidebarIcon";
-import { useSession } from "next-auth/react"
 
 export interface ChatMessage {
   title: string;
@@ -28,14 +27,10 @@ export interface ChatProps {
   sidebarOpen: boolean;
   onSidebarToggleClick: () => void;
   onUploadFiles: (files: InMemoryFile[]) => void;
-  setCapReached: () => boolean | void;
-  setSignInModalOpen: Dispatch<SetStateAction<boolean>>
-  loadedOpenAiApiKey: boolean
+  handlePromptAuth: (message: string) => Promise<boolean>
 }
 
-const PROMPTS_CAP = 5
-
-const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSidebarToggleClick, sidebarOpen, onUploadFiles, setCapReached, setSignInModalOpen, loadedOpenAiApiKey }: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSidebarToggleClick, sidebarOpen, onUploadFiles, handlePromptAuth }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
   const [paused, setPaused] = useState<boolean>(false);
@@ -57,7 +52,6 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
   const [hasDownvoted, setHasDownvoted] = useState<boolean>(false);
   const [showEvoNetPopup, setShowEvoNetPopup] = useState<boolean>(false);
   const [showPrompts, setShowPrompts] = useState<boolean>(true);
-  const { data: session } = useSession()
 
   const pausedRef = useRef(paused);
   useEffect(() => {
@@ -169,44 +163,17 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
   };
 
   const handleStart = async () => {
-    if (!loadedOpenAiApiKey && !session?.user) {
-      setSignInModalOpen(true);
-      return;
-    }
-
-    if (!loadedOpenAiApiKey) {
-      const getPromptRequest = await fetch(
-        `/api/supabase/prompts?email=${session?.user?.email}`
-      );
-      const { prompts } = await getPromptRequest.json();
-      if (prompts?.length && prompts.length >= PROMPTS_CAP) {
-        const capReached = setCapReached();
-        if (capReached) return;
-      } else {
-        const addPromptRequest = await fetch(`/api/supabase/prompts`, {
-          method: "POST",
-          body: JSON.stringify({
-            email: session?.user?.email,
-            message,
-          }),
-          headers: {
-            "Content-Type": "application/json"
-          }
-        });
-
-        if (!addPromptRequest.ok) {
-          console.log("Error trying to add prompt request");
-          return
-        }
-      }
-    }
     handleSend();
   };
 
   const handleSend = async (newMessage?: string) => {
+    const authorized = await handlePromptAuth(message)
+    if (!authorized) {
+      return
+    }
     onMessage({
       title: newMessage || message,
-      user: "user"
+      user: "user",
     });
     setSending(true);
     setShowPrompts(false);

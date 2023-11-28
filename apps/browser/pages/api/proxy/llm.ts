@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 import OpenAIApi from "openai";
 import { authOptions } from "../auth/[...nextauth]";
-import { api } from "./embeddings";
+import { api, validGoal } from "./embeddings";
 
 export default async function handler(
   req: NextApiRequest,
@@ -11,6 +11,12 @@ export default async function handler(
   if (req.method === "POST") {
     const session = await getServerSession(req, res, authOptions);
     if (session) {
+      const isValid = await validGoal(req.body.goalId);
+      if (!isValid) {
+        return res.status(403).json({
+          error: "Free quota has been achieved"
+        })
+      }
       const functions = req.body.functions ?? undefined;
       try {
         const completion = await api.chat.completions.create({

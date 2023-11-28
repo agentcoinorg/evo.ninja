@@ -6,7 +6,8 @@ export class LlmProxy implements LlmApi {
   constructor(
     private _defaultModel: string,
     private _defaultMaxTokens: number,
-    private _defaultMaxResponseTokens: number
+    private _defaultMaxResponseTokens: number,
+    private _goalId: string
   ) {}
 
   getMaxContextTokens() {
@@ -37,6 +38,7 @@ export class LlmProxy implements LlmApi {
           maxTokens: this._defaultMaxResponseTokens,
           model: this._defaultModel,
         },
+        goalId: this._goalId
       }),
       headers: {
         "Content-Type": "application/json",

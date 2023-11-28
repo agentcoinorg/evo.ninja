@@ -30,6 +30,8 @@ import { checkLlmModel } from "../src/checkLlmModel";
 import SigninModal from "../src/components/SigninModal";
 import { LlmProxy } from "../src/LlmProxy";
 import { EmbeddingProxy } from "../src/EmbeddingProxy";
+import { useSession } from "next-auth/react";
+import { AuthProxy } from "../src/AuthProxy";
 
 function Dojo() {
   const [dojoConfig, setDojoConfig] = useState<{
@@ -56,6 +58,8 @@ function Dojo() {
   // TODO: setGoalEnded is unused?
   const [goalEnded, setGoalEnded] = useState<boolean>(false);
   const [capReached, setCapReached] = useState<boolean>(false)
+  const [goalId, setGoalId] = useState<string>("")
+  const { data: session } = useSession()
 
   useEffect(() => {
     if (window.innerWidth <= 1024) {
@@ -175,12 +179,13 @@ function Dojo() {
           : new LlmProxy(
               env.GPT_MODEL as LlmModel,
               env.CONTEXT_WINDOW_TOKENS,
-              env.MAX_RESPONSE_TOKENS
+              env.MAX_RESPONSE_TOKENS,
+              goalId
             );
 
         const embedding = dojoConfig.openAiApiKey
           ? new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base)
-          : new EmbeddingProxy(cl100k_base, DEFAULT_ADA_CONFIG);
+          : new EmbeddingProxy(cl100k_base, DEFAULT_ADA_CONFIG, goalId);
 
         const userWorkspace = new InMemoryWorkspace();
         setUserWorkspace(userWorkspace);
@@ -188,7 +193,6 @@ function Dojo() {
         const internals = new SubWorkspace(".evo", userWorkspace);
 
         const chat = new EvoChat(cl100k_base);
-
         setEvo(
           new Evo(
             new AgentContext(
@@ -208,6 +212,34 @@ function Dojo() {
       }
     })();
   }, [dojoConfig]);
+
+  useEffect(() => {
+    if (!evo || dojoConfig.openAiApiKey) {
+      return
+    }
+
+    const proxyEmbedding = new EmbeddingProxy(cl100k_base, DEFAULT_ADA_CONFIG, goalId)
+    const proxyLlm = new LlmProxy(evo.context.env.GPT_MODEL, evo.context.env.CONTEXT_WINDOW_TOKENS, evo.context.env.MAX_RESPONSE_TOKENS, goalId)
+    evo.context.llm = proxyLlm
+    evo.context.embedding = proxyEmbedding
+  }, [goalId])
+
+  const handlePromptAuth = async (message: string) => {
+    if (!dojoConfig.openAiApiKey) {
+      if (!session?.user) {
+        setSignInModalOpen(true);
+        return false;
+      } else {
+        const goalId = await AuthProxy.checkPrompt(message, () => { setCapReached(true) });
+        if (goalId) {
+          setGoalId(goalId)
+        } else {
+          return false
+        }
+      }
+    }
+    return true
+  }
 
   return (
     <>
@@ -249,14 +281,7 @@ function Dojo() {
                   setSidebarOpen(!sidebarOpen);
                 }}
                 onUploadFiles={setUploadedFiles}
-                setCapReached={() => {
-                  if (!dojoConfig.openAiApiKey) {
-                    setCapReached(true)
-                    return true
-                  }
-                }}
-                loadedOpenAiApiKey={!!dojoConfig.openAiApiKey}
-                setSignInModalOpen={setSignInModalOpen}
+                handlePromptAuth={handlePromptAuth}
               />
             )}
           </>

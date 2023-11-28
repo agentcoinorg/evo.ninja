@@ -5,8 +5,8 @@ import { EmbeddingApi } from "..";
 
 export class AgentContext {
   constructor(
-    public readonly llm: LlmApi,
-    public readonly embedding: EmbeddingApi,
+    public llm: LlmApi,
+    public embedding: EmbeddingApi,
     public chat: Chat,
     public readonly logger: Logger,
     public readonly workspace: Workspace,
