@@ -6,7 +6,8 @@ import {
   DebugLog,
   LlmApi,
   LlmModel,
-  OpenAIChatCompletion
+  OpenAILlmApi,
+  OpenAIEmbeddingAPI
 } from "@evo-ninja/agents";
 import {
   Env,
@@ -94,7 +95,7 @@ export function createApp(config?: AppConfig): App {
   const scripts = new Scripts(scriptsWorkspace, "./");
 
   // LLM
-  let llm: LlmApi = new OpenAIChatCompletion(
+  let llm: LlmApi = new OpenAILlmApi(
     env.OPENAI_API_KEY,
     env.GPT_MODEL as LlmModel,
     env.CONTEXT_WINDOW_TOKENS,
@@ -115,10 +116,13 @@ export function createApp(config?: AppConfig): App {
     llm = new DebugLlmApi(debugLog, llm);
   }
 
+  const embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base);
+
   // Evo
   const evo = new Evo(
     new AgentContext(
       llm,
+      embedding,
       chat,
       logger,
       userWorkspace,
