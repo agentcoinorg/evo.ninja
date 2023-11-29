@@ -24,7 +24,7 @@
   "include": [
     "src",
     "pages"
-, "middleware.ts"  ],
+  ],
   "exclude": [
     "node_modules"
   ]

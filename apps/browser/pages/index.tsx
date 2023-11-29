@@ -58,7 +58,6 @@ function Dojo() {
   // TODO: setGoalEnded is unused?
   const [goalEnded, setGoalEnded] = useState<boolean>(false);
   const [capReached, setCapReached] = useState<boolean>(false)
-  const [goalId, setGoalId] = useState<string>("")
   const { data: session } = useSession()
   const [awaitingAuth, setAwaitingAuth] = useState<boolean>(false);
 
@@ -223,33 +222,32 @@ function Dojo() {
     })();
   }, [dojoConfig]);
 
-  // TODO: create a goal ID for goals even when there is an api key added
   const handlePromptAuth = async (message: string) => {
     if (awaitingAuth) {
       return false;
     }
 
-    if (!dojoConfig.openAiApiKey) {
-      if (!session?.user) {
-        setAccountModalOpen(true);
-        return false;
-      } else {
-        setAwaitingAuth(true);
-        const goalId = await AuthProxy.checkGoal(
-          message,
-          true,
-          () => setCapReached(true)
-        );
-        setAwaitingAuth(false);
-        if (goalId) {
-          proxyLlmApi?.setGoalId(goalId);
-          proxyEmbeddingApi?.setGoalId(goalId);
-          setGoalId(goalId)
-        } else {
-          return false
-        }
-      }
+    if (!dojoConfig.openAiApiKey && !session?.user) {
+      setAccountModalOpen(true);
+      return false;
     }
+
+    const subsidize = !dojoConfig.openAiApiKey;
+
+    setAwaitingAuth(true);
+    const goalId = await AuthProxy.checkGoal(
+      message,
+      subsidize,
+      () => setCapReached(true)
+    );
+    setAwaitingAuth(false);
+
+    if (!goalId) {
+      return false;
+    }
+
+    proxyLlmApi?.setGoalId(goalId);
+    proxyEmbeddingApi?.setGoalId(goalId);
     return true
   }
 
