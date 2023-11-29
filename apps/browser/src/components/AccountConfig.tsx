@@ -1,81 +1,114 @@
-import { useSession, signOut, signIn } from "next-auth/react";
 import React, { useState } from "react";
+import { useSession, signOut, signIn } from "next-auth/react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash, faSmileWink, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
 
 interface AccountConfigProps {
   apiKey: string | null;
-  onConfigSaved: (apiKey: string) => void;
+  allowTelemetry: boolean;
+  onConfigSaved: (apiKey: string, allowTelemetry: boolean) => void;
   capReached: boolean;
-  onClose: () => void;
+  firstTimeUser: boolean;
 }
 
 function AccountConfig(props: AccountConfigProps) {
   const [apiKey, setApiKey] = useState<string>(props.apiKey || "");
-  const { onConfigSaved, capReached } = props;
+  const [allowTelemetry, setAllowTelemetry] = useState<boolean>(props.allowTelemetry);
+  const { onConfigSaved, capReached, firstTimeUser } = props;
   const { data: session } = useSession();
 
   return (
     <div
       className="absolute inset-0 z-50 bg-neutral-900/80"
-      onClick={props.onClose}
+      onClick={() => props.onConfigSaved(apiKey, allowTelemetry)}
     >
       <div
-        className="fixed left-1/2 top-1/2 flex w-96 -translate-x-1/2 -translate-y-1/2 flex-col gap-4 rounded-lg bg-neutral-900 p-12 text-neutral-50"
+        className="fixed left-1/2 top-1/2 flex w-[100%] max-w-[38rem] -translate-x-1/2 -translate-y-1/2 flex-col gap-4 rounded-lg bg-neutral-900 p-12 text-neutral-50"
         onClick={(e) => {
           e.stopPropagation();
         }}
       >
-        {!capReached && <h2 className="text-lg font-semibold">Account</h2>}
-        {!session && (
-          <>
+        <div className="border-b px-4 py-2 flex justify-between items-center">
+          <h3 className="font-semibold text-lg">Account</h3>
+          <button onClick={() => onConfigSaved(apiKey, allowTelemetry)}>X</button>
+        </div>
+
+        {firstTimeUser && (
+          <div className="px-8 py-2 flex justify-between items-center">
+            <FontAwesomeIcon icon={faSmileWink} color="yellow" size="2x" />
+            <h4 className="text-md text-white">
+              Welcome! Please sign in or add an OpenAI API key.
+            </h4>
+          </div>
+        )}
+
+        <div className="px-8 py-2 flex justify-between items-center">
+          <h3 className="font-semibold text-lg">Email</h3>
+          {session ? (
+            <div className="w-[65%] flex flex-row gap-5 justify-end">
+              <h4 className="text-md">{session.user?.email}</h4>
+              <button
+                className="cursor-pointer"
+                onClick={() => signOut()}
+              >
+                <FontAwesomeIcon icon={faTrash} />
+              </button>
+            </div>
+          ) : (
             <button
-              className="cursor-pointer rounded-xl border-none bg-orange-600 p-2.5 text-white transition-all hover:bg-orange-500"
+              className="cursor-pointer rounded-xl border-none bg-orange-600 p-1.5 text-white transition-all hover:bg-orange-500"
               onClick={() => signIn()}
             >
               Sign in
             </button>
-            <h3 className="flex items-center justify-center text-lg font-semibold">
-              - or -
-            </h3>
-          </>
-        )}
-        {!!session && !capReached && (
-          <button
-            className="cursor-pointer rounded-xl border-none bg-orange-600 p-2.5 text-white transition-all hover:bg-orange-500"
-            onClick={() => signOut()}
-          >
-            Sign out
-          </button>
-        )}
-        <h4 className="font-semibold">Provide your own OpenAI API key</h4>
-        {capReached && (
-          <h4 className="text-md">
-            You have used all of your free daily prompts. Please enter your
-            OpenAI API key or try again tomorrow.
-          </h4>
-        )}
-        <input
-          className="rounded border border-neutral-600 bg-neutral-950 p-2.5 text-neutral-50 outline-none transition-all"
-          type="text"
-          value={apiKey}
-          onChange={(e) => setApiKey(e.target.value)}
-        />
-        <button
-          className="cursor-pointer rounded-xl border-none bg-orange-600 p-2.5 text-white transition-all hover:bg-orange-500"
-          onClick={() => onConfigSaved(apiKey)}
-        >
-          Save
-        </button>
+          )}
+        </div>
 
-        <label className="relative inline-flex cursor-pointer items-center">
-          <input type="checkbox" value="" className="peer sr-only" />
-          <div className="peer h-6 w-11 rounded-full bg-orange-500 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-orange-500 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rtl:peer-checked:after:-translate-x-full dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:orange-500"></div>
-          <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
-            Share prompts with Evo team
-          </span>
-        </label>
+        <div className="px-8 py-2 flex justify-between items-center">
+          <h3 className="font-semibold text-lg">OpenAI Key</h3>
+          <input
+            className="w-[65%] justify-end rounded border border-neutral-600 bg-neutral-950 p-1.5 text-neutral-50 outline-none transition-all"
+            type="text"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+          />
+        </div>
+
+        {capReached && (
+          <div className="px-8 py-2 flex justify-between items-center">
+            <FontAwesomeIcon icon={faExclamationCircle} color="yellow" size="2x" />
+            <h4 className="text-md text-white">
+              You have used all of your free daily prompts. Please enter your
+              OpenAI API key or try again tomorrow.
+            </h4>
+          </div>
+        )}
+
+        <div className="px-8 py-2 flex justify-between items-center">
+          <h3 className="font-semibold text-lg">Data</h3>
+          <div className="flex flex-row gap-7 justify-end">
+            <h4 className="text-md">
+              Share prompts with Evo devs
+            </h4>
+            <input type="checkbox" style={{ accentColor: "#f0541a" }} checked={allowTelemetry} onChange={(e) => setAllowTelemetry(!allowTelemetry)} />
+          </div>
+        </div>
+
+        <div className="px-8 py-2 flex justify-center items-center">
+          <button
+            className="w-[30%] cursor-pointer rounded-xl border-none bg-orange-600 p-2.5 text-white transition-all hover:bg-orange-500"
+            onClick={() => onConfigSaved(apiKey, allowTelemetry)}
+          >
+            Save
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
 export default AccountConfig;
+
+// peer h-6 w-11 rounded-full bg-orange-500 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-orange-500 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rtl:peer-checked:after:-translate-x-full dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:orange-500
+
+// peer h-5 w-11 rounded-full peer-checked:bg-orange-${allowTelemetry ? "500" : "800"} bg-orange-${allowTelemetry ? "500" : "800"} after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-full

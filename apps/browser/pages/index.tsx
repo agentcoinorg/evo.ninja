@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 import clsx from "clsx";
-import DojoConfig from "../src/components/AccountConfig";
+import AccountConfig from "../src/components/AccountConfig";
 import DojoError from "../src/components/DojoError";
 import Sidebar from "../src/components/Sidebar";
 import Chat, { ChatMessage } from "../src/components/Chat";
@@ -35,10 +35,12 @@ import { AuthProxy } from "../src/AuthProxy";
 function Dojo() {
   const [dojoConfig, setDojoConfig] = useState<{
     openAiApiKey: string | null;
+    allowTelemetry: boolean;
     loaded: boolean;
     complete: boolean;
   }>({
     openAiApiKey: null,
+    allowTelemetry: false,
     loaded: false,
     complete: false
   });
@@ -60,15 +62,18 @@ function Dojo() {
   const [capReached, setCapReached] = useState<boolean>(false)
   const { data: session } = useSession()
   const [awaitingAuth, setAwaitingAuth] = useState<boolean>(false);
+  const [firstTimeUser, setFirstTimeUser] = useState<boolean>(false);
 
   useEffect(() => {
     if (window.innerWidth <= 1024) {
       setSidebarOpen(false);
     }
     const openAiApiKey = localStorage.getItem("openai-api-key");
+    const allowTelemetry = localStorage.getItem("allow-telemetry") === "true" ? true : false;
     const complete = !!openAiApiKey;
     setDojoConfig({
       openAiApiKey,
+      allowTelemetry,
       loaded: true,
       complete
     });
@@ -109,7 +114,7 @@ function Dojo() {
     checkForUserFiles();
   }, [uploadedFiles]);
 
-  const onConfigSaved = (apiKey: string) => {
+  const onConfigSaved = (apiKey: string, allowTelemetry: boolean) => {
     let complete = true;
     let openAiApiKey = apiKey;
 
@@ -119,14 +124,24 @@ function Dojo() {
     } else {
       localStorage.setItem("openai-api-key", openAiApiKey);
     }
-    
+    localStorage.setItem("allow-telemetry", allowTelemetry.toString());
+
     setDojoConfig({
       openAiApiKey,
+      allowTelemetry,
       loaded: true,
       complete
     });
-    setCapReached(false)
+    setCapReached(false);
     setAccountModalOpen(false);
+  };
+
+  const onDisclaimerSelect = (approve: boolean) => {
+    localStorage.setItem("allow-telemetry", approve.toString());
+    setDojoConfig({
+      ...dojoConfig,
+      allowTelemetry: approve
+    });
   };
 
   useEffect(() => {
@@ -228,15 +243,18 @@ function Dojo() {
     }
 
     if (!dojoConfig.openAiApiKey && !session?.user) {
+      setFirstTimeUser(true);
       setAccountModalOpen(true);
       return false;
+    } else {
+      setFirstTimeUser(false);
     }
 
     const subsidize = !dojoConfig.openAiApiKey;
 
     setAwaitingAuth(true);
     const goalId = await AuthProxy.checkGoal(
-      message,
+      dojoConfig.allowTelemetry ? message : "<redacted>",
       subsidize,
       () => setCapReached(true)
     );
@@ -255,14 +273,12 @@ function Dojo() {
     <>
       <div className="flex h-full bg-neutral-800 bg-landing-bg bg-repeat text-center text-neutral-400">
         {(accountModal || capReached) && (
-          <DojoConfig
+          <AccountConfig
             apiKey={dojoConfig.openAiApiKey}
+            allowTelemetry={dojoConfig.allowTelemetry}
             onConfigSaved={onConfigSaved}
             capReached={capReached}
-            onClose={() => {
-              setAccountModalOpen(false);
-              setCapReached(false);
-            }}
+            firstTimeUser={firstTimeUser}
           />
         )}
         <div className={clsx(
@@ -292,6 +308,7 @@ function Dojo() {
                 goalEnded={goalEnded}
                 sidebarOpen={sidebarOpen}
                 overlayOpen={welcomeModalOpen || accountModal}
+                onDisclaimerSelect={onDisclaimerSelect}
                 onSidebarToggleClick={() => {
                   setSidebarOpen(!sidebarOpen);
                 }}

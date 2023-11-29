@@ -3,7 +3,7 @@ import { Evo } from "@evo-ninja/agents";
 import ReactMarkdown from "react-markdown";
 import FileSaver from "file-saver";
 
-import { trackMessageSent, trackThumbsFeedback} from './googleAnalytics';
+import { trackThumbsFeedback} from './googleAnalytics';
 import { ExamplePrompt, examplePrompts } from "../examplePrompts";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
@@ -26,6 +26,7 @@ export interface ChatProps {
   goalEnded: boolean;
   sidebarOpen: boolean;
   overlayOpen: boolean;
+  onDisclaimerSelect: (approve: boolean) => void;
   onSidebarToggleClick: () => void;
   onUploadFiles: (files: InMemoryFile[]) => void;
   handlePromptAuth: (message: string) => Promise<boolean>
@@ -38,6 +39,7 @@ const Chat: React.FC<ChatProps> = ({
   goalEnded,
   sidebarOpen,
   overlayOpen,
+  onDisclaimerSelect,
   onSidebarToggleClick,
   onUploadFiles,
   handlePromptAuth
@@ -52,9 +54,6 @@ const Chat: React.FC<ChatProps> = ({
   const [stopped, setStopped] = useState<boolean>(false);
   const [showDisclaimer, setShowDisclaimer] = useState<boolean>(
     localStorage.getItem('showDisclaimer') !== 'false'
-  );
-  const [trackUser, setTrackUser] = useState<boolean>(
-    localStorage.getItem('trackUser') === 'true'
   );
   const [clickedMsgIndex, setClickedMsgIndex] = useState<number | null>(null);
   const listContainerRef = useRef<HTMLDivElement | null>(null);
@@ -151,19 +150,10 @@ const Chat: React.FC<ChatProps> = ({
     localStorage.setItem('showDisclaimer', showDisclaimer.toString());
   }, [showDisclaimer]);
 
-  useEffect(() => {
-    localStorage.setItem('trackUser', trackUser.toString());
-  }, [trackUser]);
-
-  const handleCloseDisclaimer = () => {
+  const handleDisclaimerSelect = (accept: boolean) => {
     setShowDisclaimer(false);
-    setTrackUser(true);  // User accepted disclaimer, enable tracking
-  };
-
-  const handleCloseWithoutTracking = () => {
-    setShowDisclaimer(false);
-    setTrackUser(false); // User did not accept disclaimer, disable tracking
-  };
+    onDisclaimerSelect(accept);
+  }
 
   const handleSamplePromptClick = async (prompt: ExamplePrompt) => {
     if (prompt.files) {
@@ -190,10 +180,6 @@ const Chat: React.FC<ChatProps> = ({
     setShowPrompts(false);
     setMessage("");
     setEvoRunning(true);
-
-    if (trackUser) { // Only track if user accepted the disclaimer
-      trackMessageSent(newMessage || message); 
-    }
   };
 
   const handlePause = async () => {
@@ -364,8 +350,8 @@ const Chat: React.FC<ChatProps> = ({
           <div className="absolute bottom-0 z-50 flex w-4/5 items-center justify-around rounded-t-lg border-2 border-orange-600 bg-black p-2.5 text-center text-xs text-white self-center w-[100%] max-w-[56rem]">
             🧠 Hey there! Mind sharing your prompts to help make Evo even better?
             <div className="flex gap-2.5">
-              <span className="cursor-pointer px-5 py-2.5 font-bold text-orange-500" onClick={handleCloseDisclaimer}>Accept</span>
-              <span className="cursor-pointer px-5 py-2.5 font-bold text-white" onClick={handleCloseWithoutTracking}>Decline</span>
+              <span className="cursor-pointer px-5 py-2.5 font-bold text-orange-500" onClick={() => handleDisclaimerSelect(true)}>Accept</span>
+              <span className="cursor-pointer px-5 py-2.5 font-bold text-white" onClick={() => handleDisclaimerSelect(false)}>Decline</span>
             </div>
           </div>
         )}
