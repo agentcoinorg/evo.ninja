@@ -15,6 +15,8 @@ export default async function handler(
 
   const supabase = createSupabaseClient();
   const currentDate = new Date().toISOString();
+  const session = await getServerSession(req, res, authOptions);
+  const email = session?.user?.email;
 
   // If the user does not need this goal to be subsidizied
   if (!req.body.subsidize) {
@@ -22,6 +24,7 @@ export default async function handler(
     const goalAdded = await supabase
       .from("goals")
       .insert({
+        user_email: email,
         prompt: req.body.message,
         submission_date: currentDate,
         subsidized: false
@@ -39,8 +42,6 @@ export default async function handler(
 
   // The user's goal needs to be subsidized, ensure they're
   // signed in and still have enough allowance
-  const session = await getServerSession(req, res, authOptions);
-  const email = session?.user?.email;
   if (!session || !email) {
     return res.status(401).send({})
   }
@@ -64,7 +65,7 @@ export default async function handler(
   const goalAdded = await supabase
     .from("goals")
     .insert({
-      user_email: session.user?.email,
+      user_email: email,
       prompt: req.body.message,
       submission_date: new Date().toISOString(),
       subsidized: true

@@ -225,33 +225,33 @@ function Dojo() {
     })();
   }, [dojoConfig]);
 
-  // TODO: create a goal ID for goals even when there is an api key added
   const handlePromptAuth = async (message: string) => {
     if (awaitingAuth) {
       return false;
     }
 
-    if (!dojoConfig.openAiApiKey) {
-      if (!session?.user) {
-        setSignInModalOpen(true);
-        return false;
-      } else {
-        setAwaitingAuth(true);
-        const goalId = await AuthProxy.checkGoal(
-          message,
-          true,
-          () => setCapReached(true)
-        );
-        setAwaitingAuth(false);
-        if (goalId) {
-          proxyLlmApi?.setGoalId(goalId);
-          proxyEmbeddingApi?.setGoalId(goalId);
-          setGoalId(goalId)
-        } else {
-          return false
-        }
-      }
+    if (!dojoConfig.openAiApiKey && !session?.user) {
+      setSignInModalOpen(true);
+      return false;
     }
+
+    const subsidize = !dojoConfig.openAiApiKey;
+
+    setAwaitingAuth(true);
+    const goalId = await AuthProxy.checkGoal(
+      message,
+      subsidize,
+      () => setCapReached(true)
+    );
+    setAwaitingAuth(false);
+
+    if (!goalId) {
+      return false;
+    }
+
+    proxyLlmApi?.setGoalId(goalId);
+    proxyEmbeddingApi?.setGoalId(goalId);
+    setGoalId(goalId)
     return true
   }
 
