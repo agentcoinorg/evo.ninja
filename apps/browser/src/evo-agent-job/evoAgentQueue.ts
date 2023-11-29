@@ -1,9 +1,11 @@
 import { Worker, Queue } from "bullmq";
 import Redis from "ioredis";
-import { runEvoForGoal } from "./runEvoForGoal";
+import { runEvoAgentJob } from "./runEvoAgentJob";
+import { EvoAgentJobData } from "./EvoAgentJobData";
+
 const connection = new Redis(process.env.REDIS_URL!);
 
-export const evoGoalQueue = new Queue("evoGoalQueue", {
+export const evoAgentQueue = new Queue("evoAgentQueue", {
   connection,
   defaultJobOptions: {
     attempts: 2,
@@ -14,17 +16,18 @@ export const evoGoalQueue = new Queue("evoGoalQueue", {
   },
 });
 
-export type EvoGoalJobData = {
-  goal: string;
-};
-
 const worker = new Worker(
-  "evoGoalQueue",
+  "evoAgentQueueWorker",
   async (job) => {
-    const data: EvoGoalJobData = job?.data;
+    if (!job || !job.id) {
+      console.log("Job not found");
+      return;
+    }
+
+    const data: EvoAgentJobData = job.data;
     console.log(data);
 
-    await runEvoForGoal(data.goal);
+    await runEvoAgentJob(job.id, data);
   },
   {
     connection,

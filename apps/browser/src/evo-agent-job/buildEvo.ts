@@ -13,7 +13,7 @@ import {
   SubWorkspace,
 } from "@evo-ninja/agents";
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
-import { createInBrowserScripts } from "../../../src/scripts";
+import { createInBrowserScripts } from "../scripts";
 
 export function buildEvo() {
   const logger = new Logger([new ConsoleLogger()], {
