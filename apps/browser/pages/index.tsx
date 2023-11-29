@@ -228,7 +228,7 @@ function Dojo() {
   // TODO: create a goal ID for goals even when there is an api key added
   const handlePromptAuth = async (message: string) => {
     if (awaitingAuth) {
-      return;
+      return false;
     }
 
     if (!dojoConfig.openAiApiKey) {

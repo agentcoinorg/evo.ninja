@@ -35,7 +35,7 @@ function DojoConfig(props: DojoConfigProps) {
         >
           Save
         </button>
-        {!!session && (
+        {!!session && !capReached && (
           <button
             className="cursor-pointer rounded-xl border-none bg-orange-600 p-2.5 text-white transition-all hover:bg-orange-500"
             onClick={() => signOut()}
