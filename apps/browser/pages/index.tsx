@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 import clsx from "clsx";
-import DojoConfig from "../src/components/DojoConfig";
+import DojoConfig from "../src/components/AccountConfig";
 import DojoError from "../src/components/DojoError";
 import Sidebar from "../src/components/Sidebar";
 import Chat, { ChatMessage } from "../src/components/Chat";
@@ -28,7 +28,6 @@ import { createInBrowserScripts } from "../src/scripts";
 import WelcomeModal, { WELCOME_MODAL_SEEN_STORAGE_KEY } from "../src/components/WelcomeModal";
 import { BrowserLogger } from "../src/sys/logger";
 import { checkLlmModel } from "../src/checkLlmModel";
-import SigninModal from "../src/components/SigninModal";
 import { ProxyLlmApi, ProxyEmbeddingApi } from "../src/api";
 import { useSession } from "next-auth/react";
 import { AuthProxy } from "../src/AuthProxy";
@@ -44,9 +43,8 @@ function Dojo() {
     complete: false
   });
   const [welcomeModalOpen, setWelcomeModalOpen] = useState<boolean>(false);
-  const [signInModalOpen, setSignInModalOpen] = useState<boolean>(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [configOpen, setConfigOpen] = useState(false);
+  const [accountModal, setAccountModalOpen] = useState(false);
   const [dojoError, setDojoError] = useState<unknown | undefined>(undefined);
   const [evo, setEvo] = useState<Evo | undefined>(undefined);
   const [proxyEmbeddingApi, setProxyEmbeddingApi] = useState<ProxyEmbeddingApi | undefined>(undefined);
@@ -129,7 +127,7 @@ function Dojo() {
       complete
     });
     setCapReached(false)
-    setConfigOpen(false);
+    setAccountModalOpen(false);
   };
 
   useEffect(() => {
@@ -233,7 +231,7 @@ function Dojo() {
 
     if (!dojoConfig.openAiApiKey) {
       if (!session?.user) {
-        setSignInModalOpen(true);
+        setAccountModalOpen(true);
         return false;
       } else {
         setAwaitingAuth(true);
@@ -258,7 +256,7 @@ function Dojo() {
   return (
     <>
       <div className="flex h-full bg-neutral-800 bg-landing-bg bg-repeat text-center text-neutral-400">
-        {(configOpen || capReached) && (
+        {(accountModal || capReached) && (
           <DojoConfig
             apiKey={dojoConfig.openAiApiKey}
             onConfigSaved={onConfigSaved}
@@ -275,7 +273,7 @@ function Dojo() {
             onSidebarToggleClick={() => {
               setSidebarOpen(!sidebarOpen);
             }}
-            onSettingsClick={() => setConfigOpen(true)}
+            onSettingsClick={() => setAccountModalOpen(true)}
             userFiles={userFiles}
             onUploadFiles={setUploadedFiles}
           />
@@ -291,7 +289,7 @@ function Dojo() {
                 messages={messages}
                 goalEnded={goalEnded}
                 sidebarOpen={sidebarOpen}
-                overlayOpen={welcomeModalOpen || signInModalOpen}
+                overlayOpen={welcomeModalOpen || accountModal}
                 onSidebarToggleClick={() => {
                   setSidebarOpen(!sidebarOpen);
                 }}
@@ -303,7 +301,6 @@ function Dojo() {
         </div>
       </div>
       <WelcomeModal isOpen={welcomeModalOpen} onClose={() => setWelcomeModalOpen(false)} />
-      <SigninModal isOpen={signInModalOpen} onClose={() => setSignInModalOpen(false)} onConfigSaved={onConfigSaved} />
     </>
   );
 }
