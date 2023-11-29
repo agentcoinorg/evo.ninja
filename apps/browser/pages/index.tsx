@@ -60,7 +60,6 @@ function Dojo() {
   // TODO: setGoalEnded is unused?
   const [goalEnded, setGoalEnded] = useState<boolean>(false);
   const [capReached, setCapReached] = useState<boolean>(false)
-  const [goalId, setGoalId] = useState<string>("")
   const { data: session } = useSession()
   const [awaitingAuth, setAwaitingAuth] = useState<boolean>(false);
 
@@ -251,7 +250,6 @@ function Dojo() {
 
     proxyLlmApi?.setGoalId(goalId);
     proxyEmbeddingApi?.setGoalId(goalId);
-    setGoalId(goalId)
     return true
   }
 
