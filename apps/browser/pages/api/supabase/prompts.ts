@@ -1,15 +1,11 @@
-import { createClient } from "@supabase/supabase-js";
 import { NextApiRequest, NextApiResponse } from "next";
-
-export const supabase = createClient(
-  process.env.SUPABASE_URL as string,
-  process.env.SUPABASE_SERVICE_ROLE_KEY as string
-);
+import { createSupabaseServerClient } from "../../../src/supabase/createServerClient";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  const supabase = createSupabaseServerClient();
   switch (req.method) {
     case "GET":
       const { data: prompts, error } = await supabase

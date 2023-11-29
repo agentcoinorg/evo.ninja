@@ -11,7 +11,7 @@ import { faThumbsUp, faThumbsDown, faArrowUpRightFromSquare } from '@fortawesome
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import SidebarIcon from "./SidebarIcon";
-import { useSession } from "next-auth/react"
+import { createBrowserClient } from "@supabase/ssr";
 
 export interface ChatMessage {
   title: string;
@@ -57,7 +57,10 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
   const [hasDownvoted, setHasDownvoted] = useState<boolean>(false);
   const [showEvoNetPopup, setShowEvoNetPopup] = useState<boolean>(false);
   const [showPrompts, setShowPrompts] = useState<boolean>(true);
-  const { data: session } = useSession()
+  const [supabase] = useState(() => createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  ))
 
   const pausedRef = useRef(paused);
   useEffect(() => {
@@ -169,6 +172,8 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
   };
 
   const handleStart = async () => {
+    const session = await supabase.auth.getSession();
+
     if (!loadedOpenAiApiKey && !session?.user) {
       setSignInModalOpen(true);
       return;

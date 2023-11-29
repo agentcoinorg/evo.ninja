@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import OpenAIApi from "openai";
-import { authOptions } from "../auth/[...nextauth]";
-import { getServerSession } from "next-auth";
+import { createSupabaseServerClient } from "../../../src/supabase/createServerClient";
 
 export const api = new OpenAIApi({
   apiKey: process.env.OPENAI_API_KEY,
@@ -12,7 +11,8 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "POST") {
-    const session = await getServerSession(req, res, authOptions);
+    const supabase = createSupabaseServerClient();
+    const session = await supabase.auth.getSession()
     if (session) {
       const input: string[][] = req.body.input;
       try {

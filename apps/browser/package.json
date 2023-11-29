@@ -23,7 +23,6 @@
     "jsonwebtoken": "^9.0.2",
     "jszip": "^3.10.0",
     "next": "14.0.1",
-    "next-auth": "^4.24.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",

@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import type { AppProps } from "next/app";
 import { Exo } from "next/font/google";
-import { SessionProvider } from "next-auth/react"
 
 import "../styles/globals.css";
 import clsx from "clsx";
@@ -38,9 +37,7 @@ export default function EvoApp({ Component, pageProps }: AppProps) {
           });
           `}
       </Script>
-      <SessionProvider session={pageProps.session}>
-        <Component {...pageProps} />
-      </SessionProvider>
+      <Component {...pageProps} />
     </div>
   );
 }

@@ -1,15 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth";
 import OpenAIApi from "openai";
-import { authOptions } from "../auth/[...nextauth]";
 import { api } from "./embeddings";
+import { createSupabaseServerClient } from "../../../src/supabase/createServerClient";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   if (req.method === "POST") {
-    const session = await getServerSession(req, res, authOptions);
+    const supabase = createSupabaseServerClient();
+    const session = await supabase.auth.getSession()
     if (session) {
       const functions = req.body.functions ?? undefined;
       try {
