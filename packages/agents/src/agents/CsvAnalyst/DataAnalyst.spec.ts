@@ -3,7 +3,8 @@ import {
   LlmApi,
   AgentContext, 
   LlmModel,
-  OpenAIChatCompletion
+  OpenAILlmApi,
+  OpenAIEmbeddingAPI,
 } from "@/agent-core";
 import * as rimraf from "rimraf";
 import dotenv from "dotenv";
@@ -44,7 +45,7 @@ describe("Data Analyst Agent Test Suite", () => {
       },
     });
 
-    const llm: LlmApi = new OpenAIChatCompletion(
+    const llm: LlmApi = new OpenAILlmApi(
       env.OPENAI_API_KEY,
       env.GPT_MODEL as LlmModel,
       env.CONTEXT_WINDOW_TOKENS,
@@ -65,6 +66,7 @@ describe("Data Analyst Agent Test Suite", () => {
 
     const workspace = new FileSystemWorkspace(testCaseDir);
     const internals = new SubWorkspace(".evo", workspace);
+    const embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base);
 
     if (pathsForFilesToInclude) {
       for (const filePath of pathsForFilesToInclude) {
@@ -81,6 +83,7 @@ describe("Data Analyst Agent Test Suite", () => {
       agent: new CsvAnalystAgent(
         new AgentContext(
           debugLlm,
+          embedding,
           chat,
           logger,
           workspace,

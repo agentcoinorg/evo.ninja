@@ -9,7 +9,6 @@ import {
   ChatLogs,
   LlmModel,
   agentFunctionBaseToAgentFunction,
-  OpenAIEmbeddingAPI,
   Chat,
   executeAgentFunction,
   FunctionDefinition,
@@ -111,13 +110,7 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
   }
  
   protected async createEmbeddingVector(text: string): Promise<number[]> {
-    const embeddingApi = new OpenAIEmbeddingAPI(
-      this.context.env.OPENAI_API_KEY,
-      this.context.logger,
-      this.context.chat.tokenizer
-    );
-
-    return (await embeddingApi.createEmbeddings(text))[0].embedding;
+    return (await this.context.embedding.createEmbeddings(text))[0].embedding;
   }
 
   protected initializeChat(args: TRunArgs) {

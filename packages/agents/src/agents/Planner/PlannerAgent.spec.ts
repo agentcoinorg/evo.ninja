@@ -2,7 +2,8 @@ import {
   Chat,
   LlmApi,
   AgentContext,
-  OpenAIChatCompletion,
+  OpenAILlmApi,
+  OpenAIEmbeddingAPI,
 } from "@/agent-core";
 import * as rimraf from "rimraf";
 import dotenv from "dotenv";
@@ -42,7 +43,7 @@ describe('Planner Agent Test Suite', () => {
       },
     });
 
-    const llm: LlmApi = new OpenAIChatCompletion(
+    const llm: LlmApi = new OpenAILlmApi(
       env.OPENAI_API_KEY,
       env.GPT_MODEL as LlmModel,
       env.CONTEXT_WINDOW_TOKENS,
@@ -74,11 +75,13 @@ describe('Planner Agent Test Suite', () => {
       const fileContents = fs.readFileSync(filePath, "utf-8");
       workspace.writeFileSync(fileName, fileContents);
     }
+    const embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base);
 
     return {
       agent: new PlannerAgent(
         new AgentContext(
           debugLlm,
+          embedding,
           chat,
           logger,
           workspace,
