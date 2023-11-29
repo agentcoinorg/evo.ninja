@@ -20,7 +20,9 @@ function AccountConfig(props: AccountConfigProps) {
     >
       <div
         className="fixed left-1/2 top-1/2 flex w-96 -translate-x-1/2 -translate-y-1/2 flex-col gap-4 rounded-lg bg-neutral-900 p-12 text-neutral-50"
-        onClick={(e) => { e.stopPropagation() }}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
       >
         {!capReached && <h2 className="text-lg font-semibold">Account</h2>}
         {!session && (
@@ -63,6 +65,14 @@ function AccountConfig(props: AccountConfigProps) {
         >
           Save
         </button>
+
+        <label className="relative inline-flex cursor-pointer items-center">
+          <input type="checkbox" value="" className="peer sr-only" />
+          <div className="peer h-6 w-11 rounded-full bg-orange-500 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-orange-500 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rtl:peer-checked:after:-translate-x-full dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:orange-500"></div>
+          <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+            Share prompts with Evo team
+          </span>
+        </label>
       </div>
     </div>
   );
