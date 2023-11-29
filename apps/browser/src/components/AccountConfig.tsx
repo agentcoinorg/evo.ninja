@@ -108,7 +108,3 @@ function AccountConfig(props: AccountConfigProps) {
 }
 
 export default AccountConfig;
-
-// peer h-6 w-11 rounded-full bg-orange-500 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-orange-500 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rtl:peer-checked:after:-translate-x-full dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:orange-500
-
-// peer h-5 w-11 rounded-full peer-checked:bg-orange-${allowTelemetry ? "500" : "800"} bg-orange-${allowTelemetry ? "500" : "800"} after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-full
