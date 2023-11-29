@@ -25,12 +25,23 @@ export interface ChatProps {
   messages: ChatMessage[];
   goalEnded: boolean;
   sidebarOpen: boolean;
+  overlayOpen: boolean;
   onSidebarToggleClick: () => void;
   onUploadFiles: (files: InMemoryFile[]) => void;
   handlePromptAuth: (message: string) => Promise<boolean>
 }
 
-const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSidebarToggleClick, sidebarOpen, onUploadFiles, handlePromptAuth }: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({
+  evo,
+  onMessage,
+  messages,
+  goalEnded,
+  sidebarOpen,
+  overlayOpen,
+  onSidebarToggleClick,
+  onUploadFiles,
+  handlePromptAuth
+}: ChatProps) => {
   const [message, setMessage] = useState<string>("");
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
   const [paused, setPaused] = useState<boolean>(false);
@@ -301,8 +312,8 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
               onClick={() => setClickedMsgIndex(index === clickedMsgIndex ? null : index)}
             >
               <div className="prose prose-invert">
-                <ReactMarkdown>{msg.title}</ReactMarkdown>
-                <ReactMarkdown>{msg.content ?? ""}</ReactMarkdown>
+                <ReactMarkdown>{msg.title.toString()}</ReactMarkdown>
+                <ReactMarkdown>{msg.content?.toString() ?? ""}</ReactMarkdown>
               </div>
             </div>
           </div>
@@ -349,7 +360,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
         </div>
       )}
       <div className="flex items-center justify-center gap-4 p-4 mb-4 self-center w-[100%] max-w-[56rem]">
-        {showDisclaimer && (
+        {showDisclaimer && !overlayOpen && (
           <div className="absolute bottom-0 z-50 flex w-4/5 items-center justify-around rounded-t-lg border-2 border-orange-600 bg-black p-2.5 text-center text-xs text-white self-center w-[100%] max-w-[56rem]">
             🧠 Hey there! Mind sharing your prompts to help make Evo even better?
             <div className="flex gap-2.5">

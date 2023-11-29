@@ -17,8 +17,7 @@ function DojoConfig(props: DojoConfigProps) {
         </h3>
         {capReached && (
           <h4 className="text-md">
-            You have reached the cap of 5 prompts daily. Please enter your
-            OpenAI API Key or try again tomorrow
+            You have used all of your free daily prompts. Please enter your OpenAI API key or try again tomorrow.
           </h4>
         )}
         <input

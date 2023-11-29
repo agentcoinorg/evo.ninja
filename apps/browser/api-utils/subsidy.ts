@@ -1,9 +1,9 @@
 import { SupabaseClient } from "./supabase";
 
-type Subsidy = "llm" | "embedding";
+type Subsidy = "completions" | "embedding";
 
 const SUBSIDY_CAP: Record<Subsidy, number> = {
-  "llm": 50,
+  "completions": 50,
   "embedding": 1000
 };
 
@@ -23,8 +23,8 @@ export async function canUseSubsidy(
     return false;
   }
 
-  const subsidizedProp = subsidy === "llm" ?
-    "subsidized_llm_req" :
+  const subsidizedProp = subsidy === "completions" ?
+    "subsidized_completion_req" :
     "subsidized_embedding_req";
 
   const subsidizedCount = goal.data[subsidizedProp];

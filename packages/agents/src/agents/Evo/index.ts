@@ -49,15 +49,6 @@ export class Evo extends Agent<GoalRunArgs> {
     );
   }
 
-  public recreateContextualizedChat(context: AgentContext) {
-    this._cChat = new ContextualizedChat(
-      context,
-      context.chat,
-      this._chunker,
-      context.variables
-    ); 
-  }
-
   public reset() {
     this.previousPrediction = undefined;
     this.loopCounter = 0;

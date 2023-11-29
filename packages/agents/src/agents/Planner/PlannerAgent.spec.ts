@@ -2,7 +2,7 @@ import {
   Chat,
   LlmApi,
   AgentContext,
-  OpenAIChatCompletion,
+  OpenAILlmApi,
   OpenAIEmbeddingAPI,
 } from "@/agent-core";
 import * as rimraf from "rimraf";
@@ -43,7 +43,7 @@ describe('Planner Agent Test Suite', () => {
       },
     });
 
-    const llm: LlmApi = new OpenAIChatCompletion(
+    const llm: LlmApi = new OpenAILlmApi(
       env.OPENAI_API_KEY,
       env.GPT_MODEL as LlmModel,
       env.CONTEXT_WINDOW_TOKENS,

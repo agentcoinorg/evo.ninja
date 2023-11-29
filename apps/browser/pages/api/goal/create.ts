@@ -57,6 +57,7 @@ export default async function handler(
   }
 
   if (goals?.length && goals.length >= GOALS_PER_DAY_CAP) {
+    console.error("Goals per day cap reached.", goals?.length);
     return res.status(403).send({});
   }
 

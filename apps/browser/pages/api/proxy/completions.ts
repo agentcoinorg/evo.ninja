@@ -27,13 +27,15 @@ export default async function handler(
   const openai = createOpenAIApiClient();
 
   // Ensure the goal is being tracked, and we're able to continue
-  // subsidizing the goal's llm requests
+  // subsidizing the goal's completions requests
   const isValid = await isGoalValid(goalId, supabase);
   if (!isValid) {
+    console.error("IS NOT VALID", goalId, "heyooooo")
     return res.status(403).send({});
   }
-  const canSubsidize = await canUseSubsidy("llm", goalId, supabase);
+  const canSubsidize = await canUseSubsidy("completions", goalId, supabase);
   if (!canSubsidize) {
+    console.error("CANNOT SUBSIDIZE")
     return res.status(403).send({});
   }
 

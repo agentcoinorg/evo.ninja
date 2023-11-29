@@ -1,7 +1,7 @@
 import {
   Chat,
   LlmApi,
-  OpenAIChatCompletion,
+  OpenAILlmApi,
   OpenAIEmbeddingAPI,
 } from "@/agent-core";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
@@ -41,7 +41,7 @@ describe('Dev Agent Test Suite', () => {
       },
     });
 
-    const llm: LlmApi = new OpenAIChatCompletion(
+    const llm: LlmApi = new OpenAILlmApi(
       env.OPENAI_API_KEY,
       env.GPT_MODEL as LlmModel,
       env.CONTEXT_WINDOW_TOKENS,

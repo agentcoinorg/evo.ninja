@@ -17,19 +17,19 @@ import {
   ConsoleLogger,
   Scripts,
   Env,
-  OpenAIChatCompletion,
+  OpenAILlmApi,
   LlmModel,
+  LlmApi,
+  EmbeddingApi,
   Chat as EvoChat,
   OpenAIEmbeddingAPI,
-  DEFAULT_ADA_CONFIG,
 } from "@evo-ninja/agents";
 import { createInBrowserScripts } from "../src/scripts";
 import WelcomeModal, { WELCOME_MODAL_SEEN_STORAGE_KEY } from "../src/components/WelcomeModal";
 import { BrowserLogger } from "../src/sys/logger";
 import { checkLlmModel } from "../src/checkLlmModel";
 import SigninModal from "../src/components/SigninModal";
-import { LlmProxy } from "../src/LlmProxy";
-import { EmbeddingProxy } from "../src/EmbeddingProxy";
+import { ProxyLlmApi, ProxyEmbeddingApi } from "../src/api";
 import { useSession } from "next-auth/react";
 import { AuthProxy } from "../src/AuthProxy";
 
@@ -49,6 +49,8 @@ function Dojo() {
   const [configOpen, setConfigOpen] = useState(false);
   const [dojoError, setDojoError] = useState<unknown | undefined>(undefined);
   const [evo, setEvo] = useState<Evo | undefined>(undefined);
+  const [proxyEmbeddingApi, setProxyEmbeddingApi] = useState<ProxyEmbeddingApi | undefined>(undefined);
+  const [proxyLlmApi, setProxyLlmApi] = useState<ProxyLlmApi | undefined>(undefined);
   const [userFiles, setUserFiles] = useState<InMemoryFile[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<InMemoryFile[]>([]);
   const [userWorkspace, setUserWorkspace] = useState<
@@ -168,29 +170,38 @@ function Dojo() {
           MAX_RESPONSE_TOKENS: "2000",
         });
 
-        const llm = dojoConfig.openAiApiKey
-          ? new OpenAIChatCompletion(
-              env.OPENAI_API_KEY,
-              env.GPT_MODEL as LlmModel,
-              env.CONTEXT_WINDOW_TOKENS,
-              env.MAX_RESPONSE_TOKENS,
-              logger
-            )
-          : new LlmProxy(
-              env.GPT_MODEL as LlmModel,
-              env.CONTEXT_WINDOW_TOKENS,
-              env.MAX_RESPONSE_TOKENS,
-              goalId
-            );
+        let llm: LlmApi;
+        let embedding: EmbeddingApi;
 
-        const embedding = dojoConfig.openAiApiKey
-          ? new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base)
-          : new EmbeddingProxy(cl100k_base, DEFAULT_ADA_CONFIG, goalId);
+        if (dojoConfig.openAiApiKey) {
+          llm = new OpenAILlmApi(
+            env.OPENAI_API_KEY,
+            env.GPT_MODEL as LlmModel,
+            env.CONTEXT_WINDOW_TOKENS,
+            env.MAX_RESPONSE_TOKENS,
+            logger
+          );
+          embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base)
+        } else {
+          llm = new ProxyLlmApi(
+            env.GPT_MODEL as LlmModel,
+            env.CONTEXT_WINDOW_TOKENS,
+            env.MAX_RESPONSE_TOKENS,
+            () => setCapReached(true)
+          );
+          setProxyLlmApi(llm as ProxyLlmApi);
+          embedding = new ProxyEmbeddingApi(cl100k_base, () => setCapReached(true));
+          setProxyEmbeddingApi(embedding as ProxyEmbeddingApi);
+        }
 
-        const userWorkspace = new InMemoryWorkspace();
-        setUserWorkspace(userWorkspace);
+        let workspace = userWorkspace;
 
-        const internals = new SubWorkspace(".evo", userWorkspace);
+        if (!workspace) {
+          workspace = new InMemoryWorkspace();
+          setUserWorkspace(workspace);
+        }
+
+        const internals = new SubWorkspace(".evo", workspace);
 
         const chat = new EvoChat(cl100k_base);
         setEvo(
@@ -200,7 +211,7 @@ function Dojo() {
               embedding,
               chat,
               logger,
-              userWorkspace,
+              workspace,
               internals,
               env,
               scripts
@@ -213,26 +224,21 @@ function Dojo() {
     })();
   }, [dojoConfig]);
 
-  useEffect(() => {
-    if (!evo || dojoConfig.openAiApiKey) {
-      return
-    }
-
-    const proxyEmbedding = new EmbeddingProxy(cl100k_base, DEFAULT_ADA_CONFIG, goalId)
-    const proxyLlm = new LlmProxy(evo.context.env.GPT_MODEL, evo.context.env.CONTEXT_WINDOW_TOKENS, evo.context.env.MAX_RESPONSE_TOKENS, goalId)
-    evo.context.llm = proxyLlm
-    evo.context.embedding = proxyEmbedding
-    evo.recreateContextualizedChat(evo.context)
-  }, [goalId])
-
+  // TODO: create a goal ID for goals even when there is an api key added
   const handlePromptAuth = async (message: string) => {
     if (!dojoConfig.openAiApiKey) {
       if (!session?.user) {
         setSignInModalOpen(true);
         return false;
       } else {
-        const goalId = await AuthProxy.checkGoal(message, true, () => { setCapReached(true) });
+        const goalId = await AuthProxy.checkGoal(
+          message,
+          true,
+          () => setCapReached(true)
+        );
         if (goalId) {
+          proxyLlmApi?.setGoalId(goalId);
+          proxyEmbeddingApi?.setGoalId(goalId);
           setGoalId(goalId)
         } else {
           return false
@@ -278,6 +284,7 @@ function Dojo() {
                 messages={messages}
                 goalEnded={goalEnded}
                 sidebarOpen={sidebarOpen}
+                overlayOpen={welcomeModalOpen || signInModalOpen}
                 onSidebarToggleClick={() => {
                   setSidebarOpen(!sidebarOpen);
                 }}

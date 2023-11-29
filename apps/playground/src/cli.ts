@@ -6,7 +6,7 @@ import {
   LlmModel,
   Chat,
   AgentContext,
-  OpenAIChatCompletion,
+  OpenAILlmApi,
   OpenAIEmbeddingAPI
 } from "@evo-ninja/agents";
 import { run } from "./demos/basic";
@@ -23,7 +23,7 @@ export async function cli(): Promise<void> {
   });
   const env = new Env(process.env as Record<string, string>);
 
-  const llm = new OpenAIChatCompletion(
+  const llm = new OpenAILlmApi(
     env.OPENAI_API_KEY,
     env.GPT_MODEL as LlmModel,
     env.CONTEXT_WINDOW_TOKENS,
