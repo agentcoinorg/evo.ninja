@@ -1,10 +1,10 @@
 import { Chat, ChatLogs, Evo } from "@evo-ninja/agents";
 import { buildEvo } from "./buildEvo";
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
-import { EvoAgentJobData } from "./EvoAgentJobData";
-import { evoAgentJobScheduler } from "./EvoAgentJobScheduler";
+import { AgentJobData } from "./AgentJobData";
+import { evoAgentJobScheduler } from "./AgentJobScheduler";
 
-export async function runEvoAgentJob(jobId: string, jobData: EvoAgentJobData) {
+export async function runAgentJob(jobId: string, jobData: AgentJobData) {
   const { threadId } = jobData;
 
   console.log(`Running Evo for thread: '${threadId}'`);

@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { evoAgentJobScheduler } from "../../../src/evo-agent-job/EvoAgentJobScheduler";
+import { evoAgentJobScheduler } from "../../../src/agent-jobs/AgentJobScheduler";
 
 export default async function handler(
   req: NextApiRequest,
