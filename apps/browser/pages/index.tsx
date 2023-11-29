@@ -30,7 +30,10 @@ import { checkLlmModel } from "../src/checkLlmModel";
 import SigninModal from "../src/components/SigninModal";
 import { LlmProxy } from "../src/LlmProxy";
 import { EmbeddingProxy } from "../src/EmbeddingProxy";
-import { useChats } from "../src/supabase/queries/useChats";
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useRouter } from 'next/navigation'
+import { createBrowserClient } from "@supabase/ssr";
+import { OAuthModal } from "../src/components/OAuthModal";
 
 function Dojo() {
   const [dojoConfig, setDojoConfig] = useState<{
@@ -44,6 +47,7 @@ function Dojo() {
   });
   const [welcomeModalOpen, setWelcomeModalOpen] = useState<boolean>(false);
   const [signInModalOpen, setSignInModalOpen] = useState<boolean>(false);
+  const [oAuthModalOpen, setOAuthModalOpen] = useState<boolean>(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [configOpen, setConfigOpen] = useState(false);
   const [dojoError, setDojoError] = useState<unknown | undefined>(undefined);
@@ -264,7 +268,15 @@ function Dojo() {
         </div>
       </div>
       <WelcomeModal isOpen={welcomeModalOpen} onClose={() => setWelcomeModalOpen(false)} />
-      <SigninModal isOpen={signInModalOpen} onClose={() => setSignInModalOpen(false)} onConfigSaved={onConfigSaved} />
+      <SigninModal isOpen={signInModalOpen}
+        onClose={() => setSignInModalOpen(false)}
+        onConfigSaved={onConfigSaved}
+        handleSignIn={() => {
+          setSignInModalOpen(false)
+          setOAuthModalOpen(true)
+        }}
+      />
+      <OAuthModal isOpen={oAuthModalOpen} onClose={() => setOAuthModalOpen(false)} />
     </>
   );
 }

@@ -2,19 +2,32 @@ import { Dialog, Transition } from "@headlessui/react";
 import clsx from "clsx";
 import { Fragment, useState } from "react";
 import { EXO_FONT } from "../../pages/_app";
+import { createBrowserClient } from "@supabase/ssr";
 
-export default function SigninModal({
+type SupportedProviders = 'github' | 'google'
+
+export function OAuthModal({
   isOpen,
   onClose,
-  onConfigSaved,
-  handleSignIn,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onConfigSaved: (apiKey: string) => void;
-  handleSignIn: () => void;
 }) {
-  const [apiKey, setApiKey] = useState<string>("");
+  const [supabase] = useState(() => createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  ))
+
+  const onButtonClick = async (provider: SupportedProviders) => {
+    const { error } = await supabase.auth.signInWithOAuth({ 
+      provider,
+      options: {
+        redirectTo: `/api/auth/callback`,
+      }
+    })
+    if (error) console.log(error)
+  }
+
   return (
     <>
       <Transition appear show={isOpen} as={Fragment}>
@@ -40,35 +53,20 @@ export default function SigninModal({
                   )}
                 >
                   <Dialog.Title as="h3" className="text-lg font-semibold">
-                    Please add your OpenAI API key
+                    Sign In
                   </Dialog.Title>
-                  <div className="flex justify-center items-center gap-2">
-                    <input
-                      className="rounded-xl border border-neutral-600 bg-neutral-950 p-2.5 text-neutral-50 outline-none transition-all"
-                      type="text"
-                      value={apiKey}
-                      onChange={(e) => setApiKey(e.target.value)}
-                    />
+                  <div className="flex flex-col gap-2 justify-center">
                     <button
-                      className="cursor-pointer rounded-xl border-none bg-orange-600 p-2.5 text-neutral-50 transition-all hover:bg-orange-500"
-                      onClick={() => {
-                        onConfigSaved(apiKey)
-                        onClose()
-                      }}
+                      className="flex items-center bg-white dark:bg-gray-900 border border-gray-300 rounded-lg shadow-md px-6 py-2 text-sm font-medium text-gray-800 dark:text-white hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                      onClick={() => onButtonClick('google')}
                     >
-                      Save
+                      <span>Connect with Google</span>
                     </button>
-                  </div>
-                  <h3 className="flex justify-center items-center text-lg font-semibold">
-                  - or -
-                  </h3>
-                  <div className="flex justify-center">
                     <button
-                      type="button"
-                      className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-50 shadow-md outline-none transition-all hover:bg-orange-500"
-                      onClick={() => handleSignIn()}
+                      className="flex items-center bg-white dark:bg-gray-900 border border-gray-300 rounded-lg shadow-md px-6 py-2 text-sm font-medium text-gray-800 dark:text-white hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                      onClick={() => onButtonClick('github')}
                     >
-                      Sign in
+                      <span>Connect with Github</span>
                     </button>
                   </div>
                 </Dialog.Panel>
