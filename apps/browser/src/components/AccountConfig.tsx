@@ -5,6 +5,7 @@ interface AccountConfigProps {
   apiKey: string | null;
   onConfigSaved: (apiKey: string) => void;
   capReached: boolean;
+  onClose: () => void;
 }
 
 function AccountConfig(props: AccountConfigProps) {
@@ -13,8 +14,14 @@ function AccountConfig(props: AccountConfigProps) {
   const { data: session } = useSession();
 
   return (
-    <div className="absolute inset-0 z-50 bg-neutral-900/80">
-      <div className="fixed left-1/2 top-1/2 flex w-96 -translate-x-1/2 -translate-y-1/2 flex-col gap-4 rounded-lg bg-neutral-900 p-12 text-neutral-50">
+    <div
+      className="absolute inset-0 z-50 bg-neutral-900/80"
+      onClick={props.onClose}
+    >
+      <div
+        className="fixed left-1/2 top-1/2 flex w-96 -translate-x-1/2 -translate-y-1/2 flex-col gap-4 rounded-lg bg-neutral-900 p-12 text-neutral-50"
+        onClick={(e) => { e.stopPropagation() }}
+      >
         {!capReached && <h2 className="text-lg font-semibold">Account</h2>}
         {!session && (
           <>

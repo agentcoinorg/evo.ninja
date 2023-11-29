@@ -259,6 +259,10 @@ function Dojo() {
             apiKey={dojoConfig.openAiApiKey}
             onConfigSaved={onConfigSaved}
             capReached={capReached}
+            onClose={() => {
+              setAccountModalOpen(false);
+              setCapReached(false);
+            }}
           />
         )}
         <div className={clsx(
