@@ -60,7 +60,7 @@ function Dojo() {
   // TODO: setGoalEnded is unused?
   const [goalEnded, setGoalEnded] = useState<boolean>(false);
   const [capReached, setCapReached] = useState<boolean>(false)
-  const session = useSession()
+  const { session } = useSession()
   const [awaitingAuth, setAwaitingAuth] = useState<boolean>(false);
   const [firstTimeUser, setFirstTimeUser] = useState<boolean>(false);
 

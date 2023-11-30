@@ -9,6 +9,7 @@ import {
 import { useSupabase } from "../supabase/useSupabase";
 import { useSession } from "../supabase/useSession";
 import { OAuthModal } from "./OAuthModal";
+import { createGuestUser } from "../supabase/createGuestUser";
 
 interface AccountConfigProps {
   apiKey: string | null;
@@ -28,7 +29,7 @@ function AccountConfig(props: AccountConfigProps) {
   );
   const { onConfigSaved, capReached, firstTimeUser } = props;
   const supabase = useSupabase();
-  const session = useSession();
+  const { session } = useSession();
 
   return (
     <>
@@ -77,12 +78,21 @@ function AccountConfig(props: AccountConfigProps) {
                     </button>
                   </div>
                 ) : (
-                  <button
-                    className="cursor-pointer rounded-xl border-none bg-orange-600 p-1.5 text-white transition-all hover:bg-orange-500"
-                    onClick={() => setShowOauthModal(true)}
-                  >
-                    Sign in
-                  </button>
+                  <div>
+                    <button
+                      className="cursor-pointer rounded-xl border-none bg-orange-600 p-1.5 text-white transition-all hover:bg-orange-500"
+                      onClick={() => setShowOauthModal(true)}
+                    >
+                      Sign in
+                    </button>
+                    <button
+                      className="cursor-pointer rounded-xl border-none bg-orange-600 p-1.5 text-white transition-all hover:bg-orange-500"
+                      onClick={() => createGuestUser(supabase)}
+                    >
+                      Continue as guest
+                    </button>
+                  </div>
+                  
                 )}
               </div>
 

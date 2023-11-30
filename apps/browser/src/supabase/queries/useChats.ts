@@ -4,7 +4,7 @@ import { useSession } from "../useSession";
 
 export const useChats = () => {
   const supabase = useSupabase();
-  const session = useSession();
+  const { session } = useSession();
 
   return useQuery(
     supabase

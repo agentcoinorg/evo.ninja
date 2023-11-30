@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react"
 import { useSupabase } from "./useSupabase"
-import { Session } from "@supabase/supabase-js"
+import { AuthChangeEvent, Session } from "@supabase/supabase-js"
 
 export const useSession = () => {
-  const [session, setSession] = useState<Session | null>(null)
+  const [session, setSession] = useState<Session | null>()
+  const [lastSessionEvent, setLastSessionEvent] = useState<AuthChangeEvent>()
   const supabase = useSupabase()
 
   useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange((_, supabaseSession) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((e, supabaseSession) => {
+      setLastSessionEvent(e)
       setSession(supabaseSession)
     })
 
@@ -16,5 +18,5 @@ export const useSession = () => {
     }
   }, [supabase])
 
-  return session
+  return { session, lastSessionEvent }
 }
