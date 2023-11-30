@@ -23,7 +23,6 @@ export interface ChatProps {
   evo: Evo;
   onMessage: (message: ChatMessage) => void;
   messages: ChatMessage[];
-  goalEnded: boolean;
   sidebarOpen: boolean;
   overlayOpen: boolean;
   onDisclaimerSelect: (approve: boolean) => void;
@@ -36,7 +35,6 @@ const Chat: React.FC<ChatProps> = ({
   evo,
   onMessage,
   messages,
-  goalEnded,
   sidebarOpen,
   overlayOpen,
   onDisclaimerSelect,
@@ -68,19 +66,14 @@ const Chat: React.FC<ChatProps> = ({
       pausedRef.current = paused;
   }, [paused]);
 
-  const goalEndedRef = useRef(paused);
-  useEffect(() => {
-    goalEndedRef.current = goalEnded;
-  }, [goalEnded]);
-
-  useEffect(() => {
-    if (goalEnded) {
-      setPaused(true);
-      setEvoRunning(false);
-      setSending(false);
-      setShowEvoNetPopup(true);
-    }
-  }, [goalEnded]);
+  // useEffect(() => {
+  //   if (goalEnded) {
+  //     setPaused(true);
+  //     setEvoRunning(false);
+  //     setSending(false);
+  //     setShowEvoNetPopup(true);
+  //   }
+  // }, [goalEnded]);
 
   useEffect(() => {
     const runEvo = async () => {
@@ -99,15 +92,18 @@ const Chat: React.FC<ChatProps> = ({
       let messageLog = messages;
       let stepCounter = 1
       while (evoRunning) {
-        if (pausedRef.current || goalEndedRef.current) {
+        console.log("init while loop...")
+        if (pausedRef.current) {
           setStopped(true);
           return Promise.resolve();
         }
 
         setStopped(false);
 
+        console.log("waitning for next iteration...")
         const response = await evoItr.next();
-
+        console.log("response from iteraction")
+        console.log(response)
         if (response.done) {
           onMessage({
             title: "## Goal Achieved",
@@ -132,9 +128,7 @@ const Chat: React.FC<ChatProps> = ({
             user: "evo"
           };
           messageLog = [...messageLog, evoMessage];
-          if (!goalEndedRef.current) {
-            onMessage(evoMessage);
-          }
+          onMessage(evoMessage);
         }
 
         stepCounter++
@@ -304,7 +298,7 @@ const Chat: React.FC<ChatProps> = ({
             </div>
           </div>
         ))}
-        {goalEnded && (
+        {/* {goalEnded && (
           <div className="my-4 flex flex-col items-center">
             <div className="mb-2 text-xl">Provide Feedback</div>
             <div className="flex justify-center gap-4">
@@ -330,7 +324,7 @@ const Chat: React.FC<ChatProps> = ({
               </a>
             </div>
           </div>
-        )}
+        )} */}
       </div>
       {showPrompts && (
         <div className="grid w-full grid-rows-2 p-2.5 py-16 self-center w-[100%] max-w-[56rem]">

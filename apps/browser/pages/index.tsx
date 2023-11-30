@@ -30,7 +30,7 @@ import { BrowserLogger } from "../src/sys/logger";
 import { checkLlmModel } from "../src/checkLlmModel";
 import { ProxyLlmApi, ProxyEmbeddingApi } from "../src/api";
 import { useSession } from "next-auth/react";
-import { AuthProxy } from "../src/AuthProxy";
+import { AuthProxy } from "../src/api/AuthProxy";
 
 function Dojo() {
   const [dojoConfig, setDojoConfig] = useState<{
@@ -57,8 +57,6 @@ function Dojo() {
     InMemoryWorkspace | undefined
   >(undefined);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  // TODO: setGoalEnded is unused?
-  const [goalEnded, setGoalEnded] = useState<boolean>(false);
   const [capReached, setCapReached] = useState<boolean>(false)
   const { data: session } = useSession()
   const [awaitingAuth, setAwaitingAuth] = useState<boolean>(false);
@@ -305,7 +303,6 @@ function Dojo() {
                 evo={evo}
                 onMessage={onMessage}
                 messages={messages}
-                goalEnded={goalEnded}
                 sidebarOpen={sidebarOpen}
                 overlayOpen={welcomeModalOpen || accountModal}
                 onDisclaimerSelect={onDisclaimerSelect}
