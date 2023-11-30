@@ -76,8 +76,9 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         googleResults = await searchOnGoogle(query, context.env.SERP_API_KEY);
       }
 
+      const urls = googleResults.map(x => x.url).filter(u => !u.endsWith(".pdf")) 
       const searchMatches = await this.searchInPages({
-        urls: googleResults.map(x => x.url),
+        urls,
         query,
         context
       })

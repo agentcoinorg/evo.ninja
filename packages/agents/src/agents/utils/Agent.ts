@@ -110,6 +110,7 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
   }
  
   protected async createEmbeddingVector(text: string): Promise<number[]> {
+    
     return (await this.context.embedding.createEmbeddings(text))[0].embedding;
   }
 
