@@ -85,7 +85,10 @@ export class ProxyEmbeddingApi implements EmbeddingApi {
         }
 
         const { embeddings } = await embeddingResponse.json();
-        return embeddings;
+        return {
+          embedding: embeddings.embedding,
+          input
+        };
       })
     );
 
