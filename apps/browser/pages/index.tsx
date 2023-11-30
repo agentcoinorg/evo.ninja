@@ -28,13 +28,9 @@ import { createInBrowserScripts } from "../src/scripts";
 import WelcomeModal, { WELCOME_MODAL_SEEN_STORAGE_KEY } from "../src/components/WelcomeModal";
 import { BrowserLogger } from "../src/sys/logger";
 import { checkLlmModel } from "../src/checkLlmModel";
-import SigninModal from "../src/components/SigninModal";
-import { LlmProxy } from "../src/LlmProxy";
-import { EmbeddingProxy } from "../src/EmbeddingProxy";
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { useRouter } from 'next/navigation'
-import { createBrowserClient } from "@supabase/ssr";
-import { OAuthModal } from "../src/components/OAuthModal";
+import { ProxyLlmApi, ProxyEmbeddingApi } from "../src/api";
+import { AuthProxy } from "../src/AuthProxy";
+import { useSession } from "../src/supabase/useSession";
 
 function Dojo() {
   const [dojoConfig, setDojoConfig] = useState<{
@@ -49,8 +45,6 @@ function Dojo() {
     complete: false
   });
   const [welcomeModalOpen, setWelcomeModalOpen] = useState<boolean>(false);
-  const [signInModalOpen, setSignInModalOpen] = useState<boolean>(false);
-  const [oAuthModalOpen, setOAuthModalOpen] = useState<boolean>(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [accountModal, setAccountModalOpen] = useState(false);
   const [dojoError, setDojoError] = useState<unknown | undefined>(undefined);
@@ -66,7 +60,7 @@ function Dojo() {
   // TODO: setGoalEnded is unused?
   const [goalEnded, setGoalEnded] = useState<boolean>(false);
   const [capReached, setCapReached] = useState<boolean>(false)
-  const { data: session } = useSession()
+  const session = useSession()
   const [awaitingAuth, setAwaitingAuth] = useState<boolean>(false);
   const [firstTimeUser, setFirstTimeUser] = useState<boolean>(false);
 
@@ -326,15 +320,6 @@ function Dojo() {
         </div>
       </div>
       <WelcomeModal isOpen={welcomeModalOpen} onClose={() => setWelcomeModalOpen(false)} />
-      <SigninModal isOpen={signInModalOpen}
-        onClose={() => setSignInModalOpen(false)}
-        onConfigSaved={onConfigSaved}
-        handleSignIn={() => {
-          setSignInModalOpen(false)
-          setOAuthModalOpen(true)
-        }}
-      />
-      <OAuthModal isOpen={oAuthModalOpen} onClose={() => setOAuthModalOpen(false)} />
     </>
   );
 }

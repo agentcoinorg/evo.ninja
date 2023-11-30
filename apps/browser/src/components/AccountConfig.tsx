@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import { useSession, signOut, signIn } from "next-auth/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faSmileWink, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
+import { useSupabase } from "../supabase/useSupabase";
+import { useSession } from "../supabase/useSession";
+import { OAuthModal } from "./OAuthModal";
 
 interface AccountConfigProps {
   apiKey: string | null;
@@ -13,9 +15,11 @@ interface AccountConfigProps {
 
 function AccountConfig(props: AccountConfigProps) {
   const [apiKey, setApiKey] = useState<string>(props.apiKey || "");
+  const [showOauthModal, setShowOauthModal] = useState<boolean>(false);
   const [allowTelemetry, setAllowTelemetry] = useState<boolean>(props.allowTelemetry);
   const { onConfigSaved, capReached, firstTimeUser } = props;
-  const { data: session } = useSession();
+  const supabase = useSupabase();
+  const session = useSession();
 
   return (
     <div
@@ -49,7 +53,7 @@ function AccountConfig(props: AccountConfigProps) {
               <h4 className="text-md">{session.user?.email}</h4>
               <button
                 className="cursor-pointer"
-                onClick={() => signOut()}
+                onClick={() => supabase.auth.signOut()}
               >
                 <FontAwesomeIcon icon={faTrash} />
               </button>
@@ -57,7 +61,7 @@ function AccountConfig(props: AccountConfigProps) {
           ) : (
             <button
               className="cursor-pointer rounded-xl border-none bg-orange-600 p-1.5 text-white transition-all hover:bg-orange-500"
-              onClick={() => signIn()}
+              onClick={() => setShowOauthModal(true)}
             >
               Sign in
             </button>
@@ -103,6 +107,7 @@ function AccountConfig(props: AccountConfigProps) {
           </button>
         </div>
       </div>
+      <OAuthModal isOpen={showOauthModal} onClose={() => setShowOauthModal(false)} />
     </div>
   );
 }

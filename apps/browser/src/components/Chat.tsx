@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef, useCallback, SetStateAction, Dispatch } from "react";
+import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef, useCallback } from "react";
 import { Evo } from "@evo-ninja/agents";
 import ReactMarkdown from "react-markdown";
 import FileSaver from "file-saver";
@@ -11,7 +11,6 @@ import { faThumbsUp, faThumbsDown, faArrowUpRightFromSquare } from '@fortawesome
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import SidebarIcon from "./SidebarIcon";
-import { createBrowserClient } from "@supabase/ssr";
 
 export interface ChatMessage {
   title: string;
@@ -63,10 +62,6 @@ const Chat: React.FC<ChatProps> = ({
   const [hasDownvoted, setHasDownvoted] = useState<boolean>(false);
   const [showEvoNetPopup, setShowEvoNetPopup] = useState<boolean>(false);
   const [showPrompts, setShowPrompts] = useState<boolean>(true);
-  const [supabase] = useState(() => createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  ))
 
   const pausedRef = useRef(paused);
   useEffect(() => {
@@ -169,39 +164,6 @@ const Chat: React.FC<ChatProps> = ({
   };
 
   const handleStart = async () => {
-    const session = await supabase.auth.getSession();
-
-    if (!loadedOpenAiApiKey && !session?.user) {
-      setSignInModalOpen(true);
-      return;
-    }
-
-    if (!loadedOpenAiApiKey) {
-      const getPromptRequest = await fetch(
-        `/api/supabase/prompts?email=${session?.user?.email}`
-      );
-      const { prompts } = await getPromptRequest.json();
-      if (prompts?.length && prompts.length >= PROMPTS_CAP) {
-        const capReached = setCapReached();
-        if (capReached) return;
-      } else {
-        const addPromptRequest = await fetch(`/api/supabase/prompts`, {
-          method: "POST",
-          body: JSON.stringify({
-            email: session?.user?.email,
-            message,
-          }),
-          headers: {
-            "Content-Type": "application/json"
-          }
-        });
-
-        if (!addPromptRequest.ok) {
-          console.log("Error trying to add prompt request");
-          return
-        }
-      }
-    }
     handleSend();
   };
 

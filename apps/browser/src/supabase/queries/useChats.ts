@@ -1,10 +1,13 @@
-import { useSupabase } from "../useSupabase";
 import { useQuery } from "@supabase-cache-helpers/postgrest-swr";
+import { useSupabase } from "../useSupabase";
+import { useSession } from "../useSession";
 
 export const useChats = () => {
   const supabase = useSupabase();
+  const session = useSession();
+
   return useQuery(
-    supabase?.client
+    supabase
       .from("chats")
       .select(
         `
@@ -21,6 +24,6 @@ export const useChats = () => {
       )
     `
       )
-      .eq("user_id", supabase.userId) ?? null,
+      .eq("user_id", session?.user.id) ?? null,
   );
 };
