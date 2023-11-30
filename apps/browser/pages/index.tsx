@@ -31,8 +31,10 @@ import { checkLlmModel } from "../src/checkLlmModel";
 import { ProxyLlmApi, ProxyEmbeddingApi } from "../src/api";
 import { useSession } from "next-auth/react";
 import { AuthProxy } from "../src/api/AuthProxy";
+import { useDojo } from "../src/hooks/useDojo";
 
 function Dojo() {
+  const { dojo, setDojo } = useDojo()
   const [dojoConfig, setDojoConfig] = useState<{
     openAiApiKey: string | null;
     allowTelemetry: boolean;

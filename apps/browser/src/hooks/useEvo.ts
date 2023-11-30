@@ -11,7 +11,7 @@ interface State {
 }
 
 export function useEvo() {
-  const { config, error } = useDojo();
+  // const { config, error } = useDojo();
   const [evo, setEvo] = useState<Evo | undefined>();
 
   const createEvo = (browserLogger: BrowserLogger) => {

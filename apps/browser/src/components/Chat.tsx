@@ -7,7 +7,7 @@ import { trackThumbsFeedback} from './googleAnalytics';
 import { ExamplePrompt, examplePrompts } from "../examplePrompts";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
-import { faThumbsUp, faThumbsDown, faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
+import { faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import SidebarIcon from "./SidebarIcon";
@@ -65,15 +65,6 @@ const Chat: React.FC<ChatProps> = ({
   useEffect(() => {
       pausedRef.current = paused;
   }, [paused]);
-
-  // useEffect(() => {
-  //   if (goalEnded) {
-  //     setPaused(true);
-  //     setEvoRunning(false);
-  //     setSending(false);
-  //     setShowEvoNetPopup(true);
-  //   }
-  // }, [goalEnded]);
 
   useEffect(() => {
     const runEvo = async () => {
@@ -298,33 +289,6 @@ const Chat: React.FC<ChatProps> = ({
             </div>
           </div>
         ))}
-        {/* {goalEnded && (
-          <div className="my-4 flex flex-col items-center">
-            <div className="mb-2 text-xl">Provide Feedback</div>
-            <div className="flex justify-center gap-4">
-              <FontAwesomeIcon 
-                icon={faThumbsUp} 
-                onClick={handleThumbsUp} 
-                className={clsx(hasUpvoted ? 'text-orange-600' : '')} 
-              />
-              <FontAwesomeIcon 
-                icon={faThumbsDown} 
-                onClick={handleThumbsDown} 
-                className={clsx(hasUpvoted ? 'text-orange-600' : '')} 
-              />
-            </div>
-            <div>
-              <a
-                className="mt-2.5 inline-block text-orange-600 underline"
-                href="https://forms.gle/nidFArD7aPzYL5PQ7"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Fill a Detailed Feedback Form
-              </a>
-            </div>
-          </div>
-        )} */}
       </div>
       {showPrompts && (
         <div className="grid w-full grid-rows-2 p-2.5 py-16 self-center w-[100%] max-w-[56rem]">
