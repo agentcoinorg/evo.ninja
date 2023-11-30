@@ -49,6 +49,7 @@ export default async function handler(
         return data.map((innerData) => {
           return {
             embedding: innerData.embedding,
+            index: innerData.index
           };
         });
       })

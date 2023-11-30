@@ -9,6 +9,11 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>
 ) {
-  const result = await processWebpage(req.query.url as string);
-  res.status(200).json({ text: result });
+  try {
+    const result = await processWebpage(req.query.url as string);
+    return res.status(200).json({ text: result });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send({});
+  }
 }
