@@ -5,9 +5,8 @@ import {
   tokensToChars,
   Rag,
   Prompt,
-  OpenAIChatCompletion,
+  OpenAILlmApi,
   OpenAIEmbeddingAPI,
-  DEFAULT_ADA_CONFIG,
 } from "@/agent-core";
 import dotenv from "dotenv";
 import cl100k_base from "gpt-tokenizer/cjs/encoding/cl100k_base";
@@ -44,7 +43,7 @@ describe('LLM Test Suite', () => {
       process.env as Record<string, string>
     );
 
-    const llm = new OpenAIChatCompletion(
+    const llm = new OpenAILlmApi(
       env.OPENAI_API_KEY,
       env.GPT_MODEL as LlmModel,
       env.CONTEXT_WINDOW_TOKENS,
@@ -52,7 +51,7 @@ describe('LLM Test Suite', () => {
       logger
     );
     const chat = new Chat(cl100k_base);
-    const embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base, DEFAULT_ADA_CONFIG);
+    const embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base);
 
     const maxTokensToUse = maxContextTokens(llm) * 0.4;
     const tokensForPreview = maxTokensToUse * 0.7;

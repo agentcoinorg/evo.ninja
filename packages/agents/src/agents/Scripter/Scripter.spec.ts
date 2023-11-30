@@ -1,8 +1,7 @@
 import {
   Chat,
-  DEFAULT_ADA_CONFIG,
   LlmApi,
-  OpenAIChatCompletion,
+  OpenAILlmApi,
   OpenAIEmbeddingAPI,
 } from "@/agent-core";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
@@ -42,7 +41,7 @@ describe('Dev Agent Test Suite', () => {
       },
     });
 
-    const llm: LlmApi = new OpenAIChatCompletion(
+    const llm: LlmApi = new OpenAILlmApi(
       env.OPENAI_API_KEY,
       env.GPT_MODEL as LlmModel,
       env.CONTEXT_WINDOW_TOKENS,
@@ -65,7 +64,7 @@ describe('Dev Agent Test Suite', () => {
 
     const workspace = new FileSystemWorkspace(testCaseDir);
     const internals = new SubWorkspace(".evo", workspace);
-    const embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base, DEFAULT_ADA_CONFIG);
+    const embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base);
 
     return {
       agent: new ScripterAgent(
