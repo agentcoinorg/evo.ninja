@@ -37,7 +37,7 @@ export default async function handler(
     return res.status(403).send({});
   }
 
-  const input: string[][] = req.body.input;
+  const input: string[] = req.body.input;
   try {
     const embeddings = await Promise.all(
       input.map(async (inputs) => {

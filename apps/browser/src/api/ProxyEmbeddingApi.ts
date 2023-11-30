@@ -16,10 +16,10 @@ export class ProxyEmbeddingApi implements EmbeddingApi {
     private tokenizer: Tokenizer,
     private _setCapReached: () => void,
     private modelConfig: {
-      model: string,
-      maxTokensPerInput: number,
-      maxInputsPerRequest: number
-    } = DEFAULT_ADA_CONFIG,
+      model: string;
+      maxTokensPerInput: number;
+      maxInputsPerRequest: number;
+    } = DEFAULT_ADA_CONFIG
   ) {}
 
   public setGoalId(goalId: string | undefined) {
@@ -38,49 +38,68 @@ export class ProxyEmbeddingApi implements EmbeddingApi {
     const inputs = Array.isArray(input) ? input : [input];
     this.validateInput(inputs);
 
-    const batchedInputs = splitArray(inputs, this.modelConfig.maxInputsPerRequest);
+    const batchedInputs = splitArray(
+      inputs,
+      this.modelConfig.maxInputsPerRequest,
+      // use 2.5 mb as a maximum length of a single input array
+      312500,
+      (input) => Buffer.byteLength(input, "utf-8")
+    );
 
-    const results = await Promise.all(batchedInputs.map(async (inputs) => {
-      const embeddingResponse = await fetch("/api/proxy/embeddings", {
-        method: "POST",
-        body: JSON.stringify({
-          input: inputs,
-          model: this.modelConfig.model,
-          goalId
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+    const results = await Promise.all(
+      batchedInputs.map(async (input) => {
+        const embeddingResponse = await fetch("/api/proxy/embeddings", {
+          method: "POST",
+          body: JSON.stringify({
+            input: input,
+            model: this.modelConfig.model,
+            goalId,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
-      if (!embeddingResponse.ok) {
-        const error = await embeddingResponse.json();
-        if (embeddingResponse.status === 400) {
-          throw Error("Error from OpenAI Embeddings: " + error.error);
-        }
-        if (embeddingResponse.status === 429) {
-          await new Promise((resolve) => setTimeout(resolve, 15000));
-          if (!tries || tries < MAX_RATE_LIMIT_RETRIES) {
-            return this.createEmbeddings(input, tries == undefined ? 0 : ++tries);
+        if (!embeddingResponse.ok) {
+          const error = await embeddingResponse.json();
+          if (embeddingResponse.status === 400) {
+            throw Error("Error from OpenAI Embeddings: " + error.error);
           }
+          if (embeddingResponse.status === 429) {
+            await new Promise((resolve) => setTimeout(resolve, 15000));
+            if (!tries || tries < MAX_RATE_LIMIT_RETRIES) {
+              return this.createEmbeddings(
+                input,
+                tries == undefined ? 0 : ++tries
+              );
+            }
+          }
+          if (embeddingResponse.status === 403) {
+            this._setCapReached();
+            throw Error(ERROR_SUBSIDY_MAX);
+          }
+          throw Error(
+            "Error trying to get response from embeddings proxy.",
+            error.toString()
+          );
         }
-        if (embeddingResponse.status === 403) {
-          this._setCapReached();
-          throw Error(ERROR_SUBSIDY_MAX);
-        }
-        throw Error("Error trying to get response from embeddings proxy.", error);
-      }
-      const { embeddings } = await embeddingResponse.json();
-      return embeddings;
-    }))
+
+        const { embeddings } = await embeddingResponse.json();
+        return embeddings;
+      })
+    );
 
     return results.flat();
   }
 
   validateInput(inputs: string[]) {
     for (const input of inputs) {
-      if (this.tokenizer.encode(input).length > this.modelConfig.maxTokensPerInput) {
-        throw new Error(`Input exceeds max request tokens: ${this.modelConfig.maxTokensPerInput}`);
+      if (
+        this.tokenizer.encode(input).length > this.modelConfig.maxTokensPerInput
+      ) {
+        throw new Error(
+          `Input exceeds max request tokens: ${this.modelConfig.maxTokensPerInput}`
+        );
       }
     }
   }
