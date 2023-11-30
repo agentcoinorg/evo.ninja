@@ -37,7 +37,12 @@ export class OpenAIEmbeddingAPI implements EmbeddingApi {
       const inputs = Array.isArray(input) ? input : [input];
       this.validateInput(inputs);
 
-      const batchedInputs = splitArray(inputs, this.modelConfig.maxInputsPerRequest);
+      const batchedInputs = splitArray(
+        inputs,
+        this.modelConfig.maxInputsPerRequest,
+        this.modelConfig.maxTokensPerInput,
+        (input) => this.tokenizer.encode(input).length
+      );
 
       const results = await Promise.all(batchedInputs.map(async (inputs) => {
         const { data } = await this.api.embeddings.create({
