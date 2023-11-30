@@ -41,6 +41,9 @@ export class ProxyEmbeddingApi implements EmbeddingApi {
     const batchedInputs = splitArray(inputs, this.modelConfig.maxInputsPerRequest);
 
     const results = await Promise.all(batchedInputs.map(async (inputs) => {
+      let bytes = 0;
+      inputs.forEach((i) => bytes += i.length);
+      console.log("TOTAL BYTES", bytes);
       const embeddingResponse = await fetch("/api/proxy/embeddings", {
         method: "POST",
         body: JSON.stringify({
@@ -52,6 +55,7 @@ export class ProxyEmbeddingApi implements EmbeddingApi {
           "Content-Type": "application/json",
         },
       });
+      console.log("after");
 
       if (!embeddingResponse.ok) {
         const error = await embeddingResponse.json();
