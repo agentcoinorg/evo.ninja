@@ -272,15 +272,15 @@ function Dojo() {
   return (
     <>
       <div className="flex h-full bg-neutral-800 bg-landing-bg bg-repeat text-center text-neutral-400">
-        {(accountModal || capReached) && (
-          <AccountConfig
-            apiKey={dojoConfig.openAiApiKey}
-            allowTelemetry={dojoConfig.allowTelemetry}
-            onConfigSaved={onConfigSaved}
-            capReached={capReached}
-            firstTimeUser={firstTimeUser}
-          />
-        )}
+        <AccountConfig
+          isOpen={accountModal || capReached}
+          onClose={() => setAccountModalOpen(false)}
+          apiKey={dojoConfig.openAiApiKey}
+          allowTelemetry={dojoConfig.allowTelemetry}
+          onConfigSaved={onConfigSaved}
+          capReached={capReached}
+          firstTimeUser={firstTimeUser}
+        />
         <div className={clsx(
           "relative w-full lg:w-auto lg:max-w-md",
           {
