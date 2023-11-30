@@ -40,20 +40,14 @@ export class ProxyEmbeddingApi implements EmbeddingApi {
 
     const batchedInputs = splitArray(
       inputs,
-      this.modelConfig.maxInputsPerRequest
+      this.modelConfig.maxInputsPerRequest,
+      // use 2.5 mb as a maximum length of a single input array
+      312500,
+      (input) => Buffer.byteLength(input, "utf-8")
     );
-
-    // here we guarantee that the strings of array has the expected size (or token limit)
 
     const results = await Promise.all(
       batchedInputs.map(async (input) => {
-        let bytes = 0;
-        input.forEach((i) => (bytes += i.length));
-        console.log("TOTAL byte sfrom proxy embedding api", bytes);
-        if (bytes >= 1_000_000) {
-          console.log("this is the input to proxy embeddings");
-          console.log(input);
-        }
         const embeddingResponse = await fetch("/api/proxy/embeddings", {
           method: "POST",
           body: JSON.stringify({
@@ -65,11 +59,8 @@ export class ProxyEmbeddingApi implements EmbeddingApi {
             "Content-Type": "application/json",
           },
         });
-        console.log("after");
 
         if (!embeddingResponse.ok) {
-          console.log("Error in proxy embedding api");
-          console.log(embeddingResponse);
           const error = await embeddingResponse.json();
           if (embeddingResponse.status === 400) {
             throw Error("Error from OpenAI Embeddings: " + error.error);
@@ -89,7 +80,7 @@ export class ProxyEmbeddingApi implements EmbeddingApi {
           }
           throw Error(
             "Error trying to get response from embeddings proxy.",
-            error
+            error.toString()
           );
         }
 

@@ -46,7 +46,6 @@ export class StandardRagBuilder<TItem> {
       return;
     }
 
-    console.log("triggering add method :)")
     await this.collection.add(
       itemsToAdd.map(x => {
         const text = this._selector(x);

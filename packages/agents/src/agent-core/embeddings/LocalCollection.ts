@@ -26,14 +26,6 @@ export class LocalCollection<TMetadata extends BaseDocumentMetadata = BaseDocume
       return;
     }
 
-    console.log("from add")
-    let bytes = 0;
-    items.forEach((i) => bytes += i.length);
-    if (bytes >= 1000000) {
-      console.log("TOTAL BYTES", bytes);
-      console.log("this is the input")
-      console.log(items)
-    }
     const results = await this.embeddingApi.createEmbeddings(items);
     let idx = 0;
 
@@ -52,8 +44,6 @@ export class LocalCollection<TMetadata extends BaseDocumentMetadata = BaseDocume
   }
 
   async search(query: string, limit?: number): Promise<LocalDocument<TMetadata>[]> {
-    // console.log("creating embedding in search")
-    // console.log(query)
     const queryEmbeddingResults = await this.embeddingApi.createEmbeddings(query);
     const queryVector = queryEmbeddingResults[0].embedding;
     const normalizedQueryVector = normalize(queryVector);
@@ -82,12 +72,10 @@ export class LocalCollection<TMetadata extends BaseDocumentMetadata = BaseDocume
   async* iterativeSearch(
     queryOrVector: string | number[]
   ): AsyncGenerator<LocalDocument<TMetadata>, void, void> {
-    // console.log("iterative search")
-    // console.log({queryOrVector})
 
     const queryVector = typeof queryOrVector === "string"
-    ? (await this.embeddingApi.createEmbeddings(queryOrVector))[0].embedding
-    : queryOrVector as number[];
+      ? (await this.embeddingApi.createEmbeddings(queryOrVector))[0].embedding
+      : queryOrVector as number[];
 
     const normalizedQueryVector = normalize(queryVector);
 
@@ -145,8 +133,6 @@ export class LocalCollection<TMetadata extends BaseDocumentMetadata = BaseDocume
   }
 
   async searchUnique(query: string, limit: number): Promise<LocalDocument<TMetadata>[]> {
-    // console.log("search unique")
-    // console.log({ query })
     const queryEmbeddingResults = await this.embeddingApi.createEmbeddings(query);
     const queryVector = queryEmbeddingResults[0].embedding;
     const normalizedQueryVector = normalize(queryVector);
