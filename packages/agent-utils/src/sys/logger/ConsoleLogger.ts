@@ -3,25 +3,25 @@ import { ILogger } from "./";
 import chalk from "chalk";
 
 export class ConsoleLogger implements ILogger {
-  constructor() { }
+  constructor() {}
 
-  info(info: string): void {
+  async info(info: string): Promise<void> {
     console.log(info);
   }
 
-  notice(msg: string): void {
-    this.info(chalk.yellow(msg));
+  notice(msg: string): Promise<void> {
+    return this.info(chalk.yellow(msg));
   }
 
-  success(msg: string): void {
-    this.info(chalk.green(msg));
+  success(msg: string): Promise<void> {
+    return this.info(chalk.green(msg));
   }
 
-  warning(msg: string): void {
-    this.info(chalk.yellow(msg));
+  warning(msg: string): Promise<void> {
+    return this.info(chalk.yellow(msg));
   }
 
-  error(msg: string): void {
-    this.info(chalk.red(msg));
+  error(msg: string): Promise<void> {
+    return this.info(chalk.red(msg));
   }
 }

@@ -21,7 +21,7 @@ export async function cli(): Promise<void> {
     },
   );
 
-  const app = createApp({
+  const app = await createApp({
     timeout,
     rootDir: options.root,
     debug: options.debug,

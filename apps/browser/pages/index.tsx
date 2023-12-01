@@ -88,14 +88,14 @@ function Dojo() {
       return;
     }
 
-    for (const file of uploadedFiles) {
-      userWorkspace.writeFileSync(
-        file.path,
-        new TextDecoder().decode(file.content)
-      );
-    }
-
-    checkForUserFiles();
+    Promise.all(
+      uploadedFiles.map((file) =>
+        userWorkspace.writeFile(
+          file.path,
+          new TextDecoder().decode(file.content)
+        )
+      )
+    ).then(() => checkForUserFiles());
   }, [uploadedFiles]);
 
   const onConfigSaved = (apiKey: string) => {
@@ -112,7 +112,7 @@ function Dojo() {
     setDojoConfig({
       openAiApiKey,
       loaded: true,
-      complete
+      complete,
     });
     setConfigOpen(false);
   };
@@ -137,17 +137,19 @@ function Dojo() {
           promptUser: () => Promise.resolve("N/A"),
         });
 
-        const scriptsWorkspace = createInBrowserScripts();
+        const scriptsWorkspace = await createInBrowserScripts();
         const scripts = new Scripts(scriptsWorkspace);
 
         // Point by default to GPT-4 unless the given api key's account doesn't support it
-        let model = "gpt-4"
+        let model = "gpt-4";
         try {
           model = await checkLlmModel(dojoConfig.openAiApiKey as string, model);
         } catch (e: any) {
           if (e.message.includes("Incorrect API key provided")) {
-            setDojoError("Open AI API key is not correct. Please make sure it has the correct format")
-            return
+            setDojoError(
+              "Open AI API key is not correct. Please make sure it has the correct format"
+            );
+            return;
           }
         }
 

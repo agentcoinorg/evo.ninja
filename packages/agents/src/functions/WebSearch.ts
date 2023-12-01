@@ -215,27 +215,35 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         url: webpageChunks.url,
       }))
 
-      const matches = await Rag.standard<{ chunk: string; url: string }>(params.context)
-      .addItems(items)
-      .selector(x => x.chunk)
-      .query(params.query)
-      .recombine(ArrayRecombiner.standard({
-        limit: 4,
-        unique: true,
-      }));
+      const matches = await(
+        await Rag.standard<{ chunk: string; url: string }>(params.context)
+      )
+        .addItems(items)
+        .selector((x) => x.chunk)
+        .query(params.query)
+        .recombine(
+          ArrayRecombiner.standard({
+            limit: 4,
+            unique: true,
+          })
+        );
 
       return matches
     }))
 
-    const otherResults = await Rag.standard<{ chunk: string; url: string }>(params.context)
+    const otherResults = await(
+      await Rag.standard<{ chunk: string; url: string }>(params.context)
+    )
       .addItems(results.flat())
-      .selector(x => x.chunk)
+      .selector((x) => x.chunk)
       .query(params.query)
-      .recombine(ArrayRecombiner.standard({
-        limit: 10,
-        unique: true,
-        sort: "index"
-      }));
+      .recombine(
+        ArrayRecombiner.standard({
+          limit: 10,
+          unique: true,
+          sort: "index",
+        })
+      );
 
     return otherResults.map(x => x.chunk)
   }

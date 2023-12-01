@@ -50,28 +50,28 @@ export class WrapClient extends PolywrapClient {
       })))
       .setPackage("plugin/fs", PluginPackage.from(module => ({
         "readFileSync": async (args: any) => {
-          return workspace.readFileSync(args.path);
+          return workspace.readFile(args.path);
         },
         "writeFileSync": async (args: any) => {
-          workspace.writeFileSync(args.path, args.data.toString());
+          await workspace.writeFile(args.path, args.data.toString());
           return true;
         },
         "appendFileSync": async (args: any) => {
-          workspace.appendFileSync(args.path, args.data.toString());
+          await workspace.appendFile(args.path, args.data.toString());
           return true;
         },
         "existsSync": async (args: any) => {
-          return workspace.existsSync(args.path);
+          return workspace.exists(args.path);
         },
         "renameSync": async (args: any) => {
-          return workspace.renameSync(args.oldPath, args.newPath);
+          return workspace.rename(args.oldPath, args.newPath);
         },
         "mkdirSync": async (args: any) => {
-          workspace.mkdirSync(args.path);
+          workspace.mkdir(args.path);
           return true;
         },
         "readdirSync": async (args: any) => {
-          return workspace.readdirSync(args.path);
+          return workspace.readdir(args.path);
         }
       })))
       .setPackage("plugin/axios", PluginPackage.from(module => ({

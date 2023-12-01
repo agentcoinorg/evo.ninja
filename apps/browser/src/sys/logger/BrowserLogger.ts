@@ -5,28 +5,25 @@ export interface BrowserLoggerConfig {
 }
 
 export class BrowserLogger implements ILogger {
-  constructor(
-    private _config: BrowserLoggerConfig
-  ) { }
+  constructor(private _config: BrowserLoggerConfig) {}
 
-  info(info: string): void {
-    this._config.onLog(info)
+  async info(info: string): Promise<void> {
+    this._config.onLog(info);
   }
 
-
-  notice(msg: string): void {
+  async notice(msg: string): Promise<void> {
     this._config.onLog(msg);
   }
 
-  success(msg: string): void {
+  async success(msg: string): Promise<void> {
     this._config.onLog(msg);
   }
 
-  warning(msg: string): void {
+  async warning(msg: string): Promise<void> {
     this._config.onLog(msg);
   }
 
-  error(msg: string): void {
+  async error(msg: string): Promise<void> {
     this._config.onLog(msg);
   }
 }

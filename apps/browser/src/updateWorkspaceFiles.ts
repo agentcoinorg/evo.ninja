@@ -1,8 +1,12 @@
 import { Workspace } from "@evo-ninja/agent-utils";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 
-export function updateWorkspaceFiles(workspace: Workspace, files: InMemoryFile[], setFiles: (files: InMemoryFile[]) => void): void {
-  const items = workspace.readdirSync("");
+export async function updateWorkspaceFiles(
+  workspace: Workspace,
+  files: InMemoryFile[],
+  setFiles: (files: InMemoryFile[]) => void
+): Promise<void> {
+  const items = await workspace.readdir("");
   if (!items) {
     return;
   }
@@ -14,7 +18,11 @@ export function updateWorkspaceFiles(workspace: Workspace, files: InMemoryFile[]
     isDifferent = true;
   } else {
     for (let i = 0; i < items.length; i++) {
-      if (items[i].name !== files[i].path || new TextEncoder().encode(workspace.readFileSync(items[i].name)) !== files[i].content) {
+      if (
+        items[i].name !== files[i].path ||
+        new TextEncoder().encode(await workspace.readFile(items[i].name)) !==
+          files[i].content
+      ) {
         isDifferent = true;
         break;
       }
@@ -22,6 +30,17 @@ export function updateWorkspaceFiles(workspace: Workspace, files: InMemoryFile[]
   }
 
   if (isDifferent) {
-    setFiles(items.map(x => new InMemoryFile(x.name, new TextEncoder().encode(workspace.readFileSync(x.name)) || "")));
+    let contents: string[] = [];
+
+    for (const item of items) {
+      contents.push(await workspace.readFile(item.name));
+    }
+
+    setFiles(
+      items.map(
+        (x, i) =>
+          new InMemoryFile(x.name, new TextEncoder().encode(contents[i]) || "")
+      )
+    );
   }
 }

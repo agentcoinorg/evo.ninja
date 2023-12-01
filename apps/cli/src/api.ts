@@ -49,7 +49,7 @@ async function taskHandler(
   const customWorkspace = new AgentProtocolWorkspace(
     customWorkspacePath
   );
-  const app = createApp({
+  const app = await createApp({
     rootDir,
     customWorkspace,
     sessionName: id,

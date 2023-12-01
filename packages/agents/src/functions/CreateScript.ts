@@ -57,7 +57,7 @@ export class CreateScriptFunction extends LlmAgentFunctionBase<CreateScriptFuncP
         return this.onErrorCreateScript(params, rawParams, result.error?.toString() || "Unknown error");
       }
 
-      const index = writer.workspace.readFileSync("index.js");
+      const index = await writer.workspace.readFile("index.js");
 
       const script = {
         name: params.namespace,

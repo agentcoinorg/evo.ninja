@@ -109,7 +109,7 @@ describe('Dev Agent Test Suite', () => {
     );
 
     expect(response.value.ok).toBe(true);
-    const sourceCode = agent.workspace.readFileSync("output.csv");
+    const sourceCode = await agent.workspace.readFile("output.csv");
     expect(sourceCode).toBeTruthy();
   });
 });
