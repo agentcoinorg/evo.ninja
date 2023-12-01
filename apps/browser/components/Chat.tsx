@@ -7,7 +7,7 @@ import { trackThumbsFeedback} from './googleAnalytics';
 import { ExamplePrompt, examplePrompts } from "@/lib/examplePrompts";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
-import { faThumbsUp, faThumbsDown, faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
+import { faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import SidebarIcon from "./SidebarIcon";
@@ -23,7 +23,6 @@ export interface ChatProps {
   evo: Evo;
   onMessage: (message: ChatMessage) => void;
   messages: ChatMessage[];
-  goalEnded: boolean;
   sidebarOpen: boolean;
   overlayOpen: boolean;
   onDisclaimerSelect: (approve: boolean) => void;
@@ -36,7 +35,6 @@ const Chat: React.FC<ChatProps> = ({
   evo,
   onMessage,
   messages,
-  goalEnded,
   sidebarOpen,
   overlayOpen,
   onDisclaimerSelect,
@@ -63,25 +61,6 @@ const Chat: React.FC<ChatProps> = ({
   const [showEvoNetPopup, setShowEvoNetPopup] = useState<boolean>(false);
   const [showPrompts, setShowPrompts] = useState<boolean>(true);
 
-  const pausedRef = useRef(paused);
-  useEffect(() => {
-      pausedRef.current = paused;
-  }, [paused]);
-
-  const goalEndedRef = useRef(paused);
-  useEffect(() => {
-    goalEndedRef.current = goalEnded;
-  }, [goalEnded]);
-
-  useEffect(() => {
-    if (goalEnded) {
-      setPaused(true);
-      setEvoRunning(false);
-      setSending(false);
-      setShowEvoNetPopup(true);
-    }
-  }, [goalEnded]);
-
   useEffect(() => {
     const runEvo = async () => {
       if (!evoRunning) {
@@ -99,20 +78,18 @@ const Chat: React.FC<ChatProps> = ({
       let messageLog = messages;
       let stepCounter = 1
       while (evoRunning) {
-        if (pausedRef.current || goalEndedRef.current) {
-          setStopped(true);
-          return Promise.resolve();
-        }
-
         setStopped(false);
 
         const response = await evoItr.next();
 
         if (response.done) {
-          onMessage({
-            title: "## Goal Achieved",
-            user: "evo"
-          })
+          const actionTitle = response.value.value.title
+          if (actionTitle.includes("onGoalAchieved")) {
+            onMessage({
+              title: "## Goal Achieved",
+              user: "evo"
+            })
+          }
           setEvoRunning(false);
           setSending(false);
           setEvoItr(undefined);
@@ -132,9 +109,7 @@ const Chat: React.FC<ChatProps> = ({
             user: "evo"
           };
           messageLog = [...messageLog, evoMessage];
-          if (!goalEndedRef.current) {
-            onMessage(evoMessage);
-          }
+          onMessage(evoMessage);
         }
 
         stepCounter++
@@ -168,6 +143,7 @@ const Chat: React.FC<ChatProps> = ({
   };
 
   const handleSend = async (newMessage?: string) => {
+    if (!message && !newMessage) return
     const authorized = await handlePromptAuth(newMessage ?? message)
     if (!authorized) {
       return
@@ -197,20 +173,6 @@ const Chat: React.FC<ChatProps> = ({
   const handleKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter" && !sending) {
       handleSend();
-    }
-  };
-
-  const handleThumbsUp = () => {
-    if (!hasDownvoted) {
-      setHasUpvoted(true);
-      trackThumbsFeedback('positive');
-    }
-  };
-
-  const handleThumbsDown = () => {
-    if (!hasUpvoted) {
-      setHasDownvoted(true);
-      trackThumbsFeedback('negative');
     }
   };
 
@@ -304,33 +266,6 @@ const Chat: React.FC<ChatProps> = ({
             </div>
           </div>
         ))}
-        {goalEnded && (
-          <div className="my-4 flex flex-col items-center">
-            <div className="mb-2 text-xl">Provide Feedback</div>
-            <div className="flex justify-center gap-4">
-              <FontAwesomeIcon 
-                icon={faThumbsUp} 
-                onClick={handleThumbsUp} 
-                className={clsx(hasUpvoted ? 'text-orange-600' : '')} 
-              />
-              <FontAwesomeIcon 
-                icon={faThumbsDown} 
-                onClick={handleThumbsDown} 
-                className={clsx(hasUpvoted ? 'text-orange-600' : '')} 
-              />
-            </div>
-            <div>
-              <a
-                className="mt-2.5 inline-block text-orange-600 underline"
-                href="https://forms.gle/nidFArD7aPzYL5PQ7"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Fill a Detailed Feedback Form
-              </a>
-            </div>
-          </div>
-        )}
       </div>
       {showPrompts && (
         <div className="grid w-full grid-rows-2 p-2.5 py-16 self-center w-[100%] max-w-[56rem]">
