@@ -159,23 +159,7 @@ const Chat: React.FC<ChatProps> = ({
   };
 
   const handlePause = async () => {
-    console.log(evoItr)
-    if (!evoItr) return
-    console.log("Afterrrr")
     setPaused(true);
-    const message = await evoItr.return({
-      ok: true,
-      value: {
-        type: "success",
-        title: "Evo has been stopped",
-      }
-    })
-    console.log("evo has been stopped")
-    console.log(message.value)
-
-    setEvoRunning(false);
-    setSending(false);
-    setEvoItr(undefined);
   };
 
   const handleContinue = async () => {
