@@ -163,7 +163,7 @@ function Dojo() {
         const scriptsWorkspace = createInBrowserScripts();
         const scripts = new Scripts(scriptsWorkspace);
 
-        // Point by default to GPT-4 unless the given api key's account doesn't support it
+        // Point by default to GPT-4 Turbo unless the given api key's account doesn't support it
         let model = "gpt-4-1106-preview"
         if (dojoConfig.openAiApiKey) {
           try {
