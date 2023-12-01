@@ -1,6 +1,7 @@
-import TurndownService from "turndown";
 import { load } from "cheerio";
 import axios from "axios";
+
+const { NodeHtmlMarkdown } = require('node-html-markdown')
 
 const FETCH_WEBPAGE_TIMEOUT = 4000;
 const TRUSTED_SOURCES = [
@@ -33,9 +34,8 @@ export const processWebpage = async (url: string) => {
 
   const html = $.html()
 
-  const turndownService = new TurndownService();
-  const markdownText = turndownService
-    .turndown(html)
+  const markdownText =
+    (NodeHtmlMarkdown.translate(html) as string)
     .split("\n")
     .map(x => x.trim())
     .join("\n")

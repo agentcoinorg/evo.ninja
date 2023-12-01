@@ -1,13 +1,15 @@
+"use client"
+
 import React, { useState, useEffect } from "react";
 
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 import clsx from "clsx";
-import AccountConfig from "../src/components/AccountConfig";
-import DojoError from "../src/components/DojoError";
-import Sidebar from "../src/components/Sidebar";
-import Chat, { ChatMessage } from "../src/components/Chat";
-import { updateWorkspaceFiles } from "../src/updateWorkspaceFiles";
+import AccountConfig from "@/components/AccountConfig";
+import DojoError from "@/components/DojoError";
+import Sidebar from "@/components/Sidebar";
+import Chat, { ChatMessage } from "@/components/Chat";
+import { updateWorkspaceFiles } from "@/lib/updateWorkspaceFiles";
 import {
   AgentContext,
   Evo,
@@ -24,13 +26,13 @@ import {
   Chat as EvoChat,
   OpenAIEmbeddingAPI,
 } from "@evo-ninja/agents";
-import { createInBrowserScripts } from "../src/scripts";
-import WelcomeModal, { WELCOME_MODAL_SEEN_STORAGE_KEY } from "../src/components/WelcomeModal";
-import { BrowserLogger } from "../src/sys/logger";
-import { checkLlmModel } from "../src/checkLlmModel";
-import { ProxyLlmApi, ProxyEmbeddingApi } from "../src/api";
+import { createInBrowserScripts } from "@/lib/scripts";
+import WelcomeModal, { WELCOME_MODAL_SEEN_STORAGE_KEY } from "@/components/WelcomeModal";
+import { BrowserLogger } from "@/lib/sys/logger";
+import { checkLlmModel } from "@/lib/checkLlmModel";
+import { ProxyLlmApi, ProxyEmbeddingApi } from "@/lib/api";
 import { useSession } from "next-auth/react";
-import { AuthProxy } from "../src/AuthProxy";
+import { AuthProxy } from "@/lib/AuthProxy";
 
 function Dojo() {
   const [dojoConfig, setDojoConfig] = useState<{

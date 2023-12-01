@@ -1,10 +1,10 @@
-import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef, useCallback, SetStateAction, Dispatch } from "react";
+import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef, useCallback } from "react";
 import { Evo } from "@evo-ninja/agents";
 import ReactMarkdown from "react-markdown";
 import FileSaver from "file-saver";
 
 import { trackThumbsFeedback} from './googleAnalytics';
-import { ExamplePrompt, examplePrompts } from "../examplePrompts";
+import { ExamplePrompt, examplePrompts } from "@/lib/examplePrompts";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
 import { faThumbsUp, faThumbsDown, faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
