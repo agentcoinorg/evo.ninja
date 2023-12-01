@@ -1,10 +1,12 @@
 import { Logger, Workspace, Env, Scripts, WrapClient, agentPlugin } from "@evo-ninja/agent-utils";
 import { LlmApi, Chat } from "../llm";
 import { AgentVariables } from "./AgentVariables";
+import { EmbeddingApi } from "..";
 
 export class AgentContext {
   constructor(
-    public readonly llm: LlmApi,
+    public llm: LlmApi,
+    public embedding: EmbeddingApi,
     public chat: Chat,
     public readonly logger: Logger,
     public readonly workspace: Workspace,
@@ -18,6 +20,7 @@ export class AgentContext {
   cloneEmpty(): AgentContext {
     return new AgentContext(
       this.llm,
+      this.embedding,
       this.chat.cloneEmpty(),
       this.logger,
       this.workspace,

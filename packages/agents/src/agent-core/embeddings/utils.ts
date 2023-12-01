@@ -18,6 +18,36 @@ export const normalizedCosineSimilarity = (vector1: number[], norm1: number, vec
   return dotProduct(vector1, vector2) / (norm1 * norm2);
 }
 
-export const splitArray = <T>(array: T[], size: number): T[][] => {
-  return Array.from({length: Math.ceil(array.length / size)}, (_, index) => array.slice(index * size, index * size + size));
-}
+export const splitArray = (
+  input: string[],
+  maxLength: number,
+  maxTokens: number,
+  countTokens: (input: string) => number
+): string[][] => {
+  const result: string[][] = [];
+  let currentSubArray: string[] = [];
+  let currentTokens = 0;
+
+  for (let str of input) {
+    const strTokens = countTokens(str);
+
+    // Check if adding this string would exceed maxLength or maxBytes
+    if (currentSubArray.length + 1 > maxLength || currentTokens + strTokens > maxTokens) {
+      // Start a new sub-array
+      result.push(currentSubArray);
+      currentSubArray = [str];
+      currentTokens = strTokens;
+    } else {
+      // Add to the current sub-array
+      currentSubArray.push(str);
+      currentTokens += strTokens;
+    }
+  }
+
+  // Add the last sub-array if it's not empty
+  if (currentSubArray.length > 0) {
+    result.push(currentSubArray);
+  }
+
+  return result;
+};
