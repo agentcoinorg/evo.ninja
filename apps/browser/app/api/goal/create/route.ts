@@ -1,14 +1,14 @@
 import { getServerSession } from "next-auth";
 import { createSupabaseClient } from "../../../../lib/api/utils/supabase";
 import { NextResponse } from "next/server";
-import { authOptions } from "@/lib/api/authOptions";
+import { getAuthOptions } from "@/lib/api/authOptions";
 
 const GOALS_PER_DAY_CAP = 5;
 
 export async function POST(request: Request) {
   const supabase = createSupabaseClient();
   const currentDate = new Date().toISOString();
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   const email = session?.user?.email;
   const body = await request.json();
 

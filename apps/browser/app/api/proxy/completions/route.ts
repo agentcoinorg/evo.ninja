@@ -5,7 +5,7 @@ import { canUseSubsidy } from "../../../../lib/api/utils/subsidy";
 import { createSupabaseClient } from "../../../../lib/api/utils/supabase";
 import { createOpenAIApiClient } from "../../../../lib/api/utils/openai";
 import { NextRequest, NextResponse } from "next/server";
-import { authOptions } from "@/lib/api/authOptions";
+import { getAuthOptions } from "@/lib/api/authOptions";
 
 export async function POST(
   req: NextRequest,
@@ -14,7 +14,7 @@ export async function POST(
   const goalId = body.goalId;
 
   // Ensure the user is logged in
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   const email = session?.user?.email;
   if (!session || !email) {
     return NextResponse.json({}, { status: 401 })
