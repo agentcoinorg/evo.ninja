@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useLocalStorage } from "@uidotdev/usehooks";
+import { useState } from "react";
 
 export interface DojoConfig {
   openAiApiKey: string | null;
@@ -13,33 +14,45 @@ export interface Dojo {
 }
 
 export function useDojo() {
+  const [localOpenAiApiKey, setLocalOpenAiApiKey] = useLocalStorage<
+    string | null
+  >("openai-api-key", null);
+  const [allowTelemetry, setAllowTelemetry] = useLocalStorage(
+    "allow-telemetry",
+    false
+  );
+
   const [dojo, setDojo] = useState<Dojo>({
     config: {
-      openAiApiKey: null,
-      allowTelemetry: false,
+      openAiApiKey: localOpenAiApiKey,
+      allowTelemetry,
       loaded: false,
       complete: false,
     },
     error: undefined,
   });
 
-  useEffect(() => {
-    const openAiApiKey = localStorage.getItem("openai-api-key");
-    const allowTelemetry =
-      localStorage.getItem("allow-telemetry") === "true" ? true : false;
-    const config = {
-      openAiApiKey,
-      allowTelemetry,
-      loaded: true,
-      complete: !!openAiApiKey,
-    };
+  const saveConfig = (apiKey: string, allowTelemetry: boolean) => {
+    let complete = true;
 
-    setDojo({ config });
-  }, []);
+    if (!apiKey) {
+      complete = false;
+      setLocalOpenAiApiKey(null);
+    } else {
+      setLocalOpenAiApiKey(apiKey);
+    }
 
-  useEffect(() => {}, [dojo.config]);
+    setAllowTelemetry(allowTelemetry);
 
-//   const setC
+    setDojo({
+      config: {
+        openAiApiKey: apiKey,
+        allowTelemetry,
+        loaded: true,
+        complete,
+      },
+    });
+  };
 
-  return { dojo, setDojo };
+  return { dojo, setDojo, saveConfig };
 }

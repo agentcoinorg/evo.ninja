@@ -34,18 +34,9 @@ import { AuthProxy } from "../src/api/AuthProxy";
 import { useDojo } from "../src/hooks/useDojo";
 
 function Dojo() {
-  const { dojo, setDojo } = useDojo()
-  const [dojoConfig, setDojoConfig] = useState<{
-    openAiApiKey: string | null;
-    allowTelemetry: boolean;
-    loaded: boolean;
-    complete: boolean;
-  }>({
-    openAiApiKey: null,
-    allowTelemetry: false,
-    loaded: false,
-    complete: false
-  });
+  const { dojo, setDojo, saveConfig } = useDojo()
+  const { data: session } = useSession()
+
   const [welcomeModalOpen, setWelcomeModalOpen] = useState<boolean>(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [accountModal, setAccountModalOpen] = useState(false);
@@ -60,7 +51,6 @@ function Dojo() {
   >(undefined);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [capReached, setCapReached] = useState<boolean>(false)
-  const { data: session } = useSession()
   const [awaitingAuth, setAwaitingAuth] = useState<boolean>(false);
   const [firstTimeUser, setFirstTimeUser] = useState<boolean>(false);
 
@@ -68,18 +58,6 @@ function Dojo() {
     if (window.innerWidth <= 1024) {
       setSidebarOpen(false);
     }
-    const openAiApiKey = localStorage.getItem("openai-api-key");
-    const allowTelemetry = localStorage.getItem("allow-telemetry") === "true" ? true : false;
-    const complete = !!openAiApiKey;
-    setDojoConfig({
-      openAiApiKey,
-      allowTelemetry,
-      loaded: true,
-      complete
-    });
-  }, []);
-
-  useEffect(() => {
     const firstVisit = localStorage.getItem(WELCOME_MODAL_SEEN_STORAGE_KEY);
     if (!firstVisit) {
       localStorage.setItem(WELCOME_MODAL_SEEN_STORAGE_KEY, "true");
@@ -114,34 +92,13 @@ function Dojo() {
     checkForUserFiles();
   }, [uploadedFiles]);
 
-  const onConfigSaved = (apiKey: string, allowTelemetry: boolean) => {
-    let complete = true;
-    let openAiApiKey = apiKey;
-
-    if (!openAiApiKey) {
-      complete = false;
-      localStorage.removeItem("openai-api-key");
-    } else {
-      localStorage.setItem("openai-api-key", openAiApiKey);
-    }
-    localStorage.setItem("allow-telemetry", allowTelemetry.toString());
-
-    setDojoConfig({
-      openAiApiKey,
-      allowTelemetry,
-      loaded: true,
-      complete
-    });
-    setCapReached(false);
-    setAccountModalOpen(false);
-  };
-
   const onDisclaimerSelect = (approve: boolean) => {
     localStorage.setItem("allow-telemetry", approve.toString());
-    setDojoConfig({
-      ...dojoConfig,
+    setDojo({
+      config:{
+      ...dojo.config,
       allowTelemetry: approve
-    });
+    }});
   };
 
   useEffect(() => {
@@ -165,9 +122,9 @@ function Dojo() {
 
         // Point by default to GPT-4 unless the given api key's account doesn't support it
         let model = "gpt-4"
-        if (dojoConfig.openAiApiKey) {
+        if (dojo.config.openAiApiKey) {
           try {
-            model = await checkLlmModel(dojoConfig.openAiApiKey as string, model);
+            model = await checkLlmModel(dojo.config.openAiApiKey as string, model);
           } catch (e: any) {
             if (e.message.includes("Incorrect API key provided")) {
               setDojoError("Open AI API key is not correct. Please make sure it has the correct format")
@@ -177,7 +134,7 @@ function Dojo() {
         }
 
         const env = new Env({
-          OPENAI_API_KEY: dojoConfig.openAiApiKey || " ",
+          OPENAI_API_KEY: dojo.config.openAiApiKey || " ",
           GPT_MODEL: model,
           CONTEXT_WINDOW_TOKENS: "8000",
           MAX_RESPONSE_TOKENS: "2000",
@@ -186,7 +143,7 @@ function Dojo() {
         let llm: LlmApi;
         let embedding: EmbeddingApi;
 
-        if (dojoConfig.openAiApiKey) {
+        if (dojo.config.openAiApiKey) {
           llm = new OpenAILlmApi(
             env.OPENAI_API_KEY,
             env.GPT_MODEL as LlmModel,
@@ -235,14 +192,14 @@ function Dojo() {
         setDojoError(err);
       }
     })();
-  }, [dojoConfig]);
+  }, [dojo.config]);
 
   const handlePromptAuth = async (message: string) => {
     if (awaitingAuth) {
       return false;
     }
 
-    if (!dojoConfig.openAiApiKey && !session?.user) {
+    if (!dojo.config.openAiApiKey && !session?.user) {
       setFirstTimeUser(true);
       setAccountModalOpen(true);
       return false;
@@ -250,11 +207,11 @@ function Dojo() {
       setFirstTimeUser(false);
     }
 
-    const subsidize = !dojoConfig.openAiApiKey;
+    const subsidize = !dojo.config.openAiApiKey;
 
     setAwaitingAuth(true);
     const goalId = await AuthProxy.checkGoal(
-      dojoConfig.allowTelemetry ? message : "<redacted>",
+      dojo.config.allowTelemetry ? message : "<redacted>",
       subsidize,
       () => setCapReached(true)
     );
@@ -274,9 +231,9 @@ function Dojo() {
       <div className="flex h-full bg-neutral-800 bg-landing-bg bg-repeat text-center text-neutral-400">
         {(accountModal || capReached) && (
           <AccountConfig
-            apiKey={dojoConfig.openAiApiKey}
-            allowTelemetry={dojoConfig.allowTelemetry}
-            onConfigSaved={onConfigSaved}
+            apiKey={dojo.config.openAiApiKey}
+            allowTelemetry={dojo.config.allowTelemetry}
+            onConfigSaved={saveConfig}
             capReached={capReached}
             firstTimeUser={firstTimeUser}
           />
