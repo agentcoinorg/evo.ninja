@@ -73,6 +73,8 @@ function AccountConfig(props: AccountConfigProps) {
             onChange={(e) => setApiKey(e.target.value)}
           />
         </div>
+          {/* <p className="text-red-500 text-sm mt-1">{"this is the error"}</p> */}
+          {/* {dojoerror && <p className="text-red-500 text-sm mt-1">{error}</p>} */}
 
         {capReached && (
           <div className="px-8 py-2 flex justify-between items-center">

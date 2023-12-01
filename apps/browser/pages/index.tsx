@@ -34,13 +34,12 @@ import { AuthProxy } from "../src/api/AuthProxy";
 import { useDojo } from "../src/hooks/useDojo";
 
 function Dojo() {
-  const { dojo, setDojo, saveConfig } = useDojo()
+  const { dojo, setDojo, saveConfig, setDojoError } = useDojo()
   const { data: session } = useSession()
 
   const [welcomeModalOpen, setWelcomeModalOpen] = useState<boolean>(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [accountModal, setAccountModalOpen] = useState(false);
-  const [dojoError, setDojoError] = useState<unknown | undefined>(undefined);
   const [evo, setEvo] = useState<Evo | undefined>(undefined);
   const [proxyEmbeddingApi, setProxyEmbeddingApi] = useState<ProxyEmbeddingApi | undefined>(undefined);
   const [proxyLlmApi, setProxyLlmApi] = useState<ProxyLlmApi | undefined>(undefined);
@@ -92,18 +91,18 @@ function Dojo() {
     checkForUserFiles();
   }, [uploadedFiles]);
 
-  const onDisclaimerSelect = (approve: boolean) => {
-    localStorage.setItem("allow-telemetry", approve.toString());
-    setDojo({
-      config:{
-      ...dojo.config,
-      allowTelemetry: approve
-    }});
-  };
+  // const onDisclaimerSelect = (approve: boolean) => {
+  //   localStorage.setItem("allow-telemetry", approve.toString());
+  //   setDojo({
+  //     config:{
+  //     ...dojo.config,
+  //     allowTelemetry: approve
+  //   }});
+  // };
 
   useEffect(() => {
     (async () => {
-      setDojoError(undefined);
+      setDojo({ error: undefined, config: dojo.config });
       try {
         const browserLogger = new BrowserLogger({
           onLog: (message: string) => {
@@ -127,7 +126,8 @@ function Dojo() {
             model = await checkLlmModel(dojo.config.openAiApiKey as string, model);
           } catch (e: any) {
             if (e.message.includes("Incorrect API key provided")) {
-              setDojoError("Open AI API key is not correct. Please make sure it has the correct format")
+              setDojoError("Open AI API key is not correct. Please make sure it has the correct format");
+              // setDojoError("Open AI API key is not correct. Please make sure it has the correct format")
               return
             }
           }
@@ -189,7 +189,7 @@ function Dojo() {
           )
         );
       } catch (err) {
-        setDojoError(err);
+        setDojoError(err as string);
       }
     })();
   }, [dojo.config]);
@@ -233,7 +233,10 @@ function Dojo() {
           <AccountConfig
             apiKey={dojo.config.openAiApiKey}
             allowTelemetry={dojo.config.allowTelemetry}
-            onConfigSaved={saveConfig}
+            onConfigSaved={(apiKey, allowTelemetry) => { 
+              saveConfig(apiKey, allowTelemetry)
+              // setAccountModalOpen(false)
+            }}
             capReached={capReached}
             firstTimeUser={firstTimeUser}
           />
@@ -257,14 +260,14 @@ function Dojo() {
           "max-lg:hidden": sidebarOpen,
         })}>
           <>
-            {dojoError ? <DojoError error={dojoError} /> : evo && (
+            {dojo.error ? <DojoError error={dojo.error} /> : evo && (
               <Chat
                 evo={evo}
                 onMessage={onMessage}
                 messages={messages}
                 sidebarOpen={sidebarOpen}
                 overlayOpen={welcomeModalOpen || accountModal}
-                onDisclaimerSelect={onDisclaimerSelect}
+                // onDisclaimerSelect={onDisclaimerSelect}
                 onSidebarToggleClick={() => {
                   setSidebarOpen(!sidebarOpen);
                 }}

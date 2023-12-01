@@ -25,7 +25,7 @@ export interface ChatProps {
   messages: ChatMessage[];
   sidebarOpen: boolean;
   overlayOpen: boolean;
-  onDisclaimerSelect: (approve: boolean) => void;
+  // onDisclaimerSelect: (approve: boolean) => void;
   onSidebarToggleClick: () => void;
   onUploadFiles: (files: InMemoryFile[]) => void;
   handlePromptAuth: (message: string) => Promise<boolean>
@@ -37,7 +37,7 @@ const Chat: React.FC<ChatProps> = ({
   messages,
   sidebarOpen,
   overlayOpen,
-  onDisclaimerSelect,
+  // onDisclaimerSelect,
   onSidebarToggleClick,
   onUploadFiles,
   handlePromptAuth
@@ -137,7 +137,8 @@ const Chat: React.FC<ChatProps> = ({
 
   const handleDisclaimerSelect = (accept: boolean) => {
     setShowDisclaimer(false);
-    onDisclaimerSelect(accept);
+    
+    // onDisclaimerSelect(accept);
   }
 
   const handleSamplePromptClick = async (prompt: ExamplePrompt) => {

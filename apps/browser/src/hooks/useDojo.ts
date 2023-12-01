@@ -32,6 +32,13 @@ export function useDojo() {
     error: undefined,
   });
 
+  const setDojoError = (error: string) => {
+    setDojo({
+      config: dojo.config,
+      error
+    })
+  }
+
   const saveConfig = (apiKey: string, allowTelemetry: boolean) => {
     let complete = true;
 
@@ -51,8 +58,9 @@ export function useDojo() {
         loaded: true,
         complete,
       },
+      error: dojo.error
     });
   };
 
-  return { dojo, setDojo, saveConfig };
+  return { dojo, setDojo, saveConfig, setDojoError };
 }
