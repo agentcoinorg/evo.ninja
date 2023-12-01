@@ -41,17 +41,16 @@ export class ProxyEmbeddingApi implements EmbeddingApi {
     const batchedInputs = splitArray(
       inputs,
       this.modelConfig.maxInputsPerRequest,
-      // use 2.5 mb as a maximum length of a single input array
-      2500000,
-      (input) => Buffer.byteLength(input, "utf-8")
+      this.modelConfig.maxTokensPerInput,
+      (input) => this.tokenizer.encode(input).length
     );
 
     const results = await Promise.all(
-      batchedInputs.map(async (input: string[]): Promise<EmbeddingCreationResult[]> => {
+      batchedInputs.map(async (inputs: string[]): Promise<EmbeddingCreationResult[]> => {
         const embeddingResponse = await fetch("/api/proxy/embeddings", {
           method: "POST",
           body: JSON.stringify({
-            input: input,
+            inputs: inputs,
             model: this.modelConfig.model,
             goalId,
           }),
