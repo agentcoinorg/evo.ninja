@@ -7,7 +7,7 @@ export async function GET(
   const searchParams = req.nextUrl.searchParams
   const query = searchParams.get('query') as string;
   const results = await searchOnGoogle(query as string, process.env.SERP_API_KEY as string);
-  NextResponse.json({ googleResults: results }, {
+  return NextResponse.json({ googleResults: results }, {
     status: 200
   });
 }
