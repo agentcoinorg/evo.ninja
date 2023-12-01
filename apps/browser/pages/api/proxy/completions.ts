@@ -7,6 +7,10 @@ import { canUseSubsidy } from "../../../api-utils/subsidy";
 import { createSupabaseClient } from "../../../api-utils/supabase";
 import { createOpenAIApiClient } from "../../../api-utils/openai";
 
+// Configure the maximum # of seconds this function can run for
+// https://vercel.com/docs/functions/configuring-functions/duration#node.js,-next.js-13.5-or-higher,-sveltekit,-and-remix
+export const maxDuration = 45;
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
