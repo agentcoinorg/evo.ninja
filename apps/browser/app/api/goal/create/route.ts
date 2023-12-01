@@ -1,31 +1,25 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]";
-import { createSupabaseClient } from "../../../api-utils/supabase";
+import { NextRequest, NextResponse } from "next/server";
+import { createSupabaseServerClient } from "../../../../src/supabase/createServerClient";
+import { cookies } from "next/headers";
 
 const GOALS_PER_DAY_CAP = 5;
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (!(req.method === "POST")) {
-    return res.status(404).send({});
-  }
-
-  const supabase = createSupabaseClient();
+export async function POST(req: NextRequest) {
+  const cookieStore = cookies();
+  const supabase = createSupabaseServerClient(cookieStore);
+  const body = await req.json()
   const currentDate = new Date().toISOString();
-  const session = await getServerSession(req, res, authOptions);
+  const { data: session } = await supabase.auth.getSession();
   const email = session?.user?.email;
 
   // If the user does not need this goal to be subsidizied
-  if (!req.body.subsidize) {
+  if (!body.subsidize) {
     // Simply add the goal to the database and return
     const goalAdded = await supabase
       .from("goals")
       .insert({
         user_email: email,
-        prompt: req.body.message,
+        prompt: body.message,
         submission_date: currentDate,
         subsidized: false
       })
@@ -33,17 +27,23 @@ export default async function handler(
       .single();
     if (goalAdded.error) {
       console.error(goalAdded.error);
-      return res.status(500).send({});
+      return NextResponse.json({}, {
+        status: 500
+      });
     }
-    return res.status(200).send({
+    return NextResponse.json({
       goalAdded: goalAdded.data,
+    }, {
+      status: 200
     });
   }
 
   // The user's goal needs to be subsidized, ensure they're
   // signed in and still have enough allowance
   if (!session || !email) {
-    return res.status(401).send({})
+    return NextResponse.json({}, {
+      status: 401
+    })
   }
 
   const { data: goals, error } = await supabase
@@ -54,19 +54,23 @@ export default async function handler(
 
   if (error) {
     console.error(error);
-    return res.status(500).send({});
+    return NextResponse.json({}, {
+      status: 500
+    });
   }
 
   if (goals?.length && goals.length >= GOALS_PER_DAY_CAP) {
     console.error("Goals per day cap reached.", goals?.length);
-    return res.status(403).send({});
+    return NextResponse.json({}, {
+      status: 403
+    });
   }
 
   const goalAdded = await supabase
     .from("goals")
     .insert({
       user_email: email,
-      prompt: req.body.message,
+      prompt: body.message,
       submission_date: new Date().toISOString(),
       subsidized: true
     })
@@ -75,9 +79,13 @@ export default async function handler(
 
   if (goalAdded.error) {
     console.error(goalAdded.error);
-    return res.status(500).send({});
+    return NextResponse.json({}, {
+      status: 500
+    });
   }
-  return res.status(200).send({
+  return NextResponse.json({
     goalAdded: goalAdded.data,
+  }, {
+    status: 200
   });
 }

@@ -1,7 +1,7 @@
 import { Dialog, Transition } from '@headlessui/react'
 import clsx from 'clsx'
 import { Fragment } from 'react'
-import { EXO_FONT } from '../../pages/_app'
+import { EXO_FONT } from '../../app/layout'
 
 export const WELCOME_MODAL_SEEN_STORAGE_KEY = "welcome-modal-seen" 
 

@@ -1,7 +1,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import clsx from "clsx";
 import { Fragment, useState } from "react";
-import { EXO_FONT } from "../../pages/_app";
+import { EXO_FONT } from "../../app/layout";
 import { createBrowserClient } from "@supabase/ssr";
 
 type SupportedProviders = 'github' | 'google'
@@ -22,7 +22,7 @@ export function OAuthModal({
     const { error } = await supabase.auth.signInWithOAuth({ 
       provider,
       options: {
-        redirectTo: `/api/auth/callback`,
+        redirectTo: `${location.origin}/api/auth/callback`,
       }
     })
     if (error) console.log(error)

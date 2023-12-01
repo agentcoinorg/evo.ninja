@@ -1,4 +1,4 @@
-import { SupabaseClient } from "./supabase";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 type Subsidy = "completions" | "embedding";
 
