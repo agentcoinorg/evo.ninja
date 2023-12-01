@@ -26,7 +26,7 @@ import {
   Chat as EvoChat,
   OpenAIEmbeddingAPI,
 } from "@evo-ninja/agents";
-import { createInBrowserScripts } from "@/lib/scripts";
+import { createInBrowserScripts } from "@/scripts";
 import WelcomeModal, { WELCOME_MODAL_SEEN_STORAGE_KEY } from "@/components/WelcomeModal";
 import { BrowserLogger } from "@/lib/sys/logger";
 import { checkLlmModel } from "@/lib/checkLlmModel";

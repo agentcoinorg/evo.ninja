@@ -1,16 +1,11 @@
-import { Exo } from "next/font/google";
-
 import "../styles/globals.css";
 import clsx from "clsx";
 import Script from "next/script";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import NextAuthProvider from "@/components/NextSessionProvider";
+import { EXO_FONT } from "@/lib/fonts";
 config.autoAddCss = false;
-
-export const EXO_FONT = Exo({
-  subsets: ["latin"],
-});
 
 export default function EvoApp({ children }: { children: React.ReactNode }) {
   // useEffect(() => {

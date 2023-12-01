@@ -1,11 +1,11 @@
 import { getServerSession } from "next-auth";
 import OpenAIApi from "openai";
-import { authOptions } from "../../auth/[...nextauth]/route";
 import { isGoalValid } from "../../../../lib/api/utils/goal";
 import { canUseSubsidy } from "../../../../lib/api/utils/subsidy";
 import { createSupabaseClient } from "../../../../lib/api/utils/supabase";
 import { createOpenAIApiClient } from "../../../../lib/api/utils/openai";
 import { NextRequest, NextResponse } from "next/server";
+import { authOptions } from "@/lib/api/authOptions";
 
 export async function POST(
   req: NextRequest,

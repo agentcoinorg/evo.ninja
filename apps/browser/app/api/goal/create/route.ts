@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/route";
 import { createSupabaseClient } from "../../../../lib/api/utils/supabase";
 import { NextResponse } from "next/server";
+import { authOptions } from "@/lib/api/authOptions";
 
 const GOALS_PER_DAY_CAP = 5;
 
