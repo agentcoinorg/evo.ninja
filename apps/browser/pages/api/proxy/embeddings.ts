@@ -37,23 +37,21 @@ export default async function handler(
     return res.status(403).send({});
   }
 
-  const input: string[][] = req.body.input;
-  try {
-    const embeddings = await Promise.all(
-      input.map(async (inputs) => {
-        const { data } = await openai.embeddings.create({
-          model: req.body.model,
-          input: inputs,
-        });
+  const inputs: string[] = req.body.inputs;
 
-        return data.map((innerData) => {
-          return {
-            embedding: innerData.embedding,
-            input: inputs[innerData.index],
-          };
-        });
-      })
-    );
+  try {
+    const { data } = await openai.embeddings.create({
+      model: req.body.model,
+      input: inputs,
+    });
+
+    const embeddings = data.map((innerData) => {
+      return {
+        embedding: innerData.embedding,
+        index: innerData.index
+      };
+    });
+
     return res.status(200).json({ embeddings: embeddings.flat() });
   } catch (e: any) {
     // Rate limit error
