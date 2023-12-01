@@ -1,4 +1,4 @@
-import { useLocalStorage } from "@uidotdev/usehooks";
+import { useLocalStorage } from "./useLocalStorage";
 import { useState } from "react";
 
 export interface DojoConfig {
