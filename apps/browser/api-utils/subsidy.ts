@@ -18,8 +18,13 @@ export async function canUseSubsidy(
     .eq("id", goalId)
     .single();
 
+  if (!goal.data) {
+    console.error("Goal does not exist:", goalId);
+    return false;
+  }
+
   if (!goal.data.subsidized) {
-    console.error(`Goal is not subsidized.`);
+    console.error("Goal is not subsidized:", goalId);
     return false;
   }
 
@@ -30,7 +35,7 @@ export async function canUseSubsidy(
   const subsidizedCount = goal.data[subsidizedProp];
 
   if (subsidizedCount > SUBSIDY_CAP[subsidy]) {
-    console.error(`Subsity limit reached for '${subsidy}'`);
+    console.error(`Subsity limit reached for '${subsidy}':`, goalId);
     return false;
   }
 
@@ -40,7 +45,7 @@ export async function canUseSubsidy(
     .eq("id", goal.data.id);
 
   if (updateSubsidized.error) {
-    console.error(`Error updating ${subsidizedProp}: `, updateSubsidized.error);
+    console.error(`Error updating ${subsidizedProp}: `, goalId, updateSubsidized.error);
     return false;
   }
 
