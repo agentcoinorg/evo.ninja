@@ -5,14 +5,10 @@ import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import NextAuthProvider from "@/components/NextSessionProvider";
 import { EXO_FONT } from "@/lib/fonts";
+import { ReactQueryProvider } from "@/components/ReactQueryProvider";
 config.autoAddCss = false;
 
 export default function EvoApp({ children }: { children: React.ReactNode }) {
-  // useEffect(() => {
-  //   if (window) {
-  //     window.Buffer = window.Buffer || require("buffer").Buffer;
-  //   }
-  // }, []);
   return (
     <html>
       <body>
@@ -32,9 +28,11 @@ export default function EvoApp({ children }: { children: React.ReactNode }) {
               });
               `}
           </Script>
-          <NextAuthProvider>
-            {children}
-          </NextAuthProvider>
+          <ReactQueryProvider>
+            <NextAuthProvider>
+              {children}
+            </NextAuthProvider>
+          </ReactQueryProvider>
         </div>
       </body>
     </html>
