@@ -39,7 +39,7 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
   public async* run(
     args: TRunArgs
   ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
-    this.initializeChat(args);
+    await this.initializeChat(args);
 
     const { chat } = this.context;
 
@@ -94,7 +94,7 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
       }
     }
 
-    result.messages.forEach(x => chat.temporary(x));
+    await chat.temporary(result.messages);
   }
 
   protected query(msgs?: ChatMessage[]): LlmQuery {
@@ -113,12 +113,11 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
     return (await this.context.embedding.createEmbeddings(text))[0].embedding;
   }
 
-  protected initializeChat(args: TRunArgs) {
-    this.context.chat.persistent("system", `Variables are annotated using the \${variable-name} syntax. Variables can be used as function argument using the \${variable-name} syntax. Variables are created as needed, and do not exist unless otherwise stated.`);
-    
-    for (const message of this.config.prompts.initialMessages(args)) {
-      this.context.chat.persistent(message.role, message.content ?? "");
-    }
+  protected async initializeChat(args: TRunArgs) {
+    await this.context.chat.persistent([
+      { role: "system", content: `Variables are annotated using the \${variable-name} syntax. Variables can be used as function argument using the \${variable-name} syntax. Variables are created as needed, and do not exist unless otherwise stated.` },
+      ...this.config.prompts.initialMessages(args)
+    ]);
   }
 
   protected async beforeLlmResponse(): Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[]}> {

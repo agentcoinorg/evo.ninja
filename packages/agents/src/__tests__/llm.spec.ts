@@ -66,13 +66,8 @@ describe('LLM Test Suite', () => {
     );
     const chat = new Chat(cl100k_base);
 
-    for (const msg of msgs.persistent.msgs) {
-      chat.persistent(msg.role as ChatRole, msg.content ?? "");
-    }
-
-    for (const msg of msgs.temporary.msgs) {
-      chat.temporary(msg.role as ChatRole, msg.content ?? "");
-    }
+    await chat.persistent(msgs.persistent.msgs);
+    await chat.temporary(msgs.temporary.msgs);
 
     for (let i = 0; i < 20; i++) {
       const response = await llm.getResponse(
