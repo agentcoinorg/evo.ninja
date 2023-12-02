@@ -6,6 +6,7 @@ import { useEffect } from "react";
 export interface DojoConfig {
   openAiApiKey: string | null;
   allowTelemetry: boolean;
+  model: string
   // complete: boolean;
 }
 
@@ -23,7 +24,7 @@ export const welcomeModalAtom = atomWithStorage("welcome-modal-seen", false);
 export const showDisclaimerAtom = atomWithStorage("show-disclaimer", true);
 export const capReachedAtom = atom<boolean>(false)
 export const dojoAtom = atom<Dojo>({
-  config: { openAiApiKey: null, allowTelemetry: false },
+  config: { openAiApiKey: null, allowTelemetry: false, model: "gpt-4" },
 });
 
 export function useDojo() {

@@ -9,6 +9,7 @@ import {
 import { useAtom } from "jotai";
 import {
   allowTelemetryAtom,
+  capReachedAtom,
   localOpenAiApiKeyAtom,
   useDojo,
 } from "../hooks/useDojo";
@@ -18,7 +19,6 @@ interface AccountConfigProps {
   apiKey: string | null;
   allowTelemetry: boolean;
   onClose: () => void;
-  capReached: boolean;
   firstTimeUser: boolean;
 }
 
@@ -44,17 +44,28 @@ function AccountConfig(props: AccountConfigProps) {
   const [localApiKey, setLocalApiKey] = useAtom(localOpenAiApiKeyAtom);
   const [apiKey, setApiKey] = useState<string>(localApiKey || "");
   const [allowTelemetry, setAllowTelemetry] = useAtom(allowTelemetryAtom);
-  const { onClose, capReached, firstTimeUser } = props;
+  const [capReached] = useAtom(capReachedAtom)
+  const { onClose, firstTimeUser } = props;
   const { data: session } = useSession();
-  const { setDojoError } = useDojo();
+  const { dojo, setDojo, setDojoError } = useDojo();
 
   const onSave = async () => {
-    try {
-      await validateOpenAiApiKey(apiKey);
-      setLocalApiKey(apiKey);
-    } catch (e: any) {
-      setDojoError(e.message);
+    if (apiKey) {
+      try {
+        const model = await validateOpenAiApiKey(apiKey);
+        setDojo({
+          config: {
+            ...dojo.config,
+            model: model as string,
+          },
+          error: dojo.error,
+        });
+        setLocalApiKey(apiKey);
+      } catch (e: any) {
+        setDojoError(e.message);
+      }
     }
+    onClose();
   };
 
   return (
