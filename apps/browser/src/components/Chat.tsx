@@ -3,14 +3,14 @@ import { Evo } from "@evo-ninja/agents";
 import ReactMarkdown from "react-markdown";
 import FileSaver from "file-saver";
 
-import { trackThumbsFeedback} from './googleAnalytics';
 import { ExamplePrompt, examplePrompts } from "../examplePrompts";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
-import { faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import SidebarIcon from "./SidebarIcon";
+import { allowTelemetryAtom, showDisclaimerAtom } from "../hooks/useDojo";
+import { useAtom } from "jotai";
 
 export interface ChatMessage {
   title: string;
@@ -25,7 +25,6 @@ export interface ChatProps {
   messages: ChatMessage[];
   sidebarOpen: boolean;
   overlayOpen: boolean;
-  // onDisclaimerSelect: (approve: boolean) => void;
   onSidebarToggleClick: () => void;
   onUploadFiles: (files: InMemoryFile[]) => void;
   handlePromptAuth: (message: string) => Promise<boolean>
@@ -37,7 +36,6 @@ const Chat: React.FC<ChatProps> = ({
   messages,
   sidebarOpen,
   overlayOpen,
-  // onDisclaimerSelect,
   onSidebarToggleClick,
   onUploadFiles,
   handlePromptAuth
@@ -50,15 +48,12 @@ const Chat: React.FC<ChatProps> = ({
     undefined
   );
   const [stopped, setStopped] = useState<boolean>(false);
-  const [showDisclaimer, setShowDisclaimer] = useState<boolean>(
-    localStorage.getItem('showDisclaimer') !== 'false'
-  );
+  const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom)
+  const [,setAllowTelemetry] = useAtom(allowTelemetryAtom)
+
   const [clickedMsgIndex, setClickedMsgIndex] = useState<number | null>(null);
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
-  const [hasUpvoted, setHasUpvoted] = useState<boolean>(false);
-  const [hasDownvoted, setHasDownvoted] = useState<boolean>(false);
-  const [showEvoNetPopup, setShowEvoNetPopup] = useState<boolean>(false);
   const [showPrompts, setShowPrompts] = useState<boolean>(true);
 
   const pausedRef = useRef(paused);
@@ -137,8 +132,7 @@ const Chat: React.FC<ChatProps> = ({
 
   const handleDisclaimerSelect = (accept: boolean) => {
     setShowDisclaimer(false);
-    
-    // onDisclaimerSelect(accept);
+    setAllowTelemetry(accept);
   }
 
   const handleSamplePromptClick = async (prompt: ExamplePrompt) => {
@@ -147,10 +141,6 @@ const Chat: React.FC<ChatProps> = ({
     }
     setMessage(prompt.prompt);
     handleSend(prompt.prompt);
-  };
-
-  const handleStart = async () => {
-    handleSend();
   };
 
   const handleSend = async (newMessage?: string) => {
@@ -183,20 +173,6 @@ const Chat: React.FC<ChatProps> = ({
   const handleKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter" && !sending) {
       handleSend();
-    }
-  };
-
-  const handleThumbsUp = () => {
-    if (!hasDownvoted) {
-      setHasUpvoted(true);
-      trackThumbsFeedback('positive');
-    }
-  };
-
-  const handleThumbsDown = () => {
-    if (!hasUpvoted) {
-      setHasDownvoted(true);
-      trackThumbsFeedback('negative');
     }
   };
 
@@ -355,27 +331,11 @@ const Chat: React.FC<ChatProps> = ({
         {evoRunning ? (
           <div className="h-9 w-9 animate-spin rounded-full border-4 border-black/10 border-l-orange-600" />
         ) : (
-          <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" onClick={handleStart} disabled={evoRunning || sending}>
+          <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" onClick={async () => await handleSend()} disabled={evoRunning || sending}>
             Start
           </button>
         )}
       </div>
-
-      {showEvoNetPopup && (
-        <div
-          className="fixed top-0 right-0 w-[300px] bg-[#121212] text-[#f5f5f5] shadow-md border border-[#2b2b30] rounded-lg cursor-pointer transition-opacity duration-300 ease-in-out opacity-80 mt-[55px] mr-[18px] hover:border-[#ff572e] hover:opacity-100"
-          onClick={() => window.open('https://forms.gle/Wsjanqiw68DwCLTA9', '_blank')}
-        >
-          <div className="p-3 text-left text-xs flex items-start justify-between relative">
-            <a href="https://forms.gle/Wsjanqiw68DwCLTA9" target="_blank" rel="noopener noreferrer">
-              <p>Join Evo-Net! <br /> A community where script writers and AI agents collab on AI tools for specialized tasks.</p>
-            </a>
-            <div className="absolute top-3 right-3">
-              <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
-            </div>
-          </div>
-        </div>
-      )}
       <a
         className="cursor-pointer fixed bottom-0 right-0 mx-4 my-2"
         href="https://discord.gg/r3rwh69cCa"

@@ -25,19 +25,20 @@ import {
   OpenAIEmbeddingAPI,
 } from "@evo-ninja/agents";
 import { createInBrowserScripts } from "../src/scripts";
-import WelcomeModal, { WELCOME_MODAL_SEEN_STORAGE_KEY } from "../src/components/WelcomeModal";
+import WelcomeModal from "../src/components/WelcomeModal";
 import { BrowserLogger } from "../src/sys/logger";
-import { checkLlmModel } from "../src/checkLlmModel";
 import { ProxyLlmApi, ProxyEmbeddingApi } from "../src/api";
 import { useSession } from "next-auth/react";
 import { AuthProxy } from "../src/api/AuthProxy";
-import { useDojo } from "../src/hooks/useDojo";
+import { useDojo, welcomeModalAtom } from "../src/hooks/useDojo";
+import { useAtom } from "jotai";
 
 function Dojo() {
-  const { dojo, setDojo, saveConfig, setDojoError } = useDojo()
+  const { dojo, setDojoError } = useDojo()
   const { data: session } = useSession()
+  const [welcomeModalSeen, setWelcomeModalSeen] = useAtom(welcomeModalAtom)
+  const firstTimeUser = !dojo.config.openAiApiKey && !session?.user;
 
-  const [welcomeModalOpen, setWelcomeModalOpen] = useState<boolean>(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [accountModal, setAccountModalOpen] = useState(false);
   const [evo, setEvo] = useState<Evo | undefined>(undefined);
@@ -51,18 +52,6 @@ function Dojo() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [capReached, setCapReached] = useState<boolean>(false)
   const [awaitingAuth, setAwaitingAuth] = useState<boolean>(false);
-  const [firstTimeUser, setFirstTimeUser] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (window.innerWidth <= 1024) {
-      setSidebarOpen(false);
-    }
-    const firstVisit = localStorage.getItem(WELCOME_MODAL_SEEN_STORAGE_KEY);
-    if (!firstVisit) {
-      localStorage.setItem(WELCOME_MODAL_SEEN_STORAGE_KEY, "true");
-      setWelcomeModalOpen(true);
-    }
-  }, [])
 
   function checkForUserFiles() {
     if (!evo || !userWorkspace) {
@@ -91,18 +80,8 @@ function Dojo() {
     checkForUserFiles();
   }, [uploadedFiles]);
 
-  // const onDisclaimerSelect = (approve: boolean) => {
-  //   localStorage.setItem("allow-telemetry", approve.toString());
-  //   setDojo({
-  //     config:{
-  //     ...dojo.config,
-  //     allowTelemetry: approve
-  //   }});
-  // };
-
   useEffect(() => {
     (async () => {
-      setDojo({ error: undefined, config: dojo.config });
       try {
         const browserLogger = new BrowserLogger({
           onLog: (message: string) => {
@@ -119,23 +98,9 @@ function Dojo() {
         const scriptsWorkspace = createInBrowserScripts();
         const scripts = new Scripts(scriptsWorkspace);
 
-        // Point by default to GPT-4 unless the given api key's account doesn't support it
-        let model = "gpt-4"
-        if (dojo.config.openAiApiKey) {
-          try {
-            model = await checkLlmModel(dojo.config.openAiApiKey as string, model);
-          } catch (e: any) {
-            if (e.message.includes("Incorrect API key provided")) {
-              setDojoError("Open AI API key is not correct. Please make sure it has the correct format");
-              // setDojoError("Open AI API key is not correct. Please make sure it has the correct format")
-              return
-            }
-          }
-        }
-
         const env = new Env({
           OPENAI_API_KEY: dojo.config.openAiApiKey || " ",
-          GPT_MODEL: model,
+          GPT_MODEL: "gpt-4",
           CONTEXT_WINDOW_TOKENS: "8000",
           MAX_RESPONSE_TOKENS: "2000",
         });
@@ -200,11 +165,11 @@ function Dojo() {
     }
 
     if (!dojo.config.openAiApiKey && !session?.user) {
-      setFirstTimeUser(true);
+      // setFirstTimeUser(true);
       setAccountModalOpen(true);
       return false;
     } else {
-      setFirstTimeUser(false);
+      // setFirstTimeUser(false);
     }
 
     const subsidize = !dojo.config.openAiApiKey;
@@ -233,9 +198,8 @@ function Dojo() {
           <AccountConfig
             apiKey={dojo.config.openAiApiKey}
             allowTelemetry={dojo.config.allowTelemetry}
-            onConfigSaved={(apiKey, allowTelemetry) => { 
-              saveConfig(apiKey, allowTelemetry)
-              // setAccountModalOpen(false)
+            onClose={() => { 
+              setAccountModalOpen(false)
             }}
             capReached={capReached}
             firstTimeUser={firstTimeUser}
@@ -266,8 +230,7 @@ function Dojo() {
                 onMessage={onMessage}
                 messages={messages}
                 sidebarOpen={sidebarOpen}
-                overlayOpen={welcomeModalOpen || accountModal}
-                // onDisclaimerSelect={onDisclaimerSelect}
+                overlayOpen={!welcomeModalSeen || accountModal}
                 onSidebarToggleClick={() => {
                   setSidebarOpen(!sidebarOpen);
                 }}
@@ -278,7 +241,7 @@ function Dojo() {
           </>
         </div>
       </div>
-      <WelcomeModal isOpen={welcomeModalOpen} onClose={() => setWelcomeModalOpen(false)} />
+      <WelcomeModal isOpen={!welcomeModalSeen} onClose={() => setWelcomeModalSeen(true)} />
     </>
   );
 }
