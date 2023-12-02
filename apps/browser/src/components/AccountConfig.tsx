@@ -44,7 +44,7 @@ function AccountConfig(props: AccountConfigProps) {
   const [localApiKey, setLocalApiKey] = useAtom(localOpenAiApiKeyAtom);
   const [apiKey, setApiKey] = useState<string>(localApiKey || "");
   const [allowTelemetry, setAllowTelemetry] = useAtom(allowTelemetryAtom);
-  const [capReached] = useAtom(capReachedAtom)
+  const [capReached, setCapReached] = useAtom(capReachedAtom)
   const { onClose, firstTimeUser } = props;
   const { data: session } = useSession();
   const { dojo, setDojo, setDojoError } = useDojo();
@@ -61,6 +61,9 @@ function AccountConfig(props: AccountConfigProps) {
           error: dojo.error,
         });
         setLocalApiKey(apiKey);
+        if (capReached) {
+          setCapReached(false)
+        }
       } catch (e: any) {
         setDojoError(e.message);
       }
@@ -76,13 +79,13 @@ function AccountConfig(props: AccountConfigProps) {
           e.stopPropagation();
         }}
       >
-        <div className="flex items-center justify-between border-b px-4 py-2">
-          <h3 className="text-lg font-semibold">Account</h3>
+        <div className="border-b px-4 py-2 flex justify-between items-center">
+          <h3 className="font-semibold text-lg">Account</h3>
           <button onClick={onClose}>X</button>
         </div>
 
         {firstTimeUser && (
-          <div className="flex items-center justify-between px-8 py-2">
+          <div className="px-8 py-2 flex justify-between items-center">
             <FontAwesomeIcon icon={faSmileWink} color="yellow" size="2x" />
             <h4 className="text-md text-white">
               Welcome! Please sign in or add an OpenAI API key.
@@ -90,12 +93,15 @@ function AccountConfig(props: AccountConfigProps) {
           </div>
         )}
 
-        <div className="flex items-center justify-between px-8 py-2">
-          <h3 className="text-lg font-semibold">Email</h3>
+        <div className="px-8 py-2 flex justify-between items-center">
+          <h3 className="font-semibold text-lg">Email</h3>
           {session ? (
-            <div className="flex w-[65%] flex-row justify-end gap-5">
+            <div className="w-[65%] flex flex-row gap-5 justify-end">
               <h4 className="text-md">{session.user?.email}</h4>
-              <button className="cursor-pointer" onClick={() => signOut()}>
+              <button
+                className="cursor-pointer"
+                onClick={() => signOut()}
+              >
                 <FontAwesomeIcon icon={faTrash} />
               </button>
             </div>
@@ -109,8 +115,8 @@ function AccountConfig(props: AccountConfigProps) {
           )}
         </div>
 
-        <div className="flex items-center justify-between px-8 py-2">
-          <h3 className="text-lg font-semibold">OpenAI Key</h3>
+        <div className="px-8 py-2 flex justify-between items-center">
+          <h3 className="font-semibold text-lg">OpenAI Key</h3>
           <input
             className="w-[65%] justify-end rounded border border-neutral-600 bg-neutral-950 p-1.5 text-neutral-50 outline-none transition-all"
             type="text"
@@ -118,16 +124,10 @@ function AccountConfig(props: AccountConfigProps) {
             onChange={(e) => setApiKey(e.target.value)}
           />
         </div>
-        {/* <p className="text-red-500 text-sm mt-1">{"this is the error"}</p> */}
-        {/* {dojoerror && <p className="text-red-500 text-sm mt-1">{error}</p>} */}
 
         {capReached && (
-          <div className="flex items-center justify-between px-8 py-2">
-            <FontAwesomeIcon
-              icon={faExclamationCircle}
-              color="yellow"
-              size="2x"
-            />
+          <div className="px-8 py-2 flex justify-between items-center">
+            <FontAwesomeIcon icon={faExclamationCircle} color="yellow" size="2x" />
             <h4 className="text-md text-white">
               You have used all of your free daily prompts. Please enter your
               OpenAI API key or try again tomorrow.
@@ -135,20 +135,17 @@ function AccountConfig(props: AccountConfigProps) {
           </div>
         )}
 
-        <div className="flex items-center justify-between px-8 py-2">
-          <h3 className="text-lg font-semibold">Data</h3>
-          <div className="flex flex-row justify-end gap-7">
-            <h4 className="text-md">Share prompts with Evo devs</h4>
-            <input
-              type="checkbox"
-              style={{ accentColor: "#f0541a" }}
-              checked={allowTelemetry}
-              onChange={(e) => setAllowTelemetry(!allowTelemetry)}
-            />
+        <div className="px-8 py-2 flex justify-between items-center">
+          <h3 className="font-semibold text-lg">Data</h3>
+          <div className="flex flex-row gap-7 justify-end">
+            <h4 className="text-md">
+              Share prompts with Evo devs
+            </h4>
+            <input type="checkbox" style={{ accentColor: "#f0541a" }} checked={allowTelemetry} onChange={(e) => setAllowTelemetry(!allowTelemetry)} />
           </div>
         </div>
 
-        <div className="flex items-center justify-center px-8 py-2">
+        <div className="px-8 py-2 flex justify-center items-center">
           <button
             className="w-[30%] cursor-pointer rounded-xl border-none bg-orange-600 p-2.5 text-white transition-all hover:bg-orange-500"
             onClick={onSave}

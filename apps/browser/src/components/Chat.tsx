@@ -56,11 +56,6 @@ const Chat: React.FC<ChatProps> = ({
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [showPrompts, setShowPrompts] = useState<boolean>(true);
 
-  const pausedRef = useRef(paused);
-  useEffect(() => {
-      pausedRef.current = paused;
-  }, [paused]);
-
   useEffect(() => {
     const runEvo = async () => {
       if (!evoRunning) {
@@ -78,23 +73,17 @@ const Chat: React.FC<ChatProps> = ({
       let messageLog = messages;
       let stepCounter = 1
       while (evoRunning) {
-        console.log("init while loop...")
-        if (pausedRef.current) {
-          setStopped(true);
-          return Promise.resolve();
-        }
-
         setStopped(false);
 
-        console.log("waitning for next iteration...")
         const response = await evoItr.next();
-        console.log("response from iteraction")
-        console.log(response)
         if (response.done) {
-          onMessage({
-            title: "## Goal Achieved",
-            user: "evo"
-          })
+          const actionTitle = response.value.value.title
+          if (actionTitle.includes("onGoalAchieved")) {
+            onMessage({
+              title: "## Goal Achieved",
+              user: "evo"
+            })
+          }
           setEvoRunning(false);
           setSending(false);
           setEvoItr(undefined);
@@ -144,6 +133,7 @@ const Chat: React.FC<ChatProps> = ({
   };
 
   const handleSend = async (newMessage?: string) => {
+    if (!message && !newMessage) return
     const authorized = await handlePromptAuth(newMessage ?? message)
     if (!authorized) {
       return

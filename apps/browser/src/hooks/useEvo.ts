@@ -21,6 +21,7 @@ import { capReachedAtom, useDojo } from "./useDojo";
 import { ProxyEmbeddingApi, ProxyLlmApi } from "../api";
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 import { atom, useAtom } from "jotai";
+import { ChatMessage } from "../components/Chat";
 
 // interface State {
 //     evo: Evo
@@ -30,9 +31,7 @@ import { atom, useAtom } from "jotai";
 
 export const userWorkspaceAtom = atom<InMemoryWorkspace | undefined>(undefined);
 
-export function useEvo(
-  onMessage: (m: { user: string; title: string }) => void
-) {
+export function useEvo(onMessage: (message: ChatMessage) => void) {
   const { dojo, setDojoError } = useDojo();
   const [evo, setEvo] = useState<Evo | undefined>();
   const [proxyEmbeddingApi, setProxyEmbeddingApi] = useState<
@@ -122,7 +121,7 @@ export function useEvo(
         )
       );
     } catch (e: any) {
-      setDojoError(e.message)
+      setDojoError(e.message);
     }
   }, [dojo.config]);
 
