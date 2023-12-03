@@ -175,6 +175,7 @@ function Dojo() {
         }
 
         const env = new Env({
+          ...process.env,
           OPENAI_API_KEY: dojoConfig.openAiApiKey || " ",
           GPT_MODEL: model,
           CONTEXT_WINDOW_TOKENS: "8000",
@@ -190,9 +191,18 @@ function Dojo() {
             env.GPT_MODEL as LlmModel,
             env.CONTEXT_WINDOW_TOKENS,
             env.MAX_RESPONSE_TOKENS,
-            logger
+            logger,
+            undefined,
+            env.OPENAI_API_BASE_URL
           );
-          embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base)
+          embedding = new OpenAIEmbeddingAPI(
+            env.OPENAI_API_KEY,
+            logger,
+            cl100k_base,
+            undefined,
+            undefined,
+            env.OPENAI_API_BASE_URL
+          );
         } else {
           llm = new ProxyLlmApi(
             env.GPT_MODEL as LlmModel,
