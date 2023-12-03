@@ -1,6 +1,6 @@
 {
   "functions": {
-    "pages/api/proxy/completions.ts": {
+    "app/api/proxy/completions/route.ts": {
       "maxDuration": 45
     }
   }

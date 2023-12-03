@@ -1,9 +1,8 @@
-import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
 import { SupabaseAdapter } from "@auth/supabase-adapter";
 
-export const authOptions = {
+export const getAuthOptions = () => ({
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
@@ -18,6 +17,4 @@ export const authOptions = {
     url: process.env.SUPABASE_URL as string,
     secret: process.env.SUPABASE_SERVICE_ROLE_KEY as string
   })
-};
-
-export default NextAuth(authOptions);
+});

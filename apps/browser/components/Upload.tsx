@@ -2,7 +2,7 @@ import React, { useEffect, useState, PropsWithChildren } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload } from '@fortawesome/free-solid-svg-icons';
 import { useDropzone } from "react-dropzone";
-import { readFile } from '../sys/file';
+import { readFile } from '@/lib/sys/file';
 import { InMemoryFile } from '@nerfzael/memory-fs';
 import clsx from 'clsx';
 
