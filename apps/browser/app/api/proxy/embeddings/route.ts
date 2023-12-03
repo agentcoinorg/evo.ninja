@@ -27,10 +27,12 @@ export async function POST(
   // subsidizing the goal's llm requests
   const isValid = await isGoalValid(goalId, supabase);
   if (!isValid) {
+    console.error("Goal is not valid: ", goalId);
     return NextResponse.json({}, { status: 403 });
   }
   const canSubsidize = await canUseSubsidy("embedding", goalId, supabase);
   if (!canSubsidize) {
+    console.error("Cannot subsidize goal: ", goalId);
     return NextResponse.json({}, { status: 403 });
   }
 
