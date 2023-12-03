@@ -3,14 +3,12 @@ import { Evo } from "@evo-ninja/agents";
 import ReactMarkdown from "react-markdown";
 import FileSaver from "file-saver";
 
-import { trackThumbsFeedback} from './googleAnalytics';
-import { ExamplePrompt, examplePrompts } from "@/lib/examplePrompts";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
-import { faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import SidebarIcon from "./SidebarIcon";
+import { ExamplePrompt, examplePrompts } from "@/lib/examplePrompts";
 
 export interface ChatMessage {
   title: string;
@@ -56,9 +54,6 @@ const Chat: React.FC<ChatProps> = ({
   const [clickedMsgIndex, setClickedMsgIndex] = useState<number | null>(null);
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
-  const [hasUpvoted, setHasUpvoted] = useState<boolean>(false);
-  const [hasDownvoted, setHasDownvoted] = useState<boolean>(false);
-  const [showEvoNetPopup, setShowEvoNetPopup] = useState<boolean>(false);
   const [showPrompts, setShowPrompts] = useState<boolean>(true);
 
   useEffect(() => {
@@ -337,21 +332,6 @@ const Chat: React.FC<ChatProps> = ({
         )}
       </div>
 
-      {showEvoNetPopup && (
-        <div
-          className="fixed top-0 right-0 w-[300px] bg-[#121212] text-[#f5f5f5] shadow-md border border-[#2b2b30] rounded-lg cursor-pointer transition-opacity duration-300 ease-in-out opacity-80 mt-[55px] mr-[18px] hover:border-[#ff572e] hover:opacity-100"
-          onClick={() => window.open('https://forms.gle/Wsjanqiw68DwCLTA9', '_blank')}
-        >
-          <div className="p-3 text-left text-xs flex items-start justify-between relative">
-            <a href="https://forms.gle/Wsjanqiw68DwCLTA9" target="_blank" rel="noopener noreferrer">
-              <p>Join Evo-Net! <br /> A community where script writers and AI agents collab on AI tools for specialized tasks.</p>
-            </a>
-            <div className="absolute top-3 right-3">
-              <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
-            </div>
-          </div>
-        </div>
-      )}
       <a
         className="cursor-pointer fixed bottom-0 right-0 mx-4 my-2"
         href="https://discord.gg/r3rwh69cCa"

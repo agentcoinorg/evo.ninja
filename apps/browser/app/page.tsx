@@ -300,7 +300,13 @@ function Dojo() {
           "max-lg:hidden": sidebarOpen,
         })}>
           <>
-            {dojoError ? <DojoError error={dojoError} /> : evo && (
+            {dojoError ? <DojoError
+                error={dojoError}
+                sidebarOpen={sidebarOpen}
+                onSidebarToggleClick={() => {
+                  setSidebarOpen(!sidebarOpen)
+                }}
+              /> : evo && (
               <Chat
                 evo={evo}
                 onMessage={onMessage}
