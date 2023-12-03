@@ -1,4 +1,4 @@
-import TurndownService from "turndown";
+import { NodeHtmlMarkdown } from 'node-html-markdown'
 import { load } from "cheerio";
 import axios from "axios";
 
@@ -33,9 +33,8 @@ export const processWebpage = async (url: string) => {
 
   const html = $.html()
 
-  const turndownService = new TurndownService();
-  const markdownText = turndownService
-    .turndown(html)
+  const markdownText =
+    NodeHtmlMarkdown.translate(html)
     .split("\n")
     .map(x => x.trim())
     .join("\n")

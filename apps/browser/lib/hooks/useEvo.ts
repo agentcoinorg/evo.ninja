@@ -21,8 +21,8 @@ import { useDojo } from "./useDojo";
 import { ProxyEmbeddingApi, ProxyLlmApi } from "../api";
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 import { atom, useAtom } from "jotai";
-import { ChatMessage } from "../components/Chat";
-import { capReachedAtom } from "../store";
+import { ChatMessage } from "@/components/Chat";
+import { capReachedAtom } from "@/lib/store";
 
 // interface State {
 //     evo: Evo

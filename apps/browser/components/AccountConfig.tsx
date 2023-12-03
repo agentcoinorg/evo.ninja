@@ -9,9 +9,9 @@ import {
 import { useAtom } from "jotai";
 import {
   useDojo,
-} from "../hooks/useDojo";
-import { checkLlmModel } from "../checkLlmModel";
-import { allowTelemetryAtom, capReachedAtom, localOpenAiApiKeyAtom } from "../store";
+} from "@/lib/hooks/useDojo";
+import { checkLlmModel } from "@/lib/checkLlmModel";
+import { allowTelemetryAtom, capReachedAtom, localOpenAiApiKeyAtom } from "@/lib/store";
 
 interface AccountConfigProps {
   apiKey: string | null;

@@ -1,6 +1,6 @@
 import { useAtom } from "jotai";
 import { useEffect } from "react";
-import { allowTelemetryAtom, dojoAtom, localOpenAiApiKeyAtom } from "../store";
+import { allowTelemetryAtom, dojoAtom, localOpenAiApiKeyAtom } from "@/lib/store";
 
 export interface DojoConfig {
   openAiApiKey: string | null;

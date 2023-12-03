@@ -1,19 +1,21 @@
+"use client"
+
 import React, { useState, useEffect } from "react";
+import { useAtom } from "jotai";
 
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
-import AccountConfig from "../src/components/AccountConfig";
-import DojoError from "../src/components/DojoError";
-import Sidebar from "../src/components/Sidebar";
-import Chat, { ChatMessage } from "../src/components/Chat";
-import { updateWorkspaceFiles } from "../src/updateWorkspaceFiles";
-import WelcomeModal from "../src/components/WelcomeModal";
+import AccountConfig from "@/components/AccountConfig";
+import DojoError from "@/components/DojoError";
+import Sidebar from "@/components/Sidebar";
+import Chat, { ChatMessage } from "@/components/Chat";
+import { updateWorkspaceFiles } from "@/lib/updateWorkspaceFiles";
+import WelcomeModal from "@/components/WelcomeModal";
 import { useSession } from "next-auth/react";
-import { AuthProxy } from "../src/api/AuthProxy";
-import { useDojo } from "../src/hooks/useDojo";
-import { useAtom } from "jotai";
-import { useEvo, userWorkspaceAtom } from "../src/hooks/useEvo";
-import { capReachedAtom, welcomeModalAtom } from "../src/store";
+import { AuthProxy } from "@/lib/api/AuthProxy";
+import { useDojo } from "@/lib/hooks/useDojo";
+import { useEvo, userWorkspaceAtom } from "@/lib/hooks/useEvo";
+import { capReachedAtom, welcomeModalAtom } from "@/lib/store";
 
 function Dojo() {
   const { dojo } = useDojo();

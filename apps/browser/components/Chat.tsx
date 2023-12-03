@@ -3,14 +3,14 @@ import { Evo } from "@evo-ninja/agents";
 import ReactMarkdown from "react-markdown";
 import FileSaver from "file-saver";
 
-import { ExamplePrompt, examplePrompts } from "../examplePrompts";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import SidebarIcon from "./SidebarIcon";
 import { useAtom } from "jotai";
-import { allowTelemetryAtom, showDisclaimerAtom } from "../store";
+import { allowTelemetryAtom, showDisclaimerAtom } from "@/lib/store";
+import { ExamplePrompt, examplePrompts } from "@/lib/examplePrompts";
 
 export interface ChatMessage {
   title: string;
@@ -77,7 +77,8 @@ const Chat: React.FC<ChatProps> = ({
         const response = await evoItr.next();
         if (response.done) {
           const actionTitle = response.value.value.title
-          if (actionTitle.includes("onGoalAchieved")) {
+          console.log(response.value)
+          if (actionTitle.includes("onGoalAchieved") || actionTitle === "SUCCESS") {
             onMessage({
               title: "## Goal Achieved",
               user: "evo"
