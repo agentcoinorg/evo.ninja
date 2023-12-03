@@ -8,12 +8,10 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useAtom } from "jotai";
 import {
-  allowTelemetryAtom,
-  capReachedAtom,
-  localOpenAiApiKeyAtom,
   useDojo,
 } from "../hooks/useDojo";
 import { checkLlmModel } from "../checkLlmModel";
+import { allowTelemetryAtom, capReachedAtom, localOpenAiApiKeyAtom } from "../store";
 
 interface AccountConfigProps {
   apiKey: string | null;
@@ -66,7 +64,10 @@ function AccountConfig(props: AccountConfigProps) {
         }
       } catch (e: any) {
         setDojoError(e.message);
+        return
       }
+    } else {
+      setLocalApiKey(null)
     }
     onClose();
   };

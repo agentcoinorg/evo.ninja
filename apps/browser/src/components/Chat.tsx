@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef, useCallback, SetStateAction, Dispatch } from "react";
+import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef, useCallback } from "react";
 import { Evo } from "@evo-ninja/agents";
 import ReactMarkdown from "react-markdown";
 import FileSaver from "file-saver";
@@ -9,8 +9,8 @@ import { faDownload, faQuestionCircle } from "@fortawesome/free-solid-svg-icons"
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import SidebarIcon from "./SidebarIcon";
-import { allowTelemetryAtom, showDisclaimerAtom } from "../hooks/useDojo";
 import { useAtom } from "jotai";
+import { allowTelemetryAtom, showDisclaimerAtom } from "../store";
 
 export interface ChatMessage {
   title: string;

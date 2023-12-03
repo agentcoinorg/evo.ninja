@@ -10,13 +10,10 @@ import { updateWorkspaceFiles } from "../src/updateWorkspaceFiles";
 import WelcomeModal from "../src/components/WelcomeModal";
 import { useSession } from "next-auth/react";
 import { AuthProxy } from "../src/api/AuthProxy";
-import {
-  capReachedAtom,
-  useDojo,
-  welcomeModalAtom,
-} from "../src/hooks/useDojo";
+import { useDojo } from "../src/hooks/useDojo";
 import { useAtom } from "jotai";
 import { useEvo, userWorkspaceAtom } from "../src/hooks/useEvo";
+import { capReachedAtom, welcomeModalAtom } from "../src/store";
 
 function Dojo() {
   const { dojo } = useDojo();
@@ -126,23 +123,25 @@ function Dojo() {
           })}
         >
           <>
-            {dojo.error ? (
-              <DojoError error={dojo.error} />
-            ) : (
-              evo && (
-                <Chat
-                  evo={evo}
-                  onMessage={onMessage}
-                  messages={messages}
-                  sidebarOpen={sidebarOpen}
-                  overlayOpen={!welcomeModalSeen || accountModal}
-                  onSidebarToggleClick={() => {
-                    setSidebarOpen(!sidebarOpen);
-                  }}
-                  onUploadFiles={setUploadedFiles}
-                  handlePromptAuth={handlePromptAuth}
-                />
-              )
+            {dojo.error ? <DojoError
+                error={dojo.error}
+                sidebarOpen={sidebarOpen}
+                onSidebarToggleClick={() => {
+                  setSidebarOpen(!sidebarOpen)
+                }}
+              /> : evo && (
+              <Chat
+                evo={evo}
+                onMessage={onMessage}
+                messages={messages}
+                sidebarOpen={sidebarOpen}
+                overlayOpen={!welcomeModalSeen || accountModal}
+                onSidebarToggleClick={() => {
+                  setSidebarOpen(!sidebarOpen);
+                }}
+                onUploadFiles={setUploadedFiles}
+                handlePromptAuth={handlePromptAuth}
+              />
             )}
           </>
         </div>

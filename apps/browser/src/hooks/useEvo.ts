@@ -17,11 +17,12 @@ import {
 import { useEffect, useState } from "react";
 import { BrowserLogger } from "../sys/logger";
 import { createInBrowserScripts } from "../scripts";
-import { capReachedAtom, useDojo } from "./useDojo";
+import { useDojo } from "./useDojo";
 import { ProxyEmbeddingApi, ProxyLlmApi } from "../api";
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 import { atom, useAtom } from "jotai";
 import { ChatMessage } from "../components/Chat";
+import { capReachedAtom } from "../store";
 
 // interface State {
 //     evo: Evo
