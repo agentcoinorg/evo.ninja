@@ -17,10 +17,26 @@ function AccountConfig(props: AccountConfigProps) {
   const { onConfigSaved, capReached, firstTimeUser } = props;
   const { data: session } = useSession();
 
+  const onSaveClicked = async () => {
+    const previousApiKey = localStorage.getItem("openai-api-key");
+    const apiKeyHasChanged = apiKey !== previousApiKey;
+
+    onConfigSaved(apiKey, allowTelemetry);
+
+    if (apiKey) {
+      if (!session || (!session.user.email && apiKeyHasChanged)) {
+        await signIn(
+          'credentials',
+          { apiKey, redirect: false, callbackUrl: `${location.origin}` }
+        )
+      }
+    }
+  }
+
   return (
     <div
       className="absolute inset-0 z-50 bg-neutral-900/80"
-      onClick={() => props.onConfigSaved(apiKey, allowTelemetry)}
+      onClick={() => onSaveClicked()}
     >
       <div
         className="fixed left-1/2 top-1/2 flex w-[100%] max-w-[38rem] -translate-x-1/2 -translate-y-1/2 flex-col gap-4 rounded-lg bg-neutral-900 p-12 text-neutral-50"
@@ -44,12 +60,12 @@ function AccountConfig(props: AccountConfigProps) {
 
         <div className="px-8 py-2 flex justify-between items-center">
           <h3 className="font-semibold text-lg">Email</h3>
-          {session ? (
+          {session && session.user.email ? (
             <div className="w-[65%] flex flex-row gap-5 justify-end">
               <h4 className="text-md">{session.user?.email}</h4>
               <button
                 className="cursor-pointer"
-                onClick={() => signOut()}
+                onClick={() => signOut({ callbackUrl: `${location.origin}`, redirect: false })}
               >
                 <FontAwesomeIcon icon={faTrash} />
               </button>
@@ -97,7 +113,7 @@ function AccountConfig(props: AccountConfigProps) {
         <div className="px-8 py-2 flex justify-center items-center">
           <button
             className="w-[30%] cursor-pointer rounded-xl border-none bg-orange-600 p-2.5 text-white transition-all hover:bg-orange-500"
-            onClick={() => onConfigSaved(apiKey, allowTelemetry)}
+            onClick={() => onSaveClicked()}
           >
             Save
           </button>
