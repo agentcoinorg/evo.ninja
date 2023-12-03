@@ -5,7 +5,6 @@ import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import NextAuthProvider from "@/components/NextSessionProvider";
 import { EXO_FONT } from "@/lib/fonts";
-import { ReactQueryProvider } from "@/components/ReactQueryProvider";
 config.autoAddCss = false;
 
 export default function EvoApp({ children }: { children: React.ReactNode }) {
@@ -28,11 +27,9 @@ export default function EvoApp({ children }: { children: React.ReactNode }) {
               });
               `}
           </Script>
-          <ReactQueryProvider>
-            <NextAuthProvider>
-              {children}
-            </NextAuthProvider>
-          </ReactQueryProvider>
+          <NextAuthProvider>
+            {children}
+          </NextAuthProvider>
         </div>
       </body>
     </html>

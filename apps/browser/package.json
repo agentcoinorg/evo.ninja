@@ -12,8 +12,8 @@
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@headlessui/react": "^1.7.17",
     "@nerfzael/memory-fs": "0.1.1",
+    "@supabase-cache-helpers/postgrest-swr": "^1.2.6",
     "@supabase/supabase-js": "2.38.5",
-    "@tanstack/react-query": "^5.12.2",
     "buffer": "6.0.3",
     "clsx": "^2.0.0",
     "file-saver": "^2.0.5",
@@ -27,7 +27,8 @@
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
     "react-markdown": "^8.0.7",
-    "react-modal": "3.16.1"
+    "react-modal": "3.16.1",
+    "swr": "^2.2.4"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "14.0.3",
