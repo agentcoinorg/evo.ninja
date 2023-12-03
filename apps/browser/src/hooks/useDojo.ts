@@ -1,6 +1,4 @@
-import { atom } from "jotai";
 import { useAtom } from "jotai";
-import { atomWithStorage } from "jotai/utils";
 import { useEffect } from "react";
 import { allowTelemetryAtom, dojoAtom, localOpenAiApiKeyAtom } from "../store";
 
@@ -24,19 +22,12 @@ export function useDojo() {
     setDojo({
       config: {
         ...dojo.config,
+        allowTelemetry,
         openAiApiKey: localOpenAiApiKey,
       },
+      error: dojo.error
     });
-  }, [localOpenAiApiKey]);
-
-  useEffect(() => {
-    setDojo({
-      config: {
-        ...dojo.config,
-        allowTelemetry,
-      },
-    });
-  }, [allowTelemetry]);
+  }, [localOpenAiApiKey, allowTelemetry]);
 
   const setDojoError = (error: string) => {
     setDojo({

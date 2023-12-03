@@ -51,7 +51,6 @@ const Chat: React.FC<ChatProps> = ({
   const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom)
   const [,setAllowTelemetry] = useAtom(allowTelemetryAtom)
 
-  const [clickedMsgIndex, setClickedMsgIndex] = useState<number | null>(null);
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [showPrompts, setShowPrompts] = useState<boolean>(true);
@@ -244,10 +243,8 @@ const Chat: React.FC<ChatProps> = ({
             <div 
               className={clsx(
                 "my-1 rounded border border-transparent px-4 py-2.5 transition-all hover:border-orange-600",
-                msg.user === "user" ? "bg-blue-500": "bg-neutral-900",
-                clickedMsgIndex === index ? "border-orange-600" : "")
+                msg.user === "user" ? "bg-blue-500": "bg-neutral-900")
               }
-              onClick={() => setClickedMsgIndex(index === clickedMsgIndex ? null : index)}
             >
               <div className="prose prose-invert">
                 <ReactMarkdown>{msg.title.toString()}</ReactMarkdown>
