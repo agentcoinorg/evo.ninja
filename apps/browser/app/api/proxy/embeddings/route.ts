@@ -1,10 +1,10 @@
 import OpenAIApi from "openai";
 import { getServerSession } from "next-auth";
-import { isGoalValid } from "../../../../lib/api/utils/goal";
-import { canUseSubsidy } from "../../../../lib/api/utils/subsidy";
-import { createSupabaseClient } from "../../../../lib/api/utils/supabase";
-import { createOpenAIApiClient } from "../../../../lib/api/utils/openai";
 import { NextRequest, NextResponse } from "next/server";
+import { isGoalValid } from "@/lib/api/utils/goal";
+import { canUseSubsidy } from "@/lib/api/utils/subsidy";
+import { createSupabaseClient } from "@/lib/api/utils/supabase";
+import { createOpenAIApiClient } from "@/lib/api/utils/openai";
 import { getAuthOptions } from "@/lib/api/authOptions";
 
 export async function POST(
