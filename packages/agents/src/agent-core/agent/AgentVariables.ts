@@ -1,16 +1,26 @@
 export class AgentVariables {
   private _variables: Map<string, string> = new Map();
   private _funcCounters: Map<string, number> = new Map();
+  private _saveThreshold: number = 1250;
+  private onVariableSet?: (key: string, value: string) => Promise<void>; 
 
   public static Prefix = "${";
   public static Suffix = "}";
 
   constructor(
-    private options?: {
+    config?: {
+      saveThreshold?: number
       onVariableSet?: (key: string, value: string) => Promise<void>
     },
-    private _saveThreshold: number = 1250,
-  ) { }
+  ) {
+    if (config?.saveThreshold) {
+      this._saveThreshold = config.saveThreshold;
+    }
+
+    if (config?.onVariableSet) {
+      this.onVariableSet = config.onVariableSet;
+    }
+  }
 
   static hasSyntax(name: string): boolean {
     return name.startsWith(AgentVariables.Prefix) &&
@@ -43,8 +53,8 @@ export class AgentVariables {
 
     this._variables.set(name, value);
 
-    if (this.options?.onVariableSet) {
-      await this.options.onVariableSet(name, value);
+    if (this.onVariableSet) {
+      await this.onVariableSet(name, value);
     }
   }
 
