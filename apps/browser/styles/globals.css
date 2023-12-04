@@ -25,9 +25,9 @@ code {
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-teal-600 rounded;
+  @apply bg-cyan-500 rounded;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-teal-500 rounded;
+  @apply bg-cyan-400 rounded;
 }

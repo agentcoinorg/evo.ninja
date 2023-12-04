@@ -56,7 +56,7 @@ function AccountConfig(props: AccountConfigProps) {
             </div>
           ) : (
             <button
-              className="cursor-pointer rounded-xl border-none bg-teal-600 p-1.5 text-white transition-all hover:bg-teal-500"
+              className="cursor-pointer rounded-xl border-none bg-cyan-500 p-1.5 text-white transition-all hover:bg-cyan-400"
               onClick={() => signIn()}
             >
               Sign in
@@ -96,7 +96,7 @@ function AccountConfig(props: AccountConfigProps) {
 
         <div className="px-8 py-2 flex justify-center items-center">
           <button
-            className="w-[30%] cursor-pointer rounded-xl border-none bg-teal-600 p-2.5 text-white transition-all hover:bg-teal-500"
+            className="w-[30%] cursor-pointer rounded-xl border-none bg-cyan-500 p-2.5 text-white transition-all hover:bg-cyan-400"
             onClick={() => onConfigSaved(apiKey, allowTelemetry)}
           >
             Save
