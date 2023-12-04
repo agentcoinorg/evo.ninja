@@ -86,10 +86,10 @@ export class LocalCollection<
   async *iterativeSearch(
     queryOrVector: string | number[]
   ): AsyncGenerator<LocalDocument<TMetadata>, void, void> {
-    const queryVector =
-      typeof queryOrVector === "string"
-        ? (await this.embeddingApi.createEmbeddings(queryOrVector))[0].embedding
-        : (queryOrVector as number[]);
+
+    const queryVector = typeof queryOrVector === "string"
+      ? (await this.embeddingApi.createEmbeddings(queryOrVector))[0].embedding
+      : queryOrVector as number[];
 
     const normalizedQueryVector = normalize(queryVector);
 

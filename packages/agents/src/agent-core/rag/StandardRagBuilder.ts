@@ -1,7 +1,6 @@
 import { v4 as uuid } from "uuid";
 import { AgentContext } from "../agent/AgentContext";
-import { LocalCollection, OpenAIEmbeddingAPI, LocalVectorDB, LocalDocument } from "../embeddings";
-import { InMemoryWorkspace, SyncWorkspace } from "@evo-ninja/agent-utils";
+import { LocalCollection, LocalVectorDB, LocalDocument } from "../embeddings";
 
 export type Recombiner<TItem, TRecombine> = (
   results: () => Promise<AsyncGenerator<LocalDocument<{ index: number }>>>,
@@ -20,16 +19,10 @@ export class StandardRagBuilder<TItem> {
     workspace?: SyncWorkspace,
     items?: TItem[]
   ) {
-    const embeddingApi = new OpenAIEmbeddingAPI(
-      context.env.OPENAI_API_KEY,
-      context.logger,
-      context.chat.tokenizer
-    );
-
     const db = new LocalVectorDB(
       workspace ?? new InMemoryWorkspace(),
       "ragdb",
-      embeddingApi
+      context.embedding
     );
 
     this.collection = db.addCollection<{ index: number }>(

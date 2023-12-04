@@ -15,5 +15,5 @@ db
 !/benchmarks/agbenchmark_config/config.json
 /benchmarks/agbenchmark_config
 
-/apps/browser/src/scripts.ts
+/apps/browser/lib/scripts.ts
 .next

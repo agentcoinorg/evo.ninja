@@ -4,12 +4,12 @@ import {
   faDiscord,
   faGithub,
 } from "@fortawesome/free-brands-svg-icons";
-import { faCog, faDownload } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faDownload } from "@fortawesome/free-solid-svg-icons";
 import { faFolder } from "@fortawesome/free-solid-svg-icons";
 import Upload from "./Upload";
 import File from "./File";
 
-import { downloadFilesAsZip } from "../sys/file/downloadFilesAsZip";
+import { downloadFilesAsZip } from "@/lib/sys/file/downloadFilesAsZip";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import CloseIcon from "./CloseIcon";
 import SidebarIcon from "./SidebarIcon";
@@ -45,8 +45,8 @@ const Sidebar = ({
         </div>
         <div className="flex items-center gap-3 w-full">
           <div className="flex flex-1 justify-center h-14 items-center rounded border border-neutral-500 p-3 text-lg text-white gap-4 cursor-pointer hover:opacity-100 opacity-80 transition-all" onClick={onSettingsClick}>
-            <FontAwesomeIcon icon={faCog} />
-            Settings
+            <FontAwesomeIcon icon={faUser} />
+            Account
           </div>
           <div className="rounded border border-neutral-500 h-14 p-4 text-lg text-white gap-4 cursor-pointer hover:opacity-100 opacity-80 transition-all" onClick={onSidebarToggleClick}>
             <SidebarIcon />

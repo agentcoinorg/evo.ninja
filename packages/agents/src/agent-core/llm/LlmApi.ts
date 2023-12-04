@@ -1,5 +1,5 @@
 import { ChatCompletionMessage } from "openai/resources";
-import { ChatLogs, ChatMessage, FunctionDefinition } from ".";
+import { ChatLogs, FunctionDefinition } from ".";
 
 export declare const LlmRoles: {
   readonly System: "system";

@@ -3,15 +3,12 @@ import { Evo } from "@evo-ninja/agents";
 import ReactMarkdown from "react-markdown";
 import FileSaver from "file-saver";
 
-import { trackMessageSent, trackThumbsFeedback} from './googleAnalytics';
-import { ExamplePrompt, examplePrompts } from "../examplePrompts";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload, faQuestion, faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
-import { faThumbsUp, faThumbsDown, faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
+import { faDownload, faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
 import { InMemoryFile } from "@nerfzael/memory-fs";
-
 import clsx from "clsx";
 import SidebarIcon from "./SidebarIcon";
+import { ExamplePrompt, examplePrompts } from "@/lib/examplePrompts";
 
 export interface ChatMessage {
   title: string;
@@ -24,14 +21,25 @@ export interface ChatProps {
   evo: Evo;
   onMessage: (message: ChatMessage) => void;
   messages: ChatMessage[];
-  goalEnded: boolean;
   sidebarOpen: boolean;
+  overlayOpen: boolean;
+  onDisclaimerSelect: (approve: boolean) => void;
   onSidebarToggleClick: () => void;
   onUploadFiles: (files: InMemoryFile[]) => void;
+  handlePromptAuth: (message: string) => Promise<boolean>
 }
 
-const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSidebarToggleClick, sidebarOpen, onUploadFiles }: ChatProps) => {
-
+const Chat: React.FC<ChatProps> = ({
+  evo,
+  onMessage,
+  messages,
+  sidebarOpen,
+  overlayOpen,
+  onDisclaimerSelect,
+  onSidebarToggleClick,
+  onUploadFiles,
+  handlePromptAuth
+}: ChatProps) => {
   const [message, setMessage] = useState<string>("");
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
   const [paused, setPaused] = useState<boolean>(false);
@@ -43,35 +51,10 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
   const [showDisclaimer, setShowDisclaimer] = useState<boolean>(
     localStorage.getItem('showDisclaimer') !== 'false'
   );
-  const [trackUser, setTrackUser] = useState<boolean>(
-    localStorage.getItem('trackUser') === 'true'
-  );
   const [clickedMsgIndex, setClickedMsgIndex] = useState<number | null>(null);
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
-  const [hasUpvoted, setHasUpvoted] = useState<boolean>(false);
-  const [hasDownvoted, setHasDownvoted] = useState<boolean>(false);
-  const [showEvoNetPopup, setShowEvoNetPopup] = useState<boolean>(false);
   const [showPrompts, setShowPrompts] = useState<boolean>(true);
-
-  const pausedRef = useRef(paused);
-  useEffect(() => {
-      pausedRef.current = paused;
-  }, [paused]);
-
-  const goalEndedRef = useRef(paused);
-  useEffect(() => {
-    goalEndedRef.current = goalEnded;
-  }, [goalEnded]);
-
-  useEffect(() => {
-    if (goalEnded) {
-      setPaused(true);
-      setEvoRunning(false);
-      setSending(false);
-      setShowEvoNetPopup(true);
-    }
-  }, [goalEnded]);
 
   useEffect(() => {
     const runEvo = async () => {
@@ -90,20 +73,18 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
       let messageLog = messages;
       let stepCounter = 1
       while (evoRunning) {
-        if (pausedRef.current || goalEndedRef.current) {
-          setStopped(true);
-          return Promise.resolve();
-        }
-
         setStopped(false);
 
         const response = await evoItr.next();
 
         if (response.done) {
-          onMessage({
-            title: "## Goal Achieved",
-            user: "evo"
-          })
+          const actionTitle = response.value.value.title
+          if (actionTitle.includes("onGoalAchieved")) {
+            onMessage({
+              title: "## Goal Achieved",
+              user: "evo"
+            })
+          }
           setEvoRunning(false);
           setSending(false);
           setEvoItr(undefined);
@@ -123,9 +104,7 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
             user: "evo"
           };
           messageLog = [...messageLog, evoMessage];
-          if (!goalEndedRef.current) {
-            onMessage(evoMessage);
-          }
+          onMessage(evoMessage);
         }
 
         stepCounter++
@@ -141,19 +120,10 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
     localStorage.setItem('showDisclaimer', showDisclaimer.toString());
   }, [showDisclaimer]);
 
-  useEffect(() => {
-    localStorage.setItem('trackUser', trackUser.toString());
-  }, [trackUser]);
-
-  const handleCloseDisclaimer = () => {
+  const handleDisclaimerSelect = (accept: boolean) => {
     setShowDisclaimer(false);
-    setTrackUser(true);  // User accepted disclaimer, enable tracking
-  };
-
-  const handleCloseWithoutTracking = () => {
-    setShowDisclaimer(false);
-    setTrackUser(false); // User did not accept disclaimer, disable tracking
-  };
+    onDisclaimerSelect(accept);
+  }
 
   const handleSamplePromptClick = async (prompt: ExamplePrompt) => {
     if (prompt.files) {
@@ -165,21 +135,22 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
 
   const handleStart = async () => {
     handleSend();
-  }
+  };
 
   const handleSend = async (newMessage?: string) => {
+    if (!message && !newMessage) return
+    const authorized = await handlePromptAuth(newMessage ?? message)
+    if (!authorized) {
+      return
+    }
     onMessage({
       title: newMessage || message,
-      user: "user"
+      user: "user",
     });
     setSending(true);
     setShowPrompts(false);
     setMessage("");
     setEvoRunning(true);
-
-    if (trackUser) { // Only track if user accepted the disclaimer
-      trackMessageSent(newMessage || message); 
-    }
   };
 
   const handlePause = async () => {
@@ -197,20 +168,6 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
   const handleKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter" && !sending) {
       handleSend();
-    }
-  };
-
-  const handleThumbsUp = () => {
-    if (!hasDownvoted) {
-      setHasUpvoted(true);
-      trackThumbsFeedback('positive');
-    }
-  };
-
-  const handleThumbsDown = () => {
-    if (!hasUpvoted) {
-      setHasDownvoted(true);
-      trackThumbsFeedback('negative');
     }
   };
 
@@ -298,39 +255,12 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
               onClick={() => setClickedMsgIndex(index === clickedMsgIndex ? null : index)}
             >
               <div className="prose prose-invert">
-                <ReactMarkdown>{msg.title}</ReactMarkdown>
-                <ReactMarkdown>{msg.content ?? ""}</ReactMarkdown>
+                <ReactMarkdown>{msg.title.toString()}</ReactMarkdown>
+                <ReactMarkdown>{msg.content?.toString() ?? ""}</ReactMarkdown>
               </div>
             </div>
           </div>
         ))}
-        {goalEnded && (
-          <div className="my-4 flex flex-col items-center">
-            <div className="mb-2 text-xl">Provide Feedback</div>
-            <div className="flex justify-center gap-4">
-              <FontAwesomeIcon 
-                icon={faThumbsUp} 
-                onClick={handleThumbsUp} 
-                className={clsx(hasUpvoted ? 'text-orange-600' : '')} 
-              />
-              <FontAwesomeIcon 
-                icon={faThumbsDown} 
-                onClick={handleThumbsDown} 
-                className={clsx(hasUpvoted ? 'text-orange-600' : '')} 
-              />
-            </div>
-            <div>
-              <a
-                className="mt-2.5 inline-block text-orange-600 underline"
-                href="https://forms.gle/nidFArD7aPzYL5PQ7"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Fill a Detailed Feedback Form
-              </a>
-            </div>
-          </div>
-        )}
       </div>
       {showPrompts && (
         <div className="grid w-full grid-rows-2 p-2.5 py-16 self-center w-[100%] max-w-[56rem]">
@@ -346,12 +276,12 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
         </div>
       )}
       <div className="flex items-center justify-center gap-4 p-4 mb-4 self-center w-[100%] max-w-[56rem]">
-        {showDisclaimer && (
+        {showDisclaimer && !overlayOpen && (
           <div className="absolute bottom-0 z-50 flex w-4/5 items-center justify-around rounded-t-lg border-2 border-orange-600 bg-black p-2.5 text-center text-xs text-white self-center w-[100%] max-w-[56rem]">
             🧠 Hey there! Mind sharing your prompts to help make Evo even better?
             <div className="flex gap-2.5">
-              <span className="cursor-pointer px-5 py-2.5 font-bold text-orange-500" onClick={handleCloseDisclaimer}>Accept</span>
-              <span className="cursor-pointer px-5 py-2.5 font-bold text-white" onClick={handleCloseWithoutTracking}>Decline</span>
+              <span className="cursor-pointer px-5 py-2.5 font-bold text-orange-500" onClick={() => handleDisclaimerSelect(true)}>Accept</span>
+              <span className="cursor-pointer px-5 py-2.5 font-bold text-white" onClick={() => handleDisclaimerSelect(false)}>Decline</span>
             </div>
           </div>
         )}
@@ -402,21 +332,6 @@ const Chat: React.FC<ChatProps> = ({ evo, onMessage, messages, goalEnded, onSide
         )}
       </div>
 
-      {showEvoNetPopup && (
-        <div
-          className="fixed top-0 right-0 w-[300px] bg-[#121212] text-[#f5f5f5] shadow-md border border-[#2b2b30] rounded-lg cursor-pointer transition-opacity duration-300 ease-in-out opacity-80 mt-[55px] mr-[18px] hover:border-[#ff572e] hover:opacity-100"
-          onClick={() => window.open('https://forms.gle/Wsjanqiw68DwCLTA9', '_blank')}
-        >
-          <div className="p-3 text-left text-xs flex items-start justify-between relative">
-            <a href="https://forms.gle/Wsjanqiw68DwCLTA9" target="_blank" rel="noopener noreferrer">
-              <p>Join Evo-Net! <br /> A community where script writers and AI agents collab on AI tools for specialized tasks.</p>
-            </a>
-            <div className="absolute top-3 right-3">
-              <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
-            </div>
-          </div>
-        </div>
-      )}
       <a
         className="cursor-pointer fixed bottom-0 right-0 mx-4 my-2"
         href="https://discord.gg/r3rwh69cCa"
