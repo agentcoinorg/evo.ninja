@@ -88,9 +88,9 @@ jobs:
       run: yarn start:api -c &
       env:
         OPENAI_API_KEY: ${{ secrets.BENCHMARK_CI_OPENAI_API_KEY }}
-        GPT_MODEL: "gpt-4-0613"
-        CONTEXT_WINDOW_TOKENS: 8000
-        MAX_RESPONSE_TOKENS: 2000
+        GPT_MODEL: "gpt-4-1106-preview"
+        CONTEXT_WINDOW_TOKENS: 128000
+        MAX_RESPONSE_TOKENS: 4096
         SERP_API_KEY: ${{ secrets.BENCHMARK_CI_SERP_API_KEY }}
 
     - name: Set up Python 3.10
