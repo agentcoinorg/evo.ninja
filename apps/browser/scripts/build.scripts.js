@@ -69,4 +69,4 @@ const {{variableName}} = {
 const template = Handlebars.compile(templateFile);
 
 const scriptsFile = template({ scripts });
-fs.writeFileSync("./src/scripts.ts", scriptsFile);
+fs.writeFileSync("./lib/scripts.ts", scriptsFile);

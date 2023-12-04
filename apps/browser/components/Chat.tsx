@@ -1,16 +1,14 @@
-import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef, useCallback, SetStateAction, Dispatch } from "react";
+import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef, useCallback } from "react";
 import { Evo } from "@evo-ninja/agents";
 import ReactMarkdown from "react-markdown";
 import FileSaver from "file-saver";
 
-import { trackThumbsFeedback} from './googleAnalytics';
-import { ExamplePrompt, examplePrompts } from "../examplePrompts";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
-import { faThumbsUp, faThumbsDown, faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import SidebarIcon from "./SidebarIcon";
+import { ExamplePrompt, examplePrompts } from "@/lib/examplePrompts";
 
 export interface ChatMessage {
   title: string;
@@ -23,7 +21,6 @@ export interface ChatProps {
   evo: Evo;
   onMessage: (message: ChatMessage) => void;
   messages: ChatMessage[];
-  goalEnded: boolean;
   sidebarOpen: boolean;
   overlayOpen: boolean;
   onDisclaimerSelect: (approve: boolean) => void;
@@ -36,7 +33,6 @@ const Chat: React.FC<ChatProps> = ({
   evo,
   onMessage,
   messages,
-  goalEnded,
   sidebarOpen,
   overlayOpen,
   onDisclaimerSelect,
@@ -58,29 +54,7 @@ const Chat: React.FC<ChatProps> = ({
   const [clickedMsgIndex, setClickedMsgIndex] = useState<number | null>(null);
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
-  const [hasUpvoted, setHasUpvoted] = useState<boolean>(false);
-  const [hasDownvoted, setHasDownvoted] = useState<boolean>(false);
-  const [showEvoNetPopup, setShowEvoNetPopup] = useState<boolean>(false);
   const [showPrompts, setShowPrompts] = useState<boolean>(true);
-
-  const pausedRef = useRef(paused);
-  useEffect(() => {
-      pausedRef.current = paused;
-  }, [paused]);
-
-  const goalEndedRef = useRef(paused);
-  useEffect(() => {
-    goalEndedRef.current = goalEnded;
-  }, [goalEnded]);
-
-  useEffect(() => {
-    if (goalEnded) {
-      setPaused(true);
-      setEvoRunning(false);
-      setSending(false);
-      setShowEvoNetPopup(true);
-    }
-  }, [goalEnded]);
 
   useEffect(() => {
     const runEvo = async () => {
@@ -99,20 +73,18 @@ const Chat: React.FC<ChatProps> = ({
       let messageLog = messages;
       let stepCounter = 1
       while (evoRunning) {
-        if (pausedRef.current || goalEndedRef.current) {
-          setStopped(true);
-          return Promise.resolve();
-        }
-
         setStopped(false);
 
         const response = await evoItr.next();
 
         if (response.done) {
-          onMessage({
-            title: "## Goal Achieved",
-            user: "evo"
-          })
+          const actionTitle = response.value.value.title
+          if (actionTitle.includes("onGoalAchieved")) {
+            onMessage({
+              title: "## Goal Achieved",
+              user: "evo"
+            })
+          }
           setEvoRunning(false);
           setSending(false);
           setEvoItr(undefined);
@@ -132,9 +104,7 @@ const Chat: React.FC<ChatProps> = ({
             user: "evo"
           };
           messageLog = [...messageLog, evoMessage];
-          if (!goalEndedRef.current) {
-            onMessage(evoMessage);
-          }
+          onMessage(evoMessage);
         }
 
         stepCounter++
@@ -168,6 +138,7 @@ const Chat: React.FC<ChatProps> = ({
   };
 
   const handleSend = async (newMessage?: string) => {
+    if (!message && !newMessage) return
     const authorized = await handlePromptAuth(newMessage ?? message)
     if (!authorized) {
       return
@@ -197,20 +168,6 @@ const Chat: React.FC<ChatProps> = ({
   const handleKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter" && !sending) {
       handleSend();
-    }
-  };
-
-  const handleThumbsUp = () => {
-    if (!hasDownvoted) {
-      setHasUpvoted(true);
-      trackThumbsFeedback('positive');
-    }
-  };
-
-  const handleThumbsDown = () => {
-    if (!hasUpvoted) {
-      setHasDownvoted(true);
-      trackThumbsFeedback('negative');
     }
   };
 
@@ -304,33 +261,6 @@ const Chat: React.FC<ChatProps> = ({
             </div>
           </div>
         ))}
-        {goalEnded && (
-          <div className="my-4 flex flex-col items-center">
-            <div className="mb-2 text-xl">Provide Feedback</div>
-            <div className="flex justify-center gap-4">
-              <FontAwesomeIcon 
-                icon={faThumbsUp} 
-                onClick={handleThumbsUp} 
-                className={clsx(hasUpvoted ? 'text-orange-600' : '')} 
-              />
-              <FontAwesomeIcon 
-                icon={faThumbsDown} 
-                onClick={handleThumbsDown} 
-                className={clsx(hasUpvoted ? 'text-orange-600' : '')} 
-              />
-            </div>
-            <div>
-              <a
-                className="mt-2.5 inline-block text-orange-600 underline"
-                href="https://forms.gle/nidFArD7aPzYL5PQ7"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Fill a Detailed Feedback Form
-              </a>
-            </div>
-          </div>
-        )}
       </div>
       {showPrompts && (
         <div className="grid w-full grid-rows-2 p-2.5 py-16 self-center w-[100%] max-w-[56rem]">
@@ -402,21 +332,6 @@ const Chat: React.FC<ChatProps> = ({
         )}
       </div>
 
-      {showEvoNetPopup && (
-        <div
-          className="fixed top-0 right-0 w-[300px] bg-[#121212] text-[#f5f5f5] shadow-md border border-[#2b2b30] rounded-lg cursor-pointer transition-opacity duration-300 ease-in-out opacity-80 mt-[55px] mr-[18px] hover:border-[#ff572e] hover:opacity-100"
-          onClick={() => window.open('https://forms.gle/Wsjanqiw68DwCLTA9', '_blank')}
-        >
-          <div className="p-3 text-left text-xs flex items-start justify-between relative">
-            <a href="https://forms.gle/Wsjanqiw68DwCLTA9" target="_blank" rel="noopener noreferrer">
-              <p>Join Evo-Net! <br /> A community where script writers and AI agents collab on AI tools for specialized tasks.</p>
-            </a>
-            <div className="absolute top-3 right-3">
-              <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
-            </div>
-          </div>
-        </div>
-      )}
       <a
         className="cursor-pointer fixed bottom-0 right-0 mx-4 my-2"
         href="https://discord.gg/r3rwh69cCa"
