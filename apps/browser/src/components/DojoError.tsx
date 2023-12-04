@@ -12,7 +12,7 @@ const DojoError: React.FC<DojoErrorProps> = (props: DojoErrorProps) => {
       <div className="flex-1 overflow-auto border-b border-b-neutral-700 p-5">
         <div>
           <div className="SenderName">Critical Error</div>
-          <div className="my-4 rounded bg-orange-600 px-4 py-2.5 text-neutral-50">{JSON.stringify(error, null, 2)}</div>
+          <div className="my-4 rounded bg-teal-600 px-4 py-2.5 text-neutral-50">{JSON.stringify(error, null, 2)}</div>
         </div>
       </div>
     </div>

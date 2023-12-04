@@ -291,9 +291,9 @@ const Chat: React.FC<ChatProps> = ({
             ) : null}
             <div 
               className={clsx(
-                "my-1 rounded border border-transparent px-4 py-2.5 transition-all hover:border-orange-600",
+                "my-1 rounded border border-transparent px-4 py-2.5 transition-all hover:border-teal-600",
                 msg.user === "user" ? "bg-blue-500": "bg-neutral-900",
-                clickedMsgIndex === index ? "border-orange-600" : "")
+                clickedMsgIndex === index ? "border-teal-600" : "")
               }
               onClick={() => setClickedMsgIndex(index === clickedMsgIndex ? null : index)}
             >
@@ -311,17 +311,17 @@ const Chat: React.FC<ChatProps> = ({
               <FontAwesomeIcon 
                 icon={faThumbsUp} 
                 onClick={handleThumbsUp} 
-                className={clsx(hasUpvoted ? 'text-orange-600' : '')} 
+                className={clsx(hasUpvoted ? 'text-teal-600' : '')} 
               />
               <FontAwesomeIcon 
                 icon={faThumbsDown} 
                 onClick={handleThumbsDown} 
-                className={clsx(hasUpvoted ? 'text-orange-600' : '')} 
+                className={clsx(hasUpvoted ? 'text-teal-600' : '')} 
               />
             </div>
             <div>
               <a
-                className="mt-2.5 inline-block text-orange-600 underline"
+                className="mt-2.5 inline-block text-teal-600 underline"
                 href="https://forms.gle/nidFArD7aPzYL5PQ7"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -337,7 +337,7 @@ const Chat: React.FC<ChatProps> = ({
           {examplePrompts.map((prompt, index) => (
             <div 
               key={index} 
-              className="m-1 cursor-pointer rounded-xl border border-neutral-500 bg-neutral-800 p-2.5 text-left text-xs text-neutral-50 transition-all hover:border-orange-500" 
+              className="m-1 cursor-pointer rounded-xl border border-neutral-500 bg-neutral-800 p-2.5 text-left text-xs text-neutral-50 transition-all hover:border-teal-500" 
               onClick={() => handleSamplePromptClick(prompt)}
             >
               {prompt.prompt}
@@ -347,10 +347,10 @@ const Chat: React.FC<ChatProps> = ({
       )}
       <div className="flex items-center justify-center gap-4 p-4 mb-4 self-center w-[100%] max-w-[56rem]">
         {showDisclaimer && !overlayOpen && (
-          <div className="absolute bottom-0 z-50 flex w-4/5 items-center justify-around rounded-t-lg border-2 border-orange-600 bg-black p-2.5 text-center text-xs text-white self-center w-[100%] max-w-[56rem]">
+          <div className="absolute bottom-0 z-50 flex w-4/5 items-center justify-around rounded-t-lg border-2 border-teal-600 bg-black p-2.5 text-center text-xs text-white self-center w-[100%] max-w-[56rem]">
             🧠 Hey there! Mind sharing your prompts to help make Evo even better?
             <div className="flex gap-2.5">
-              <span className="cursor-pointer px-5 py-2.5 font-bold text-orange-500" onClick={() => handleDisclaimerSelect(true)}>Accept</span>
+              <span className="cursor-pointer px-5 py-2.5 font-bold text-teal-500" onClick={() => handleDisclaimerSelect(true)}>Accept</span>
               <span className="cursor-pointer px-5 py-2.5 font-bold text-white" onClick={() => handleDisclaimerSelect(false)}>Decline</span>
             </div>
           </div>
@@ -368,7 +368,7 @@ const Chat: React.FC<ChatProps> = ({
           <>
             {
               !paused && (
-                <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" onClick={handlePause} disabled={!evoRunning || paused}>
+                <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-teal-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-teal-500" onClick={handlePause} disabled={!evoRunning || paused}>
                 Pause
                 </button>
               )
@@ -377,13 +377,13 @@ const Chat: React.FC<ChatProps> = ({
               paused && (
                 <>
                   {!stopped && (
-                     <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" disabled={true}>
+                     <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-teal-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-teal-500" disabled={true}>
                      Pausing
                      </button>
                   )}
 
                   {stopped && (
-                     <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" onClick={handleContinue} disabled={evoRunning && !paused}>
+                     <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-teal-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-teal-500" onClick={handleContinue} disabled={evoRunning && !paused}>
                      Paused
                      </button>
                   )}
@@ -394,9 +394,9 @@ const Chat: React.FC<ChatProps> = ({
         )}
 
         {evoRunning ? (
-          <div className="h-9 w-9 animate-spin rounded-full border-4 border-black/10 border-l-orange-600" />
+          <div className="h-9 w-9 animate-spin rounded-full border-4 border-black/10 border-l-teal-600" />
         ) : (
-          <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" onClick={handleStart} disabled={evoRunning || sending}>
+          <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-teal-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-teal-500" onClick={handleStart} disabled={evoRunning || sending}>
             Start
           </button>
         )}
