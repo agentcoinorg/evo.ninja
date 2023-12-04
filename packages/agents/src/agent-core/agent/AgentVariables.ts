@@ -5,7 +5,12 @@ export class AgentVariables {
   public static Prefix = "${";
   public static Suffix = "}";
 
-  constructor(private _saveThreshold: number = 1250) { }
+  constructor(
+    private options?: {
+      onVariableSet?: (key: string, value: string) => Promise<void>
+    },
+    private _saveThreshold: number = 1250,
+  ) { }
 
   static hasSyntax(name: string): boolean {
     return name.startsWith(AgentVariables.Prefix) &&
@@ -31,12 +36,16 @@ export class AgentVariables {
     return this._variables.get(name);
   }
 
-  set(name: string, value: string): void {
+  async set(name: string, value: string): Promise<void> {
     if (AgentVariables.hasSyntax(name)) {
       name = AgentVariables.stripSyntax(name);
     }
 
     this._variables.set(name, value);
+
+    if (this.options?.onVariableSet) {
+      await this.options.onVariableSet(name, value);
+    }
   }
 
   read(name: string, index: number, count: number): string {
@@ -53,11 +62,11 @@ export class AgentVariables {
     }
   }
 
-  save(funcName: string, result: string): string {
+  async save(funcName: string, result: string): Promise<string> {
     const count = (this._funcCounters.get(funcName) || 0) + 1;
     const varName = `${funcName}_${count}`;
     this._funcCounters.set(funcName, count);
-    this.set(varName, result);
+    await this.set(varName, result);
     return varName;
   }
 
