@@ -10,7 +10,7 @@ export class Chat {
   constructor(
     protected _tokenizer: Tokenizer,
     protected options?: {
-      onMessagesAdded?: (type: ChatLogType, msgs: (ChatMessage & { tokens: number })[]) => Promise<void>
+      onMessagesAdded?: (msgs: ChatMessage[]) => Promise<void>
     }
   ) {
     this._chatLogs = new ChatLogs();
@@ -40,12 +40,13 @@ export class Chat {
       return { ...msg, tokens };
     })
 
-    for (const msgWithTokens of msgsWithTokens) {
-      this._chatLogs.add(type, [msgWithTokens], [msgWithTokens.tokens]);
-    }
+    const msgsToAdd = msgsWithTokens.map(({ tokens, ...msg }) => msg);
+    const tokensToAdd = msgsWithTokens.map(({ tokens }) => tokens);
+
+    this._chatLogs.add(type, msgsToAdd, tokensToAdd)
 
     if (this.options?.onMessagesAdded) {
-      await this.options.onMessagesAdded(type, msgsWithTokens);
+      await this.options.onMessagesAdded(msgsToAdd);
     }
   }
 
