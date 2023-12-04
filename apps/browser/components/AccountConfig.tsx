@@ -27,7 +27,7 @@ const validateOpenAiApiKey = async (
 ): Promise<string | void> => {
   try {
     // Make sure that given api key has access to GPT-4
-    await checkLlmModel(openAiApiKey, "gpt-4");
+    await checkLlmModel(openAiApiKey, "gpt-4-1106-preview");
   } catch (e: any) {
     if (e.message.includes("Incorrect API key provided")) {
       throw new Error(

@@ -55,9 +55,9 @@ export function useEvo(onMessage: (message: ChatMessage) => void, setError: (msg
 
       const env = new Env({
         OPENAI_API_KEY: localOpenAiApiKey || " ",
-        GPT_MODEL: "gpt-4",
-        CONTEXT_WINDOW_TOKENS: "8000",
-        MAX_RESPONSE_TOKENS: "2000",
+        GPT_MODEL: "gpt-4-1106-preview",
+        CONTEXT_WINDOW_TOKENS: "128000",
+        MAX_RESPONSE_TOKENS: "4096",
       });
 
       let llm: LlmApi;
