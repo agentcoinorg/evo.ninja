@@ -20,24 +20,20 @@ export const DEFAULT_ADA_CONFIG: ModelConfig = {
 
 export class OpenAIEmbeddingAPI implements EmbeddingApi {
   private api: OpenAIApi;
-  private modelConfig: ModelConfig;
-  private maxRateLimitRetries: number;
 
   constructor(
     private apiKey: string,
     private logger: ILogger,
     private tokenizer: Tokenizer,
-    modelConfig?: ModelConfig,
-    maxRateLimitRetries?: number,
-    baseURL?: string
+    baseURL?: string,
+    private modelConfig: ModelConfig = DEFAULT_ADA_CONFIG,
+    private maxRateLimitRetries: number = 5,
   ) {
     this.api = new OpenAIApi({
       apiKey: this.apiKey,
       dangerouslyAllowBrowser: true,
       baseURL: baseURL
     });
-    this.modelConfig = modelConfig || DEFAULT_ADA_CONFIG;
-    this.maxRateLimitRetries = maxRateLimitRetries || 5;
   }
 
   async createEmbeddings(input: string | string[], tries?: number): Promise<EmbeddingCreationResult[]> {

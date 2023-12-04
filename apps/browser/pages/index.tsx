@@ -192,15 +192,12 @@ function Dojo() {
             env.CONTEXT_WINDOW_TOKENS,
             env.MAX_RESPONSE_TOKENS,
             logger,
-            undefined,
             env.OPENAI_API_BASE_URL
           );
           embedding = new OpenAIEmbeddingAPI(
             env.OPENAI_API_KEY,
             logger,
             cl100k_base,
-            undefined,
-            undefined,
             env.OPENAI_API_BASE_URL
           );
         } else {

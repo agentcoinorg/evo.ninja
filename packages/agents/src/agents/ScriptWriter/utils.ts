@@ -10,8 +10,6 @@ export const createScriptWriter = (context: AgentContext): ScriptWriter => {
     context.env.OPENAI_API_KEY,
     context.logger,
     context.chat.tokenizer,
-    undefined,
-    undefined,
     context.env.OPENAI_API_BASE_URL
   );
 

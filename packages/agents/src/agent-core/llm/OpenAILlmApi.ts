@@ -15,7 +15,6 @@ export type FunctionDefinition = ChatCompletionTool.Function;
 
 export class OpenAILlmApi implements LlmApi {
   private _api: OpenAIApi;
-  private _maxRateLimitRetries: number;
 
   constructor(
     private _apiKey: string,
@@ -23,15 +22,14 @@ export class OpenAILlmApi implements LlmApi {
     private _defaultMaxTokens: number,
     private _defaultMaxResponseTokens: number,
     private _logger: Logger,
-    maxRateLimitRetries?: number,
-    baseURL?: string
+    baseURL?: string,
+    private _maxRateLimitRetries: number = 5,
   ) {
     this._api = new OpenAIApi({
       apiKey: this._apiKey,
       dangerouslyAllowBrowser: true,
       baseURL: baseURL
     });
-    this._maxRateLimitRetries = maxRateLimitRetries || 5;
   }
 
   getMaxContextTokens() {

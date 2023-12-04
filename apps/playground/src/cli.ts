@@ -29,7 +29,6 @@ export async function cli(): Promise<void> {
     env.CONTEXT_WINDOW_TOKENS,
     env.MAX_RESPONSE_TOKENS,
     logger,
-    undefined,
     env.OPENAI_API_BASE_URL
   );
   const chat = new Chat(cl100k_base);
@@ -37,8 +36,6 @@ export async function cli(): Promise<void> {
     env.OPENAI_API_KEY,
     logger,
     cl100k_base,
-    undefined,
-    undefined,
     env.OPENAI_API_BASE_URL
   );
   const context = new AgentContext(

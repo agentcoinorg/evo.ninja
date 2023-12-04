@@ -101,7 +101,6 @@ export function createApp(config?: AppConfig): App {
     env.CONTEXT_WINDOW_TOKENS,
     env.MAX_RESPONSE_TOKENS,
     logger,
-    undefined,
     env.OPENAI_API_BASE_URL
   );
 
@@ -122,8 +121,6 @@ export function createApp(config?: AppConfig): App {
     env.OPENAI_API_KEY,
     logger,
     cl100k_base,
-    undefined,
-    undefined,
     env.OPENAI_API_BASE_URL
   );
 
