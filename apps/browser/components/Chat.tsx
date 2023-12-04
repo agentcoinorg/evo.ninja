@@ -168,7 +168,7 @@ const Chat: React.FC<ChatProps> = ({
   const handleKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter" && !sending) {
       handleSend();
-    }
+    } 
   };
 
   const exportChatHistory = () => {

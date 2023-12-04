@@ -104,14 +104,14 @@ function Dojo() {
       return;
     }
 
-    for (const file of uploadedFiles) {
-      userWorkspace.writeFileSync(
-        file.path,
-        new TextDecoder().decode(file.content)
-      );
-    }
-
-    checkForUserFiles();
+    Promise.all(
+      uploadedFiles.map((file) =>
+        userWorkspace.writeFile(
+          file.path,
+          new TextDecoder().decode(file.content)
+        )
+      )
+    ).then(checkForUserFiles);
   }, [uploadedFiles]);
 
   const onConfigSaved = (apiKey: string, allowTelemetry: boolean) => {
@@ -130,7 +130,7 @@ function Dojo() {
       openAiApiKey,
       allowTelemetry,
       loaded: true,
-      complete
+      complete,
     });
     setCapReached(false);
     setAccountModalOpen(false);
@@ -140,7 +140,7 @@ function Dojo() {
     localStorage.setItem("allow-telemetry", approve.toString());
     setDojoConfig({
       ...dojoConfig,
-      allowTelemetry: approve
+      allowTelemetry: approve,
     });
   };
 
@@ -160,18 +160,23 @@ function Dojo() {
           promptUser: () => Promise.resolve("N/A"),
         });
 
-        const scriptsWorkspace = createInBrowserScripts();
+        const scriptsWorkspace = await createInBrowserScripts();
         const scripts = new Scripts(scriptsWorkspace);
 
         // Point by default to GPT-4 Turbo unless the given api key's account doesn't support it
-        let model = "gpt-4-1106-preview"
+        let model = "gpt-4-1106-preview";
         if (dojoConfig.openAiApiKey) {
           try {
-            model = await checkLlmModel(dojoConfig.openAiApiKey as string, model);
+            model = await checkLlmModel(
+              dojoConfig.openAiApiKey as string,
+              model
+            );
           } catch (e: any) {
             if (e.message.includes("Incorrect API key provided")) {
-              setDojoError("Open AI API key is not correct. Please make sure it has the correct format")
-              return
+              setDojoError(
+                "Open AI API key is not correct. Please make sure it has the correct format"
+              );
+              return;
             }
           }
         }
@@ -194,7 +199,11 @@ function Dojo() {
             env.MAX_RESPONSE_TOKENS,
             logger
           );
-          embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base)
+          embedding = new OpenAIEmbeddingAPI(
+            env.OPENAI_API_KEY,
+            logger,
+            cl100k_base
+          );
         } else {
           llm = new ProxyLlmApi(
             env.GPT_MODEL as LlmModel,
@@ -203,7 +212,9 @@ function Dojo() {
             () => setCapReached(true)
           );
           setProxyLlmApi(llm as ProxyLlmApi);
-          embedding = new ProxyEmbeddingApi(cl100k_base, () => setCapReached(true));
+          embedding = new ProxyEmbeddingApi(cl100k_base, () =>
+            setCapReached(true)
+          );
           setProxyEmbeddingApi(embedding as ProxyEmbeddingApi);
         }
 
