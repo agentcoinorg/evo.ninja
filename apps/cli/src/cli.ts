@@ -15,10 +15,10 @@ export async function cli(): Promise<void> {
 
   const timeout = new Timeout(
     options.timeout,
-    (logger: Logger): void => {
-      logger.error("Agent has timed out");
+    async (logger: Logger): Promise<void> => {
+      await logger.error("Agent has timed out");
       process.exit(1);
-    },
+    }
   );
 
   const app = await createApp({
@@ -30,46 +30,45 @@ export async function cli(): Promise<void> {
 
   await app.logger.logHeader();
 
-  async function handleGoal(goal: string) {
-    app.debugLog?.goalStart(goal);
+  async function handleGoal(goal: string): Promise<void> {
+    await app.debugLog?.goalStart(goal);
 
     let iterator = app.evo.run({ goal });
     let stepCounter = 1;
 
     while (true) {
-      app.debugLog?.stepStart();
-      app.logger.info(`## Step ${stepCounter}\n`)
+      await app.debugLog?.stepStart();
+      await app.logger.info(`## Step ${stepCounter}\n`);
       const response = await iterator.next();
-      app.debugLog?.stepEnd();
+      await app.debugLog?.stepEnd();
 
-      const logMessage = (message: AgentOutput) => {
+      const logMessage = async (message: AgentOutput) => {
         const messageStr = `${message.title}  \n${message.content ?? ""}`;
-        app.logger.info(`### Action executed:\n${messageStr}`);
-        app.debugLog?.stepLog(messageStr);
-      }
+        await app.logger.info(`### Action executed:\n${messageStr}`);
+        await app.debugLog?.stepLog(messageStr);
+      };
 
-      const logError = (error: string) => {
-        app.logger.error(error);
-        app.debugLog?.stepError(error);
-      }
+      const logError = async (error: string) => {
+        await app.logger.error(error);
+        await app.debugLog?.stepError(error);
+      };
 
       if (response.done) {
         if (!response.value.ok) {
-          logError(response.value.error ?? "Unknown error");
+          await logError(response.value.error ?? "Unknown error");
         } else {
-          logMessage(response.value.value);
+          await logMessage(response.value.value);
         }
         break;
       }
 
       if (response.value && response.value) {
-        logMessage(response.value);
+        await logMessage(response.value);
       }
-      stepCounter++
+      stepCounter++;
     }
 
-    app.debugLog?.goalEnd();
-    return Promise.resolve();
+    await app.debugLog?.goalEnd();
   }
 
   let goal: string | undefined = program.args[0];
@@ -79,7 +78,7 @@ export async function cli(): Promise<void> {
     if (!goal) {
       goal = await app.logger.prompt("Enter your goal");
     } else if (goalCounter === 0) {
-      app.fileLogger.info("# User\n **Enter your goal:** " + goal);
+      await app.fileLogger.info("# User\n **Enter your goal:** " + goal);
     } else {
       goal = await app.logger.prompt("Enter another goal");
       app.evo.reset();

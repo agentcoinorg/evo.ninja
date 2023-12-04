@@ -55,7 +55,7 @@ export class DebugLog {
 
   async goalEnd(): Promise<void> {
     this.goal.time.end();
-    this.save();
+    await this.save();
   }
 
   async stepStart(): Promise<void> {

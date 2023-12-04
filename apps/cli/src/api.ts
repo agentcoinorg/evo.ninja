@@ -56,45 +56,47 @@ async function taskHandler(
     debug: true,
   });
 
-  app.logger.info("\n////////////////////////////////////////////");
-  app.logger.info(`Trying to achieve goal: ${input}\nTask with ID: ${id}`);
-  app.debugLog?.goalStart(input);
+  await app.logger.info("\n////////////////////////////////////////////");
+  await app.logger.info(
+    `Trying to achieve goal: ${input}\nTask with ID: ${id}`
+  );
+  await app.debugLog?.goalStart(input);
 
   let iterator = app.evo.run({ goal: input });
 
   async function stepHandler(stepInput: StepInput | null): Promise<StepResult> {
-    app.logger.info(`Running step....`);
-    app.debugLog?.stepStart();
+    await app.logger.info(`Running step....`);
+    await app.debugLog?.stepStart();
     const response = await iterator.next(stepInput);
-    app.debugLog?.stepEnd();
+    await app.debugLog?.stepEnd();
 
-    const logMessage = (message: AgentOutput) => {
+    const logMessage = async (message: AgentOutput) => {
       const messageStr = `${message.title}  \n${message.content ?? ""}`;
-      app.logger.info(`### Action executed:\n${messageStr}`);
-      app.debugLog?.stepLog(messageStr);
-    }
+      await app.logger.info(`### Action executed:\n${messageStr}`);
+      await app.debugLog?.stepLog(messageStr);
+    };
 
-    const logError = (error: string) => {
-      app.logger.error(error);
-      app.debugLog?.stepError(error);
-    }
+    const logError = async (error: string) => {
+      await app.logger.error(error);
+      await app.debugLog?.stepError(error);
+    };
 
-    const artifacts = customWorkspace.artifacts
+    const artifacts = customWorkspace.artifacts;
     customWorkspace.cleanArtifacts();
 
     if (response.done) {
       if (!response.value.ok) {
-        logError(response.value.error ?? "Unknown error");
+        await logError(response.value.error ?? "Unknown error");
       } else {
-        logMessage(response.value.value);
+        await logMessage(response.value.value);
       }
       if (options.clean) {
-        app.logger.info("Removing generated scripts");
+        await app.logger.info("Removing generated scripts");
         await removeNewScripts();
       }
-      app.logger.info("////////////////////////////////////////////\n");
+      await app.logger.info("////////////////////////////////////////////\n");
     } else if (response.value && response.value) {
-      logMessage(response.value);
+      await logMessage(response.value);
     }
 
     const outputTitle =

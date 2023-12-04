@@ -3,7 +3,7 @@ module.exports = {
   ignorePatterns: [
     "**/__tests__/**/*.*",
     "**/node_modules/**/*.*",
-    "**/coverage/**/*.*"
+    "**/coverage/**/*.*",
   ],
   overrides: [
     {
@@ -12,38 +12,46 @@ module.exports = {
       parserOptions: {
         project: ["tsconfig.json", "./packages/**/tsconfig.json"],
       },
-      plugins: [
-        "eslint-plugin-import",
-        "@typescript-eslint",
-        "prettier"
-      ],
+      plugins: ["eslint-plugin-import", "@typescript-eslint", "prettier"],
       extends: [
         "eslint:recommended",
         "plugin:@typescript-eslint/eslint-recommended",
         "plugin:@typescript-eslint/recommended",
         "prettier",
-        "plugin:json/recommended"
+        "plugin:json/recommended",
       ],
       rules: {
         "prettier/prettier": ["error"],
-        "spaced-comment": ["error", "always", { "markers": ["/"] }],
+        "spaced-comment": ["error", "always", { markers: ["/"] }],
         "@typescript-eslint/naming-convention": [
           "error",
-          {selector: "default", format: ["camelCase"]},
+          { selector: "default", format: ["camelCase"] },
           {
             selector: [
-              "classProperty", "parameterProperty", "objectLiteralProperty",
-              "classMethod", "parameter"
+              "classProperty",
+              "parameterProperty",
+              "objectLiteralProperty",
+              "classMethod",
+              "parameter",
             ],
-            format: ["camelCase"], leadingUnderscore: "allow"
+            format: ["camelCase"],
+            leadingUnderscore: "allow",
           },
           //wrap host methods doesn't satisfy neither camel or snake
-          {selector: ["objectLiteralMethod", "typeMethod"], filter: {regex: "^_wrap_.*", match: true}, format: null},
+          {
+            selector: ["objectLiteralMethod", "typeMethod"],
+            filter: { regex: "^_wrap_.*", match: true },
+            format: null,
+          },
           //variable must be in camel or upper case
-          {selector: "variable", format: ["camelCase", "UPPER_CASE"], leadingUnderscore: "allow"},
+          {
+            selector: "variable",
+            format: ["camelCase", "UPPER_CASE"],
+            leadingUnderscore: "allow",
+          },
           //classes and types must be in PascalCase
-          {selector: ["typeLike", "enum"], format: ["PascalCase"]},
-          {selector: "enumMember", format: null},
+          { selector: ["typeLike", "enum"], format: ["PascalCase"] },
+          { selector: "enumMember", format: null },
           //ignore rule for quoted stuff
           {
             selector: [
@@ -54,82 +62,71 @@ module.exports = {
               "objectLiteralMethod",
               "typeMethod",
               "accessor",
-              "enumMember"
+              "enumMember",
             ],
             format: null,
-            modifiers: ["requiresQuotes"]
+            modifiers: ["requiresQuotes"],
           },
           //ignore rules on destructured params
           {
             selector: "variable",
             modifiers: ["destructured"],
-            format: null
-          }
+            format: null,
+          },
         ],
         "@typescript-eslint/explicit-module-boundary-types": "error",
         "@typescript-eslint/member-ordering": [
-          "error", {
-            classes: {
-              order: "as-written",
-              memberTypes: [
-                // Constructors
-                "public-constructor",
-                "protected-constructor",
-                "private-constructor",
-
-                // Methods
-                "public-static-method",
-                "public-abstract-method",
-                "public-instance-method",
-                "public-decorated-method",
-                "protected-static-method",
-                "protected-abstract-method",
-                "protected-instance-method",
-                "protected-decorated-method",
-                "private-static-method",
-                "private-abstract-method",
-                "private-instance-method",
-                "private-decorated-method",
-              ],
-            },
+          "error",
+          {
+            default: ["signature", "constructor", "method", "field"],
           },
         ],
         "@typescript-eslint/no-explicit-any": "error",
         "@typescript-eslint/no-require-imports": "error",
-        "@typescript-eslint/no-unused-vars": ["error", {
-          "varsIgnorePattern": "^_",
-          "argsIgnorePattern": "^_",
-        }],
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            varsIgnorePattern: "^_",
+            argsIgnorePattern: "^_",
+          },
+        ],
         "@typescript-eslint/no-floating-promises": "error",
-        "import/no-extraneous-dependencies": ["error", {
-          "devDependencies": false,
-          "optionalDependencies": true,
-          "peerDependencies": false
-        }],
+        "import/no-extraneous-dependencies": [
+          "error",
+          {
+            devDependencies: false,
+            optionalDependencies: true,
+            peerDependencies: false,
+          },
+        ],
         "import/order": [
           "error",
           {
-            "groups": [["index", "sibling", "parent", "internal"], ["external", "builtin"], "object"],
-            "newlines-between": "always"
-          }
-        ]
+            groups: [
+              ["index", "sibling", "parent", "internal"],
+              ["external", "builtin"],
+              "object",
+            ],
+            "newlines-between": "always",
+          },
+        ],
       },
     },
     {
       files: ["**/__tests__/**/*.ts", "*.spec.ts"],
       rules: {
-        "import/no-extraneous-dependencies": "off"
-      }
+        "import/no-extraneous-dependencies": "off",
+      },
     },
     {
       files: ["*.d.ts"],
       rules: {
-        "@typescript-eslint/triple-slash-reference": "off"
-      }
+        "@typescript-eslint/triple-slash-reference": "off",
+      },
     },
     {
       files: ["*.json"],
       extends: ["plugin:json/recommended"],
-    }
-  ]
+    },
+  ],
 };

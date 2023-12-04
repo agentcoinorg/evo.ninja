@@ -117,7 +117,7 @@ export class FileSystemWorkspace implements Workspace, SyncWorkspace {
 
   mkdirSync(subpath: string, opts?: { recursive: boolean }): void {
     const absPath = this.toWorkspacePath(subpath);
-    fs.mkdirSync(absPath, { recursive: true });
+    fs.mkdirSync(absPath, opts);
   }
 
   rmdirSync(subpath: string, opts?: { recursive: boolean }): void {

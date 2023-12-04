@@ -35,10 +35,10 @@ const rl = readline.createInterface({
 
 const prompt = (fileLogger: FileLogger) => (query: string) =>
   new Promise<string>((resolve) => {
-    const callback = (answer: string) => {
-      fileLogger.info(`# User\n**${query}:** ${answer}`);
+    const callback = async (answer: string) => {
+      await fileLogger.info(`# User\n**${query}:** ${answer}`);
       resolve(answer);
-    }
+    };
     rl.question(`${query}: `, callback)
   });
 
