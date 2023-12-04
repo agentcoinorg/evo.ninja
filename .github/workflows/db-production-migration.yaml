@@ -1,4 +1,4 @@
-name: Production database migration
+name: db-production-migration
 
 on:
   push:
@@ -6,13 +6,17 @@ on:
       - release/production
 
 jobs:
-  release:
+  migrate:
     runs-on: ubuntu-latest
 
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
       SUPABASE_PROJECT_ID: ${{ secrets.PRODUCTION_PROJECT_ID }}
+
+    defaults:
+      run:
+        working-directory: ./apps/browser
 
     steps:
       - uses: actions/checkout@v3
