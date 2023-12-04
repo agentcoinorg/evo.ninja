@@ -33,20 +33,18 @@ export class Chat {
   }
 
   public async add(type: ChatLogType, msg: ChatMessage | ChatMessage[]): Promise<void> {
-    let msgs = Array.isArray(msg) ? msg : [msg];
+    const msgs = Array.isArray(msg) ? msg : [msg];
 
     const msgsWithTokens = msgs.map((msg) => {
       const tokens = this._tokenizer.encode(JSON.stringify(msg)).length;
       return { ...msg, tokens };
     })
+    const tokens = msgsWithTokens.map(({ tokens }) => tokens);
 
-    const msgsToAdd = msgsWithTokens.map(({ tokens, ...msg }) => msg);
-    const tokensToAdd = msgsWithTokens.map(({ tokens }) => tokens);
-
-    this._chatLogs.add(type, msgsToAdd, tokensToAdd)
+    this._chatLogs.add(type, msgs, tokens)
 
     if (this.options?.onMessagesAdded) {
-      await this.options.onMessagesAdded(msgsToAdd);
+      await this.options.onMessagesAdded(msgs);
     }
   }
 
