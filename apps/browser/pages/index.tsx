@@ -164,7 +164,7 @@ function Dojo() {
         const scripts = new Scripts(scriptsWorkspace);
 
         // Point by default to GPT-4 unless the given api key's account doesn't support it
-        let model = "gpt-4-1106-preview"
+        let model = "gpt-4"
         if (dojoConfig.openAiApiKey) {
           try {
             model = await checkLlmModel(dojoConfig.openAiApiKey as string, model);
@@ -179,8 +179,8 @@ function Dojo() {
         const env = new Env({
           OPENAI_API_KEY: dojoConfig.openAiApiKey || " ",
           GPT_MODEL: model,
-          CONTEXT_WINDOW_TOKENS: "128000",
-          MAX_RESPONSE_TOKENS: "4096",
+          CONTEXT_WINDOW_TOKENS: "8000",
+          MAX_RESPONSE_TOKENS: "2000",
         });
 
         let llm: LlmApi;
