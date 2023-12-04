@@ -27,7 +27,7 @@ const File = ({ file }: { file: FileType }) => {
   return (
     <>
       <div
-        className="my-2.5 flex w-auto cursor-pointer items-center justify-between rounded border-2 border-neutral-500 bg-neutral-900 p-2.5 hover:border-orange-600"
+        className="my-2.5 flex w-auto cursor-pointer items-center justify-between rounded border-2 border-neutral-500 bg-neutral-900 p-2.5 hover:border-teal-600"
         onClick={handleClick}
       >
         {file.path}
@@ -45,7 +45,7 @@ const File = ({ file }: { file: FileType }) => {
         }}
       >
         <button
-          className="inline-block h-12 w-24 cursor-pointer rounded-xl border-none bg-orange-600 px-6 py-2.5 text-center text-neutral-900 shadow-md outline-none transition-all hover:bg-orange-500"
+          className="inline-block h-12 w-24 cursor-pointer rounded-xl border-none bg-teal-600 px-6 py-2.5 text-center text-neutral-900 shadow-md outline-none transition-all hover:bg-teal-500"
           onClick={handleClose}
         >
           Close

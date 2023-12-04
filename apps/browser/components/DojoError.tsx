@@ -19,7 +19,7 @@ const DojoError: React.FC<DojoErrorProps> = (props: DojoErrorProps) => {
       </div>
       <div className="flex-1 overflow-auto p-5 text-left items-center">
         <div className="SenderName text-center text-lg font-semibold">Critical Error</div>
-        <div className="my-4 rounded bg-orange-600 px-4 py-2.5 text-neutral-50">{typeof error === "string" ? error : JSON.stringify(error, null, 2)}</div>
+        <div className="my-4 rounded bg-teal-600 px-4 py-2.5 text-neutral-50">{typeof error === "string" ? error : JSON.stringify(error, null, 2)}</div>
       </div>
     </div>
   );
