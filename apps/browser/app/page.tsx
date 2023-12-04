@@ -6,29 +6,40 @@ import { useAtom } from "jotai";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import AccountConfig from "@/components/AccountConfig";
-import DojoError from "@/components/DojoError";
 import Sidebar from "@/components/Sidebar";
 import Chat, { ChatMessage } from "@/components/Chat";
 import { updateWorkspaceFiles } from "@/lib/updateWorkspaceFiles";
 import WelcomeModal from "@/components/WelcomeModal";
 import { useSession } from "next-auth/react";
 import { AuthProxy } from "@/lib/api/AuthProxy";
-import { useDojo } from "@/lib/hooks/useDojo";
 import { useEvo, userWorkspaceAtom } from "@/lib/hooks/useEvo";
-import { capReachedAtom, welcomeModalAtom } from "@/lib/store";
+import { allowTelemetryAtom, capReachedAtom, localOpenAiApiKeyAtom, welcomeModalAtom } from "@/lib/store";
+import { toast } from "react-toastify"
 
 function Dojo() {
-  const { dojo } = useDojo();
+  const [allowTelemetry] = useAtom(allowTelemetryAtom)
+  const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom)
   const { data: session } = useSession();
+  const [error, setError] = useState<string | undefined>()
   const [welcomeModalSeen, setWelcomeModalSeen] = useAtom(welcomeModalAtom);
-  const firstTimeUser = !dojo.config.openAiApiKey && !session?.user;
+  const firstTimeUser = !localOpenAiApiKey && !session?.user;
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error, {
+        theme: "dark",
+        autoClose: 5000
+      })
+      setTimeout(() => setError(undefined), 5000)
+    }
+  }, [error])
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const onMessage = (message: ChatMessage) => {
     setMessages((messages) => [...messages, message]);
     checkForUserFiles();
   };
-  const { evo, proxyEmbeddingApi, proxyLlmApi } = useEvo(onMessage);
+  const { evo, proxyEmbeddingApi, proxyLlmApi } = useEvo(onMessage, setError);
   const [userWorkspace] = useAtom(userWorkspaceAtom);
   const [, setCapReached] = useAtom(capReachedAtom);
 
@@ -70,11 +81,11 @@ function Dojo() {
       return false;
     }
 
-    const subsidize = !dojo.config.openAiApiKey;
+    const subsidize = !localOpenAiApiKey;
 
     setAwaitingAuth(true);
     const goalId = await AuthProxy.checkGoal(
-      dojo.config.allowTelemetry ? message : "<redacted>",
+      allowTelemetry ? message : "<redacted>",
       subsidize,
       () => {
         setCapReached(true);
@@ -97,12 +108,13 @@ function Dojo() {
       <div className="flex h-full bg-neutral-800 bg-landing-bg bg-repeat text-center text-neutral-400">
         {accountModal && (
           <AccountConfig
-            apiKey={dojo.config.openAiApiKey}
-            allowTelemetry={dojo.config.allowTelemetry}
+            apiKey={localOpenAiApiKey}
+            allowTelemetry={allowTelemetry}
             onClose={() => {
               setAccountModalOpen(false);
             }}
             firstTimeUser={firstTimeUser}
+            setError={setError}
           />
         )}
         <div
@@ -125,13 +137,7 @@ function Dojo() {
           })}
         >
           <>
-            {dojo.error ? <DojoError
-                error={dojo.error}
-                sidebarOpen={sidebarOpen}
-                onSidebarToggleClick={() => {
-                  setSidebarOpen(!sidebarOpen)
-                }}
-              /> : evo && (
+          {evo && (
               <Chat
                 evo={evo}
                 onMessage={onMessage}

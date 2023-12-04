@@ -17,23 +17,16 @@ import {
 import { useEffect, useState } from "react";
 import { BrowserLogger } from "../sys/logger";
 import { createInBrowserScripts } from "../scripts";
-import { useDojo } from "./useDojo";
 import { ProxyEmbeddingApi, ProxyLlmApi } from "../api";
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 import { atom, useAtom } from "jotai";
 import { ChatMessage } from "@/components/Chat";
-import { capReachedAtom } from "@/lib/store";
-
-// interface State {
-//     evo: Evo
-//     iterator: ReturnType<Evo["run"]>
-//     running: boolean
-// }
+import { capReachedAtom, localOpenAiApiKeyAtom } from "@/lib/store";
 
 export const userWorkspaceAtom = atom<InMemoryWorkspace | undefined>(undefined);
 
-export function useEvo(onMessage: (message: ChatMessage) => void) {
-  const { dojo, setDojoError } = useDojo();
+export function useEvo(onMessage: (message: ChatMessage) => void, setError: (msg: string) => void) {
+  const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom)
   const [evo, setEvo] = useState<Evo | undefined>();
   const [proxyEmbeddingApi, setProxyEmbeddingApi] = useState<
     ProxyEmbeddingApi | undefined
@@ -61,8 +54,8 @@ export function useEvo(onMessage: (message: ChatMessage) => void) {
       const scripts = new Scripts(scriptsWorkspace);
 
       const env = new Env({
-        OPENAI_API_KEY: dojo.config.openAiApiKey || " ",
-        GPT_MODEL: dojo.config.model,
+        OPENAI_API_KEY: localOpenAiApiKey || " ",
+        GPT_MODEL: "gpt-4",
         CONTEXT_WINDOW_TOKENS: "8000",
         MAX_RESPONSE_TOKENS: "2000",
       });
@@ -70,7 +63,7 @@ export function useEvo(onMessage: (message: ChatMessage) => void) {
       let llm: LlmApi;
       let embedding: EmbeddingApi;
 
-      if (dojo.config.openAiApiKey) {
+      if (localOpenAiApiKey) {
         llm = new OpenAILlmApi(
           env.OPENAI_API_KEY,
           env.GPT_MODEL as LlmModel,
@@ -122,9 +115,9 @@ export function useEvo(onMessage: (message: ChatMessage) => void) {
         )
       );
     } catch (e: any) {
-      setDojoError(e.message);
+      setError(e.message);
     }
-  }, [dojo.config]);
+  }, [localOpenAiApiKey]);
 
   return { evo, proxyEmbeddingApi, proxyLlmApi };
 }
