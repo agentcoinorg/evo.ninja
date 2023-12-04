@@ -3,7 +3,7 @@ name: db-staging-migration
 on:
   push:
     branches: 
-      - feat/supabase-migration
+      - release/staging
 
 jobs:
   migrate:
