@@ -39,22 +39,26 @@ export class CreateScriptFunction extends LlmAgentFunctionBase<CreateScriptFuncP
       if (params.namespace.startsWith("agent.")) {
         return this.onErrorCannotCreateScriptsOnAgentNamespace(params, rawParams);
       }
-      context.logger.notice(`Creating script '${params.namespace}'...`);
+      await context.logger.notice(`Creating script '${params.namespace}'...`);
 
       const writer = createScriptWriter(context);
 
       const result = await this.askAgent(
-        writer, 
+        writer,
         {
           namespace: params.namespace,
           description: params.description,
-          args: params.arguments
+          args: params.arguments,
         },
         context
       );
 
       if (!result.ok) {
-        return this.onErrorCreateScript(params, rawParams, result.error?.toString() || "Unknown error");
+        return this.onErrorCreateScript(
+          params,
+          rawParams,
+          result.error?.toString() || "Unknown error"
+        );
       }
 
       const index = await writer.workspace.readFile("index.js");
@@ -63,9 +67,9 @@ export class CreateScriptFunction extends LlmAgentFunctionBase<CreateScriptFuncP
         name: params.namespace,
         description: params.description,
         arguments: params.arguments,
-        code: index
+        code: index,
       };
-      context.scripts.addScript(params.namespace, script);
+      await context.scripts.addScript(params.namespace, script);
 
       return this.onSuccess(script, params, rawParams);
     };

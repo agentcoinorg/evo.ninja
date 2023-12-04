@@ -12,7 +12,6 @@ export class FileSystemWorkspace implements Workspace, SyncWorkspace {
     // Fully resolve the workspace path
     this._workspacePath = path.resolve(this._workspacePath);
 
-    console.log("Workspace path: ", this._workspacePath);
     // Initialize the directory
     if (!fs.existsSync(this._workspacePath)) {
       fs.mkdirSync(this._workspacePath, { recursive: true });

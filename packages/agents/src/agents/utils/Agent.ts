@@ -76,7 +76,7 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
         )
       );
     } catch (err) {
-      this.context.logger.error(err);
+      await this.context.logger.error(err);
       return ResultErr("Unrecoverable error encountered.");
     }
   }

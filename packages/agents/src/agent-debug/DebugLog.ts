@@ -50,7 +50,7 @@ export class DebugLog {
   async goalStart(prompt: string): Promise<void> {
     this.goal.prompt = prompt;
     this.goal.time.start();
-    this.save();
+    await this.save();
   }
 
   async goalEnd(): Promise<void> {
@@ -66,22 +66,22 @@ export class DebugLog {
     };
     step.time.start();
     this.steps.push(step);
-    this.save();
+    await this.save();
   }
 
   async stepEnd(): Promise<void> {
     this.latestStep.time.end();
-    this.save();
+    await this.save();
   }
 
   async stepLog(message: string): Promise<void> {
     this.latestStep.message = message;
-    this.save();
+    await this.save();
   }
 
   async stepError(error: string): Promise<void> {
     this.latestStep.error = error;
-    this.save();
+    await this.save();
   }
 
   async stepLlmReq(
@@ -95,7 +95,7 @@ export class DebugLog {
     this.latestStep.llmReqs.push(req);
     this.latestStep.llmTime.add(req.time.duration());
     this.longestLlmReqs.addItem(req);
-    this.save();
+    await this.save();
   }
 
   toString(): string {

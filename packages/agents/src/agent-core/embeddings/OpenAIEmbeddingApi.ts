@@ -61,7 +61,9 @@ export class OpenAIEmbeddingAPI implements EmbeddingApi {
         const maybeOpenAiError = error as Partial<OpenAIError>;
 
         if (maybeOpenAiError.status === 429) {
-          this.logger.warning("Warning: OpenAI rate limit exceeded, sleeping for 15 seconds.");
+          await this.logger.warning(
+            "Warning: OpenAI rate limit exceeded, sleeping for 15 seconds."
+          );
 
           await new Promise((resolve) => setTimeout(resolve, 15000));
 

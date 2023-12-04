@@ -15,7 +15,7 @@ export class FileLogger implements ILogger {
     // Make the log directory if it doesn't exist
     const logDir = path.dirname(filePath);
     if (!(await workspace.exists(logDir))) {
-      workspace.mkdir(logDir, { recursive: true });
+      await workspace.mkdir(logDir, { recursive: true });
     }
 
     // Delete the file if it exists

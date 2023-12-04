@@ -22,8 +22,8 @@ export class AgentPlugin extends Module<AgentPluginConfig> {
     this._logger = this.config.logger;
   }
 
-  public speak(args: Args_speak): string {
-    this._logger.success(args.message);
+  public async speak(args: Args_speak): Promise<string> {
+    await this._logger.success(args.message);
     return "";
   }
 
@@ -32,13 +32,13 @@ export class AgentPlugin extends Module<AgentPluginConfig> {
     return "User: " + response;
   }
 
-  public onGoalAchieved(args: Args_onGoalAchieved): boolean {
-    this._logger.success(`Goal has been achieved: ${args.message}`);
+  public async onGoalAchieved(args: Args_onGoalAchieved): Promise<boolean> {
+    await this._logger.success(`Goal has been achieved: ${args.message}`);
     return true;
   }
 
-  public onGoalFailed(args: Args_onGoalFailed): boolean {
-    this._logger.error(`Goal could not be achieved: ${args.message}`);
+  public async onGoalFailed(args: Args_onGoalFailed): Promise<boolean> {
+    await this._logger.error(`Goal could not be achieved: ${args.message}`);
     return true;
   }
 }

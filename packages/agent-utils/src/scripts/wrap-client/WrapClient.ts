@@ -41,10 +41,14 @@ export class WrapClient extends PolywrapClient {
       })))
       .setPackage("plugin/console", PluginPackage.from(module => ({
         "log": async (args: any) => {
-          logger.info("CONSOLE.LOG " + JSON.stringify(args.args, null, 2));
+          await logger.info(
+            "CONSOLE.LOG " + JSON.stringify(args.args, null, 2)
+          );
         },
         "error": async (args: any) => {
-          logger.error("CONSOLE.ERROR " + JSON.stringify(args.args, null, 2));
+          await logger.error(
+            "CONSOLE.ERROR " + JSON.stringify(args.args, null, 2)
+          );
           this.jsPromiseOutput = ResultErr(args.args)
         },
       })))
@@ -67,7 +71,7 @@ export class WrapClient extends PolywrapClient {
           return workspace.rename(args.oldPath, args.newPath);
         },
         "mkdirSync": async (args: any) => {
-          workspace.mkdir(args.path);
+          await workspace.mkdir(args.path);
           return true;
         },
         "readdirSync": async (args: any) => {

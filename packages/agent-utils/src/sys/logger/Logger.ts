@@ -74,14 +74,14 @@ export class Logger implements ILogger {
           verticalLayout: "default",
           whitespaceBreak: true,
         },
-        function (err: Error | null, data?: string) {
+        async function (err: Error | null, data?: string) {
           if (err) {
-            logger.error("Something went wrong...", err);
+            await logger.error("Something went wrong...", err);
             reject(err);
             return;
           }
-          logger.info("```\n" + data + "\n```\n");
-          logger.info("Support: https://discord.gg/r3rwh69cCa");
+          await logger.info("```\n" + data + "\n```\n");
+          await logger.info("Support: https://discord.gg/r3rwh69cCa");
           resolve();
         }
       );

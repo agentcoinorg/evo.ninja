@@ -104,7 +104,7 @@ export class Evo extends Agent<GoalRunArgs> {
 
     const predictionVector = await this.createEmbeddingVector(prediction);
 
-    this.context.logger.info("### Prediction:\n-> " + prediction);
+    await this.context.logger.info("### Prediction:\n-> " + prediction);
 
     const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(
       predictionVector,
