@@ -6,6 +6,7 @@
     "@auth/supabase-adapter": "0.1.9",
     "@evo-ninja/agent-utils": "0.1.0",
     "@evo-ninja/agents": "0.1.0",
+    "@evo-ninja/agent-utils-fs": "~0.1.0",
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
     "@fortawesome/free-brands-svg-icons": "^6.4.2",
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
@@ -25,7 +26,8 @@
     "react-dropzone": "^14.2.3",
     "react-markdown": "^8.0.7",
     "react-modal": "3.16.1",
-    "bullmq": "4.14.4"
+    "bullmq": "4.14.4",
+    "@polywrap/result": "~0.12.0"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "14.0.1",
