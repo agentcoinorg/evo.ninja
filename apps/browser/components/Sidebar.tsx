@@ -6,6 +6,7 @@ import clsx from "clsx";
 import DropdownAccount from "./DropdownAccount";
 import CurrentWorkspace from "./CurrentWorkspace";
 import colors from "tailwindcss/colors";
+import { NotePencil } from "@phosphor-icons/react";
 
 export interface SidebarProps {
   userFiles: InMemoryFile[];
@@ -13,6 +14,9 @@ export interface SidebarProps {
   hoveringSidebarButton: boolean;
   sidebarOpen: boolean;
 }
+
+const chats: string[] = ["New Chat", "Utilities Spending"];
+// const chats: string[] = [];
 
 const Sidebar = ({
   userFiles,
@@ -67,14 +71,14 @@ const Sidebar = ({
           style={{ animationDelay: sidebarOpen ? "150ms" : "0ms" }}
         >
           <div className="flex h-full flex-col space-y-6">
-            <div className="flex items-center justify-between p-4">
+            <div className="flex items-center p-4">
               <Logo className="cursor-pointer transition-opacity hover:opacity-50" />
-              <IconButton
+              {/* <IconButton
                 iconName="NotePencil"
                 iconProps={{ size: 20, color: colors.cyan[100] }}
                 buttonClassName="rounded-full border border-cyan-600 bg-cyan-500 p-1.5 hover:bg-cyan-600 transition-colors duration-300"
                 iconClassName="group-hover:text-white"
-              />
+              /> */}
             </div>
             <div className="space-y-1 px-2">
               <div className="flex w-full items-center justify-between space-x-1 px-3">
@@ -83,15 +87,26 @@ const Sidebar = ({
                 </div>
                 <IconButton iconName="NotePencil" iconProps={{ size: 18 }} />
               </div>
-              <div className="space-y-0.5 px-2">
-                {["New Chat", "Utilities Spending"].map((chat, i) => (
-                  <div
-                    key={i}
-                    className="w-full cursor-pointer rounded p-1 text-zinc-100 transition-colors duration-300 hover:bg-zinc-800 hover:text-white"
-                  >
-                    {chat}
+              <div className="space-y-0.5">
+                {chats.length > 0 ? (
+                  <div className="px-2">
+                    {chats.map((chat, i) => (
+                      <div
+                        key={i}
+                        className="w-full cursor-pointer rounded p-1 text-zinc-100 transition-colors duration-300 hover:bg-zinc-800 hover:text-white"
+                      >
+                        {chat}
+                      </div>
+                    ))}
                   </div>
-                ))}
+                ) : (
+                  <div className="mt-1 flex flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed border-zinc-500 p-7 text-center">
+                    <NotePencil size={24} className="text-[currentColor]" />
+                    <p className="leading-regular text-xs text-zinc-500">
+                      You currently have no chats in your workspace.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
             <CurrentWorkspace

@@ -17,17 +17,17 @@ code {
 }
 
 ::-webkit-scrollbar {
-  @apply w-2 h-2 rounded;
+  @apply w-1 h-1 rounded;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-zinc-600;
+  @apply bg-zinc-800 rounded;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-cyan-500 rounded;
+  @apply bg-zinc-500 rounded;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-cyan-400 rounded;
+  @apply bg-zinc-400 rounded;
 }
