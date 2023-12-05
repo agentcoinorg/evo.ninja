@@ -54,7 +54,7 @@ export async function* basicFunctionCallLoop(
         }
         const functionResult = message.content || "";
         if (result.storeInVariable || context.variables.shouldSave(functionResult)) {
-          const varName = context.variables.save(name || "", functionResult);
+          const varName = await context.variables.save(name || "", functionResult);
           message.content = `\${${varName}}`;
         }
       }

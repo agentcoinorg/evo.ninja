@@ -89,7 +89,7 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
       }
       const functionResult = message.content || "";
       if (result.storeInVariable || this.context.variables.shouldSave(functionResult)) {
-        const varName = this.context.variables.save(func.name, functionResult);
+        const varName = await this.context.variables.save(func.name, functionResult);
         message.content = `\${${varName}}`;
       }
     }
