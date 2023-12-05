@@ -13,6 +13,7 @@ import {
   Scripts,
   Chat as EvoChat,
   SubWorkspace,
+  AgentVariables,
 } from "@evo-ninja/agents";
 import { useEffect, useState } from "react";
 import { BrowserLogger } from "../sys/logger";
@@ -22,10 +23,13 @@ import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 import { atom, useAtom } from "jotai";
 import { ChatMessage } from "@/components/Chat";
 import { capReachedAtom, localOpenAiApiKeyAtom } from "@/lib/store";
+import { useSupabase } from "../supabase/useSupabase";
+import { mapChatMessageToMessageDTO } from "../supabase/evo";
 
 export const userWorkspaceAtom = atom<InMemoryWorkspace | undefined>(undefined);
 
-export function useEvo(onMessage: (message: ChatMessage) => void, setError: (msg: string) => void) {
+export function useEvo(chatId: string, onMessage: (message: ChatMessage) => void, setError: (msg: string) => void) {
+  const supabase = useSupabase()
   const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom)
   const [evo, setEvo] = useState<Evo | undefined>();
   const [proxyEmbeddingApi, setProxyEmbeddingApi] = useState<
@@ -99,7 +103,38 @@ export function useEvo(onMessage: (message: ChatMessage) => void, setError: (msg
 
       const internals = new SubWorkspace(".evo", workspace);
 
-      const chat = new EvoChat(cl100k_base);
+      const chat = new EvoChat(cl100k_base, {
+        async onMessagesAdded(type, msgs) {
+          const temporary = type === "temporary"
+          const mappedMessages = msgs.map(
+            (msg) => mapChatMessageToMessageDTO(1, temporary, msg)
+          )
+
+          const response = await supabase
+            .from('messages')
+            .insert(mappedMessages)
+
+          if (response.error) {
+            throw response.error
+          }
+        },
+      });
+      const agentVariables = new AgentVariables({
+        async onVariableSet(key, value) {
+          const response = await supabase
+          .from('variables')
+          .upsert({
+            key,
+            value,
+          })
+          .match({ key })
+
+          if (response.error) {
+            throw response.error
+          }
+        },
+      })
+
       setEvo(
         new Evo(
           new AgentContext(
@@ -110,7 +145,9 @@ export function useEvo(onMessage: (message: ChatMessage) => void, setError: (msg
             workspace,
             internals,
             env,
-            scripts
+            scripts,
+            undefined,
+            agentVariables
           )
         )
       );

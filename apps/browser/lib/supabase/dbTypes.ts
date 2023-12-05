@@ -11,7 +11,7 @@ export interface Database {
     Tables: {
       agent_outputs: {
         Row: {
-          chat_id: number
+          chat_id: string
           content: string | null
           created_at: string
           id: number
@@ -19,7 +19,7 @@ export interface Database {
           type: string
         }
         Insert: {
-          chat_id: number
+          chat_id: string
           content?: string | null
           created_at?: string
           id?: number
@@ -27,7 +27,7 @@ export interface Database {
           type: string
         }
         Update: {
-          chat_id?: number
+          chat_id?: string
           content?: string | null
           created_at?: string
           id?: number
@@ -47,17 +47,17 @@ export interface Database {
       chats: {
         Row: {
           created_at: string
-          id: number
+          id: string
           user_id: string
         }
         Insert: {
           created_at?: string
-          id?: number
+          id?: string
           user_id: string
         }
         Update: {
           created_at?: string
-          id?: number
+          id?: string
           user_id?: string
         }
         Relationships: [
@@ -72,7 +72,7 @@ export interface Database {
       }
       messages: {
         Row: {
-          chat_id: number
+          chat_id: string
           content: string | null
           created_at: string
           function_call: Json | null
@@ -84,7 +84,7 @@ export interface Database {
           tool_calls: Json | null
         }
         Insert: {
-          chat_id: number
+          chat_id: string
           content?: string | null
           created_at?: string
           function_call?: Json | null
@@ -96,7 +96,7 @@ export interface Database {
           tool_calls?: Json | null
         }
         Update: {
-          chat_id?: number
+          chat_id?: string
           content?: string | null
           created_at?: string
           function_call?: Json | null
@@ -140,19 +140,19 @@ export interface Database {
       }
       variables: {
         Row: {
-          chat_id: number
+          chat_id: string
           id: number
           key: string
           value: string
         }
         Insert: {
-          chat_id: number
+          chat_id: string
           id?: number
           key: string
           value: string
         }
         Update: {
-          chat_id?: number
+          chat_id?: string
           id?: number
           key?: string
           value?: string
