@@ -33,7 +33,7 @@ export class ReadAndAnalyzeFileFunction extends AgentFunctionBase<ReadAndAnalyze
 
       const data = agent.context.workspace.readFileSync(params.path);
       const summary = await analyzeData.analyze({ data, question: params.question }, agent.context);
-      const variable = agent.context.variables.save("fileData", data);
+      const variable = await agent.context.variables.save("fileData", data);
 
       return {
         outputs: [],

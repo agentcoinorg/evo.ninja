@@ -6,28 +6,75 @@ import {
   faSmileWink,
   faExclamationCircle,
 } from "@fortawesome/free-solid-svg-icons";
+import { useAtom } from "jotai";
+import { checkLlmModel } from "@/lib/checkLlmModel";
+import {
+  allowTelemetryAtom,
+  capReachedAtom,
+  localOpenAiApiKeyAtom,
+} from "@/lib/store";
 
 interface AccountConfigProps {
   apiKey: string | null;
   allowTelemetry: boolean;
-  onConfigSaved: (apiKey: string, allowTelemetry: boolean) => void;
-  capReached: boolean;
+  onClose: () => void;
   firstTimeUser: boolean;
+  setError: (msg: string) => void;
 }
 
+const validateOpenAiApiKey = async (
+  openAiApiKey: string
+): Promise<string | void> => {
+  try {
+    // Make sure that given api key has access to GPT-4
+    await checkLlmModel(openAiApiKey, "gpt-4-1106-preview");
+  } catch (e: any) {
+    if (e.message.includes("Incorrect API key provided")) {
+      throw new Error(
+        "Open AI API key is not correct. Please make sure it has the correct format"
+      );
+    }
+
+    if (e.message.includes("Model not supported")) {
+      throw new Error(
+        "You API Key does not support GPT-4. Make sure to enable billing"
+      );
+    }
+
+    throw new Error("Error validating OpenAI API Key");
+  }
+};
+
 function AccountConfig(props: AccountConfigProps) {
-  const [apiKey, setApiKey] = useState<string>(props.apiKey || "");
-  const [allowTelemetry, setAllowTelemetry] = useState<boolean>(
-    props.allowTelemetry
-  );
-  const { onConfigSaved, capReached, firstTimeUser } = props;
+  const [localApiKey, setLocalApiKey] = useAtom(localOpenAiApiKeyAtom);
+  const [apiKey, setApiKey] = useState<string>(localApiKey || "");
+  const [allowTelemetry, setAllowTelemetry] = useAtom(allowTelemetryAtom);
+  const [telemetry, setTelemetry] = useState(allowTelemetry);
+  const [capReached, setCapReached] = useAtom(capReachedAtom);
+  const { onClose, firstTimeUser, setError } = props;
   const { data: session } = useSession();
 
+  const onSave = async () => {
+    if (apiKey) {
+      try {
+        await validateOpenAiApiKey(apiKey);
+        setLocalApiKey(apiKey);
+        if (capReached) {
+          setCapReached(false);
+        }
+      } catch (e: any) {
+        setError(e.message);
+        return;
+      }
+    } else {
+      setLocalApiKey(null);
+    }
+    setAllowTelemetry(telemetry);
+    onClose();
+  };
+
   return (
-    <div
-      className="absolute inset-0 z-50 bg-zinc-900/80"
-      onClick={() => props.onConfigSaved(apiKey, allowTelemetry)}
-    >
+    <div className="absolute inset-0 z-50 bg-zinc-900/80" onClick={onClose}>
       <div
         className="fixed left-1/2 top-1/2 flex w-[100%] max-w-[38rem] -translate-x-1/2 -translate-y-1/2 flex-col gap-4 rounded-lg bg-zinc-900 p-12 text-zinc-50"
         onClick={(e) => {
@@ -36,9 +83,7 @@ function AccountConfig(props: AccountConfigProps) {
       >
         <div className="flex items-center justify-between border-b px-4 py-2">
           <h3 className="text-lg font-semibold">Account</h3>
-          <button onClick={() => onConfigSaved(apiKey, allowTelemetry)}>
-            X
-          </button>
+          <button onClick={onClose}>X</button>
         </div>
 
         {firstTimeUser && (
@@ -100,16 +145,16 @@ function AccountConfig(props: AccountConfigProps) {
             <input
               type="checkbox"
               style={{ accentColor: "#f0541a" }}
-              checked={allowTelemetry}
-              onChange={(e) => setAllowTelemetry(!allowTelemetry)}
+              checked={telemetry}
+              onChange={(e) => setTelemetry(!telemetry)}
             />
           </div>
         </div>
 
         <div className="flex items-center justify-center px-8 py-2">
           <button
-            className="w-[30%] cursor-pointer rounded-xl border-none bg-cyan-500 p-2.5 text-white transition-all hover:bg-cyan-400"
-            onClick={() => onConfigSaved(apiKey, allowTelemetry)}
+            className="w-[30%] cursor-pointer rounded-xl border-none bg-orange-600 p-2.5 text-white transition-all hover:bg-orange-500"
+            onClick={onSave}
           >
             Save
           </button>

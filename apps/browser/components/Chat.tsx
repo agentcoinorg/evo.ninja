@@ -18,6 +18,8 @@ import {
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import SidebarIcon from "./SidebarIcon";
+import { useAtom } from "jotai";
+import { allowTelemetryAtom, showDisclaimerAtom } from "@/lib/store";
 import { ExamplePrompt, examplePrompts } from "@/lib/examplePrompts";
 
 export interface ChatMessage {
@@ -33,7 +35,6 @@ export interface ChatProps {
   messages: ChatMessage[];
   sidebarOpen: boolean;
   overlayOpen: boolean;
-  onDisclaimerSelect: (approve: boolean) => void;
   onSidebarToggleClick: () => void;
   onUploadFiles: (files: InMemoryFile[]) => void;
   handlePromptAuth: (message: string) => Promise<boolean>;
@@ -45,7 +46,6 @@ const Chat: React.FC<ChatProps> = ({
   messages,
   sidebarOpen,
   overlayOpen,
-  onDisclaimerSelect,
   onSidebarToggleClick,
   onUploadFiles,
   handlePromptAuth,
@@ -58,10 +58,9 @@ const Chat: React.FC<ChatProps> = ({
     undefined
   );
   const [stopped, setStopped] = useState<boolean>(false);
-  const [showDisclaimer, setShowDisclaimer] = useState<boolean>(
-    localStorage.getItem("showDisclaimer") !== "false"
-  );
-  const [clickedMsgIndex, setClickedMsgIndex] = useState<number | null>(null);
+  const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom);
+  const [, setAllowTelemetry] = useAtom(allowTelemetryAtom);
+
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [showPrompts, setShowPrompts] = useState<boolean>(true);
@@ -86,10 +85,13 @@ const Chat: React.FC<ChatProps> = ({
         setStopped(false);
 
         const response = await evoItr.next();
-
         if (response.done) {
           const actionTitle = response.value.value.title;
-          if (actionTitle.includes("onGoalAchieved")) {
+          console.log(response.value);
+          if (
+            actionTitle.includes("onGoalAchieved") ||
+            actionTitle === "SUCCESS"
+          ) {
             onMessage({
               title: "## Goal Achieved",
               user: "evo",
@@ -132,7 +134,7 @@ const Chat: React.FC<ChatProps> = ({
 
   const handleDisclaimerSelect = (accept: boolean) => {
     setShowDisclaimer(false);
-    onDisclaimerSelect(accept);
+    setAllowTelemetry(accept);
   };
 
   const handleSamplePromptClick = async (prompt: ExamplePrompt) => {
@@ -141,10 +143,6 @@ const Chat: React.FC<ChatProps> = ({
     }
     setMessage(prompt.prompt);
     handleSend(prompt.prompt);
-  };
-
-  const handleStart = async () => {
-    handleSend();
   };
 
   const handleSend = async (newMessage?: string) => {
@@ -281,13 +279,9 @@ const Chat: React.FC<ChatProps> = ({
             ) : null}
             <div
               className={clsx(
-                "my-1 rounded border border-transparent px-4 py-2.5 transition-all hover:border-cyan-500",
-                msg.user === "user" ? "bg-blue-500" : "bg-zinc-900",
-                clickedMsgIndex === index ? "border-cyan-500" : ""
+                "my-1 rounded border border-transparent px-4 py-2.5 transition-all hover:border-orange-600",
+                msg.user === "user" ? "bg-blue-500" : "bg-zinc-900"
               )}
-              onClick={() =>
-                setClickedMsgIndex(index === clickedMsgIndex ? null : index)
-              }
             >
               <div className="prose prose-invert">
                 <ReactMarkdown>{msg.title.toString()}</ReactMarkdown>
@@ -381,14 +375,13 @@ const Chat: React.FC<ChatProps> = ({
         ) : (
           <button
             className="inline-block h-12 cursor-pointer rounded-xl border-none bg-cyan-500 px-5 py-2.5 text-center text-zinc-950 shadow-md outline-none transition-all hover:bg-cyan-400"
-            onClick={handleStart}
+            onClick={async () => await handleSend()}
             disabled={evoRunning || sending}
           >
             Start
           </button>
         )}
       </div>
-
       <a
         className="fixed bottom-0 right-0 mx-4 my-2 cursor-pointer"
         href="https://discord.gg/r3rwh69cCa"

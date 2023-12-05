@@ -64,13 +64,17 @@ export class Evo extends Agent<GoalRunArgs> {
     );
   }
 
-  protected initializeChat(args: GoalRunArgs): void {
+  protected async initializeChat(args: GoalRunArgs): Promise<void> {
     const { chat } = this.context;
 
-    chat.persistent(buildDirectoryPreviewMsg(this.context.workspace));
-    chat.persistent("user", prompts.exhaustAllApproaches);
-    chat.persistent("user", prompts.variablesExplainer);
-    chat.persistent("user", args.goal);
+    const initialMessages: ChatMessage[] = [
+      buildDirectoryPreviewMsg(this.context.workspace),
+      { role: "user", content: prompts.exhaustAllApproaches },
+      { role: "user", content: prompts.variablesExplainer },
+      { role: "user", content: args.goal },
+    ]
+
+    await chat.persistent(initialMessages);
     this.goal = args.goal;
   }
 
