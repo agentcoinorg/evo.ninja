@@ -17,7 +17,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
-import SidebarIcon from "./SidebarIcon";
 import { useAtom } from "jotai";
 import { allowTelemetryAtom, showDisclaimerAtom } from "@/lib/store";
 import { ExamplePrompt, examplePrompts } from "@/lib/examplePrompts";
@@ -39,6 +38,8 @@ export interface ChatProps {
   onUploadFiles: (files: InMemoryFile[]) => void;
   handlePromptAuth: (message: string) => Promise<boolean>;
 }
+
+const chat_name = "New Chat";
 
 const Chat: React.FC<ChatProps> = ({
   evo,
@@ -251,18 +252,13 @@ const Chat: React.FC<ChatProps> = ({
 
   return (
     <div className="flex h-full flex-col bg-[#0A0A0A] text-white">
-      <div className="flex items-center justify-between border-b-2 border-zinc-700 p-4">
-        <div
-          className="h-14 cursor-pointer p-4 text-lg text-white opacity-80 transition-all hover:opacity-100"
-          onClick={onSidebarToggleClick}
-        >
-          {sidebarOpen ? <></> : <SidebarIcon />}
-        </div>
-        <FontAwesomeIcon
+      <div className="flex h-12 items-center justify-center border-b-2 border-zinc-700">
+        <div>{chat_name}</div>
+        {/* <FontAwesomeIcon
           className="cursor-pointer"
           icon={faDownload}
           onClick={exportChatHistory}
-        />
+        /> */}
       </div>
       <div
         ref={listContainerRef}
