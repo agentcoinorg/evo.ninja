@@ -53,7 +53,11 @@ function Dojo() {
     if (!evo || !userWorkspace) {
       return;
     }
-    updateWorkspaceFiles(userWorkspace, userFiles, setUserFiles);
+
+    //eslint-disable-next-line @typescript-eslint/no-floating-promises
+    (async () => {
+      await updateWorkspaceFiles(userWorkspace, userFiles, setUserFiles);
+    })();
   }
 
   useEffect(() => {
@@ -61,149 +65,20 @@ function Dojo() {
       return;
     }
 
-    Promise.all(
-      uploadedFiles.map((file) =>
-        userWorkspace.writeFile(
-          file.path,
-          new TextDecoder().decode(file.content)
-        )
-      )
-    ).then(checkForUserFiles);
-  }, [uploadedFiles]);
-
-  const onConfigSaved = (apiKey: string, allowTelemetry: boolean) => {
-    let complete = true;
-    let openAiApiKey = apiKey;
-
-    if (!openAiApiKey) {
-      complete = false;
-      localStorage.removeItem("openai-api-key");
-    } else {
-      localStorage.setItem("openai-api-key", openAiApiKey);
-    }
-    localStorage.setItem("allow-telemetry", allowTelemetry.toString());
-
-    setDojoConfig({
-      openAiApiKey,
-      allowTelemetry,
-      loaded: true,
-      complete,
-    });
-    setCapReached(false);
-    setAccountModalOpen(false);
-  };
-
-  const onDisclaimerSelect = (approve: boolean) => {
-    localStorage.setItem("allow-telemetry", approve.toString());
-    setDojoConfig({
-      ...dojoConfig,
-      allowTelemetry: approve,
-    });
-  };
-
-  useEffect(() => {
+    //eslint-disable-next-line @typescript-eslint/no-floating-promises
     (async () => {
-      setDojoError(undefined);
-      try {
-        const browserLogger = new BrowserLogger({
-          onLog: (message: string) => {
-            onMessage({
-              user: "evo",
-              title: message,
-            });
-          },
-        });
-        const logger = new Logger([browserLogger, new ConsoleLogger()], {
-          promptUser: () => Promise.resolve("N/A"),
-        });
-
-        const scriptsWorkspace = await createInBrowserScripts();
-        const scripts = new Scripts(scriptsWorkspace);
-
-        // Point by default to GPT-4 Turbo unless the given api key's account doesn't support it
-        let model = "gpt-4-1106-preview";
-        if (dojoConfig.openAiApiKey) {
-          try {
-            model = await checkLlmModel(
-              dojoConfig.openAiApiKey as string,
-              model
-            );
-          } catch (e: any) {
-            if (e.message.includes("Incorrect API key provided")) {
-              setDojoError(
-                "Open AI API key is not correct. Please make sure it has the correct format"
-              );
-              return;
-            }
-          }
-        }
-
-        const env = new Env({
-          OPENAI_API_KEY: dojoConfig.openAiApiKey || " ",
-          GPT_MODEL: model,
-          CONTEXT_WINDOW_TOKENS: "128000",
-          MAX_RESPONSE_TOKENS: "4096",
-        });
-
-        let llm: LlmApi;
-        let embedding: EmbeddingApi;
-
-        if (dojoConfig.openAiApiKey) {
-          llm = new OpenAILlmApi(
-            env.OPENAI_API_KEY,
-            env.GPT_MODEL as LlmModel,
-            env.CONTEXT_WINDOW_TOKENS,
-            env.MAX_RESPONSE_TOKENS,
-            logger
-          );
-          embedding = new OpenAIEmbeddingAPI(
-            env.OPENAI_API_KEY,
-            logger,
-            cl100k_base
-          );
-        } else {
-          llm = new ProxyLlmApi(
-            env.GPT_MODEL as LlmModel,
-            env.CONTEXT_WINDOW_TOKENS,
-            env.MAX_RESPONSE_TOKENS,
-            () => setCapReached(true)
-          );
-          setProxyLlmApi(llm as ProxyLlmApi);
-          embedding = new ProxyEmbeddingApi(cl100k_base, () =>
-            setCapReached(true)
-          );
-          setProxyEmbeddingApi(embedding as ProxyEmbeddingApi);
-        }
-
-        let workspace = userWorkspace;
-
-        if (!workspace) {
-          workspace = new InMemoryWorkspace();
-          setUserWorkspace(workspace);
-        }
-
-        const internals = new SubWorkspace(".evo", workspace);
-
-        const chat = new EvoChat(cl100k_base);
-        setEvo(
-          new Evo(
-            new AgentContext(
-              llm,
-              embedding,
-              chat,
-              logger,
-              workspace,
-              internals,
-              env,
-              scripts
-            )
+      await Promise.all(
+        uploadedFiles.map((file) =>
+          userWorkspace.writeFile(
+            file.path,
+            new TextDecoder().decode(file.content)
           )
-        );
-      } catch (err) {
-        setDojoError(err);
-      }
+        )
+      );
+
+      checkForUserFiles();
     })();
-  }, [dojoConfig]);
+  }, [uploadedFiles]);
 
   const handlePromptAuth = async (message: string) => {
     if (awaitingAuth) {

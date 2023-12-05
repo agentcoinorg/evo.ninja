@@ -129,14 +129,14 @@ const Chat: React.FC<ChatProps> = ({
       onUploadFiles(prompt.files);
     }
     setMessage(prompt.prompt);
-    handleSend(prompt.prompt);
+    await handleSend(prompt.prompt);
   };
 
-  const handleSend = async (newMessage?: string) => {
-    if (!message && !newMessage) return
-    const authorized = await handlePromptAuth(newMessage ?? message)
+  const handleSend = async (newMessage?: string): Promise<void> => {
+    if (!message && !newMessage) return;
+    const authorized = await handlePromptAuth(newMessage ?? message);
     if (!authorized) {
-      return
+      return;
     }
     onMessage({
       title: newMessage || message,
@@ -160,10 +160,10 @@ const Chat: React.FC<ChatProps> = ({
     setMessage(event.target.value);
   };
 
-  const handleKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyPress = async (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter" && !sending) {
-      handleSend();
-    } 
+      await handleSend();
+    }
   };
 
   const exportChatHistory = () => {

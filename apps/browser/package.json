@@ -48,7 +48,7 @@
     "prebuild": "yarn build:scripts && yarn build:env",
     "build:scripts": "node scripts/build.scripts.js",
     "build:env": "node scripts/build.env.js",
-    "lint": "prettier . --write",
+    "lint": "eslint --color -c ../../.eslintrc.js app/ lib/ components/",
     "start": "next start"
   }
 }
