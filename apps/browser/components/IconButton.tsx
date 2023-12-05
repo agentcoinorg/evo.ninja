@@ -32,23 +32,27 @@ const IconButton = ({
     iconClassName?: IconButtonProps["iconClassName"],
     iconProps?: IconProps
   ) => {
-    const iconDefaultClass = clsx(
-      "text-zinc-500 transition-colors ease-in-out group-hover:text-cyan-500",
-      iconClassName
-    );
+    const defaultProps: IconProps = {
+      className: clsx(
+        "text-zinc-500 transition-colors ease-in-out group-hover:text-cyan-500",
+        iconClassName
+      ),
+      weight: "bold",
+      ...iconProps,
+    };
     switch (iconName) {
       case "DownloadSimple":
-        return <DownloadSimple className={iconDefaultClass} {...iconProps} />;
+        return <DownloadSimple {...defaultProps} />;
       case "FilePlus":
-        return <FilePlus className={iconDefaultClass} {...iconProps} />;
+        return <FilePlus {...defaultProps} />;
       case "NotePencil":
-        return <NotePencil className={iconDefaultClass} {...iconProps} />;
+        return <NotePencil {...defaultProps} />;
       case "DiscordLogo":
-        return <DiscordLogo className={iconDefaultClass} {...iconProps} />;
+        return <DiscordLogo {...defaultProps} />;
       case "GithubLogo":
-        return <GithubLogo className={iconDefaultClass} {...iconProps} />;
+        return <GithubLogo {...defaultProps} />;
       case "X":
-        return <X className={iconDefaultClass} {...iconProps} />;
+        return <X {...defaultProps} />;
     }
   };
   return (
