@@ -9,6 +9,7 @@ import { downloadFilesAsZip } from "@/lib/sys/file/downloadFilesAsZip";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import DropdownAccount from "./DropdownAccount";
+import FileIcon from "./FileIcon";
 
 export interface SidebarProps {
   userFiles: InMemoryFile[];
@@ -29,6 +30,11 @@ const Sidebar = ({
 
   function downloadUserFiles() {
     downloadFilesAsZip("workspace.zip", userFiles);
+  }
+
+  function getFileType(path: InMemoryFile["path"]) {
+    const index = path.lastIndexOf(".");
+    return path.substring(index + 1);
   }
 
   useEffect(() => {
@@ -94,21 +100,33 @@ const Sidebar = ({
                 {["New Chat", "Utilities Spending"].map((chat, i) => (
                   <div
                     key={i}
-                    className="text-zinc-180 w-[calc(100%+0.5rem)] -translate-x-2 transform cursor-pointer rounded p-2 transition-colors duration-300 hover:bg-zinc-800 hover:text-white"
+                    className="w-[calc(100%+0.5rem)] -translate-x-2 transform cursor-pointer rounded p-2 text-zinc-100 transition-colors duration-300 hover:bg-zinc-800 hover:text-white"
                   >
                     {chat}
                   </div>
                 ))}
               </div>
             </div>
-            <div className="flex w-full items-center justify-between space-x-1">
-              <div className="text-xs uppercase tracking-widest text-zinc-500">
-                Current Workspace
+            <div className="space-y-1">
+              <div className="flex w-full items-center justify-between space-x-1">
+                <div className="text-xs uppercase tracking-widest text-zinc-500">
+                  Current Workspace
+                </div>
+                <div className="flex items-center space-x-1">
+                  <IconButton iconName="FilePlus" size={18} />
+                  {userFiles.length !== 0 && (
+                    <IconButton iconName="DownloadSimple" size={18} />
+                  )}
+                </div>
               </div>
-              <div className="flex items-center space-x-1">
-                <IconButton iconName="FilePlus" size={18} />
-                <IconButton iconName="DownloadSimple" size={18} />
-              </div>
+              {userFiles.map((file, i) => {
+                return (
+                  <div className="flex w-[calc(100%+0.5rem)] -translate-x-2 transform cursor-pointer items-center space-x-2 rounded p-2 text-cyan-500 transition-colors duration-300 hover:bg-zinc-800 hover:text-white">
+                    <FileIcon fileType={getFileType(file.path)} />
+                    <div key={i}>{file.path}</div>
+                  </div>
+                );
+              })}
             </div>
           </div>
           <div className="relative flex w-full items-center justify-between">
