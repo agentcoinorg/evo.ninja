@@ -1,10 +1,20 @@
-import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  ChangeEvent,
+  KeyboardEvent,
+  useRef,
+  useCallback,
+} from "react";
 import { Evo } from "@evo-ninja/agents";
 import ReactMarkdown from "react-markdown";
 import FileSaver from "file-saver";
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload, faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faDownload,
+  faQuestionCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import SidebarIcon from "./SidebarIcon";
@@ -26,7 +36,7 @@ export interface ChatProps {
   onDisclaimerSelect: (approve: boolean) => void;
   onSidebarToggleClick: () => void;
   onUploadFiles: (files: InMemoryFile[]) => void;
-  handlePromptAuth: (message: string) => Promise<boolean>
+  handlePromptAuth: (message: string) => Promise<boolean>;
 }
 
 const Chat: React.FC<ChatProps> = ({
@@ -38,7 +48,7 @@ const Chat: React.FC<ChatProps> = ({
   onDisclaimerSelect,
   onSidebarToggleClick,
   onUploadFiles,
-  handlePromptAuth
+  handlePromptAuth,
 }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
   const [evoRunning, setEvoRunning] = useState<boolean>(false);
@@ -49,7 +59,7 @@ const Chat: React.FC<ChatProps> = ({
   );
   const [stopped, setStopped] = useState<boolean>(false);
   const [showDisclaimer, setShowDisclaimer] = useState<boolean>(
-    localStorage.getItem('showDisclaimer') !== 'false'
+    localStorage.getItem("showDisclaimer") !== "false"
   );
   const [clickedMsgIndex, setClickedMsgIndex] = useState<number | null>(null);
   const listContainerRef = useRef<HTMLDivElement | null>(null);
@@ -71,59 +81,59 @@ const Chat: React.FC<ChatProps> = ({
       }
 
       let messageLog = messages;
-      let stepCounter = 1
+      let stepCounter = 1;
       while (evoRunning) {
         setStopped(false);
 
         const response = await evoItr.next();
 
         if (response.done) {
-          const actionTitle = response.value.value.title
+          const actionTitle = response.value.value.title;
           if (actionTitle.includes("onGoalAchieved")) {
             onMessage({
               title: "## Goal Achieved",
-              user: "evo"
-            })
+              user: "evo",
+            });
           }
           setEvoRunning(false);
           setSending(false);
           setEvoItr(undefined);
           evo.reset();
-          break
+          break;
         }
 
         onMessage({
           title: `## Step ${stepCounter}`,
-          user: "evo"
-        })
+          user: "evo",
+        });
 
         if (!response.done) {
           const evoMessage = {
             title: `### Action executed:\n${response.value.title}`,
             content: response.value.content,
-            user: "evo"
+            user: "evo",
           };
           messageLog = [...messageLog, evoMessage];
           onMessage(evoMessage);
         }
 
-        stepCounter++
+        stepCounter++;
       }
       return Promise.resolve();
-    }
+    };
 
     const timer = setTimeout(runEvo, 200);
     return () => clearTimeout(timer);
   }, [evoRunning, evoItr]);
 
   useEffect(() => {
-    localStorage.setItem('showDisclaimer', showDisclaimer.toString());
+    localStorage.setItem("showDisclaimer", showDisclaimer.toString());
   }, [showDisclaimer]);
 
   const handleDisclaimerSelect = (accept: boolean) => {
     setShowDisclaimer(false);
     onDisclaimerSelect(accept);
-  }
+  };
 
   const handleSamplePromptClick = async (prompt: ExamplePrompt) => {
     if (prompt.files) {
@@ -138,10 +148,10 @@ const Chat: React.FC<ChatProps> = ({
   };
 
   const handleSend = async (newMessage?: string) => {
-    if (!message && !newMessage) return
-    const authorized = await handlePromptAuth(newMessage ?? message)
+    if (!message && !newMessage) return;
+    const authorized = await handlePromptAuth(newMessage ?? message);
     if (!authorized) {
-      return
+      return;
     }
     onMessage({
       title: newMessage || message,
@@ -172,33 +182,46 @@ const Chat: React.FC<ChatProps> = ({
   };
 
   const exportChatHistory = () => {
-    const exportedContent = messages.map((msg, i, msgs) => {
-      if (msg.user === "user") {
-        return `# User\n**Goal:** ${msg.title}\n`
-      } else {
-        const logMessage = `${msg.title} \n${msg.content ?? ""}`
-        // We only append # Evo into the first message from Evo
-        if (msgs.slice(0, i).some(m => m.user === "evo")) {
-          return logMessage
+    const exportedContent = messages
+      .map((msg, i, msgs) => {
+        if (msg.user === "user") {
+          return `# User\n**Goal:** ${msg.title}\n`;
         } else {
-          return `# Evo\n` + logMessage
+          const logMessage = `${msg.title} \n${msg.content ?? ""}`;
+          // We only append # Evo into the first message from Evo
+          if (msgs.slice(0, i).some((m) => m.user === "evo")) {
+            return logMessage;
+          } else {
+            return `# Evo\n` + logMessage;
+          }
         }
-      }
-    }).join('\n');
+      })
+      .join("\n");
 
     // Generate a date-time stamp
     const date = new Date();
-    const dateTimeStamp = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}_${date.getHours().toString().padStart(2, '0')}-${date.getMinutes().toString().padStart(2, '0')}-${date.getSeconds().toString().padStart(2, '0')}`;
+    const dateTimeStamp = `${date.getFullYear()}-${(date.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}_${date
+      .getHours()
+      .toString()
+      .padStart(2, "0")}-${date.getMinutes().toString().padStart(2, "0")}-${date
+      .getSeconds()
+      .toString()
+      .padStart(2, "0")}`;
 
-    const blob = new Blob([exportedContent], { type: 'text/plain;charset=utf-8' });
-    FileSaver.saveAs(blob, `evo-ninja-${dateTimeStamp}.md`)
+    const blob = new Blob([exportedContent], {
+      type: "text/plain;charset=utf-8",
+    });
+    FileSaver.saveAs(blob, `evo-ninja-${dateTimeStamp}.md`);
   };
 
   const handleScroll = useCallback(() => {
     // Detect if the user is at the bottom of the list
     const container = listContainerRef.current;
     if (container) {
-      const isScrolledToBottom = container.scrollHeight - container.scrollTop <= container.clientHeight;
+      const isScrolledToBottom =
+        container.scrollHeight - container.scrollTop <= container.clientHeight;
       setIsAtBottom(isScrolledToBottom);
     }
   }, []);
@@ -207,13 +230,13 @@ const Chat: React.FC<ChatProps> = ({
     const container = listContainerRef.current;
     if (container) {
       // Add scroll event listener
-      container.addEventListener('scroll', handleScroll);
+      container.addEventListener("scroll", handleScroll);
     }
 
     // Clean up listener
     return () => {
       if (container) {
-        container.removeEventListener('scroll', handleScroll);
+        container.removeEventListener("scroll", handleScroll);
       }
     };
   }, [handleScroll]);
@@ -223,36 +246,48 @@ const Chat: React.FC<ChatProps> = ({
     if (isAtBottom) {
       listContainerRef.current?.scrollTo({
         top: listContainerRef.current.scrollHeight,
-        behavior: 'smooth',
+        behavior: "smooth",
       });
     }
   }, [messages, isAtBottom]);
 
   return (
     <div className="flex h-full flex-col bg-[#0A0A0A] text-white">
-      <div className="flex justify-between items-center p-4 border-b-2 border-neutral-700">
-        <div className="h-14 p-4 text-lg text-white cursor-pointer hover:opacity-100 opacity-80 transition-all" onClick={onSidebarToggleClick}>
-          { sidebarOpen ? <></>: <SidebarIcon /> }
+      <div className="flex items-center justify-between border-b-2 border-zinc-700 p-4">
+        <div
+          className="h-14 cursor-pointer p-4 text-lg text-white opacity-80 transition-all hover:opacity-100"
+          onClick={onSidebarToggleClick}
+        >
+          {sidebarOpen ? <></> : <SidebarIcon />}
         </div>
-        <FontAwesomeIcon className="cursor-pointer" icon={faDownload} onClick={exportChatHistory} />
+        <FontAwesomeIcon
+          className="cursor-pointer"
+          icon={faDownload}
+          onClick={exportChatHistory}
+        />
       </div>
       <div
         ref={listContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-auto p-5 text-left items-center"
+        className="flex-1 items-center overflow-auto p-5 text-left"
       >
         {messages.map((msg, index) => (
-          <div key={index} className={`${msg.user} m-auto self-center w-[100%] max-w-[56rem]`}>
+          <div
+            key={index}
+            className={`${msg.user} m-auto w-[100%] max-w-[56rem] self-center`}
+          >
             {index === 0 || messages[index - 1].user !== msg.user ? (
               <div className="SenderName">{msg.user.toUpperCase()}</div>
             ) : null}
-            <div 
+            <div
               className={clsx(
                 "my-1 rounded border border-transparent px-4 py-2.5 transition-all hover:border-cyan-500",
-                msg.user === "user" ? "bg-blue-500": "bg-neutral-900",
-                clickedMsgIndex === index ? "border-cyan-500" : "")
+                msg.user === "user" ? "bg-blue-500" : "bg-zinc-900",
+                clickedMsgIndex === index ? "border-cyan-500" : ""
+              )}
+              onClick={() =>
+                setClickedMsgIndex(index === clickedMsgIndex ? null : index)
               }
-              onClick={() => setClickedMsgIndex(index === clickedMsgIndex ? null : index)}
             >
               <div className="prose prose-invert">
                 <ReactMarkdown>{msg.title.toString()}</ReactMarkdown>
@@ -263,11 +298,11 @@ const Chat: React.FC<ChatProps> = ({
         ))}
       </div>
       {showPrompts && (
-        <div className="grid w-full grid-rows-2 p-2.5 py-16 self-center w-[100%] max-w-[56rem]">
+        <div className="grid w-[100%] w-full max-w-[56rem] grid-rows-2 self-center p-2.5 py-16">
           {examplePrompts.map((prompt, index) => (
-            <div 
-              key={index} 
-              className="m-1 cursor-pointer rounded-xl border border-neutral-500 bg-neutral-800 p-2.5 text-left text-xs text-neutral-50 transition-all hover:border-cyan-400" 
+            <div
+              key={index}
+              className="m-1 cursor-pointer rounded-xl border border-zinc-500 bg-zinc-800 p-2.5 text-left text-xs text-zinc-50 transition-all hover:border-cyan-400"
               onClick={() => handleSamplePromptClick(prompt)}
             >
               {prompt.prompt}
@@ -275,13 +310,24 @@ const Chat: React.FC<ChatProps> = ({
           ))}
         </div>
       )}
-      <div className="flex items-center justify-center gap-4 p-4 mb-4 self-center w-[100%] max-w-[56rem]">
+      <div className="mb-4 flex w-[100%] max-w-[56rem] items-center justify-center gap-4 self-center p-4">
         {showDisclaimer && !overlayOpen && (
-          <div className="absolute bottom-0 z-50 flex w-4/5 items-center justify-around rounded-t-lg border-2 border-cyan-500 bg-black p-2.5 text-center text-xs text-white self-center w-[100%] max-w-[56rem]">
-            🧠 Hey there! Mind sharing your prompts to help make Evo even better?
+          <div className="absolute bottom-0 z-50 flex w-4/5 w-[100%] max-w-[56rem] items-center justify-around self-center rounded-t-lg border-2 border-cyan-500 bg-black p-2.5 text-center text-xs text-white">
+            🧠 Hey there! Mind sharing your prompts to help make Evo even
+            better?
             <div className="flex gap-2.5">
-              <span className="cursor-pointer px-5 py-2.5 font-bold text-cyan-400" onClick={() => handleDisclaimerSelect(true)}>Accept</span>
-              <span className="cursor-pointer px-5 py-2.5 font-bold text-white" onClick={() => handleDisclaimerSelect(false)}>Decline</span>
+              <span
+                className="cursor-pointer px-5 py-2.5 font-bold text-cyan-400"
+                onClick={() => handleDisclaimerSelect(true)}
+              >
+                Accept
+              </span>
+              <span
+                className="cursor-pointer px-5 py-2.5 font-bold text-white"
+                onClick={() => handleDisclaimerSelect(false)}
+              >
+                Decline
+              </span>
             </div>
           </div>
         )}
@@ -291,49 +337,60 @@ const Chat: React.FC<ChatProps> = ({
           onChange={handleChange}
           onKeyPress={handleKeyPress}
           placeholder="Enter your main goal here..."
-          className="mr-2.5 flex-1 rounded border border-neutral-400 bg-neutral-900 p-2.5 text-neutral-50 outline-none transition-all"
+          className="mr-2.5 flex-1 rounded border border-zinc-400 bg-zinc-900 p-2.5 text-zinc-50 outline-none transition-all"
           disabled={sending || showDisclaimer} // Disable input while sending or if disclaimer is shown
         />
         {evoRunning && (
           <>
-            {
-              !paused && (
-                <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-cyan-500 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-cyan-400" onClick={handlePause} disabled={!evoRunning || paused}>
+            {!paused && (
+              <button
+                className="inline-block h-12 cursor-pointer rounded-xl border-none bg-cyan-500 px-5 py-2.5 text-center text-zinc-950 shadow-md outline-none transition-all hover:bg-cyan-400"
+                onClick={handlePause}
+                disabled={!evoRunning || paused}
+              >
                 Pause
-                </button>
-              )
-            }
-            {
-              paused && (
-                <>
-                  {!stopped && (
-                     <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-cyan-500 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-cyan-400" disabled={true}>
-                     Pausing
-                     </button>
-                  )}
+              </button>
+            )}
+            {paused && (
+              <>
+                {!stopped && (
+                  <button
+                    className="inline-block h-12 cursor-pointer rounded-xl border-none bg-cyan-500 px-5 py-2.5 text-center text-zinc-950 shadow-md outline-none transition-all hover:bg-cyan-400"
+                    disabled={true}
+                  >
+                    Pausing
+                  </button>
+                )}
 
-                  {stopped && (
-                     <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-cyan-500 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-cyan-400" onClick={handleContinue} disabled={evoRunning && !paused}>
-                     Paused
-                     </button>
-                  )}
-                </>
-              )
-            }
+                {stopped && (
+                  <button
+                    className="inline-block h-12 cursor-pointer rounded-xl border-none bg-cyan-500 px-5 py-2.5 text-center text-zinc-950 shadow-md outline-none transition-all hover:bg-cyan-400"
+                    onClick={handleContinue}
+                    disabled={evoRunning && !paused}
+                  >
+                    Paused
+                  </button>
+                )}
+              </>
+            )}
           </>
         )}
 
         {evoRunning ? (
           <div className="h-9 w-9 animate-spin rounded-full border-4 border-black/10 border-l-cyan-500" />
         ) : (
-          <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-cyan-500 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-cyan-400" onClick={handleStart} disabled={evoRunning || sending}>
+          <button
+            className="inline-block h-12 cursor-pointer rounded-xl border-none bg-cyan-500 px-5 py-2.5 text-center text-zinc-950 shadow-md outline-none transition-all hover:bg-cyan-400"
+            onClick={handleStart}
+            disabled={evoRunning || sending}
+          >
             Start
           </button>
         )}
       </div>
 
       <a
-        className="cursor-pointer fixed bottom-0 right-0 mx-4 my-2"
+        className="fixed bottom-0 right-0 mx-4 my-2 cursor-pointer"
         href="https://discord.gg/r3rwh69cCa"
         target="_blank"
         rel="noopener noreferrer"

@@ -21,7 +21,7 @@ code {
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-neutral-600;
+  @apply bg-zinc-600;
 }
 
 ::-webkit-scrollbar-thumb {

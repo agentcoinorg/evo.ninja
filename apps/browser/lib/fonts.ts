@@ -1,5 +1,6 @@
-import { Exo } from "next/font/google";
+import { Ubuntu } from "next/font/google";
 
-export const EXO_FONT = Exo({
+export const Ubuntu_FONT = Ubuntu({
   subsets: ["latin"],
+  weight: ['300', '400', '500', '700'],
 });

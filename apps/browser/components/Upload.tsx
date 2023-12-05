@@ -1,17 +1,21 @@
-import React, { useEffect, useState, PropsWithChildren } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUpload } from '@fortawesome/free-solid-svg-icons';
+import React, { useEffect, useState, PropsWithChildren } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import { useDropzone } from "react-dropzone";
-import { readFile } from '@/lib/sys/file';
-import { InMemoryFile } from '@nerfzael/memory-fs';
-import clsx from 'clsx';
+import { readFile } from "@/lib/sys/file";
+import { InMemoryFile } from "@nerfzael/memory-fs";
+import clsx from "clsx";
 
 interface UploadProps {
-  className?: string
-  onUploadFiles: (files: InMemoryFile[]) => void
+  className?: string;
+  onUploadFiles: (files: InMemoryFile[]) => void;
 }
 
-function Upload({ className, onUploadFiles, children }: PropsWithChildren<UploadProps>) {
+function Upload({
+  className,
+  onUploadFiles,
+  children,
+}: PropsWithChildren<UploadProps>) {
   const [showUpload, setShowUpload] = useState(false);
   const { acceptedFiles, getRootProps, getInputProps, isDragAccept, open } =
     useDropzone({ noClick: true });
@@ -36,8 +40,10 @@ function Upload({ className, onUploadFiles, children }: PropsWithChildren<Upload
     <div
       {...getRootProps({
         className: clsx(
-          'dropzone',
-          isDragAccept ? " border-2 border-dashed border-blue-200 bg-neutral-50" : "",
+          "dropzone",
+          isDragAccept
+            ? " border-2 border-dashed border-blue-200 bg-zinc-50"
+            : "",
           className
         ),
       })}
@@ -46,18 +52,19 @@ function Upload({ className, onUploadFiles, children }: PropsWithChildren<Upload
         <div className="p-5">
           <input {...getInputProps()} />
           <p>
-            Drag &quot;n&quot; drop the build folder here, or click to
-            select the files
+            Drag &quot;n&quot; drop the build folder here, or click to select
+            the files
           </p>
         </div>
       )}
       {!isDragAccept && !showUpload && (
         <>
           {children}
-          <button 
-            className="my-4 inline-block h-9 cursor-pointer rounded-xl border-none bg-cyan-500 px-6 py-2.5 text-center text-neutral-900 shadow-md outline-none transition-all hover:bg-cyan-400" 
-            title="Upload files" 
-            onClick={open}>
+          <button
+            className="my-4 inline-block h-9 cursor-pointer rounded-xl border-none bg-cyan-500 px-6 py-2.5 text-center text-zinc-900 shadow-md outline-none transition-all hover:bg-cyan-400"
+            title="Upload files"
+            onClick={open}
+          >
             <FontAwesomeIcon icon={faUpload} /> Upload
           </button>
         </>

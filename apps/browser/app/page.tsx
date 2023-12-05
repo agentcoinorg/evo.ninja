@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useState, useEffect } from "react";
 
@@ -27,12 +27,15 @@ import {
   OpenAIEmbeddingAPI,
 } from "@evo-ninja/agents";
 import { createInBrowserScripts } from "@/lib/scripts";
-import WelcomeModal, { WELCOME_MODAL_SEEN_STORAGE_KEY } from "@/components/WelcomeModal";
+import WelcomeModal, {
+  WELCOME_MODAL_SEEN_STORAGE_KEY,
+} from "@/components/WelcomeModal";
 import { BrowserLogger } from "@/lib/sys/logger";
 import { checkLlmModel } from "@/lib/checkLlmModel";
 import { ProxyLlmApi, ProxyEmbeddingApi } from "@/lib/api";
 import { useSession } from "next-auth/react";
 import { AuthProxy } from "@/lib/AuthProxy";
+import CloseSidebarIcon from "@/components/CloseSidebarIcon";
 
 function Dojo() {
   const [dojoConfig, setDojoConfig] = useState<{
@@ -44,23 +47,28 @@ function Dojo() {
     openAiApiKey: null,
     allowTelemetry: false,
     loaded: false,
-    complete: false
+    complete: false,
   });
   const [welcomeModalOpen, setWelcomeModalOpen] = useState<boolean>(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [hoveringSidebarButton, setHovering] = useState<boolean>(false);
   const [accountModal, setAccountModalOpen] = useState(false);
   const [dojoError, setDojoError] = useState<unknown | undefined>(undefined);
   const [evo, setEvo] = useState<Evo | undefined>(undefined);
-  const [proxyEmbeddingApi, setProxyEmbeddingApi] = useState<ProxyEmbeddingApi | undefined>(undefined);
-  const [proxyLlmApi, setProxyLlmApi] = useState<ProxyLlmApi | undefined>(undefined);
+  const [proxyEmbeddingApi, setProxyEmbeddingApi] = useState<
+    ProxyEmbeddingApi | undefined
+  >(undefined);
+  const [proxyLlmApi, setProxyLlmApi] = useState<ProxyLlmApi | undefined>(
+    undefined
+  );
   const [userFiles, setUserFiles] = useState<InMemoryFile[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<InMemoryFile[]>([]);
   const [userWorkspace, setUserWorkspace] = useState<
     InMemoryWorkspace | undefined
   >(undefined);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [capReached, setCapReached] = useState<boolean>(false)
-  const { data: session } = useSession()
+  const [capReached, setCapReached] = useState<boolean>(false);
+  const { data: session } = useSession();
   const [awaitingAuth, setAwaitingAuth] = useState<boolean>(false);
   const [firstTimeUser, setFirstTimeUser] = useState<boolean>(false);
 
@@ -69,13 +77,14 @@ function Dojo() {
       setSidebarOpen(false);
     }
     const openAiApiKey = localStorage.getItem("openai-api-key");
-    const allowTelemetry = localStorage.getItem("allow-telemetry") === "true" ? true : false;
+    const allowTelemetry =
+      localStorage.getItem("allow-telemetry") === "true" ? true : false;
     const complete = !!openAiApiKey;
     setDojoConfig({
       openAiApiKey,
       allowTelemetry,
       loaded: true,
-      complete
+      complete,
     });
   }, []);
 
@@ -85,7 +94,7 @@ function Dojo() {
       localStorage.setItem(WELCOME_MODAL_SEEN_STORAGE_KEY, "true");
       setWelcomeModalOpen(true);
     }
-  }, [])
+  }, []);
 
   function checkForUserFiles() {
     if (!evo || !userWorkspace) {
@@ -130,7 +139,7 @@ function Dojo() {
       openAiApiKey,
       allowTelemetry,
       loaded: true,
-      complete
+      complete,
     });
     setCapReached(false);
     setAccountModalOpen(false);
@@ -140,7 +149,7 @@ function Dojo() {
     localStorage.setItem("allow-telemetry", approve.toString());
     setDojoConfig({
       ...dojoConfig,
-      allowTelemetry: approve
+      allowTelemetry: approve,
     });
   };
 
@@ -164,14 +173,19 @@ function Dojo() {
         const scripts = new Scripts(scriptsWorkspace);
 
         // Point by default to GPT-4 unless the given api key's account doesn't support it
-        let model = "gpt-4"
+        let model = "gpt-4";
         if (dojoConfig.openAiApiKey) {
           try {
-            model = await checkLlmModel(dojoConfig.openAiApiKey as string, model);
+            model = await checkLlmModel(
+              dojoConfig.openAiApiKey as string,
+              model
+            );
           } catch (e: any) {
             if (e.message.includes("Incorrect API key provided")) {
-              setDojoError("Open AI API key is not correct. Please make sure it has the correct format")
-              return
+              setDojoError(
+                "Open AI API key is not correct. Please make sure it has the correct format"
+              );
+              return;
             }
           }
         }
@@ -194,7 +208,11 @@ function Dojo() {
             env.MAX_RESPONSE_TOKENS,
             logger
           );
-          embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base)
+          embedding = new OpenAIEmbeddingAPI(
+            env.OPENAI_API_KEY,
+            logger,
+            cl100k_base
+          );
         } else {
           llm = new ProxyLlmApi(
             env.GPT_MODEL as LlmModel,
@@ -203,7 +221,9 @@ function Dojo() {
             () => setCapReached(true)
           );
           setProxyLlmApi(llm as ProxyLlmApi);
-          embedding = new ProxyEmbeddingApi(cl100k_base, () => setCapReached(true));
+          embedding = new ProxyEmbeddingApi(cl100k_base, () =>
+            setCapReached(true)
+          );
           setProxyEmbeddingApi(embedding as ProxyEmbeddingApi);
         }
 
@@ -266,12 +286,12 @@ function Dojo() {
 
     proxyLlmApi?.setGoalId(goalId);
     proxyEmbeddingApi?.setGoalId(goalId);
-    return true
-  }
+    return true;
+  };
 
   return (
     <>
-      <div className="flex h-full bg-neutral-800 bg-landing-bg bg-repeat text-center text-neutral-400">
+      <div className="flex h-full bg-zinc-900 bg-landing-bg bg-repeat text-zinc-400">
         {(accountModal || capReached) && (
           <AccountConfig
             apiKey={dojoConfig.openAiApiKey}
@@ -281,50 +301,64 @@ function Dojo() {
             firstTimeUser={firstTimeUser}
           />
         )}
-        <div className={clsx(
-          "relative w-full lg:w-auto lg:max-w-md",
-          {
-            hidden: !sidebarOpen,
-          },
-        )}>
+        <div className="relative w-full transition-transform lg:w-auto lg:max-w-md">
           <Sidebar
-            onSidebarToggleClick={() => {
-              setSidebarOpen(!sidebarOpen);
-            }}
-            onSettingsClick={() => setAccountModalOpen(true)}
+            hoveringSidebarButton={hoveringSidebarButton}
+            sidebarOpen={sidebarOpen}
+            // onSettingsClick={() => setAccountModalOpen(true)}
             userFiles={userFiles}
             onUploadFiles={setUploadedFiles}
           />
+          <button
+            className="absolute -right-8 top-1/2 z-10 cursor-pointer"
+            onMouseEnter={() => setHovering(true)}
+            onMouseLeave={() => setHovering(false)}
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+          >
+            <CloseSidebarIcon
+              hoveringSidebarButton={hoveringSidebarButton}
+              sidebarOpen={sidebarOpen}
+            />
+          </button>
         </div>
-        <div className={clsx("relative grow border-l-2 border-neutral-700", {
-          "max-lg:hidden": sidebarOpen,
-        })}>
+        <div
+          className={clsx("relative grow", {
+            "max-lg:hidden": sidebarOpen,
+          })}
+        >
           <>
-            {dojoError ? <DojoError
+            {dojoError ? (
+              <DojoError
                 error={dojoError}
                 sidebarOpen={sidebarOpen}
                 onSidebarToggleClick={() => {
-                  setSidebarOpen(!sidebarOpen)
-                }}
-              /> : evo && (
-              <Chat
-                evo={evo}
-                onMessage={onMessage}
-                messages={messages}
-                sidebarOpen={sidebarOpen}
-                overlayOpen={welcomeModalOpen || accountModal}
-                onDisclaimerSelect={onDisclaimerSelect}
-                onSidebarToggleClick={() => {
                   setSidebarOpen(!sidebarOpen);
                 }}
-                onUploadFiles={setUploadedFiles}
-                handlePromptAuth={handlePromptAuth}
               />
+            ) : (
+              evo && (
+                <Chat
+                  evo={evo}
+                  onMessage={onMessage}
+                  messages={messages}
+                  sidebarOpen={sidebarOpen}
+                  overlayOpen={welcomeModalOpen || accountModal}
+                  onDisclaimerSelect={onDisclaimerSelect}
+                  onSidebarToggleClick={() => {
+                    setSidebarOpen(!sidebarOpen);
+                  }}
+                  onUploadFiles={setUploadedFiles}
+                  handlePromptAuth={handlePromptAuth}
+                />
+              )
             )}
           </>
         </div>
       </div>
-      <WelcomeModal isOpen={welcomeModalOpen} onClose={() => setWelcomeModalOpen(false)} />
+      <WelcomeModal
+        isOpen={welcomeModalOpen}
+        onClose={() => setWelcomeModalOpen(false)}
+      />
     </>
   );
 }
