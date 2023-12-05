@@ -8,8 +8,9 @@ import {
   X,
 } from "@phosphor-icons/react";
 import clsx from "clsx";
+import { ButtonHTMLAttributes, MouseEventHandler } from "react";
 
-interface IconButtonProps extends IconProps {
+interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   buttonClassName?: string;
   iconClassName?: string;
   iconName:
@@ -19,13 +20,16 @@ interface IconButtonProps extends IconProps {
     | "DiscordLogo"
     | "GithubLogo"
     | "X";
+  iconProps?: IconProps;
 }
 
 const IconButton = ({
   buttonClassName,
   iconClassName,
   iconName,
-  ...iconProps
+  onClick,
+  iconProps,
+  ...buttonProps
 }: IconButtonProps) => {
   const iconSwitch = (
     iconName: IconButtonProps["iconName"],
@@ -59,6 +63,8 @@ const IconButton = ({
     <button
       className={clsx("group p-1.5", buttonClassName)}
       aria-label={iconName}
+      onClick={onClick}
+      {...buttonProps}
     >
       {iconSwitch(iconName, iconClassName, iconProps)}
     </button>
