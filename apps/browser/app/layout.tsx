@@ -1,18 +1,18 @@
-import "../styles/globals.css";
 import clsx from "clsx";
 import Script from "next/script";
 import { config } from "@fortawesome/fontawesome-svg-core";
-import "@fortawesome/fontawesome-svg-core/styles.css";
 import NextAuthProvider from "@/components/NextSessionProvider";
 import { EXO_FONT } from "@/lib/fonts";
+import { Provider } from "jotai";
+import { ToastContainer } from "react-toastify";
+
+import "../styles/globals.css";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+import "react-toastify/dist/ReactToastify.css";
+
 config.autoAddCss = false;
 
 export default function EvoApp({ children }: { children: React.ReactNode }) {
-  // useEffect(() => {
-  //   if (window) {
-  //     window.Buffer = window.Buffer || require("buffer").Buffer;
-  //   }
-  // }, []);
   return (
     <html>
       <body>
@@ -32,9 +32,10 @@ export default function EvoApp({ children }: { children: React.ReactNode }) {
               });
               `}
           </Script>
-          <NextAuthProvider>
-            {children}
-          </NextAuthProvider>
+          <Provider>
+            <NextAuthProvider>{children}</NextAuthProvider>
+          </Provider>
+          <ToastContainer />
         </div>
       </body>
     </html>

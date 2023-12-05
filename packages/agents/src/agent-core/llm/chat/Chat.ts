@@ -7,7 +7,12 @@ export type ChatRole = ChatCompletionRole;
 export class Chat {
   protected _chatLogs: ChatLogs;
 
-  constructor(protected _tokenizer: Tokenizer) {
+  constructor(
+    protected _tokenizer: Tokenizer,
+    protected options?: {
+      onMessagesAdded?: (msgs: ChatMessage[]) => Promise<void>
+    }
+  ) {
     this._chatLogs = new ChatLogs();
   }
 
@@ -27,56 +32,69 @@ export class Chat {
     return this._chatLogs.messages;
   }
 
-  public add(type: ChatLogType, msg: ChatMessage | ChatMessage[]) {
-    let msgs = Array.isArray(msg) ? msg : [msg];
+  public async add(type: ChatLogType, msg: ChatMessage | ChatMessage[]): Promise<void> {
+    const msgs = Array.isArray(msg) ? msg : [msg];
 
-    for (const msg of msgs) {
+    const msgsWithTokens = msgs.map((msg) => {
       const tokens = this._tokenizer.encode(JSON.stringify(msg)).length;
-      this._chatLogs.add(type, [msg], [tokens]);
+      return { ...msg, tokens };
+    })
+    const tokens = msgsWithTokens.map(({ tokens }) => tokens);
+
+    this._chatLogs.add(type, msgs, tokens)
+
+    if (this.options?.onMessagesAdded) {
+      await this.options.onMessagesAdded(msgs);
     }
   }
 
-  public persistent(role: ChatRole, content: string): string | undefined;
-  public persistent(
+  public async persistent(role: ChatRole, content: string): Promise<void>;
+  public async persistent(
     msg: ChatMessage
-  ): string | undefined;
-  public persistent(
-    roleOrMsg: ChatRole | ChatMessage,
+  ): Promise<void>;
+  public async persistent(
+    msgs: ChatMessage[]
+  ): Promise<void>;
+  public async persistent(
+    roleOrMsg: ChatRole | ChatMessage | ChatMessage[],
     content?: string
-  ): string | undefined {
+  ): Promise<void> {
     switch (typeof roleOrMsg) {
       case "string":
-        this.add("persistent", {
+        await this.add("persistent", {
           role: roleOrMsg as "system" | "user" | "assistant",
           content: content ?? null,
         });
-        return content;
+        break;
       case "object":
-        this.add("persistent", roleOrMsg as ChatMessage);
-        return roleOrMsg.content || undefined;
+        await this.add("persistent", roleOrMsg);
+        break;
       default:
         throw new Error(`Invalid type for roleOrMsg: ${typeof roleOrMsg}`);
     }
   }
 
-  public temporary(
+  public async temporary(
     role: ChatRole,
     content?: string
-  ): string | undefined;
-  public temporary(
+  ): Promise<void>;
+  public async temporary(
     msg: ChatMessage
-  ): string | undefined;
-  public temporary(
-    roleOrMsg: ChatRole | ChatMessage,
+  ): Promise<void>;
+  public async temporary(
+    msgs: ChatMessage[]
+  ): Promise<void>;
+  public async temporary(
+    roleOrMsg: ChatRole | ChatMessage | ChatMessage[],
     content?: string
-  ): string | undefined {
+  ): Promise<void> {
     switch(typeof roleOrMsg) {
       case "string":
-        this.add("temporary", { role: roleOrMsg as "system" | "user", content: content ?? null });
-        return content;
+        await this.add("temporary", { role: roleOrMsg as "system" | "user", content: content ?? null });
+        break;
       case "object":
-        this.add("temporary", roleOrMsg as ChatMessage);
-        return roleOrMsg.content || undefined;
+        await this.add("temporary", roleOrMsg as ChatMessage);
+        break;
       default:
         throw new Error(`Invalid type for roleOrMsg: ${typeof roleOrMsg}`);
     }
