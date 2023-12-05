@@ -1,6 +1,7 @@
 import { Row } from "./types";
 
 import {
+  AgentOutput,
   ChatMessage
 } from "@evo-ninja/agents";
 
@@ -56,5 +57,22 @@ export const mapChatMessageToMessageDTO = (chatId: number, temporary: boolean, m
         temporary
       }
     }
+  }
+}
+
+export const mapVariableToVariableDTO = (chatId: number, variable: string, value: string): Omit<Row<'variables'>, "id" | "created_at"> => {
+  return {
+    chat_id: chatId,
+    key: variable,
+    value
+  }
+}
+
+export const mapAgentOutputToOutputDTO = (chatId: number, output: AgentOutput): Omit<Row<'agent_outputs'>, "id" | "created_at"> => {
+  return {
+    chat_id: chatId,
+    title: output.title,
+    content: output.content ?? null,
+    type: output.type,
   }
 }
