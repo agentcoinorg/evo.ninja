@@ -1,11 +1,26 @@
 export class AgentVariables {
   private _variables: Map<string, string> = new Map();
   private _funcCounters: Map<string, number> = new Map();
+  private _saveThreshold: number = 1250;
+  private onVariableSet?: (key: string, value: string) => Promise<void>; 
 
   public static Prefix = "${";
   public static Suffix = "}";
 
-  constructor(private _saveThreshold: number = 1250) { }
+  constructor(
+    config?: {
+      saveThreshold?: number
+      onVariableSet?: (key: string, value: string) => Promise<void>
+    },
+  ) {
+    if (config?.saveThreshold) {
+      this._saveThreshold = config.saveThreshold;
+    }
+
+    if (config?.onVariableSet) {
+      this.onVariableSet = config.onVariableSet;
+    }
+  }
 
   static hasSyntax(name: string): boolean {
     return name.startsWith(AgentVariables.Prefix) &&
@@ -31,12 +46,16 @@ export class AgentVariables {
     return this._variables.get(name);
   }
 
-  set(name: string, value: string): void {
+  async set(name: string, value: string): Promise<void> {
     if (AgentVariables.hasSyntax(name)) {
       name = AgentVariables.stripSyntax(name);
     }
 
     this._variables.set(name, value);
+
+    if (this.onVariableSet) {
+      await this.onVariableSet(name, value);
+    }
   }
 
   read(name: string, index: number, count: number): string {
@@ -53,11 +72,11 @@ export class AgentVariables {
     }
   }
 
-  save(funcName: string, result: string): string {
+  async save(funcName: string, result: string): Promise<string> {
     const count = (this._funcCounters.get(funcName) || 0) + 1;
     const varName = `${funcName}_${count}`;
     this._funcCounters.set(funcName, count);
-    this.set(varName, result);
+    await this.set(varName, result);
     return varName;
   }
 
