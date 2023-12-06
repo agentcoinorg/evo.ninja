@@ -27,7 +27,7 @@ function AccountConfig(props: AccountConfigProps) {
               : "Provide your own OpenAI key and use Evo as a guest. As a guest, your sessions will not be saved."}
           </p>
         )}
-        <div className="space-y-2">
+        <div className="space-y-3">
           <TextField
             value={apiKey ? apiKey : ""}
             placeholder="Enter API Key"
@@ -40,7 +40,7 @@ function AccountConfig(props: AccountConfigProps) {
           <div className="text-xs text-zinc-400">
             Don't have an OpenAI key?
             <a
-              className="ml-1 text-cyan-500 underline"
+              className="ml-1 text-cyan-500 underline transition-colors duration-300 hover:text-white"
               href="https://help.openai.com/en/articles/4936850-where-do-i-find-my-api-key"
               target="_blank"
               rel="noredirect"
@@ -50,9 +50,9 @@ function AccountConfig(props: AccountConfigProps) {
           </div>
         </div>
 
-        <div className="space-y-1">
+        <div className="w-full space-y-1">
           <h3 className="text-sm font-semibold">Data</h3>
-          <fieldset className="flex items-center justify-between">
+          <fieldset className="flex w-full items-center justify-between">
             <label className="text-sm text-zinc-200">
               Share prompts with Evo
             </label>
