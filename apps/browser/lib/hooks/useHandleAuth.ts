@@ -3,24 +3,24 @@ import { useState } from "react";
 import {
   allowTelemetryAtom,
   capReachedAtom,
-  chatIdAtom,
   localOpenAiApiKeyAtom,
+  proxyEmbeddingAtom,
+  proxyLlmAtom,
 } from "../store";
 import { useSession } from "next-auth/react";
-import { useEvo } from "./useEvo";
 import { AuthProxy } from "../api/AuthProxy";
 
 export function useHandleAuth() {
   const [awaitingAuth, setAwaitingAuth] = useState<boolean>(false);
   const [, setAccountModalOpen] = useState(false);
 
-  const [chatId, setChatId] = useAtom(chatIdAtom)
   const [allowTelemetry] = useAtom(allowTelemetryAtom);
   const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom);
   const [, setCapReached] = useAtom(capReachedAtom);
+  const [proxyLlmApi] = useAtom(proxyLlmAtom);
+  const [proxyEmbeddingApi] = useAtom(proxyEmbeddingAtom);
 
   const { data: session } = useSession();
-//   const { proxyLlmApi, proxyEmbeddingApi } = useEvo({ chatId, });
 
   const firstTimeUser = !localOpenAiApiKey && !session?.user;
 
@@ -51,8 +51,8 @@ export function useHandleAuth() {
       return false;
     }
 
-    // proxyLlmApi?.setGoalId(goalId);
-    // proxyEmbeddingApi?.setGoalId(goalId);
+    proxyLlmApi?.setGoalId(goalId);
+    proxyEmbeddingApi?.setGoalId(goalId);
     return true;
   };
   return {

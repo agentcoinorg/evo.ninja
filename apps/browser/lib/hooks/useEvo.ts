@@ -22,26 +22,42 @@ import { ProxyEmbeddingApi, ProxyLlmApi } from "../api";
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 import { useAtom } from "jotai";
 import { ChatMessage } from "@/components/Chat";
-import { capReachedAtom, errorAtom, localOpenAiApiKeyAtom, userWorkspaceAtom } from "@/lib/store";
+import {
+  capReachedAtom,
+  proxyEmbeddingAtom,
+  proxyLlmAtom,
+  localOpenAiApiKeyAtom,
+  userWorkspaceAtom,
+} from "@/lib/store";
 import { useSupabase } from "../supabase/useSupabase";
 import { mapChatMessageToMessageDTO } from "../supabase/evo";
 
 interface UseEvoArgs {
   chatId: string;
-  onMessage: (message: ChatMessage) => void
+  onMessage: (message: ChatMessage) => void;
 }
 
-export function useEvo({ chatId, onMessage }: UseEvoArgs) {
-  const supabase = useSupabase()
-  const [, setError] = useAtom(errorAtom)
-  const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom)
+export function useEvo({ chatId, onMessage }: UseEvoArgs): {
+  running: boolean;
+  error?: string;
+  start: (message: string) => void;
+  resume: () => void;
+  pause: () => void;
+  paused: boolean;
+} {
+  // const supabase = useSupabase();
+  const [paused, setPaused] = useState<boolean>(false);
+  const [running, setRunning] = useState<boolean>(false);
+  const [iterator, setIterator] = useState<
+    ReturnType<Evo["run"]> | undefined
+  >();
+
+  const [error, setError] = useState<string | undefined>();
+  const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom);
   const [evo, setEvo] = useState<Evo | undefined>();
-  const [proxyEmbeddingApi, setProxyEmbeddingApi] = useState<
-    ProxyEmbeddingApi | undefined
-  >(undefined);
-  const [proxyLlmApi, setProxyLlmApi] = useState<ProxyLlmApi | undefined>(
-    undefined
-  );
+  const [, setLlmProxyApi] = useAtom(proxyLlmAtom);
+  const [, setEmbeddingProxyApi] = useAtom(proxyEmbeddingAtom);
+
   const [, setCapReached] = useAtom(capReachedAtom);
   const [userWorkspace, setUserWorkspace] = useAtom(userWorkspaceAtom);
 
@@ -92,11 +108,11 @@ export function useEvo({ chatId, onMessage }: UseEvoArgs) {
           env.MAX_RESPONSE_TOKENS,
           () => setCapReached(true)
         );
-        setProxyLlmApi(llm as ProxyLlmApi);
+        setLlmProxyApi(llm as ProxyLlmApi);
         embedding = new ProxyEmbeddingApi(cl100k_base, () =>
           setCapReached(true)
         );
-        setProxyEmbeddingApi(embedding as ProxyEmbeddingApi);
+        setEmbeddingProxyApi(embedding as ProxyEmbeddingApi);
       }
 
       let workspace = userWorkspace;
@@ -110,14 +126,15 @@ export function useEvo({ chatId, onMessage }: UseEvoArgs) {
 
       const chat = new EvoChat(cl100k_base, {
         async onMessagesAdded(type, msgs) {
-          const temporary = type === "temporary"
-          const mappedMessages = msgs.map(
-            (msg) => mapChatMessageToMessageDTO(chatId, temporary, msg)
-          )
+          const temporary = type === "temporary";
+          const mappedMessages = msgs.map((msg) =>
+            mapChatMessageToMessageDTO(chatId, temporary, msg)
+          );
 
-          console.log("Message DTO")
-          console.log(mappedMessages)
+          console.log("Message DTO");
+          console.log(mappedMessages);
 
+          //TODO(cbrzn): Attach with backend once UI is ready
           // const response = await supabase
           //   .from('messages')
           //   .insert(mappedMessages)
@@ -153,9 +170,7 @@ export function useEvo({ chatId, onMessage }: UseEvoArgs) {
             workspace,
             internals,
             env,
-            scripts,
-            undefined,
-            undefined
+            scripts
           )
         )
       );
@@ -164,5 +179,73 @@ export function useEvo({ chatId, onMessage }: UseEvoArgs) {
     }
   }, [localOpenAiApiKey]);
 
-  return { evo, proxyEmbeddingApi, proxyLlmApi };
+  const start = (goal: string) => {
+    if (!evo) return;
+    setIterator(evo.run({ goal }));
+    setRunning(true);
+  };
+
+  const pause = () => {
+    if (!paused) {
+      setPaused(true);
+    }
+  };
+
+  const resume = () => {
+    if (paused) {
+      setPaused(false);
+    }
+  };
+
+  useEffect(() => {
+    const runEvo = async () => {
+      // Create a new iteration thread
+      if (!iterator) return;
+      let stepCounter = 1;
+      while (running) {
+        // setStopped(false);
+        const response = await iterator.next();
+        if (response.done) {
+          const actionTitle = response.value.value.title;
+          console.log(response.value);
+          if (
+            actionTitle.includes("onGoalAchieved") ||
+            actionTitle === "SUCCESS"
+          ) {
+            onMessage({
+              title: "## Goal Achieved",
+              user: "evo",
+            });
+          }
+          setRunning(false);
+          setIterator(undefined);
+          evo?.reset();
+          break;
+        }
+
+        onMessage({
+          title: `## Step ${stepCounter}`,
+          user: "evo",
+        });
+
+        if (!response.done) {
+          // TODO: Update this function to add information to the modal output (rather than adding it into the chat)
+          const evoMessage = {
+            title: `### Action executed:\n${response.value.title}`,
+            content: response.value.content,
+            user: "evo",
+          };
+          // messageLog = [...messageLog, evoMessage];
+          onMessage(evoMessage);
+        }
+
+        stepCounter++;
+      }
+    };
+
+    const timer = setTimeout(runEvo, 200);
+    return () => clearTimeout(timer);
+  }, [running, iterator, paused]);
+
+  return { running, pause, start, error, resume, paused };
 }

@@ -2,6 +2,7 @@ import { InMemoryWorkspace } from "@evo-ninja/agent-utils";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
+import { ProxyEmbeddingApi, ProxyLlmApi } from "./api";
 
 export const localOpenAiApiKeyAtom = atomWithStorage<string | null>(
   "openai-api-key",
@@ -18,3 +19,5 @@ export const uploadedFilesAtom = atom<InMemoryFile[]>([]);
 export const userWorkspaceAtom = atom<InMemoryWorkspace | undefined>(undefined);
 export const sidebarAtom = atom<boolean>(true)
 export const chatIdAtom = atom<string>("")
+export const proxyLlmAtom = atom<ProxyLlmApi | undefined>(undefined)
+export const proxyEmbeddingAtom = atom<ProxyEmbeddingApi | undefined>(undefined)

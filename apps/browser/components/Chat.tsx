@@ -55,67 +55,6 @@ const Chat: React.FC<ChatProps> = ({
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [showPrompts, setShowPrompts] = useState<boolean>(true);
 
-  // TODO: This entire effect will be moved to useEvo
-  // useEffect(() => {
-  //   const runEvo = async () => {
-  //     if (!evoRunning) {
-  //       return Promise.resolve();
-  //     }
-
-  //     // Create a new iteration thread
-  //     if (!evoItr) {
-  //       const userMsgs = messages.filter((msg) => msg.user === "user");
-  //       const goal = userMsgs[userMsgs.length - 1].title;
-  //       setEvoItr(evo.run({ goal }));
-  //       return Promise.resolve();
-  //     }
-
-  //     let messageLog = messages;
-  //     let stepCounter = 1
-  //     while (evoRunning) {
-  //       setStopped(false);
-
-  //       const response = await evoItr.next();
-  //       if (response.done) {
-  //         const actionTitle = response.value.value.title
-  //         console.log(response.value)
-  //         if (actionTitle.includes("onGoalAchieved") || actionTitle === "SUCCESS") {
-  //           onMessage({
-  //             title: "## Goal Achieved",
-  //             user: "evo"
-  //           })
-  //         }
-  //         setEvoRunning(false);
-  //         setSending(false);
-  //         setEvoItr(undefined);
-  //         evo.reset();
-  //         break
-  //       }
-
-  //       onMessage({
-  //         title: `## Step ${stepCounter}`,
-  //         user: "evo"
-  //       })
-
-  //       if (!response.done) {
-  //         const evoMessage = {
-  //           title: `### Action executed:\n${response.value.title}`,
-  //           content: response.value.content,
-  //           user: "evo"
-  //         };
-  //         messageLog = [...messageLog, evoMessage];
-  //         onMessage(evoMessage);
-  //       }
-
-  //       stepCounter++
-  //     }
-  //     return Promise.resolve();
-  //   }
-
-  //   const timer = setTimeout(runEvo, 200);
-  //   return () => clearTimeout(timer);
-  // }, [evoRunning, evoItr]);
-
   const handleDisclaimerSelect = (accept: boolean) => {
     setShowDisclaimer(false);
     setAllowTelemetry(accept);
