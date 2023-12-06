@@ -67,6 +67,7 @@ function CurrentWorkspace({
             iconProps={{ size: 18 }}
             onClick={open}
           />
+          <input {...getInputProps()} />
           {userFiles.length !== 0 && (
             <IconButton
               buttonClassName="text-zinc-500 hover:text-cyan-500"
@@ -117,15 +118,6 @@ function CurrentWorkspace({
                 );
               })}
             </div>
-            {isDragAccept && (
-              <div className="animate-fade-in pointer-events-none absolute left-1/2 top-1/2 z-10 w-8/12 -translate-x-1/2 -translate-y-1/2 transform rounded-lg bg-zinc-900/80 p-3 text-center text-xs opacity-0 shadow-md backdrop-blur group-hover:block">
-                <input {...getInputProps()} />
-                <p>
-                  Drag &quot;n&quot; drop the build folder here, or click to
-                  select the files
-                </p>
-              </div>
-            )}
           </>
         )}
       </div>
