@@ -6,13 +6,14 @@ import {
   localOpenAiApiKeyAtom,
   proxyEmbeddingAtom,
   proxyLlmAtom,
+  showAccountModalAtom,
 } from "../store";
 import { useSession } from "next-auth/react";
 import { AuthProxy } from "../api/AuthProxy";
 
 export function useHandleAuth() {
   const [awaitingAuth, setAwaitingAuth] = useState<boolean>(false);
-  const [, setAccountModalOpen] = useState(false);
+  const [, setAccountModalOpen] = useAtom(showAccountModalAtom);
 
   const [allowTelemetry] = useAtom(allowTelemetryAtom);
   const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom);

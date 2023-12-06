@@ -20,7 +20,7 @@ export interface ChatMessage {
 
 export interface ChatProps {
   messages: ChatMessage[];
-  samplePrompts: ExamplePrompt[];
+  samplePrompts: ExamplePrompt[] | undefined;
   isRunning: boolean;
   isStopped: boolean;
   isPaused: boolean;
@@ -138,7 +138,7 @@ const Chat: React.FC<ChatProps> = ({
           </div>
         ))}
       </div>
-      {samplePrompts.length && (
+      {samplePrompts ? (
         <div className="grid w-full grid-rows-2 p-2.5 py-16 self-center w-[100%] max-w-[56rem]">
           {samplePrompts.map((prompt, index) => (
             <div 
@@ -150,7 +150,7 @@ const Chat: React.FC<ChatProps> = ({
             </div>
           ))}
         </div>
-      )}
+      ): null}
       <div className="flex items-center justify-center gap-4 p-4 mb-4 self-center w-[100%] max-w-[56rem]">
         <Disclaimer isOpen={showDisclaimer} onClose={() => setShowDisclaimer(false)} />
         <input
