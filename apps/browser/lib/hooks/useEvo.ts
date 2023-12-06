@@ -38,16 +38,21 @@ interface UseEvoArgs {
 }
 
 export function useEvo({ chatId, onMessage }: UseEvoArgs): {
-  running: boolean;
+  isRunning: boolean;
   error?: string;
   start: (message: string) => void;
-  resume: () => void;
-  pause: () => void;
-  paused: boolean;
+  onContinue: () => void;
+  onPause: () => void;
+  isPaused: boolean;
+  isStopped: boolean;
+  isSending: boolean;
+  setIsSending: (sending: boolean) => void
 } {
   // const supabase = useSupabase();
-  const [paused, setPaused] = useState<boolean>(false);
-  const [running, setRunning] = useState<boolean>(false);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [isSending, setIsSending] = useState<boolean>(false);
+  const [isStopped, setIsStopped] = useState<boolean>(false);
   const [iterator, setIterator] = useState<
     ReturnType<Evo["run"]> | undefined
   >();
@@ -182,18 +187,18 @@ export function useEvo({ chatId, onMessage }: UseEvoArgs): {
   const start = (goal: string) => {
     if (!evo) return;
     setIterator(evo.run({ goal }));
-    setRunning(true);
+    setIsRunning(true);
   };
 
-  const pause = () => {
-    if (!paused) {
-      setPaused(true);
+  const onPause = () => {
+    if (!isPaused) {
+      setIsPaused(true);
     }
   };
 
-  const resume = () => {
-    if (paused) {
-      setPaused(false);
+  const onContinue = () => {
+    if (isPaused) {
+      setIsPaused(false);
     }
   };
 
@@ -202,8 +207,8 @@ export function useEvo({ chatId, onMessage }: UseEvoArgs): {
       // Create a new iteration thread
       if (!iterator) return;
       let stepCounter = 1;
-      while (running) {
-        // setStopped(false);
+      while (isRunning) {
+        setIsStopped(false);
         const response = await iterator.next();
         if (response.done) {
           const actionTitle = response.value.value.title;
@@ -217,8 +222,9 @@ export function useEvo({ chatId, onMessage }: UseEvoArgs): {
               user: "evo",
             });
           }
-          setRunning(false);
+          setIsRunning(false);
           setIterator(undefined);
+          setIsSending(false);
           evo?.reset();
           break;
         }
@@ -245,7 +251,18 @@ export function useEvo({ chatId, onMessage }: UseEvoArgs): {
 
     const timer = setTimeout(runEvo, 200);
     return () => clearTimeout(timer);
-  }, [running, iterator, paused]);
+  }, [isRunning, iterator, isPaused]);
 
-  return { running, pause, start, error, resume, paused };
+  return {
+    isRunning,
+    onPause,
+    start,
+    error,
+    onContinue,
+    isPaused,
+    isSending,
+    isStopped,
+    setIsSending,
+
+  };
 }

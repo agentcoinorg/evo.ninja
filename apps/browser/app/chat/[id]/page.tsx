@@ -1,10 +1,11 @@
-"use client"
+"use client";
 
 import { useEvo } from "@/lib/hooks/useEvo";
 import Chat, { ChatMessage } from "@/components/Chat";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useCheckForUserFiles } from "@/lib/hooks/useCheckForUserFiles";
+import { useHandleAuth } from "@/lib/hooks/useHandleAuth";
 
 export default function ChatPage() {
   const router = useRouter();
@@ -18,23 +19,43 @@ export default function ChatPage() {
     checkForUserFiles();
   };
 
-  const { evo } = useEvo({ chatId, onMessage })
+  const {
+    isRunning,
+    isPaused,
+    isSending,
+    isStopped,
+    start,
+    onContinue,
+    onPause,
+    setIsSending,
+  } = useEvo({ chatId, onMessage });
+  const { handlePromptAuth } = useHandleAuth();
 
+  const handleSend = async (newMessage: string) => {
+    if (!newMessage) return;
+    const authorized = await handlePromptAuth(newMessage);
+    if (!authorized) {
+      return;
+    }
+    onMessage({
+      title: newMessage,
+      user: "user",
+    });
+    setIsSending(true);
+    start(newMessage);
+  };
 
   return (
-    <>
-      {evo && (
-        <Chat
-          evo={evo}
-          onMessage={onMessage}
-          messages={messages}
-          sidebarOpen={false}
-          overlayOpen={false}
-          onSidebarToggleClick={() => {}}
-          onUploadFiles={() => {}}
-          handlePromptAuth={() => Promise.resolve(true)}
-        />
-      )}
-    </>
+    <Chat
+      messages={messages}
+      samplePrompts={[]}
+      isPaused={isPaused}
+      isRunning={isRunning}
+      isSending={isSending}
+      isStopped={isStopped}
+      onPromptSent={handleSend}
+      onPause={onPause}
+      onContinue={onContinue}
+    />
   );
 }
