@@ -20,16 +20,20 @@ import { BrowserLogger } from "../sys/logger";
 import { createInBrowserScripts } from "../scripts";
 import { ProxyEmbeddingApi, ProxyLlmApi } from "../api";
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
-import { atom, useAtom } from "jotai";
+import { useAtom } from "jotai";
 import { ChatMessage } from "@/components/Chat";
-import { capReachedAtom, localOpenAiApiKeyAtom } from "@/lib/store";
+import { capReachedAtom, errorAtom, localOpenAiApiKeyAtom, userWorkspaceAtom } from "@/lib/store";
 import { useSupabase } from "../supabase/useSupabase";
 import { mapChatMessageToMessageDTO } from "../supabase/evo";
 
-export const userWorkspaceAtom = atom<InMemoryWorkspace | undefined>(undefined);
+interface UseEvoArgs {
+  chatId: string;
+  onMessage: (message: ChatMessage) => void
+}
 
-export function useEvo(chatId: string, onMessage: (message: ChatMessage) => void, setError: (msg: string) => void) {
+export function useEvo({ chatId, onMessage }: UseEvoArgs) {
   const supabase = useSupabase()
+  const [, setError] = useAtom(errorAtom)
   const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom)
   const [evo, setEvo] = useState<Evo | undefined>();
   const [proxyEmbeddingApi, setProxyEmbeddingApi] = useState<
@@ -40,6 +44,7 @@ export function useEvo(chatId: string, onMessage: (message: ChatMessage) => void
   );
   const [, setCapReached] = useAtom(capReachedAtom);
   const [userWorkspace, setUserWorkspace] = useAtom(userWorkspaceAtom);
+
   useEffect(() => {
     try {
       const browserLogger = new BrowserLogger({
@@ -107,7 +112,7 @@ export function useEvo(chatId: string, onMessage: (message: ChatMessage) => void
         async onMessagesAdded(type, msgs) {
           const temporary = type === "temporary"
           const mappedMessages = msgs.map(
-            (msg) => mapChatMessageToMessageDTO(1, temporary, msg)
+            (msg) => mapChatMessageToMessageDTO(chatId, temporary, msg)
           )
 
           const response = await supabase

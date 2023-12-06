@@ -11,16 +11,10 @@ import { checkLlmModel } from "@/lib/checkLlmModel";
 import {
   allowTelemetryAtom,
   capReachedAtom,
+  errorAtom,
   localOpenAiApiKeyAtom,
+  showAccountModalAtom,
 } from "@/lib/store";
-
-interface AccountConfigProps {
-  apiKey: string | null;
-  allowTelemetry: boolean;
-  onClose: () => void;
-  firstTimeUser: boolean;
-  setError: (msg: string) => void;
-}
 
 const validateOpenAiApiKey = async (
   openAiApiKey: string
@@ -45,14 +39,20 @@ const validateOpenAiApiKey = async (
   }
 };
 
-function AccountConfig(props: AccountConfigProps) {
+function AccountConfig() {
+  const [accountModal, setAccountModalOpen] = useAtom(showAccountModalAtom);
   const [localApiKey, setLocalApiKey] = useAtom(localOpenAiApiKeyAtom);
   const [apiKey, setApiKey] = useState<string>(localApiKey || "");
   const [allowTelemetry, setAllowTelemetry] = useAtom(allowTelemetryAtom);
   const [telemetry, setTelemetry] = useState(allowTelemetry);
   const [capReached, setCapReached] = useAtom(capReachedAtom);
-  const { onClose, firstTimeUser, setError } = props;
+  const [_, setError] = useAtom(errorAtom)
   const { data: session } = useSession();
+  const firstTimeUser = !localApiKey && !session?.user;
+
+  const onClose = () => {
+    setAccountModalOpen(false)
+  }
 
   const onSave = async () => {
     if (apiKey) {
@@ -73,7 +73,7 @@ function AccountConfig(props: AccountConfigProps) {
     onClose();
   };
 
-  return (
+  return accountModal && (
     <div className="absolute inset-0 z-50 bg-neutral-900/80" onClick={onClose}>
       <div
         className="fixed left-1/2 top-1/2 flex w-[100%] max-w-[38rem] -translate-x-1/2 -translate-y-1/2 flex-col gap-4 rounded-lg bg-neutral-900 p-12 text-neutral-50"

@@ -9,27 +9,25 @@ import { faFolder } from "@fortawesome/free-solid-svg-icons";
 import Upload from "./Upload";
 import File from "./File";
 
-import { downloadFilesAsZip } from "@/lib/sys/file/downloadFilesAsZip";
-import { InMemoryFile } from "@nerfzael/memory-fs";
 import CloseIcon from "./CloseIcon";
 import SidebarIcon from "./SidebarIcon";
+import { useAtom } from "jotai";
+import { uploadedFilesAtom, userFilesAtom } from "@/lib/store";
+import { useDownloadFilesAsZip } from "@/lib/hooks/useDownloadFilesAsZip";
 
 export interface SidebarProps {
   onSettingsClick: () => void;
-  userFiles: InMemoryFile[];
-  onUploadFiles: (files: InMemoryFile[]) => void;
   onSidebarToggleClick: () => void;
 }
 
 const Sidebar = ({
   onSettingsClick,
-  userFiles,
-  onUploadFiles,
   onSidebarToggleClick,
 }: SidebarProps) => {
-  function downloadUserFiles() {
-    downloadFilesAsZip("workspace.zip", userFiles);
-  }
+  const [userFiles] = useAtom(userFilesAtom)
+  const [, setUploadedFiles] = useAtom(uploadedFilesAtom)
+
+  const downloadUserFiles = useDownloadFilesAsZip()
 
   return (
     <div className="box-border flex h-full w-full flex-col items-center overflow-auto bg-opacity-black p-4 justify-between">
@@ -55,7 +53,7 @@ const Sidebar = ({
 
         <Upload
           className="flex h-auto max-h-96 w-full flex-col justify-between overflow-y-auto rounded border border-neutral-500 bg-neutral-900 p-4 text-neutral-50"
-          onUploadFiles={onUploadFiles}
+          onUploadFiles={setUploadedFiles}
         >
           <h3 className="text-lg font-semibold">
             <FontAwesomeIcon icon={faFolder} style={{ marginRight: "10px" }} />{" "}

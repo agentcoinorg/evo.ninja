@@ -1,14 +1,24 @@
+"use client"
+
 import { Dialog, Transition } from '@headlessui/react'
 import clsx from 'clsx'
 import { Fragment } from 'react'
 import { EXO_FONT } from '@/lib/fonts'
+import { useAtom } from 'jotai'
+import { welcomeModalAtom } from '@/lib/store'
 
 export const WELCOME_MODAL_SEEN_STORAGE_KEY = "welcome-modal-seen" 
 
-export default function WelcomeModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
+export default function WelcomeModal() {
+  const [welcomeModalSeen, setWelcomeModalSeen] = useAtom(welcomeModalAtom);
+
+  const onClose = () => {
+    setWelcomeModalSeen(true)
+  }
+  
   return (
     <>
-      <Transition appear show={isOpen} as={Fragment}>
+      <Transition appear show={welcomeModalSeen} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={onClose}>
           <div className="fixed inset-0 overflow-y-auto" style={{ backgroundColor: "black" }}>
             <div className="flex min-h-full items-center justify-center p-4 text-center">
