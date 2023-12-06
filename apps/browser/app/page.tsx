@@ -5,7 +5,7 @@ import { useAtom } from "jotai";
 
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
-import AccountConfig from "@/components/AccountConfig";
+// import AccountConfig from "@/components/AccountConfig";
 import Sidebar from "@/components/Sidebar";
 import CloseSidebarIcon from "@/components/CloseSidebarIcon";
 import Chat, { ChatMessage } from "@/components/Chat";
@@ -113,7 +113,7 @@ function Dojo() {
   return (
     <>
       <div className="flex h-full bg-zinc-900 bg-landing-bg bg-repeat text-zinc-400">
-        {accountModal && (
+        {/* {accountModal && (
           <AccountConfig
             apiKey={localOpenAiApiKey}
             allowTelemetry={allowTelemetry}
@@ -123,7 +123,7 @@ function Dojo() {
             firstTimeUser={firstTimeUser}
             setError={setError}
           />
-        )}
+        )} */}
         <div className="relative w-full transition-transform lg:w-auto lg:max-w-md">
           <Sidebar
             hoveringSidebarButton={hoveringSidebarButton}
@@ -168,6 +168,9 @@ function Dojo() {
         </div>
       </div>
       <WelcomeModal
+        apiKey={localOpenAiApiKey}
+        allowTelemetry={allowTelemetry}
+        firstTimeUser={firstTimeUser}
         isOpen={!welcomeModalSeen}
         onClose={() => setWelcomeModalSeen(true)}
       />

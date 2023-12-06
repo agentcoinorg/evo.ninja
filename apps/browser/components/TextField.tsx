@@ -34,7 +34,7 @@ const TextField = ({
           onClick={handleCheck}
         >
           <input
-            type={type}
+            type="hidden"
             className="hidden"
             checked={isChecked}
             // {...props}
@@ -44,7 +44,7 @@ const TextField = ({
       ) : (
         <input
           className={clsx(
-            "w-full rounded-md border-2 border-zinc-500 bg-transparent px-4 py-2 text-white outline-none transition-all hover:border-zinc-600 hover:bg-zinc-950 focus:border-zinc-400",
+            "w-full rounded-md border-2 border-zinc-500 bg-transparent px-4 py-2 text-white outline-none transition-all hover:border-zinc-600 hover:bg-zinc-950 focus:border-zinc-400 focus:ring-2 focus:ring-cyan-500/50",
             { "border-red-500": error },
             className
           )}
