@@ -13,7 +13,6 @@
     "@headlessui/react": "^1.7.17",
     "@nerfzael/memory-fs": "0.1.1",
     "@supabase/supabase-js": "2.38.5",
-    "js-sha512": "^0.8.0",
     "jsonwebtoken": "^9.0.2",
     "buffer": "6.0.3",
     "clsx": "^2.0.0",

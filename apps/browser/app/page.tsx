@@ -242,7 +242,7 @@ function Dojo() {
       return false;
     }
 
-    if (!dojoConfig.openAiApiKey && !session?.user) {
+    if (!dojoConfig.openAiApiKey && !session?.user.email) {
       setFirstTimeUser(true);
       setAccountModalOpen(true);
       return false;

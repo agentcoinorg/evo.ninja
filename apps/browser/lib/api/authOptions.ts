@@ -1,7 +1,7 @@
 import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { sha512 } from "js-sha512";
+import { v4 as uuid } from "uuid";
 import jwt from "jsonwebtoken"
 
 import { SupabaseAdapter } from "@auth/supabase-adapter";
@@ -28,43 +28,17 @@ export const getAuthOptions = (skipCredentials = false): AuthOptions => {
   const supabase = createSupabaseClient()
 
   const credentialsProvider = CredentialsProvider({
-    name: "Open AI API Key",
-    credentials: {
-      apiKey: { label: "API Key", type: "text" },
-    },
+    name: "Guest Account",
+    credentials: {},
     async authorize(credentials, req) {
-      if (!credentials?.apiKey) {
-        throw new Error("No API key provided")
-      }
-
-      if (!process.env.NEXT_AUTH_SECRET) {
-        throw new Error("No NEXT_AUTH_SECRET provided")
-      }
-
-      const keyHash = sha512.hmac(process.env.NEXT_AUTH_SECRET, credentials.apiKey)
-
-      const { data: selectData, error: selectError } = await supabase
-      .from('users')
-      .select("id, api_key_hash, email")
-      .eq('api_key_hash', keyHash)
-
-      if (selectError) {
-        console.log(selectError)
-        throw new Error("Error selecting user")
-      }
-
-      if (selectData && selectData[0]) {
-        return {
-          id: selectData[0].id
-        }
-      }
+      const guest_id = uuid()
 
       const { data: insertData, error: insertError } = await supabase
       .from('users')
       .insert([
-        { api_key_hash: keyHash },
+        { id: guest_id },
       ])
-      .select("id, api_key_hash, email")
+      .select("id, email")
 
       if (insertError) {
         console.log(insertError)
@@ -73,7 +47,7 @@ export const getAuthOptions = (skipCredentials = false): AuthOptions => {
 
       if (insertData && insertData[0]) {
         return {
-          id: insertData[0].id
+          id: guest_id
         }
       }
 
