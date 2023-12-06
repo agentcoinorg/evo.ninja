@@ -41,7 +41,7 @@ export function useEvo(onMessage: (message: ChatMessage) => void, setError: (msg
     (async () => {
       try {
         const browserLogger = new BrowserLogger({
-          onLog: (message: string) => {
+          onLog: async (message: string) => {
             onMessage({
               user: "evo",
               title: message,
