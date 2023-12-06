@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSession, signOut, signIn } from "next-auth/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -53,6 +53,16 @@ function AccountConfig() {
   const onClose = () => {
     setAccountModalOpen(false)
   }
+
+  useEffect(() => {
+    if (!apiKey && localApiKey) {
+      setApiKey(localApiKey)
+    }
+  }, [localApiKey])
+
+  useEffect(() => {
+    setTelemetry(allowTelemetry)
+  }, [allowTelemetry])
 
   const onSave = async () => {
     if (apiKey) {
