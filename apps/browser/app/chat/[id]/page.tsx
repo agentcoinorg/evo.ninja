@@ -20,6 +20,40 @@ export default function ChatPage() {
 
   const { evo } = useEvo({ chatId, onMessage })
 
+  const handleSend = async (newMessage?: string) => {
+    if (!message && !newMessage) return
+    const authorized = await handlePromptAuth(newMessage ?? message)
+    if (!authorized) {
+      return
+    }
+    onMessage({
+      title: newMessage || message,
+      user: "user",
+    });
+    setSending(true);
+    setShowPrompts(false);
+    setMessage("");
+    setEvoRunning(true);
+  };
+
+  const handlePause = async () => {
+    setPaused(true);
+  };
+
+  const handleContinue = async () => {
+    setPaused(false);
+  };
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setMessage(event.target.value);
+  };
+
+  const handleKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && !sending) {
+      handleSend();
+    }
+  };
+
 
   return (
     <>

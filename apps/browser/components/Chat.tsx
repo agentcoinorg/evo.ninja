@@ -1,16 +1,15 @@
-import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useRef, useCallback } from "react";
-import { Evo } from "@evo-ninja/agents";
+import React, { useState, useEffect, useRef, useCallback, ChangeEvent } from "react";
 import ReactMarkdown from "react-markdown";
-import FileSaver from "file-saver";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
-import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import SidebarIcon from "./SidebarIcon";
 import { useAtom } from "jotai";
-import { allowTelemetryAtom, showDisclaimerAtom, sidebarAtom } from "@/lib/store";
-import { ExamplePrompt, examplePrompts } from "@/lib/examplePrompts";
+import { showDisclaimerAtom, sidebarAtom, uploadedFilesAtom } from "@/lib/store";
+import { ExamplePrompt } from "@/lib/examplePrompts";
+import Disclaimer from "./modals/Disclaimer";
+import { exportChatHistory } from "@/lib/exportChatHistory";
 
 export interface ChatMessage {
   title: string;
@@ -20,170 +19,57 @@ export interface ChatMessage {
 }
 
 export interface ChatProps {
-  // evo: Evo;
-  // onMessage: (message: ChatMessage) => void;
   messages: ChatMessage[];
-  // overlayOpen: boolean;
-  // onSidebarToggleClick: () => void;
-  // onUploadFiles: (files: InMemoryFile[]) => void;
-  // handlePromptAuth: (message: string) => Promise<boolean>
+  samplePrompts: ExamplePrompt[];
+  isRunning: boolean;
+  isStopped: boolean;
+  isPaused: boolean;
+  isSending: boolean;
+  onPause: () => void;
+  onContinue: () => void;
+  onPromptSent: (prompt: string) => void;
 }
 
 const Chat: React.FC<ChatProps> = ({
-  // evo,
-  // onMessage,
   messages,
-//   overlayOpen,
-//   onSidebarToggleClick,
-//   onUploadFiles,
-//   handlePromptAuth
+  samplePrompts,
+  onPromptSent,
+  onContinue,
+  onPause,
+  isPaused,
+  isRunning,
+  isSending,
+  isStopped
 }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
   const [sidebarOpen, setSidebarOpen] = useAtom(sidebarAtom);
 
-  // const [evoRunning, setEvoRunning] = useState<boolean>(false);
-  // const [paused, setPaused] = useState<boolean>(false);
-  // const [sending, setSending] = useState<boolean>(false);
-  // const [evoItr, setEvoItr] = useState<ReturnType<Evo["run"]> | undefined>(
-  //   undefined
-  // );
-  const [stopped, setStopped] = useState<boolean>(false);
   const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom)
-  const [,setAllowTelemetry] = useAtom(allowTelemetryAtom)
+  const [, setUploadedFiles] = useAtom(uploadedFilesAtom)
 
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
-  const [showPrompts, setShowPrompts] = useState<boolean>(true);
 
-  // TODO: This entire effect will be moved to useEvo
-  // useEffect(() => {
-  //   const runEvo = async () => {
-  //     if (!evoRunning) {
-  //       return Promise.resolve();
-  //     }
-
-  //     // Create a new iteration thread
-  //     if (!evoItr) {
-  //       const userMsgs = messages.filter((msg) => msg.user === "user");
-  //       const goal = userMsgs[userMsgs.length - 1].title;
-  //       setEvoItr(evo.run({ goal }));
-  //       return Promise.resolve();
-  //     }
-
-  //     let messageLog = messages;
-  //     let stepCounter = 1
-  //     while (evoRunning) {
-  //       setStopped(false);
-
-  //       const response = await evoItr.next();
-  //       if (response.done) {
-  //         const actionTitle = response.value.value.title
-  //         console.log(response.value)
-  //         if (actionTitle.includes("onGoalAchieved") || actionTitle === "SUCCESS") {
-  //           onMessage({
-  //             title: "## Goal Achieved",
-  //             user: "evo"
-  //           })
-  //         }
-  //         setEvoRunning(false);
-  //         setSending(false);
-  //         setEvoItr(undefined);
-  //         evo.reset();
-  //         break
-  //       }
-
-  //       onMessage({
-  //         title: `## Step ${stepCounter}`,
-  //         user: "evo"
-  //       })
-
-  //       if (!response.done) {
-  //         const evoMessage = {
-  //           title: `### Action executed:\n${response.value.title}`,
-  //           content: response.value.content,
-  //           user: "evo"
-  //         };
-  //         messageLog = [...messageLog, evoMessage];
-  //         onMessage(evoMessage);
-  //       }
-
-  //       stepCounter++
-  //     }
-  //     return Promise.resolve();
-  //   }
-
-  //   const timer = setTimeout(runEvo, 200);
-  //   return () => clearTimeout(timer);
-  // }, [evoRunning, evoItr]);
-
-  const handleDisclaimerSelect = (accept: boolean) => {
-    setShowDisclaimer(false);
-    setAllowTelemetry(accept);
+  const handleSend = (prompt: string) => {
+    onPromptSent(prompt);
+    setMessage("")
   }
-
-  const handleSamplePromptClick = async (prompt: ExamplePrompt) => {
-    if (prompt.files) {
-      onUploadFiles(prompt.files);
-    }
-    setMessage(prompt.prompt);
-    handleSend(prompt.prompt);
-  };
-
-  const handleSend = async (newMessage?: string) => {
-    if (!message && !newMessage) return
-    const authorized = await handlePromptAuth(newMessage ?? message)
-    if (!authorized) {
-      return
-    }
-    onMessage({
-      title: newMessage || message,
-      user: "user",
-    });
-    setSending(true);
-    setShowPrompts(false);
-    setMessage("");
-    setEvoRunning(true);
-  };
-
-  const handlePause = async () => {
-    setPaused(true);
-  };
-
-  const handleContinue = async () => {
-    setPaused(false);
-  };
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setMessage(event.target.value);
   };
 
-  const handleKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter" && !sending) {
-      handleSend();
+  const handleKeyPress = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter" && !isSending) {
+      handleSend(message)
     }
   };
 
-  const exportChatHistory = () => {
-    const exportedContent = messages.map((msg, i, msgs) => {
-      if (msg.user === "user") {
-        return `# User\n**Goal:** ${msg.title}\n`
-      } else {
-        const logMessage = `${msg.title} \n${msg.content ?? ""}`
-        // We only append # Evo into the first message from Evo
-        if (msgs.slice(0, i).some(m => m.user === "evo")) {
-          return logMessage
-        } else {
-          return `# Evo\n` + logMessage
-        }
-      }
-    }).join('\n');
-
-    // Generate a date-time stamp
-    const date = new Date();
-    const dateTimeStamp = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}_${date.getHours().toString().padStart(2, '0')}-${date.getMinutes().toString().padStart(2, '0')}-${date.getSeconds().toString().padStart(2, '0')}`;
-
-    const blob = new Blob([exportedContent], { type: 'text/plain;charset=utf-8' });
-    FileSaver.saveAs(blob, `evo-ninja-${dateTimeStamp}.md`)
+  const handleSamplePromptClick = async (prompt: ExamplePrompt) => {
+    if (prompt.files) {
+      setUploadedFiles(prompt.files);
+    }
+    handleSend(prompt.prompt)
   };
 
   const handleScroll = useCallback(() => {
@@ -226,7 +112,7 @@ const Chat: React.FC<ChatProps> = ({
         <div className="h-14 p-4 text-lg text-white cursor-pointer hover:opacity-100 opacity-80 transition-all" onClick={() => setSidebarOpen(!sidebarOpen)}>
           { sidebarOpen ? <></>: <SidebarIcon /> }
         </div>
-        <FontAwesomeIcon className="cursor-pointer" icon={faDownload} onClick={exportChatHistory} />
+        <FontAwesomeIcon className="cursor-pointer" icon={faDownload} onClick={() => exportChatHistory(messages)} />
       </div>
       <div
         ref={listContainerRef}
@@ -252,9 +138,9 @@ const Chat: React.FC<ChatProps> = ({
           </div>
         ))}
       </div>
-      {showPrompts && (
+      {samplePrompts.length && (
         <div className="grid w-full grid-rows-2 p-2.5 py-16 self-center w-[100%] max-w-[56rem]">
-          {examplePrompts.map((prompt, index) => (
+          {samplePrompts.map((prompt, index) => (
             <div 
               key={index} 
               className="m-1 cursor-pointer rounded-xl border border-neutral-500 bg-neutral-800 p-2.5 text-left text-xs text-neutral-50 transition-all hover:border-orange-500" 
@@ -266,15 +152,7 @@ const Chat: React.FC<ChatProps> = ({
         </div>
       )}
       <div className="flex items-center justify-center gap-4 p-4 mb-4 self-center w-[100%] max-w-[56rem]">
-        {showDisclaimer && !overlayOpen && (
-          <div className="absolute bottom-0 z-50 flex w-4/5 items-center justify-around rounded-t-lg border-2 border-orange-600 bg-black p-2.5 text-center text-xs text-white self-center w-[100%] max-w-[56rem]">
-            🧠 Hey there! Mind sharing your prompts to help make Evo even better?
-            <div className="flex gap-2.5">
-              <span className="cursor-pointer px-5 py-2.5 font-bold text-orange-500" onClick={() => handleDisclaimerSelect(true)}>Accept</span>
-              <span className="cursor-pointer px-5 py-2.5 font-bold text-white" onClick={() => handleDisclaimerSelect(false)}>Decline</span>
-            </div>
-          </div>
-        )}
+        <Disclaimer isOpen={showDisclaimer} onClose={() => setShowDisclaimer(false)} />
         <input
           type="text"
           value={message}
@@ -282,28 +160,28 @@ const Chat: React.FC<ChatProps> = ({
           onKeyPress={handleKeyPress}
           placeholder="Enter your main goal here..."
           className="mr-2.5 flex-1 rounded border border-neutral-400 bg-neutral-900 p-2.5 text-neutral-50 outline-none transition-all"
-          disabled={sending || showDisclaimer} // Disable input while sending or if disclaimer is shown
+          disabled={isSending || showDisclaimer}
         />
-        {evoRunning && (
+        {isRunning && (
           <>
             {
-              !paused && (
-                <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" onClick={handlePause} disabled={!evoRunning || paused}>
+              !isPaused && (
+                <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" onClick={onPause} disabled={!isRunning || isPaused}>
                 Pause
                 </button>
               )
             }
             {
-              paused && (
+              isPaused && (
                 <>
-                  {!stopped && (
+                  {!isStopped && (
                      <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" disabled={true}>
                      Pausing
                      </button>
                   )}
 
-                  {stopped && (
-                     <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" onClick={handleContinue} disabled={evoRunning && !paused}>
+                  {isStopped && (
+                     <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" onClick={onContinue} disabled={isRunning && !isPaused}>
                      Paused
                      </button>
                   )}
@@ -313,10 +191,10 @@ const Chat: React.FC<ChatProps> = ({
           </>
         )}
 
-        {evoRunning ? (
+        {isRunning ? (
           <div className="h-9 w-9 animate-spin rounded-full border-4 border-black/10 border-l-orange-600" />
         ) : (
-          <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" onClick={async () => await handleSend()} disabled={evoRunning || sending}>
+          <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" onClick={() => handleSend(message)} disabled={isRunning || isSending}>
             Start
           </button>
         )}
