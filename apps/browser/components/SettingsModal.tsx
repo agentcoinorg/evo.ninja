@@ -127,13 +127,7 @@ export default function SettingsModal(props: AccountConfigProps) {
                         <label className="text-sm text-zinc-200">
                           Share prompts with Evo
                         </label>
-                        <TextField
-                          type="checkbox"
-                          checked={telemetry}
-                          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                            setTelemetry(!telemetry)
-                          }
-                        />
+                        <TextField checked={telemetry} type="checkbox" />
                       </fieldset>
                     </div>
 
