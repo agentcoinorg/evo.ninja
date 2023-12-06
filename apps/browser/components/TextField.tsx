@@ -1,15 +1,23 @@
 import clsx from "clsx";
-import { useState, ChangeEvent, InputHTMLAttributes } from "react";
+import { useState, ChangeEvent, InputHTMLAttributes, ReactNode } from "react";
 
 interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
   checked?: boolean;
+  leftAdornment?: ReactNode;
+  leftAdornmentClassnames?: string;
+  rightAdornment?: ReactNode;
+  rightAdornmentClassnames?: string;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
 const TextField = ({
   type = "input",
+  leftAdornment,
+  leftAdornmentClassnames,
+  rightAdornment,
+  rightAdornmentClassnames,
   className,
   label,
   error,
@@ -26,7 +34,7 @@ const TextField = ({
   };
 
   return (
-    <fieldset className="space-y-1">
+    <div className="w-full space-y-1">
       {label && <label className="text-sm font-semibold">{label}</label>}
       {type === "checkbox" ? (
         <div
@@ -42,18 +50,44 @@ const TextField = ({
           <div className={clsx("checkmark", { hidden: !isChecked })} />
         </div>
       ) : (
-        <input
-          className={clsx(
-            "w-full rounded-md border-2 border-zinc-500 bg-transparent px-4 py-2 text-white outline-none transition-all hover:border-zinc-600 hover:bg-zinc-950 focus:border-zinc-400 focus:ring-2 focus:ring-cyan-500/50",
-            { "border-red-500": error },
-            className
+        <div className="relative w-full">
+          {leftAdornment && (
+            <div
+              className={clsx(
+                "absolute left-4 top-1/2 -translate-y-1/2 transform",
+                leftAdornmentClassnames
+              )}
+            >
+              {leftAdornment}
+            </div>
           )}
-          type={type}
-          // {...props}
-        />
+          <input
+            className={clsx(
+              "w-full rounded-lg border-2 border-zinc-500 bg-transparent p-4 text-sm text-white outline-none transition-all placeholder:text-white/50 hover:border-zinc-600 hover:bg-zinc-950 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/20",
+              { "border-red-500": error },
+              { "!pl-10": leftAdornment },
+              { "!pr-10": rightAdornment },
+              className
+            )}
+            type={type}
+            placeholder={props.placeholder}
+            disabled={props.disabled}
+            // {...props}
+          />
+          {rightAdornment && (
+            <div
+              className={clsx(
+                "absolute right-4 top-1/2 -translate-y-1/2 transform",
+                rightAdornmentClassnames
+              )}
+            >
+              {rightAdornment}
+            </div>
+          )}
+        </div>
       )}
       {error && <div className="text-xs text-red-500">{error}</div>}
-    </fieldset>
+    </div>
   );
 };
 

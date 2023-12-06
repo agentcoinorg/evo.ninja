@@ -12,11 +12,16 @@ const Button = ({
   hierarchy = "primary",
   size = "default",
   className,
+  disabled,
   ...props
 }: ButtonProps) => {
   const hierarchyClasses = {
-    primary: "border-cyan-300 bg-cyan-500 hover:bg-cyan-600",
-    secondary: "border-zinc-700 bg-zinc-800 hover:bg-zinc-700",
+    primary: clsx("border-cyan-300 bg-cyan-500", {
+      "hover:bg-cyan-600": !disabled,
+    }),
+    secondary: clsx("border-zinc-700 bg-zinc-800", {
+      "hover:bg-zinc-700": !disabled,
+    }),
   };
 
   const sizeClasses = {
@@ -27,9 +32,10 @@ const Button = ({
   return (
     <button
       className={clsx(
-        "inline-flex cursor-pointer items-center justify-center space-x-2 rounded-md border text-white transition-all",
+        "inline-flex items-center justify-center space-x-2 rounded-md border text-white transition-all",
         hierarchyClasses[hierarchy],
         sizeClasses[size],
+        disabled ? "opacity-60 cursor-default" : "cursor-pointer",
         className
       )}
       {...props}

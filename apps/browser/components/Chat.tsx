@@ -20,6 +20,9 @@ import clsx from "clsx";
 import { useAtom } from "jotai";
 import { allowTelemetryAtom, showDisclaimerAtom } from "@/lib/store";
 import { ExamplePrompt, examplePrompts } from "@/lib/examplePrompts";
+import TextField from "./TextField";
+import { UploadSimple } from "@phosphor-icons/react";
+import ChatInputButton from "./ChatInputButton";
 
 export interface ChatMessage {
   title: string;
@@ -321,62 +324,28 @@ const Chat: React.FC<ChatProps> = ({
             </div>
           </div>
         )}
-        <input
+        <TextField
           type="text"
           value={message}
           onChange={handleChange}
-          onKeyPress={handleKeyPress}
-          placeholder="Enter your main goal here..."
-          className="mr-2.5 flex-1 rounded border border-zinc-400 bg-zinc-900 p-2.5 text-zinc-50 outline-none transition-all"
+          onKeyDown={handleKeyPress}
+          placeholder="Ask Evo anything..."
+          className="!rounded-lg !p-4 !pl-12"
+          leftAdornment={<UploadSimple color="white" size={24} />}
+          rightAdornment={
+            <ChatInputButton
+              evoRunning={evoRunning}
+              paused={paused}
+              sending={sending}
+              stopped={stopped}
+              handlePause={handlePause}
+              handleContinue={handleContinue}
+              handleSend={handleSend}
+            />
+          }
+          rightAdornmentClassnames="!right-3"
           disabled={sending || showDisclaimer} // Disable input while sending or if disclaimer is shown
         />
-        {evoRunning && (
-          <>
-            {!paused && (
-              <button
-                className="inline-block h-12 cursor-pointer rounded-xl border-none bg-cyan-500 px-5 py-2.5 text-center text-zinc-950 shadow-md outline-none transition-all hover:bg-cyan-400"
-                onClick={handlePause}
-                disabled={!evoRunning || paused}
-              >
-                Pause
-              </button>
-            )}
-            {paused && (
-              <>
-                {!stopped && (
-                  <button
-                    className="inline-block h-12 cursor-pointer rounded-xl border-none bg-cyan-500 px-5 py-2.5 text-center text-zinc-950 shadow-md outline-none transition-all hover:bg-cyan-400"
-                    disabled={true}
-                  >
-                    Pausing
-                  </button>
-                )}
-
-                {stopped && (
-                  <button
-                    className="inline-block h-12 cursor-pointer rounded-xl border-none bg-cyan-500 px-5 py-2.5 text-center text-zinc-950 shadow-md outline-none transition-all hover:bg-cyan-400"
-                    onClick={handleContinue}
-                    disabled={evoRunning && !paused}
-                  >
-                    Paused
-                  </button>
-                )}
-              </>
-            )}
-          </>
-        )}
-
-        {evoRunning ? (
-          <div className="h-9 w-9 animate-spin rounded-full border-4 border-black/10 border-l-cyan-500" />
-        ) : (
-          <button
-            className="inline-block h-12 cursor-pointer rounded-xl border-none bg-cyan-500 px-5 py-2.5 text-center text-zinc-950 shadow-md outline-none transition-all hover:bg-cyan-400"
-            onClick={async () => await handleSend()}
-            disabled={evoRunning || sending}
-          >
-            Start
-          </button>
-        )}
       </div>
       <a
         className="fixed bottom-0 right-0 mx-4 my-2 cursor-pointer"
