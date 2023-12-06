@@ -1,4 +1,5 @@
 "use client";
+
 import { Provider as JotaiProvider } from "jotai";
 import { ToastContainer } from "react-toastify";
 import ToastProvider from "@/components/providers/ToastProvider";

@@ -9,7 +9,7 @@ import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import SidebarIcon from "./SidebarIcon";
 import { useAtom } from "jotai";
-import { allowTelemetryAtom, showDisclaimerAtom } from "@/lib/store";
+import { allowTelemetryAtom, showDisclaimerAtom, sidebarAtom } from "@/lib/store";
 import { ExamplePrompt, examplePrompts } from "@/lib/examplePrompts";
 
 export interface ChatMessage {
@@ -20,33 +20,33 @@ export interface ChatMessage {
 }
 
 export interface ChatProps {
-  evo: Evo;
-  onMessage: (message: ChatMessage) => void;
+  // evo: Evo;
+  // onMessage: (message: ChatMessage) => void;
   messages: ChatMessage[];
-  sidebarOpen: boolean;
-  overlayOpen: boolean;
-  onSidebarToggleClick: () => void;
-  onUploadFiles: (files: InMemoryFile[]) => void;
-  handlePromptAuth: (message: string) => Promise<boolean>
+  // overlayOpen: boolean;
+  // onSidebarToggleClick: () => void;
+  // onUploadFiles: (files: InMemoryFile[]) => void;
+  // handlePromptAuth: (message: string) => Promise<boolean>
 }
 
 const Chat: React.FC<ChatProps> = ({
-  evo,
-  onMessage,
+  // evo,
+  // onMessage,
   messages,
-  sidebarOpen,
-  overlayOpen,
-  onSidebarToggleClick,
-  onUploadFiles,
-  handlePromptAuth
+//   overlayOpen,
+//   onSidebarToggleClick,
+//   onUploadFiles,
+//   handlePromptAuth
 }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
-  const [evoRunning, setEvoRunning] = useState<boolean>(false);
-  const [paused, setPaused] = useState<boolean>(false);
-  const [sending, setSending] = useState<boolean>(false);
-  const [evoItr, setEvoItr] = useState<ReturnType<Evo["run"]> | undefined>(
-    undefined
-  );
+  const [sidebarOpen, setSidebarOpen] = useAtom(sidebarAtom);
+
+  // const [evoRunning, setEvoRunning] = useState<boolean>(false);
+  // const [paused, setPaused] = useState<boolean>(false);
+  // const [sending, setSending] = useState<boolean>(false);
+  // const [evoItr, setEvoItr] = useState<ReturnType<Evo["run"]> | undefined>(
+  //   undefined
+  // );
   const [stopped, setStopped] = useState<boolean>(false);
   const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom)
   const [,setAllowTelemetry] = useAtom(allowTelemetryAtom)
@@ -55,69 +55,66 @@ const Chat: React.FC<ChatProps> = ({
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [showPrompts, setShowPrompts] = useState<boolean>(true);
 
-  useEffect(() => {
-    const runEvo = async () => {
-      if (!evoRunning) {
-        return Promise.resolve();
-      }
+  // TODO: This entire effect will be moved to useEvo
+  // useEffect(() => {
+  //   const runEvo = async () => {
+  //     if (!evoRunning) {
+  //       return Promise.resolve();
+  //     }
 
-      // Create a new iteration thread
-      if (!evoItr) {
-        const userMsgs = messages.filter((msg) => msg.user === "user");
-        const goal = userMsgs[userMsgs.length - 1].title;
-        setEvoItr(evo.run({ goal }));
-        return Promise.resolve();
-      }
+  //     // Create a new iteration thread
+  //     if (!evoItr) {
+  //       const userMsgs = messages.filter((msg) => msg.user === "user");
+  //       const goal = userMsgs[userMsgs.length - 1].title;
+  //       setEvoItr(evo.run({ goal }));
+  //       return Promise.resolve();
+  //     }
 
-      let messageLog = messages;
-      let stepCounter = 1
-      while (evoRunning) {
-        setStopped(false);
+  //     let messageLog = messages;
+  //     let stepCounter = 1
+  //     while (evoRunning) {
+  //       setStopped(false);
 
-        const response = await evoItr.next();
-        if (response.done) {
-          const actionTitle = response.value.value.title
-          console.log(response.value)
-          if (actionTitle.includes("onGoalAchieved") || actionTitle === "SUCCESS") {
-            onMessage({
-              title: "## Goal Achieved",
-              user: "evo"
-            })
-          }
-          setEvoRunning(false);
-          setSending(false);
-          setEvoItr(undefined);
-          evo.reset();
-          break
-        }
+  //       const response = await evoItr.next();
+  //       if (response.done) {
+  //         const actionTitle = response.value.value.title
+  //         console.log(response.value)
+  //         if (actionTitle.includes("onGoalAchieved") || actionTitle === "SUCCESS") {
+  //           onMessage({
+  //             title: "## Goal Achieved",
+  //             user: "evo"
+  //           })
+  //         }
+  //         setEvoRunning(false);
+  //         setSending(false);
+  //         setEvoItr(undefined);
+  //         evo.reset();
+  //         break
+  //       }
 
-        onMessage({
-          title: `## Step ${stepCounter}`,
-          user: "evo"
-        })
+  //       onMessage({
+  //         title: `## Step ${stepCounter}`,
+  //         user: "evo"
+  //       })
 
-        if (!response.done) {
-          const evoMessage = {
-            title: `### Action executed:\n${response.value.title}`,
-            content: response.value.content,
-            user: "evo"
-          };
-          messageLog = [...messageLog, evoMessage];
-          onMessage(evoMessage);
-        }
+  //       if (!response.done) {
+  //         const evoMessage = {
+  //           title: `### Action executed:\n${response.value.title}`,
+  //           content: response.value.content,
+  //           user: "evo"
+  //         };
+  //         messageLog = [...messageLog, evoMessage];
+  //         onMessage(evoMessage);
+  //       }
 
-        stepCounter++
-      }
-      return Promise.resolve();
-    }
+  //       stepCounter++
+  //     }
+  //     return Promise.resolve();
+  //   }
 
-    const timer = setTimeout(runEvo, 200);
-    return () => clearTimeout(timer);
-  }, [evoRunning, evoItr]);
-
-  useEffect(() => {
-    localStorage.setItem('showDisclaimer', showDisclaimer.toString());
-  }, [showDisclaimer]);
+  //   const timer = setTimeout(runEvo, 200);
+  //   return () => clearTimeout(timer);
+  // }, [evoRunning, evoItr]);
 
   const handleDisclaimerSelect = (accept: boolean) => {
     setShowDisclaimer(false);
@@ -226,7 +223,7 @@ const Chat: React.FC<ChatProps> = ({
   return (
     <div className="flex h-full flex-col bg-[#0A0A0A] text-white">
       <div className="flex justify-between items-center p-4 border-b-2 border-neutral-700">
-        <div className="h-14 p-4 text-lg text-white cursor-pointer hover:opacity-100 opacity-80 transition-all" onClick={onSidebarToggleClick}>
+        <div className="h-14 p-4 text-lg text-white cursor-pointer hover:opacity-100 opacity-80 transition-all" onClick={() => setSidebarOpen(!sidebarOpen)}>
           { sidebarOpen ? <></>: <SidebarIcon /> }
         </div>
         <FontAwesomeIcon className="cursor-pointer" icon={faDownload} onClick={exportChatHistory} />

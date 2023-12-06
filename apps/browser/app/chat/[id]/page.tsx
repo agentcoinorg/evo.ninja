@@ -19,42 +19,7 @@ export default function ChatPage() {
   };
 
   const { evo } = useEvo({ chatId, onMessage })
-  // const { evo, proxyEmbeddingApi, proxyLlmApi } = useEvo({
-  //   chatId,
-  //   onMessage,
-  // });
 
-  // const handlePromptAuth = async (message: string) => {
-  //   if (awaitingAuth) {
-  //     return false;
-  //   }
-
-  //   if (firstTimeUser) {
-  //     setAccountModalOpen(true);
-  //     return false;
-  //   }
-
-  //   const subsidize = !localOpenAiApiKey;
-
-  //   setAwaitingAuth(true);
-  //   const goalId = await AuthProxy.checkGoal(
-  //     allowTelemetry ? message : "<redacted>",
-  //     subsidize,
-  //     () => {
-  //       setCapReached(true);
-  //       setAccountModalOpen(true);
-  //     }
-  //   );
-  //   setAwaitingAuth(false);
-
-  //   if (!goalId) {
-  //     return false;
-  //   }
-
-  //   proxyLlmApi?.setGoalId(goalId);
-  //   proxyEmbeddingApi?.setGoalId(goalId);
-  //   return true;
-  // };
 
   return (
     <>
