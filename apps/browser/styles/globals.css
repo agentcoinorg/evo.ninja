@@ -5,7 +5,7 @@
 body,
 #__next,
 html {
-  @apply h-full font-sans;
+  @apply h-full font-sans bg-zinc-900;
 }
 
 code {
@@ -14,6 +14,21 @@ code {
 
 #root {
   @apply h-full;
+}
+
+.checkbox {
+  @apply rounded border-2 border-zinc-500 w-4 h-4 transition-colors duration-300 cursor-pointer hover:border-zinc-400;
+}
+
+.checkbox.checked {
+  @apply border-cyan-500 bg-cyan-500/50 text-white hover:border-cyan-400;
+}
+
+.checkmark {
+  @apply w-full h-full bg-no-repeat;
+  background-image: url('../public/checkmark.svg');
+  background-size: 70%;
+  background-position: center 56%;
 }
 
 ::-webkit-scrollbar {
