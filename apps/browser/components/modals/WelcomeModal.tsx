@@ -18,7 +18,7 @@ export default function WelcomeModal() {
   
   return (
     <>
-      <Transition appear show={welcomeModalSeen} as={Fragment}>
+      <Transition appear show={!welcomeModalSeen} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={onClose}>
           <div className="fixed inset-0 overflow-y-auto" style={{ backgroundColor: "black" }}>
             <div className="flex min-h-full items-center justify-center p-4 text-center">

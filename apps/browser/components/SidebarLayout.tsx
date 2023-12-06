@@ -1,15 +1,15 @@
 "use client"
 
-import React, { useState } from "react";
+import React from "react";
 import { useAtom } from "jotai";
 
 import clsx from "clsx";
 import Sidebar from "@/components/Sidebar";
-import { showAccountModalAtom } from "@/lib/store";
+import { showAccountModalAtom, sidebarAtom } from "@/lib/store";
 
 export default function SidebarLayout({ children }: { children: React.ReactNode }) {
   const [, setAccountModalOpen] = useAtom(showAccountModalAtom);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useAtom(sidebarAtom);
 
   return (
     <>

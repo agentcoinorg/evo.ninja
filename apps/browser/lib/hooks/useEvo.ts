@@ -115,30 +115,33 @@ export function useEvo({ chatId, onMessage }: UseEvoArgs) {
             (msg) => mapChatMessageToMessageDTO(chatId, temporary, msg)
           )
 
-          const response = await supabase
-            .from('messages')
-            .insert(mappedMessages)
+          console.log("Message DTO")
+          console.log(mappedMessages)
 
-          if (response.error) {
-            throw response.error
-          }
+          // const response = await supabase
+          //   .from('messages')
+          //   .insert(mappedMessages)
+
+          // if (response.error) {
+          //   throw response.error
+          // }
         },
       });
-      const agentVariables = new AgentVariables({
-        async onVariableSet(key, value) {
-          const response = await supabase
-          .from('variables')
-          .upsert({
-            key,
-            value,
-          })
-          .match({ key })
+      // const agentVariables = new AgentVariables({
+      //   async onVariableSet(key, value) {
+      //     const response = await supabase
+      //     .from('variables')
+      //     .upsert({
+      //       key,
+      //       value,
+      //     })
+      //     .match({ key })
 
-          if (response.error) {
-            throw response.error
-          }
-        },
-      })
+      //     if (response.error) {
+      //       throw response.error
+      //     }
+      //   },
+      // })
 
       setEvo(
         new Evo(
@@ -152,7 +155,7 @@ export function useEvo({ chatId, onMessage }: UseEvoArgs) {
             env,
             scripts,
             undefined,
-            agentVariables
+            undefined
           )
         )
       );

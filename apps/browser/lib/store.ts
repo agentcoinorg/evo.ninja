@@ -16,3 +16,5 @@ export const showAccountModalAtom = atom<boolean>(false);
 export const userFilesAtom = atom<InMemoryFile[]>([]);
 export const uploadedFilesAtom = atom<InMemoryFile[]>([]);
 export const userWorkspaceAtom = atom<InMemoryWorkspace | undefined>(undefined);
+export const sidebarAtom = atom<boolean>(true)
+export const chatIdAtom = atom<string>("")

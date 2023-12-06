@@ -73,7 +73,7 @@ function AccountConfig() {
     onClose();
   };
 
-  return accountModal && (
+  return accountModal ? (
     <div className="absolute inset-0 z-50 bg-neutral-900/80" onClick={onClose}>
       <div
         className="fixed left-1/2 top-1/2 flex w-[100%] max-w-[38rem] -translate-x-1/2 -translate-y-1/2 flex-col gap-4 rounded-lg bg-neutral-900 p-12 text-neutral-50"
@@ -161,7 +161,7 @@ function AccountConfig() {
         </div>
       </div>
     </div>
-  );
+  ) : <></>;
 }
 
 export default AccountConfig;

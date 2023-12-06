@@ -5,7 +5,7 @@ import { LlmQuery } from "./LlmQuery";
 export class LlmQueryBuilder {
   constructor(private readonly llm: LlmApi, private readonly tokenizer: Tokenizer, private messages: ChatMessage[] = [] ) {}
 
-  message(role: ChatRole, content: string | Prompt): LlmQueryBuilder {
+  message(role: "user", content: string | Prompt): LlmQueryBuilder {
     this.messages.push({ role, content: content.toString() });
     return this;
   }
