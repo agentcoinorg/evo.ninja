@@ -254,8 +254,8 @@ const Chat: React.FC<ChatProps> = ({
   }, [messages, isAtBottom]);
 
   return (
-    <div className="flex h-full flex-col bg-[#0A0A0A] text-white">
-      <div className="flex h-12 items-center justify-center border-b-2 border-zinc-700">
+    <div className="flex h-full flex-col">
+      <div className="flex h-12 items-center justify-center border-b-2 border-zinc-800">
         <div>{chat_name}</div>
         {/* <FontAwesomeIcon
           className="cursor-pointer"

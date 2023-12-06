@@ -54,7 +54,7 @@ const Sidebar = ({
       className={clsx(
         "overflow-y relative z-10 h-full border-r-2 bg-zinc-900 transition-all duration-300 ease-in-out",
         sidebarOpen ? "w-[290px]" : "w-0 border-none",
-        hoveringSidebarButton ? "border-zinc-500" : "border-zinc-700"
+        hoveringSidebarButton ? "border-zinc-500" : "border-zinc-800"
       )}
     >
       <div
@@ -73,12 +73,6 @@ const Sidebar = ({
           <div className="flex h-full flex-col space-y-6">
             <div className="flex items-center p-4">
               <Logo className="cursor-pointer transition-opacity hover:opacity-50" />
-              {/* <IconButton
-                iconName="NotePencil"
-                iconProps={{ size: 20, color: colors.cyan[100] }}
-                buttonClassName="rounded-full border border-cyan-600 bg-cyan-500 p-1.5 hover:bg-cyan-600 transition-colors duration-300"
-                iconClassName="group-hover:text-white"
-              /> */}
             </div>
             <div className="space-y-1 px-2">
               <div className="flex w-full items-center justify-between space-x-1 px-3">

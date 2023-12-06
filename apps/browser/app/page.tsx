@@ -112,7 +112,11 @@ function Dojo() {
 
   return (
     <>
-      <div className="flex h-full bg-zinc-900 bg-landing-bg bg-repeat text-zinc-400">
+      <div className="relative flex h-full overflow-x-clip">
+        <div className="pointer-events-none fixed inset-0 bottom-0 left-0 right-0 top-0 overflow-clip">
+          <div className="mix-blend-softlight absolute -bottom-1/4 left-1/3 h-screen w-7/12 rotate-[-30deg] rounded-full bg-gradient-to-b from-cyan-500/40 to-cyan-700/10 opacity-30 blur-[128px]" />
+          <div className="mix-blend-softlight absolute -bottom-1/4 left-[65%] h-[50vh] w-4/12 rotate-[30deg] rounded-full bg-gradient-to-b from-pink-500/40 to-pink-600/20 opacity-10 blur-[128px]" />
+        </div>
         {/* {accountModal && (
           <AccountConfig
             apiKey={localOpenAiApiKey}
