@@ -19,7 +19,7 @@
     "gpt-tokenizer": "~2.1.1",
     "jszip": "^3.10.0",
     "jotai": "2.6.0",
-    "next": "14.0.3",
+    "next": "14.0.4-canary.41",
     "next-auth": "4.24.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
