@@ -27,7 +27,7 @@ export interface ChatProps {
   isSending: boolean;
   onPause: () => void;
   onContinue: () => void;
-  onPromptSent: (prompt: string) => void;
+  onPromptSent: (prompt: string) => Promise<void>;
 }
 
 const Chat: React.FC<ChatProps> = ({
@@ -50,8 +50,8 @@ const Chat: React.FC<ChatProps> = ({
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
 
-  const handleSend = (prompt: string) => {
-    onPromptSent(prompt);
+  const handleSend = async (prompt: string) => {
+    await onPromptSent(prompt);
     setMessage("")
   }
 
@@ -59,9 +59,9 @@ const Chat: React.FC<ChatProps> = ({
     setMessage(event.target.value);
   };
 
-  const handleKeyPress = (event: React.KeyboardEvent) => {
+  const handleKeyPress = async (event: React.KeyboardEvent) => {
     if (event.key === "Enter" && !isSending) {
-      handleSend(message)
+      await handleSend(message)
     }
   };
 
@@ -69,7 +69,7 @@ const Chat: React.FC<ChatProps> = ({
     if (prompt.files) {
       setUploadedFiles(prompt.files);
     }
-    handleSend(prompt.prompt)
+    await handleSend(prompt.prompt)
   };
 
   const handleScroll = useCallback(() => {
