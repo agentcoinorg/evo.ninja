@@ -101,8 +101,8 @@ export class ContextualizedChat {
     sorted.temporary = postProcessMessages(sorted.temporary);
 
     const chat = this._rawChat.cloneEmpty();
-    chat.add("persistent", sorted.persistent);
-    chat.add("temporary", sorted.temporary);
+    await chat.persistent(sorted.persistent);
+    await chat.temporary(sorted.temporary);
     return chat;
   }
 
