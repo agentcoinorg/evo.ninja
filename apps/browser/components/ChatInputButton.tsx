@@ -72,6 +72,7 @@ const ChatInputButton = ({
           onClick={async () => await handleSend()}
           disabled={evoRunning || sending}
           className="!p-2"
+          type="submit"
         >
           <ArrowRight weight="bold" />
         </Button>
