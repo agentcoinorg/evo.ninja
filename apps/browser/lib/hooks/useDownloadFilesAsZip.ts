@@ -5,7 +5,7 @@ import { downloadFilesAsZip } from "../sys/file/downloadFilesAsZip";
 export const useDownloadFilesAsZip = () => {
   const [userFiles] = useAtom(userFilesAtom);
   
-  return () => {
-    downloadFilesAsZip("workspace.zip", userFiles);
+  return async () => {
+    await downloadFilesAsZip("workspace.zip", userFiles);
   }
 }

@@ -6,10 +6,10 @@ export const useCheckForUserFiles = () => {
   const [userFiles, setUserFiles] = useAtom(userFilesAtom);
   const [userWorkspace] = useAtom(userWorkspaceAtom);
   
-  return () => {
+  return async () => {
     if (!userWorkspace) {
       return;
     }
-    updateWorkspaceFiles(userWorkspace, userFiles, setUserFiles);
+    await updateWorkspaceFiles(userWorkspace, userFiles, setUserFiles);
   }
 }

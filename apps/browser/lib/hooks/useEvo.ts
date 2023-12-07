@@ -46,7 +46,7 @@ export function useEvo({ chatId, onMessage }: UseEvoArgs): {
   isPaused: boolean;
   isStopped: boolean;
   isSending: boolean;
-  setIsSending: (sending: boolean) => void
+  setIsSending: (sending: boolean) => void;
 } {
   // const supabase = useSupabase();
   const [isPaused, setIsPaused] = useState<boolean>(false);
@@ -67,121 +67,123 @@ export function useEvo({ chatId, onMessage }: UseEvoArgs): {
   const [userWorkspace, setUserWorkspace] = useAtom(userWorkspaceAtom);
 
   useEffect(() => {
-    try {
-      const browserLogger = new BrowserLogger({
-        onLog: (message: string) => {
-          onMessage({
-            user: "evo",
-            title: message,
-          });
-        },
-      });
-      const logger = new Logger([browserLogger, new ConsoleLogger()], {
-        promptUser: () => Promise.resolve("N/A"),
-      });
+    (async () => {
+      try {
+        const browserLogger = new BrowserLogger({
+          onLog: async (message: string) => {
+            onMessage({
+              user: "evo",
+              title: message,
+            });
+          },
+        });
+        const logger = new Logger([browserLogger, new ConsoleLogger()], {
+          promptUser: () => Promise.resolve("N/A"),
+        });
 
-      const scriptsWorkspace = createInBrowserScripts();
-      const scripts = new Scripts(scriptsWorkspace);
+        const scriptsWorkspace = await createInBrowserScripts();
+        const scripts = new Scripts(scriptsWorkspace);
 
-      const env = new Env({
-        OPENAI_API_KEY: localOpenAiApiKey || " ",
-        GPT_MODEL: "gpt-4-1106-preview",
-        CONTEXT_WINDOW_TOKENS: "128000",
-        MAX_RESPONSE_TOKENS: "4096",
-      });
+        const env = new Env({
+          OPENAI_API_KEY: localOpenAiApiKey || " ",
+          GPT_MODEL: "gpt-4-1106-preview",
+          CONTEXT_WINDOW_TOKENS: "128000",
+          MAX_RESPONSE_TOKENS: "4096",
+        });
 
-      let llm: LlmApi;
-      let embedding: EmbeddingApi;
+        let llm: LlmApi;
+        let embedding: EmbeddingApi;
 
-      if (localOpenAiApiKey) {
-        llm = new OpenAILlmApi(
-          env.OPENAI_API_KEY,
-          env.GPT_MODEL as LlmModel,
-          env.CONTEXT_WINDOW_TOKENS,
-          env.MAX_RESPONSE_TOKENS,
-          logger
-        );
-        embedding = new OpenAIEmbeddingAPI(
-          env.OPENAI_API_KEY,
-          logger,
-          cl100k_base
-        );
-      } else {
-        llm = new ProxyLlmApi(
-          env.GPT_MODEL as LlmModel,
-          env.CONTEXT_WINDOW_TOKENS,
-          env.MAX_RESPONSE_TOKENS,
-          () => setCapReached(true)
-        );
-        setLlmProxyApi(llm as ProxyLlmApi);
-        embedding = new ProxyEmbeddingApi(cl100k_base, () =>
-          setCapReached(true)
-        );
-        setEmbeddingProxyApi(embedding as ProxyEmbeddingApi);
-      }
-
-      let workspace = userWorkspace;
-
-      if (!workspace) {
-        workspace = new InMemoryWorkspace();
-        setUserWorkspace(workspace);
-      }
-
-      const internals = new SubWorkspace(".evo", workspace);
-
-      const chat = new EvoChat(cl100k_base, {
-        async onMessagesAdded(type, msgs) {
-          const temporary = type === "temporary";
-          const mappedMessages = msgs.map((msg) =>
-            mapChatMessageToMessageDTO(chatId, temporary, msg)
+        if (localOpenAiApiKey) {
+          llm = new OpenAILlmApi(
+            env.OPENAI_API_KEY,
+            env.GPT_MODEL as LlmModel,
+            env.CONTEXT_WINDOW_TOKENS,
+            env.MAX_RESPONSE_TOKENS,
+            logger
           );
-
-          console.log("Message DTO");
-          console.log(mappedMessages);
-
-          //TODO(cbrzn): Attach with backend once UI is ready
-          // const response = await supabase
-          //   .from('messages')
-          //   .insert(mappedMessages)
-
-          // if (response.error) {
-          //   throw response.error
-          // }
-        },
-      });
-      // const agentVariables = new AgentVariables({
-      //   async onVariableSet(key, value) {
-      //     const response = await supabase
-      //     .from('variables')
-      //     .upsert({
-      //       key,
-      //       value,
-      //     })
-      //     .match({ key })
-
-      //     if (response.error) {
-      //       throw response.error
-      //     }
-      //   },
-      // })
-
-      setEvo(
-        new Evo(
-          new AgentContext(
-            llm,
-            embedding,
-            chat,
+          embedding = new OpenAIEmbeddingAPI(
+            env.OPENAI_API_KEY,
             logger,
-            workspace,
-            internals,
-            env,
-            scripts
+            cl100k_base
+          );
+        } else {
+          llm = new ProxyLlmApi(
+            env.GPT_MODEL as LlmModel,
+            env.CONTEXT_WINDOW_TOKENS,
+            env.MAX_RESPONSE_TOKENS,
+            () => setCapReached(true)
+          );
+          setLlmProxyApi(llm as ProxyLlmApi);
+          embedding = new ProxyEmbeddingApi(cl100k_base, () =>
+            setCapReached(true)
+          );
+          setEmbeddingProxyApi(embedding as ProxyEmbeddingApi);
+        }
+
+        let workspace = userWorkspace;
+
+        if (!workspace) {
+          workspace = new InMemoryWorkspace();
+          setUserWorkspace(workspace);
+        }
+
+        const internals = new SubWorkspace(".evo", workspace);
+
+        const chat = new EvoChat(cl100k_base, {
+          async onMessagesAdded(type, msgs) {
+            const temporary = type === "temporary";
+            const mappedMessages = msgs.map((msg) =>
+              mapChatMessageToMessageDTO(chatId, temporary, msg)
+            );
+
+            console.log("Message DTO");
+            console.log(mappedMessages);
+
+            //TODO(cbrzn): Attach with backend once UI is ready
+            // const response = await supabase
+            //   .from('messages')
+            //   .insert(mappedMessages)
+
+            // if (response.error) {
+            //   throw response.error
+            // }
+          },
+        });
+        // const agentVariables = new AgentVariables({
+        //   async onVariableSet(key, value) {
+        //     const response = await supabase
+        //     .from('variables')
+        //     .upsert({
+        //       key,
+        //       value,
+        //     })
+        //     .match({ key })
+
+        //     if (response.error) {
+        //       throw response.error
+        //     }
+        //   },
+        // })
+
+        setEvo(
+          new Evo(
+            new AgentContext(
+              llm,
+              embedding,
+              chat,
+              logger,
+              workspace,
+              internals,
+              env,
+              scripts
+            )
           )
-        )
-      );
-    } catch (e: any) {
-      setError(e.message);
-    }
+        );
+      } catch (e: any) {
+        setError(e.message);
+      }
+    })();
   }, [localOpenAiApiKey]);
 
   const start = (goal: string) => {
@@ -263,6 +265,5 @@ export function useEvo({ chatId, onMessage }: UseEvoArgs): {
     isSending,
     isStopped,
     setIsSending,
-
   };
 }

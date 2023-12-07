@@ -17,6 +17,7 @@ function Upload({ className, onUploadFiles, children }: PropsWithChildren<Upload
     useDropzone({ noClick: true });
 
   useEffect(() => {
+    //eslint-disable-next-line @typescript-eslint/no-floating-promises
     (async () => {
       if (acceptedFiles && acceptedFiles.length) {
         const result = await Promise.all(
