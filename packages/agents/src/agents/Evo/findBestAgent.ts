@@ -28,11 +28,10 @@ export const findBestAgent = async (
   AgentFunctionBase<unknown>[]
 ]> => {
   const allAgents: Agent[] = [
-    DeveloperAgent,
     CsvAnalystAgent,
     ResearcherAgent,
     SynthesizerAgent,
-  ].map(agentClass => new agentClass(context.cloneEmpty()));
+  ].map((agentClass) => new agentClass(context.cloneEmpty()));
 
   const agentsWithPrompts = allAgents.map(agent => {
     return {
