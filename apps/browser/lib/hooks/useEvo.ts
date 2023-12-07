@@ -3,7 +3,6 @@ import {
   ConsoleLogger,
   EmbeddingApi,
   Env,
-  ChatMessage as AgentMessage,
   Evo,
   InMemoryWorkspace,
   LlmApi,
@@ -14,8 +13,9 @@ import {
   Scripts,
   Chat as EvoChat,
   SubWorkspace,
-  ChatLogType,
+  ChatMessage as AgentMessage,
   AgentVariables,
+  ChatLogType,
 } from "@evo-ninja/agents";
 import { useEffect, useState } from "react";
 import { BrowserLogger } from "../sys/logger";
@@ -53,6 +53,7 @@ export function useEvo({
   isSending: boolean;
   setIsSending: (sending: boolean) => void;
 } {
+  // const supabase = useSupabase();
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [isSending, setIsSending] = useState<boolean>(false);
@@ -71,18 +72,19 @@ export function useEvo({
   const [userWorkspace, setUserWorkspace] = useAtom(userWorkspaceAtom);
 
   useEffect(() => {
-    try {
-      const browserLogger = new BrowserLogger({
-        onLog: async (message: string) => {
-          await onChatLog({
-            user: "evo",
-            title: message,
-          });
-        },
-      });
-      const logger = new Logger([browserLogger, new ConsoleLogger()], {
-        promptUser: () => Promise.resolve("N/A"),
-      });
+    (async () => {
+      try {
+        const browserLogger = new BrowserLogger({
+          onLog: async (message: string) => {
+            await onChatLog({
+              user: "evo",
+              title: message,
+            });
+          },
+        });
+        const logger = new Logger([browserLogger, new ConsoleLogger()], {
+          promptUser: () => Promise.resolve("N/A"),
+        });
 
         const scriptsWorkspace = await createInBrowserScripts();
         const scripts = new Scripts(scriptsWorkspace);
@@ -133,34 +135,36 @@ export function useEvo({
 
         const internals = new SubWorkspace(".evo", workspace);
 
-      const chat = new EvoChat(cl100k_base, {
-        onMessagesAdded: onAgentMessages
-      });
+        const chat = new EvoChat(cl100k_base, {
+          onMessagesAdded: onAgentMessages,
+        });
+        const agentVariables = new AgentVariables({
+          onVariableSet
+        })
 
-      const agentVariables = new AgentVariables({
-        onVariableSet
-      })
-
-      setEvo(
-        new Evo(
-          new AgentContext(
-            llm,
-            embedding,
-            chat,
-            logger,
-            workspace,
-            internals,
-            env,
-            scripts,
-            undefined,
-            agentVariables
+        setEvo(
+          new Evo(
+            new AgentContext(
+              llm,
+              embedding,
+              chat,
+              logger,
+              workspace,
+              internals,
+              env,
+              scripts,
+              undefined,
+              agentVariables
+            )
           )
         );
       } catch (e: any) {
         setError(e.message);
       }
     })();
-  }, [localOpenAiApiKey]);
+  }, [
+    localOpenAiApiKey
+  ]);
 
   const start = (goal: string) => {
     if (!evo) return;
