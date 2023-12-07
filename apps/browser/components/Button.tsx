@@ -1,11 +1,14 @@
 import clsx from "clsx";
-import { ButtonHTMLAttributes, PropsWithChildren } from "react";
+import { ButtonHTMLAttributes, PropsWithChildren, ReactNode } from "react";
+import Tooltip, { TooltipProps } from "./Tooltip";
 
 interface ButtonProps
   extends PropsWithChildren<ButtonHTMLAttributes<HTMLButtonElement>> {
   hierarchy?: "primary" | "secondary";
   size?: "default" | "lg";
   variant?: "icon" | "text";
+  helperContent?: TooltipProps["content"];
+  helperPlacement?: TooltipProps["placement"];
 }
 
 const Button = ({
@@ -13,6 +16,8 @@ const Button = ({
   hierarchy = "primary",
   size = "default",
   variant,
+  helperContent,
+  helperPlacement,
   className,
   disabled,
   ...props
@@ -46,7 +51,7 @@ const Button = ({
   return (
     <button
       className={clsx(
-        "text-shadow-md inline-flex items-center justify-center space-x-2 rounded-md border transition-all duration-500",
+        "text-shadow-md relative inline-flex items-center justify-center space-x-2 rounded-md border transition-all duration-500",
         hierarchyClasses[hierarchy],
         sizeClasses[size],
         variantClass,
@@ -56,6 +61,9 @@ const Button = ({
       {...props}
     >
       {children}
+      {helperContent && (
+        <Tooltip placement={helperPlacement} content={helperContent} />
+      )}
     </button>
   );
 };
