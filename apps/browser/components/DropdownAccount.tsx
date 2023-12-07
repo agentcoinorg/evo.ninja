@@ -5,6 +5,7 @@ import SettingsModal from "./SettingsModal";
 import { useAtom } from "jotai";
 import { allowTelemetryAtom, localOpenAiApiKeyAtom } from "@/lib/store";
 import { useSession } from "next-auth/react";
+import SignInModal from "./SignInModal";
 
 interface DropdownAccountProps {
   dropdownOpen: boolean;
@@ -17,15 +18,25 @@ const DropdownAccount: React.ForwardRefRenderFunction<
   const [allowTelemetry] = useAtom(allowTelemetryAtom);
   const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom);
   const { data: session } = useSession();
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] =
+    useState<boolean>(false);
+  const [isSignInModalOpen, setIsSignInModalOpen] = useState<boolean>(false);
   const firstTimeUser = !localOpenAiApiKey && !session?.user;
 
   const handleAccountSettingsClick = () => {
-    setIsOpen(true);
+    setIsSettingsModalOpen(true);
   };
 
-  const onClose = () => {
-    setIsOpen(false);
+  const onSettingsClose = () => {
+    setIsSettingsModalOpen(false);
+  };
+
+  const handleSignInClick = () => {
+    setIsSignInModalOpen(true);
+  };
+
+  const onSignInClose = () => {
+    setIsSignInModalOpen(false);
   };
 
   return (
@@ -44,17 +55,26 @@ const DropdownAccount: React.ForwardRefRenderFunction<
           <GearSix size={16} weight="bold" />
           <div className="leading-none">Account Settings</div>
         </div>
-        <div className="flex w-full cursor-pointer items-center space-x-2 rounded-md p-2 text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white">
+        <div
+          className="flex w-full cursor-pointer items-center space-x-2 rounded-md p-2 text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white"
+          onClick={handleSignInClick}
+        >
           <UserCirclePlus size={16} weight="bold" />
           <div className="leading-none">Sign In</div>
         </div>
       </div>
       <SettingsModal
-        isOpen={isOpen}
-        onClose={onClose}
+        isOpen={isSettingsModalOpen}
+        onClose={onSettingsClose}
         apiKey={localOpenAiApiKey}
         allowTelemetry={allowTelemetry}
         firstTimeUser={firstTimeUser}
+      />
+      <SignInModal
+        apiKey={localOpenAiApiKey}
+        allowTelemetry={allowTelemetry}
+        isOpen={isSignInModalOpen}
+        onClose={onSignInClose}
       />
     </>
   );

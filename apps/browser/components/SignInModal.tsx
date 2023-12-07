@@ -9,19 +9,18 @@ import {
 import Modal from "./Modal";
 import Button from "./Button";
 import AccountConfig from "./AccountConfig";
-import { ArrowRight, LinkBreak, SignOut } from "@phosphor-icons/react";
+import { SignOut } from "@phosphor-icons/react";
 import Image from "next/image";
 
 export const WELCOME_MODAL_SEEN_STORAGE_KEY = "welcome-modal-seen";
 
-const justAuthenticated = false;
+const justAuthenticated = true;
 
 interface AccountConfigProps {
   apiKey: string | null;
   allowTelemetry: boolean;
   isOpen: boolean;
   onClose: () => void;
-  firstTimeUser: boolean;
 }
 
 const validateOpenAiApiKey = async (
@@ -47,14 +46,13 @@ const validateOpenAiApiKey = async (
   }
 };
 
-export default function SettingsModal(props: AccountConfigProps) {
+export default function SignInModal(props: AccountConfigProps) {
   const [localApiKey, setLocalApiKey] = useAtom(localOpenAiApiKeyAtom);
   const [allowTelemetry, setAllowTelemetry] = useAtom(allowTelemetryAtom);
   const [apiKey, setApiKey] = useState<string>(localApiKey || "");
   const [telemetry, setTelemetry] = useState(allowTelemetry);
   const [error, setError] = useState<string | undefined>();
   const [capReached, setCapReached] = useAtom(capReachedAtom);
-  const { firstTimeUser } = props;
 
   const { isOpen, onClose } = props;
 
@@ -78,13 +76,7 @@ export default function SettingsModal(props: AccountConfigProps) {
   };
   return (
     <>
-      <Modal isOpen={isOpen} title="Welcome to Evo Ninja" onClose={onSave}>
-        {!firstTimeUser && (
-          <div className="border-b-2 border-zinc-700 pb-8 text-center">
-            Evo is an agent that can do many things. This is a technical
-            preview, feedback and questions are appreciated!
-          </div>
-        )}
+      <Modal isOpen={isOpen} title="Sign In" onClose={onSave}>
         {justAuthenticated ? (
           <div className="space-y-6">
             <div className="border-b-2 border-zinc-700 pb-8 text-center">
@@ -103,19 +95,22 @@ export default function SettingsModal(props: AccountConfigProps) {
                 </div>
               </div>
               <div className="space-x-2">
-                {/* <Button className="!px-4" hierarchy="secondary">
-                  <LinkBreak color="currentColor" size={16} />
-                  <div>Unsync</div>
-                </Button> */}
                 <Button className="!px-4" hierarchy="secondary">
                   <SignOut color="currentColor" size={16} />
                   <div>Sign Out</div>
                 </Button>
               </div>
             </div>
+            <AccountConfig
+              apiKey={apiKey}
+              telemetry={telemetry}
+              setTelemetry={setTelemetry}
+              setApiKey={setApiKey}
+              justAuthenticated={justAuthenticated}
+            />
           </div>
         ) : (
-          <div className="space-y-6 border-b-2 border-zinc-700 pb-8">
+          <div className="space-y-6">
             <p>Sign in below to save your sessions</p>
             <div className="space-y-2">
               <Button className="w-full" hierarchy="secondary">
@@ -139,21 +134,6 @@ export default function SettingsModal(props: AccountConfigProps) {
             </div>
           </div>
         )}
-
-        <AccountConfig
-          apiKey={apiKey}
-          telemetry={telemetry}
-          setTelemetry={setTelemetry}
-          setApiKey={setApiKey}
-          justAuthenticated={justAuthenticated}
-        />
-
-        <div className="flex justify-end border-t-2 border-zinc-700 pt-8">
-          <Button onClick={onSave}>
-            <div>Get Started</div>
-            <ArrowRight size={16} color="white" />
-          </Button>
-        </div>
       </Modal>
     </>
   );
