@@ -46,9 +46,9 @@ const validateOpenAiApiKey = async (
 
 export default function SettingsModal(props: AccountConfigProps) {
   const [localApiKey, setLocalApiKey] = useAtom(localOpenAiApiKeyAtom);
-  const [apiKey] = useState<string>(localApiKey || "");
+  const [apiKey, setApiKey] = useState<string>(localApiKey || "");
   const [allowTelemetry, setAllowTelemetry] = useAtom(allowTelemetryAtom);
-  const [telemetry] = useState(allowTelemetry);
+  const [telemetry, setTelemetry] = useState(allowTelemetry);
   const [, setError] = useState<string | undefined>();
   const [capReached, setCapReached] = useAtom(capReachedAtom);
 
@@ -98,7 +98,9 @@ export default function SettingsModal(props: AccountConfigProps) {
             justAuthenticated={false}
             apiKey={apiKey}
             showText={false}
-            allowTelemetry={allowTelemetry}
+            telemetry={telemetry}
+            setTelemetry={setTelemetry}
+            setApiKey={setApiKey}
           />
 
           <div className="flex justify-end border-t-2 border-zinc-700 pt-6">

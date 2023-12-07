@@ -4,18 +4,17 @@ import { allowTelemetryAtom } from "@/lib/store";
 import TextField from "./TextField";
 
 interface AccountConfigProps {
-  apiKey: string | null;
-  allowTelemetry: boolean;
+  setApiKey: (key: string) => void
+  apiKey: string | null
+  setTelemetry: (telemetry: boolean) => void
+  telemetry: boolean
   justAuthenticated?: boolean;
   showText?: boolean;
 }
 
 function AccountConfig(props: AccountConfigProps) {
   const [error] = useState<string | undefined>();
-  const [allowTelemetry] = useAtom(allowTelemetryAtom);
-  const [telemetry, setTelemetry] = useState(allowTelemetry);
-
-  const { apiKey, justAuthenticated, showText } = props;
+  const { justAuthenticated, showText, apiKey, setApiKey, setTelemetry, telemetry } = props;
 
   return (
     <>
@@ -33,7 +32,7 @@ function AccountConfig(props: AccountConfigProps) {
             placeholder="Enter API Key"
             label="OpenAI Key"
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setTelemetry(e.target.checked)
+              setApiKey(e.target.value)
             }
             error={error}
           />
