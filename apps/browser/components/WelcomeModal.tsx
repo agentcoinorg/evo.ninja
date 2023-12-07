@@ -14,7 +14,7 @@ import Image from "next/image";
 
 export const WELCOME_MODAL_SEEN_STORAGE_KEY = "welcome-modal-seen";
 
-const justAuthenticated = true;
+const justAuthenticated = false;
 
 interface AccountConfigProps {
   apiKey: string | null;

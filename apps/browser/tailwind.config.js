@@ -14,7 +14,8 @@ module.exports = {
         mono: ["Fira Mono", ...defaultTheme.fontFamily.mono]
       },
       backgroundSize: {
-        "landing-bg": `461px 250px`
+        "landing-bg": `461px 250px`,
+        button: '100% 200%'
       },
       colors: {
         'opacity-black': 'hsla(0, 0%, 9%, 0.8)'
