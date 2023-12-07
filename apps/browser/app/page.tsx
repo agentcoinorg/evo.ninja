@@ -116,12 +116,11 @@ function Dojo({ params }: { params: { id?: string } }) {
       }
 
       chatIdRef.current = createdChat.id
-
-      await onChatLog({
-        title: newMessage,
-        user: "user",
-      });
     }
+    await onChatLog({
+      title: newMessage,
+      user: "user",
+    });
 
     setIsSending(true);
     start(newMessage);
