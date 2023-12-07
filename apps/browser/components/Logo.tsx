@@ -321,7 +321,7 @@ type LogoType = {
 const Logo = ({ wordmark = true, className }: LogoType) => {
   return (
     <>
-      <div className={clsx("flex w-[136px] items-center gap-3", className)}>
+      <div className={clsx("flex w-4 items-center gap-3", className)}>
         <LogoMark />
         {wordmark && <WordMark />}
       </div>

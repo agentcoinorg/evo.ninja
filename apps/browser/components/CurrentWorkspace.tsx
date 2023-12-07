@@ -9,10 +9,11 @@ import { readFile } from "@/lib/sys/file";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import { downloadFilesAsZip } from "@/lib/sys/file/downloadFilesAsZip";
 import clsx from "clsx";
-import IconButton from "./IconButton";
+
 import FileIcon from "./FileIcon";
 import colors from "tailwindcss/colors";
-import { FilePlus } from "@phosphor-icons/react";
+import { DownloadSimple, FilePlus } from "@phosphor-icons/react";
+import Button from "./Button";
 
 interface UploadProps {
   className?: string;
@@ -62,19 +63,18 @@ function CurrentWorkspace({
           Current Workspace
         </div>
         <div className="flex items-center space-x-1">
-          <IconButton
-            iconName="FilePlus"
-            iconProps={{ size: 18 }}
-            onClick={open}
-          />
+          <Button variant="icon" onClick={open}>
+            <FilePlus size={18} weight="bold" />
+          </Button>
           <input {...getInputProps()} />
           {userFiles.length !== 0 && (
-            <IconButton
-              buttonClassName="text-zinc-500 hover:text-cyan-500"
-              iconName="DownloadSimple"
-              iconProps={{ size: 18 }}
+            <Button
+              variant="icon"
+              className="text-zinc-500 hover:text-cyan-500"
               onClick={downloadUserFiles}
-            />
+            >
+              <DownloadSimple size={18} weight="bold" />
+            </Button>
           )}
         </div>
       </div>

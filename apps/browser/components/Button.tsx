@@ -5,12 +5,14 @@ interface ButtonProps
   extends PropsWithChildren<ButtonHTMLAttributes<HTMLButtonElement>> {
   hierarchy?: "primary" | "secondary";
   size?: "default" | "lg";
+  variant?: "icon";
 }
 
 const Button = ({
   children,
   hierarchy = "primary",
   size = "default",
+  variant,
   className,
   disabled,
   ...props
@@ -35,12 +37,18 @@ const Button = ({
     lg: "px-8 py-3",
   };
 
+  const variantClasses = {
+    icon: "border-none bg-none !p-1 text-zinc-500 hover:text-cyan-500",
+  };
+  const variantClass = variant ? variantClasses[variant] : null;
+
   return (
     <button
       className={clsx(
         "text-shadow-md inline-flex items-center justify-center space-x-2 rounded-md border text-white transition-all duration-500",
         hierarchyClasses[hierarchy],
         sizeClasses[size],
+        variantClass,
         disabled ? "cursor-default opacity-60" : "cursor-pointer",
         className
       )}

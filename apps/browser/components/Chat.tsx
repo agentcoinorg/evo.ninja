@@ -15,9 +15,20 @@ import { useAtom } from "jotai";
 import { allowTelemetryAtom, showDisclaimerAtom } from "@/lib/store";
 import { ExamplePrompt, examplePrompts } from "@/lib/examplePrompts";
 import TextField from "./TextField";
-import { UploadSimple } from "@phosphor-icons/react";
+import {
+  CaretCircleRight,
+  CopySimple,
+  PencilSimple,
+  ThumbsDown,
+  ThumbsUp,
+  UploadSimple,
+} from "@phosphor-icons/react";
 import ChatInputButton from "./ChatInputButton";
 import Image from "next/image";
+import AvatarBlockie from "./AvatarBlockie";
+import Logo from "./Logo";
+import Button from "./Button";
+import LoadingCircle from "./LoadingCircle";
 
 export interface ChatMessage {
   title: string;
@@ -261,29 +272,81 @@ const Chat: React.FC<ChatProps> = ({
       <div
         ref={listContainerRef}
         onScroll={handleScroll}
-        className="flex-1 items-center overflow-auto p-5 text-left"
+        className="flex-1 items-center space-y-6 overflow-auto p-5 text-left"
       >
-        {messages.map((msg, index) => (
-          <div
-            key={index}
-            className={`${msg.user} m-auto w-[100%] max-w-[56rem] self-center`}
-          >
-            {index === 0 || messages[index - 1].user !== msg.user ? (
-              <div className="SenderName">{msg.user.toUpperCase()}</div>
-            ) : null}
+        {messages.map((msg, index) => {
+          return (
             <div
-              className={clsx(
-                "my-1 rounded border border-transparent px-4 py-2.5 transition-all hover:border-orange-600",
-                msg.user === "user" ? "bg-blue-500" : "bg-zinc-900"
-              )}
+              key={index}
+              className={`${msg.user} m-auto w-full max-w-[56rem] self-center`}
             >
-              <div className="prose prose-invert">
-                <ReactMarkdown>{msg.title.toString()}</ReactMarkdown>
-                <ReactMarkdown>{msg.content?.toString() ?? ""}</ReactMarkdown>
+              <div className="group relative flex w-full items-start space-x-4 rounded-lg p-2 pb-10 text-white transition-colors duration-300 hover:bg-zinc-950/40">
+                {msg.user === "evo" ? (
+                  <Logo wordmark={false} className="!w-8" />
+                ) : (
+                  <AvatarBlockie
+                    address="0x7cB57B5A97eAbe94205C07890BE4c1aD31E486A8"
+                    size={32}
+                    className="border-2 border-zinc-900"
+                  />
+                )}
+                <div className="space-y-2 pt-1">
+                  {index === 0 || messages[index - 1].user !== msg.user ? (
+                    <div className="SenderName font-medium">
+                      {msg.user.charAt(0).toUpperCase() + msg.user.slice(1)}
+                    </div>
+                  ) : null}
+                  <div className="prose prose-invert max-w-[49rem]">
+                    <ReactMarkdown>{msg.title.toString()}</ReactMarkdown>
+                    <ReactMarkdown>
+                      {msg.content?.toString() ?? ""}
+                    </ReactMarkdown>
+                  </div>
+                  {msg.user === "evo" && evoRunning && sending && (
+                    <div className="flex items-center space-x-2 text-cyan-500">
+                      <LoadingCircle />
+                      <div>Predicting best approach...</div>
+                      <Button
+                        variant="icon"
+                        className="!text-cyan-500 hover:!text-cyan-700"
+                      >
+                        <CaretCircleRight
+                          // weight="bold"
+                          className="fill-currentColor"
+                          size={20}
+                        />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                <div className="animate-fade-in absolute bottom-1 right-1 hidden space-x-0.5 group-hover:flex">
+                  {msg.user === "evo" ? (
+                    <>
+                      <Button variant="icon">
+                        <CopySimple size={16} className="fill-currentColor" />
+                      </Button>
+                      <Button variant="icon">
+                        <ThumbsUp size={16} className="fill-currentColor" />
+                      </Button>
+                      <Button variant="icon">
+                        <ThumbsDown size={16} className="fill-currentColor" />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="icon">
+                        <PencilSimple size={16} className="fill-currentColor" />
+                      </Button>
+                      <Button variant="icon">
+                        <CopySimple size={16} className="fill-currentColor" />
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       {showPrompts && (
         <div className="grid w-[100%] w-full max-w-[56rem] grid-rows-2 self-center p-2.5 py-16">
