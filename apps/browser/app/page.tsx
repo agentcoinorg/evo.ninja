@@ -8,11 +8,9 @@ import { useHandleAuth } from "@/lib/hooks/useHandleAuth";
 import { mapAgentOutputToOutputDTO, mapChatMessageToMessageDTO, mapVariableToVariableDTO } from "@/lib/supabase/evo";
 import { useSupabase } from "@/lib/supabase/useSupabase";
 import { ChatLogType, ChatMessage as AgentMessage } from "@evo-ninja/agents";
-import router from "next/router";
 import { useRef, useState } from "react";
 
 function Dojo() {
-  console.log(router.query.id as string)
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const chatIdRef = useRef<string | undefined>()
   const [samplePrompts, setSamplePrompts] = useState<ExamplePrompt[] | undefined>(examplePrompts)
@@ -120,12 +118,11 @@ function Dojo() {
       }
 
       chatIdRef.current = createdChat.id
-
-      await onChatLog({
-        title: newMessage,
-        user: "user",
-      });
     }
+    await onChatLog({
+      title: newMessage,
+      user: "user",
+    });
 
     setIsSending(true);
     start(newMessage);
