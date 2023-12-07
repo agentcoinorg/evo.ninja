@@ -1,11 +1,8 @@
+import { ChatMessage as AgentMessage } from "@evo-ninja/agents";
 import { Row } from "./types";
+import { ChatMessage } from "@/components/Chat";
 
-import {
-  AgentOutput,
-  ChatMessage
-} from "@evo-ninja/agents";
-
-export const mapChatMessageToMessageDTO = (chatId: string, temporary: boolean, message: ChatMessage): Omit<Row<'messages'>, "id" | "created_at"> => {
+export const mapChatMessageToMessageDTO = (chatId: string, temporary: boolean, message: AgentMessage): Omit<Row<'messages'>, "id" | "created_at"> => {
   switch (message.role) {
     case "user":
     case "system": {
@@ -68,11 +65,11 @@ export const mapVariableToVariableDTO = (chatId: string, variable: string, value
   }
 }
 
-export const mapAgentOutputToOutputDTO = (chatId: string, output: AgentOutput): Omit<Row<'agent_outputs'>, "id" | "created_at"> => {
+export const mapAgentOutputToOutputDTO = (chatId: string, chatLog: ChatMessage): Omit<Row<'logs'>, "id" | "created_at"> => {
   return {
     chat_id: chatId,
-    title: output.title,
-    content: output.content ?? null,
-    type: output.type,
+    title: chatLog.title,
+    content: chatLog.content ?? null,
+    user: chatLog.user,
   }
 }
