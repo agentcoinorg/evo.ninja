@@ -5,7 +5,7 @@ interface ButtonProps
   extends PropsWithChildren<ButtonHTMLAttributes<HTMLButtonElement>> {
   hierarchy?: "primary" | "secondary";
   size?: "default" | "lg";
-  variant?: "icon";
+  variant?: "icon" | "text";
 }
 
 const Button = ({
@@ -19,13 +19,13 @@ const Button = ({
 }: ButtonProps) => {
   const hierarchyClasses = {
     primary: clsx(
-      "bg-button border-cyan-300 bg-gradient-to-b from-cyan-300 via-cyan-600 to-cyan-800 bg-bottom",
+      "bg-button border-cyan-300 bg-gradient-to-b from-cyan-300 via-cyan-600 to-cyan-800 bg-bottom text-white",
       {
         "hover:bg-top": !disabled,
       }
     ),
     secondary: clsx(
-      "bg-button border-zinc-700 bg-gradient-to-b from-zinc-700 via-zinc-800 to-zinc-900 bg-bottom",
+      "bg-button border-zinc-700 bg-gradient-to-b from-zinc-700 via-zinc-800 to-zinc-900 bg-bottom text-white",
       {
         "hover:bg-top": !disabled,
       }
@@ -38,14 +38,15 @@ const Button = ({
   };
 
   const variantClasses = {
-    icon: "border-none bg-none !p-1 text-zinc-500 hover:text-cyan-500",
+    icon: "border-none bg-none !p-1 !text-zinc-500 hover:!text-cyan-500",
+    text: "border-none bg-none !p-1 text-cyan-500 hover:text-white",
   };
   const variantClass = variant ? variantClasses[variant] : null;
 
   return (
     <button
       className={clsx(
-        "text-shadow-md inline-flex items-center justify-center space-x-2 rounded-md border text-white transition-all duration-500",
+        "text-shadow-md inline-flex items-center justify-center space-x-2 rounded-md border transition-all duration-500",
         hierarchyClasses[hierarchy],
         sizeClasses[size],
         variantClass,

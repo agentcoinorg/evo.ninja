@@ -29,6 +29,7 @@ import AvatarBlockie from "./AvatarBlockie";
 import Logo from "./Logo";
 import Button from "./Button";
 import LoadingCircle from "./LoadingCircle";
+import Disclaimer from "./Disclaimer";
 
 export interface ChatMessage {
   title: string;
@@ -305,8 +306,10 @@ const Chat: React.FC<ChatProps> = ({
                   {msg.user === "evo" && evoRunning && sending && (
                     <div className="flex items-center space-x-2 text-cyan-500">
                       <LoadingCircle />
-                      <div className="flex cursor-pointer items-center space-x-2 text-cyan-500 transition-colors duration-500 hover:text-cyan-700 group">
-                        <div className="group-hover:underline">Predicting best approach...</div>
+                      <div className="group flex cursor-pointer items-center space-x-2 text-cyan-500 transition-colors duration-500 hover:text-cyan-700">
+                        <div className="group-hover:underline">
+                          Predicting best approach...
+                        </div>
                         <Button
                           variant="icon"
                           className="text-current transition-none"
@@ -361,24 +364,7 @@ const Chat: React.FC<ChatProps> = ({
       )}
       <div className="mb-4 flex w-[100%] max-w-[56rem] items-center justify-center gap-4 self-center p-4">
         {showDisclaimer && !overlayOpen && (
-          <div className="absolute bottom-0 z-50 flex w-4/5 w-[100%] max-w-[56rem] items-center justify-around self-center rounded-t-lg border-2 border-cyan-500 bg-black p-2.5 text-center text-xs text-white">
-            🧠 Hey there! Mind sharing your prompts to help make Evo even
-            better?
-            <div className="flex gap-2.5">
-              <span
-                className="cursor-pointer px-5 py-2.5 font-bold text-cyan-400"
-                onClick={() => handleDisclaimerSelect(true)}
-              >
-                Accept
-              </span>
-              <span
-                className="cursor-pointer px-5 py-2.5 font-bold text-white"
-                onClick={() => handleDisclaimerSelect(false)}
-              >
-                Decline
-              </span>
-            </div>
-          </div>
+          <Disclaimer handleDisclaimerSelect={handleDisclaimerSelect} />
         )}
         <TextField
           type="text"

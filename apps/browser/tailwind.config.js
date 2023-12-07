@@ -33,12 +33,17 @@ module.exports = {
       animation: {
         'fade-in': 'fade 300ms ease-in-out forwards',
         'fade-out': 'fade 300ms ease-in-out reverse forwards',
-        'slide-down': 'slide-down 500ms ease-in-out forwards'
+        'slide-down': 'slide-down 500ms ease-in-out forwards',
+        'slide-up': 'slide-up 500ms ease-in-out forwards'
       },
       keyframes: {
         'fade': {
           "0%": { opacity: 0 },
           "100%": {opacity: 1 }
+        },
+        'slide-up': {
+          "0%": { transform: 'translateY(10%)', opacity: 0 },
+          "100%": { transform: 'translateY(0%)', opacity: 1 }
         },
         'slide-down': {
           "0%": { transform: 'translateY(-10%)', opacity: 0 },

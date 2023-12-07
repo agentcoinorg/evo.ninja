@@ -19,7 +19,6 @@ interface TextFieldProps
   leftAdornmentClassnames?: string;
   rightAdornment?: ReactNode;
   rightAdornmentClassnames?: string;
-  readOnly?: boolean;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -33,8 +32,6 @@ const TextField = ({
   label,
   error,
   checked,
-  readOnly = false,
-  onChange,
   ...props
 }: TextFieldProps) => {
   const [isChecked, setIsChecked] =
@@ -42,12 +39,6 @@ const TextField = ({
 
   const handleCheck = () => {
     setIsChecked(!isChecked);
-  };
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (onChange) {
-      onChange(e);
-    }
   };
 
   return (
@@ -62,7 +53,7 @@ const TextField = ({
             type="hidden"
             className="hidden"
             checked={isChecked}
-            onChange={handleChange}
+            onChange={props.onChange}
             {...props}
           />
           <div className={clsx("checkmark", { hidden: !isChecked })} />
@@ -88,10 +79,6 @@ const TextField = ({
               className
             )}
             type={type}
-            placeholder={props.placeholder}
-            disabled={props.disabled}
-            readOnly={readOnly}
-            onChange={handleChange}
             {...props}
           />
           {rightAdornment && (
