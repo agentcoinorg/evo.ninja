@@ -17,3 +17,7 @@ db
 
 /apps/browser/lib/scripts.ts
 .next
+
+# Supabase
+.branches
+.temp
