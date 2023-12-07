@@ -117,17 +117,6 @@ function Dojo() {
           <div className="mix-blend-softlight absolute -bottom-1/4 left-1/3 h-screen w-7/12 rotate-[-30deg] rounded-full bg-gradient-to-b from-cyan-500/40 to-cyan-700/10 opacity-30 blur-[128px]" />
           <div className="mix-blend-softlight absolute -bottom-1/4 left-[65%] h-[50vh] w-4/12 rotate-[30deg] rounded-full bg-gradient-to-b from-pink-500/40 to-pink-600/20 opacity-10 blur-[128px]" />
         </div>
-        {/* {accountModal && (
-          <AccountConfig
-            apiKey={localOpenAiApiKey}
-            allowTelemetry={allowTelemetry}
-            onClose={() => {
-              setAccountModalOpen(false);
-            }}
-            firstTimeUser={firstTimeUser}
-            setError={setError}
-          />
-        )} */}
         <div className="relative w-full transition-transform lg:w-auto lg:max-w-md">
           <Sidebar
             hoveringSidebarButton={hoveringSidebarButton}
@@ -153,22 +142,21 @@ function Dojo() {
             "max-lg:hidden": sidebarOpen,
           })}
         >
-          <>
-            {evo && (
-              <Chat
-                evo={evo}
-                onMessage={onMessage}
-                messages={messages}
-                sidebarOpen={sidebarOpen}
-                overlayOpen={!welcomeModalSeen || accountModal}
-                onSidebarToggleClick={() => {
-                  setSidebarOpen(!sidebarOpen);
-                }}
-                onUploadFiles={setUploadedFiles}
-                handlePromptAuth={handlePromptAuth}
-              />
-            )}
-          </>
+          {evo && (
+            <Chat
+              landingPage={firstTimeUser}
+              evo={evo}
+              onMessage={onMessage}
+              messages={messages}
+              sidebarOpen={sidebarOpen}
+              overlayOpen={!welcomeModalSeen || accountModal}
+              onSidebarToggleClick={() => {
+                setSidebarOpen(!sidebarOpen);
+              }}
+              onUploadFiles={setUploadedFiles}
+              handlePromptAuth={handlePromptAuth}
+            />
+          )}
         </div>
       </div>
       <WelcomeModal

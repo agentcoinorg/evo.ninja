@@ -44,6 +44,7 @@ export interface ChatProps {
   messages: ChatMessage[];
   sidebarOpen: boolean;
   overlayOpen: boolean;
+  landingPage: boolean;
   onSidebarToggleClick: () => void;
   onUploadFiles: (files: InMemoryFile[]) => void;
   handlePromptAuth: (message: string) => Promise<boolean>;
@@ -57,6 +58,7 @@ const Chat: React.FC<ChatProps> = ({
   messages,
   sidebarOpen,
   overlayOpen,
+  landingPage,
   onSidebarToggleClick,
   onUploadFiles,
   handlePromptAuth,
@@ -69,6 +71,7 @@ const Chat: React.FC<ChatProps> = ({
     undefined
   );
   const [stopped, setStopped] = useState<boolean>(false);
+  const [isLandingPage, setIsLandingPage] = useState<boolean>(landingPage);
   const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom);
   const [, setAllowTelemetry] = useAtom(allowTelemetryAtom);
 
@@ -170,6 +173,7 @@ const Chat: React.FC<ChatProps> = ({
     setShowPrompts(false);
     setMessage("");
     setEvoRunning(true);
+    setIsLandingPage(false);
   };
 
   const handlePause = async () => {
@@ -261,134 +265,180 @@ const Chat: React.FC<ChatProps> = ({
   }, [messages, isAtBottom]);
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex h-12 items-center justify-center border-b-2 border-zinc-800">
-        <div>{chat_name}</div>
-        {/* <FontAwesomeIcon
-          className="cursor-pointer"
-          icon={faDownload}
-          onClick={exportChatHistory}
-        /> */}
-      </div>
-      <div
-        ref={listContainerRef}
-        onScroll={handleScroll}
-        className="flex-1 items-center space-y-6 overflow-auto p-5 text-left"
-      >
-        {messages.map((msg, index) => {
-          return (
-            <div
-              key={index}
-              className={`${msg.user} m-auto w-full max-w-[56rem] self-center`}
-            >
-              <div className="animate-slide-down group relative flex w-full items-start space-x-4 rounded-lg p-2 pb-10 text-white opacity-0 transition-colors duration-300 ">
-                {msg.user === "evo" ? (
-                  <Logo wordmark={false} className="!w-8" />
-                ) : (
-                  <AvatarBlockie
-                    address="0x7cB57B5A97eAbe94205C07890BE4c1aD31E486A8"
-                    size={32}
-                    className="border-2 border-zinc-900"
-                  />
-                )}
-                <div className="space-y-2 pt-1">
-                  {index === 0 || messages[index - 1].user !== msg.user ? (
-                    <div className="SenderName font-medium">
-                      {msg.user.charAt(0).toUpperCase() + msg.user.slice(1)}
-                    </div>
-                  ) : null}
-                  <div className="prose prose-invert max-w-[49rem]">
-                    <ReactMarkdown>{msg.title.toString()}</ReactMarkdown>
-                    <ReactMarkdown>
-                      {msg.content?.toString() ?? ""}
-                    </ReactMarkdown>
-                  </div>
-                  {msg.user === "evo" && evoRunning && sending && (
-                    <div className="flex items-center space-x-2 text-cyan-500">
-                      <LoadingCircle />
-                      <div className="group flex cursor-pointer items-center space-x-2 text-cyan-500 transition-colors duration-500 hover:text-cyan-700">
-                        <div className="group-hover:underline">
-                          Predicting best approach...
-                        </div>
-                        <Button
-                          variant="icon"
-                          className="text-current transition-none"
-                        >
-                          <CaretCircleRight size={20} />
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div className="animate-fade-in absolute bottom-1 left-9 hidden space-x-0.5 group-hover:flex">
-                  {msg.user === "evo" ? (
-                    <>
-                      <Button variant="icon">
-                        <CopySimple size={16} className="fill-currentColor" />
-                      </Button>
-                      <Button variant="icon">
-                        <ThumbsUp size={16} className="fill-currentColor" />
-                      </Button>
-                      <Button variant="icon">
-                        <ThumbsDown size={16} className="fill-currentColor" />
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button variant="icon">
-                        <PencilSimple size={16} className="fill-currentColor" />
-                      </Button>
-                      <Button variant="icon">
-                        <CopySimple size={16} className="fill-currentColor" />
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      {showPrompts && (
-        <div className="grid w-[100%] w-full max-w-[56rem] grid-rows-2 self-center p-2.5 py-8">
-          {examplePrompts.map((prompt, index) => (
-            <div
-              key={index}
-              className="m-1 cursor-pointer rounded-lg border-2 border-zinc-700 bg-zinc-900/80 p-2.5 text-left text-xs text-zinc-50 transition-all hover:border-cyan-400"
-              onClick={() => handleSamplePromptClick(prompt)}
-            >
-              {prompt.prompt}
-            </div>
-          ))}
+    <div
+      className={clsx("flex h-full flex-col", {
+        "items-center justify-center": isLandingPage,
+      })}
+    >
+      {isLandingPage ? (
+        <div className="flex flex-col items-center space-y-2">
+          <Logo wordmark={false} className="h-16 w-16" />
+          <h1 className="text-2xl font-bold">What's your goal today?</h1>
         </div>
+      ) : (
+        <>
+          <div className="flex h-12 items-center justify-center border-b-2 border-zinc-800">
+            <div>{chat_name}</div>
+          </div>
+          <div
+            ref={listContainerRef}
+            onScroll={handleScroll}
+            className="flex-1 items-center space-y-6 overflow-auto p-5 text-left"
+          >
+            {messages.map((msg, index) => {
+              return (
+                <div
+                  key={index}
+                  className={`${msg.user} m-auto w-full max-w-[56rem] self-center`}
+                >
+                  <div className="animate-slide-down group relative flex w-full items-start space-x-4 rounded-lg p-2 pb-10 text-white opacity-0 transition-colors duration-300 ">
+                    {msg.user === "evo" ? (
+                      <Logo wordmark={false} className="!w-8" />
+                    ) : (
+                      <AvatarBlockie
+                        address="0x7cB57B5A97eAbe94205C07890BE4c1aD31E486A8"
+                        size={32}
+                        className="border-2 border-zinc-900"
+                      />
+                    )}
+                    <div className="space-y-2 pt-1">
+                      {index === 0 || messages[index - 1].user !== msg.user ? (
+                        <div className="SenderName font-medium">
+                          {msg.user.charAt(0).toUpperCase() + msg.user.slice(1)}
+                        </div>
+                      ) : null}
+                      <div className="prose prose-invert max-w-[49rem]">
+                        <ReactMarkdown>{msg.title.toString()}</ReactMarkdown>
+                        <ReactMarkdown>
+                          {msg.content?.toString() ?? ""}
+                        </ReactMarkdown>
+                      </div>
+                      {msg.user === "evo" && evoRunning && sending && (
+                        <div className="flex items-center space-x-2 text-cyan-500">
+                          <LoadingCircle />
+                          <div className="group flex cursor-pointer items-center space-x-2 text-cyan-500 transition-all duration-500 hover:text-cyan-700">
+                            <div className="group-hover:underline">
+                              Predicting best approach...
+                            </div>
+                            <Button
+                              variant="icon"
+                              className="!text-current !transition-none"
+                            >
+                              <CaretCircleRight size={20} />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="animate-fade-in absolute bottom-1 left-9 hidden space-x-0.5 group-hover:flex">
+                      {msg.user === "evo" ? (
+                        <>
+                          <Button variant="icon">
+                            <CopySimple
+                              size={16}
+                              className="fill-currentColor"
+                            />
+                          </Button>
+                          <Button variant="icon">
+                            <ThumbsUp size={16} className="fill-currentColor" />
+                          </Button>
+                          <Button variant="icon">
+                            <ThumbsDown
+                              size={16}
+                              className="fill-currentColor"
+                            />
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button variant="icon">
+                            <PencilSimple
+                              size={16}
+                              className="fill-currentColor"
+                            />
+                          </Button>
+                          <Button variant="icon">
+                            <CopySimple
+                              size={16}
+                              className="fill-currentColor"
+                            />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
       )}
-      <div className="mb-4 flex w-[100%] max-w-[56rem] items-center justify-center gap-4 self-center p-4">
-        {showDisclaimer && !overlayOpen && (
-          <Disclaimer handleDisclaimerSelect={handleDisclaimerSelect} />
+      <div
+        className={clsx(
+          "flex space-y-4",
+          isLandingPage
+            ? "flex-col-reverse"
+            : "mx-auto w-full max-w-[56rem] flex-col"
         )}
-        <TextField
-          type="text"
-          value={message}
-          onChange={handleChange}
-          onKeyDown={handleKeyPress}
-          placeholder="Ask Evo anything..."
-          className="!rounded-lg !p-4 !pl-12"
-          leftAdornment={<UploadSimple color="white" size={24} />}
-          rightAdornment={
-            <ChatInputButton
-              evoRunning={evoRunning}
-              paused={paused}
-              sending={sending}
-              stopped={stopped}
-              handlePause={handlePause}
-              handleContinue={handleContinue}
-              handleSend={handleSend}
-            />
-          }
-          rightAdornmentClassnames="!right-3"
-          disabled={sending || showDisclaimer} // Disable input while sending or if disclaimer is shown
-        />
+      >
+        {showPrompts && (
+          <div className="flex flex-col items-center space-y-3">
+            {isLandingPage && (
+              <h2 className="w-full text-center font-normal">
+                Not sure where to start? Try asking one of these:
+              </h2>
+            )}
+            <div className="flex w-full max-w-[56rem] flex-wrap items-center justify-center space-x-1 space-y-1 self-center">
+              {examplePrompts.map((prompt, index) => (
+                <div
+                  key={index}
+                  className={clsx(
+                    "cursor-pointer rounded-lg border-2  bg-zinc-900/50 p-2.5 text-xs text-zinc-400 transition-all duration-300 ease-in-out hover:bg-cyan-600 hover:text-white",
+                    isLandingPage
+                      ? "whitespace-nowrap border-zinc-700"
+                      : "m-1 w-[calc(100%-1.5rem)] border-zinc-800"
+                  )}
+                  onClick={() => handleSamplePromptClick(prompt)}
+                >
+                  {prompt.prompt}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        <div
+          className={clsx(
+            "mb-4 flex w-full items-center justify-center gap-4 self-center p-4",
+            isLandingPage ? "max-w-[42rem]" : "max-w-[56rem]"
+          )}
+        >
+          <TextField
+            type="text"
+            value={message}
+            onChange={handleChange}
+            onKeyDown={handleKeyPress}
+            placeholder="Ask Evo anything..."
+            className="!rounded-lg !p-4 !pl-12"
+            leftAdornment={<UploadSimple color="white" size={24} />}
+            rightAdornment={
+              <ChatInputButton
+                evoRunning={evoRunning}
+                paused={paused}
+                sending={sending}
+                stopped={stopped}
+                handlePause={handlePause}
+                handleContinue={handleContinue}
+                handleSend={handleSend}
+              />
+            }
+            rightAdornmentClassnames="!right-3"
+            disabled={sending || showDisclaimer} // Disable input while sending or if disclaimer is shown
+          />
+        </div>
       </div>
+      {showDisclaimer && !overlayOpen && (
+        <Disclaimer handleDisclaimerSelect={handleDisclaimerSelect} />
+      )}
       <a
         className="fixed bottom-4 right-4 z-10 cursor-pointer rounded-full border-2 border-zinc-500 bg-zinc-700 p-1 shadow hover:bg-zinc-600 hover:shadow-lg"
         href="https://discord.gg/r3rwh69cCa"
