@@ -8,11 +8,13 @@ import { useHandleAuth } from "@/lib/hooks/useHandleAuth";
 import { mapAgentOutputToOutputDTO, mapChatMessageToMessageDTO, mapVariableToVariableDTO } from "@/lib/supabase/evo";
 import { useSupabase } from "@/lib/supabase/useSupabase";
 import { ChatLogType, ChatMessage as AgentMessage } from "@evo-ninja/agents";
-import { useState } from "react";
+import router from "next/router";
+import { useRef, useState } from "react";
 
 function Dojo() {
+  console.log(router.query.id as string)
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [chatId, setChatId] = useState<string | undefined>()
+  const chatIdRef = useRef<string | undefined>()
   const [samplePrompts, setSamplePrompts] = useState<ExamplePrompt[] | undefined>(examplePrompts)
   const checkForUserFiles = useCheckForUserFiles();
   const supabase = useSupabase()
@@ -27,6 +29,8 @@ function Dojo() {
   }
 
   const addMessages = async (temporary: ChatLogType, messages: AgentMessage[]) => {
+    const chatId = chatIdRef.current;
+
     if (!chatId) {
       throw new Error("No ChatID to add messages")
     }
@@ -43,6 +47,8 @@ function Dojo() {
   }
 
   const addVariableToChat = async (key: string, value: string) => {
+    const chatId = chatIdRef.current;
+
     if (!chatId) {
       throw new Error("No ChatID to add variable")
     }
@@ -59,6 +65,8 @@ function Dojo() {
   }
 
   const addChatLog = async (log: ChatMessage) => {
+    const chatId = chatIdRef.current;
+
     if (!chatId) {
       throw new Error("No ChatID to add chat log")
     }
@@ -111,13 +119,14 @@ function Dojo() {
         return;
       }
 
-      setChatId(createdChat.id)
+      chatIdRef.current = createdChat.id
+
+      await onChatLog({
+        title: newMessage,
+        user: "user",
+      });
     }
 
-    await onChatLog({
-      title: newMessage,
-      user: "user",
-    });
     setIsSending(true);
     start(newMessage);
   };
