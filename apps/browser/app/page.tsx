@@ -5,88 +5,84 @@ import { ExamplePrompt, examplePrompts } from "@/lib/examplePrompts";
 import { useCheckForUserFiles } from "@/lib/hooks/useCheckForUserFiles";
 import { useEvo } from "@/lib/hooks/useEvo";
 import { useHandleAuth } from "@/lib/hooks/useHandleAuth";
-import { mapAgentOutputToOutputDTO, mapChatMessageToMessageDTO, mapVariableToVariableDTO } from "@/lib/supabase/evo";
-import { useSupabase } from "@/lib/supabase/useSupabase";
+import { useAddChatLog } from "@/lib/mutations/useAddChatLog";
+import { useAddMessages } from "@/lib/mutations/useAddMessages";
+import { useAddVariable } from "@/lib/mutations/useAddVariable";
+import { useCreateChat } from "@/lib/mutations/useCreateChat";
+import { useChats } from "@/lib/queries/useChats";
+import { errorAtom } from "@/lib/store";
 import { ChatLogType, ChatMessage as AgentMessage } from "@evo-ninja/agents";
-import router from "next/router";
-import { useRef, useState } from "react";
+import { useAtom } from "jotai";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
-function Dojo() {
-  console.log(router.query.id as string)
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+function Dojo({ params }: { params: { id?: string } }) {
+  const router = useRouter()
+  const { mutateAsync: createChat } = useCreateChat()
+  const { mutateAsync: addMessages } = useAddMessages()
+  const { mutateAsync: addChatLog } = useAddChatLog()
+  const { mutateAsync: addVariable } = useAddVariable()
+  const { data: chats } = useChats()
+  const [, setError] = useAtom(errorAtom)
+  const [currentChat, setCurrentChat] = useState<{ id: string }>();
+
   const chatIdRef = useRef<string | undefined>()
   const [samplePrompts, setSamplePrompts] = useState<ExamplePrompt[] | undefined>(examplePrompts)
   const checkForUserFiles = useCheckForUserFiles();
-  const supabase = useSupabase()
-  const createChat = async () => {
-    const { data, error } = await supabase.from("chats").insert({}).select("id, created_at")
 
-    if (error) {
-      throw new Error(error.message);
+  useEffect(() => {
+    if (chats && params.id) {
+      const foundChat = chats.find(c => c.id === params.id)
+
+      if (foundChat) {
+        setCurrentChat(foundChat)
+        return;
+      }
+
+      setError("No chat with this ID")
+      router.push('/')
     }
+  }, [chats])
 
-    return data[0]
-  }
-
-  const addMessages = async (temporary: ChatLogType, messages: AgentMessage[]) => {
+  const onAgentMessages = async (type: ChatLogType, messages: AgentMessage[]) => {
     const chatId = chatIdRef.current;
 
     if (!chatId) {
       throw new Error("No ChatID to add messages")
     }
 
-    const { error } = await supabase
-      .from("messages")
-      .insert(
-        messages.map(msg => mapChatMessageToMessageDTO(chatId, temporary === "temporary", msg))
-      )
-
-    if (error) {
-      throw new Error(error.message);
-    }
+    await addMessages({
+      chatId,
+      messages,
+      type
+    })
   }
 
-  const addVariableToChat = async (key: string, value: string) => {
+  const onVariableSet = async (key: string, value: string) => {
     const chatId = chatIdRef.current;
 
     if (!chatId) {
       throw new Error("No ChatID to add variable")
     }
 
-    const { error } = await supabase
-      .from("variables")
-      .insert(
-        mapVariableToVariableDTO(chatId, key, value)
-      )
-
-    if (error) {
-      throw new Error(error.message);
-    }
+    await addVariable({
+      chatId,
+      key,
+      value
+    })
   }
 
-  const addChatLog = async (log: ChatMessage) => {
+  const onChatLog = async (log: ChatMessage) => {
     const chatId = chatIdRef.current;
 
     if (!chatId) {
       throw new Error("No ChatID to add chat log")
     }
 
-    const { error } = await supabase
-      .from("logs")
-      .insert(
-        mapAgentOutputToOutputDTO(chatId, log)
-      )
-
-    if (error) {
-      throw new Error(error.message);
-    }
+    await addChatLog({ chatId, log })
+    checkForUserFiles();
   }
 
-  const onChatLog = async (message: ChatMessage) => {
-    setMessages((messages) => [...messages, message]);
-    await addChatLog(message)
-    checkForUserFiles();
-  };
   const {
     isRunning,
     isPaused,
@@ -98,8 +94,8 @@ function Dojo() {
     setIsSending,
   } = useEvo({
     onChatLog,
-    onAgentMessages: addMessages,
-    onVariableSet: addVariableToChat
+    onAgentMessages,
+    onVariableSet
   });
   const { handlePromptAuth } = useHandleAuth();
 
@@ -133,7 +129,7 @@ function Dojo() {
 
   return (
     <Chat
-      messages={messages}
+      messages={[]}
       samplePrompts={samplePrompts}
       isPaused={isPaused}
       isRunning={isRunning}

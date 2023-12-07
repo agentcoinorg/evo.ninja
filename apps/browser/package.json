@@ -13,6 +13,7 @@
     "@headlessui/react": "^1.7.17",
     "@nerfzael/memory-fs": "0.1.1",
     "@supabase/supabase-js": "2.38.5",
+    "@tanstack/react-query": "^5.12.2",
     "buffer": "6.0.3",
     "clsx": "^2.0.0",
     "file-saver": "^2.0.5",
