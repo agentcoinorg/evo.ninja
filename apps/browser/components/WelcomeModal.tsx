@@ -50,10 +50,11 @@ const validateOpenAiApiKey = async (
 export default function SettingsModal(props: AccountConfigProps) {
   const [localApiKey, setLocalApiKey] = useAtom(localOpenAiApiKeyAtom);
   const [allowTelemetry, setAllowTelemetry] = useAtom(allowTelemetryAtom);
+  const [apiKey, setApiKey] = useState<string>(localApiKey || "");
   const [telemetry, setTelemetry] = useState(allowTelemetry);
   const [error, setError] = useState<string | undefined>();
   const [capReached, setCapReached] = useAtom(capReachedAtom);
-  const { firstTimeUser, apiKey } = props;
+  const { firstTimeUser } = props;
 
   const { isOpen, onClose } = props;
 
@@ -143,7 +144,9 @@ export default function SettingsModal(props: AccountConfigProps) {
 
         <AccountConfig
           apiKey={apiKey}
-          allowTelemetry={allowTelemetry}
+          telemetry={telemetry}
+          setTelemetry={setTelemetry}
+          setApiKey={setApiKey}
           justAuthenticated={justAuthenticated}
         />
 
