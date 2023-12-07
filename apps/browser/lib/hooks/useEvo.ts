@@ -51,7 +51,7 @@ export function useEvo({
   isPaused: boolean;
   isStopped: boolean;
   isSending: boolean;
-  setIsSending: (sending: boolean) => void
+  setIsSending: (sending: boolean) => void;
 } {
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [isRunning, setIsRunning] = useState<boolean>(false);
@@ -84,54 +84,54 @@ export function useEvo({
         promptUser: () => Promise.resolve("N/A"),
       });
 
-      const scriptsWorkspace = createInBrowserScripts();
-      const scripts = new Scripts(scriptsWorkspace);
+        const scriptsWorkspace = await createInBrowserScripts();
+        const scripts = new Scripts(scriptsWorkspace);
 
-      const env = new Env({
-        OPENAI_API_KEY: localOpenAiApiKey || " ",
-        GPT_MODEL: "gpt-4-1106-preview",
-        CONTEXT_WINDOW_TOKENS: "128000",
-        MAX_RESPONSE_TOKENS: "4096",
-      });
+        const env = new Env({
+          OPENAI_API_KEY: localOpenAiApiKey || " ",
+          GPT_MODEL: "gpt-4-1106-preview",
+          CONTEXT_WINDOW_TOKENS: "128000",
+          MAX_RESPONSE_TOKENS: "4096",
+        });
 
-      let llm: LlmApi;
-      let embedding: EmbeddingApi;
+        let llm: LlmApi;
+        let embedding: EmbeddingApi;
 
-      if (localOpenAiApiKey) {
-        llm = new OpenAILlmApi(
-          env.OPENAI_API_KEY,
-          env.GPT_MODEL as LlmModel,
-          env.CONTEXT_WINDOW_TOKENS,
-          env.MAX_RESPONSE_TOKENS,
-          logger
-        );
-        embedding = new OpenAIEmbeddingAPI(
-          env.OPENAI_API_KEY,
-          logger,
-          cl100k_base
-        );
-      } else {
-        llm = new ProxyLlmApi(
-          env.GPT_MODEL as LlmModel,
-          env.CONTEXT_WINDOW_TOKENS,
-          env.MAX_RESPONSE_TOKENS,
-          () => setCapReached(true)
-        );
-        setLlmProxyApi(llm as ProxyLlmApi);
-        embedding = new ProxyEmbeddingApi(cl100k_base, () =>
-          setCapReached(true)
-        );
-        setEmbeddingProxyApi(embedding as ProxyEmbeddingApi);
-      }
+        if (localOpenAiApiKey) {
+          llm = new OpenAILlmApi(
+            env.OPENAI_API_KEY,
+            env.GPT_MODEL as LlmModel,
+            env.CONTEXT_WINDOW_TOKENS,
+            env.MAX_RESPONSE_TOKENS,
+            logger
+          );
+          embedding = new OpenAIEmbeddingAPI(
+            env.OPENAI_API_KEY,
+            logger,
+            cl100k_base
+          );
+        } else {
+          llm = new ProxyLlmApi(
+            env.GPT_MODEL as LlmModel,
+            env.CONTEXT_WINDOW_TOKENS,
+            env.MAX_RESPONSE_TOKENS,
+            () => setCapReached(true)
+          );
+          setLlmProxyApi(llm as ProxyLlmApi);
+          embedding = new ProxyEmbeddingApi(cl100k_base, () =>
+            setCapReached(true)
+          );
+          setEmbeddingProxyApi(embedding as ProxyEmbeddingApi);
+        }
 
-      let workspace = userWorkspace;
+        let workspace = userWorkspace;
 
-      if (!workspace) {
-        workspace = new InMemoryWorkspace();
-        setUserWorkspace(workspace);
-      }
+        if (!workspace) {
+          workspace = new InMemoryWorkspace();
+          setUserWorkspace(workspace);
+        }
 
-      const internals = new SubWorkspace(".evo", workspace);
+        const internals = new SubWorkspace(".evo", workspace);
 
       const chat = new EvoChat(cl100k_base, {
         onMessagesAdded: onAgentMessages
@@ -155,11 +155,11 @@ export function useEvo({
             undefined,
             agentVariables
           )
-        )
-      );
-    } catch (e: any) {
-      setError(e.message);
-    }
+        );
+      } catch (e: any) {
+        setError(e.message);
+      }
+    })();
   }, [localOpenAiApiKey]);
 
   const start = (goal: string) => {
@@ -241,6 +241,5 @@ export function useEvo({
     isSending,
     isStopped,
     setIsSending,
-
   };
 }

@@ -1,25 +1,31 @@
 import { ScriptFunction } from "./utils";
 
-export class CsvFilterRowsFunction extends ScriptFunction<{ csv: string, columnName: string, filterValue: string }> {
+export class CsvFilterRowsFunction extends ScriptFunction<{
+  csv: string;
+  columnName: string;
+  filterValue: string;
+}> {
   name: string = "csv_filterRows";
+  description: string =
+    "Filters and returns rows from a CSV dataset based on a specified column index and a search string";
   parameters: any = {
     type: "object",
-    properties: { 
+    properties: {
       csv: {
-        type: "string"
+        type: "string",
       },
       columnName: {
-        type: "string"
+        type: "string",
       },
       filterValue: {
-        type: "string"
+        type: "string",
       },
       outputFile: {
         type: "string",
-        description: "Write the result to a file"
-      }
+        description: "Write the result to a file",
+      },
     },
     required: ["csv", "columnName", "filterValue", "withHeader"],
-    additionalProperties: false
+    additionalProperties: false,
   };
 }

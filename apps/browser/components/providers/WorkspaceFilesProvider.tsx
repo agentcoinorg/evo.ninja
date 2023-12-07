@@ -13,14 +13,18 @@ export default function WorkspaceFilesProvider({ children }: { children: React.R
       return;
     }
 
-    for (const file of uploadedFiles) {
-      userWorkspace.writeFileSync(
-        file.path,
-        new TextDecoder().decode(file.content)
+    //eslint-disable-next-line @typescript-eslint/no-floating-promises
+    (async () => {
+      await Promise.all(
+        uploadedFiles.map((file) =>
+          userWorkspace.writeFile(
+            file.path,
+            new TextDecoder().decode(file.content)
+          )
+        )
       );
-    }
-
-    checkForUserFiles();
+      await checkForUserFiles();
+    })();
   }, [uploadedFiles]);
 
   return (

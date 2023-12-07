@@ -36,9 +36,9 @@ export class SummarizeDirectoryFunction extends LlmAgentFunctionBase<SummarizeDi
       const fuzTokens = 200;
       const maxInputTokens = this.llm.getMaxContextTokens() - (this.llm.getMaxResponseTokens() + fuzTokens);
       const chunker = new DirectoryChunker({ maxChunkSize: maxInputTokens })
-      const chunks = chunker.chunk({
+      const chunks = await chunker.chunk({
         workspace: context.workspace,
-        directory: params.subDirectory
+        directory: params.subDirectory,
       });
 
       let summary: string | undefined = undefined;
