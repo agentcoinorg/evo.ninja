@@ -280,7 +280,7 @@ const Chat: React.FC<ChatProps> = ({
               key={index}
               className={`${msg.user} m-auto w-full max-w-[56rem] self-center`}
             >
-              <div className="group relative flex w-full items-start space-x-4 rounded-lg p-2 pb-10 text-white transition-colors duration-300 hover:bg-zinc-950/40">
+              <div className="animate-slide-down group relative flex w-full items-start space-x-4 rounded-lg p-2 pb-10 text-white opacity-0 transition-colors duration-300 ">
                 {msg.user === "evo" ? (
                   <Logo wordmark={false} className="!w-8" />
                 ) : (
@@ -305,21 +305,19 @@ const Chat: React.FC<ChatProps> = ({
                   {msg.user === "evo" && evoRunning && sending && (
                     <div className="flex items-center space-x-2 text-cyan-500">
                       <LoadingCircle />
-                      <div>Predicting best approach...</div>
-                      <Button
-                        variant="icon"
-                        className="!text-cyan-500 hover:!text-cyan-700"
-                      >
-                        <CaretCircleRight
-                          // weight="bold"
-                          className="fill-currentColor"
-                          size={20}
-                        />
-                      </Button>
+                      <div className="flex cursor-pointer items-center space-x-2 text-cyan-500 transition-colors duration-500 hover:text-cyan-700 group">
+                        <div className="group-hover:underline">Predicting best approach...</div>
+                        <Button
+                          variant="icon"
+                          className="text-current transition-none"
+                        >
+                          <CaretCircleRight size={20} />
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </div>
-                <div className="animate-fade-in absolute bottom-1 right-1 hidden space-x-0.5 group-hover:flex">
+                <div className="animate-fade-in absolute bottom-1 left-9 hidden space-x-0.5 group-hover:flex">
                   {msg.user === "evo" ? (
                     <>
                       <Button variant="icon">
@@ -349,11 +347,11 @@ const Chat: React.FC<ChatProps> = ({
         })}
       </div>
       {showPrompts && (
-        <div className="grid w-[100%] w-full max-w-[56rem] grid-rows-2 self-center p-2.5 py-16">
+        <div className="grid w-[100%] w-full max-w-[56rem] grid-rows-2 self-center p-2.5 py-8">
           {examplePrompts.map((prompt, index) => (
             <div
               key={index}
-              className="m-1 cursor-pointer rounded-xl border border-zinc-500 bg-zinc-800 p-2.5 text-left text-xs text-zinc-50 transition-all hover:border-cyan-400"
+              className="m-1 cursor-pointer rounded-lg border-2 border-zinc-700 bg-zinc-900/80 p-2.5 text-left text-xs text-zinc-50 transition-all hover:border-cyan-400"
               onClick={() => handleSamplePromptClick(prompt)}
             >
               {prompt.prompt}
