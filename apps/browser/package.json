@@ -51,7 +51,7 @@
     "build:env": "node scripts/build.env.js",
     "db:start": "supabase start",
     "db:stop": "supabase stop",
-    "lint": "prettier . --write",
+    "lint": "eslint --color -c ../../.eslintrc.js app/ lib/ components/",
     "start": "next start"
   }
 }

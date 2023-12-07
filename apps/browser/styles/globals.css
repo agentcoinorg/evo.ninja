@@ -17,7 +17,7 @@ code {
 }
 
 ::-webkit-scrollbar {
-  @apply w-2 h-2 rounded;
+  @apply h-2 w-2 rounded;
 }
 
 ::-webkit-scrollbar-track {
@@ -25,9 +25,9 @@ code {
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-orange-600 rounded;
+  @apply rounded bg-orange-600;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-orange-500 rounded;
+  @apply rounded bg-orange-500;
 }

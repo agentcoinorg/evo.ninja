@@ -27,20 +27,11 @@ export class Evo extends Agent<GoalRunArgs> {
   private initializedAgents: Set<string> = new Set();
   private goal: string = "";
 
-  constructor(
-    context: AgentContext,
-    timeout?: Timeout,
-  ) {
-    super(
-      new AgentConfig(
-        agentPrompts,
-        [],
-        context.scripts,
-        timeout
-      ),
-      context,
-    );
-    this._chunker = new MessageChunker({ maxChunkSize: context.variables.saveThreshold });
+  constructor(context: AgentContext, timeout?: Timeout) {
+    super(new AgentConfig(agentPrompts, [], context.scripts, timeout), context);
+    this._chunker = new MessageChunker({
+      maxChunkSize: context.variables.saveThreshold,
+    });
     this._cChat = new ContextualizedChat(
       this.context,
       this.context.chat,
@@ -68,7 +59,7 @@ export class Evo extends Agent<GoalRunArgs> {
     const { chat } = this.context;
 
     const initialMessages: ChatMessage[] = [
-      buildDirectoryPreviewMsg(this.context.workspace),
+      await buildDirectoryPreviewMsg(this.context.workspace),
       { role: "user", content: prompts.exhaustAllApproaches },
       { role: "user", content: prompts.variablesExplainer },
       { role: "user", content: args.goal },
@@ -78,19 +69,29 @@ export class Evo extends Agent<GoalRunArgs> {
     this.goal = args.goal;
   }
 
-  protected async beforeLlmResponse(): Promise<{ logs: ChatLogs, agentFunctions: FunctionDefinition[], allFunctions: AgentFunction<AgentContext>[], finalOutput?: AgentOutput }> {
+  protected async beforeLlmResponse(): Promise<{
+    logs: ChatLogs;
+    agentFunctions: FunctionDefinition[];
+    allFunctions: AgentFunction<AgentContext>[];
+    finalOutput?: AgentOutput;
+  }> {
     const { chat } = this.context;
     const { messages } = chat.chatLogs;
 
-    const prediction = (!this.previousPrediction || this.loopCounter % 2 === 0) ?
-      await this.predictBestNextStep(messages, this.previousAgent, this.previousPrediction ? "SUCCESS": undefined) :
-      this.previousPrediction;
+    const prediction =
+      !this.previousPrediction || this.loopCounter % 2 === 0
+        ? await this.predictBestNextStep(
+            messages,
+            this.previousAgent,
+            this.previousPrediction ? "SUCCESS" : undefined
+          )
+        : this.previousPrediction;
 
     this.loopCounter += 1;
 
     if (
       prediction === "SUCCESS" ||
-      prediction.includes("\"SUCCESS\"") ||
+      prediction.includes('"SUCCESS"') ||
       prediction.includes("goal has been achieved")
     ) {
       return {
@@ -99,16 +100,19 @@ export class Evo extends Agent<GoalRunArgs> {
         allFunctions: [],
         finalOutput: {
           type: "success",
-          title: "SUCCESS"
-        }
+          title: "SUCCESS",
+        },
       };
     }
 
     const predictionVector = await this.createEmbeddingVector(prediction);
 
-    this.context.logger.info("### Prediction:\n-> " + prediction);
+    await this.context.logger.info("### Prediction:\n-> " + prediction);
 
-    const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(predictionVector, this.context);
+    const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(
+      predictionVector,
+      this.context
+    );
 
     if (!this.initializedAgents.has(agent.config.prompts.name)) {
       this.initializedAgents.add(agent.config.prompts.name);
@@ -122,13 +126,17 @@ export class Evo extends Agent<GoalRunArgs> {
       await this.createEmbeddingVector(`${persona}\n${prediction}`)
     );
 
-    const logs = insertPersonaAsFirstMsg(persona, contextualizedChat.chatLogs, chat.tokenizer);
+    const logs = insertPersonaAsFirstMsg(
+      persona,
+      contextualizedChat.chatLogs,
+      chat.tokenizer
+    );
 
     return {
       logs,
       agentFunctions,
-      allFunctions: allFunctions.map(agentFunctionBaseToAgentFunction(agent))
-    }
+      allFunctions: allFunctions.map(agentFunctionBaseToAgentFunction(agent)),
+    };
   }
 
   private async contextualizeChat(predictionVector: number[]): Promise<Chat> {
@@ -138,37 +146,37 @@ export class Evo extends Agent<GoalRunArgs> {
     const fuzz = 500;
     const maxChatTokens = maxContextTokens - maxResponseTokens - fuzz;
 
-    return await this._cChat.contextualize(
-      predictionVector, {
-        persistent: maxChatTokens * 0.25,
-        temporary: maxChatTokens * 0.75
-      }
-    );
+    return await this._cChat.contextualize(predictionVector, {
+      persistent: maxChatTokens * 0.25,
+      temporary: maxChatTokens * 0.75,
+    });
   }
 
-  private async predictBestNextStep(messages: ChatMessage[], previousAgent: Agent<unknown> | undefined, terminationStr?: string): Promise<string> {
-    const agentPersona = previousAgent ?
-      // TODO: fix this when we refactor agent prompts
-      previousAgent.config.prompts.initialMessages({ goal: "" }).slice(0, -1) :
-      [{ role: "user", content: prompts.generalAgentPersona }];
+  private async predictBestNextStep(
+    messages: ChatMessage[],
+    previousAgent: Agent<unknown> | undefined,
+    terminationStr?: string
+  ): Promise<string> {
+    const agentPersona = previousAgent
+      ? // TODO: fix this when we refactor agent prompts
+        previousAgent.config.prompts.initialMessages({ goal: "" }).slice(0, -1)
+      : [{ role: "user", content: prompts.generalAgentPersona }];
 
     return await this.askLlm(
-      new Prompt()
-        .json([
-          ...agentPersona,
-          ...messages
-        ])
-        .line(`
+      new Prompt().json([...agentPersona, ...messages]).line(`
           Consider the above chat between a user and assistant.
           Consider that if information needs to be used, and it is not in the chat, it must be searched or read.
           In your expert opinion, what is the best next step for the assistant?
-          ${terminationStr && this.goal.length < 350 ? `If you are 100% sure the user's goal has been achieved, simply respond with "${terminationStr}". The user's goal is: "${this.goal}". If the user asks for an output file, has it been written?` : ""}`
-        ),
+          ${
+            terminationStr && this.goal.length < 350
+              ? `If you are 100% sure the user's goal has been achieved, simply respond with "${terminationStr}". The user's goal is: "${this.goal}". If the user asks for an output file, has it been written?`
+              : ""
+          }`),
       {
-        model: "gpt-3.5-turbo-16k"
+        model: "gpt-3.5-turbo-16k",
       }
     );
-  };
+  }
 
   private maxContextChars(): number {
     return tokensToChars(this.maxContextTokens());
@@ -179,17 +187,27 @@ export class Evo extends Agent<GoalRunArgs> {
   }
 
   isLargeMsg = (message: ChatMessage): boolean => {
-    return !!message.content && message.content.length > this.maxContextChars() * 0.0625;
-  }
+    return (
+      !!message.content &&
+      message.content.length > this.maxContextChars() * 0.0625
+    );
+  };
 }
 
-const insertPersonaAsFirstMsg = (persona: string, logs: ChatLogs, tokenizer: Tokenizer): ChatLogs => {
+const insertPersonaAsFirstMsg = (
+  persona: string,
+  logs: ChatLogs,
+  tokenizer: Tokenizer
+): ChatLogs => {
   const newLogs = logs.clone();
-  newLogs.insert("persistent",
-    [{
-      role: "user",
-      content: persona,
-    } as ChatMessage],
+  newLogs.insert(
+    "persistent",
+    [
+      {
+        role: "user",
+        content: persona,
+      } as ChatMessage,
+    ],
     [tokenizer.encode(persona).length],
     0
   );
@@ -197,15 +215,19 @@ const insertPersonaAsFirstMsg = (persona: string, logs: ChatLogs, tokenizer: Tok
   return newLogs;
 };
 
-const buildDirectoryPreviewMsg = (workspace: Workspace): ChatMessage => {
-  const files = workspace.readdirSync("./");
+const buildDirectoryPreviewMsg = async (
+  workspace: Workspace
+): Promise<ChatMessage> => {
+  const files = await workspace.readdir("./");
   return {
     role: "user",
     content: `Current directory: './'
-Files: ${
-files.filter((x) => x.type === "file").map((x) => x.name).join(", ")
-}\nDirectories: ${
-files.filter((x) => x.type === "directory").map((x) => x.name).join(", ")
-}` 
-  }
+Files: ${files
+      .filter((x) => x.type === "file")
+      .map((x) => x.name)
+      .join(", ")}\nDirectories: ${files
+      .filter((x) => x.type === "directory")
+      .map((x) => x.name)
+      .join(", ")}`,
+  };
 };

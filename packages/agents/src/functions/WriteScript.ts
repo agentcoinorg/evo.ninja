@@ -57,7 +57,7 @@ export class WriteScriptFunction extends AgentFunctionBase<WriteScriptFuncParame
         return this.onErrorCannotRequireLib(this.name, params, rawParams, context.variables);
       }
 
-      context.workspace.writeFileSync("index.js", params.code);
+      await context.workspace.writeFile("index.js", params.code);
 
       return this.onSuccess(params, rawParams, context.variables);
     };

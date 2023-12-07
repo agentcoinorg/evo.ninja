@@ -1,22 +1,26 @@
 import { ScriptFunction } from "./utils";
 
-export class CsvSortByColumnFunction extends ScriptFunction<{ csv: string, columnIndex: string }> {
+export class CsvSortByColumnFunction extends ScriptFunction<{
+  csv: string;
+  columnIndex: string;
+}> {
   name: string = "csv_sortByColumn";
+  description: string = "Sort a column in a CSV";
   parameters: any = {
     type: "object",
-    properties: { 
+    properties: {
       csv: {
-          type: "string"
+        type: "string",
       },
       columnIndex: {
-          type: "number"
+        type: "number",
       },
       outputFile: {
-          type: "string",
-          description: "Write the result to a file"
-      }
+        type: "string",
+        description: "Write the result to a file",
+      },
     },
     required: ["csv", "columnIndex"],
-    additionalProperties: false
+    additionalProperties: false,
   };
 }

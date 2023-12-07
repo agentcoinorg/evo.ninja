@@ -3,39 +3,46 @@ import { ILogger } from "./Logger";
 import { Workspace } from "../workspaces";
 
 export class FileLogger implements ILogger {
-  constructor(
-    private _filePath: string,
-    private _workspace: Workspace
-  ) {
+  private constructor(
+    private readonly _filePath: string,
+    private readonly _workspace: Workspace
+  ) {}
+
+  static async create(
+    filePath: string,
+    workspace: Workspace
+  ): Promise<FileLogger> {
     // Make the log directory if it doesn't exist
-    const logDir = path.dirname(this._filePath);
-    if (!_workspace.existsSync(logDir)) {
-      _workspace.mkdirSync(logDir, { recursive: true });
+    const logDir = path.dirname(filePath);
+    if (!(await workspace.exists(logDir))) {
+      await workspace.mkdir(logDir, { recursive: true });
     }
 
     // Delete the file if it exists
-    if (_workspace.existsSync(this._filePath)) {
-      _workspace.rmSync(this._filePath);
+    if (await workspace.exists(filePath)) {
+      await workspace.rm(filePath);
     }
+
+    return new FileLogger(filePath, workspace);
   }
 
-  info(info: string): void {
-    this._workspace.appendFileSync(this._filePath, info + "  \n");
+  async info(info: string): Promise<void> {
+    await this._workspace.appendFile(this._filePath, info + "  \n");
   }
 
-  notice(msg: string): void {
-    this.info(msg + "  \n");
+  notice(msg: string): Promise<void> {
+    return this.info(msg + "  \n");
   }
 
-  success(msg: string): void {
-    this.info(msg + "  \n");
+  success(msg: string): Promise<void> {
+    return this.info(msg + "  \n");
   }
 
-  warning(msg: string): void {
-    this.info(msg + "  \n");
+  warning(msg: string): Promise<void> {
+    return this.info(msg + "  \n");
   }
 
-  error(msg: string): void {
-    this.info(msg + "  \n");
+  error(msg: string): Promise<void> {
+    return this.info(msg + "  \n");
   }
 }

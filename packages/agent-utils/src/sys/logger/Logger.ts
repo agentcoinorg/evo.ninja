@@ -1,11 +1,11 @@
 import figlet from "figlet";
 
 export interface ILogger {
-  info: (info: string) => void;
-  notice: (msg: string) => void;
-  success: (msg: string) => void;
-  warning: (msg: string) => void;
-  error: (msg: string, error?: unknown) => void;
+  info: (info: string) => Promise<void>;
+  notice: (msg: string) => Promise<void>;
+  success: (msg: string) => Promise<void>;
+  warning: (msg: string) => Promise<void>;
+  error: (msg: string, error?: unknown) => Promise<void>;
 }
 
 export interface LoggerCallbacks {
@@ -18,36 +18,33 @@ export class Logger implements ILogger {
   constructor(
     protected _loggers: ILogger[],
     protected _callbacks: LoggerCallbacks
-  ) { }
+  ) {}
 
-  info(info: string) {
-    this._loggers.forEach((l) => l.info(info));
+  async info(info: string): Promise<void> {
+    await Promise.all(this._loggers.map((l) => l.info(info)));
   }
 
-  notice(msg: string) {
-    this._loggers.forEach((l) => l.notice(msg));
+  async notice(msg: string): Promise<void> {
+    await Promise.all(this._loggers.map((l) => l.notice(msg)));
   }
 
-  success(msg: string) {
-    this._loggers.forEach((l) => l.success(msg));
+  async success(msg: string): Promise<void> {
+    await Promise.all(this._loggers.map((l) => l.success(msg)));
   }
 
-  warning(msg: string) {
-    this._loggers.forEach((l) => l.warning(msg));
+  async warning(msg: string): Promise<void> {
+    await Promise.all(this._loggers.map((l) => l.warning(msg)));
   }
 
-  error(msg: string, error?: unknown) {
+  async error(msg: string, error?: unknown): Promise<void> {
     if (!error) {
-      this._loggers.forEach((l) => l.error(msg));
+      await Promise.all(this._loggers.map((l) => l.error(msg)));
       return;
     }
 
     let errorStr: string = "";
     let errorObj = error as Record<string, unknown>;
-    if (
-      typeof error === "object" &&
-      errorObj.message
-    ) {
+    if (typeof error === "object" && errorObj.message) {
       if (errorObj.response) {
         const responseObj = errorObj.response as Record<string, unknown>;
         const status = responseObj.status || "N/A";
@@ -58,7 +55,7 @@ export class Logger implements ILogger {
       errorStr += `\nMessage: ${errorObj.message}`;
     }
 
-    this._loggers.forEach((l) => l.error(`${msg}${errorStr}`));
+    await Promise.all(this._loggers.map((l) => l.error(`${msg}${errorStr}`)));
   }
 
   async prompt(query: string): Promise<string> {
@@ -69,21 +66,25 @@ export class Logger implements ILogger {
     const logger = this;
 
     return new Promise<void>((resolve, reject) => {
-      figlet.text("Evo.Ninja", {
-        font: "Doom",
-        horizontalLayout: "default",
-        verticalLayout: "default",
-        whitespaceBreak: true
-      }, function(err: Error | null, data?: string) {
-        if (err) {
-          logger.error("Something went wrong...", err);
-          reject(err);
-          return;
+      figlet.text(
+        "Evo.Ninja",
+        {
+          font: "Doom",
+          horizontalLayout: "default",
+          verticalLayout: "default",
+          whitespaceBreak: true,
+        },
+        async function (err: Error | null, data?: string) {
+          if (err) {
+            await logger.error("Something went wrong...", err);
+            reject(err);
+            return;
+          }
+          await logger.info("```\n" + data + "\n```\n");
+          await logger.info("Support: https://discord.gg/r3rwh69cCa");
+          resolve();
         }
-        logger.info("```\n" + data + "\n```\n");
-        logger.info("Support: https://discord.gg/r3rwh69cCa");
-        resolve();
-      });
+      );
     });
   }
 }

@@ -25,14 +25,14 @@ dotenv.config({
 
 jest.setTimeout(300000);
 
-describe("Data Analyst Agent Test Suite", () => {
-  function createDataAnalystAgent(
+describe("Data Analyst Agent Test Suite", async () => {
+  async function createDataAnalystAgent(
     testName: string,
     pathsForFilesToInclude?: string[]
-  ): {
+  ): Promise<{
     agent: Agent;
     debugLog: DebugLog;
-  } {
+  }> {
     const testCaseDir = path.join(__dirname, ".tests", testName);
 
     // reset the dir
@@ -75,7 +75,7 @@ describe("Data Analyst Agent Test Suite", () => {
         }
         const fileName = path.basename(filePath);
         const fileContents = fs.readFileSync(filePath, "utf-8");
-        workspace.writeFileSync(fileName, fileContents);
+        await workspace.writeFile(fileName, fileContents);
       }
     }
 
@@ -89,8 +89,8 @@ describe("Data Analyst Agent Test Suite", () => {
           workspace,
           internals,
           env,
-          scripts,
-        ),
+          scripts
+        )
       ),
       debugLog,
     };
@@ -101,19 +101,19 @@ describe("Data Analyst Agent Test Suite", () => {
     goal: string,
     debugLog: DebugLog
   ) {
-    debugLog.goalStart(goal);
+    await debugLog.goalStart(goal);
     const iterator = agent.run({ goal });
 
     while (true) {
-      debugLog.stepStart();
+      await debugLog.stepStart();
       const response = await iterator.next();
-      debugLog.stepEnd();
+      await debugLog.stepEnd();
 
       if (response.done) {
         if (!response.value.ok) {
-          debugLog.stepError(response.value.error ?? "Unknown error");
+          await debugLog.stepError(response.value.error ?? "Unknown error");
         } else {
-          debugLog.stepLog(JSON.stringify(response.value.value));
+          await debugLog.stepLog(JSON.stringify(response.value.value));
         }
         return response;
       }
@@ -121,7 +121,7 @@ describe("Data Analyst Agent Test Suite", () => {
   }
 
   test("sort-csv", async () => {
-    const { agent, debugLog } = createDataAnalystAgent("sort-csv", [
+    const { agent, debugLog } = await createDataAnalystAgent("sort-csv", [
       path.join(__dirname, "testInputs/sortCsv/input.csv"),
     ]);
     const response = await runDataAnalystAgent(
@@ -130,7 +130,7 @@ describe("Data Analyst Agent Test Suite", () => {
       debugLog
     );
     expect(response.value.ok).toBe(true);
-    const outputCsv = agent.workspace.readFileSync("output.csv");
+    const outputCsv = await agent.workspace.readFile("output.csv");
     expect(outputCsv).toBeTruthy();
     expect(outputCsv).toBe(`id,name,timestamp
 1,Bob,2023-09-24 12:05:00
@@ -141,7 +141,7 @@ describe("Data Analyst Agent Test Suite", () => {
   });
 
   test("label-csv", async () => {
-    const { agent, debugLog } = createDataAnalystAgent("label-csv", [
+    const { agent, debugLog } = await createDataAnalystAgent("label-csv", [
       path.join(__dirname, "testInputs/labelCsv/input.csv"),
     ]);
     const response = await runDataAnalystAgent(
@@ -150,7 +150,7 @@ describe("Data Analyst Agent Test Suite", () => {
       debugLog
     );
     expect(response.value.ok).toBe(true);
-    const outputCsv = agent.workspace.readFileSync("output.csv");
+    const outputCsv = await agent.workspace.readFile("output.csv");
     expect(outputCsv).toBeTruthy();
     console.log(outputCsv);
     expect(outputCsv).toContain(`Item,Color
@@ -169,7 +169,7 @@ Fern,Green
   });
 
   test("combine-csv", async () => {
-    const { agent, debugLog } = createDataAnalystAgent("combine-csv", [
+    const { agent, debugLog } = await createDataAnalystAgent("combine-csv", [
       path.join(__dirname, "testInputs/combineCsv/file1.csv"),
       path.join(__dirname, "testInputs/combineCsv/file2.csv"),
     ]);
@@ -179,7 +179,7 @@ Fern,Green
       debugLog
     );
     expect(response.value.ok).toBe(true);
-    const outputCsv = agent.workspace.readFileSync("output.csv");
+    const outputCsv = await agent.workspace.readFile("output.csv");
     expect(outputCsv).toBeTruthy();
     expect(outputCsv).toContain(`Age,ID,Name,Occupation,Salary
 28,101,John,Engineer,80000
@@ -188,7 +188,7 @@ Fern,Green
   });
 
   test("AnswerQuestionSmallCsv", async () => {
-    const { agent, debugLog } = createDataAnalystAgent(
+    const { agent, debugLog } = await createDataAnalystAgent(
       "answer-question-small-csv",
       [path.join(__dirname, "testInputs/answerQuestionSmallCsv/file1.csv")]
     );
@@ -199,14 +199,15 @@ Fern,Green
     );
 
     expect(response.value.ok).toBe(true);
-    const result = agent.workspace.readFileSync("output.txt");
+    const result = await agent.workspace.readFile("output.txt");
     expect(result).toContain("84");
   });
 
   test("AnswerQuestionCsv", async () => {
-    const { agent, debugLog } = createDataAnalystAgent("answer-question-csv", [
-      path.join(__dirname, "testInputs/answerQuestionCsv/file1.csv"),
-    ]);
+    const { agent, debugLog } = await createDataAnalystAgent(
+      "answer-question-csv",
+      [path.join(__dirname, "testInputs/answerQuestionCsv/file1.csv")]
+    );
     const response = await runDataAnalystAgent(
       agent,
       "How much was spent on utilities in total ? Write the answer in an output.txt file.",
@@ -214,12 +215,12 @@ Fern,Green
     );
 
     expect(response.value.ok).toBe(true);
-    const result = agent.workspace.readFileSync("output.txt");
+    const result = await agent.workspace.readFile("output.txt");
     expect(result).toContain("1861");
   });
 
   test.only("AnswerQuestionCombineCsv", async () => {
-    const { agent, debugLog } = createDataAnalystAgent(
+    const { agent, debugLog } = await createDataAnalystAgent(
       "answer-question-combine-csv",
       [
         path.join(__dirname, "testInputs/answerQuestionCombineCsv/file1.csv"),
@@ -233,7 +234,7 @@ Fern,Green
     );
 
     expect(response.value.ok).toBe(true);
-    const result = agent.workspace.readFileSync("output.txt");
+    const result = await agent.workspace.readFile("output.txt");
     expect(result).toContain("1861");
   });
 });
