@@ -9,12 +9,6 @@ import React, {
 import { Evo } from "@evo-ninja/agents";
 import ReactMarkdown from "react-markdown";
 import FileSaver from "file-saver";
-
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faDownload,
-  faQuestionCircle,
-} from "@fortawesome/free-solid-svg-icons";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import { useAtom } from "jotai";
@@ -23,6 +17,7 @@ import { ExamplePrompt, examplePrompts } from "@/lib/examplePrompts";
 import TextField from "./TextField";
 import { UploadSimple } from "@phosphor-icons/react";
 import ChatInputButton from "./ChatInputButton";
+import Image from "next/image";
 
 export interface ChatMessage {
   title: string;
@@ -348,12 +343,12 @@ const Chat: React.FC<ChatProps> = ({
         />
       </div>
       <a
-        className="fixed bottom-0 right-0 mx-4 my-2 cursor-pointer"
+        className="fixed bottom-4 right-4 z-10 cursor-pointer rounded-full border-2 border-zinc-500 bg-zinc-700 p-1 shadow hover:bg-zinc-600 hover:shadow-lg"
         href="https://discord.gg/r3rwh69cCa"
         target="_blank"
         rel="noopener noreferrer"
       >
-        <FontAwesomeIcon icon={faQuestionCircle} title="Questions?" />
+        <Image alt="Support" src="/questionmark.svg" width={12} height={12} />
       </a>
     </div>
   );

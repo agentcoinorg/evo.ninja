@@ -1,7 +1,17 @@
 import clsx from "clsx";
-import { useState, ChangeEvent, InputHTMLAttributes, ReactNode } from "react";
+import {
+  useState,
+  DetailedHTMLProps,
+  ChangeEvent,
+  InputHTMLAttributes,
+  ReactNode,
+} from "react";
 
-interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
+interface TextFieldProps
+  extends DetailedHTMLProps<
+    InputHTMLAttributes<HTMLInputElement>,
+    HTMLInputElement
+  > {
   label?: string;
   error?: string;
   checked?: boolean;

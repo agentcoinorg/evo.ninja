@@ -5,6 +5,7 @@ import {
   NotePencil,
   DiscordLogo,
   GithubLogo,
+  Question,
   X,
 } from "@phosphor-icons/react";
 import clsx from "clsx";
@@ -19,6 +20,7 @@ interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     | "NotePencil"
     | "DiscordLogo"
     | "GithubLogo"
+    | "Question"
     | "X";
   iconProps?: IconProps;
 }
@@ -55,6 +57,8 @@ const IconButton = ({
         return <DiscordLogo {...defaultProps} />;
       case "GithubLogo":
         return <GithubLogo {...defaultProps} />;
+      case "Question":
+        return <Question {...defaultProps} />;
       case "X":
         return <X {...defaultProps} />;
     }

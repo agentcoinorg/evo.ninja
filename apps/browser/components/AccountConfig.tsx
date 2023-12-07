@@ -41,7 +41,7 @@ function AccountConfig(props: AccountConfigProps) {
             Don't have an OpenAI key?
             <a
               className="ml-1 text-cyan-500 underline transition-colors duration-300 hover:text-white"
-              href="https://help.openai.com/en/articles/4936850-where-do-i-find-my-api-key"
+              href="https://platform.openai.com/account/api-keys"
               target="_blank"
               rel="noredirect"
             >

@@ -102,10 +102,10 @@ export default function SettingsModal(props: AccountConfigProps) {
                 </div>
               </div>
               <div className="space-x-2">
-                <Button className="!px-4" hierarchy="secondary">
+                {/* <Button className="!px-4" hierarchy="secondary">
                   <LinkBreak color="currentColor" size={16} />
                   <div>Unsync</div>
-                </Button>
+                </Button> */}
                 <Button className="!px-4" hierarchy="secondary">
                   <SignOut color="currentColor" size={16} />
                   <div>Sign Out</div>

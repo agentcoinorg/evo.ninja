@@ -95,9 +95,9 @@ function CurrentWorkspace({
             <div
               {...getRootProps({
                 className: clsx(
-                  "dropzone group h-full cursor-pointer space-y-1 overflow-y-auto rounded-lg border-2 border-solid border-zinc-900 p-[6px] transition-all duration-100 ease-in-out",
+                  "dropzone group h-full space-y-1 overflow-y-auto rounded-lg border-2 border-solid border-zinc-900 p-[6px] transition-all duration-100 ease-in-out",
                   {
-                    "!border-dashed !border-cyan-500 !bg-zinc-950":
+                    "cursor-pointer !border-dashed !border-cyan-500 !bg-zinc-950":
                       isDragAccept,
                   },
                   className
@@ -107,13 +107,14 @@ function CurrentWorkspace({
               {userFiles.map((file, i) => {
                 return (
                   <div
+                    key={i}
                     className={clsx(
                       "flex w-full cursor-pointer items-center space-x-2 rounded p-1 text-cyan-500 transition-colors duration-300",
-                      { "hover:bg-zinc-800 hover:text-white": isDragAccept }
+                      { "hover:bg-zinc-800 hover:text-white": !isDragAccept }
                     )}
                   >
                     <FileIcon fileType={getFileType(file.path)} />
-                    <div key={i}>{file.path}</div>
+                    <div>{file.path}</div>
                   </div>
                 );
               })}
