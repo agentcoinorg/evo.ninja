@@ -6,8 +6,8 @@ import WelcomeModal from "./WelcomeModal";
 export function Modals() {
   return (
     <>
-      <WelcomeModal />
-      <AccountConfig />
+      {/* <WelcomeModal />
+      <AccountConfig /> */}
     </>
   );
 }

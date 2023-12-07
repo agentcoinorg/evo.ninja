@@ -13,7 +13,7 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
 
   return (
     <>
-      <div className="flex h-full bg-neutral-800 bg-landing-bg bg-repeat text-center text-neutral-400">
+      {/* <div className="flex h-full bg-neutral-800 bg-landing-bg bg-repeat text-center text-neutral-400">
         <div
           className={clsx("relative w-full lg:w-auto lg:max-w-md", {
             hidden: !sidebarOpen,
@@ -33,7 +33,7 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
         >
           {children}
         </div>
-      </div>
+      </div> */}
     </>
   );
 }

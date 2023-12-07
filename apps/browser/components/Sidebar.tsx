@@ -1,104 +1,144 @@
-import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faDiscord,
-  faGithub,
-} from "@fortawesome/free-brands-svg-icons";
-import { faUser, faDownload } from "@fortawesome/free-solid-svg-icons";
-import { faFolder } from "@fortawesome/free-solid-svg-icons";
-import Upload from "./Upload";
-import File from "./File";
-
-import CloseIcon from "./CloseIcon";
-import SidebarIcon from "./SidebarIcon";
-import { useAtom } from "jotai";
-import { uploadedFilesAtom, userFilesAtom } from "@/lib/store";
-import { useDownloadFilesAsZip } from "@/lib/hooks/useDownloadFilesAsZip";
+import React, { useEffect, useRef, useState } from "react";
+import Logo from "./Logo";
+import IconButton from "./IconButton";
+import { InMemoryFile } from "@nerfzael/memory-fs";
+import clsx from "clsx";
+import DropdownAccount from "./DropdownAccount";
+import CurrentWorkspace from "./CurrentWorkspace";
+import colors from "tailwindcss/colors";
+import { NotePencil } from "@phosphor-icons/react";
 
 export interface SidebarProps {
-  onSettingsClick: () => void;
-  onSidebarToggleClick: () => void;
+  userFiles: InMemoryFile[];
+  onUploadFiles: (files: InMemoryFile[]) => void;
+  hoveringSidebarButton: boolean;
+  sidebarOpen: boolean;
 }
 
-const Sidebar = ({
-  onSettingsClick,
-  onSidebarToggleClick,
-}: SidebarProps) => {
-  const [userFiles] = useAtom(userFilesAtom)
-  const [, setUploadedFiles] = useAtom(uploadedFilesAtom)
+const chats: string[] = ["New Chat", "Utilities Spending"];
+// const chats: string[] = [];
 
-  const downloadUserFiles = useDownloadFilesAsZip()
+const Sidebar = ({
+  userFiles,
+  onUploadFiles,
+  sidebarOpen,
+  hoveringSidebarButton,
+}: SidebarProps) => {
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    }
+
+    // Bind the event listener
+    if (dropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    // Unbind the event listener on clean up
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownOpen]);
 
   return (
-    <div className="box-border flex h-full w-full flex-col items-center overflow-auto bg-opacity-black p-4 justify-between">
-      <div className="flex h-auto w-full flex-col items-center gap-4">
-        <div className="flex w-full justify-end lg:hidden">
-          <div
-            className="flex cursor-pointer gap-2"
-            onClick={onSidebarToggleClick}
-          >
-            <span>Close menu</span>
-            <CloseIcon></CloseIcon>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 w-full">
-          <div className="flex flex-1 justify-center h-14 items-center rounded border border-neutral-500 p-3 text-lg text-white gap-4 cursor-pointer hover:opacity-100 opacity-80 transition-all" onClick={onSettingsClick}>
-            <FontAwesomeIcon icon={faUser} />
-            Account
-          </div>
-          <div className="rounded border border-neutral-500 h-14 p-4 text-lg text-white gap-4 cursor-pointer hover:opacity-100 opacity-80 transition-all" onClick={onSidebarToggleClick}>
-            <SidebarIcon />
-          </div>
-        </div>
-
-        <Upload
-          className="flex h-auto max-h-96 w-full flex-col justify-between overflow-y-auto rounded border border-neutral-500 bg-neutral-900 p-4 text-neutral-50"
-          onUploadFiles={setUploadedFiles}
+    <div
+      className={clsx(
+        "overflow-y relative z-10 h-full border-r-2 bg-zinc-900 transition-all duration-300 ease-in-out",
+        sidebarOpen ? "w-[290px]" : "w-0 border-none",
+        hoveringSidebarButton ? "border-zinc-500" : "border-zinc-800"
+      )}
+    >
+      <div
+        className={clsx(
+          "flex h-full flex-col justify-between transition-opacity",
+          {
+            "opacity-50 delay-0": sidebarOpen && hoveringSidebarButton,
+            "hidden delay-0 duration-0": !sidebarOpen,
+          }
+        )}
+      >
+        <div
+          className="animate-fade-in flex h-full flex-col justify-between opacity-0"
+          style={{ animationDelay: sidebarOpen ? "150ms" : "0ms" }}
         >
-          <h3 className="text-lg font-semibold">
-            <FontAwesomeIcon icon={faFolder} style={{ marginRight: "10px" }} />{" "}
-            WORKSPACE
-          </h3>
-          <div>
-            {userFiles.map((file, i) => (
-              <File key={i} file={file}  />
-            ))}
+          <div className="flex h-full flex-col space-y-6">
+            <div className="flex items-center p-4">
+              <Logo className="cursor-pointer transition-opacity hover:opacity-50" />
+            </div>
+            <div className="space-y-1 px-2">
+              <div className="flex w-full items-center justify-between space-x-1 px-3">
+                <div className="text-xs uppercase tracking-widest text-zinc-500">
+                  Recent Chats
+                </div>
+                <IconButton iconName="NotePencil" iconProps={{ size: 18 }} />
+              </div>
+              <div className="space-y-0.5">
+                {chats.length > 0 ? (
+                  <div className="px-2">
+                    {chats.map((chat, i) => (
+                      <div
+                        key={i}
+                        className="w-full cursor-pointer rounded p-1 text-zinc-100 transition-colors duration-300 hover:bg-zinc-800 hover:text-white"
+                      >
+                        {chat}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-1 flex flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed border-zinc-500 p-7 text-center">
+                    <NotePencil size={24} className="text-[currentColor]" />
+                    <p className="leading-regular text-xs text-zinc-500">
+                      You currently have no chats in your workspace.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+            <CurrentWorkspace
+              userFiles={userFiles}
+              onUploadFiles={onUploadFiles}
+            />
           </div>
-          {userFiles.length !== 0 && (
-            <button
-              className="my-4 inline-block h-9 cursor-pointer rounded-xl border-none bg-orange-600 px-6 py-2.5 text-center text-neutral-900 shadow-md outline-none transition-all hover:bg-orange-500"
-              title="Download"
-              onClick={downloadUserFiles}
+          <div className="relative flex h-auto w-full items-center justify-between p-4">
+            <DropdownAccount ref={dropdownRef} dropdownOpen={dropdownOpen} />
+            <div
+              className={clsx(
+                "inline-flex w-full -translate-x-2 transform cursor-pointer items-center space-x-2 rounded-lg p-2 transition-colors hover:bg-zinc-800",
+                { "bg-zinc-800": dropdownOpen }
+              )}
+              onClick={() => setDropdownOpen(!dropdownOpen)}
             >
-              <FontAwesomeIcon icon={faDownload} /> Download
-            </button>
-          )}
-        </Upload>
-      </div>
-        <div className="box-border flex justify-center w-10/12 flex-col gap-2">
-          <div className="flex justify-center">
-            <img className="max-w-[16rem]" src="avatar-name.png" alt="Main Logo" />
-          </div>
-          <div className="flex justify-center text-lg text-white gap-4">
-            <a
-              className="cursor-pointer opacity-80 transition-all hover:opacity-100"
-              href="https://discord.gg/r3rwh69cCa"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FontAwesomeIcon icon={faDiscord} title="Support & Feedback" />
-            </a>
-            <div className="pointer-events-none">|</div>
-            <a
-              className="cursor-pointer opacity-80 transition-all hover:opacity-100"
-              href="https://github.com/polywrap/evo.ninja"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FontAwesomeIcon icon={faGithub} title="Star us on GitHub" />
-            </a>
+              <div className="h-6 w-6 rounded-full bg-yellow-500"></div>
+              <div className="text-white">Guest</div>
+            </div>
+            <div className="flex items-center space-x-1 text-lg text-white">
+              <a
+                href="https://discord.gg/r3rwh69cCa"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <IconButton iconName="DiscordLogo" iconProps={{ size: 20 }} />
+              </a>
+              <a
+                href="https://github.com/polywrap/evo.ninja"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <IconButton iconName="GithubLogo" iconProps={{ size: 20 }} />
+              </a>
+            </div>
           </div>
         </div>
+      </div>
     </div>
   );
 };

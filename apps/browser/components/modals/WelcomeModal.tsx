@@ -1,67 +1,168 @@
-"use client"
+import React, { useState } from "react";
+import { useAtom } from "jotai";
+import { checkLlmModel } from "@/lib/checkLlmModel";
+import {
+  allowTelemetryAtom,
+  capReachedAtom,
+  localOpenAiApiKeyAtom,
+} from "@/lib/store";
+import Modal from "../Modal";
+import Button from "../Button";
+import AccountConfig from "./AccountConfig";
+import { ArrowRight, LinkBreak, SignOut } from "@phosphor-icons/react";
+import Image from "next/image";
+import { useSession } from "next-auth/react";
 
-import { Dialog, Transition } from '@headlessui/react'
-import clsx from 'clsx'
-import { Fragment } from 'react'
-import { EXO_FONT } from '@/lib/fonts'
-import { useAtom } from 'jotai'
-import { welcomeModalAtom } from '@/lib/store'
+export const WELCOME_MODAL_SEEN_STORAGE_KEY = "welcome-modal-seen";
 
-export const WELCOME_MODAL_SEEN_STORAGE_KEY = "welcome-modal-seen" 
+const justAuthenticated = true;
 
-export default function WelcomeModal() {
-  const [welcomeModalSeen, setWelcomeModalSeen] = useAtom(welcomeModalAtom);
+interface AccountConfigProps {
+  // apiKey: string | null;
+  // allowTelemetry: boolean;
+  isOpen: boolean;
+  onClose: () => void;
+  // firstTimeUser: boolean;
+}
 
-  const onClose = () => {
-    setWelcomeModalSeen(true)
+const validateOpenAiApiKey = async (
+  openAiApiKey: string
+): Promise<string | void> => {
+  try {
+    // Make sure that given api key has access to GPT-4
+    await checkLlmModel(openAiApiKey, "gpt-4-1106-preview");
+  } catch (e: any) {
+    if (e.message.includes("Incorrect API key provided")) {
+      throw new Error(
+        "Open AI API key is not correct. Please make sure it has the correct format"
+      );
+    }
+
+    if (e.message.includes("Model not supported")) {
+      throw new Error(
+        "You API Key does not support GPT-4. Make sure to enable billing"
+      );
+    }
+
+    throw new Error("Error validating OpenAI API Key");
   }
-  
+};
+
+export default function SettingsModal(props: AccountConfigProps) {
+  const [localApiKey, setLocalApiKey] = useAtom(localOpenAiApiKeyAtom);
+  const [allowTelemetry, setAllowTelemetry] = useAtom(allowTelemetryAtom);
+
+  const [apiKey, setApiKey] = useState(localApiKey || "")
+  const [telemetry, setTelemetry] = useState(allowTelemetry);
+  const [error, setError] = useState<string | undefined>();
+  const [capReached, setCapReached] = useAtom(capReachedAtom);
+
+  const { data: session } = useSession()
+
+  const firstTimeUser = !session?.user?.email && !localApiKey
+  // const { firstTimeUser, apiKey } = props;
+
+  const { isOpen, onClose } = props;
+
+  const onSave = async () => {
+    if (apiKey) {
+      try {
+        await validateOpenAiApiKey(apiKey);
+        setLocalApiKey(apiKey);
+        if (capReached) {
+          setCapReached(false);
+        }
+      } catch (e: any) {
+        setError(e.message);
+        return;
+      }
+    } else {
+      setLocalApiKey(null);
+    }
+    setAllowTelemetry(telemetry);
+    onClose();
+  };
   return (
     <>
-      <Transition appear show={!welcomeModalSeen} as={Fragment}>
-        <Dialog as="div" className="relative z-10" onClose={onClose}>
-          <div className="fixed inset-0 overflow-y-auto" style={{ backgroundColor: "black" }}>
-            <div className="flex min-h-full items-center justify-center p-4 text-center">
-              <Transition.Child
-                as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0 scale-95"
-                enterTo="opacity-100 scale-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95"
-              >
-                <Dialog.Panel className={clsx(
-                  EXO_FONT.className,
-                  "w-full max-w-md transform text-neutral-50 overflow-hidden rounded-2xl bg-neutral-800 p-6 text-left align-middle shadow-xl transition-all"
-                )}>
-                  <Dialog.Title
-                    as="h3"
-                    className="text-lg font-semibold"
-                  >
-                    Welcome to Evo Ninja!
-                  </Dialog.Title>
-                  <div className="mt-2">
-                    <p className="text-sm">
-                    Evo is an agent that can do many things. This is a technical preview, feedback and questions are appreciated!
-                    </p>
+      <Modal isOpen={isOpen} title="Welcome to Evo Ninja" onClose={onSave}>
+        {!firstTimeUser && (
+          <div className="border-b-2 border-zinc-700 pb-8 text-center">
+            Evo is an agent that can do many things. This is a technical
+            preview, feedback and questions are appreciated!
+          </div>
+        )}
+        {justAuthenticated && (
+          <div className="space-y-6">
+            <div className="border-b-2 border-zinc-700 pb-8 text-center">
+              You're signed in!
+            </div>
+            <div className="flex items-center justify-between rounded-lg bg-zinc-800 p-4">
+              <div className="flex items-center space-x-2">
+                <div className="h-8 w-8 rounded-full bg-yellow-500" />
+                <div className="space-y-1">
+                  <div className="text-sm font-semibold leading-none">
+                    Colin Spence
                   </div>
-
-                  <div className="mt-4 flex justify-center">
-                    <button
-                      type="button"
-                      className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500"
-                      onClick={onClose}
-                    >
-                      Try it out
-                    </button>
+                  <div className="text-xs leading-none text-gray-400 underline">
+                    colin@dorg.tech
                   </div>
-                </Dialog.Panel>
-              </Transition.Child>
+                </div>
+              </div>
+              <div className="space-x-2">
+                <Button className="!px-4" hierarchy="secondary">
+                  <LinkBreak color="currentColor" size={16} />
+                  <div>Unsync</div>
+                </Button>
+                <Button className="!px-4" hierarchy="secondary">
+                  <SignOut color="currentColor" size={16} />
+                  <div>Sign Out</div>
+                </Button>
+              </div>
             </div>
           </div>
-        </Dialog>
-      </Transition>
+        )}
+
+        {!justAuthenticated && (
+          <div className="space-y-6 border-b-2 border-zinc-700 pb-8">
+            <p>Sign in below to save your sessions</p>
+            <div className="space-y-2">
+              <Button className="w-full" hierarchy="secondary">
+                <Image
+                  alt="Sign in with Github"
+                  width={20}
+                  height={20}
+                  src="/github-logo.svg"
+                />
+                <div>Sign in with Github</div>
+              </Button>
+              <Button className="w-full" hierarchy="secondary">
+                <Image
+                  alt="Sign in with Google"
+                  width={20}
+                  height={20}
+                  src="/google-logo.svg"
+                />
+                <div>Sign in with Google</div>
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <AccountConfig
+          telemetry={telemetry}
+          setTelemetry={setTelemetry}
+          apiKey={apiKey}
+          setApiKey={setApiKey}
+          justAuthenticated={justAuthenticated}
+        />
+
+        <div className="flex justify-end border-t-2 border-zinc-700 pt-8">
+          <Button onClick={onSave}>
+            <div>Get Started</div>
+            <ArrowRight size={16} color="white" />
+          </Button>
+        </div>
+      </Modal>
     </>
-  )
+  );
 }

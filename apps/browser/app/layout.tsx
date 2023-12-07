@@ -2,7 +2,9 @@ import clsx from "clsx";
 import Script from "next/script";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import NextAuthProvider from "@/components/providers/NextSessionProvider";
-import { EXO_FONT } from "@/lib/fonts";
+import { Ubuntu_FONT } from "@/lib/fonts";
+import { Provider } from "jotai";
+import { ToastContainer } from "react-toastify";
 
 import "../styles/globals.css";
 import "@fortawesome/fontawesome-svg-core/styles.css";
@@ -17,7 +19,7 @@ export default function EvoApp({ children }: { children: React.ReactNode }) {
   return (
     <html>
       <body>
-        <div className={clsx(EXO_FONT.className, "h-full")}>
+        <div className={clsx(Ubuntu_FONT.className, "h-full")}>
           <Script
             strategy="lazyOnload"
             src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID}`}
@@ -35,8 +37,8 @@ export default function EvoApp({ children }: { children: React.ReactNode }) {
           </Script>
           <Providers>
             <NextAuthProvider>
-              <SidebarLayout>{children}</SidebarLayout>
-              <Modals />
+              {children}
+              {/* <Modals /> */}
             </NextAuthProvider>
           </Providers>
         </div>
