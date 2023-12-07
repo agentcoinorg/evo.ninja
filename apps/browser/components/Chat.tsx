@@ -419,7 +419,11 @@ const Chat: React.FC<ChatProps> = ({
             onKeyDown={handleKeyPress}
             placeholder="Ask Evo anything..."
             className="!rounded-lg !p-4 !pl-12"
-            leftAdornment={<UploadSimple color="white" size={24} />}
+            leftAdornment={
+              <Button variant="icon" className="!text-white">
+                <UploadSimple size={20} />
+              </Button>
+            }
             rightAdornment={
               <ChatInputButton
                 evoRunning={evoRunning}
