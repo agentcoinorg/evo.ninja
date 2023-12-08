@@ -77,7 +77,7 @@ const Sidebar = ({
       </div>
         <div className="box-border flex justify-center w-10/12 flex-col gap-2">
           <div className="flex justify-center">
-            <img className="max-w-[16rem]" src="avatar-name.png" alt="Main Logo" />
+            <img className="max-w-[16rem]" src="/avatar-name.png" alt="Main Logo" />
           </div>
           <div className="flex justify-center text-lg text-white gap-4">
             <a
