@@ -316,12 +316,13 @@ export const WordMark = () => (
 type LogoType = {
   wordmark?: boolean;
   className?: string;
+  onClick: () => void
 };
 
-const Logo = ({ wordmark = true, className }: LogoType) => {
+const Logo = ({ wordmark = true, className, onClick }: LogoType) => {
   return (
     <>
-      <div className={clsx("flex w-4 items-center gap-3", className)}>
+      <div className={clsx("flex w-4 items-center gap-3", className)} onClick={onClick}>
         <LogoMark />
         {wordmark && <WordMark />}
       </div>

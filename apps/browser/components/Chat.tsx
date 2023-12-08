@@ -2,14 +2,10 @@ import React, {
   useState,
   useEffect,
   ChangeEvent,
-  KeyboardEvent,
   useRef,
   useCallback,
 } from "react";
-import { Evo } from "@evo-ninja/agents";
 import ReactMarkdown from "react-markdown";
-import FileSaver from "file-saver";
-import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import { useAtom } from "jotai";
 import { allowTelemetryAtom, showAccountModalAtom, showDisclaimerAtom, sidebarAtom, uploadedFilesAtom, welcomeModalAtom } from "@/lib/store";
@@ -40,7 +36,7 @@ export interface ChatMessage {
 
 export interface ChatProps {
   messages: ChatMessage[];
-  samplePrompts: ExamplePrompt[] | undefined;
+  samplePrompts?: ExamplePrompt[];
   isRunning: boolean;
   isStopped: boolean;
   isPaused: boolean;
@@ -64,7 +60,6 @@ const Chat: React.FC<ChatProps> = ({
   isStopped
 }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
-  const [sidebarOpen, setSidebarOpen] = useAtom(sidebarAtom);
   const [showAccountModal] = useAtom(showAccountModalAtom)
   const [welcomeModalSeen] = useAtom(welcomeModalAtom)
   const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom)
@@ -73,8 +68,6 @@ const Chat: React.FC<ChatProps> = ({
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
 
-
-  const [isLandingPage, setIsLandingPage] = useState<boolean>(false);
   const [, setAllowTelemetry] = useAtom(allowTelemetryAtom);
 
   const handleDisclaimerSelect = (select: boolean) => {
@@ -142,10 +135,10 @@ const Chat: React.FC<ChatProps> = ({
   return (
     <div
       className={clsx("flex h-full flex-col", {
-        "items-center justify-center": isLandingPage,
+        "items-center justify-center": samplePrompts?.length,
       })}
     >
-      {isLandingPage ? (
+      {samplePrompts?.length ? (
         <div className="flex flex-col items-center space-y-2">
           <Logo wordmark={false} className="h-16 w-16" />
           <h1 className="text-2xl font-bold">What's your goal today?</h1>
@@ -251,25 +244,23 @@ const Chat: React.FC<ChatProps> = ({
       <div
         className={clsx(
           "flex space-y-4",
-          isLandingPage
+          samplePrompts?.length
             ? "flex-col-reverse"
             : "mx-auto w-full max-w-[56rem] flex-col"
         )}
       >
-        {!messages.length && (
+        {samplePrompts?.length && (
           <div className="flex flex-col items-center space-y-3">
-            {isLandingPage && (
               <h2 className="w-full text-center font-normal">
                 Not sure where to start? Try asking one of these:
               </h2>
-            )}
             <div className="flex w-full max-w-[56rem] flex-wrap items-center justify-center space-x-1 space-y-1 self-center">
               {examplePrompts.map((prompt, index) => (
                 <div
                   key={index}
                   className={clsx(
                     "cursor-pointer rounded-lg border-2  bg-zinc-900/50 p-2.5 text-xs text-zinc-400 transition-all duration-300 ease-in-out hover:bg-cyan-600 hover:text-white",
-                    isLandingPage
+                    samplePrompts?.length
                       ? "whitespace-nowrap border-zinc-700"
                       : "m-1 w-[calc(100%-1.5rem)] border-zinc-800"
                   )}
@@ -284,7 +275,7 @@ const Chat: React.FC<ChatProps> = ({
         <div
           className={clsx(
             "mb-4 flex w-full items-center justify-center gap-4 self-center p-4",
-            isLandingPage ? "max-w-[42rem]" : "max-w-[56rem]"
+            samplePrompts?.length ? "max-w-[42rem]" : "max-w-[56rem]"
           )}
         >
           <TextField

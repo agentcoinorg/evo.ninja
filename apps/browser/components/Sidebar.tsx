@@ -7,6 +7,9 @@ import CurrentWorkspace from "./CurrentWorkspace";
 import { DiscordLogo, GithubLogo, NotePencil } from "@phosphor-icons/react";
 import AvatarBlockie from "./AvatarBlockie";
 import Button from "./Button";
+import { useCreateChat } from "@/lib/mutations/useCreateChat";
+import { useChats } from "@/lib/queries/useChats";
+import { useRouter } from "next/navigation";
 
 export interface SidebarProps {
   userFiles: InMemoryFile[];
@@ -15,7 +18,7 @@ export interface SidebarProps {
   sidebarOpen: boolean;
 }
 
-const chats: string[] = ["New Chat", "Utilities Spending"];
+// const chats: string[] = ["New Chat", "Utilities Spending"];
 // const chats: string[] = [];
 
 const Sidebar = ({
@@ -24,8 +27,14 @@ const Sidebar = ({
   sidebarOpen,
   hoveringSidebarButton,
 }: SidebarProps) => {
+  const router = useRouter()
   const dropdownRef = useRef<HTMLDivElement>(null);
-
+  const { mutateAsync: createChat } = useCreateChat()
+  const { data: chats } = useChats()
+  const mappedChats = chats?.map(chat => ({
+    id: chat.id,
+    name: chat.logs[0]?.title ?? "New session"
+  }))
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
 
   useEffect(() => {
@@ -72,7 +81,13 @@ const Sidebar = ({
         >
           <div className="flex h-full flex-col space-y-6">
             <div className="flex items-center p-4">
-              <Logo className="w-[136px] cursor-pointer transition-opacity hover:opacity-50" />
+              <Logo
+                className="w-[136px] cursor-pointer transition-opacity hover:opacity-50"
+                onClick={async () => {
+                  const createdChat = await createChat()
+                  router.push(`/chat/${createdChat.id}`)
+                }}
+              />
             </div>
             <div className="space-y-1 px-2">
               <div className="flex w-full items-center justify-between space-x-1 px-3">
@@ -84,14 +99,15 @@ const Sidebar = ({
                 </Button>
               </div>
               <div className="space-y-0.5">
-                {chats.length > 0 ? (
+                {chats && chats.length > 0 ? (
                   <div className="px-2">
-                    {chats.map((chat, i) => (
+                    {mappedChats?.map((chat, i) => (
                       <div
+                        onClick={() => router.push(`/chat/${chat.id}`)}
                         key={i}
                         className="w-full cursor-pointer rounded p-1 text-zinc-100 transition-colors duration-300 hover:bg-zinc-800 hover:text-white"
                       >
-                        {chat}
+                        {chat.name}
                       </div>
                     ))}
                   </div>

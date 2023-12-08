@@ -3,6 +3,8 @@ import { InMemoryFile } from "@nerfzael/memory-fs";
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { ProxyEmbeddingApi, ProxyLlmApi } from "./api";
+import { SupabaseClient, createClient } from "@supabase/supabase-js";
+import { Database } from "./supabase/dbTypes";
 
 export const localOpenAiApiKeyAtom = atomWithStorage<string | null>(
   "openai-api-key",

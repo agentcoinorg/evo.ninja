@@ -13,7 +13,9 @@ import {
   Scripts,
   Chat as EvoChat,
   SubWorkspace,
+  ChatMessage as AgentMessage,
   AgentVariables,
+  ChatLogType,
 } from "@evo-ninja/agents";
 import { useEffect, useState } from "react";
 import { BrowserLogger } from "../sys/logger";
@@ -29,15 +31,18 @@ import {
   localOpenAiApiKeyAtom,
   userWorkspaceAtom,
 } from "@/lib/store";
-import { useSupabase } from "../supabase/useSupabase";
-import { mapChatMessageToMessageDTO } from "../supabase/evo";
 
 interface UseEvoArgs {
-  chatId: string;
-  onMessage: (message: ChatMessage) => void;
+  onChatLog: (message: ChatMessage) => Promise<void>;
+  onMessagesAdded: (type: ChatLogType, messages: AgentMessage[]) => Promise<void>;
+  onVariableSet: (key: string, value: string) => Promise<void>;
 }
 
-export function useEvo({ chatId, onMessage }: UseEvoArgs): {
+export function useEvo({
+  onChatLog,
+  onMessagesAdded,
+  onVariableSet
+}: UseEvoArgs): {
   isRunning: boolean;
   error?: string;
   start: (message: string) => void;
@@ -71,7 +76,7 @@ export function useEvo({ chatId, onMessage }: UseEvoArgs): {
       try {
         const browserLogger = new BrowserLogger({
           onLog: async (message: string) => {
-            onMessage({
+            await onChatLog({
               user: "evo",
               title: message,
             });
@@ -131,40 +136,11 @@ export function useEvo({ chatId, onMessage }: UseEvoArgs): {
         const internals = new SubWorkspace(".evo", workspace);
 
         const chat = new EvoChat(cl100k_base, {
-          async onMessagesAdded(type, msgs) {
-            const temporary = type === "temporary";
-            const mappedMessages = msgs.map((msg) =>
-              mapChatMessageToMessageDTO(chatId, temporary, msg)
-            );
-
-            console.log("Message DTO");
-            console.log(mappedMessages);
-
-            //TODO(cbrzn): Attach with backend once UI is ready
-            // const response = await supabase
-            //   .from('messages')
-            //   .insert(mappedMessages)
-
-            // if (response.error) {
-            //   throw response.error
-            // }
-          },
+          onMessagesAdded,
         });
-        // const agentVariables = new AgentVariables({
-        //   async onVariableSet(key, value) {
-        //     const response = await supabase
-        //     .from('variables')
-        //     .upsert({
-        //       key,
-        //       value,
-        //     })
-        //     .match({ key })
-
-        //     if (response.error) {
-        //       throw response.error
-        //     }
-        //   },
-        // })
+        const agentVariables = new AgentVariables({
+          onVariableSet
+        })
 
         setEvo(
           new Evo(
@@ -176,7 +152,9 @@ export function useEvo({ chatId, onMessage }: UseEvoArgs): {
               workspace,
               internals,
               env,
-              scripts
+              scripts,
+              undefined,
+              agentVariables
             )
           )
         );
@@ -184,7 +162,9 @@ export function useEvo({ chatId, onMessage }: UseEvoArgs): {
         setError(e.message);
       }
     })();
-  }, [localOpenAiApiKey]);
+  }, [
+    localOpenAiApiKey
+  ]);
 
   const start = (goal: string) => {
     if (!evo) return;
@@ -213,13 +193,13 @@ export function useEvo({ chatId, onMessage }: UseEvoArgs): {
         setIsStopped(false);
         const response = await iterator.next();
         if (response.done) {
-          const actionTitle = response.value.value.title;
           console.log(response.value);
+          const actionTitle = response.value.value.title;
           if (
             actionTitle.includes("onGoalAchieved") ||
             actionTitle === "SUCCESS"
           ) {
-            onMessage({
+            await onChatLog({
               title: "## Goal Achieved",
               user: "evo",
             });
@@ -231,7 +211,7 @@ export function useEvo({ chatId, onMessage }: UseEvoArgs): {
           break;
         }
 
-        onMessage({
+        await onChatLog({
           title: `## Step ${stepCounter}`,
           user: "evo",
         });
@@ -244,7 +224,7 @@ export function useEvo({ chatId, onMessage }: UseEvoArgs): {
             user: "evo",
           };
           // messageLog = [...messageLog, evoMessage];
-          onMessage(evoMessage);
+          await onChatLog(evoMessage);
         }
 
         stepCounter++;

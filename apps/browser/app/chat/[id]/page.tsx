@@ -1,23 +1,71 @@
 "use client";
 
-import { useEvo } from "@/lib/hooks/useEvo";
 import Chat, { ChatMessage } from "@/components/Chat";
-import { useRouter } from "next/router";
-import { useState } from "react";
 import { useCheckForUserFiles } from "@/lib/hooks/useCheckForUserFiles";
+import { useEvo } from "@/lib/hooks/useEvo";
 import { useHandleAuth } from "@/lib/hooks/useHandleAuth";
+import { useAddChatLog } from "@/lib/mutations/useAddChatLog";
+import { useAddMessages } from "@/lib/mutations/useAddMessages";
+import { useAddVariable } from "@/lib/mutations/useAddVariable";
+import { useChats } from "@/lib/queries/useChats";
+import { errorAtom } from "@/lib/store";
+import { ChatLogType, ChatMessage as AgentMessage } from "@evo-ninja/agents";
+import { useAtom } from "jotai";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-export default function ChatPage() {
-  const router = useRouter();
-  const chatId = router.query.id as string;
+function ChatPage({ params }: { params: { id: string } }) {
+  const router = useRouter()
+  const { status } = useSession()
 
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const { mutateAsync: addMessages } = useAddMessages()
+  const { mutateAsync: addChatLog } = useAddChatLog()
+  const { mutateAsync: addVariable } = useAddVariable()
+  const { data: chats } = useChats()
+
+  const [, setError] = useAtom(errorAtom)
+  const currentChat = chats?.find(c => c.id === (params.id))
+
+  const logs = currentChat?.logs ?? []
   const checkForUserFiles = useCheckForUserFiles();
 
-  const onMessage = (message: ChatMessage) => {
-    setMessages((messages) => [...messages, message]);
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      setError("No chat with this ID")
+      router.push('/')
+      return;
+    }
+  }, [status])
+
+  useEffect(() => {
+    if (chats && !currentChat) {
+      setError("No chat with this ID")
+      router.push('/')
+      return;
+    }
+  }, [currentChat])
+
+  const onMessagesAdded = async (type: ChatLogType, messages: AgentMessage[]) => {
+    await addMessages({
+      chatId: params.id,
+      messages,
+      type
+    })
+  }
+
+  const onVariableSet = async (key: string, value: string) => {
+    await addVariable({
+      chatId: params.id,
+      key,
+      value
+    })
+  }
+
+  const onChatLog = async (log: ChatMessage) => {
+    await addChatLog({ chatId: params.id, log })
     checkForUserFiles();
-  };
+  }
 
   const {
     isRunning,
@@ -28,27 +76,34 @@ export default function ChatPage() {
     onContinue,
     onPause,
     setIsSending,
-  } = useEvo({ chatId, onMessage });
+  } = useEvo({
+    onChatLog,
+    onMessagesAdded,
+    onVariableSet
+  });
   const { handlePromptAuth } = useHandleAuth();
 
   const handleSend = async (newMessage: string) => {
     if (!newMessage) return;
+
     const authorized = await handlePromptAuth(newMessage);
+
     if (!authorized) {
       return;
     }
-    onMessage({
+
+    await onChatLog({
       title: newMessage,
       user: "user",
     });
+
     setIsSending(true);
     start(newMessage);
   };
 
   return (
     <Chat
-      messages={messages}
-      samplePrompts={[]}
+      messages={logs}
       isPaused={isPaused}
       isRunning={isRunning}
       isSending={isSending}
@@ -59,3 +114,5 @@ export default function ChatPage() {
     />
   );
 }
+
+export default ChatPage;

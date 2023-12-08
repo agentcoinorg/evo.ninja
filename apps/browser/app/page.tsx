@@ -4,30 +4,100 @@ import Chat, { ChatMessage } from "@/components/Chat";
 import CloseSidebarIcon from "@/components/CloseSidebarIcon";
 import Sidebar from "@/components/Sidebar";
 import WelcomeModal from "@/components/modals/WelcomeModal";
-import { ExamplePrompt, examplePrompts } from "@/lib/examplePrompts";
+import { examplePrompts } from "@/lib/examplePrompts";
 import { useCheckForUserFiles } from "@/lib/hooks/useCheckForUserFiles";
 import { useEvo } from "@/lib/hooks/useEvo";
 import { useHandleAuth } from "@/lib/hooks/useHandleAuth";
-import { sidebarAtom, uploadedFilesAtom, userFilesAtom, welcomeModalAtom } from "@/lib/store";
-import clsx from "clsx";
+import { useAddChatLog } from "@/lib/mutations/useAddChatLog";
+import { useAddMessages } from "@/lib/mutations/useAddMessages";
+import { useAddVariable } from "@/lib/mutations/useAddVariable";
+import { useCreateChat } from "@/lib/mutations/useCreateChat";
+import { useChats } from "@/lib/queries/useChats";
+import { welcomeModalAtom } from "@/lib/store";
+import { ChatLogType, ChatMessage as AgentMessage } from "@evo-ninja/agents";
 import { useAtom } from "jotai";
-import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { useEffect, useRef, useState } from "react";
 
 function Dojo() {
-  const [sidebarOpen, setSidebarOpen] = useAtom(sidebarAtom);
-  const [userFiles] = useAtom(userFilesAtom)
   const [welcomeModalSeen, setWelcomeModalSeen] = useAtom(welcomeModalAtom);
-  const [, setUploadedFiles] = useAtom(uploadedFilesAtom)
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [samplePrompts, setSamplePrompts] = useState<
-    ExamplePrompt[] | undefined
-  >(examplePrompts);
 
+  const { mutateAsync: createChat } = useCreateChat();
+  const { mutateAsync: addMessages } = useAddMessages();
+  const { mutateAsync: addChatLog } = useAddChatLog();
+  const { mutateAsync: addVariable } = useAddVariable();
   const checkForUserFiles = useCheckForUserFiles();
-  const onMessage = (message: ChatMessage) => {
-    setMessages((messages) => [...messages, message]);
-    checkForUserFiles();
+
+  const { status: sessionStatus } = useSession();
+  const { data: chats } = useChats();
+
+  const chatIdRef = useRef<string | undefined>();
+  const inMemoryLogsRef = useRef<ChatMessage[]>([]);
+
+  const [inMemoryLogs, setInMemoryLogs] = useState<ChatMessage[]>([]);
+
+  const isAuthenticatedRef = useRef<boolean>(false);
+  const currentChat = chats?.find((c) => c.id === chatIdRef.current);
+  const logs = currentChat?.logs ?? [];
+  const logsToShow = isAuthenticatedRef.current ? logs : inMemoryLogs;
+
+  useEffect(() => {
+    if (sessionStatus === "authenticated") {
+      isAuthenticatedRef.current = true;
+    }
+  }, [sessionStatus]);
+
+  const onMessagesAdded = async (
+    type: ChatLogType,
+    messages: AgentMessage[]
+  ) => {
+    if (!isAuthenticatedRef.current) {
+      return;
+    }
+
+    if (!chatIdRef.current) {
+      throw new Error("No ChatID to add messages");
+    }
+
+    await addMessages({
+      chatId: chatIdRef.current,
+      messages,
+      type,
+    });
   };
+
+  const onVariableSet = async (key: string, value: string) => {
+    if (!isAuthenticatedRef.current) {
+      return;
+    }
+
+    if (!chatIdRef.current) {
+      throw new Error("No ChatID to add variable");
+    }
+
+    await addVariable({
+      chatId: chatIdRef.current,
+      key,
+      value,
+    });
+  };
+
+  const onChatLog = async (log: ChatMessage) => {
+    checkForUserFiles();
+
+    if (!isAuthenticatedRef.current) {
+      inMemoryLogsRef.current = [...inMemoryLogsRef.current, log];
+      setInMemoryLogs(inMemoryLogsRef.current);
+      return;
+    }
+
+    if (!chatIdRef.current) {
+      throw new Error("No ChatID to add chat log");
+    }
+
+    await addChatLog({ chatId: chatIdRef.current, log });
+  };
+
   const {
     isRunning,
     isPaused,
@@ -37,7 +107,11 @@ function Dojo() {
     onContinue,
     onPause,
     setIsSending,
-  } = useEvo({ chatId: "", onMessage });
+  } = useEvo({
+    onChatLog,
+    onMessagesAdded,
+    onVariableSet,
+  });
   const { handlePromptAuth } = useHandleAuth();
   const [hoveringSidebarButton, setHovering] = useState<boolean>(false);
 
@@ -48,60 +122,38 @@ function Dojo() {
     if (!authorized) {
       return;
     }
-    setSamplePrompts(undefined);
-    onMessage({
+
+    if (!currentChat?.messages.length && isAuthenticatedRef.current) {
+      const createdChat = await createChat();
+
+      if (!createdChat) {
+        return;
+      }
+
+      chatIdRef.current = createdChat.id;
+    }
+    await onChatLog({
       title: newMessage,
       user: "user",
     });
+
     setIsSending(true);
     start(newMessage);
   };
 
   return (
     <>
-      <div className="relative flex h-full overflow-x-clip">
-        <div className="pointer-events-none fixed inset-0 bottom-0 left-0 right-0 top-0 overflow-clip">
-          <div className="mix-blend-softlight absolute -bottom-1/4 left-1/3 h-screen w-7/12 rotate-[-30deg] rounded-full bg-gradient-to-b from-cyan-500/40 to-cyan-700/10 opacity-30 blur-[128px]" />
-          <div className="mix-blend-softlight absolute -bottom-1/4 left-[65%] h-[50vh] w-4/12 rotate-[30deg] rounded-full bg-gradient-to-b from-pink-500/40 to-pink-600/20 opacity-10 blur-[128px]" />
-        </div>
-        <div className="relative w-full transition-transform lg:w-auto lg:max-w-md">
-          <Sidebar
-            hoveringSidebarButton={hoveringSidebarButton}
-            sidebarOpen={sidebarOpen}
-            // onSettingsClick={() => setAccountModalOpen(true)}
-            userFiles={userFiles}
-            onUploadFiles={setUploadedFiles}
-          />
-          <button
-            className="absolute -right-8 top-1/2 z-10 cursor-pointer"
-            onMouseEnter={() => setHovering(true)}
-            onMouseLeave={() => setHovering(false)}
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
-            <CloseSidebarIcon
-              hoveringSidebarButton={hoveringSidebarButton}
-              sidebarOpen={sidebarOpen}
-            />
-          </button>
-        </div>
-        <div
-          className={clsx("relative grow", {
-            "max-lg:hidden": sidebarOpen,
-          })}
-        >
-          <Chat
-            messages={messages}
-            samplePrompts={samplePrompts}
-            isPaused={isPaused}
-            isRunning={isRunning}
-            isSending={isSending}
-            isStopped={isStopped}
-            onPromptSent={handleSend}
-            onPause={onPause}
-            onContinue={onContinue}
-          />
-        </div>
-      </div>
+      <Chat
+        messages={logsToShow}
+        samplePrompts={logsToShow.length ? undefined : examplePrompts}
+        isPaused={isPaused}
+        isRunning={isRunning}
+        isSending={isSending}
+        isStopped={isStopped}
+        onPromptSent={handleSend}
+        onPause={onPause}
+        onContinue={onContinue}
+      />
       <WelcomeModal
         isOpen={!welcomeModalSeen}
         onClose={() => setWelcomeModalSeen(true)}
