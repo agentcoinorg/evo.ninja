@@ -18,49 +18,43 @@ function Dojo() {
   const { mutateAsync: addMessages } = useAddMessages()
   const { mutateAsync: addChatLog } = useAddChatLog()
   const { mutateAsync: addVariable } = useAddVariable()
-  const { data: chats } = useChats()
+  const { data: chats, refetch } = useChats()
   const chatIdRef = useRef<string | undefined>()
-  const currentChat = chats?.find(c => c.id === (chatIdRef.current))
-  console.log(currentChat)
+  const currentChat = chats?.find(c => c.id === chatIdRef.current)
+  
   const logs = currentChat?.logs ?? []
   const checkForUserFiles = useCheckForUserFiles();
 
   const onAgentMessages = async (type: ChatLogType, messages: AgentMessage[]) => {
-    const chatId = chatIdRef.current;
-
-    if (!chatId) {
+    if (!chatIdRef.current) {
       throw new Error("No ChatID to add messages")
     }
 
     await addMessages({
-      chatId,
+      chatId: chatIdRef.current,
       messages,
       type
     })
   }
 
   const onVariableSet = async (key: string, value: string) => {
-    const chatId = chatIdRef.current;
-
-    if (!chatId) {
+    if (!chatIdRef.current) {
       throw new Error("No ChatID to add variable")
     }
 
     await addVariable({
-      chatId,
+      chatId: chatIdRef.current,
       key,
       value
     })
   }
 
   const onChatLog = async (log: ChatMessage) => {
-    const chatId = chatIdRef.current;
-
-    if (!chatId) {
+    if (!chatIdRef.current) {
       throw new Error("No ChatID to add chat log")
     }
 
-    await addChatLog({ chatId, log })
+    await addChatLog({ chatId: chatIdRef.current, log })
     checkForUserFiles();
   }
 
@@ -96,6 +90,7 @@ function Dojo() {
       }
 
       chatIdRef.current = createdChat.id
+      refetch()
     }
     await onChatLog({
       title: newMessage,
