@@ -24,7 +24,7 @@ function Dojo({ params }: { params: { id?: string } }) {
   const { mutateAsync: addVariable } = useAddVariable()
   const { data: chats } = useChats()
   const [, setError] = useAtom(errorAtom)
-  const [currentChat, setCurrentChat] = useState<{ id: string }>();
+  const [currentChat, setCurrentChat] = useState<{ id: string, messages: AgentMessage[] }>();
 
   const chatIdRef = useRef<string | undefined>()
   const [samplePrompts, setSamplePrompts] = useState<ExamplePrompt[] | undefined>(examplePrompts)
@@ -108,7 +108,7 @@ function Dojo({ params }: { params: { id?: string } }) {
     }
     setSamplePrompts(undefined)
 
-    if (!messages.length) {
+    if (!currentChat?.messages.length) {
       const createdChat = await createChat()
 
       if (!createdChat) {
