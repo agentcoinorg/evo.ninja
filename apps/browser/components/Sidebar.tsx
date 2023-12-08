@@ -14,6 +14,7 @@ import SidebarIcon from "./SidebarIcon";
 import { useAtom } from "jotai";
 import { uploadedFilesAtom, userFilesAtom } from "@/lib/store";
 import { useDownloadFilesAsZip } from "@/lib/hooks/useDownloadFilesAsZip";
+import ChatList from "./ChatList";
 
 export interface SidebarProps {
   onSettingsClick: () => void;
@@ -74,6 +75,8 @@ const Sidebar = ({
             </button>
           )}
         </Upload>
+
+        <ChatList />
       </div>
         <div className="box-border flex justify-center w-10/12 flex-col gap-2">
           <div className="flex justify-center">

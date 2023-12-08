@@ -1,14 +1,14 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useSupabase } from "../hooks/useSupabase"
 import { useSession } from "next-auth/react"
+import { createSupabaseClient } from "../supabase/supabase"
 
 export const useCreateChat = () => {
-  const supabase = useSupabase()
   const { data: session } = useSession()
   const queryClient = useQueryClient()
   
   return useMutation({
     mutationFn: async () => {
+      const supabase = createSupabaseClient(session?.supabaseAccessToken as string)
       const { data, error } = await supabase
         .from("chats")
         .insert({})

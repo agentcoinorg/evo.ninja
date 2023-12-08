@@ -18,7 +18,7 @@ function Dojo() {
   const { mutateAsync: addMessages } = useAddMessages()
   const { mutateAsync: addChatLog } = useAddChatLog()
   const { mutateAsync: addVariable } = useAddVariable()
-  const { data: chats, refetch } = useChats()
+  const { data: chats } = useChats()
   const chatIdRef = useRef<string | undefined>()
   const currentChat = chats?.find(c => c.id === chatIdRef.current)
   
@@ -90,7 +90,6 @@ function Dojo() {
       }
 
       chatIdRef.current = createdChat.id
-      refetch()
     }
     await onChatLog({
       title: newMessage,

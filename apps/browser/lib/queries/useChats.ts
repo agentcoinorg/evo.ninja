@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
-import { useSupabase } from "../hooks/useSupabase"
 import { ChatMessage as AgentMessage } from "@evo-ninja/agents"
 import { ChatMessage } from "@/components/Chat"
 import { Json } from "../supabase/dbTypes"
+import { createSupabaseClient } from "../supabase/supabase"
 
 export interface Chat {
   id: string;
@@ -108,13 +108,13 @@ const mapChatDTOtoChat = (dto: ChatDTO): Chat => {
 }
 
 export const useChats = () => {
-  const supabase = useSupabase()
   const { data: session } = useSession()
 
   return useQuery({
     queryKey: ['chats', session?.user?.email],
     enabled: !!session?.user?.email,
     queryFn: async () => {
+      const supabase = createSupabaseClient(session?.supabaseAccessToken as string)
       const { data, error } = await supabase
         .from('chats')
         .select(`

@@ -15,7 +15,7 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
     <>
       <div className="flex h-full bg-neutral-800 bg-landing-bg bg-repeat text-center text-neutral-400">
         <div
-          className={clsx("relative w-full lg:w-auto lg:max-w-md", {
+          className={clsx("relative w-full lg:w-auto lg:max-w-xs", {
             hidden: !sidebarOpen,
           })}
         >
