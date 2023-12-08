@@ -24,25 +24,19 @@ function Dojo({ params }: { params: { id?: string } }) {
   const { mutateAsync: addVariable } = useAddVariable()
   const { data: chats } = useChats()
   const [, setError] = useAtom(errorAtom)
-  const [currentChat, setCurrentChat] = useState<{ id: string, messages: AgentMessage[] }>();
-
   const chatIdRef = useRef<string | undefined>()
+  const currentChat = chats?.find(c => c.id === (params.id ?? chatIdRef.current))
+  const logs = currentChat?.logs ?? []
   const [samplePrompts, setSamplePrompts] = useState<ExamplePrompt[] | undefined>(examplePrompts)
   const checkForUserFiles = useCheckForUserFiles();
 
   useEffect(() => {
-    if (chats && params.id) {
-      const foundChat = chats.find(c => c.id === params.id)
-
-      if (foundChat) {
-        setCurrentChat(foundChat)
-        return;
-      }
-
+    if (chats && params.id && !currentChat) {
       setError("No chat with this ID")
       router.push('/')
+      return;
     }
-  }, [chats])
+  }, [currentChat])
 
   const onAgentMessages = async (type: ChatLogType, messages: AgentMessage[]) => {
     const chatId = chatIdRef.current;
@@ -128,8 +122,8 @@ function Dojo({ params }: { params: { id?: string } }) {
 
   return (
     <Chat
-      messages={[]}
-      samplePrompts={samplePrompts}
+      messages={logs}
+      samplePrompts={params.id ? []: samplePrompts}
       isPaused={isPaused}
       isRunning={isRunning}
       isSending={isSending}

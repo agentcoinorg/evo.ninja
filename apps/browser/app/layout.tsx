@@ -1,7 +1,6 @@
 import clsx from "clsx";
 import Script from "next/script";
 import { config } from "@fortawesome/fontawesome-svg-core";
-import NextAuthProvider from "@/components/providers/NextSessionProvider";
 import { EXO_FONT } from "@/lib/fonts";
 
 import "../styles/globals.css";
@@ -34,10 +33,8 @@ export default function EvoApp({ children }: { children: React.ReactNode }) {
             `}
           </Script>
           <Providers>
-            <NextAuthProvider>
-              <SidebarLayout>{children}</SidebarLayout>
-              <Modals />
-            </NextAuthProvider>
+            <SidebarLayout>{children}</SidebarLayout>
+            <Modals />
           </Providers>
         </div>
       </body>

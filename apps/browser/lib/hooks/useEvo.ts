@@ -193,8 +193,8 @@ export function useEvo({
         setIsStopped(false);
         const response = await iterator.next();
         if (response.done) {
-          const actionTitle = response.value.value.title;
           console.log(response.value);
+          const actionTitle = response.value.value.title;
           if (
             actionTitle.includes("onGoalAchieved") ||
             actionTitle === "SUCCESS"

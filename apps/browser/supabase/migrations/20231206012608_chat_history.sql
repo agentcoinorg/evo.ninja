@@ -80,8 +80,8 @@ CREATE POLICY "Users can only manage their own logs" ON "public"."logs" USING ((
 
 CREATE POLICY "Users can only manage their own variables" ON "public"."variables" USING ((EXISTS ( SELECT 1
    FROM "public"."chats"
-  WHERE (("chats"."id" = "logs"."chat_id") AND ("chats"."user_id" = "auth"."uid"()))))) WITH CHECK ((EXISTS ( SELECT 1
+  WHERE (("chats"."id" = "variables"."chat_id") AND ("chats"."user_id" = "auth"."uid"()))))) WITH CHECK ((EXISTS ( SELECT 1
    FROM "public"."chats"
-  WHERE (("chats"."id" = "logs"."chat_id") AND ("chats"."user_id" = "auth"."uid"())))));
+  WHERE (("chats"."id" = "variables"."chat_id") AND ("chats"."user_id" = "auth"."uid"())))));
 
 alter table "public"."chats" alter column "user_id" set default auth.uid();
