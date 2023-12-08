@@ -11,21 +11,40 @@ import { useAddVariable } from "@/lib/mutations/useAddVariable";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";
 import { useChats } from "@/lib/queries/useChats";
 import { ChatLogType, ChatMessage as AgentMessage } from "@evo-ninja/agents";
-import { useRef } from "react";
+import { useSession } from "next-auth/react";
+import { useEffect, useRef, useState } from "react";
 
 function Dojo() {
   const { mutateAsync: createChat } = useCreateChat()
   const { mutateAsync: addMessages } = useAddMessages()
   const { mutateAsync: addChatLog } = useAddChatLog()
   const { mutateAsync: addVariable } = useAddVariable()
-  const { data: chats } = useChats()
-  const chatIdRef = useRef<string | undefined>()
-  const currentChat = chats?.find(c => c.id === chatIdRef.current)
-  
-  const logs = currentChat?.logs ?? []
   const checkForUserFiles = useCheckForUserFiles();
 
-  const onAgentMessages = async (type: ChatLogType, messages: AgentMessage[]) => {
+  const { status: sessionStatus } = useSession()
+  const { data: chats } = useChats()
+
+  const chatIdRef = useRef<string | undefined>()
+  const inMemoryLogsRef = useRef<ChatMessage[]>([])
+
+  const [inMemoryLogs, setInMemoryLogs] = useState<ChatMessage[]>([])
+  
+  const isAuthenticatedRef = useRef<boolean>(false);
+  const currentChat = chats?.find(c => c.id === chatIdRef.current)
+  const logs = currentChat?.logs ?? []
+  const logsToShow = isAuthenticatedRef.current ? logs : inMemoryLogs;
+
+  useEffect(() => {
+    if (sessionStatus === "authenticated") {
+      isAuthenticatedRef.current = true
+    }
+  }, [sessionStatus])
+
+  const onMessagesAdded = async (type: ChatLogType, messages: AgentMessage[]) => {
+    if (!isAuthenticatedRef.current) {
+      return;
+    }
+
     if (!chatIdRef.current) {
       throw new Error("No ChatID to add messages")
     }
@@ -38,6 +57,10 @@ function Dojo() {
   }
 
   const onVariableSet = async (key: string, value: string) => {
+    if (!isAuthenticatedRef.current) {
+      return;
+    }
+
     if (!chatIdRef.current) {
       throw new Error("No ChatID to add variable")
     }
@@ -50,12 +73,19 @@ function Dojo() {
   }
 
   const onChatLog = async (log: ChatMessage) => {
+    checkForUserFiles();
+
+    if (!isAuthenticatedRef.current) {
+      inMemoryLogsRef.current = [...inMemoryLogsRef.current, log]
+      setInMemoryLogs(inMemoryLogsRef.current)
+      return;
+    }
+
     if (!chatIdRef.current) {
       throw new Error("No ChatID to add chat log")
     }
 
     await addChatLog({ chatId: chatIdRef.current, log })
-    checkForUserFiles();
   }
 
   const {
@@ -69,7 +99,7 @@ function Dojo() {
     setIsSending,
   } = useEvo({
     onChatLog,
-    onAgentMessages,
+    onMessagesAdded,
     onVariableSet
   });
   const { handlePromptAuth } = useHandleAuth();
@@ -82,7 +112,7 @@ function Dojo() {
       return;
     }
 
-    if (!currentChat?.messages.length) {
+    if (!currentChat?.messages.length && isAuthenticatedRef.current) {
       const createdChat = await createChat()
 
       if (!createdChat) {
@@ -102,8 +132,8 @@ function Dojo() {
 
   return (
     <Chat
-      messages={logs}
-      samplePrompts={chatIdRef.current ? []: examplePrompts}
+      messages={logsToShow}
+      samplePrompts={logsToShow.length ? undefined: examplePrompts}
       isPaused={isPaused}
       isRunning={isRunning}
       isSending={isSending}

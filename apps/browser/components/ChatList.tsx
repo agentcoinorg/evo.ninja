@@ -1,3 +1,4 @@
+import { useCreateChat } from "@/lib/mutations/useCreateChat"
 import { useChats } from "@/lib/queries/useChats"
 import clsx from "clsx"
 import { useParams, useRouter } from "next/navigation"
@@ -5,6 +6,7 @@ import { useParams, useRouter } from "next/navigation"
 export default function ChatList() {
   const router = useRouter()
   const params = useParams<{ id?: string }>()
+  const { mutateAsync: createChat } = useCreateChat()
   const { data: chats } = useChats()
   const mappedChats = chats?.map(chat => ({
     id: chat.id,
@@ -19,7 +21,10 @@ export default function ChatList() {
       <button 
         className="inline-block h-9 cursor-pointer rounded-xl border-none bg-orange-600 px-6 py-2.5 text-center text-neutral-900 shadow-md outline-none transition-all hover:bg-orange-500" 
         title="New chat" 
-        onClick={() => router.push(`/`)}
+        onClick={async () => {
+          const createdChat = await createChat()
+          router.push(`/chat/${createdChat.id}`)
+        }}
       >
         New chat
       </button>
