@@ -272,7 +272,7 @@ const Chat: React.FC<ChatProps> = ({
     >
       {isLandingPage ? (
         <div className="flex flex-col items-center space-y-2">
-          <Logo wordmark={false} className="h-16 w-16" />
+          <Logo wordmark={false} className="h-16 !min-w-[4rem]" />
           <h1 className="text-2xl font-bold">What's your goal today?</h1>
         </div>
       ) : (
