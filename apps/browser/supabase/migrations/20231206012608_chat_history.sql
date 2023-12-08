@@ -65,3 +65,17 @@ alter table "public"."logs" validate constraint "logs_chat_id_fkey";
 alter table "public"."variables" add constraint "variables_chat_id_fkey" FOREIGN KEY (chat_id) REFERENCES chats(id) not valid;
 
 alter table "public"."variables" validate constraint "variables_chat_id_fkey";
+
+CREATE POLICY "Users can only manage their own messages" ON "public"."messages" USING ((EXISTS ( SELECT 1
+   FROM "public"."chats"
+  WHERE (("chats"."id" = "messages"."chat_id") AND ("chats"."user_id" = "auth"."uid"()))))) WITH CHECK ((EXISTS ( SELECT 1
+   FROM "public"."chats"
+  WHERE (("chats"."id" = "messages"."chat_id") AND ("chats"."user_id" = "auth"."uid"())))));
+
+CREATE POLICY "Users can only manage their own logs" ON "public"."logs" USING ((EXISTS ( SELECT 1
+   FROM "public"."chats"
+  WHERE (("chats"."id" = "logs"."chat_id") AND ("chats"."user_id" = "auth"."uid"()))))) WITH CHECK ((EXISTS ( SELECT 1
+   FROM "public"."chats"
+  WHERE (("chats"."id" = "logs"."chat_id") AND ("chats"."user_id" = "auth"."uid"())))));
+
+alter table "public"."chats" alter column "user_id" set default auth.uid();
