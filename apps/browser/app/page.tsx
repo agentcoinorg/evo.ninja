@@ -1,7 +1,7 @@
 "use client";
 
 import Chat, { ChatMessage } from "@/components/Chat";
-import { ExamplePrompt, examplePrompts } from "@/lib/examplePrompts";
+import { examplePrompts } from "@/lib/examplePrompts";
 import { useCheckForUserFiles } from "@/lib/hooks/useCheckForUserFiles";
 import { useEvo } from "@/lib/hooks/useEvo";
 import { useHandleAuth } from "@/lib/hooks/useHandleAuth";
@@ -10,33 +10,20 @@ import { useAddMessages } from "@/lib/mutations/useAddMessages";
 import { useAddVariable } from "@/lib/mutations/useAddVariable";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";
 import { useChats } from "@/lib/queries/useChats";
-import { errorAtom } from "@/lib/store";
 import { ChatLogType, ChatMessage as AgentMessage } from "@evo-ninja/agents";
-import { useAtom } from "jotai";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 
-function Dojo({ params }: { params: { id?: string } }) {
-  const router = useRouter()
+function Dojo() {
   const { mutateAsync: createChat } = useCreateChat()
   const { mutateAsync: addMessages } = useAddMessages()
   const { mutateAsync: addChatLog } = useAddChatLog()
   const { mutateAsync: addVariable } = useAddVariable()
   const { data: chats } = useChats()
-  const [, setError] = useAtom(errorAtom)
   const chatIdRef = useRef<string | undefined>()
-  const currentChat = chats?.find(c => c.id === (params.id ?? chatIdRef.current))
+  const currentChat = chats?.find(c => c.id === (chatIdRef.current))
+  console.log(currentChat)
   const logs = currentChat?.logs ?? []
-  const [samplePrompts, setSamplePrompts] = useState<ExamplePrompt[] | undefined>(examplePrompts)
   const checkForUserFiles = useCheckForUserFiles();
-
-  useEffect(() => {
-    if (chats && params.id && !currentChat) {
-      setError("No chat with this ID")
-      router.push('/')
-      return;
-    }
-  }, [currentChat])
 
   const onAgentMessages = async (type: ChatLogType, messages: AgentMessage[]) => {
     const chatId = chatIdRef.current;
@@ -100,7 +87,6 @@ function Dojo({ params }: { params: { id?: string } }) {
     if (!authorized) {
       return;
     }
-    setSamplePrompts(undefined)
 
     if (!currentChat?.messages.length) {
       const createdChat = await createChat()
@@ -123,7 +109,7 @@ function Dojo({ params }: { params: { id?: string } }) {
   return (
     <Chat
       messages={logs}
-      samplePrompts={params.id ? []: samplePrompts}
+      samplePrompts={chatIdRef.current ? []: examplePrompts}
       isPaused={isPaused}
       isRunning={isRunning}
       isSending={isSending}

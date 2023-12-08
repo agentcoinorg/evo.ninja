@@ -20,7 +20,7 @@ export interface ChatMessage {
 
 export interface ChatProps {
   messages: ChatMessage[];
-  samplePrompts: ExamplePrompt[] | undefined;
+  samplePrompts?: ExamplePrompt[];
   isRunning: boolean;
   isStopped: boolean;
   isPaused: boolean;
