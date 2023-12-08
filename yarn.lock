@@ -1784,7 +1784,7 @@
     "@types/websocket" "^1.0.3"
     ws "^8.14.2"
 
-"@supabase/storage-js@^2.5.4":
+"@supabase/storage-js@2.5.5", "@supabase/storage-js@^2.5.4":
   version "2.5.5"
   resolved "https://registry.yarnpkg.com/@supabase/storage-js/-/storage-js-2.5.5.tgz#2958e2a2cec8440e605bb53bd36649288c4dfa01"
   integrity sha512-OpLoDRjFwClwc2cjTJZG8XviTiQH4Ik8sCiMK5v7et0MDu2QlXjCAW3ljxJB5+z/KazdMOTnySi+hysxWUPu3w==
