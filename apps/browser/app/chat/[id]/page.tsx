@@ -46,7 +46,7 @@ function ChatPage({ params }: { params: { id: string } }) {
     }
   }, [currentChat])
 
-  const onAgentMessages = async (type: ChatLogType, messages: AgentMessage[]) => {
+  const onMessagesAdded = async (type: ChatLogType, messages: AgentMessage[]) => {
     await addMessages({
       chatId: params.id,
       messages,
@@ -78,7 +78,7 @@ function ChatPage({ params }: { params: { id: string } }) {
     setIsSending,
   } = useEvo({
     onChatLog,
-    onAgentMessages,
+    onMessagesAdded,
     onVariableSet
   });
   const { handlePromptAuth } = useHandleAuth();
