@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import Logo from "./Logo";
-import IconButton from "./IconButton";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import DropdownAccount from "./DropdownAccount";
 import CurrentWorkspace from "./CurrentWorkspace";
-import colors from "tailwindcss/colors";
-import { NotePencil } from "@phosphor-icons/react";
+import { DiscordLogo, GithubLogo, NotePencil } from "@phosphor-icons/react";
+import AvatarBlockie from "./AvatarBlockie";
+import Button from "./Button";
 
 export interface SidebarProps {
   userFiles: InMemoryFile[];
@@ -72,14 +72,16 @@ const Sidebar = ({
         >
           <div className="flex h-full flex-col space-y-6">
             <div className="flex items-center p-4">
-              <Logo className="cursor-pointer transition-opacity hover:opacity-50" />
+              <Logo className="w-[136px] cursor-pointer transition-opacity hover:opacity-50" />
             </div>
             <div className="space-y-1 px-2">
               <div className="flex w-full items-center justify-between space-x-1 px-3">
                 <div className="text-xs uppercase tracking-widest text-zinc-500">
                   Recent Chats
                 </div>
-                <IconButton iconName="NotePencil" iconProps={{ size: 18 }} />
+                <Button variant="icon">
+                  <NotePencil size={18} weight="bold" />
+                </Button>
               </div>
               <div className="space-y-0.5">
                 {chats.length > 0 ? (
@@ -117,7 +119,9 @@ const Sidebar = ({
               )}
               onClick={() => setDropdownOpen(!dropdownOpen)}
             >
-              <div className="h-6 w-6 rounded-full bg-yellow-500"></div>
+              <AvatarBlockie
+                address={"0x7cB57B5A97eAbe94205C07890BE4c1aD31E486A8"}
+              />
               <div className="text-white">Guest</div>
             </div>
             <div className="flex items-center space-x-1 text-lg text-white">
@@ -126,14 +130,18 @@ const Sidebar = ({
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <IconButton iconName="DiscordLogo" iconProps={{ size: 20 }} />
+                <Button variant="icon">
+                  <DiscordLogo size={20} />
+                </Button>
               </a>
               <a
                 href="https://github.com/polywrap/evo.ninja"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <IconButton iconName="GithubLogo" iconProps={{ size: 20 }} />
+                <Button variant="icon">
+                  <GithubLogo size={20} />
+                </Button>
               </a>
             </div>
           </div>

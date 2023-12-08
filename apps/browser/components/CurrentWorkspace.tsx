@@ -9,10 +9,11 @@ import { readFile } from "@/lib/sys/file";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import { downloadFilesAsZip } from "@/lib/sys/file/downloadFilesAsZip";
 import clsx from "clsx";
-import IconButton from "./IconButton";
+
 import FileIcon from "./FileIcon";
 import colors from "tailwindcss/colors";
-import { FilePlus } from "@phosphor-icons/react";
+import { DownloadSimple, FilePlus } from "@phosphor-icons/react";
+import Button from "./Button";
 
 interface UploadProps {
   className?: string;
@@ -62,19 +63,18 @@ function CurrentWorkspace({
           Current Workspace
         </div>
         <div className="flex items-center space-x-1">
-          <IconButton
-            iconName="FilePlus"
-            iconProps={{ size: 18 }}
-            onClick={open}
-          />
+          <Button variant="icon" onClick={open}>
+            <FilePlus size={18} weight="bold" />
+          </Button>
           <input {...getInputProps()} />
           {userFiles.length !== 0 && (
-            <IconButton
-              buttonClassName="text-zinc-500 hover:text-cyan-500"
-              iconName="DownloadSimple"
-              iconProps={{ size: 18 }}
+            <Button
+              variant="icon"
+              className="text-zinc-500 hover:text-cyan-500"
               onClick={downloadUserFiles}
-            />
+            >
+              <DownloadSimple size={18} weight="bold" />
+            </Button>
           )}
         </div>
       </div>
@@ -95,9 +95,9 @@ function CurrentWorkspace({
             <div
               {...getRootProps({
                 className: clsx(
-                  "dropzone group h-full cursor-pointer space-y-1 overflow-y-auto rounded-lg border-2 border-solid border-zinc-900 p-[6px] transition-all duration-100 ease-in-out",
+                  "dropzone group h-full space-y-1 overflow-y-auto rounded-lg border-2 border-solid border-zinc-900 p-[6px] transition-all duration-100 ease-in-out",
                   {
-                    "!border-dashed !border-cyan-500 !bg-zinc-950":
+                    "cursor-pointer !border-dashed !border-cyan-500 !bg-zinc-950":
                       isDragAccept,
                   },
                   className
@@ -107,13 +107,14 @@ function CurrentWorkspace({
               {userFiles.map((file, i) => {
                 return (
                   <div
+                    key={i}
                     className={clsx(
                       "flex w-full cursor-pointer items-center space-x-2 rounded p-1 text-cyan-500 transition-colors duration-300",
-                      { "hover:bg-zinc-800 hover:text-white": isDragAccept }
+                      { "hover:bg-zinc-800 hover:text-white": !isDragAccept }
                     )}
                   >
                     <FileIcon fileType={getFileType(file.path)} />
-                    <div key={i}>{file.path}</div>
+                    <div>{file.path}</div>
                   </div>
                 );
               })}

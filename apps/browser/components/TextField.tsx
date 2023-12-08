@@ -1,7 +1,17 @@
 import clsx from "clsx";
-import { useState, ChangeEvent, InputHTMLAttributes, ReactNode } from "react";
+import {
+  useState,
+  DetailedHTMLProps,
+  ChangeEvent,
+  InputHTMLAttributes,
+  ReactNode,
+} from "react";
 
-interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
+interface TextFieldProps
+  extends DetailedHTMLProps<
+    InputHTMLAttributes<HTMLInputElement>,
+    HTMLInputElement
+  > {
   label?: string;
   error?: string;
   checked?: boolean;
@@ -9,7 +19,6 @@ interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   leftAdornmentClassnames?: string;
   rightAdornment?: ReactNode;
   rightAdornmentClassnames?: string;
-  readOnly?: boolean;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -23,8 +32,6 @@ const TextField = ({
   label,
   error,
   checked,
-  readOnly = false,
-  onChange,
   ...props
 }: TextFieldProps) => {
   const [isChecked, setIsChecked] =
@@ -32,12 +39,6 @@ const TextField = ({
 
   const handleCheck = () => {
     setIsChecked(!isChecked);
-  };
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (onChange) {
-      onChange(e);
-    }
   };
 
   return (
@@ -52,7 +53,7 @@ const TextField = ({
             type="hidden"
             className="hidden"
             checked={isChecked}
-            onChange={handleChange}
+            onChange={props.onChange}
             {...props}
           />
           <div className={clsx("checkmark", { hidden: !isChecked })} />
@@ -71,17 +72,16 @@ const TextField = ({
           )}
           <input
             className={clsx(
-              "w-full rounded-lg border-2 border-zinc-500 bg-transparent p-4 text-sm text-white outline-none transition-all placeholder:text-white/50 hover:border-zinc-600 hover:bg-zinc-950 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/20",
+              "focus:ring-3 w-full rounded-lg border-2 border-zinc-500 bg-transparent p-4 text-sm text-white outline-none transition-all placeholder:text-white/50 focus:border-cyan-500 focus:ring-cyan-500/20",
+              props.disabled
+                ? "cursor-default opacity-50"
+                : "cursor-text hover:border-zinc-600 hover:bg-zinc-950",
               { "border-red-500": error },
               { "!pl-10": leftAdornment },
               { "!pr-10": rightAdornment },
               className
             )}
             type={type}
-            placeholder={props.placeholder}
-            disabled={props.disabled}
-            readOnly={readOnly}
-            onChange={handleChange}
             {...props}
           />
           {rightAdornment && (

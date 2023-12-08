@@ -12,6 +12,7 @@ import Modal from "./Modal";
 import Button from "./Button";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import AccountConfig from "./modals/AccountConfig";
+import { useSession } from "next-auth/react";
 
 interface AccountConfigProps {
   apiKey: string | null;
@@ -51,7 +52,7 @@ export default function SettingsModal(props: AccountConfigProps) {
   const [telemetry, setTelemetry] = useState(allowTelemetry);
   const [, setError] = useState<string | undefined>();
   const [capReached, setCapReached] = useAtom(capReachedAtom);
-
+  const { data: session } = useSession()
   const { isOpen, onClose } = props;
 
   const onSave = async () => {
@@ -95,7 +96,7 @@ export default function SettingsModal(props: AccountConfigProps) {
           )}
 
           <AccountConfig
-            justAuthenticated={false}
+            isLoggedIn={!!session?.user}
             apiKey={apiKey}
             showText={false}
             telemetry={telemetry}

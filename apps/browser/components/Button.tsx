@@ -1,27 +1,40 @@
 import clsx from "clsx";
-import { ButtonHTMLAttributes, PropsWithChildren } from "react";
+import { ButtonHTMLAttributes, PropsWithChildren, ReactNode } from "react";
+import Tooltip, { TooltipProps } from "./Tooltip";
 
 interface ButtonProps
   extends PropsWithChildren<ButtonHTMLAttributes<HTMLButtonElement>> {
   hierarchy?: "primary" | "secondary";
   size?: "default" | "lg";
+  variant?: "icon" | "text";
+  helperContent?: TooltipProps["content"];
+  helperPlacement?: TooltipProps["placement"];
 }
 
 const Button = ({
   children,
   hierarchy = "primary",
   size = "default",
+  variant,
+  helperContent,
+  helperPlacement,
   className,
   disabled,
   ...props
 }: ButtonProps) => {
   const hierarchyClasses = {
-    primary: clsx("border-cyan-300 bg-cyan-500", {
-      "hover:bg-cyan-600": !disabled,
-    }),
-    secondary: clsx("border-zinc-700 bg-zinc-800", {
-      "hover:bg-zinc-700": !disabled,
-    }),
+    primary: clsx(
+      "bg-button border-cyan-300 bg-gradient-to-b from-cyan-300 via-cyan-600 to-cyan-800 bg-bottom text-white",
+      {
+        "hover:bg-top": !disabled,
+      }
+    ),
+    secondary: clsx(
+      "bg-button border-zinc-700 bg-gradient-to-b from-zinc-700 via-zinc-800 to-zinc-900 bg-bottom text-white",
+      {
+        "hover:bg-top": !disabled,
+      }
+    ),
   };
 
   const sizeClasses = {
@@ -29,18 +42,28 @@ const Button = ({
     lg: "px-8 py-3",
   };
 
+  const variantClasses = {
+    icon: "border-none bg-none !p-1 text-zinc-500 hover:!text-cyan-500",
+    text: "border-none bg-none !p-1 text-cyan-500 hover:text-white",
+  };
+  const variantClass = variant ? variantClasses[variant] : null;
+
   return (
     <button
       className={clsx(
-        "inline-flex items-center justify-center space-x-2 rounded-md border text-white transition-all",
+        "text-shadow-md relative inline-flex items-center justify-center space-x-2 rounded-md border transition-all duration-500",
         hierarchyClasses[hierarchy],
         sizeClasses[size],
-        disabled ? "opacity-60 cursor-default" : "cursor-pointer",
+        variantClass,
+        disabled ? "cursor-default opacity-60" : "cursor-pointer",
         className
       )}
       {...props}
     >
       {children}
+      {helperContent && (
+        <Tooltip placement={helperPlacement} content={helperContent} />
+      )}
     </button>
   );
 };

@@ -1,9 +1,10 @@
 import { PropsWithChildren } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
-import IconButton from "./IconButton";
 import { Ubuntu_FONT } from "@/lib/fonts";
 import clsx from "clsx";
+import { X } from "@phosphor-icons/react";
+import Button from "./Button";
 
 interface ModalProps {
   title: string;
@@ -43,12 +44,13 @@ export default function Modal(props: PropsWithChildren<ModalProps>) {
                     <Dialog.Title as="h3" className="text-lg font-medium">
                       {title}
                     </Dialog.Title>
-                    <IconButton
-                      iconName="X"
+                    <Button
+                      variant="icon"
                       onClick={onClose}
-                      iconProps={{ weight: "bold", color: "white", size: 20 }}
-                      buttonClassName="transform translate-x-2"
-                    />
+                      className="translate-x-2 transform"
+                    >
+                      <X size={20} color="white" weight="bold" />
+                    </Button>
                   </div>
                   <div className="max-h-[calc(100vh-96px)] space-y-8 overflow-y-auto bg-zinc-900 p-8 pb-12">
                     {children}

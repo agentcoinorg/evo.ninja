@@ -6,23 +6,20 @@ import {
   capReachedAtom,
   localOpenAiApiKeyAtom,
 } from "@/lib/store";
-import Modal from "../Modal";
-import Button from "../Button";
-import AccountConfig from "./AccountConfig";
-import { ArrowRight, LinkBreak, SignOut } from "@phosphor-icons/react";
+import Modal from "./Modal";
+import Button from "./Button";
+import AccountConfig from "../components/modals/AccountConfig";
+import { SignOut } from "@phosphor-icons/react";
 import Image from "next/image";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 export const WELCOME_MODAL_SEEN_STORAGE_KEY = "welcome-modal-seen";
 
-const justAuthenticated = false;
-
 interface AccountConfigProps {
-  // apiKey: string | null;
-  // allowTelemetry: boolean;
+  apiKey: string | null;
+  allowTelemetry: boolean;
   isOpen: boolean;
   onClose: () => void;
-  // firstTimeUser: boolean;
 }
 
 const validateOpenAiApiKey = async (
@@ -48,16 +45,16 @@ const validateOpenAiApiKey = async (
   }
 };
 
-export default function SettingsModal(props: AccountConfigProps) {
+export default function SignInModal(props: AccountConfigProps) {
   const [localApiKey, setLocalApiKey] = useAtom(localOpenAiApiKeyAtom);
   const [allowTelemetry, setAllowTelemetry] = useAtom(allowTelemetryAtom);
   const [apiKey, setApiKey] = useState<string>(localApiKey || "");
   const [telemetry, setTelemetry] = useState(allowTelemetry);
   const [error, setError] = useState<string | undefined>();
   const [capReached, setCapReached] = useAtom(capReachedAtom);
+
   const { data: session } = useSession()
-  const firstTimeUser = !session?.user?.email && !localApiKey
-  
+
   const { isOpen, onClose } = props;
 
   const onSave = async () => {
@@ -80,13 +77,7 @@ export default function SettingsModal(props: AccountConfigProps) {
   };
   return (
     <>
-      <Modal isOpen={isOpen} title="Welcome to Evo Ninja" onClose={onSave}>
-        {!firstTimeUser && (
-          <div className="border-b-2 border-zinc-700 pb-8 text-center">
-            Evo is an agent that can do many things. This is a technical
-            preview, feedback and questions are appreciated!
-          </div>
-        )}
+      <Modal isOpen={isOpen} title="Sign In" onClose={onSave}>
         {session?.user?.email ? (
           <div className="space-y-6">
             <div className="border-b-2 border-zinc-700 pb-8 text-center">
@@ -111,12 +102,19 @@ export default function SettingsModal(props: AccountConfigProps) {
                 </Button>
               </div>
             </div>
+            <AccountConfig
+              apiKey={apiKey}
+              telemetry={telemetry}
+              setTelemetry={setTelemetry}
+              setApiKey={setApiKey}
+              isLoggedIn={!!session.user}
+            />
           </div>
         ) : (
-          <div className="space-y-6 border-b-2 border-zinc-700 pb-8">
+          <div className="space-y-6">
             <p>Sign in below to save your sessions</p>
             <div className="space-y-2">
-              <Button className="w-full" hierarchy="secondary" onClick={() => signIn("github")}>
+            <Button className="w-full" hierarchy="secondary" onClick={() => signIn("github")}>
                 <Image
                   alt="Sign in with Github"
                   width={20}
@@ -137,21 +135,6 @@ export default function SettingsModal(props: AccountConfigProps) {
             </div>
           </div>
         )}
-
-        <AccountConfig
-          telemetry={telemetry}
-          setTelemetry={setTelemetry}
-          apiKey={apiKey}
-          setApiKey={setApiKey}
-          isLoggedIn={!!session?.user}
-        />
-
-        <div className="flex justify-end border-t-2 border-zinc-700 pt-8">
-          <Button onClick={onSave}>
-            <div>Get Started</div>
-            <ArrowRight size={16} color="white" />
-          </Button>
-        </div>
       </Modal>
     </>
   );

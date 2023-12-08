@@ -8,22 +8,20 @@ interface AccountConfigProps {
   apiKey: string | null
   setTelemetry: (telemetry: boolean) => void
   telemetry: boolean
-  justAuthenticated?: boolean;
+  isLoggedIn: boolean;
   showText?: boolean;
 }
 
 function AccountConfig(props: AccountConfigProps) {
   const [error] = useState<string | undefined>();
-  // const [telemetry, setTelemetry] = useState(allowTelemetry);
-  // const [apiKey, setApiKey] = useState<string>()
-  const { justAuthenticated, showText, apiKey, setApiKey, setTelemetry, telemetry } = props;
+  const { isLoggedIn, showText, apiKey, setApiKey, setTelemetry, telemetry } = props;
 
   return (
     <>
       <div className="space-y-6">
         {showText && (
           <p>
-            {justAuthenticated
+            {isLoggedIn
               ? "Provide your own OpenAI key to get started with Evo."
               : "Provide your own OpenAI key and use Evo as a guest. As a guest, your sessions will not be saved."}
           </p>
@@ -42,7 +40,7 @@ function AccountConfig(props: AccountConfigProps) {
             Don't have an OpenAI key?
             <a
               className="ml-1 text-cyan-500 underline transition-colors duration-300 hover:text-white"
-              href="https://help.openai.com/en/articles/4936850-where-do-i-find-my-api-key"
+              href="https://platform.openai.com/account/api-keys"
               target="_blank"
               rel="noredirect"
             >

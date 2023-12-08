@@ -11,7 +11,7 @@ const LoadingCircle = ({ strokeWidth = 12, className }: LoadingCircleProps) => {
       <svg
         aria-hidden="true"
         className={clsx(
-          "inline h-4 w-4 animate-spin stroke-cyan-500 text-cyan-500/30",
+          "inline flex h-4 w-4 animate-spin stroke-cyan-500 text-cyan-500/30",
           className
         )}
         width="100"
