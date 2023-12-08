@@ -8,20 +8,20 @@ interface AccountConfigProps {
   apiKey: string | null
   setTelemetry: (telemetry: boolean) => void
   telemetry: boolean
-  justAuthenticated?: boolean;
+  isLoggedIn: boolean;
   showText?: boolean;
 }
 
 function AccountConfig(props: AccountConfigProps) {
   const [error] = useState<string | undefined>();
-  const { justAuthenticated, showText, apiKey, setApiKey, setTelemetry, telemetry } = props;
+  const { isLoggedIn, showText, apiKey, setApiKey, setTelemetry, telemetry } = props;
 
   return (
     <>
       <div className="space-y-6">
         {showText && (
           <p>
-            {justAuthenticated
+            {isLoggedIn
               ? "Provide your own OpenAI key to get started with Evo."
               : "Provide your own OpenAI key and use Evo as a guest. As a guest, your sessions will not be saved."}
           </p>

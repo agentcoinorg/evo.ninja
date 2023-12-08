@@ -11,10 +11,9 @@ import Button from "./Button";
 import AccountConfig from "./AccountConfig";
 import { SignOut } from "@phosphor-icons/react";
 import Image from "next/image";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 export const WELCOME_MODAL_SEEN_STORAGE_KEY = "welcome-modal-seen";
-
-const justAuthenticated = true;
 
 interface AccountConfigProps {
   apiKey: string | null;
@@ -54,6 +53,8 @@ export default function SignInModal(props: AccountConfigProps) {
   const [error, setError] = useState<string | undefined>();
   const [capReached, setCapReached] = useAtom(capReachedAtom);
 
+  const { data: session } = useSession()
+
   const { isOpen, onClose } = props;
 
   const onSave = async () => {
@@ -77,7 +78,7 @@ export default function SignInModal(props: AccountConfigProps) {
   return (
     <>
       <Modal isOpen={isOpen} title="Sign In" onClose={onSave}>
-        {justAuthenticated ? (
+        {session?.user?.email ? (
           <div className="space-y-6">
             <div className="border-b-2 border-zinc-700 pb-8 text-center">
               You're signed in!
@@ -87,15 +88,15 @@ export default function SignInModal(props: AccountConfigProps) {
                 <div className="h-8 w-8 rounded-full bg-yellow-500" />
                 <div className="space-y-1">
                   <div className="text-sm font-semibold leading-none">
-                    Colin Spence
+                    {session.user.name}
                   </div>
                   <div className="text-xs leading-none text-gray-400 underline">
-                    colin@dorg.tech
+                    {session.user.email}
                   </div>
                 </div>
               </div>
               <div className="space-x-2">
-                <Button className="!px-4" hierarchy="secondary">
+                <Button className="!px-4" hierarchy="secondary" onClick={() => signOut()}>
                   <SignOut color="currentColor" size={16} />
                   <div>Sign Out</div>
                 </Button>
@@ -106,14 +107,14 @@ export default function SignInModal(props: AccountConfigProps) {
               telemetry={telemetry}
               setTelemetry={setTelemetry}
               setApiKey={setApiKey}
-              justAuthenticated={justAuthenticated}
+              isLoggedIn={!!session.user}
             />
           </div>
         ) : (
           <div className="space-y-6">
             <p>Sign in below to save your sessions</p>
             <div className="space-y-2">
-              <Button className="w-full" hierarchy="secondary">
+            <Button className="w-full" hierarchy="secondary" onClick={() => signIn("github")}>
                 <Image
                   alt="Sign in with Github"
                   width={20}
@@ -122,7 +123,7 @@ export default function SignInModal(props: AccountConfigProps) {
                 />
                 <div>Sign in with Github</div>
               </Button>
-              <Button className="w-full" hierarchy="secondary">
+              <Button className="w-full" hierarchy="secondary" onClick={() => signIn("google")}>
                 <Image
                   alt="Sign in with Google"
                   width={20}
