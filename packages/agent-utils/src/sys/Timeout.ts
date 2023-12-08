@@ -3,8 +3,8 @@ import { Logger } from "./logger";
 export class Timeout {
   constructor(
     public seconds: number = 20 * 60,
-    public callback: (logger: Logger) => void
-  ) { }
+    public callback: (logger: Logger) => Promise<void>
+  ) {}
 
   public get milliseconds() {
     return this.seconds * 1000;

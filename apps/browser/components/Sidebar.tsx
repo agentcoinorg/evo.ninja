@@ -27,8 +27,8 @@ const Sidebar = ({
   onUploadFiles,
   onSidebarToggleClick,
 }: SidebarProps) => {
-  function downloadUserFiles() {
-    downloadFilesAsZip("workspace.zip", userFiles);
+  async function downloadUserFiles() {
+    await downloadFilesAsZip("workspace.zip", userFiles);
   }
 
   return (

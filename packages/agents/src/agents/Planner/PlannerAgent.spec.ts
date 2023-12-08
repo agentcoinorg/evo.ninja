@@ -27,10 +27,13 @@ jest.setTimeout(120000);
 
 describe('Planner Agent Test Suite', () => {
 
-  function createPlannerAgent(testName: string, pathsForFilesToInclude: string[] = []): {
+  async function createPlannerAgent(
+    testName: string,
+    pathsForFilesToInclude: string[] = []
+  ): Promise<{
     agent: Agent;
     debugLog: DebugLog;
-  } {
+  }> {
     const testCaseDir = path.join(__dirname, ".tests", testName);
 
     // reset the dir
@@ -59,9 +62,7 @@ describe('Planner Agent Test Suite', () => {
     const chat = new Chat(cl100k_base);
 
     const scriptsDir = path.join(rootDir, "scripts");
-    const scriptsWorkspace = new FileSystemWorkspace(
-      scriptsDir
-    );
+    const scriptsWorkspace = new FileSystemWorkspace(scriptsDir);
     const scripts = new Scripts(scriptsWorkspace, "./");
 
     const workspace = new FileSystemWorkspace(testCaseDir);
@@ -73,7 +74,7 @@ describe('Planner Agent Test Suite', () => {
       }
       const fileName = path.basename(filePath);
       const fileContents = fs.readFileSync(filePath, "utf-8");
-      workspace.writeFileSync(fileName, fileContents);
+      await workspace.writeFile(fileName, fileContents);
     }
     const embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base);
 
@@ -87,27 +88,31 @@ describe('Planner Agent Test Suite', () => {
           workspace,
           internals,
           env,
-          scripts,
+          scripts
         )
       ),
-      debugLog
+      debugLog,
     };
   }
 
-  async function runPlannerAgent(agent: Agent, goal: string, debugLog: DebugLog) {
-    debugLog.goalStart(goal);
+  async function runPlannerAgent(
+    agent: Agent,
+    goal: string,
+    debugLog: DebugLog
+  ) {
+    await debugLog.goalStart(goal);
     const iterator = agent.run({ goal });
 
     while (true) {
-      debugLog.stepStart();
+      await debugLog.stepStart();
       const response = await iterator.next();
-      debugLog.stepEnd();
+      await debugLog.stepEnd();
 
       if (response.done) {
         if (!response.value.ok) {
-          debugLog.stepError(response.value.error ?? "Unknown error");
+          await debugLog.stepError(response.value.error ?? "Unknown error");
         } else {
-          debugLog.stepLog(JSON.stringify(response.value.value));
+          await debugLog.stepLog(JSON.stringify(response.value.value));
         }
         return response;
       }
@@ -115,7 +120,7 @@ describe('Planner Agent Test Suite', () => {
   }
 
   test("AnswerQuestionSmallCsv", async () => {
-    const { agent, debugLog } = createPlannerAgent(
+    const { agent, debugLog } = await createPlannerAgent(
       "AnswerQuestionSmallCsv",
       [path.join(__dirname, "testInputs/AnswerQuestionSmallCsv/file1.csv")]
     );

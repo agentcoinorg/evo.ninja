@@ -53,7 +53,11 @@ function Dojo() {
     if (!evo || !userWorkspace) {
       return;
     }
-    updateWorkspaceFiles(userWorkspace, userFiles, setUserFiles);
+
+    //eslint-disable-next-line @typescript-eslint/no-floating-promises
+    (async () => {
+      await updateWorkspaceFiles(userWorkspace, userFiles, setUserFiles);
+    })();
   }
 
   useEffect(() => {
@@ -61,14 +65,19 @@ function Dojo() {
       return;
     }
 
-    for (const file of uploadedFiles) {
-      userWorkspace.writeFileSync(
-        file.path,
-        new TextDecoder().decode(file.content)
+    //eslint-disable-next-line @typescript-eslint/no-floating-promises
+    (async () => {
+      await Promise.all(
+        uploadedFiles.map((file) =>
+          userWorkspace.writeFile(
+            file.path,
+            new TextDecoder().decode(file.content)
+          )
+        )
       );
-    }
 
-    checkForUserFiles();
+      checkForUserFiles();
+    })();
   }, [uploadedFiles]);
 
   const handlePromptAuth = async (message: string) => {

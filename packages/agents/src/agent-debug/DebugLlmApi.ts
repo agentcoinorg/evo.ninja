@@ -37,11 +37,7 @@ export class DebugLlmApi implements LlmApi {
     );
 
     time.end();
-    this.debugLog.stepLlmReq(
-      time,
-      chatLogs.clone(),
-      resp
-    );
+    await this.debugLog.stepLlmReq(time, chatLogs.clone(), resp);
 
     return resp;
   }

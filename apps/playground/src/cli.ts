@@ -9,7 +9,7 @@ import {
   OpenAILlmApi,
   OpenAIEmbeddingAPI
 } from "@evo-ninja/agents";
-import { run } from "./demos/basic";
+import { run } from "./demos/revenue-retrieval";
 import { LlmAdapter } from "./utils";
 
 dotenv.config({

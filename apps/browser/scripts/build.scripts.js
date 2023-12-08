@@ -34,26 +34,29 @@ const scripts = uniqueFilesWithoutExtension.map((name) => {
 
 const templateFile = `import { InMemoryWorkspace, Workspace } from "@evo-ninja/agent-utils";
 
-export function createInBrowserScripts(): InMemoryWorkspace {
+export async function createInBrowserScripts(): Promise<InMemoryWorkspace> {
   const workspace = new InMemoryWorkspace();
 
   const availableScripts = [
     {{#each scripts}}
     {{variableName}},
     {{/each}}
-  ]
-  availableScripts.forEach((script) => addScript(script, workspace));
+  ];
+
+  await Promise.all(
+    availableScripts.map((script) => addScript(script, workspace))
+  );
 
   return workspace;
 }
 
 
-function addScript(
+async function addScript(
   script: { name: string; definition: string; code: string },
   scriptsWorkspace: Workspace
-) {
-  scriptsWorkspace.writeFileSync(script.name.concat(".json"), script.definition);
-  scriptsWorkspace.writeFileSync(script.name.concat(".js"), script.code);
+): Promise<void> {
+  await scriptsWorkspace.writeFile(script.name.concat(".json"), script.definition);
+  await scriptsWorkspace.writeFile(script.name.concat(".js"), script.code);
 }
 
 // Scripts embedded below
