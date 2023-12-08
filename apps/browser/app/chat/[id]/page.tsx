@@ -11,11 +11,13 @@ import { useChats } from "@/lib/queries/useChats";
 import { errorAtom } from "@/lib/store";
 import { ChatLogType, ChatMessage as AgentMessage } from "@evo-ninja/agents";
 import { useAtom } from "jotai";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 function ChatPage({ params }: { params: { id: string } }) {
   const router = useRouter()
+  const { status } = useSession()
 
   const { mutateAsync: addMessages } = useAddMessages()
   const { mutateAsync: addChatLog } = useAddChatLog()
@@ -27,6 +29,14 @@ function ChatPage({ params }: { params: { id: string } }) {
 
   const logs = currentChat?.logs ?? []
   const checkForUserFiles = useCheckForUserFiles();
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      setError("No chat with this ID")
+      router.push('/')
+      return;
+    }
+  }, [status])
 
   useEffect(() => {
     if (chats && !currentChat) {
