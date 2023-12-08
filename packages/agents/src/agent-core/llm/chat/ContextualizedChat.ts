@@ -69,7 +69,7 @@ export class ContextualizedChat {
 
   async contextualize(contextVector: number[], tokenLimits: Record<ChatLogType, number>): Promise<Chat> {
     // Ensure all new messages have been processed
-    this._processNewMessages();
+    await this._processNewMessages();
 
     const persistentLargeChunks = await this._rags["persistent"]
       .query(contextVector)
@@ -101,8 +101,8 @@ export class ContextualizedChat {
     sorted.temporary = postProcessMessages(sorted.temporary);
 
     const chat = this._rawChat.cloneEmpty();
-    chat.add("persistent", sorted.persistent);
-    chat.add("temporary", sorted.temporary);
+    await chat.persistent(sorted.persistent);
+    await chat.temporary(sorted.temporary);
     return chat;
   }
 

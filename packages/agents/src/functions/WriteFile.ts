@@ -9,8 +9,8 @@ interface WriteFileFuncParameters {
 };
 
 export class WriteFileFunction extends ScriptFunction<WriteFileFuncParameters> {
-
   name: string = "fs_writeFile";
+  description: string = `Writes data to a file, replacing the file if it already exists.`;
   parameters: any = {
     type: "object",
     properties: {
@@ -18,29 +18,40 @@ export class WriteFileFunction extends ScriptFunction<WriteFileFuncParameters> {
         type: "string",
       },
       data: {
-        type: "string"
+        type: "string",
       },
       encoding: {
-        type: "string"
+        type: "string",
       },
     },
     required: ["path", "data", "encoding"],
-    additionalProperties: false
+    additionalProperties: false,
   };
 
-  onSuccess(agent: Agent, params: WriteFileFuncParameters, rawParams: string | undefined, result: string): AgentFunctionResult {
+  onSuccess(
+    agent: Agent,
+    params: WriteFileFuncParameters,
+    rawParams: string | undefined,
+    result: string
+  ): AgentFunctionResult {
     return {
       outputs: [
         {
           type: AgentOutputType.Success,
           title: `[${agent.config.prompts.name}] ${this.name}`,
-          content: `${params.path} ${params.encoding}:\n\`\`\`\n${trimText(params.data, 200)}\n\`\`\``
-        }
+          content: `${params.path} ${params.encoding}:\n\`\`\`\n${trimText(
+            params.data,
+            200
+          )}\n\`\`\``,
+        },
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ChatMessageBuilder.functionCallResult(this.name, "Successfully wrote file.")
-      ]
-    }
+        ChatMessageBuilder.functionCallResult(
+          this.name,
+          "Successfully wrote file."
+        ),
+      ],
+    };
   }
 }

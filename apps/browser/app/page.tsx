@@ -1,102 +1,63 @@
 "use client"
 
 import React, { useState, useEffect } from "react";
+import { useAtom } from "jotai";
 
 import { InMemoryFile } from "@nerfzael/memory-fs";
-import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 import clsx from "clsx";
 import AccountConfig from "@/components/AccountConfig";
-import DojoError from "@/components/DojoError";
 import Sidebar from "@/components/Sidebar";
 import Chat, { ChatMessage } from "@/components/Chat";
 import { updateWorkspaceFiles } from "@/lib/updateWorkspaceFiles";
-import {
-  AgentContext,
-  Evo,
-  SubWorkspace,
-  InMemoryWorkspace,
-  Logger,
-  ConsoleLogger,
-  Scripts,
-  Env,
-  OpenAILlmApi,
-  LlmModel,
-  LlmApi,
-  EmbeddingApi,
-  Chat as EvoChat,
-  OpenAIEmbeddingAPI,
-} from "@evo-ninja/agents";
-import { createInBrowserScripts } from "@/lib/scripts";
-import WelcomeModal, { WELCOME_MODAL_SEEN_STORAGE_KEY } from "@/components/WelcomeModal";
-import { BrowserLogger } from "@/lib/sys/logger";
-import { checkLlmModel } from "@/lib/checkLlmModel";
-import { ProxyLlmApi, ProxyEmbeddingApi } from "@/lib/api";
+import WelcomeModal from "@/components/WelcomeModal";
 import { useSession } from "next-auth/react";
-import { AuthProxy } from "@/lib/AuthProxy";
+import { AuthProxy } from "@/lib/api/AuthProxy";
+import { useEvo, userWorkspaceAtom } from "@/lib/hooks/useEvo";
+import { allowTelemetryAtom, capReachedAtom, localOpenAiApiKeyAtom, welcomeModalAtom } from "@/lib/store";
+import { toast } from "react-toastify"
 
 function Dojo() {
-  const [dojoConfig, setDojoConfig] = useState<{
-    openAiApiKey: string | null;
-    allowTelemetry: boolean;
-    loaded: boolean;
-    complete: boolean;
-  }>({
-    openAiApiKey: null,
-    allowTelemetry: false,
-    loaded: false,
-    complete: false
-  });
-  const [welcomeModalOpen, setWelcomeModalOpen] = useState<boolean>(false);
+  const [allowTelemetry] = useAtom(allowTelemetryAtom)
+  const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom)
+  const { data: session } = useSession();
+  const [error, setError] = useState<string | undefined>()
+  const [welcomeModalSeen, setWelcomeModalSeen] = useAtom(welcomeModalAtom);
+  const firstTimeUser = !localOpenAiApiKey && !session?.user;
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error, {
+        theme: "dark",
+        autoClose: 5000
+      })
+      setTimeout(() => setError(undefined), 5000)
+    }
+  }, [error])
+
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const onMessage = (message: ChatMessage) => {
+    setMessages((messages) => [...messages, message]);
+    checkForUserFiles();
+  };
+  const { evo, proxyEmbeddingApi, proxyLlmApi } = useEvo(onMessage, setError);
+  const [userWorkspace] = useAtom(userWorkspaceAtom);
+  const [, setCapReached] = useAtom(capReachedAtom);
+
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [accountModal, setAccountModalOpen] = useState(false);
-  const [dojoError, setDojoError] = useState<unknown | undefined>(undefined);
-  const [evo, setEvo] = useState<Evo | undefined>(undefined);
-  const [proxyEmbeddingApi, setProxyEmbeddingApi] = useState<ProxyEmbeddingApi | undefined>(undefined);
-  const [proxyLlmApi, setProxyLlmApi] = useState<ProxyLlmApi | undefined>(undefined);
   const [userFiles, setUserFiles] = useState<InMemoryFile[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<InMemoryFile[]>([]);
-  const [userWorkspace, setUserWorkspace] = useState<
-    InMemoryWorkspace | undefined
-  >(undefined);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [capReached, setCapReached] = useState<boolean>(false)
-  const { data: session } = useSession()
   const [awaitingAuth, setAwaitingAuth] = useState<boolean>(false);
-  const [firstTimeUser, setFirstTimeUser] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (window.innerWidth <= 1024) {
-      setSidebarOpen(false);
-    }
-    const openAiApiKey = localStorage.getItem("openai-api-key");
-    const allowTelemetry = localStorage.getItem("allow-telemetry") === "true" ? true : false;
-    const complete = !!openAiApiKey;
-    setDojoConfig({
-      openAiApiKey,
-      allowTelemetry,
-      loaded: true,
-      complete
-    });
-  }, []);
-
-  useEffect(() => {
-    const firstVisit = localStorage.getItem(WELCOME_MODAL_SEEN_STORAGE_KEY);
-    if (!firstVisit) {
-      localStorage.setItem(WELCOME_MODAL_SEEN_STORAGE_KEY, "true");
-      setWelcomeModalOpen(true);
-    }
-  }, [])
 
   function checkForUserFiles() {
     if (!evo || !userWorkspace) {
       return;
     }
-    updateWorkspaceFiles(userWorkspace, userFiles, setUserFiles);
-  }
 
-  function onMessage(message: ChatMessage) {
-    setMessages((messages) => [...messages, message]);
-    checkForUserFiles();
+    //eslint-disable-next-line @typescript-eslint/no-floating-promises
+    (async () => {
+      await updateWorkspaceFiles(userWorkspace, userFiles, setUserFiles);
+    })();
   }
 
   useEffect(() => {
@@ -104,159 +65,41 @@ function Dojo() {
       return;
     }
 
-    for (const file of uploadedFiles) {
-      userWorkspace.writeFileSync(
-        file.path,
-        new TextDecoder().decode(file.content)
-      );
-    }
-
-    checkForUserFiles();
-  }, [uploadedFiles]);
-
-  const onConfigSaved = (apiKey: string, allowTelemetry: boolean) => {
-    let complete = true;
-    let openAiApiKey = apiKey;
-
-    if (!openAiApiKey) {
-      complete = false;
-      localStorage.removeItem("openai-api-key");
-    } else {
-      localStorage.setItem("openai-api-key", openAiApiKey);
-    }
-    localStorage.setItem("allow-telemetry", allowTelemetry.toString());
-
-    setDojoConfig({
-      openAiApiKey,
-      allowTelemetry,
-      loaded: true,
-      complete
-    });
-    setCapReached(false);
-    setAccountModalOpen(false);
-  };
-
-  const onDisclaimerSelect = (approve: boolean) => {
-    localStorage.setItem("allow-telemetry", approve.toString());
-    setDojoConfig({
-      ...dojoConfig,
-      allowTelemetry: approve
-    });
-  };
-
-  useEffect(() => {
+    //eslint-disable-next-line @typescript-eslint/no-floating-promises
     (async () => {
-      setDojoError(undefined);
-      try {
-        const browserLogger = new BrowserLogger({
-          onLog: (message: string) => {
-            onMessage({
-              user: "evo",
-              title: message,
-            });
-          },
-        });
-        const logger = new Logger([browserLogger, new ConsoleLogger()], {
-          promptUser: () => Promise.resolve("N/A"),
-        });
-
-        const scriptsWorkspace = createInBrowserScripts();
-        const scripts = new Scripts(scriptsWorkspace);
-
-        // Point by default to GPT-4 unless the given api key's account doesn't support it
-        let model = "gpt-4"
-        if (dojoConfig.openAiApiKey) {
-          try {
-            model = await checkLlmModel(dojoConfig.openAiApiKey as string, model);
-          } catch (e: any) {
-            if (e.message.includes("Incorrect API key provided")) {
-              setDojoError("Open AI API key is not correct. Please make sure it has the correct format")
-              return
-            }
-          }
-        }
-
-        const env = new Env({
-          OPENAI_API_KEY: dojoConfig.openAiApiKey || " ",
-          GPT_MODEL: model,
-          CONTEXT_WINDOW_TOKENS: "8000",
-          MAX_RESPONSE_TOKENS: "2000",
-        });
-
-        let llm: LlmApi;
-        let embedding: EmbeddingApi;
-
-        if (dojoConfig.openAiApiKey) {
-          llm = new OpenAILlmApi(
-            env.OPENAI_API_KEY,
-            env.GPT_MODEL as LlmModel,
-            env.CONTEXT_WINDOW_TOKENS,
-            env.MAX_RESPONSE_TOKENS,
-            logger
-          );
-          embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base)
-        } else {
-          llm = new ProxyLlmApi(
-            env.GPT_MODEL as LlmModel,
-            env.CONTEXT_WINDOW_TOKENS,
-            env.MAX_RESPONSE_TOKENS,
-            () => setCapReached(true)
-          );
-          setProxyLlmApi(llm as ProxyLlmApi);
-          embedding = new ProxyEmbeddingApi(cl100k_base, () => setCapReached(true));
-          setProxyEmbeddingApi(embedding as ProxyEmbeddingApi);
-        }
-
-        let workspace = userWorkspace;
-
-        if (!workspace) {
-          workspace = new InMemoryWorkspace();
-          setUserWorkspace(workspace);
-        }
-
-        const internals = new SubWorkspace(".evo", workspace);
-
-        const chat = new EvoChat(cl100k_base);
-        setEvo(
-          new Evo(
-            new AgentContext(
-              llm,
-              embedding,
-              chat,
-              logger,
-              workspace,
-              internals,
-              env,
-              scripts
-            )
+      await Promise.all(
+        uploadedFiles.map((file) =>
+          userWorkspace.writeFile(
+            file.path,
+            new TextDecoder().decode(file.content)
           )
-        );
-      } catch (err) {
-        setDojoError(err);
-      }
+        )
+      );
+
+      checkForUserFiles();
     })();
-  }, [dojoConfig]);
+  }, [uploadedFiles]);
 
   const handlePromptAuth = async (message: string) => {
     if (awaitingAuth) {
       return false;
     }
 
-    if (!dojoConfig.openAiApiKey && !session?.user.email) {
-      setFirstTimeUser(true);
+    if (firstTimeUser) {
       setAccountModalOpen(true);
       return false;
-    } else {
-      setFirstTimeUser(false);
     }
 
-    const subsidize = !dojoConfig.openAiApiKey;
+    const subsidize = !localOpenAiApiKey;
 
     setAwaitingAuth(true);
     const goalId = await AuthProxy.checkGoal(
-      dojoConfig.allowTelemetry ? message : "<redacted>",
+      allowTelemetry ? message : "<redacted>",
       subsidize,
-      () => setCapReached(true)
+      () => {
+        setCapReached(true);
+        setAccountModalOpen(true);
+      }
     );
     setAwaitingAuth(false);
 
@@ -266,27 +109,28 @@ function Dojo() {
 
     proxyLlmApi?.setGoalId(goalId);
     proxyEmbeddingApi?.setGoalId(goalId);
-    return true
-  }
+    return true;
+  };
 
   return (
     <>
       <div className="flex h-full bg-neutral-800 bg-landing-bg bg-repeat text-center text-neutral-400">
-        {(accountModal || capReached) && (
+        {accountModal && (
           <AccountConfig
-            apiKey={dojoConfig.openAiApiKey}
-            allowTelemetry={dojoConfig.allowTelemetry}
-            onConfigSaved={onConfigSaved}
-            capReached={capReached}
+            apiKey={localOpenAiApiKey}
+            allowTelemetry={allowTelemetry}
+            onClose={() => {
+              setAccountModalOpen(false);
+            }}
             firstTimeUser={firstTimeUser}
+            setError={setError}
           />
         )}
-        <div className={clsx(
-          "relative w-full lg:w-auto lg:max-w-md",
-          {
+        <div
+          className={clsx("relative w-full lg:w-auto lg:max-w-md", {
             hidden: !sidebarOpen,
-          },
-        )}>
+          })}
+        >
           <Sidebar
             onSidebarToggleClick={() => {
               setSidebarOpen(!sidebarOpen);
@@ -296,24 +140,19 @@ function Dojo() {
             onUploadFiles={setUploadedFiles}
           />
         </div>
-        <div className={clsx("relative grow border-l-2 border-neutral-700", {
-          "max-lg:hidden": sidebarOpen,
-        })}>
+        <div
+          className={clsx("relative grow border-l-2 border-neutral-700", {
+            "max-lg:hidden": sidebarOpen,
+          })}
+        >
           <>
-            {dojoError ? <DojoError
-                error={dojoError}
-                sidebarOpen={sidebarOpen}
-                onSidebarToggleClick={() => {
-                  setSidebarOpen(!sidebarOpen)
-                }}
-              /> : evo && (
+          {evo && (
               <Chat
                 evo={evo}
                 onMessage={onMessage}
                 messages={messages}
                 sidebarOpen={sidebarOpen}
-                overlayOpen={welcomeModalOpen || accountModal}
-                onDisclaimerSelect={onDisclaimerSelect}
+                overlayOpen={!welcomeModalSeen || accountModal}
                 onSidebarToggleClick={() => {
                   setSidebarOpen(!sidebarOpen);
                 }}
@@ -324,7 +163,10 @@ function Dojo() {
           </>
         </div>
       </div>
-      <WelcomeModal isOpen={welcomeModalOpen} onClose={() => setWelcomeModalOpen(false)} />
+      <WelcomeModal
+        isOpen={!welcomeModalSeen}
+        onClose={() => setWelcomeModalSeen(true)}
+      />
     </>
   );
 }

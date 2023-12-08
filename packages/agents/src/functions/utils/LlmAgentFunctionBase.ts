@@ -43,7 +43,7 @@ export abstract class LlmAgentFunctionBase<TParams> extends AgentFunctionBase<TP
         }
       }
 
-      response.value && context.logger.info(response.value.title);
+      response.value && (await context.logger.info(response.value.title));
     }
   }
 }

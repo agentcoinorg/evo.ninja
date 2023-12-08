@@ -84,19 +84,19 @@ describe('Dev Agent Test Suite', () => {
   }
 
   async function runAgent(agent: ScripterAgent, goal: string, debugLog: DebugLog) {
-    debugLog.goalStart(goal);
+    await debugLog.goalStart(goal);
     const iterator = agent.run({ goal });
 
     while (true) {
-      debugLog.stepStart();
+      await debugLog.stepStart();
       const response = await iterator.next();
-      debugLog.stepEnd();
+      await debugLog.stepEnd();
 
       if (response.done) {
         if (!response.value.ok) {
-          debugLog.stepError(response.value.error ?? "Unknown error");
+          await debugLog.stepError(response.value.error ?? "Unknown error");
         } else {
-          debugLog.stepLog(JSON.stringify(response.value.value));
+          await debugLog.stepLog(JSON.stringify(response.value.value));
         }
         return response;
       }
@@ -112,7 +112,7 @@ describe('Dev Agent Test Suite', () => {
     );
 
     expect(response.value.ok).toBe(true);
-    const sourceCode = agent.workspace.readFileSync("output.csv");
+    const sourceCode = await agent.workspace.readFile("output.csv");
     expect(sourceCode).toBeTruthy();
   });
 });
