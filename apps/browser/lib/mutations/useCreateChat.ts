@@ -1,17 +1,20 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { createSupabaseClient } from "../supabase/supabase"
+import { Chat } from "../queries/useChats"
 
 export const useCreateChat = () => {
   const { data: session } = useSession()
   const queryClient = useQueryClient()
   
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (chatId: string) => {
       const supabase = createSupabaseClient(session?.supabaseAccessToken as string)
       const { data, error } = await supabase
         .from("chats")
-        .insert({})
+        .insert({
+          id: chatId
+        })
         .select("id")
 
       if (error) {
@@ -20,8 +23,18 @@ export const useCreateChat = () => {
 
       return data[0]
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['chats', session?.user?.email] })
+    onMutate: async (chatId: string) => {
+      await queryClient.cancelQueries({ queryKey: ['chats'] })
+      queryClient.setQueryData<Chat[]>(['chats'], (old) => [...(old ?? []), {
+        id: chatId,
+        messages: [],
+        logs: [],
+        variables: new Map(),
+        created_at: new Date().toISOString()
+      }])
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['chats'] })
     },
   })
 }

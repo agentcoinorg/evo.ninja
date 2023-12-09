@@ -1,3 +1,4 @@
+import { v4 as uuid } from "uuid";
 import { useCreateChat } from "@/lib/mutations/useCreateChat"
 import { useChats } from "@/lib/queries/useChats"
 import clsx from "clsx"
@@ -22,7 +23,8 @@ export default function ChatList() {
         className="inline-block h-9 cursor-pointer rounded-xl border-none bg-orange-600 px-6 py-2.5 text-center text-neutral-900 shadow-md outline-none transition-all hover:bg-orange-500" 
         title="New chat" 
         onClick={async () => {
-          const createdChat = await createChat()
+          const id = uuid()
+          const createdChat = await createChat(id)
           router.push(`/chat/${createdChat.id}`)
         }}
       >

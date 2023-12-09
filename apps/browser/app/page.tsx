@@ -1,5 +1,6 @@
 "use client";
 
+import { v4 as uuid } from "uuid";
 import Chat, { ChatMessage } from "@/components/Chat";
 import { examplePrompts } from "@/lib/examplePrompts";
 import { useCheckForUserFiles } from "@/lib/hooks/useCheckForUserFiles";
@@ -113,7 +114,8 @@ function Dojo() {
     }
 
     if (!currentChat?.messages.length && isAuthenticatedRef.current) {
-      const createdChat = await createChat()
+      const chatId = uuid()
+      const createdChat = await createChat(chatId)
 
       if (!createdChat) {
         return;
