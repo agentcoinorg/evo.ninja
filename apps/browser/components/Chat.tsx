@@ -42,10 +42,8 @@ export interface ChatProps {
   evo: Evo;
   onMessage: (message: ChatMessage) => void;
   messages: ChatMessage[];
-  sidebarOpen: boolean;
   overlayOpen: boolean;
   landingPage: boolean;
-  onSidebarToggleClick: () => void;
   onUploadFiles: (files: InMemoryFile[]) => void;
   handlePromptAuth: (message: string) => Promise<boolean>;
 }
@@ -56,10 +54,8 @@ const Chat: React.FC<ChatProps> = ({
   evo,
   onMessage,
   messages,
-  sidebarOpen,
   overlayOpen,
   landingPage,
-  onSidebarToggleClick,
   onUploadFiles,
   handlePromptAuth,
 }: ChatProps) => {
@@ -266,7 +262,7 @@ const Chat: React.FC<ChatProps> = ({
 
   return (
     <div
-      className={clsx("flex h-full flex-col", {
+      className={clsx("flex h-full w-full flex-col px-5", {
         "items-center justify-center": isLandingPage,
       })}
     >
@@ -283,7 +279,7 @@ const Chat: React.FC<ChatProps> = ({
           <div
             ref={listContainerRef}
             onScroll={handleScroll}
-            className="flex-1 items-center space-y-6 overflow-auto p-5 text-left"
+            className="w-full flex-1 items-center space-y-6 overflow-auto p-5 text-left"
           >
             {messages.map((msg, index) => {
               return (
@@ -375,10 +371,8 @@ const Chat: React.FC<ChatProps> = ({
       )}
       <div
         className={clsx(
-          "flex space-y-4",
-          isLandingPage
-            ? "flex-col-reverse"
-            : "mx-auto w-full max-w-[56rem] flex-col"
+          "flex w-full space-y-4",
+          isLandingPage ? "flex-col-reverse" : "mx-auto max-w-[56rem] flex-col"
         )}
       >
         {showPrompts && (
@@ -388,15 +382,15 @@ const Chat: React.FC<ChatProps> = ({
                 Not sure where to start? Try asking one of these:
               </h2>
             )}
-            <div className="flex w-full max-w-[56rem] flex-wrap items-center justify-center space-x-1 space-y-1 self-center">
+            <div className="flex w-full max-w-[56rem] flex-wrap items-center justify-center self-center">
               {examplePrompts.map((prompt, index) => (
                 <div
                   key={index}
                   className={clsx(
-                    "cursor-pointer rounded-lg border-2  bg-zinc-900/50 p-2.5 text-xs text-zinc-400 transition-all duration-300 ease-in-out hover:bg-cyan-600 hover:text-white",
+                    "m-1 cursor-pointer rounded-lg  border-2 bg-zinc-900/50 p-2.5 text-xs text-zinc-400 transition-all duration-300 ease-in-out hover:bg-cyan-600 hover:text-white",
                     isLandingPage
-                      ? "whitespace-nowrap border-zinc-700"
-                      : "m-1 w-[calc(100%-1.5rem)] border-zinc-800"
+                      ? "border-zinc-700"
+                      : "w-[calc(100%-1.5rem)] border-zinc-800"
                   )}
                   onClick={() => handleSamplePromptClick(prompt)}
                 >
