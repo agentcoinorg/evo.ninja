@@ -5,6 +5,7 @@ import React, {
   KeyboardEvent,
   useRef,
   useCallback,
+  memo,
 } from "react";
 import { Evo } from "@evo-ninja/agents";
 import ReactMarkdown from "react-markdown";
@@ -261,14 +262,14 @@ const Chat: React.FC<ChatProps> = ({
   }, [messages, isAtBottom]);
 
   return (
-    <div
+    <main
       className={clsx("flex h-full w-full flex-col px-5", {
         "items-center justify-center": isLandingPage,
       })}
     >
       {isLandingPage ? (
         <div className="flex flex-col items-center space-y-2">
-          <Logo wordmark={false} className="h-16 !min-w-[4rem]" />
+          <Logo wordmark={false} className="w-16" />
           <h1 className="text-2xl font-bold">What's your goal today?</h1>
         </div>
       ) : (
@@ -445,8 +446,8 @@ const Chat: React.FC<ChatProps> = ({
       >
         <Image alt="Support" src="/questionmark.svg" width={12} height={12} />
       </a>
-    </div>
+    </main>
   );
 };
 
-export default Chat;
+export default memo(Chat);

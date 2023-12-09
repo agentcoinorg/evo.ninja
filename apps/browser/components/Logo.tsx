@@ -1,4 +1,5 @@
 import { clsx } from "clsx";
+import { memo } from "react";
 
 type LogoType = {
   wordmark?: boolean;
@@ -317,4 +318,4 @@ const Logo = ({ wordmark = true, className, logoClassName }: LogoType) => {
   );
 };
 
-export default Logo;
+export default memo(Logo);

@@ -3,8 +3,6 @@ import Script from "next/script";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import NextAuthProvider from "@/components/NextSessionProvider";
 import { Ubuntu_FONT } from "@/lib/fonts";
-import { Provider } from "jotai";
-import { ToastContainer } from "react-toastify";
 
 import "../styles/globals.css";
 import "@fortawesome/fontawesome-svg-core/styles.css";

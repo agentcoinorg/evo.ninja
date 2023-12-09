@@ -4,9 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useAtom } from "jotai";
 
 import { InMemoryFile } from "@nerfzael/memory-fs";
-import clsx from "clsx";
 import Sidebar from "@/components/Sidebar";
-import CloseSidebarIcon from "@/components/CloseSidebarIcon";
 import Chat, { ChatMessage } from "@/components/Chat";
 import { updateWorkspaceFiles } from "@/lib/updateWorkspaceFiles";
 import WelcomeModal from "@/components/WelcomeModal";

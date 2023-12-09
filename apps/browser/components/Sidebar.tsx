@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { memo, useEffect, useRef, useState } from "react";
 import Logo from "./Logo";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
@@ -63,12 +63,12 @@ const Sidebar = ({ userFiles, onUploadFiles }: SidebarProps) => {
 
   return (
     <>
-      {isMobile ? (
+      {isMobile && (
         <>
           {sidebarOpen && (
             <div className="animate-fade-in fixed bottom-0 left-0 right-0 top-0 z-10 bg-zinc-900/50 opacity-0 backdrop-blur" />
           )}
-          <div
+          <header
             className={clsx(
               "absolute left-0 right-0 top-0 z-20 m-4 flex h-[52px] items-center",
               sidebarOpen ? "justify-end" : "justify-between"
@@ -84,24 +84,12 @@ const Sidebar = ({ userFiles, onUploadFiles }: SidebarProps) => {
             >
               {sidebarOpen ? <X size={32} /> : <List size={32} />}
             </Button>
-          </div>
+          </header>
         </>
-      ) : (
-        <button
-          className="absolute -right-8 top-1/2 z-10 cursor-pointer"
-          onMouseEnter={() => setHovering(true)}
-          onMouseLeave={() => setHovering(false)}
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-        >
-          <CloseSidebarIcon
-            hoveringSidebarButton={hoveringSidebarButton}
-            sidebarOpen={sidebarOpen}
-          />
-        </button>
       )}
-      <div
+      <aside
         className={clsx(
-          "overflow-y fixed bottom-0 left-0 top-0 z-10 h-full border-r-2 bg-zinc-900 transition-all duration-300 ease-in-out md:relative",
+          "fixed bottom-0 left-0 top-0 z-10 h-full border-r-2 bg-zinc-900 transition-all duration-300 ease-in-out md:relative",
           sidebarOpen
             ? "w-[calc(100%-72px)] md:w-[290px] md:min-w-[290px]"
             : "w-0 min-w-0 border-none",
@@ -112,8 +100,9 @@ const Sidebar = ({ userFiles, onUploadFiles }: SidebarProps) => {
           className={clsx(
             "flex h-full flex-col justify-between transition-opacity",
             {
-              "opacity-50 delay-0": sidebarOpen && hoveringSidebarButton,
-              "hidden delay-0 duration-0": !sidebarOpen,
+              "opacity-50 delay-0 duration-300":
+                sidebarOpen && hoveringSidebarButton,
+              "pointer-events-none opacity-0 delay-0 duration-0": !sidebarOpen,
             }
           )}
         >
@@ -122,7 +111,9 @@ const Sidebar = ({ userFiles, onUploadFiles }: SidebarProps) => {
             style={{ animationDelay: sidebarOpen ? "150ms" : "0ms" }}
           >
             <div className="flex h-full flex-col space-y-6">
-              <Logo className="w-[162px] cursor-pointer p-4 transition-opacity hover:opacity-50" />
+              <header>
+                <Logo className="w-[162px] cursor-pointer p-4 transition-opacity hover:opacity-50" />
+              </header>
               <div className="space-y-1 px-2">
                 <div className="flex w-full items-center justify-between space-x-1 px-3">
                   <div className="text-xs uppercase tracking-widest text-zinc-500">
@@ -196,9 +187,22 @@ const Sidebar = ({ userFiles, onUploadFiles }: SidebarProps) => {
             </div>
           </div>
         </div>
-      </div>
+        {!isMobile && (
+          <button
+            className="absolute -right-8 top-1/2 z-10 cursor-pointer"
+            onMouseEnter={() => setHovering(true)}
+            onMouseLeave={() => setHovering(false)}
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+          >
+            <CloseSidebarIcon
+              hoveringSidebarButton={hoveringSidebarButton}
+              sidebarOpen={sidebarOpen}
+            />
+          </button>
+        )}
+      </aside>
     </>
   );
 };
 
-export default Sidebar;
+export default memo(Sidebar);
