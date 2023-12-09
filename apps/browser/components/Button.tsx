@@ -1,5 +1,6 @@
 import clsx from "clsx";
-import { ButtonHTMLAttributes, PropsWithChildren, ReactNode } from "react";
+import { Popover } from "@headlessui/react";
+import { ButtonHTMLAttributes, PropsWithChildren, useState } from "react";
 import Tooltip, { TooltipProps } from "./Tooltip";
 
 interface ButtonProps
@@ -22,6 +23,7 @@ const Button = ({
   disabled,
   ...props
 }: ButtonProps) => {
+  const [showTooltip, setShowTooltip] = useState<boolean>(false);
   const hierarchyClasses = {
     primary: clsx(
       "bg-button border-cyan-300 bg-gradient-to-b from-cyan-300 via-cyan-600 to-cyan-800 bg-bottom text-white",
@@ -49,22 +51,27 @@ const Button = ({
   const variantClass = variant ? variantClasses[variant] : null;
 
   return (
-    <button
-      className={clsx(
-        "text-shadow-md relative inline-flex items-center justify-center space-x-2 rounded-md border transition-all duration-500",
-        hierarchyClasses[hierarchy],
-        sizeClasses[size],
-        variantClass,
-        disabled ? "cursor-default opacity-60" : "cursor-pointer",
-        className
-      )}
-      {...props}
-    >
-      {children}
-      {helperContent && (
-        <Tooltip placement={helperPlacement} content={helperContent} />
-      )}
-    </button>
+    <Popover className="relative">
+      <Popover.Button
+        // as="button"
+        className={clsx(
+          "text-shadow-md relative inline-flex items-center justify-center space-x-2 rounded-md border transition-all duration-500",
+          hierarchyClasses[hierarchy],
+          sizeClasses[size],
+          variantClass,
+          disabled ? "cursor-default opacity-60" : "cursor-pointer",
+          className
+        )}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+        {...props}
+      >
+        {children}
+        {helperContent && showTooltip && (
+          <Tooltip placement={helperPlacement} content={helperContent} />
+        )}
+      </Popover.Button>
+    </Popover>
   );
 };
 
