@@ -1,54 +1,53 @@
 drop table roles CASCADE;
+drop table chats CASCADE;
+drop table messages CASCADE;
+
+CREATE TABLE "public"."chats" (
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+  "user_id" "uuid" default auth.uid(),
+  PRIMARY KEY ("id"),
+  FOREIGN KEY ("user_id") REFERENCES "public"."users"("id")
+);
+
+alter table "public"."chats" enable row level security;
 
 create table "public"."logs" (
-    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-    "created_at" timestamp with time zone not null default now(),
-    "title" text not null,
-    "content" text,
-    "chat_id" uuid not null,
-    "user" text not null
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "created_at" timestamp with time zone not null default now(),
+  "title" text not null,
+  "content" text,
+  "chat_id" uuid not null,
+  "user" text not null,
+  FOREIGN KEY ("chat_id") REFERENCES "public"."chats"("id")
 );
 
 alter table "public"."logs" enable row level security;
 
 create table "public"."variables" (
-    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-    "key" text not null,
-    "value" text not null,
-    "chat_id" uuid not null
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "key" text not null,
+  "value" text not null,
+  "chat_id" uuid not null,
+  FOREIGN KEY ("chat_id") REFERENCES "public"."chats"("id")
 );
 
 alter table "public"."variables" enable row level security;
 
-alter table "public"."chats" alter column "id" drop identity;
-alter table "public"."chats" add column "new_id" uuid;
-update "public"."chats" set "new_id" = uuid_generate_v4();
-alter table "public"."chats" drop column "id" cascade;
-alter table "public"."chats" rename column "new_id" to "id";
-alter table "public"."chats" add primary key ("id");
-alter table "public"."chats" alter column "id" set default gen_random_uuid();
-
-
-alter table "public"."messages" alter column "id" drop identity;
-alter table "public"."messages" add column "new_id" uuid;
-update "public"."messages" set "new_id" = uuid_generate_v4();
-alter table "public"."messages" drop column "id" cascade;
-alter table "public"."messages" rename column "new_id" to "id";
-alter table "public"."messages" add primary key ("id");
-alter table "public"."messages" alter column "id" set default gen_random_uuid();
-
-
-alter table "public"."messages" add column "temporary" boolean not null;
-
-alter table "public"."messages" add column "tool_call_id" text;
-
-alter table "public"."messages" add column "tool_calls" json;
-
-alter table "public"."messages" alter column "role" type text using "role"::text;
-alter table "public"."messages" drop column "chat_id";
-alter table "public"."messages" add column "chat_id" uuid not null;
-
-alter table "public"."messages" add constraint "messages_chat_id_fkey" FOREIGN KEY (chat_id) REFERENCES chats(id) not valid;
+CREATE TABLE "public"."messages" (
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+  "chat_id" uuid NOT NULL,
+  "content" "text",
+  "name" "text",
+  "function_call" "json",
+  "temporary" boolean NOT NULL,
+  "tool_call_id" "text",
+  "tool_calls" json,
+  "role" "text" NOT NULL,
+  PRIMARY KEY ("id"),
+  FOREIGN KEY ("chat_id") REFERENCES "public"."chats"("id")
+);
 
 CREATE UNIQUE INDEX logs_pkey ON public.logs USING btree (id);
 
@@ -58,13 +57,12 @@ alter table "public"."logs" add constraint "logs_pkey" PRIMARY KEY using index "
 
 alter table "public"."variables" add constraint "variables_pkey" PRIMARY KEY using index "variables_pkey";
 
-alter table "public"."logs" add constraint "logs_chat_id_fkey" FOREIGN KEY (chat_id) REFERENCES chats(id) not valid;
-
 alter table "public"."logs" validate constraint "logs_chat_id_fkey";
 
-alter table "public"."variables" add constraint "variables_chat_id_fkey" FOREIGN KEY (chat_id) REFERENCES chats(id) not valid;
-
 alter table "public"."variables" validate constraint "variables_chat_id_fkey";
+
+CREATE POLICY "Users can only manage their own chats" ON "public"."chats"
+  USING (("user_id" = "auth"."uid"())) WITH CHECK (("user_id" = "auth"."uid"()));
 
 CREATE POLICY "Users can only manage their own messages" ON "public"."messages" USING ((EXISTS ( SELECT 1
    FROM "public"."chats"
@@ -83,5 +81,3 @@ CREATE POLICY "Users can only manage their own variables" ON "public"."variables
   WHERE (("chats"."id" = "variables"."chat_id") AND ("chats"."user_id" = "auth"."uid"()))))) WITH CHECK ((EXISTS ( SELECT 1
    FROM "public"."chats"
   WHERE (("chats"."id" = "variables"."chat_id") AND ("chats"."user_id" = "auth"."uid"())))));
-
-alter table "public"."chats" alter column "user_id" set default auth.uid();
