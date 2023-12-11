@@ -15,7 +15,7 @@ import { ChatLogType, ChatMessage as AgentMessage } from "@evo-ninja/agents";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 
-function Dojo() {
+function Dojo({ params }: { params: { id?: string } }) {
   const { mutateAsync: createChat } = useCreateChat()
   const { mutateAsync: addMessages } = useAddMessages()
   const { mutateAsync: addChatLog } = useAddChatLog()
@@ -31,7 +31,7 @@ function Dojo() {
   const [inMemoryLogs, setInMemoryLogs] = useState<ChatMessage[]>([])
   
   const isAuthenticatedRef = useRef<boolean>(false);
-  const currentChat = chats?.find(c => c.id === chatIdRef.current)
+  const currentChat = chats?.find(c => c.id === (chatIdRef.current ?? params.id))
   const logs = currentChat?.logs ?? []
   const logsToShow = isAuthenticatedRef.current ? logs : inMemoryLogs;
 
@@ -122,6 +122,8 @@ function Dojo() {
       }
 
       chatIdRef.current = createdChat.id
+
+      window.history.replaceState(null, "Chat", `/chat/${chatId}`);
     }
     await onChatLog({
       title: newMessage,
@@ -135,7 +137,7 @@ function Dojo() {
   return (
     <Chat
       messages={logsToShow}
-      samplePrompts={logsToShow.length ? undefined: examplePrompts}
+      samplePrompts={logsToShow.length || params.id ? undefined: examplePrompts}
       isPaused={isPaused}
       isRunning={isRunning}
       isSending={isSending}

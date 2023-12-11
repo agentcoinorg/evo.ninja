@@ -34,6 +34,7 @@ export default function ChatList() {
         <div className="flex flex-col gap-2 text-start">
           {mappedChats?.map(({name, id}) => (
             <span
+              key={id}
               onClick={() => router.push(`/chat/${id}`)}
               className={clsx(
                 "text-ellipsis whitespace-nowrap overflow-hidden p-2.5 cursor-pointer rounded border-2 border-neutral-500 hover:border-orange-600",
