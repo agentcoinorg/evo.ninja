@@ -20,38 +20,36 @@ function Dojo({ params }: { params: { id?: string } }) {
   const { mutateAsync: addMessages } = useAddMessages()
   const { mutateAsync: addChatLog } = useAddChatLog()
   const { mutateAsync: addVariable } = useAddVariable()
+  
+  const { handlePromptAuth } = useHandleAuth();
   const checkForUserFiles = useCheckForUserFiles();
 
   const { status: sessionStatus } = useSession()
   const { data: chats } = useChats()
 
   const chatIdRef = useRef<string | undefined>()
+  const isAuthenticatedRef = useRef<boolean>(false);
   const inMemoryLogsRef = useRef<ChatMessage[]>([])
 
   const [inMemoryLogs, setInMemoryLogs] = useState<ChatMessage[]>([])
   
-  const isAuthenticatedRef = useRef<boolean>(false);
-  const currentChat = chats?.find(c => c.id === (chatIdRef.current ?? params.id))
+  const currentChatId = params.id ?? chatIdRef.current
+  const currentChat = chats?.find(c => c.id === currentChatId)
   const logs = currentChat?.logs ?? []
   const logsToShow = isAuthenticatedRef.current ? logs : inMemoryLogs;
-
-  useEffect(() => {
-    if (sessionStatus === "authenticated") {
-      isAuthenticatedRef.current = true
-    }
-  }, [sessionStatus])
+  const showExamplePrompts = logsToShow.length || params.id
 
   const onMessagesAdded = async (type: ChatLogType, messages: AgentMessage[]) => {
     if (!isAuthenticatedRef.current) {
       return;
     }
 
-    if (!chatIdRef.current) {
+    if (!currentChatId) {
       throw new Error("No ChatID to add messages")
     }
 
     await addMessages({
-      chatId: chatIdRef.current,
+      chatId: currentChatId,
       messages,
       type
     })
@@ -62,12 +60,12 @@ function Dojo({ params }: { params: { id?: string } }) {
       return;
     }
 
-    if (!chatIdRef.current) {
+    if (!currentChatId) {
       throw new Error("No ChatID to add variable")
     }
 
     await addVariable({
-      chatId: chatIdRef.current,
+      chatId: currentChatId,
       key,
       value
     })
@@ -82,28 +80,12 @@ function Dojo({ params }: { params: { id?: string } }) {
       return;
     }
 
-    if (!chatIdRef.current) {
+    if (!currentChatId) {
       throw new Error("No ChatID to add chat log")
     }
 
-    await addChatLog({ chatId: chatIdRef.current, log })
+    await addChatLog({ chatId: currentChatId, log })
   }
-
-  const {
-    isRunning,
-    isPaused,
-    isSending,
-    isStopped,
-    start,
-    onContinue,
-    onPause,
-    setIsSending,
-  } = useEvo({
-    onChatLog,
-    onMessagesAdded,
-    onVariableSet
-  });
-  const { handlePromptAuth } = useHandleAuth();
 
   const handleSend = async (newMessage: string) => {
     if (!newMessage) return;
@@ -134,10 +116,31 @@ function Dojo({ params }: { params: { id?: string } }) {
     start(newMessage);
   };
 
+  const {
+    isRunning,
+    isPaused,
+    isSending,
+    isStopped,
+    start,
+    onContinue,
+    onPause,
+    setIsSending,
+  } = useEvo({
+    onChatLog,
+    onMessagesAdded,
+    onVariableSet
+  });
+
+  useEffect(() => {
+    if (sessionStatus === "authenticated") {
+      isAuthenticatedRef.current = true
+    }
+  }, [sessionStatus])
+
   return (
     <Chat
       messages={logsToShow}
-      samplePrompts={logsToShow.length || params.id ? undefined: examplePrompts}
+      samplePrompts={showExamplePrompts? examplePrompts: undefined}
       isPaused={isPaused}
       isRunning={isRunning}
       isSending={isSending}
