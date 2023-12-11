@@ -37,7 +37,7 @@ export const useAddVariable = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['chats', session?.user?.email] })
+      queryClient.invalidateQueries({ queryKey: ['chats'] })
     },
   })
 }

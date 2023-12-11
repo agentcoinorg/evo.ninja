@@ -111,7 +111,7 @@ export const useChats = () => {
   const { data: session } = useSession()
 
   return useQuery({
-    queryKey: ['chats', session?.user?.email],
+    queryKey: ['chats'],
     enabled: !!session?.user?.email,
     queryFn: async () => {
       const supabase = createSupabaseClient(session?.supabaseAccessToken as string)

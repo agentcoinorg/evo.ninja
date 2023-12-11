@@ -1,5 +1,6 @@
 "use client";
 
+import { v4 as uuid } from "uuid";
 import Chat, { ChatMessage } from "@/components/Chat";
 import CloseSidebarIcon from "@/components/CloseSidebarIcon";
 import Sidebar from "@/components/Sidebar";
@@ -124,7 +125,8 @@ function Dojo() {
     }
 
     if (!currentChat?.messages.length && isAuthenticatedRef.current) {
-      const createdChat = await createChat();
+      const chatId = uuid()
+      const createdChat = await createChat(chatId)
 
       if (!createdChat) {
         return;
