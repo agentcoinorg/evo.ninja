@@ -1,12 +1,12 @@
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-import { createSupabaseClient } from "@/lib/api/utils/supabase";
+import { createAdminSupabaseClient } from "@/lib/api/utils/supabase";
 import { getAuthOptions } from "@/lib/api/authOptions";
 
 const GOALS_PER_DAY_CAP = 555;
 
 export async function POST(request: Request) {
-  const supabase = createSupabaseClient();
+  const supabase = createAdminSupabaseClient();
   const currentDate = new Date().toISOString();
   const session = await getServerSession(getAuthOptions());
   const email = session?.user?.email;

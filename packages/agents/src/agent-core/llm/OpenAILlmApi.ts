@@ -22,11 +22,13 @@ export class OpenAILlmApi implements LlmApi {
     private _defaultMaxTokens: number,
     private _defaultMaxResponseTokens: number,
     private _logger: Logger,
-    private _maxRateLimitRetries: number = 5
+    baseURL?: string,
+    private _maxRateLimitRetries: number = 5,
   ) {
     this._api = new OpenAIApi({
       apiKey: this._apiKey,
-      dangerouslyAllowBrowser: true
+      dangerouslyAllowBrowser: true,
+      baseURL: baseURL
     });
   }
 

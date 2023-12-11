@@ -19,39 +19,36 @@ import { ChatLogType, ChatMessage as AgentMessage } from "@evo-ninja/agents";
 import { useAtom } from "jotai";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { errorAtom } from "@/lib/store";
 
-function Dojo() {
+function Dojo({ params }: { params: { id?: string } }) {
   const [welcomeModalSeen, setWelcomeModalSeen] = useAtom(welcomeModalAtom);
 
-  const { mutateAsync: createChat } = useCreateChat();
-  const { mutateAsync: addMessages } = useAddMessages();
-  const { mutateAsync: addChatLog } = useAddChatLog();
-  const { mutateAsync: addVariable } = useAddVariable();
+  const { mutateAsync: createChat } = useCreateChat()
+  const { mutateAsync: addMessages } = useAddMessages()
+  const { mutateAsync: addChatLog } = useAddChatLog()
+  const { mutateAsync: addVariable } = useAddVariable()
+  
+  const { handlePromptAuth } = useHandleAuth();
   const checkForUserFiles = useCheckForUserFiles();
+  const router = useRouter()
+  const [, setError] = useAtom(errorAtom)
 
   const { status: sessionStatus } = useSession();
   const { data: chats } = useChats();
 
-  const chatIdRef = useRef<string | undefined>();
-  const inMemoryLogsRef = useRef<ChatMessage[]>([]);
-
-  const [inMemoryLogs, setInMemoryLogs] = useState<ChatMessage[]>([]);
-
+  const chatIdRef = useRef<string | undefined>(params.id)
   const isAuthenticatedRef = useRef<boolean>(false);
-  const currentChat = chats?.find((c) => c.id === chatIdRef.current);
-  const logs = currentChat?.logs ?? [];
+  const inMemoryLogsRef = useRef<ChatMessage[]>([])
+
+  const [inMemoryLogs, setInMemoryLogs] = useState<ChatMessage[]>([])
+
+  const currentChat = chats?.find(c => c.id === chatIdRef.current)
+  const logs = currentChat?.logs ?? []
   const logsToShow = isAuthenticatedRef.current ? logs : inMemoryLogs;
 
-  useEffect(() => {
-    if (sessionStatus === "authenticated") {
-      isAuthenticatedRef.current = true;
-    }
-  }, [sessionStatus]);
-
-  const onMessagesAdded = async (
-    type: ChatLogType,
-    messages: AgentMessage[]
-  ) => {
+  const onMessagesAdded = async (type: ChatLogType, messages: AgentMessage[]) => {
     if (!isAuthenticatedRef.current) {
       return;
     }
@@ -99,23 +96,6 @@ function Dojo() {
     await addChatLog({ chatId: chatIdRef.current, log });
   };
 
-  const {
-    isRunning,
-    isPaused,
-    isSending,
-    isStopped,
-    start,
-    onContinue,
-    onPause,
-    setIsSending,
-  } = useEvo({
-    onChatLog,
-    onMessagesAdded,
-    onVariableSet,
-  });
-  const { handlePromptAuth } = useHandleAuth();
-  const [hoveringSidebarButton, setHovering] = useState<boolean>(false);
-
   const handleSend = async (newMessage: string) => {
     if (!newMessage) return;
     const authorized = await handlePromptAuth(newMessage);
@@ -132,7 +112,9 @@ function Dojo() {
         return;
       }
 
-      chatIdRef.current = createdChat.id;
+      chatIdRef.current = createdChat.id
+
+      window.history.pushState(null, "Chat", `/chat/${chatId}`);
     }
     await onChatLog({
       title: newMessage,
@@ -143,13 +125,48 @@ function Dojo() {
     start(newMessage);
   };
 
+  const {
+    isRunning,
+    isPaused,
+    isSending,
+    isStopped,
+    start,
+    onContinue,
+    onPause,
+    setIsSending,
+  } = useEvo({
+    onChatLog,
+    onMessagesAdded,
+    onVariableSet
+  });
+
+  useEffect(() => {
+    if (sessionStatus === "authenticated") {
+      isAuthenticatedRef.current = true
+    }
+  }, [sessionStatus])
+
+  useEffect(() => {
+    if (sessionStatus === "unauthenticated" && params.id) {
+      router.push('/')
+      return;
+    }
+
+    if (sessionStatus === "authenticated" && params.id && chats && !currentChat) {
+      setError(`Chat with id '${params.id}' not found`)
+      router.push('/')
+      return;
+    }
+
+  }, [sessionStatus, currentChat, params.id])
+
   return (
     <>
           {/* <div className="relative flex h-full overflow-x-clip"> */}
 
       <Chat
         messages={logsToShow}
-        samplePrompts={logsToShow.length ? undefined : examplePrompts}
+        samplePrompts={!logsToShow.length ? examplePrompts: undefined}
         isPaused={isPaused}
         isRunning={isRunning}
         isSending={isSending}

@@ -16,7 +16,7 @@ import Button from "./Button";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";
 import { useChats } from "@/lib/queries/useChats";
 import { useRouter } from "next/navigation";
-import CloseSidebarIcon from "./CloseSidebarIcon";
+import { v4 as uuid } from "uuid";
 import useWindowSize from "@/lib/hooks/useWindowSize";
 
 export interface SidebarProps {
@@ -106,7 +106,14 @@ const Sidebar = ({
                 <div className="text-xs uppercase tracking-widest text-zinc-500">
                   Recent Chats
                 </div>
-                <Button variant="icon">
+                <Button
+                  variant="icon"
+                  onClick={async () => {
+                    const id = uuid();
+                    const createdChat = await createChat(id);
+                    router.push(`/chat/${createdChat.id}`);
+                  }}
+                >
                   <NotePencil size={18} weight="bold" />
                 </Button>
               </div>
@@ -117,6 +124,7 @@ const Sidebar = ({
                       <div
                         key={i}
                         className="w-full cursor-pointer rounded p-1 text-zinc-100 transition-colors duration-300 hover:bg-zinc-800 hover:text-white"
+                        onClick={() => router.push(`/chat/${chat.id}`)}
                       >
                         {chat.name}
                       </div>
