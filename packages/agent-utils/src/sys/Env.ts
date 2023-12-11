@@ -4,6 +4,7 @@ export class Env {
   public readonly CONTEXT_WINDOW_TOKENS: number;
   public readonly MAX_RESPONSE_TOKENS: number;
   public readonly SERP_API_KEY?: string;
+  public readonly OPENAI_API_BASE_URL?: string;
 
   constructor(envVars: Record<string, string | undefined>) {
     const {
@@ -11,7 +12,8 @@ export class Env {
       GPT_MODEL,
       CONTEXT_WINDOW_TOKENS,
       MAX_RESPONSE_TOKENS,
-      SERP_API_KEY
+      SERP_API_KEY,
+      OPENAI_API_BASE_URL
     } = envVars;
 
     if (!OPENAI_API_KEY) {
@@ -33,7 +35,8 @@ export class Env {
       GPT_MODEL,
       CONTEXT_WINDOW_TOKENS: Number(CONTEXT_WINDOW_TOKENS),
       MAX_RESPONSE_TOKENS: Number(MAX_RESPONSE_TOKENS),
-      SERP_API_KEY
+      SERP_API_KEY,
+      OPENAI_API_BASE_URL
     };
   }
 }
