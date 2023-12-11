@@ -169,7 +169,7 @@ function Dojo({ params }: { params: { id?: string } }) {
   return (
     <Chat
       messages={logsToShow}
-      samplePrompts={!chatIdRef.current ? examplePrompts : undefined}
+      samplePrompts={!logsToShow.length ? examplePrompts: undefined}
       isPaused={isPaused}
       isRunning={isRunning}
       isSending={isSending}
