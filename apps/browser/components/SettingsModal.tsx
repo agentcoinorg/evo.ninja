@@ -50,7 +50,7 @@ export default function SettingsModal(props: AccountConfigProps) {
   const [apiKey, setApiKey] = useState<string>(localApiKey || "");
   const [allowTelemetry, setAllowTelemetry] = useAtom(allowTelemetryAtom);
   const [telemetry, setTelemetry] = useState(allowTelemetry);
-  const [, setError] = useState<string | undefined>();
+  const [error, setError] = useState<string | undefined>();
   const [capReached, setCapReached] = useAtom(capReachedAtom);
   const { data: session } = useSession()
   const { isOpen, onClose } = props;
@@ -82,7 +82,7 @@ export default function SettingsModal(props: AccountConfigProps) {
             ? "You've Used Your Free Prompts Today"
             : "Account Settings"
         }
-        onClose={onSave}
+        onClose={onClose}
       >
         <div className="space-y-6">
           {capReached && (
@@ -102,6 +102,7 @@ export default function SettingsModal(props: AccountConfigProps) {
             telemetry={telemetry}
             setTelemetry={setTelemetry}
             setApiKey={setApiKey}
+            error={error}
           />
 
           <div className="flex justify-end border-t-2 border-zinc-700 pt-6">

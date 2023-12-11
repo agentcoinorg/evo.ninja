@@ -108,6 +108,7 @@ export default function SignInModal(props: AccountConfigProps) {
               setTelemetry={setTelemetry}
               setApiKey={setApiKey}
               isLoggedIn={!!session.user}
+              error={error}
             />
           </div>
         ) : (

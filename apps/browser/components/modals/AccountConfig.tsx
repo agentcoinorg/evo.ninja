@@ -10,11 +10,11 @@ interface AccountConfigProps {
   telemetry: boolean
   isLoggedIn: boolean;
   showText?: boolean;
+  error: string | undefined
 }
 
 function AccountConfig(props: AccountConfigProps) {
-  const [error] = useState<string | undefined>();
-  const { isLoggedIn, showText, apiKey, setApiKey, setTelemetry, telemetry } = props;
+  const { isLoggedIn, showText, apiKey, setApiKey, setTelemetry, telemetry, error } = props;
 
   return (
     <>

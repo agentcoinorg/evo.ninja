@@ -9,20 +9,15 @@ import {
 import Modal from "../Modal";
 import Button from "../Button";
 import AccountConfig from "./AccountConfig";
-import { ArrowRight, LinkBreak, SignOut } from "@phosphor-icons/react";
+import { ArrowRight, SignOut } from "@phosphor-icons/react";
 import Image from "next/image";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 export const WELCOME_MODAL_SEEN_STORAGE_KEY = "welcome-modal-seen";
 
-const justAuthenticated = false;
-
-interface AccountConfigProps {
-  // apiKey: string | null;
-  // allowTelemetry: boolean;
+interface WelcomeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  // firstTimeUser: boolean;
 }
 
 const validateOpenAiApiKey = async (
@@ -48,7 +43,7 @@ const validateOpenAiApiKey = async (
   }
 };
 
-export default function SettingsModal(props: AccountConfigProps) {
+export default function WelcomeModal(props: WelcomeModalProps) {
   const [localApiKey, setLocalApiKey] = useAtom(localOpenAiApiKeyAtom);
   const [allowTelemetry, setAllowTelemetry] = useAtom(allowTelemetryAtom);
   const [apiKey, setApiKey] = useState<string>(localApiKey || "");
@@ -80,7 +75,7 @@ export default function SettingsModal(props: AccountConfigProps) {
   };
   return (
     <>
-      <Modal isOpen={isOpen} title="Welcome to Evo Ninja" onClose={onSave}>
+      <Modal isOpen={isOpen} title="Welcome to Evo Ninja" onClose={onClose}>
         {!firstTimeUser && (
           <div className="border-b-2 border-zinc-700 pb-8 text-center">
             Evo is an agent that can do many things. This is a technical
@@ -144,6 +139,7 @@ export default function SettingsModal(props: AccountConfigProps) {
           apiKey={apiKey}
           setApiKey={setApiKey}
           isLoggedIn={!!session?.user}
+          error={error}
         />
 
         <div className="flex justify-end border-t-2 border-zinc-700 pt-8">
