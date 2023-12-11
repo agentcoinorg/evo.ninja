@@ -1,6 +1,7 @@
 import { useCheckForUserFiles } from "@/lib/hooks/useCheckForUserFiles";
 import { uploadedFilesAtom, userWorkspaceAtom } from "@/lib/store";
 import { useAtom } from "jotai";
+import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 
 export default function WorkspaceFilesProvider({ children }: { children: React.ReactNode }) {
@@ -16,8 +17,8 @@ export default function WorkspaceFilesProvider({ children }: { children: React.R
     //eslint-disable-next-line @typescript-eslint/no-floating-promises
     (async () => {
       await Promise.all(
-        uploadedFiles.map((file) =>
-          userWorkspace.writeFile(
+        uploadedFiles.map(async (file) =>
+          await userWorkspace.writeFile(
             file.path,
             new TextDecoder().decode(file.content)
           )
@@ -25,7 +26,16 @@ export default function WorkspaceFilesProvider({ children }: { children: React.R
       );
       await checkForUserFiles();
     })();
-  }, [uploadedFiles]);
+  }, [uploadedFiles, userWorkspace]);
+
+
+  // useEffect(() => {
+  //   (async () => {
+  //     if (userWorkspace) {
+  //       await checkForUserFiles()
+  //     }
+  //   })()
+  // }, [userWorkspace])
 
   return (
     <>

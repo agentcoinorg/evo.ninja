@@ -11,8 +11,10 @@ import SidebarIcon from "./SidebarIcon";
 import { useAtom } from "jotai";
 import { uploadedFilesAtom, userFilesAtom } from "@/lib/store";
 import { useDownloadFilesAsZip } from "@/lib/hooks/useDownloadFilesAsZip";
-import { useSupabase } from "@/lib/hooks/useSupabase";
 import { SupabaseBucketWorkspace } from "@/lib/supabase/SupabaseBucketWorkspace";
+import ChatList from "./ChatList";
+import { createSupabaseClient } from "@/lib/supabase/supabase";
+import { useSession } from "next-auth/react";
 
 export interface SidebarProps {
   onSettingsClick: () => void;
@@ -22,30 +24,30 @@ export interface SidebarProps {
 const Sidebar = ({ onSettingsClick, onSidebarToggleClick }: SidebarProps) => {
   const [userFiles] = useAtom(userFilesAtom);
   const [, setUploadedFiles] = useAtom(uploadedFilesAtom);
-
-  const supabase = useSupabase()
+  // const { data: session } = useSession()
+  // const supabase = createSupabaseClient(session?.supabaseAccessToken as string)
   const downloadUserFiles = useDownloadFilesAsZip();
 
-  const testSupabaseUpload = async () => {
-    const storage = new SupabaseBucketWorkspace(supabase.storage)
-    await storage.writeFile("f37e1373-d2e9-4bd5-bf6e-8fda7bd53d36/jaja.txt", "papi q paso pue SIUUUUUU");
-  }
+  // const testSupabaseUpload = async () => {
+  //   const storage = new SupabaseBucketWorkspace(supabase.storage)
+  //   await storage.writeFile("f37e1373-d2e9-4bd5-bf6e-8fda7bd53d36/jaja.txt", "papi q paso pue SIUUUUUU");
+  // }
 
-  const testSupabaseDelete = async () => {
-    const storage = new SupabaseBucketWorkspace(supabase.storage)
-    await storage.rm("f37e1373-d2e9-4bd5-bf6e-8fda7bd53d36/jaja.txt");
-  }
+  // const testSupabaseDelete = async () => {
+  //   const storage = new SupabaseBucketWorkspace(supabase.storage)
+  //   await storage.rm("f37e1373-d2e9-4bd5-bf6e-8fda7bd53d36/jaja.txt");
+  // }
 
-  const testSupabaseRead = async () => {
-    const storage = new SupabaseBucketWorkspace(supabase.storage)
-    const t = await storage.readFile("f37e1373-d2e9-4bd5-bf6e-8fda7bd53d36/jaja.txt");
-    console.log({ t })
-  }
+  // const testSupabaseRead = async () => {
+  //   const storage = new SupabaseBucketWorkspace(supabase.storage)
+  //   const t = await storage.readFile("f37e1373-d2e9-4bd5-bf6e-8fda7bd53d36/jaja.txt");
+  //   console.log({ t })
+  // }
 
-  const testSupabaseUpdate = async () => {
-    const storage = new SupabaseBucketWorkspace(supabase.storage)
-    await storage.rename("f37e1373-d2e9-4bd5-bf6e-8fda7bd53d36/jaja.txt", "f37e1373-d2e9-4bd5-bf6e-8fda7bd53d36/jajazzzz.txt");
-  }
+  // const testSupabaseUpdate = async () => {
+  //   const storage = new SupabaseBucketWorkspace(supabase.storage)
+  //   await storage.rename("f37e1373-d2e9-4bd5-bf6e-8fda7bd53d36/jaja.txt", "f37e1373-d2e9-4bd5-bf6e-8fda7bd53d36/jajazzzz.txt");
+  // }
 
   return (
     <div className="box-border flex h-full w-full flex-col items-center justify-between overflow-auto bg-opacity-black p-4">
@@ -82,7 +84,7 @@ const Sidebar = ({ onSettingsClick, onSidebarToggleClick }: SidebarProps) => {
             <FontAwesomeIcon icon={faFolder} style={{ marginRight: "10px" }} />{" "}
             WORKSPACE
           </h3>
-          <button
+          {/* <button
             className="my-4 inline-block h-9 cursor-pointer rounded-xl border-none bg-orange-600 px-6 py-2.5 text-center text-neutral-900 shadow-md outline-none transition-all hover:bg-orange-500"
             title="Test"
             onClick={testSupabaseUpload}
@@ -109,7 +111,7 @@ const Sidebar = ({ onSettingsClick, onSidebarToggleClick }: SidebarProps) => {
             onClick={testSupabaseUpdate}
           >
             Test update
-          </button>
+          </button> */}
 
           <div>
             {userFiles.map((file, i) => (
@@ -126,6 +128,8 @@ const Sidebar = ({ onSettingsClick, onSidebarToggleClick }: SidebarProps) => {
             </button>
           )}
         </Upload>
+
+        <ChatList />
       </div>
       <div className="box-border flex w-10/12 flex-col justify-center gap-2">
         <div className="flex justify-center">

@@ -31,17 +31,19 @@ import {
   localOpenAiApiKeyAtom,
   userWorkspaceAtom,
 } from "@/lib/store";
-import { SupabaseBucketWorkspace } from "@/app/api/agent-jobs/SupabaseBucketWorkspace";
+import { useSession } from "next-auth/react";
+import { SupabaseBucketWorkspace } from "../supabase/SupabaseBucketWorkspace";
+import { createSupabaseClient } from "../supabase/supabase";
 
 interface UseEvoArgs {
   onChatLog: (message: ChatMessage) => Promise<void>;
-  onAgentMessages: (type: ChatLogType, messages: AgentMessage[]) => Promise<void>;
+  onMessagesAdded: (type: ChatLogType, messages: AgentMessage[]) => Promise<void>;
   onVariableSet: (key: string, value: string) => Promise<void>;
 }
 
 export function useEvo({
   onChatLog,
-  onAgentMessages,
+  onMessagesAdded,
   onVariableSet
 }: UseEvoArgs): {
   isRunning: boolean;
@@ -54,7 +56,6 @@ export function useEvo({
   isSending: boolean;
   setIsSending: (sending: boolean) => void;
 } {
-  // const supabase = useSupabase();
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [isSending, setIsSending] = useState<boolean>(false);
@@ -68,7 +69,7 @@ export function useEvo({
   const [evo, setEvo] = useState<Evo | undefined>();
   const [, setLlmProxyApi] = useAtom(proxyLlmAtom);
   const [, setEmbeddingProxyApi] = useAtom(proxyEmbeddingAtom);
-
+  
   const [, setCapReached] = useAtom(capReachedAtom);
   const [userWorkspace, setUserWorkspace] = useAtom(userWorkspaceAtom);
 
@@ -131,19 +132,19 @@ export function useEvo({
 
         if (!workspace) {
           workspace = new InMemoryWorkspace();
-          // workspace = new SupabaseBucketWorkspace();
           setUserWorkspace(workspace);
         }
 
-        const internals = new SubWorkspace(".evo", workspace);
+        const internals = new SubWorkspace(".evo", new InMemoryWorkspace());
 
         const chat = new EvoChat(cl100k_base, {
-          onMessagesAdded: onAgentMessages,
+          onMessagesAdded,
         });
         const agentVariables = new AgentVariables({
           onVariableSet
         })
-
+        console.log("workspace in evo :)")
+        console.log(userWorkspace)
         setEvo(
           new Evo(
             new AgentContext(
@@ -165,7 +166,8 @@ export function useEvo({
       }
     })();
   }, [
-    localOpenAiApiKey
+    localOpenAiApiKey,
+    userWorkspace
   ]);
 
   const start = (goal: string) => {

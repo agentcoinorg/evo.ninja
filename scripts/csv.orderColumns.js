@@ -52,7 +52,7 @@ const reorderedRows = orderColumnsAlphabetically(rows);
 const result = serializeCSV(reorderedRows, delimiter);
 
 if (typeof outputFile === "string") {
-  fs.writeFileSync(outputFile, result);
+  await fs.writeFileSync(outputFile, result);
 }
 
 return result;

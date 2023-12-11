@@ -53,7 +53,7 @@ const sortedRows = sortCSVByColumn(rows, columnIndex);
 const result = serializeCSV(sortedRows, delimiter);
 
 if (typeof outputFile === "string") {
-  fs.writeFileSync(outputFile, result);
+  await fs.writeFileSync(outputFile, result);
 }
 
 return result;

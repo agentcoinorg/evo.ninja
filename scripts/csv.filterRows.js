@@ -45,7 +45,7 @@ resultRows = [header].concat(filteredRows);
 const result = serializeCSV(resultRows, delimiter);
 
 if (typeof outputFile === "string") {
-  fs.writeFileSync(outputFile, result);
+  await writeFileSync(outputFile, result);
 }
 
 return result;

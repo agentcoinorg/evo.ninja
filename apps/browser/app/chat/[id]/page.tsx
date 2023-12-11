@@ -8,25 +8,43 @@ import { useAddChatLog } from "@/lib/mutations/useAddChatLog";
 import { useAddMessages } from "@/lib/mutations/useAddMessages";
 import { useAddVariable } from "@/lib/mutations/useAddVariable";
 import { useChats } from "@/lib/queries/useChats";
-import { errorAtom } from "@/lib/store";
+import { errorAtom, userWorkspaceAtom } from "@/lib/store";
+import { SupabaseBucketWorkspace } from "@/lib/supabase/SupabaseBucketWorkspace";
+import { createSupabaseClient } from "@/lib/supabase/supabase";
 import { ChatLogType, ChatMessage as AgentMessage } from "@evo-ninja/agents";
 import { useAtom } from "jotai";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 function ChatPage({ params }: { params: { id: string } }) {
   const router = useRouter()
+  const { status, data: session } = useSession()
 
   const { mutateAsync: addMessages } = useAddMessages()
   const { mutateAsync: addChatLog } = useAddChatLog()
   const { mutateAsync: addVariable } = useAddVariable()
   const { data: chats } = useChats()
 
+  const [, setUserWorkspace] = useAtom(userWorkspaceAtom);
   const [, setError] = useAtom(errorAtom)
   const currentChat = chats?.find(c => c.id === (params.id))
 
   const logs = currentChat?.logs ?? []
   const checkForUserFiles = useCheckForUserFiles();
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      setError("No chat with this ID")
+      router.push('/')
+      return;
+    }
+    if (session?.supabaseAccessToken) {
+      const { storage } = createSupabaseClient(session?.supabaseAccessToken as string)
+      const supabaseWorkspace = new SupabaseBucketWorkspace(storage, params.id)
+      setUserWorkspace(supabaseWorkspace)
+    }
+  }, [status, session?.supabaseAccessToken])
 
   useEffect(() => {
     if (chats && !currentChat) {
@@ -36,7 +54,7 @@ function ChatPage({ params }: { params: { id: string } }) {
     }
   }, [currentChat])
 
-  const onAgentMessages = async (type: ChatLogType, messages: AgentMessage[]) => {
+  const onMessagesAdded = async (type: ChatLogType, messages: AgentMessage[]) => {
     await addMessages({
       chatId: params.id,
       messages,
@@ -68,7 +86,7 @@ function ChatPage({ params }: { params: { id: string } }) {
     setIsSending,
   } = useEvo({
     onChatLog,
-    onAgentMessages,
+    onMessagesAdded,
     onVariableSet
   });
   const { handlePromptAuth } = useHandleAuth();

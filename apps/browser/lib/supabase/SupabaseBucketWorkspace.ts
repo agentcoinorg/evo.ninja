@@ -9,7 +9,8 @@ export class SupabaseBucketWorkspace {
   private bucketName = "workspaces"
   constructor(
     // private readonly bucketName: string,
-    private readonly supabaseStorage: StorageClient
+    private readonly supabaseStorage: StorageClient,
+    private readonly folderName: string
   ) {}
 
   async init(): Promise<void> {
@@ -29,6 +30,8 @@ export class SupabaseBucketWorkspace {
 
   async writeFile(subpath: string, data: string): Promise<void> {
     const path = this.toWorkspacePath(subpath);
+    console.log("this is the path:")
+    console.log(path)
 
     const { error } = await this.supabaseStorage
       .from(this.bucketName)
@@ -189,7 +192,7 @@ export class SupabaseBucketWorkspace {
   }
 
   private toWorkspacePath(subpath: string): string {
-    return path.resolve("/", subpath).slice(1);
+    return path.resolve("/", this.folderName, subpath).slice(1);
   }
 
   private toWorkspacePathSegments(subpath: string): string[] {
