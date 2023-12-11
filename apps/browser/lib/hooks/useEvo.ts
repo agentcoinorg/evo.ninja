@@ -1,3 +1,8 @@
+import { BrowserLogger } from "../sys/logger";
+import { createInBrowserScripts } from "../scripts";
+import { ProxyEmbeddingApi, ProxyLlmApi } from "../api";
+
+import { useEffect, useState } from "react";
 import {
   AgentContext,
   ConsoleLogger,
@@ -17,12 +22,9 @@ import {
   AgentVariables,
   ChatLogType,
 } from "@evo-ninja/agents";
-import { useEffect, useState } from "react";
-import { BrowserLogger } from "../sys/logger";
-import { createInBrowserScripts } from "../scripts";
-import { ProxyEmbeddingApi, ProxyLlmApi } from "../api";
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 import { useAtom } from "jotai";
+
 import { ChatMessage } from "@/components/Chat";
 import {
   capReachedAtom,
@@ -31,21 +33,17 @@ import {
   localOpenAiApiKeyAtom,
   userWorkspaceAtom,
 } from "@/lib/store";
-import { useSession } from "next-auth/react";
-import { SupabaseBucketWorkspace } from "../supabase/SupabaseBucketWorkspace";
-import { createSupabaseClient } from "../supabase/supabase";
 
 interface UseEvoArgs {
   onChatLog: (message: ChatMessage) => Promise<void>;
-  onMessagesAdded: (type: ChatLogType, messages: AgentMessage[]) => Promise<void>;
+  onMessagesAdded: (
+    type: ChatLogType,
+    messages: AgentMessage[]
+  ) => Promise<void>;
   onVariableSet: (key: string, value: string) => Promise<void>;
 }
 
-export function useEvo({
-  onChatLog,
-  onMessagesAdded,
-  onVariableSet
-}: UseEvoArgs): {
+export function useEvo({ onChatLog, onMessagesAdded, onVariableSet }: UseEvoArgs): {
   isRunning: boolean;
   error?: string;
   start: (message: string) => void;
@@ -69,11 +67,12 @@ export function useEvo({
   const [evo, setEvo] = useState<Evo | undefined>();
   const [, setLlmProxyApi] = useAtom(proxyLlmAtom);
   const [, setEmbeddingProxyApi] = useAtom(proxyEmbeddingAtom);
-  
+
   const [, setCapReached] = useAtom(capReachedAtom);
   const [userWorkspace, setUserWorkspace] = useAtom(userWorkspaceAtom);
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     (async () => {
       try {
         const browserLogger = new BrowserLogger({
@@ -108,13 +107,13 @@ export function useEvo({
             env.CONTEXT_WINDOW_TOKENS,
             env.MAX_RESPONSE_TOKENS,
             logger,
-            env.OPENAI_API_BASE_URL,
+            env.OPENAI_API_BASE_URL
           );
           embedding = new OpenAIEmbeddingAPI(
             env.OPENAI_API_KEY,
             logger,
             cl100k_base,
-            env.OPENAI_API_BASE_URL,
+            env.OPENAI_API_BASE_URL
           );
         } else {
           llm = new ProxyLlmApi(
@@ -143,10 +142,10 @@ export function useEvo({
           onMessagesAdded,
         });
         const agentVariables = new AgentVariables({
-          onVariableSet
-        })
-        console.log("workspace in evo :)")
-        console.log(userWorkspace)
+          onVariableSet,
+        });
+        console.log("workspace in evo :)");
+        console.log(userWorkspace);
         setEvo(
           new Evo(
             new AgentContext(
@@ -167,10 +166,7 @@ export function useEvo({
         setError(e.message);
       }
     })();
-  }, [
-    localOpenAiApiKey,
-    userWorkspace
-  ]);
+  }, [localOpenAiApiKey, userWorkspace]);
 
   const start = (goal: string) => {
     if (!evo) return;

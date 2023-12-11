@@ -19,7 +19,6 @@ import { createSupabaseClient } from "@/lib/supabase/supabase";
 import { useAtom } from "jotai";
 import { userWorkspaceAtom } from "@/lib/store";
 import { useRouter } from "next/navigation";
-import { useAtom } from "jotai";
 import { errorAtom } from "@/lib/store";
 
 function Dojo({ params }: { params: { id?: string } }) {
@@ -50,7 +49,10 @@ function Dojo({ params }: { params: { id?: string } }) {
    useEffect(() => {
     if (session?.supabaseAccessToken && chatIdRef.current) {
       const { storage } = createSupabaseClient(session.supabaseAccessToken)
-      const supabaseWorkspace = new SupabaseBucketWorkspace(storage, chatIdRef.current)
+      const supabaseWorkspace = new SupabaseBucketWorkspace(
+        chatIdRef.current,
+        storage
+      );
       setUserWorkspace(supabaseWorkspace)
     }
   }, [chatIdRef.current])
