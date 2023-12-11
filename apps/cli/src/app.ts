@@ -101,7 +101,8 @@ export async function createApp(config?: AppConfig): Promise<App> {
     env.GPT_MODEL as LlmModel,
     env.CONTEXT_WINDOW_TOKENS,
     env.MAX_RESPONSE_TOKENS,
-    logger
+    logger,
+    env.OPENAI_API_BASE_URL
   );
 
   // Chat
@@ -117,7 +118,12 @@ export async function createApp(config?: AppConfig): Promise<App> {
     llm = new DebugLlmApi(debugLog, llm);
   }
 
-  const embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base);
+  const embedding = new OpenAIEmbeddingAPI(
+    env.OPENAI_API_KEY,
+    logger,
+    cl100k_base,
+    env.OPENAI_API_BASE_URL
+  );
 
   // Evo
   const evo = new Evo(
