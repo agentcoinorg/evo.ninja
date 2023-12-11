@@ -29,5 +29,5 @@ jobs:
     - name: Build
       run: yarn build
       env:
-        NEXT_PUBLIC_SUPABASE_URL: supabase-url
+        NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
         NEXT_PUBLIC_SUPABASE_ANON_KEY: supabase-anon-key
