@@ -107,12 +107,14 @@ export function useEvo({
             env.GPT_MODEL as LlmModel,
             env.CONTEXT_WINDOW_TOKENS,
             env.MAX_RESPONSE_TOKENS,
-            logger
+            logger,
+            env.OPENAI_API_BASE_URL,
           );
           embedding = new OpenAIEmbeddingAPI(
             env.OPENAI_API_KEY,
             logger,
-            cl100k_base
+            cl100k_base,
+            env.OPENAI_API_BASE_URL,
           );
         } else {
           llm = new ProxyLlmApi(

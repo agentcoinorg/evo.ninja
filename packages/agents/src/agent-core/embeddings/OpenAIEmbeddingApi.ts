@@ -6,7 +6,13 @@ import { splitArray } from "./utils";
 import OpenAIApi from "openai";
 import { ILogger } from "@evo-ninja/agent-utils";
 
-export const DEFAULT_ADA_CONFIG = {
+interface ModelConfig {
+  model: string;
+  maxTokensPerInput: number;
+  maxInputsPerRequest: number;
+}
+
+export const DEFAULT_ADA_CONFIG: ModelConfig = {
   model: "text-embedding-ada-002",
   maxTokensPerInput: 8191,
   maxInputsPerRequest: 2048
@@ -14,21 +20,19 @@ export const DEFAULT_ADA_CONFIG = {
 
 export class OpenAIEmbeddingAPI implements EmbeddingApi {
   private api: OpenAIApi;
-  
+
   constructor(
     private apiKey: string,
     private logger: ILogger,
     private tokenizer: Tokenizer,
-    private modelConfig: {
-      model: string,
-      maxTokensPerInput: number,
-      maxInputsPerRequest: number
-    } = DEFAULT_ADA_CONFIG,
-    private _maxRateLimitRetries: number = 5
+    baseURL?: string,
+    private modelConfig: ModelConfig = DEFAULT_ADA_CONFIG,
+    private maxRateLimitRetries: number = 5,
   ) {
     this.api = new OpenAIApi({
       apiKey: this.apiKey,
-      dangerouslyAllowBrowser: true
+      dangerouslyAllowBrowser: true,
+      baseURL: baseURL
     });
   }
 
@@ -72,7 +76,7 @@ export class OpenAIEmbeddingAPI implements EmbeddingApi {
 
           await new Promise((resolve) => setTimeout(resolve, 15000));
 
-          if (!tries || tries < this._maxRateLimitRetries) {
+          if (!tries || tries < this.maxRateLimitRetries) {
             return this.createEmbeddings(
               input,
               tries === undefined ? 0 : ++tries
