@@ -1,21 +1,31 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { memo, useEffect, useRef, useState } from "react";
 import Logo from "./Logo";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import DropdownAccount from "./DropdownAccount";
 import CurrentWorkspace from "./CurrentWorkspace";
-import { DiscordLogo, GithubLogo, NotePencil } from "@phosphor-icons/react";
+import {
+  DiscordLogo,
+  GithubLogo,
+  List,
+  NotePencil,
+  X,
+} from "@phosphor-icons/react";
 import AvatarBlockie from "./AvatarBlockie";
 import Button from "./Button";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";
 import { useChats } from "@/lib/queries/useChats";
 import { useRouter } from "next/navigation";
+import CloseSidebarIcon from "./CloseSidebarIcon";
+import useWindowSize from "@/lib/hooks/useWindowSize";
 
 export interface SidebarProps {
   userFiles: InMemoryFile[];
   onUploadFiles: (files: InMemoryFile[]) => void;
   hoveringSidebarButton: boolean;
   sidebarOpen: boolean;
+  setHovering: (set: boolean) => void;
+  setSidebarOpen: (set: boolean) => void;
 }
 
 // const chats: string[] = ["New Chat", "Utilities Spending"];
@@ -26,16 +36,29 @@ const Sidebar = ({
   onUploadFiles,
   sidebarOpen,
   hoveringSidebarButton,
+  setSidebarOpen,
+  setHovering,
 }: SidebarProps) => {
-  const router = useRouter()
+  const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { mutateAsync: createChat } = useCreateChat()
-  const { data: chats } = useChats()
-  const mappedChats = chats?.map(chat => ({
+  const { mutateAsync: createChat } = useCreateChat();
+  const { data: chats } = useChats();
+  const mappedChats = chats?.map((chat) => ({
     id: chat.id,
-    name: chat.logs[0]?.title ?? "New session"
-  }))
+    name: chat.logs[0]?.title ?? "New session",
+  }));
+  const { isMobile } = useWindowSize();
+  // const [sidebarOpen, setSidebarOpen] = useState<boolean>(!isMobile);
+  // const [hoveringSidebarButton, setHovering] = useState<boolean>(false);
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (isMobile) {
+      setSidebarOpen(false);
+    } else {
+      setSidebarOpen(true);
+    }
+  }, [isMobile]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -59,36 +82,25 @@ const Sidebar = ({
   }, [dropdownOpen]);
 
   return (
-    <div
-      className={clsx(
-        "overflow-y relative z-10 h-full border-r-2 bg-zinc-900 transition-all duration-300 ease-in-out",
-        sidebarOpen ? "w-[290px]" : "w-0 border-none",
-        hoveringSidebarButton ? "border-zinc-500" : "border-zinc-800"
-      )}
-    >
+    <>
       <div
         className={clsx(
           "flex h-full flex-col justify-between transition-opacity",
           {
-            "opacity-50 delay-0": sidebarOpen && hoveringSidebarButton,
-            "hidden delay-0 duration-0": !sidebarOpen,
+            "opacity-50 delay-0 duration-300":
+              sidebarOpen && hoveringSidebarButton,
+            "pointer-events-none opacity-0 delay-0 duration-0": !sidebarOpen,
           }
         )}
       >
         <div
-          className="animate-fade-in flex h-full flex-col justify-between opacity-0"
+          className="flex h-full animate-fade-in flex-col justify-between opacity-0"
           style={{ animationDelay: sidebarOpen ? "150ms" : "0ms" }}
         >
           <div className="flex h-full flex-col space-y-6">
-            <div className="flex items-center p-4">
-              <Logo
-                className="w-[136px] cursor-pointer transition-opacity hover:opacity-50"
-                onClick={async () => {
-                  const createdChat = await createChat()
-                  router.push(`/chat/${createdChat.id}`)
-                }}
-              />
-            </div>
+            <header>
+              <Logo className="w-[162px] cursor-pointer p-4 transition-opacity hover:opacity-50" />
+            </header>
             <div className="space-y-1 px-2">
               <div className="flex w-full items-center justify-between space-x-1 px-3">
                 <div className="text-xs uppercase tracking-widest text-zinc-500">
@@ -103,7 +115,6 @@ const Sidebar = ({
                   <div className="px-2">
                     {mappedChats?.map((chat, i) => (
                       <div
-                        onClick={() => router.push(`/chat/${chat.id}`)}
                         key={i}
                         className="w-full cursor-pointer rounded p-1 text-zinc-100 transition-colors duration-300 hover:bg-zinc-800 hover:text-white"
                       >
@@ -163,8 +174,8 @@ const Sidebar = ({
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
-export default Sidebar;
+export default memo(Sidebar);

@@ -4,11 +4,19 @@ import React, {
   ChangeEvent,
   useRef,
   useCallback,
+  memo,
 } from "react";
 import ReactMarkdown from "react-markdown";
 import clsx from "clsx";
 import { useAtom } from "jotai";
-import { allowTelemetryAtom, showAccountModalAtom, showDisclaimerAtom, sidebarAtom, uploadedFilesAtom, welcomeModalAtom } from "@/lib/store";
+import {
+  allowTelemetryAtom,
+  showAccountModalAtom,
+  showDisclaimerAtom,
+  sidebarAtom,
+  uploadedFilesAtom,
+  welcomeModalAtom,
+} from "@/lib/store";
 import { ExamplePrompt, examplePrompts } from "@/lib/examplePrompts";
 import TextField from "./TextField";
 import {
@@ -57,13 +65,13 @@ const Chat: React.FC<ChatProps> = ({
   isPaused,
   isRunning,
   isSending,
-  isStopped
+  isStopped,
 }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
-  const [showAccountModal] = useAtom(showAccountModalAtom)
-  const [welcomeModalSeen] = useAtom(welcomeModalAtom)
-  const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom)
-  const [, setUploadedFiles] = useAtom(uploadedFilesAtom)
+  const [showAccountModal] = useAtom(showAccountModalAtom);
+  const [welcomeModalSeen] = useAtom(welcomeModalAtom);
+  const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom);
+  const [, setUploadedFiles] = useAtom(uploadedFilesAtom);
 
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -71,14 +79,14 @@ const Chat: React.FC<ChatProps> = ({
   const [, setAllowTelemetry] = useAtom(allowTelemetryAtom);
 
   const handleDisclaimerSelect = (select: boolean) => {
-    setAllowTelemetry(select)
-    setShowDisclaimer(false)
-  }
+    setAllowTelemetry(select);
+    setShowDisclaimer(false);
+  };
 
   const handleSend = async (prompt: string) => {
     await onPromptSent(prompt);
-    setMessage("")
-  }
+    setMessage("");
+  };
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setMessage(event.target.value);
@@ -86,7 +94,7 @@ const Chat: React.FC<ChatProps> = ({
 
   const handleKeyPress = async (event: React.KeyboardEvent) => {
     if (event.key === "Enter" && !isSending) {
-      await handleSend(message)
+      await handleSend(message);
     }
   };
 
@@ -94,7 +102,7 @@ const Chat: React.FC<ChatProps> = ({
     if (prompt.files) {
       setUploadedFiles(prompt.files);
     }
-    await handleSend(prompt.prompt)
+    await handleSend(prompt.prompt);
   };
 
   const handleScroll = useCallback(() => {
@@ -133,14 +141,14 @@ const Chat: React.FC<ChatProps> = ({
   }, [messages, isAtBottom]);
 
   return (
-    <div
-      className={clsx("flex h-full flex-col", {
+    <main
+      className={clsx("flex h-full w-full flex-col px-5", {
         "items-center justify-center": samplePrompts?.length,
       })}
     >
       {samplePrompts?.length ? (
         <div className="flex flex-col items-center space-y-2">
-          <Logo wordmark={false} className="h-16 w-16" />
+          <Logo wordmark={false} className="w-16" />
           <h1 className="text-2xl font-bold">What's your goal today?</h1>
         </div>
       ) : (
@@ -151,7 +159,7 @@ const Chat: React.FC<ChatProps> = ({
           <div
             ref={listContainerRef}
             onScroll={handleScroll}
-            className="flex-1 items-center space-y-6 overflow-auto p-5 text-left"
+            className="w-full flex-1 items-center space-y-6 overflow-auto p-5 text-left"
           >
             {messages.map((msg, index) => {
               return (
@@ -159,7 +167,7 @@ const Chat: React.FC<ChatProps> = ({
                   key={index}
                   className={`${msg.user} m-auto w-full max-w-[56rem] self-center`}
                 >
-                  <div className="animate-slide-down group relative flex w-full items-start space-x-4 rounded-lg p-2 pb-10 text-white opacity-0 transition-colors duration-300 ">
+                  <div className="group relative flex w-full animate-slide-down items-start space-x-4 rounded-lg p-2 pb-10 text-white opacity-0 transition-colors duration-300 ">
                     {msg.user === "evo" ? (
                       <Logo wordmark={false} className="!w-8" />
                     ) : (
@@ -198,7 +206,7 @@ const Chat: React.FC<ChatProps> = ({
                         </div>
                       )}
                     </div>
-                    <div className="animate-fade-in absolute bottom-1 left-9 hidden space-x-0.5 group-hover:flex">
+                    <div className="absolute bottom-1 left-9 hidden animate-fade-in space-x-0.5 group-hover:flex">
                       {msg.user === "evo" ? (
                         <>
                           <Button variant="icon">
@@ -243,26 +251,26 @@ const Chat: React.FC<ChatProps> = ({
       )}
       <div
         className={clsx(
-          "flex space-y-4",
+          "flex w-full space-y-4",
           samplePrompts?.length
             ? "flex-col-reverse"
-            : "mx-auto w-full max-w-[56rem] flex-col"
+            : "mx-auto max-w-[56rem] flex-col"
         )}
       >
         {samplePrompts?.length && (
           <div className="flex flex-col items-center space-y-3">
-              <h2 className="w-full text-center font-normal">
-                Not sure where to start? Try asking one of these:
-              </h2>
-            <div className="flex w-full max-w-[56rem] flex-wrap items-center justify-center space-x-1 space-y-1 self-center">
+            <h2 className="w-full text-center font-normal">
+              Not sure where to start? Try asking one of these:
+            </h2>
+            <div className="flex w-full max-w-[56rem] flex-wrap items-center justify-center self-center">
               {examplePrompts.map((prompt, index) => (
                 <div
                   key={index}
                   className={clsx(
-                    "cursor-pointer rounded-lg border-2  bg-zinc-900/50 p-2.5 text-xs text-zinc-400 transition-all duration-300 ease-in-out hover:bg-cyan-600 hover:text-white",
+                    "m-1 cursor-pointer rounded-lg  border-2 bg-zinc-900/50 p-2.5 text-xs text-zinc-400 transition-all duration-300 ease-in-out hover:bg-cyan-600 hover:text-white",
                     samplePrompts?.length
-                      ? "whitespace-nowrap border-zinc-700"
-                      : "m-1 w-[calc(100%-1.5rem)] border-zinc-800"
+                      ? "border-zinc-700"
+                      : "w-[calc(100%-1.5rem)] border-zinc-800"
                   )}
                   onClick={() => handleSamplePromptClick(prompt)}
                 >
@@ -292,13 +300,13 @@ const Chat: React.FC<ChatProps> = ({
             }
             rightAdornment={
               <ChatInputButton
-              evoRunning={isRunning}
-              paused={isPaused}
-              sending={isSending}
-              stopped={isStopped}
-              handlePause={onPause}
-              handleContinue={onContinue}
-              handleSend={async () => await handleSend(message)}
+                evoRunning={isRunning}
+                paused={isPaused}
+                sending={isSending}
+                stopped={isStopped}
+                handlePause={onPause}
+                handleContinue={onContinue}
+                handleSend={async () => await handleSend(message)}
               />
             }
             rightAdornmentClassnames="!right-3"
@@ -306,7 +314,8 @@ const Chat: React.FC<ChatProps> = ({
           />
         </div>
       </div>
-      {showDisclaimer && !showAccountModal && welcomeModalSeen &&  (
+
+      {showDisclaimer && !showAccountModal && welcomeModalSeen && (
         <Disclaimer handleDisclaimerSelect={handleDisclaimerSelect} />
       )}
       <a
@@ -317,8 +326,8 @@ const Chat: React.FC<ChatProps> = ({
       >
         <Image alt="Support" src="/questionmark.svg" width={12} height={12} />
       </a>
-    </div>
+    </main>
   );
 };
 
-export default Chat;
+export default memo(Chat);

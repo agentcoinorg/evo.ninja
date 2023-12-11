@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { ReactNode } from "react";
+import { Popover } from "@headlessui/react";
 
 export interface TooltipProps {
   content: ReactNode | string;
@@ -30,9 +31,10 @@ const Tooltip = ({ content, placement = "top" }: TooltipProps) => {
   const arrowClasses = placement ? placementClasses[placement].arrow : null;
 
   return (
-    <div
+    <Popover.Panel
+      static
       className={clsx(
-        "absolute !m-0 w-[250px] max-w-[240px] max-w-xl rounded-lg bg-zinc-900 p-2 text-white shadow-md backdrop-blur",
+        "absolute z-20 !m-0 w-max max-w-[240px] animate-[fade_100ms_ease-in-out_200ms_forwards] rounded-lg bg-zinc-700 p-2 text-white opacity-0 shadow-md backdrop-blur",
         tooltipClasses
       )}
     >
@@ -43,7 +45,7 @@ const Tooltip = ({ content, placement = "top" }: TooltipProps) => {
           arrowClasses
         )}
       />
-    </div>
+    </Popover.Panel>
   );
 };
 

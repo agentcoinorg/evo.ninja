@@ -145,6 +145,8 @@ function Dojo() {
 
   return (
     <>
+          {/* <div className="relative flex h-full overflow-x-clip"> */}
+
       <Chat
         messages={logsToShow}
         samplePrompts={logsToShow.length ? undefined : examplePrompts}
