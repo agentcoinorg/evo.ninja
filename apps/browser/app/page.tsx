@@ -161,7 +161,7 @@ function Dojo({ params }: { params: { id?: string } }) {
       return;
     }
 
-    if (sessionStatus === "authenticated" && params.id && !currentChat) {
+    if (sessionStatus === "authenticated" && params.id && chats && !currentChat) {
       setError(`Chat with id '${params.id}' not found`)
       router.push('/')
       return;
