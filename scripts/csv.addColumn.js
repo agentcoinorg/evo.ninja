@@ -49,7 +49,7 @@ const updatedRows = addColumnToCSVRows(rows, column, values);
 const result = serializeCSV(updatedRows, delimiter);
 
 if (typeof outputFile === "string") {
-  await fs.writeFileSync(outputFile, result);
+  fs.writeFileSync(outputFile, result);
 }
 
 return result;

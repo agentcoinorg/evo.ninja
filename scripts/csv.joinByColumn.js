@@ -78,7 +78,7 @@ function joinCSVs(csv1, csv2, columnName) {
 const result = joinCSVs(csv1, csv2, joinColumnName);
 
 if (typeof outputFile === "string") {
-  await fs.writeFileSync(outputFile, result);
+  fs.writeFileSync(outputFile, result);
 }
 
 return result;
