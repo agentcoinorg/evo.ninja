@@ -1,16 +1,18 @@
-import { useQuery } from "@tanstack/react-query"
-import { useSession } from "next-auth/react"
-import { ChatMessage as AgentMessage } from "@evo-ninja/agents"
-import { ChatMessage } from "@/components/Chat"
-import { Json } from "../supabase/dbTypes"
-import { createSupabaseClient } from "../supabase/supabase"
+import { Json } from "../supabase/dbTypes";
+import { createSupabaseClient } from "../supabase/createSupabaseClient";
+
+import { useQuery } from "@tanstack/react-query";
+import { ChatMessage as AgentMessage } from "@evo-ninja/agents";
+import { useSession } from "next-auth/react";
+
+import { ChatMessage } from "@/components/Chat";
 
 export interface Chat {
   id: string;
   created_at: string;
   messages: AgentMessage[];
   logs: ChatMessage[];
-  variables: Map<string, string>
+  variables: Map<string, string>;
 }
 
 interface MessageDTO {
@@ -47,25 +49,32 @@ interface ChatDTO {
   messages: MessageDTO[];
 }
 
-const mapMessageDTOtoMessage = (dto: MessageDTO): AgentMessage & { temporary: boolean } => {
-  const messageRole = dto.role as "function" | "user" | "tool" | "system" | "assistant"
-  
+const mapMessageDTOtoMessage = (
+  dto: MessageDTO
+): AgentMessage & { temporary: boolean } => {
+  const messageRole = dto.role as
+    | "function"
+    | "user"
+    | "tool"
+    | "system"
+    | "assistant";
+
   switch (messageRole) {
     case "user":
     case "system": {
       return {
         role: messageRole,
         content: dto.content,
-        temporary: dto.temporary
-      }
+        temporary: dto.temporary,
+      };
     }
     case "function": {
       return {
         role: messageRole,
         content: dto.content,
         temporary: dto.temporary,
-        name: dto.name as string
-      }
+        name: dto.name as string,
+      };
     }
     case "assistant": {
       return {
@@ -75,7 +84,7 @@ const mapMessageDTOtoMessage = (dto: MessageDTO): AgentMessage & { temporary: bo
         // TODO: Json casting
         function_call: dto.function_call as any,
         tool_calls: dto.tool_calls as any,
-      }
+      };
     }
     case "tool": {
       return {
@@ -83,42 +92,38 @@ const mapMessageDTOtoMessage = (dto: MessageDTO): AgentMessage & { temporary: bo
         content: dto.content,
         temporary: dto.temporary,
         tool_call_id: dto.tool_call_id as string,
-      }
+      };
     }
   }
-}
+};
 
 const mapChatDTOtoChat = (dto: ChatDTO): Chat => {
-  const messages = dto.messages.map(mapMessageDTOtoMessage)
-  const variables = new Map(
-    dto.variables.map(v => ([v.key, v.value]))
-  )
-  const logs = dto.logs.map(log => ({
+  const messages = dto.messages.map(mapMessageDTOtoMessage);
+  const variables = new Map(dto.variables.map((v) => [v.key, v.value]));
+  const logs = dto.logs.map((log) => ({
     ...log,
-    content: log.content ?? undefined
-  }))
+    content: log.content ?? undefined,
+  }));
 
   return {
     id: dto.id,
     created_at: dto.created_at,
     messages,
     variables,
-    logs
-  }
-}
+    logs,
+  };
+};
 
 export const useChats = () => {
-  const { data: session } = useSession()
+  const { data: session } = useSession();
+  const supabase = createSupabaseClient(session?.supabaseAccessToken as string);
 
   return useQuery({
-    queryKey: ['chats'],
+    queryKey: ["chats"],
     enabled: !!session?.user?.email,
     refetchOnMount: false,
     queryFn: async () => {
-      const supabase = createSupabaseClient(session?.supabaseAccessToken as string)
-      const { data, error } = await supabase
-        .from('chats')
-        .select(`
+      const { data, error } = await supabase.from("chats").select(`
           id,
           created_at,
           logs(id, created_at, title, content, user),
@@ -134,14 +139,14 @@ export const useChats = () => {
             role,
             tool_call_id
           )
-        `)
+        `);
 
       if (error) {
-        console.error(error)
-        throw new Error(error.message)
+        console.error(error);
+        throw new Error(error.message);
       }
 
-      return data.map(mapChatDTOtoChat)
-    }
-  })
-}
+      return data.map(mapChatDTOtoChat);
+    },
+  });
+};

@@ -1,40 +1,42 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useSession } from "next-auth/react"
-import { createSupabaseClient } from "../supabase/supabase"
-import { Chat } from "../queries/useChats"
+import { Chat } from "../queries/useChats";
+import { useSupabaseClient } from "../supabase/useSupabaseClient";
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useCreateChat = () => {
-  const { data: session } = useSession()
-  const queryClient = useQueryClient()
-  
+  const supabase = useSupabaseClient();
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (chatId: string) => {
-      const supabase = createSupabaseClient(session?.supabaseAccessToken as string)
       const { data, error } = await supabase
         .from("chats")
         .insert({
-          id: chatId
+          id: chatId,
         })
-        .select("id")
+        .select("id");
 
       if (error) {
         throw new Error(error.message);
       }
 
-      return data[0]
+      return data[0];
     },
     onMutate: async (chatId: string) => {
-      await queryClient.cancelQueries({ queryKey: ['chats'] })
-      queryClient.setQueryData<Chat[]>(['chats'], (old) => [...(old ?? []), {
-        id: chatId,
-        messages: [],
-        logs: [],
-        variables: new Map(),
-        created_at: new Date().toISOString()
-      }])
+      await queryClient.cancelQueries({ queryKey: ["chats"] });
+      queryClient.setQueryData<Chat[]>(["chats"], (old) => [
+        ...(old ?? []),
+        {
+          id: chatId,
+          messages: [],
+          logs: [],
+          variables: new Map(),
+          created_at: new Date().toISOString(),
+        },
+      ]);
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['chats'] })
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["chats"] });
     },
-  })
-}
+  });
+};

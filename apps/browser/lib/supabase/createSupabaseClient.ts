@@ -1,7 +1,11 @@
-import { createClient } from "@supabase/supabase-js";
 import { Database } from "./dbTypes";
+import { EvoSupabaseClient } from "./EvoSupabaseClient";
 
-export const createSupabaseClient = (supabaseAccessToken: string) => {
+import { createClient } from "@supabase/supabase-js";
+
+export const createSupabaseClient = (
+  supabaseAccessToken: string
+): EvoSupabaseClient => {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
     throw Error("Env missing NEXT_PUBLIC_SUPABASE_URL");
   }
@@ -16,11 +20,11 @@ export const createSupabaseClient = (supabaseAccessToken: string) => {
     {
       global: {
         headers: {
-          Authorization: `Bearer ${supabaseAccessToken}`,
+          authorization: `Bearer ${supabaseAccessToken}`,
         },
       },
     }
-  )
+  );
 
   return client;
-}
+};

@@ -15,63 +15,56 @@ import { ChatLogType, ChatMessage as AgentMessage } from "@evo-ninja/agents";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { SupabaseBucketWorkspace } from "@/lib/supabase/SupabaseBucketWorkspace";
-import { createSupabaseClient } from "@/lib/supabase/supabase";
 import { useAtom } from "jotai";
 import { userWorkspaceAtom } from "@/lib/store";
 import { useRouter } from "next/navigation";
 import { errorAtom } from "@/lib/store";
+import { useSupabaseClient } from "@/lib/supabase/useSupabaseClient";
 
 function Dojo({ params }: { params: { id?: string } }) {
-  const { mutateAsync: createChat } = useCreateChat()
-  const { mutateAsync: addMessages } = useAddMessages()
-  const { mutateAsync: addChatLog } = useAddChatLog()
-  const { mutateAsync: addVariable } = useAddVariable()
-  
+  const { mutateAsync: createChat } = useCreateChat();
+  const { mutateAsync: addMessages } = useAddMessages();
+  const { mutateAsync: addChatLog } = useAddChatLog();
+  const { mutateAsync: addVariable } = useAddVariable();
+
   const { handlePromptAuth } = useHandleAuth();
   const checkForUserFiles = useCheckForUserFiles();
-  const router = useRouter()
-  const [, setError] = useAtom(errorAtom)
+  const router = useRouter();
+  const [, setError] = useAtom(errorAtom);
 
-  const { status: sessionStatus, data: session } = useSession()
-  const { data: chats } = useChats()
+  const { status: sessionStatus, data: session } = useSession();
+  const { data: chats } = useChats();
 
-  const chatIdRef = useRef<string | undefined>(params.id)
+  const chatIdRef = useRef<string | undefined>(params.id);
   const isAuthenticatedRef = useRef<boolean>(false);
-  const inMemoryLogsRef = useRef<ChatMessage[]>([])
-  const [, setUserWorkspace] = useAtom(userWorkspaceAtom);
+  const inMemoryLogsRef = useRef<ChatMessage[]>([]);
 
-  const [inMemoryLogs, setInMemoryLogs] = useState<ChatMessage[]>([])
+  const [inMemoryLogs, setInMemoryLogs] = useState<ChatMessage[]>([]);
 
-  const currentChat = chats?.find(c => c.id === chatIdRef.current)
-  const logs = currentChat?.logs ?? []
+  const currentChat = chats?.find((c) => c.id === chatIdRef.current);
+  const logs = currentChat?.logs ?? [];
   const logsToShow = isAuthenticatedRef.current ? logs : inMemoryLogs;
 
-   useEffect(() => {
-    if (session?.supabaseAccessToken && chatIdRef.current) {
-      const { storage } = createSupabaseClient(session.supabaseAccessToken)
-      const supabaseWorkspace = new SupabaseBucketWorkspace(
-        chatIdRef.current,
-        storage
-      );
-      setUserWorkspace(supabaseWorkspace)
-    }
-  }, [chatIdRef.current])
+  useUserWorkspace(chatIdRef.current);
 
-  const onMessagesAdded = async (type: ChatLogType, messages: AgentMessage[]) => {
+  const onMessagesAdded = async (
+    type: ChatLogType,
+    messages: AgentMessage[]
+  ) => {
     if (!isAuthenticatedRef.current) {
       return;
     }
 
     if (!chatIdRef.current) {
-      throw new Error("No ChatID to add messages")
+      throw new Error("No ChatID to add messages");
     }
 
     await addMessages({
       chatId: chatIdRef.current,
       messages,
-      type
-    })
-  }
+      type,
+    });
+  };
 
   const onVariableSet = async (key: string, value: string) => {
     if (!isAuthenticatedRef.current) {
@@ -79,31 +72,31 @@ function Dojo({ params }: { params: { id?: string } }) {
     }
 
     if (!chatIdRef.current) {
-      throw new Error("No ChatID to add variable")
+      throw new Error("No ChatID to add variable");
     }
 
     await addVariable({
       chatId: chatIdRef.current,
       key,
-      value
-    })
-  }
+      value,
+    });
+  };
 
   const onChatLog = async (log: ChatMessage) => {
     checkForUserFiles();
 
     if (!isAuthenticatedRef.current) {
-      inMemoryLogsRef.current = [...inMemoryLogsRef.current, log]
-      setInMemoryLogs(inMemoryLogsRef.current)
+      inMemoryLogsRef.current = [...inMemoryLogsRef.current, log];
+      setInMemoryLogs(inMemoryLogsRef.current);
       return;
     }
 
     if (!chatIdRef.current) {
-      throw new Error("No ChatID to add chat log")
+      throw new Error("No ChatID to add chat log");
     }
 
-    await addChatLog({ chatId: chatIdRef.current, log })
-  }
+    await addChatLog({ chatId: chatIdRef.current, log });
+  };
 
   const handleSend = async (newMessage: string) => {
     if (!newMessage) return;
@@ -114,14 +107,14 @@ function Dojo({ params }: { params: { id?: string } }) {
     }
 
     if (!currentChat?.messages.length && isAuthenticatedRef.current) {
-      const chatId = uuid()
-      const createdChat = await createChat(chatId)
+      const chatId = uuid();
+      const createdChat = await createChat(chatId);
 
       if (!createdChat) {
         return;
       }
 
-      chatIdRef.current = createdChat.id
+      chatIdRef.current = createdChat.id;
 
       window.history.pushState(null, "Chat", `/chat/${chatId}`);
     }
@@ -146,33 +139,37 @@ function Dojo({ params }: { params: { id?: string } }) {
   } = useEvo({
     onChatLog,
     onMessagesAdded,
-    onVariableSet
+    onVariableSet,
   });
 
   useEffect(() => {
     if (sessionStatus === "authenticated") {
-      isAuthenticatedRef.current = true
+      isAuthenticatedRef.current = true;
     }
-  }, [sessionStatus])
+  }, [sessionStatus]);
 
   useEffect(() => {
     if (sessionStatus === "unauthenticated" && params.id) {
-      router.push('/')
+      router.push("/");
       return;
     }
 
-    if (sessionStatus === "authenticated" && params.id && chats && !currentChat) {
-      setError(`Chat with id '${params.id}' not found`)
-      router.push('/')
+    if (
+      sessionStatus === "authenticated" &&
+      params.id &&
+      chats &&
+      !currentChat
+    ) {
+      setError(`Chat with id '${params.id}' not found`);
+      router.push("/");
       return;
     }
-
-  }, [sessionStatus, currentChat, params.id])
+  }, [sessionStatus, currentChat, params.id]);
 
   return (
     <Chat
       messages={logsToShow}
-      samplePrompts={!chatIdRef.current? examplePrompts: undefined}
+      samplePrompts={!chatIdRef.current ? examplePrompts : undefined}
       isPaused={isPaused}
       isRunning={isRunning}
       isSending={isSending}
@@ -185,3 +182,20 @@ function Dojo({ params }: { params: { id?: string } }) {
 }
 
 export default Dojo;
+
+const useUserWorkspace = (chatId: string | undefined) => {
+  const supabase = useSupabaseClient();
+  const [, setUserWorkspace] = useAtom(userWorkspaceAtom);
+
+  useEffect(() => {
+    if (!chatId) {
+      return;
+    }
+
+    const supabaseWorkspace = new SupabaseBucketWorkspace(
+      chatId,
+      supabase.storage
+    );
+    setUserWorkspace(supabaseWorkspace);
+  }, [chatId]);
+};
