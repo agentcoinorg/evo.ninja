@@ -57,11 +57,11 @@ export class WrapClient extends PolywrapClient {
           return await workspace.readFile(args.path);
         },
         "writeFileSync": async (args: any) => {
-          await await workspace.writeFile(args.path, args.data.toString());
+          await workspace.writeFile(args.path, args.data.toString());
           return true;
         },
         "appendFileSync": async (args: any) => {
-          await await workspace.appendFile(args.path, args.data.toString());
+          await workspace.appendFile(args.path, args.data.toString());
           return true;
         },
         "existsSync": async (args: any) => {
@@ -71,7 +71,7 @@ export class WrapClient extends PolywrapClient {
           return await workspace.rename(args.oldPath, args.newPath);
         },
         "mkdirSync": async (args: any) => {
-          await await workspace.mkdir(args.path);
+          await workspace.mkdir(args.path);
           return true;
         },
         "readdirSync": async (args: any) => {
