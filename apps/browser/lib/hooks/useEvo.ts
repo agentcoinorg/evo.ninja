@@ -31,6 +31,7 @@ import {
   localOpenAiApiKeyAtom,
   userWorkspaceAtom,
 } from "@/lib/store";
+import { SupabaseBucketWorkspace } from "@/app/api/agent-jobs/SupabaseBucketWorkspace";
 
 interface UseEvoArgs {
   onChatLog: (message: ChatMessage) => Promise<void>;
@@ -130,6 +131,7 @@ export function useEvo({
 
         if (!workspace) {
           workspace = new InMemoryWorkspace();
+          // workspace = new SupabaseBucketWorkspace();
           setUserWorkspace(workspace);
         }
 

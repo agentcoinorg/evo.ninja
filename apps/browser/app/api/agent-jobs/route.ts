@@ -9,19 +9,20 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   // const threadId = request.threadId as string;
 
   // console.log("Adding job to the queue: " + threadId);
-  const bucketName = "jure-bucket";
+  const bucketName = "workspace";
 
   const workspace = new SupabaseBucketWorkspace(bucketName, supabase.storage);
 
   await workspace.init();
-  console.log("Workspace initialized", await workspace.exists("AbA.txt"));
-  const testFile1 = await workspace.readFile("AbA.txt");
-  console.log("Test file1 written", testFile1);
-
-  await workspace.writeFile("hey.txt", "Hello world from the test dir2!");
-
-  const dir = await workspace.readdir("./test2");
-  console.log("Dir", dir);
+  console.log("Workspace initialized");
+  // const testFile1 = await workspace.readFile("AbA.txt");
+  // console.log("Test file1 written", testFile1);
+  
+  // await workspace.writeFile("hey2.txt", "Hello world from the test dir2!");
+  console.log(await workspace.exists("hey2.txt"))
+  // console.log("written")
+  // const dir = await workspace.readdir("./test2");
+  // console.log("Dir", dir);
   // const file = await workspace.readFile("hello.txt");
 
   // console.log("File written", file);
@@ -59,16 +60,4 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   // console.log("Dir3", dir3);
 
   return NextResponse.json({}, { status: 200 });
-
-  // const result = await evoAgentJobScheduler.startJob(threadId);
-
-  // if (!result.ok) {
-  //   return res.status(500).json({
-  //     error: "Failed to add job to the queue",
-  //   });
-  // }
-
-  // return res.status(200).json({
-  //   jobId: result.value.id,
-  // });
 }
