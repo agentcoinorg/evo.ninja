@@ -98,7 +98,7 @@ function Dojo({ params }: { params: { id?: string } }) {
       return;
     }
 
-    if (!currentChat?.messages.length && isAuthenticatedRef.current) {
+    if (!currentChat?.messages.length && isAuthenticatedRef.current && !params.id) {
       const chatId = uuid()
       const createdChat = await createChat(chatId)
 
