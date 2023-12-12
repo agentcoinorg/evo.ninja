@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "evopynja"
+version = "0.1.0"
+description = ""
+authors = ["Nestor Amesty <nestor09amesty@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.10.12"
+langchain = "^0.0.349"
+pyautogen = "^0.2.2"
+beautifulsoup4 = "^4.12.2"
+click = "^8.1.7"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
