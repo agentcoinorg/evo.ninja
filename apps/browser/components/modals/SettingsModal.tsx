@@ -3,8 +3,8 @@ import React from "react";
 import { useAtom } from "jotai";
 import { capReachedAtom } from "@/lib/store";
 import { FloppyDisk, WarningCircle } from "@phosphor-icons/react";
-import Modal from "./Modal";
-import Button from "./Button";
+import Modal from "./ModalBase";
+import Button from "../Button";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { useAccountConfig } from "@/lib/hooks/useAccountConfig";
 

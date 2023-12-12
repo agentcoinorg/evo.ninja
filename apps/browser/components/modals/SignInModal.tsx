@@ -1,6 +1,6 @@
 import React from "react";
-import Modal from "./Modal";
-import Button from "./Button";
+import Modal from "./ModalBase";
+import Button from "../Button";
 import { SignOut } from "@phosphor-icons/react";
 import Image from "next/image";
 import { signIn, signOut, useSession } from "next-auth/react";

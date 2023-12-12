@@ -6,11 +6,11 @@ import {
 } from "@phosphor-icons/react";
 import clsx from "clsx";
 import React, { forwardRef, useEffect, useState } from "react";
-import SettingsModal from "./SettingsModal";
+import SettingsModal from "./modals/SettingsModal";
 import { useAtom } from "jotai";
 import { allowTelemetryAtom, capReachedAtom, localOpenAiApiKeyAtom } from "@/lib/store";
 import { useSession, signOut } from "next-auth/react";
-import SignInModal from "./SignInModal";
+import SignInModal from "./modals/SignInModal";
 
 interface DropdownAccountProps {
   dropdownOpen: boolean;

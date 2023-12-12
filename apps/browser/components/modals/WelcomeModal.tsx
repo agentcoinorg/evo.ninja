@@ -1,5 +1,5 @@
 import React from "react";
-import Modal from "../Modal";
+import Modal from "./ModalBase";
 import Button from "../Button";
 import { ArrowRight, SignOut } from "@phosphor-icons/react";
 import Image from "next/image";

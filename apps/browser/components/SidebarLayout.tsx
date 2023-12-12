@@ -71,7 +71,6 @@ export default function SidebarLayout({
             <Sidebar
               hoveringSidebarButton={hoveringSidebarButton}
               sidebarOpen={sidebarOpen}
-              // onSettingsClick={() => setAccountModalOpen(true)}
               userFiles={userFiles}
               onUploadFiles={setUploadedFiles}
               setSidebarOpen={setSidebarOpen}

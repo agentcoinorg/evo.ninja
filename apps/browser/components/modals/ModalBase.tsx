@@ -4,7 +4,7 @@ import { Fragment } from "react";
 import { Ubuntu_FONT } from "@/lib/fonts";
 import clsx from "clsx";
 import { X } from "@phosphor-icons/react";
-import Button from "./Button";
+import Button from "../Button";
 
 interface ModalProps {
   title: string;

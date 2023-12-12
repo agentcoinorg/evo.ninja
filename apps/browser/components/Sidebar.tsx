@@ -9,7 +9,7 @@ import AvatarBlockie from "./AvatarBlockie";
 import Button from "./Button";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";
 import { useChats } from "@/lib/queries/useChats";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { v4 as uuid } from "uuid";
 import useWindowSize from "@/lib/hooks/useWindowSize";
 import { useSession } from "next-auth/react";
