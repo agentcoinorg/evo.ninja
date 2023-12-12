@@ -95,19 +95,10 @@ function Dojo({ params }: { params: { id?: string } }) {
 
   const handleSend = async (newMessage: string) => {
     if (!newMessage) return;
-    const authorized = await handlePromptAuth(newMessage);
 
-    if (!authorized) {
-      return;
-    }
-
-    if (
-      !currentChat?.messages.length &&
-      isAuthenticatedRef.current &&
-      !params.id
-    ) {
+    if (!currentChat?.messages.length && isAuthenticatedRef.current && !params.id) {
       const chatId = uuid();
-      const createdChat = await createChat(chatId);
+      const createdChat = await createChat(chatId)
 
       if (!createdChat) {
         return;
@@ -117,6 +108,13 @@ function Dojo({ params }: { params: { id?: string } }) {
 
       window.history.pushState(null, "Chat", `/chat/${chatId}`);
     }
+
+    const authorized = await handlePromptAuth(newMessage, chatIdRef.current);
+
+    if (!authorized) {
+      return;
+    }
+
     await onChatLog({
       title: newMessage,
       user: "user",

@@ -62,8 +62,9 @@ export class Evo extends Agent<GoalRunArgs> {
       await buildDirectoryPreviewMsg(this.context.workspace),
       { role: "user", content: prompts.exhaustAllApproaches },
       { role: "user", content: prompts.variablesExplainer },
+      { role: "user", content: prompts.evoExplainer },
       { role: "user", content: args.goal },
-    ]
+    ];
 
     await chat.persistent(initialMessages);
     this.goal = args.goal;
