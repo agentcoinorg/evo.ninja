@@ -1,10 +1,15 @@
-import { GearSix, UserCirclePlus } from "@phosphor-icons/react";
+import {
+  GearSix,
+  Question,
+  SignOut,
+  UserCirclePlus,
+} from "@phosphor-icons/react";
 import clsx from "clsx";
 import React, { forwardRef, useState } from "react";
 import SettingsModal from "./SettingsModal";
 import { useAtom } from "jotai";
 import { allowTelemetryAtom, localOpenAiApiKeyAtom } from "@/lib/store";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import SignInModal from "./SignInModal";
 
 interface DropdownAccountProps {
@@ -55,13 +60,32 @@ const DropdownAccount: React.ForwardRefRenderFunction<
           <GearSix size={16} weight="bold" />
           <div className="leading-none">Account Settings</div>
         </div>
-        <div
-          className="flex w-full cursor-pointer items-center space-x-2 rounded-md p-2 text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white"
-          onClick={handleSignInClick}
+        <a
+          className="flex w-full cursor-pointer items-center space-x-2 rounded-md p-2 text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white md:hidden"
+          href="https://discord.gg/r3rwh69cCa"
+          target="_blank"
+          rel="noopener noreferrer"
         >
-          <UserCirclePlus size={16} weight="bold" />
-          <div className="leading-none">Sign In</div>
-        </div>
+          <Question size={16} weight="bold" />
+          <div className="leading-none">Support</div>
+        </a>
+        {session?.user.email ? (
+          <div
+            className="flex w-full cursor-pointer items-center space-x-2 rounded-md p-2 text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white"
+            onClick={() => signOut()}
+          >
+            <SignOut size={16} weight="bold" />
+            <div className="leading-none">Sign Out</div>
+          </div>
+        ) : (
+          <div
+            className="flex w-full cursor-pointer items-center space-x-2 rounded-md p-2 text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white"
+            onClick={handleSignInClick}
+          >
+            <UserCirclePlus size={16} weight="bold" />
+            <div className="leading-none">Sign In</div>
+          </div>
+        )}
       </div>
       <SettingsModal
         isOpen={isSettingsModalOpen}
