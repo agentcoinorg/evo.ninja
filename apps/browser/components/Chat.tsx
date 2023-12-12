@@ -105,6 +105,7 @@ const Chat: React.FC<ChatProps> = ({
       });
     }
   }, [logs, isAtBottom]);
+  console.log("LogsX", logs);
 
   return (
     <div className="flex h-full flex-col bg-[#0A0A0A] text-white">

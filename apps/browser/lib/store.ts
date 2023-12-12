@@ -1,9 +1,9 @@
 import { ProxyEmbeddingApi, ProxyLlmApi } from "./api";
 
-import { Workspace } from "@evo-ninja/agent-utils";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
+import { SupabaseBucketWorkspace } from "./supabase/SupabaseBucketWorkspace";
 
 export const localOpenAiApiKeyAtom = atomWithStorage<string | null>(
   "openai-api-key",
@@ -17,7 +17,9 @@ export const errorAtom = atom<string | undefined>(undefined);
 export const showAccountModalAtom = atom<boolean>(false);
 export const userFilesAtom = atom<InMemoryFile[]>([]);
 export const uploadedFilesAtom = atom<InMemoryFile[]>([]);
-export const userWorkspaceAtom = atom<Workspace | undefined>(undefined);
+export const userWorkspaceAtom = atom<SupabaseBucketWorkspace | undefined>(
+  undefined
+);
 export const sidebarAtom = atom<boolean>(true);
 export const chatIdAtom = atom<string | undefined>(undefined);
 export const proxyLlmAtom = atom<ProxyLlmApi | undefined>(undefined);

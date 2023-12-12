@@ -6,7 +6,7 @@ const MAX_FILE_SIZE = "20MB";
 
 export class SupabaseBucketWorkspace {
   constructor(
-    private readonly chatId: string,
+    public readonly chatId: string,
     private readonly supabaseStorage: StorageClient
   ) {}
 

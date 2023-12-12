@@ -1,9 +1,9 @@
-import { useCheckForUserFiles } from "@/lib/hooks/useCheckForUserFiles";
+import { useCheckForEvoWorkspaceFiles } from "@/lib/hooks/useCheckForEvoWorkspaceFiles";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";
 import { chatIdAtom, uploadedFilesAtom, userWorkspaceAtom } from "@/lib/store";
 import { Workspace } from "@evo-ninja/agent-utils";
 import { useAtom } from "jotai";
-import { use, useEffect } from "react";
+import { useEffect } from "react";
 
 export default function WorkspaceFilesProvider({
   children,
@@ -13,7 +13,7 @@ export default function WorkspaceFilesProvider({
   const [uploadedFiles] = useAtom(uploadedFilesAtom);
   const [userWorkspace] = useAtom(userWorkspaceAtom);
   const [chatId] = useAtom(chatIdAtom);
-  const checkForUserFiles = useCheckForUserFiles();
+  const checkForEvoWorkspaceFiles = useCheckForEvoWorkspaceFiles();
   const createChat = useCreateChat();
 
   const onUploadFiles = async (workspace: Workspace) => {
@@ -22,7 +22,7 @@ export default function WorkspaceFilesProvider({
         workspace.writeFile(file.path, new TextDecoder().decode(file.content))
       )
     );
-    await checkForUserFiles();
+    await checkForEvoWorkspaceFiles();
   };
 
   useEffect(() => {

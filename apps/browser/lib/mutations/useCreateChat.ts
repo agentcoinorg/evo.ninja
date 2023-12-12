@@ -6,11 +6,10 @@ import { useSupabaseClient } from "../supabase/useSupabaseClient";
 import { useAtom } from "jotai";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { v4 as uuid } from "uuid";
-import { Workspace } from "@evo-ninja/agent-utils";
 
 export const useCreateChat = (): (() => Promise<{
   chatId: string;
-  workspace: Workspace;
+  workspace: SupabaseBucketWorkspace;
 }>) => {
   const supabase = useSupabaseClient();
   const queryClient = useQueryClient();

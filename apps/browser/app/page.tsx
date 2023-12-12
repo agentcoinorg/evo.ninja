@@ -2,7 +2,7 @@
 
 import Chat, { ChatLog } from "@/components/Chat";
 import { examplePrompts } from "@/lib/examplePrompts";
-import { useCheckForUserFiles } from "@/lib/hooks/useCheckForUserFiles";
+import { useCheckForEvoWorkspaceFiles } from "@/lib/hooks/useCheckForEvoWorkspaceFiles";
 import { useEvo } from "@/lib/hooks/useEvo";
 import { useHandleAuth } from "@/lib/hooks/useHandleAuth";
 import { useAddChatLog } from "@/lib/mutations/useAddChatLog";
@@ -16,46 +16,58 @@ import { useEffect, useRef, useState } from "react";
 import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
 import { chatIdAtom, errorAtom, userWorkspaceAtom } from "@/lib/store";
+import { SupabaseBucketWorkspace } from "@/lib/supabase/SupabaseBucketWorkspace";
 import { useSupabaseClient } from "@/lib/supabase/useSupabaseClient";
 
 function Dojo({ params }: { params: { id?: string } }) {
   const createChat = useCreateChat();
+  const supabase = useSupabaseClient();
   const { mutateAsync: addMessages } = useAddMessages();
   const { mutateAsync: addChatLog } = useAddChatLog();
   const { mutateAsync: addVariable } = useAddVariable();
 
   const { handlePromptAuth } = useHandleAuth();
-  const checkForUserFiles = useCheckForUserFiles();
+  const checkForEvoWorkspaceFiles = useCheckForEvoWorkspaceFiles();
   const router = useRouter();
   const [, setError] = useAtom(errorAtom);
-  const [_, setChatId] = useAtom(chatIdAtom);
-  const supabase = useSupabaseClient();
-  const [, setUserWorkspace] = useAtom(userWorkspaceAtom);
-  const chatIdRef = useRef<string | undefined>(undefined);
+  const chatIdRef = useRef<string | undefined>(params.id);
+  const [goal, setGoal] = useState<string | undefined>(undefined);
+  const [userWorkspace, setUserWorkspace] = useAtom(userWorkspaceAtom);
 
-  const { status: sessionStatus, data: session } = useSession();
+  const { status: sessionStatus } = useSession();
   const { data: chats } = useChats();
 
   const isAuthenticatedRef = useRef<boolean>(false);
   const inMemoryLogsRef = useRef<ChatLog[]>([]);
 
   const [inMemoryLogs, setInMemoryLogs] = useState<ChatLog[]>([]);
-
   const currentChat = chats?.find((c) => c.id === chatIdRef.current);
-  const logs = currentChat?.logs ?? [];
-  const logsToShow = isAuthenticatedRef.current ? logs : inMemoryLogs;
+
+  const [logsToShow, setLogsToShow] = useState<ChatLog[]>([]);
+
+  useEffect(() => {
+    const logs = currentChat?.logs ?? [];
+
+    setLogsToShow(isAuthenticatedRef.current ? logs : inMemoryLogs);
+  }, [chats, chatIdRef.current]);
 
   useEffect(() => {
     (async () => {
-      if (!params.id) {
+      if (!chatIdRef.current) {
         return;
       }
 
-      console.log("Setting chat id", params.id);
-      setChatId(params.id);
-      chatIdRef.current = params.id;
+      if (userWorkspace?.chatId != chatIdRef.current) {
+        const workspace = new SupabaseBucketWorkspace(
+          chatIdRef.current,
+          supabase.storage
+        );
+        setUserWorkspace(workspace);
+        await checkForEvoWorkspaceFiles(workspace);
+        console.log("Set workspace", workspace);
+      }
     })();
-  }, [params.id]);
+  }, [chatIdRef.current]);
 
   const onMessagesAdded = async (
     type: ChatLogType,
@@ -93,7 +105,8 @@ function Dojo({ params }: { params: { id?: string } }) {
   };
 
   const onChatLog = async (log: ChatLog) => {
-    checkForUserFiles();
+    console.log("On chat log", log);
+    await checkForEvoWorkspaceFiles();
 
     if (!isAuthenticatedRef.current) {
       inMemoryLogsRef.current = [...inMemoryLogsRef.current, log];
@@ -114,6 +127,7 @@ function Dojo({ params }: { params: { id?: string } }) {
     if (!currentChat?.messages.length && isAuthenticatedRef.current) {
       const { chatId } = await createChat();
       chatIdRef.current = chatId;
+      console.log("Created chat", chatId);
     }
 
     const authorized = await handlePromptAuth(newMessage, chatIdRef.current);
@@ -129,6 +143,8 @@ function Dojo({ params }: { params: { id?: string } }) {
 
     setIsSending(true);
     start(newMessage);
+    setGoal(newMessage);
+    console.log("Sending", newMessage);
   };
 
   const {
@@ -144,6 +160,7 @@ function Dojo({ params }: { params: { id?: string } }) {
     onChatLog,
     onMessagesAdded,
     onVariableSet,
+    goal,
   });
 
   useEffect(() => {
@@ -173,7 +190,7 @@ function Dojo({ params }: { params: { id?: string } }) {
   return (
     <Chat
       logs={logsToShow}
-      samplePrompts={!logsToShow.length ? examplePrompts : undefined}
+      samplePrompts={!logsToShow?.length ? examplePrompts : undefined}
       isPaused={isPaused}
       isRunning={isRunning}
       isSending={isSending}
