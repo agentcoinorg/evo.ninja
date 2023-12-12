@@ -29,9 +29,10 @@ function Dojo({ params }: { params: { id?: string } }) {
   const checkForUserFiles = useCheckForUserFiles();
   const router = useRouter();
   const [, setError] = useAtom(errorAtom);
-  const [chatId, setChatId] = useAtom(chatIdAtom);
+  const [_, setChatId] = useAtom(chatIdAtom);
   const supabase = useSupabaseClient();
   const [, setUserWorkspace] = useAtom(userWorkspaceAtom);
+  const chatIdRef = useRef<string | undefined>(undefined);
 
   const { status: sessionStatus, data: session } = useSession();
   const { data: chats } = useChats();
@@ -41,7 +42,7 @@ function Dojo({ params }: { params: { id?: string } }) {
 
   const [inMemoryLogs, setInMemoryLogs] = useState<ChatMessage[]>([]);
 
-  const currentChat = chats?.find((c) => c.id === chatId);
+  const currentChat = chats?.find((c) => c.id === chatIdRef.current);
   const logs = currentChat?.logs ?? [];
   const logsToShow = isAuthenticatedRef.current ? logs : inMemoryLogs;
 
@@ -52,13 +53,8 @@ function Dojo({ params }: { params: { id?: string } }) {
       }
 
       console.log("Setting chat id", params.id);
-      const workspace = new SupabaseBucketWorkspace(
-        params.id,
-        supabase.storage
-      );
-      await workspace.init();
       setChatId(params.id);
-      setUserWorkspace(workspace);
+      chatIdRef.current = params.id;
     })();
   }, [params.id]);
 
@@ -70,12 +66,12 @@ function Dojo({ params }: { params: { id?: string } }) {
       return;
     }
 
-    if (!chatId) {
+    if (!chatIdRef.current) {
       throw new Error("No ChatID to add messages");
     }
 
     await addMessages({
-      chatId,
+      chatId: chatIdRef.current,
       messages,
       type,
     });
@@ -86,12 +82,12 @@ function Dojo({ params }: { params: { id?: string } }) {
       return;
     }
 
-    if (!chatId) {
+    if (!chatIdRef.current) {
       throw new Error("No ChatID to add variable");
     }
 
     await addVariable({
-      chatId,
+      chatId: chatIdRef.current,
       key,
       value,
     });
@@ -106,11 +102,11 @@ function Dojo({ params }: { params: { id?: string } }) {
       return;
     }
 
-    if (!chatId) {
+    if (!chatIdRef.current) {
       throw new Error("No ChatID to add chat log");
     }
 
-    await addChatLog({ chatId, log });
+    await addChatLog({ chatId: chatIdRef.current, log });
   };
 
   const handleSend = async (newMessage: string) => {
@@ -122,7 +118,8 @@ function Dojo({ params }: { params: { id?: string } }) {
     }
 
     if (!currentChat?.messages.length && isAuthenticatedRef.current) {
-      await createChat();
+      const { chatId } = await createChat();
+      chatIdRef.current = chatId;
     }
     await onChatLog({
       title: newMessage,

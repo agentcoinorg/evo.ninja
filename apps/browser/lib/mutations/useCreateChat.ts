@@ -1,15 +1,21 @@
 import { useAtom } from "jotai";
 import { Chat } from "../queries/useChats";
-import { chatIdAtom } from "../store";
+import { chatIdAtom, userWorkspaceAtom } from "../store";
 import { useSupabaseClient } from "../supabase/useSupabaseClient";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { v4 as uuid } from "uuid";
+import { Workspace } from "@evo-ninja/agent-utils";
+import { SupabaseBucketWorkspace } from "../supabase/SupabaseBucketWorkspace";
 
-export const useCreateChat = () => {
+export const useCreateChat = (): (() => Promise<{
+  chatId: string;
+  workspace: Workspace;
+}>) => {
   const supabase = useSupabaseClient();
   const queryClient = useQueryClient();
   const [_, setChatId] = useAtom(chatIdAtom);
+  const [_, setUserWorkspace] = useAtom(userWorkspaceAtom);
 
   const { mutateAsync: createChat } = useMutation({
     mutationFn: async (chatId: string) => {
@@ -50,5 +56,13 @@ export const useCreateChat = () => {
     window.history.pushState(null, "Chat", `/chat/${chatId}`);
     await createChat(chatId);
     setChatId(chatId);
+
+    const workspace = new SupabaseBucketWorkspace(chatId, supabase.storage);
+    setUserWorkspace(workspace);
+
+    return {
+      chatId,
+      workspace,
+    };
   };
 };

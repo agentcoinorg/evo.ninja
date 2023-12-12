@@ -10,24 +10,7 @@ export class SupabaseBucketWorkspace {
     private readonly supabaseStorage: StorageClient
   ) {}
 
-  private get bucketName(): string {
-    return `workspace-${this.chatId}`;
-  }
-
-  async init(): Promise<void> {
-    if (await this.doesBucketExist(this.bucketName)) {
-      return;
-    }
-
-    const { error } = await this.supabaseStorage.createBucket(this.bucketName, {
-      public: false,
-      fileSizeLimit: MAX_FILE_SIZE,
-    });
-
-    if (error) {
-      throw error;
-    }
-  }
+  async init(): Promise<void> {}
 
   async writeFile(subpath: string, data: string): Promise<void> {
     const path = this.toWorkspacePath(subpath);
@@ -191,7 +174,7 @@ export class SupabaseBucketWorkspace {
   }
 
   private toWorkspacePath(subpath: string): string {
-    return path.resolve("/", subpath).slice(1);
+    return path.resolve("/", this.chatId, subpath).slice(1);
   }
 
   private toWorkspacePathSegments(subpath: string): string[] {
@@ -210,4 +193,6 @@ export class SupabaseBucketWorkspace {
 
     return true;
   }
+
+  private bucketName = "workspaces";
 }
