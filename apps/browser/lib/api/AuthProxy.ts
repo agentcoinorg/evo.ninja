@@ -1,5 +1,6 @@
 export class AuthProxy {
   public static async checkGoal(
+    chatId: string | undefined,
     message: string,
     subsidize: boolean,
     setCapReached: () => void
@@ -7,6 +8,7 @@ export class AuthProxy {
     const getGoalRequest = await fetch(`/api/goal/create`, {
       method: "POST",
       body: JSON.stringify({
+        chatId,
         message,
         subsidize
       }),

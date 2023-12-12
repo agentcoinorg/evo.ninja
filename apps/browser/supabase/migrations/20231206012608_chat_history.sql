@@ -4,6 +4,8 @@ DROP TABLE chats CASCADE;
 
 DROP TABLE messages CASCADE;
 
+ALTER TABLE "public"."goals" ADD COLUMN chat_id uuid;
+
 CREATE TABLE "public"."chats" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL,

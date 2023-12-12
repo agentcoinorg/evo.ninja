@@ -53,6 +53,7 @@
     "build:scripts": "node scripts/build.scripts.js",
     "build:env": "node scripts/build.env.js",
     "db:start": "supabase start",
+    "db:reset": "supabase db reset",
     "db:stop": "supabase stop",
     "lint": "eslint --color -c ../../.eslintrc.js app/ lib/ components/",
     "start": "next start"
