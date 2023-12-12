@@ -1,9 +1,7 @@
 "use client";
 
 import { v4 as uuid } from "uuid";
-import Chat, { ChatMessage } from "@/components/Chat";
-import CloseSidebarIcon from "@/components/CloseSidebarIcon";
-import Sidebar from "@/components/Sidebar";
+import Chat, { ChatLog } from "@/components/Chat";
 import WelcomeModal from "@/components/modals/WelcomeModal";
 import { examplePrompts } from "@/lib/examplePrompts";
 import { useCheckForUserFiles } from "@/lib/hooks/useCheckForUserFiles";
@@ -14,8 +12,8 @@ import { useAddMessages } from "@/lib/mutations/useAddMessages";
 import { useAddVariable } from "@/lib/mutations/useAddVariable";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";
 import { useChats } from "@/lib/queries/useChats";
+import { ChatLogType, ChatMessage } from "@evo-ninja/agents";
 import { welcomeModalAtom } from "@/lib/store";
-import { ChatLogType, ChatMessage as AgentMessage } from "@evo-ninja/agents";
 import { useAtom } from "jotai";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
@@ -40,15 +38,15 @@ function Dojo({ params }: { params: { id?: string } }) {
 
   const chatIdRef = useRef<string | undefined>(params.id)
   const isAuthenticatedRef = useRef<boolean>(false);
-  const inMemoryLogsRef = useRef<ChatMessage[]>([])
+  const inMemoryLogsRef = useRef<ChatLog[]>([])
 
-  const [inMemoryLogs, setInMemoryLogs] = useState<ChatMessage[]>([])
+  const [inMemoryLogs, setInMemoryLogs] = useState<ChatLog[]>([])
 
   const currentChat = chats?.find(c => c.id === chatIdRef.current)
   const logs = currentChat?.logs ?? []
   const logsToShow = isAuthenticatedRef.current ? logs : inMemoryLogs;
 
-  const onMessagesAdded = async (type: ChatLogType, messages: AgentMessage[]) => {
+  const onMessagesAdded = async (type: ChatLogType, messages: ChatMessage[]) => {
     if (!isAuthenticatedRef.current) {
       return;
     }
@@ -80,7 +78,7 @@ function Dojo({ params }: { params: { id?: string } }) {
     });
   };
 
-  const onChatLog = async (log: ChatMessage) => {
+  const onChatLog = async (log: ChatLog) => {
     checkForUserFiles();
 
     if (!isAuthenticatedRef.current) {
@@ -104,7 +102,7 @@ function Dojo({ params }: { params: { id?: string } }) {
       return;
     }
 
-    if (!currentChat?.messages.length && isAuthenticatedRef.current) {
+    if (!currentChat?.messages.length && isAuthenticatedRef.current && !params.id) {
       const chatId = uuid()
       const createdChat = await createChat(chatId)
 
@@ -162,10 +160,8 @@ function Dojo({ params }: { params: { id?: string } }) {
 
   return (
     <>
-          {/* <div className="relative flex h-full overflow-x-clip"> */}
-
       <Chat
-        messages={logsToShow}
+        logs={logsToShow}
         samplePrompts={!logsToShow.length ? examplePrompts: undefined}
         isPaused={isPaused}
         isRunning={isRunning}

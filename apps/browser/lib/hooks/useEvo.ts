@@ -13,7 +13,7 @@ import {
   Scripts,
   Chat as EvoChat,
   SubWorkspace,
-  ChatMessage as AgentMessage,
+  ChatMessage,
   AgentVariables,
   ChatLogType,
 } from "@evo-ninja/agents";
@@ -23,7 +23,7 @@ import { createInBrowserScripts } from "../scripts";
 import { ProxyEmbeddingApi, ProxyLlmApi } from "../api";
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 import { useAtom } from "jotai";
-import { ChatMessage } from "@/components/Chat";
+import { ChatLog } from "@/components/Chat";
 import {
   capReachedAtom,
   proxyEmbeddingAtom,
@@ -33,8 +33,8 @@ import {
 } from "@/lib/store";
 
 interface UseEvoArgs {
-  onChatLog: (message: ChatMessage) => Promise<void>;
-  onMessagesAdded: (type: ChatLogType, messages: AgentMessage[]) => Promise<void>;
+  onChatLog: (message: ChatLog) => Promise<void>;
+  onMessagesAdded: (type: ChatLogType, messages: ChatMessage[]) => Promise<void>;
   onVariableSet: (key: string, value: string) => Promise<void>;
 }
 

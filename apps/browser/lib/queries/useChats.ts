@@ -1,15 +1,15 @@
 import { useQuery } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
-import { ChatMessage as AgentMessage } from "@evo-ninja/agents"
-import { ChatMessage } from "@/components/Chat"
+import { ChatMessage } from "@evo-ninja/agents"
+import { ChatLog } from "@/components/Chat"
 import { Json } from "../supabase/dbTypes"
 import { createSupabaseClient } from "../supabase/supabase"
 
 export interface Chat {
   id: string;
   created_at: string;
-  messages: AgentMessage[];
-  logs: ChatMessage[];
+  messages: ChatMessage[];
+  logs: ChatLog[];
   variables: Map<string, string>
 }
 
@@ -47,7 +47,7 @@ interface ChatDTO {
   messages: MessageDTO[];
 }
 
-const mapMessageDTOtoMessage = (dto: MessageDTO): AgentMessage & { temporary: boolean } => {
+const mapMessageDTOtoMessage = (dto: MessageDTO): ChatMessage & { temporary: boolean } => {
   const messageRole = dto.role as "function" | "user" | "tool" | "system" | "assistant"
   
   switch (messageRole) {

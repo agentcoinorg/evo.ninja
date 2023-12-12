@@ -48,7 +48,7 @@ const Sidebar = ({
   };
 
   const handleChatClick = (id: string) => {
-    () => router.push(`/chat/${id}`);
+    router.push(`/chat/${id}`);
   };
 
   useEffect(() => {

@@ -36,7 +36,7 @@ import Disclaimer from "./Disclaimer";
 import useWindowSize from "@/lib/hooks/useWindowSize";
 import { useSession } from "next-auth/react";
 
-export interface ChatMessage {
+export interface ChatLog {
   title: string;
   content?: string;
   user: string;
@@ -44,7 +44,7 @@ export interface ChatMessage {
 }
 
 export interface ChatProps {
-  messages: ChatMessage[];
+  logs: ChatLog[];
   samplePrompts?: ExamplePrompt[];
   isRunning: boolean;
   isStopped: boolean;
@@ -58,7 +58,7 @@ export interface ChatProps {
 const chat_name = "New Chat";
 
 const Chat: React.FC<ChatProps> = ({
-  messages,
+  logs,
   samplePrompts,
   onPromptSent,
   onContinue,
@@ -141,7 +141,7 @@ const Chat: React.FC<ChatProps> = ({
         behavior: "smooth",
       });
     }
-  }, [messages, isAtBottom]);
+  }, [logs, isAtBottom]);
 
   return (
     <main
@@ -164,7 +164,7 @@ const Chat: React.FC<ChatProps> = ({
             onScroll={handleScroll}
             className="w-full flex-1 items-center space-y-6 overflow-y-auto overflow-x-clip px-2 py-3 text-left"
           >
-            {messages.map((msg, index) => {
+            {logs.map((msg, index) => {
               return (
                 <div
                   key={index}
@@ -186,7 +186,7 @@ const Chat: React.FC<ChatProps> = ({
                       </>
                     )}
                     <div className="max-w-[calc(100vw-84px)] space-y-2 pt-1 md:max-w-[49rem]">
-                      {index === 0 || messages[index - 1].user !== msg.user ? (
+                      {index === 0 || logs[index - 1].user !== msg.user ? (
                         <div className="SenderName font-medium">
                           {session?.user.name && !msg.user.includes("evo")
                             ? session?.user.name
