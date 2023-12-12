@@ -18,11 +18,7 @@ const Sidebar = ({
   onSettingsClick,
   onSidebarToggleClick,
 }: SidebarProps) => {
-  const [userFiles] = useAtom(userFilesAtom)
-  const [, setUploadedFiles] = useAtom(uploadedFilesAtom)
-  const { data: session } = useSession()
-
-  const downloadUserFiles = useDownloadFilesAsZip()
+  const { data: session } = useSession();
 
   return (
     <div className="box-border flex h-full w-full flex-col items-center justify-between overflow-auto bg-opacity-black p-4">

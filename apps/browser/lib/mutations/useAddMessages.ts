@@ -1,14 +1,14 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useSession } from "next-auth/react"
-import { ChatLogType, ChatMessage } from "@evo-ninja/agents"
-import { Row } from "../supabase/types"
-import { createSupabaseClient } from "../supabase/supabase"
+import { useSupabaseClient } from "../supabase/useSupabaseClient";
+import { Row } from "../supabase/types";
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ChatLogType, ChatMessage } from "@evo-ninja/agents";
 
 const mapChatMessageToMessageDTO = (
   chatId: string,
   temporary: boolean,
   message: ChatMessage
-): Omit<Row<'messages'>, "id" | "created_at"> => {
+): Omit<Row<"messages">, "id" | "created_at"> => {
   switch (message.role) {
     case "user":
     case "system": {

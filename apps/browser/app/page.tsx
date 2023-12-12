@@ -16,7 +16,6 @@ import { useEffect, useRef, useState } from "react";
 import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
 import { chatIdAtom, errorAtom, userWorkspaceAtom } from "@/lib/store";
-import { SupabaseBucketWorkspace } from "@/lib/supabase/SupabaseBucketWorkspace";
 import { useSupabaseClient } from "@/lib/supabase/useSupabaseClient";
 
 function Dojo({ params }: { params: { id?: string } }) {
@@ -38,9 +37,9 @@ function Dojo({ params }: { params: { id?: string } }) {
   const { data: chats } = useChats();
 
   const isAuthenticatedRef = useRef<boolean>(false);
-  const inMemoryLogsRef = useRef<ChatLog[]>([])
+  const inMemoryLogsRef = useRef<ChatLog[]>([]);
 
-  const [inMemoryLogs, setInMemoryLogs] = useState<ChatLog[]>([])
+  const [inMemoryLogs, setInMemoryLogs] = useState<ChatLog[]>([]);
 
   const currentChat = chats?.find((c) => c.id === chatIdRef.current);
   const logs = currentChat?.logs ?? [];
@@ -112,17 +111,6 @@ function Dojo({ params }: { params: { id?: string } }) {
   const handleSend = async (newMessage: string) => {
     if (!newMessage) return;
 
-    if (!currentChat?.messages.length && isAuthenticatedRef.current && !params.id) {
-      const chatId = uuid();
-      const createdChat = await createChat(chatId)
-
-      if (!createdChat) {
-        return;
-      }
-
-      chatIdRef.current = createdChat.id
-
-      window.history.pushState(null, "Chat", `/chat/${chatId}`);
     if (!currentChat?.messages.length && isAuthenticatedRef.current) {
       const { chatId } = await createChat();
       chatIdRef.current = chatId;
