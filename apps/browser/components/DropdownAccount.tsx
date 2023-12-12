@@ -5,10 +5,10 @@ import {
   UserCirclePlus,
 } from "@phosphor-icons/react";
 import clsx from "clsx";
-import React, { forwardRef, useState } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 import SettingsModal from "./SettingsModal";
 import { useAtom } from "jotai";
-import { allowTelemetryAtom, localOpenAiApiKeyAtom } from "@/lib/store";
+import { allowTelemetryAtom, capReachedAtom, localOpenAiApiKeyAtom } from "@/lib/store";
 import { useSession, signOut } from "next-auth/react";
 import SignInModal from "./SignInModal";
 
@@ -27,6 +27,7 @@ const DropdownAccount: React.ForwardRefRenderFunction<
     useState<boolean>(false);
   const [isSignInModalOpen, setIsSignInModalOpen] = useState<boolean>(false);
   const firstTimeUser = !localOpenAiApiKey && !session?.user;
+  const [ capReached ] = useAtom(capReachedAtom)
 
   const handleAccountSettingsClick = () => {
     setIsSettingsModalOpen(true);
@@ -43,6 +44,12 @@ const DropdownAccount: React.ForwardRefRenderFunction<
   const onSignInClose = () => {
     setIsSignInModalOpen(false);
   };
+
+  useEffect(() => {
+    if (capReached) {
+      setIsSettingsModalOpen(true)
+    }
+  }, [capReached])
 
   return (
     <>

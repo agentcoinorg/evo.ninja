@@ -8,7 +8,6 @@ import "@fortawesome/fontawesome-svg-core/styles.css";
 import "react-toastify/dist/ReactToastify.css";
 import SidebarLayout from "@/components/SidebarLayout";
 import { Providers } from "@/components/providers/Providers";
-import { Modals } from "@/components/modals/Modals";
 
 config.autoAddCss = false;
 
@@ -34,7 +33,6 @@ export default function EvoApp({ children }: { children: React.ReactNode }) {
           </Script>
           <Providers>
             <SidebarLayout>{children}</SidebarLayout>
-            <Modals />
           </Providers>
         </div>
       </body>

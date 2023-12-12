@@ -1,20 +1,26 @@
-import React, { ChangeEvent, useState } from "react";
-import { useAtom } from "jotai";
-import { allowTelemetryAtom } from "@/lib/store";
+import React, { ChangeEvent } from "react";
 import TextField from "../TextField";
 
 interface AccountConfigProps {
-  setApiKey: (key: string) => void
-  apiKey: string | null
-  setTelemetry: (telemetry: boolean) => void
-  telemetry: boolean
+  setApiKey: (key: string) => void;
+  apiKey: string | null;
+  setTelemetry: (telemetry: boolean) => void;
+  telemetry: boolean;
   isLoggedIn: boolean;
   showText?: boolean;
-  error: string | undefined
+  error: string | undefined;
 }
 
 function AccountConfig(props: AccountConfigProps) {
-  const { isLoggedIn, showText, apiKey, setApiKey, setTelemetry, telemetry, error } = props;
+  const {
+    isLoggedIn,
+    showText,
+    apiKey,
+    setApiKey,
+    setTelemetry,
+    telemetry,
+    error,
+  } = props;
 
   return (
     <>
@@ -35,6 +41,7 @@ function AccountConfig(props: AccountConfigProps) {
               setApiKey(e.target.value)
             }
             error={error}
+            type="text"
           />
           <div className="text-xs text-zinc-400">
             Don't have an OpenAI key?
