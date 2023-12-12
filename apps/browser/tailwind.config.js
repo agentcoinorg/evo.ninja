@@ -25,7 +25,7 @@ module.exports = {
         DEFAULT: {
           css: {
             pre: {
-              "background-color": theme('colors.zinc.900')
+              "background-color": theme('colors.zinc.950')
             }
           }
         }

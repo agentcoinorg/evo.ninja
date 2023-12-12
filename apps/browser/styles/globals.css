@@ -46,3 +46,7 @@ code {
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-zinc-400 rounded;
 }
+
+::-webkit-scrollbar-corner {
+  @apply bg-transparent;
+}

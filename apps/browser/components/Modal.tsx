@@ -20,7 +20,7 @@ export default function Modal(props: PropsWithChildren<ModalProps>) {
       <Transition appear show={isOpen} as={Fragment}>
         <Dialog
           as="div"
-          className={clsx(Ubuntu_FONT.className, "relative z-10")}
+          className={clsx(Ubuntu_FONT.className, "relative z-30")}
           onClose={onClose}
         >
           <div className="fixed inset-0 overflow-y-auto bg-zinc-400/50 backdrop-blur">
