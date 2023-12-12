@@ -7,10 +7,23 @@ from autogen import UserProxyAgent
 import autogen
 
 load_dotenv()
-brwoserless_api_key = os.getenv("BROWSERLESS_API_KEY")
-config_list = config_list_from_json("OAI_CONFIG_LIST")
 
-# Create user proxy agent
+api_keys = [os.getenv("OPENAI_API_KEY")]
+api_type = "openai"  # Type of API, e.g., "openai"  "aoai".
+
+config_list = autogen.get_config_list(
+    api_keys,
+    
+)
+brwoserless_api_key = os.getenv("BROWSERLESS_API_KEY")
+
+gpt4config = {
+            "config_list": config_list,
+            "model": "gpt-4-0613",
+            "assistant_id": None,
+            "temperature": 0.2,
+            "assistant_id":None
+        }
 
 @click.command()
 @click.option('--goal',
@@ -26,58 +39,44 @@ def main(goal: str):
 
     research_planner = GPTAssistantAgent(
         name="researcher",
-        llm_config={
-            "config_list": config_list,
-            "assistant_id": "asst_dG7xuXtd3j4O6WpdR7hkT8zK"
-        }
+        description="placeholder text",
+        llm_config=gpt4config
     )
 
     researcher = GPTAssistantAgent(
         name="research_manager",
-        llm_config={
-            "config_list": config_list,
-            "assistant_id": "asst_USStI8GI6FFM0XYU2Eip8xKT"
-        }
+        description="placeholder text",
+        llm_config=gpt4config
     )
 
     tech_researcher = GPTAssistantAgent(
         name="researcher",
-        llm_config={
-            "config_list": config_list,
-            "assistant_id": "asst_dFAlb63sfXWGqMTADd6ccEux"
-        }
+        description="placeholder text",
+        llm_config=gpt4config
     )
 
     conflicts_researcher = GPTAssistantAgent(
         name="researcher",
-        llm_config={
-            "config_list": config_list,
-            "assistant_id": "asst_AUHkbN3KlTrKrCru2ivCIBCt"
-        }
+        description="placeholder text",
+        llm_config=gpt4config
     )
 
     economics_researcher = GPTAssistantAgent(
         name="researcher",
-        llm_config={
-            "config_list": config_list,
-            "assistant_id": "asst_LX9C3PQVPBIEG262XF0LU7PB"
-        }
+        description="placeholder text",
+        llm_config=gpt4config
     )
 
     data_analyst = GPTAssistantAgent(
         name="researcher",
-        llm_config={
-            "config_list": config_list,
-            "assistant_id": "asst_SLqASyuY9S1dSQ1gKxRaN5eb"
-        }
+        description="placeholder text",
+        llm_config=gpt4config
     )
 
     historical_analyst = GPTAssistantAgent(
         name="researcher",
-        llm_config={
-            "config_list": config_list,
-            "assistant_id": "asst_B2zz2WIE5EwLeTg8lHn67PHt"
-        }
+        description="placeholder text",
+        llm_config=gpt4config
     )
 
     # Create group chat
@@ -94,7 +93,7 @@ def main(goal: str):
     group_chat_manager = autogen.GroupChatManager(groupchat=groupchat, llm_config={"config_list": config_list})
 
     user_proxy.initiate_chat(group_chat_manager, message=goal)
-    click.echo(f"Hello {name}!")
+    click.echo(f"Hello !")
 
 if __name__ == '__main__':
     main()
