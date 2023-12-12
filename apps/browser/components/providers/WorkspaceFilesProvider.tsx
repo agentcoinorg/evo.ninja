@@ -1,5 +1,6 @@
 import { useCheckForUserFiles } from "@/lib/hooks/useCheckForUserFiles";
-import { uploadedFilesAtom, userWorkspaceAtom } from "@/lib/store";
+import { useCreateChat } from "@/lib/mutations/useCreateChat";
+import { chatIdAtom, uploadedFilesAtom, userWorkspaceAtom } from "@/lib/store";
 import { useAtom } from "jotai";
 import { useEffect } from "react";
 
@@ -10,22 +11,30 @@ export default function WorkspaceFilesProvider({
 }) {
   const [uploadedFiles] = useAtom(uploadedFilesAtom);
   const [userWorkspace] = useAtom(userWorkspaceAtom);
+  const [chatId] = useAtom(chatIdAtom);
   const checkForUserFiles = useCheckForUserFiles();
+  const createChat = useCreateChat();
 
   useEffect(() => {
-    if (!userWorkspace) {
-      return;
-    }
-
     //eslint-disable-next-line @typescript-eslint/no-floating-promises
     (async () => {
+      if (uploadedFiles.length !== 0) {
+        console.log("Uploading...");
+        if (!chatId) {
+          await createChat();
+        }
+      }
+
+      if (!userWorkspace) {
+        return;
+      }
+
       await Promise.all(
-        uploadedFiles.map(
-          async (file) =>
-            await userWorkspace.writeFile(
-              file.path,
-              new TextDecoder().decode(file.content)
-            )
+        uploadedFiles.map((file) =>
+          userWorkspace.writeFile(
+            file.path,
+            new TextDecoder().decode(file.content)
+          )
         )
       );
       await checkForUserFiles();

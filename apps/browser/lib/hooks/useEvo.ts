@@ -69,11 +69,15 @@ export function useEvo({ onChatLog, onMessagesAdded, onVariableSet }: UseEvoArgs
   const [, setEmbeddingProxyApi] = useAtom(proxyEmbeddingAtom);
 
   const [, setCapReached] = useAtom(capReachedAtom);
-  const [userWorkspace, setUserWorkspace] = useAtom(userWorkspaceAtom);
+  const [userWorkspace] = useAtom(userWorkspaceAtom);
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     (async () => {
+      if (!userWorkspace) {
+        return;
+      }
+
       try {
         const browserLogger = new BrowserLogger({
           onLog: async (message: string) => {
@@ -129,13 +133,6 @@ export function useEvo({ onChatLog, onMessagesAdded, onVariableSet }: UseEvoArgs
           setEmbeddingProxyApi(embedding as ProxyEmbeddingApi);
         }
 
-        let workspace = userWorkspace;
-
-        if (!workspace) {
-          workspace = new InMemoryWorkspace();
-          setUserWorkspace(workspace);
-        }
-
         const internals = new SubWorkspace(".evo", new InMemoryWorkspace());
 
         const chat = new EvoChat(cl100k_base, {
@@ -153,7 +150,7 @@ export function useEvo({ onChatLog, onMessagesAdded, onVariableSet }: UseEvoArgs
               embedding,
               chat,
               logger,
-              workspace,
+              userWorkspace,
               internals,
               env,
               scripts,

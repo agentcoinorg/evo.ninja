@@ -1,13 +1,17 @@
+import { useAtom } from "jotai";
 import { Chat } from "../queries/useChats";
+import { chatIdAtom } from "../store";
 import { useSupabaseClient } from "../supabase/useSupabaseClient";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { v4 as uuid } from "uuid";
 
 export const useCreateChat = () => {
   const supabase = useSupabaseClient();
   const queryClient = useQueryClient();
+  const [_, setChatId] = useAtom(chatIdAtom);
 
-  return useMutation({
+  const { mutateAsync: createChat } = useMutation({
     mutationFn: async (chatId: string) => {
       const { data, error } = await supabase
         .from("chats")
@@ -39,4 +43,12 @@ export const useCreateChat = () => {
       await queryClient.invalidateQueries({ queryKey: ["chats"] });
     },
   });
+
+  return async () => {
+    const chatId = uuid();
+
+    window.history.pushState(null, "Chat", `/chat/${chatId}`);
+    await createChat(chatId);
+    setChatId(chatId);
+  };
 };
