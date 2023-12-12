@@ -34,8 +34,10 @@ export class FindScriptFunction extends AgentFunctionBase<FindScriptFuncParamete
 
   buildExecutor({ context }: Agent<unknown>): (params: FindScriptFuncParameters, rawParams?: string) => Promise<AgentFunctionResult> {
     return async (params: FindScriptFuncParameters, rawParams?: string): Promise<AgentFunctionResult> => {
-      const candidates = this.scripts.searchAllScripts(
-        `${params.namespace} ${params.description}`
+      const candidates = (
+        await this.scripts.searchAllScripts(
+          `${params.namespace} ${params.description}`
+        )
       ).slice(0, 5);
 
       if (candidates.length === 0) {

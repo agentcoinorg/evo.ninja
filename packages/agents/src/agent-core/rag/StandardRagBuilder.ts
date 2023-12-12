@@ -1,20 +1,34 @@
 import { v4 as uuid } from "uuid";
 import { AgentContext } from "../agent/AgentContext";
 import { LocalCollection, LocalVectorDB, LocalDocument } from "../embeddings";
-import { Workspace } from "@evo-ninja/agent-utils";
+import { SyncWorkspace, InMemoryWorkspace } from "@evo-ninja/agent-utils";
 
-export type Recombiner<TItem, TRecombine> = (results: () => Promise<AsyncGenerator<LocalDocument<{ index: number }>>>, originalItems: TItem[]) => Promise<TRecombine>;
+export type Recombiner<TItem, TRecombine> = (
+  results: () => Promise<AsyncGenerator<LocalDocument<{ index: number }>>>,
+  originalItems: TItem[]
+) => Promise<TRecombine>;
 
 export class StandardRagBuilder<TItem> {
-  private _selector: (item: TItem) => string = x => x as unknown as string;
+  private _selector: (item: TItem) => string = (x) => x as unknown as string;
   private readonly collection: LocalCollection<{ index: number }>;
   private _items: TItem[];
   private lastAddedItemIndex: number;
 
-  constructor(context: AgentContext, collectionName?: string, workspace?: Workspace, items?: TItem[]) {
-    const db = new LocalVectorDB(workspace ?? context.internals, "ragdb", context.embedding);
+  constructor(
+    context: AgentContext,
+    collectionName?: string,
+    workspace?: SyncWorkspace,
+    items?: TItem[]
+  ) {
+    const db = new LocalVectorDB(
+      workspace ?? new InMemoryWorkspace(),
+      "ragdb",
+      context.embedding
+    );
 
-    this.collection = db.addCollection<{ index: number }>(collectionName ?? uuid());
+    this.collection = db.addCollection<{ index: number }>(
+      collectionName ?? uuid()
+    );
     this._items = items ?? [];
     this.lastAddedItemIndex = items ? items.length - 1 : -1;
   }
@@ -36,7 +50,12 @@ export class StandardRagBuilder<TItem> {
   }
 
   query(queryOrVector: string | number[]): QueryWithRecombine<TItem> {
-    return new QueryWithRecombine<TItem>(queryOrVector, this.collection, this._items, this.forceAddItemsToCollection.bind(this));
+    return new QueryWithRecombine<TItem>(
+      queryOrVector,
+      this.collection,
+      this._items,
+      this.forceAddItemsToCollection.bind(this)
+    );
   }
 
   private async addItemsToCollection(): Promise<void> {
@@ -47,13 +66,15 @@ export class StandardRagBuilder<TItem> {
     }
 
     await this.collection.add(
-      itemsToAdd.map(x => {
+      itemsToAdd.map((x) => {
         const text = this._selector(x);
         if (typeof text != "string") {
-          throw Error("Selector should return a string. Perhaps you forgot to set the selector?");
+          throw Error(
+            "Selector should return a string. Perhaps you forgot to set the selector?"
+          );
         }
         return text;
-      }), 
+      }),
       itemsToAdd.map((_, i) => ({ index: this.lastAddedItemIndex + i + 1 }))
     );
 

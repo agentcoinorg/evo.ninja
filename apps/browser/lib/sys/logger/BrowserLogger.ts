@@ -1,32 +1,29 @@
 import { ILogger } from "@evo-ninja/agent-utils";
 
 export interface BrowserLoggerConfig {
-  onLog(markdown: string): void;
+  onLog(markdown: string): Promise<void>;
 }
 
 export class BrowserLogger implements ILogger {
-  constructor(
-    private _config: BrowserLoggerConfig
-  ) { }
+  constructor(private _config: BrowserLoggerConfig) {}
 
-  info(info: string): void {
-    this._config.onLog(info)
+  async info(info: string): Promise<void> {
+    await this._config.onLog(info);
   }
 
-
-  notice(msg: string): void {
-    this._config.onLog(msg);
+  async notice(msg: string): Promise<void> {
+    await this._config.onLog(msg);
   }
 
-  success(msg: string): void {
-    this._config.onLog(msg);
+  async success(msg: string): Promise<void> {
+    await this._config.onLog(msg);
   }
 
-  warning(msg: string): void {
-    this._config.onLog(msg);
+  async warning(msg: string): Promise<void> {
+    await this._config.onLog(msg);
   }
 
-  error(msg: string): void {
-    this._config.onLog(msg);
+  async error(msg: string): Promise<void> {
+    await this._config.onLog(msg);
   }
 }

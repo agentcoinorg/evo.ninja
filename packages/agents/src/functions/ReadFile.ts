@@ -14,6 +14,7 @@ export class ReadFileFunction extends ScriptFunction<ReadFileFuncParameters> {
   }
 
   name: string = "fs_readFile";
+  description: string = `Reads data from a file`;
   parameters: any = {
     type: "object",
     properties: {
@@ -21,28 +22,34 @@ export class ReadFileFunction extends ScriptFunction<ReadFileFuncParameters> {
         type: "string",
       },
       encoding: {
-        type: "string"
+        type: "string",
       },
     },
     required: ["path", "encoding"],
-    additionalProperties: false
+    additionalProperties: false,
   };
 
-  onSuccess(agent: Agent, params: ReadFileFuncParameters, rawParams: string | undefined, result: string): AgentFunctionResult {
+  onSuccess(
+    agent: Agent,
+    params: ReadFileFuncParameters,
+    rawParams: string | undefined,
+    result: string
+  ): AgentFunctionResult {
     return {
       outputs: [
         {
           type: AgentOutputType.Success,
           title: `[${agent.config.prompts.name}] ${this.name}`,
-          content: `${params.path}\n` +
+          content:
+            `${params.path}\n` +
             `${params.encoding}\n` +
-            `${trimText(result, 200)}`
-        }
+            `${trimText(result, 200)}`,
+        },
       ],
       messages: [
         ChatMessageBuilder.functionCall(this.name, rawParams),
-        ChatMessageBuilder.functionCallResult(this.name, result)
-      ]
-    }
+        ChatMessageBuilder.functionCallResult(this.name, result),
+      ],
+    };
   }
 }

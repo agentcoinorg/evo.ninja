@@ -1,164 +1,173 @@
-"use client"
+"use client";
 
-import React, { useState, useEffect } from "react";
-import { useAtom } from "jotai";
-
-import { InMemoryFile } from "@nerfzael/memory-fs";
-import clsx from "clsx";
-import AccountConfig from "@/components/AccountConfig";
-import Sidebar from "@/components/Sidebar";
-import Chat, { ChatMessage } from "@/components/Chat";
-import { updateWorkspaceFiles } from "@/lib/updateWorkspaceFiles";
-import WelcomeModal from "@/components/WelcomeModal";
+import { v4 as uuid } from "uuid";
+import Chat, { ChatLog } from "@/components/Chat";
+import { examplePrompts } from "@/lib/examplePrompts";
+import { useCheckForUserFiles } from "@/lib/hooks/useCheckForUserFiles";
+import { useEvo } from "@/lib/hooks/useEvo";
+import { useHandleAuth } from "@/lib/hooks/useHandleAuth";
+import { useAddChatLog } from "@/lib/mutations/useAddChatLog";
+import { useAddMessages } from "@/lib/mutations/useAddMessages";
+import { useAddVariable } from "@/lib/mutations/useAddVariable";
+import { useCreateChat } from "@/lib/mutations/useCreateChat";
+import { useChats } from "@/lib/queries/useChats";
+import { ChatLogType, ChatMessage } from "@evo-ninja/agents";
 import { useSession } from "next-auth/react";
-import { AuthProxy } from "@/lib/api/AuthProxy";
-import { useEvo, userWorkspaceAtom } from "@/lib/hooks/useEvo";
-import { allowTelemetryAtom, capReachedAtom, localOpenAiApiKeyAtom, welcomeModalAtom } from "@/lib/store";
-import { toast } from "react-toastify"
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAtom } from "jotai";
+import { errorAtom } from "@/lib/store";
 
-function Dojo() {
-  const [allowTelemetry] = useAtom(allowTelemetryAtom)
-  const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom)
-  const { data: session } = useSession();
-  const [error, setError] = useState<string | undefined>()
-  const [welcomeModalSeen, setWelcomeModalSeen] = useAtom(welcomeModalAtom);
-  const firstTimeUser = !localOpenAiApiKey && !session?.user;
+function Dojo({ params }: { params: { id?: string } }) {
+  const { mutateAsync: createChat } = useCreateChat()
+  const { mutateAsync: addMessages } = useAddMessages()
+  const { mutateAsync: addChatLog } = useAddChatLog()
+  const { mutateAsync: addVariable } = useAddVariable()
+  
+  const { handlePromptAuth } = useHandleAuth();
+  const checkForUserFiles = useCheckForUserFiles();
+  const router = useRouter()
+  const [, setError] = useAtom(errorAtom)
 
-  useEffect(() => {
-    if (error) {
-      toast.error(error, {
-        theme: "dark",
-        autoClose: 5000
-      })
-      setTimeout(() => setError(undefined), 5000)
-    }
-  }, [error])
+  const { status: sessionStatus } = useSession()
+  const { data: chats } = useChats()
 
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const onMessage = (message: ChatMessage) => {
-    setMessages((messages) => [...messages, message]);
-    checkForUserFiles();
-  };
-  const { evo, proxyEmbeddingApi, proxyLlmApi } = useEvo(onMessage, setError);
-  const [userWorkspace] = useAtom(userWorkspaceAtom);
-  const [, setCapReached] = useAtom(capReachedAtom);
+  const chatIdRef = useRef<string | undefined>(params.id)
+  const isAuthenticatedRef = useRef<boolean>(false);
+  const inMemoryLogsRef = useRef<ChatLog[]>([])
 
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [accountModal, setAccountModalOpen] = useState(false);
-  const [userFiles, setUserFiles] = useState<InMemoryFile[]>([]);
-  const [uploadedFiles, setUploadedFiles] = useState<InMemoryFile[]>([]);
-  const [awaitingAuth, setAwaitingAuth] = useState<boolean>(false);
+  const [inMemoryLogs, setInMemoryLogs] = useState<ChatLog[]>([])
 
-  function checkForUserFiles() {
-    if (!evo || !userWorkspace) {
+  const currentChat = chats?.find(c => c.id === chatIdRef.current)
+  const logs = currentChat?.logs ?? []
+  const logsToShow = isAuthenticatedRef.current ? logs : inMemoryLogs;
+
+  const onMessagesAdded = async (type: ChatLogType, messages: ChatMessage[]) => {
+    if (!isAuthenticatedRef.current) {
       return;
     }
-    updateWorkspaceFiles(userWorkspace, userFiles, setUserFiles);
+
+    if (!chatIdRef.current) {
+      throw new Error("No ChatID to add messages")
+    }
+
+    await addMessages({
+      chatId: chatIdRef.current,
+      messages,
+      type
+    })
   }
 
-  useEffect(() => {
-    if (!evo || !userWorkspace) {
+  const onVariableSet = async (key: string, value: string) => {
+    if (!isAuthenticatedRef.current) {
       return;
     }
 
-    for (const file of uploadedFiles) {
-      userWorkspace.writeFileSync(
-        file.path,
-        new TextDecoder().decode(file.content)
-      );
+    if (!chatIdRef.current) {
+      throw new Error("No ChatID to add variable")
     }
 
+    await addVariable({
+      chatId: chatIdRef.current,
+      key,
+      value
+    })
+  }
+
+  const onChatLog = async (log: ChatLog) => {
     checkForUserFiles();
-  }, [uploadedFiles]);
 
-  const handlePromptAuth = async (message: string) => {
-    if (awaitingAuth) {
-      return false;
+    if (!isAuthenticatedRef.current) {
+      inMemoryLogsRef.current = [...inMemoryLogsRef.current, log]
+      setInMemoryLogs(inMemoryLogsRef.current)
+      return;
     }
 
-    if (firstTimeUser) {
-      setAccountModalOpen(true);
-      return false;
+    if (!chatIdRef.current) {
+      throw new Error("No ChatID to add chat log")
     }
 
-    const subsidize = !localOpenAiApiKey;
+    await addChatLog({ chatId: chatIdRef.current, log })
+  }
 
-    setAwaitingAuth(true);
-    const goalId = await AuthProxy.checkGoal(
-      allowTelemetry ? message : "<redacted>",
-      subsidize,
-      () => {
-        setCapReached(true);
-        setAccountModalOpen(true);
+  const handleSend = async (newMessage: string) => {
+    if (!newMessage) return;
+
+    if (!currentChat?.messages.length && isAuthenticatedRef.current && !params.id) {
+      const chatId = uuid();
+      const createdChat = await createChat(chatId)
+
+      if (!createdChat) {
+        return;
       }
-    );
-    setAwaitingAuth(false);
 
-    if (!goalId) {
-      return false;
+      chatIdRef.current = createdChat.id
+
+      window.history.pushState(null, "Chat", `/chat/${chatId}`);
     }
 
-    proxyLlmApi?.setGoalId(goalId);
-    proxyEmbeddingApi?.setGoalId(goalId);
-    return true;
+    const authorized = await handlePromptAuth(newMessage, chatIdRef.current);
+
+    if (!authorized) {
+      return;
+    }
+
+    await onChatLog({
+      title: newMessage,
+      user: "user",
+    });
+
+    setIsSending(true);
+    start(newMessage);
   };
 
+  const {
+    isRunning,
+    isPaused,
+    isSending,
+    isStopped,
+    start,
+    onContinue,
+    onPause,
+    setIsSending,
+  } = useEvo({
+    onChatLog,
+    onMessagesAdded,
+    onVariableSet
+  });
+
+  useEffect(() => {
+    if (sessionStatus === "authenticated") {
+      isAuthenticatedRef.current = true
+    }
+  }, [sessionStatus])
+
+  useEffect(() => {
+    if (sessionStatus === "unauthenticated" && params.id) {
+      router.push('/')
+      return;
+    }
+
+    if (sessionStatus === "authenticated" && params.id && chats && !currentChat) {
+      setError(`Chat with id '${params.id}' not found`)
+      router.push('/')
+      return;
+    }
+
+  }, [sessionStatus, currentChat, params.id])
+
   return (
-    <>
-      <div className="flex h-full bg-neutral-800 bg-landing-bg bg-repeat text-center text-neutral-400">
-        {accountModal && (
-          <AccountConfig
-            apiKey={localOpenAiApiKey}
-            allowTelemetry={allowTelemetry}
-            onClose={() => {
-              setAccountModalOpen(false);
-            }}
-            firstTimeUser={firstTimeUser}
-            setError={setError}
-          />
-        )}
-        <div
-          className={clsx("relative w-full lg:w-auto lg:max-w-md", {
-            hidden: !sidebarOpen,
-          })}
-        >
-          <Sidebar
-            onSidebarToggleClick={() => {
-              setSidebarOpen(!sidebarOpen);
-            }}
-            onSettingsClick={() => setAccountModalOpen(true)}
-            userFiles={userFiles}
-            onUploadFiles={setUploadedFiles}
-          />
-        </div>
-        <div
-          className={clsx("relative grow border-l-2 border-neutral-700", {
-            "max-lg:hidden": sidebarOpen,
-          })}
-        >
-          <>
-          {evo && (
-              <Chat
-                evo={evo}
-                onMessage={onMessage}
-                messages={messages}
-                sidebarOpen={sidebarOpen}
-                overlayOpen={!welcomeModalSeen || accountModal}
-                onSidebarToggleClick={() => {
-                  setSidebarOpen(!sidebarOpen);
-                }}
-                onUploadFiles={setUploadedFiles}
-                handlePromptAuth={handlePromptAuth}
-              />
-            )}
-          </>
-        </div>
-      </div>
-      <WelcomeModal
-        isOpen={!welcomeModalSeen}
-        onClose={() => setWelcomeModalSeen(true)}
-      />
-    </>
+    <Chat
+      logs={logsToShow}
+      samplePrompts={!logsToShow.length ? examplePrompts: undefined}
+      isPaused={isPaused}
+      isRunning={isRunning}
+      isSending={isSending}
+      isStopped={isStopped}
+      onPromptSent={handleSend}
+      onPause={onPause}
+      onContinue={onContinue}
+    />
   );
 }
 
