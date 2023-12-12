@@ -1,7 +1,7 @@
-import { ChatMessage } from "@/components/Chat"
+import { ChatLog } from "@/components/Chat"
 import FileSaver from "file-saver"
 
-export const exportChatHistory = (messages: ChatMessage[]) => {
+export const exportChatHistory = (messages: ChatLog[]) => {
   const exportedContent = messages.map((msg, i, msgs) => {
     if (msg.user === "user") {
       return `# User\n**Goal:** ${msg.title}\n`
