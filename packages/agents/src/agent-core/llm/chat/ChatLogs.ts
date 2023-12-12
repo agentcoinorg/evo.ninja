@@ -4,7 +4,9 @@ import { ChatCompletionMessageParam } from "openai/resources";
 
 // Evo doesn't support image from the user as input right now,
 // so we override the content to always be string
-export type ChatMessage = Omit<ChatCompletionMessageParam, "content"> & {
+type OmitUnion<T, K extends keyof any> = T extends any ? Omit<T, K> : never;
+
+export type ChatMessage = OmitUnion<ChatCompletionMessageParam, "content"> & {
   content: string | null
 }
 

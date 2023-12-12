@@ -10,7 +10,7 @@ export class Chat {
   constructor(
     protected _tokenizer: Tokenizer,
     protected options?: {
-      onMessagesAdded?: (msgs: ChatMessage[]) => Promise<void>
+      onMessagesAdded?: (type: ChatLogType, msgs: ChatMessage[]) => Promise<void>
     }
   ) {
     this._chatLogs = new ChatLogs();
@@ -44,7 +44,7 @@ export class Chat {
     this._chatLogs.add(type, msgs, tokens)
 
     if (this.options?.onMessagesAdded) {
-      await this.options.onMessagesAdded(msgs);
+      await this.options.onMessagesAdded(type, msgs);
     }
   }
 
