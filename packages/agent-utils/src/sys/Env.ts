@@ -36,7 +36,7 @@ export class Env {
       CONTEXT_WINDOW_TOKENS: Number(CONTEXT_WINDOW_TOKENS),
       MAX_RESPONSE_TOKENS: Number(MAX_RESPONSE_TOKENS),
       SERP_API_KEY,
-      OPENAI_API_BASE_URL
+      OPENAI_API_BASE_URL: OPENAI_API_BASE_URL || undefined
     };
   }
 }

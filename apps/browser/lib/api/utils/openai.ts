@@ -6,6 +6,6 @@ export function createOpenAIApiClient() {
   }
   return new OpenAIApi({
     apiKey: process.env.OPENAI_API_KEY,
-    baseURL: process.env.OPENAI_API_BASE_URL
+    baseURL: process.env.OPENAI_API_BASE_URL || undefined
   });
 }
