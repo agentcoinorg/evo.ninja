@@ -1,7 +1,7 @@
 "use client";
 
 import { v4 as uuid } from "uuid";
-import Chat, { ChatMessage } from "@/components/Chat";
+import Chat, { ChatLog } from "@/components/Chat";
 import { examplePrompts } from "@/lib/examplePrompts";
 import { useCheckForUserFiles } from "@/lib/hooks/useCheckForUserFiles";
 import { useEvo } from "@/lib/hooks/useEvo";
@@ -11,7 +11,7 @@ import { useAddMessages } from "@/lib/mutations/useAddMessages";
 import { useAddVariable } from "@/lib/mutations/useAddVariable";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";
 import { useChats } from "@/lib/queries/useChats";
-import { ChatLogType, ChatMessage as AgentMessage } from "@evo-ninja/agents";
+import { ChatLogType, ChatMessage } from "@evo-ninja/agents";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -34,15 +34,15 @@ function Dojo({ params }: { params: { id?: string } }) {
 
   const chatIdRef = useRef<string | undefined>(params.id)
   const isAuthenticatedRef = useRef<boolean>(false);
-  const inMemoryLogsRef = useRef<ChatMessage[]>([])
+  const inMemoryLogsRef = useRef<ChatLog[]>([])
 
-  const [inMemoryLogs, setInMemoryLogs] = useState<ChatMessage[]>([])
+  const [inMemoryLogs, setInMemoryLogs] = useState<ChatLog[]>([])
 
   const currentChat = chats?.find(c => c.id === chatIdRef.current)
   const logs = currentChat?.logs ?? []
   const logsToShow = isAuthenticatedRef.current ? logs : inMemoryLogs;
 
-  const onMessagesAdded = async (type: ChatLogType, messages: AgentMessage[]) => {
+  const onMessagesAdded = async (type: ChatLogType, messages: ChatMessage[]) => {
     if (!isAuthenticatedRef.current) {
       return;
     }
@@ -74,7 +74,7 @@ function Dojo({ params }: { params: { id?: string } }) {
     })
   }
 
-  const onChatLog = async (log: ChatMessage) => {
+  const onChatLog = async (log: ChatLog) => {
     checkForUserFiles();
 
     if (!isAuthenticatedRef.current) {
@@ -156,7 +156,7 @@ function Dojo({ params }: { params: { id?: string } }) {
 
   return (
     <Chat
-      messages={logsToShow}
+      logs={logsToShow}
       samplePrompts={!logsToShow.length ? examplePrompts: undefined}
       isPaused={isPaused}
       isRunning={isRunning}

@@ -11,7 +11,7 @@ import { ExamplePrompt } from "@/lib/examplePrompts";
 import Disclaimer from "./modals/Disclaimer";
 import { exportChatHistory } from "@/lib/exportChatHistory";
 
-export interface ChatMessage {
+export interface ChatLog {
   title: string;
   content?: string;
   user: string;
@@ -19,7 +19,7 @@ export interface ChatMessage {
 }
 
 export interface ChatProps {
-  messages: ChatMessage[];
+  logs: ChatLog[];
   samplePrompts?: ExamplePrompt[];
   isRunning: boolean;
   isStopped: boolean;
@@ -31,7 +31,7 @@ export interface ChatProps {
 }
 
 const Chat: React.FC<ChatProps> = ({
-  messages,
+  logs,
   samplePrompts,
   onPromptSent,
   onContinue,
@@ -104,7 +104,7 @@ const Chat: React.FC<ChatProps> = ({
         behavior: 'smooth',
       });
     }
-  }, [messages, isAtBottom]);
+  }, [logs, isAtBottom]);
 
   return (
     <div className="flex h-full flex-col bg-[#0A0A0A] text-white">
@@ -112,16 +112,16 @@ const Chat: React.FC<ChatProps> = ({
         <div className="h-14 p-4 text-lg text-white cursor-pointer hover:opacity-100 opacity-80 transition-all" onClick={() => setSidebarOpen(!sidebarOpen)}>
           { sidebarOpen ? <></>: <SidebarIcon /> }
         </div>
-        <FontAwesomeIcon className="cursor-pointer" icon={faDownload} onClick={() => exportChatHistory(messages)} />
+        <FontAwesomeIcon className="cursor-pointer" icon={faDownload} onClick={() => exportChatHistory(logs)} />
       </div>
       <div
         ref={listContainerRef}
         onScroll={handleScroll}
         className="flex-1 overflow-auto p-5 text-left items-center"
       >
-        {messages.map((msg, index) => (
+        {logs.map((msg, index) => (
           <div key={index} className={`${msg.user} m-auto self-center w-[100%] max-w-[56rem]`}>
-            {index === 0 || messages[index - 1].user !== msg.user ? (
+            {index === 0 || logs[index - 1].user !== msg.user ? (
               <div className="SenderName">{msg.user.toUpperCase()}</div>
             ) : null}
             <div 
