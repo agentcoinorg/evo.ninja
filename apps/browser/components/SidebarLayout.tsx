@@ -25,7 +25,7 @@ export default function SidebarLayout({
 
   return (
     <>
-      <div className="relative flex h-full overflow-x-clip">
+      <div className="relative flex h-screen overflow-hidden">
         {/* <div className="pointer-events-none fixed inset-0 bottom-0 left-0 right-0 top-0 overflow-clip">
           <div className="mix-blend-softlight absolute -bottom-1/4 left-1/3 h-screen w-7/12 rotate-[-30deg] rounded-full bg-gradient-to-b from-cyan-500/40 to-cyan-700/10 opacity-30 blur-[128px]" />
           <div className="mix-blend-softlight absolute -bottom-1/4 left-[65%] h-[50vh] w-4/12 rotate-[30deg] rounded-full bg-gradient-to-b from-pink-500/40 to-pink-600/20 opacity-10 blur-[128px]" />
@@ -34,7 +34,7 @@ export default function SidebarLayout({
           {isMobile && (
             <>
               {sidebarOpen && (
-                <div className="fixed bottom-0 left-0 right-0 top-0 z-10 animate-fade-in bg-zinc-900/50 opacity-0 backdrop-blur" />
+                <div className="animate-fade-in fixed bottom-0 left-0 right-0 top-0 z-10 bg-zinc-900/50 opacity-0 backdrop-blur" />
               )}
               <header
                 className={clsx(
@@ -43,7 +43,12 @@ export default function SidebarLayout({
                 )}
               >
                 {!sidebarOpen && (
-                  <Logo className="w-[162px] animate-fade-in cursor-pointer opacity-0 transition-opacity hover:opacity-50" />
+                  <a href="/">
+                    <Logo
+                      wordmark={false}
+                      className="animate-fade-in w-8 cursor-pointer opacity-0 transition-opacity hover:opacity-50"
+                    />
+                  </a>
                 )}
                 <Button
                   variant="icon"

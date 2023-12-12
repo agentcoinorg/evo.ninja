@@ -78,7 +78,7 @@ function CurrentWorkspace({
           )}
         </div>
       </div>
-      <div className="relative h-[300px]">
+      <div className="relative h-full max-h-[24vh] overflow-y-auto">
         {userFiles.length === 0 ? (
           <div
             className="mt-1 flex cursor-pointer flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed border-zinc-500 p-7 text-center transition-colors duration-300 hover:border-cyan-500 hover:bg-zinc-950 hover:text-cyan-500"
@@ -109,7 +109,7 @@ function CurrentWorkspace({
                   <div
                     key={i}
                     className={clsx(
-                      "flex w-full cursor-pointer items-center space-x-2 rounded p-1 text-cyan-500 transition-colors duration-300",
+                      "flex w-full cursor-pointer items-center space-x-2 rounded p-1 text-sm text-cyan-500 transition-colors duration-300 md:text-base",
                       { "hover:bg-zinc-800 hover:text-white": !isDragAccept }
                     )}
                   >

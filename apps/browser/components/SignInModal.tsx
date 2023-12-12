@@ -53,7 +53,7 @@ export default function SignInModal(props: AccountConfigProps) {
   const [error, setError] = useState<string | undefined>();
   const [capReached, setCapReached] = useAtom(capReachedAtom);
 
-  const { data: session } = useSession()
+  const { data: session } = useSession();
 
   const { isOpen, onClose } = props;
 
@@ -85,20 +85,31 @@ export default function SignInModal(props: AccountConfigProps) {
             </div>
             <div className="flex items-center justify-between rounded-lg bg-zinc-800 p-4">
               <div className="flex items-center space-x-2">
-                <div className="h-8 w-8 rounded-full bg-yellow-500" />
+                {session.user.image ? (
+                  <img
+                    src={session.user.image}
+                    className="h-8 w-8 rounded-full bg-yellow-500"
+                  />
+                ) : (
+                  <div className="h-8 w-8 rounded-full bg-yellow-500" />
+                )}
                 <div className="space-y-1">
                   <div className="text-sm font-semibold leading-none">
                     {session.user.name}
                   </div>
-                  <div className="text-xs leading-none text-gray-400 underline">
+                  <div className="text-[12px] leading-none text-gray-400">
                     {session.user.email}
                   </div>
                 </div>
               </div>
               <div className="space-x-2">
-                <Button className="!px-4" hierarchy="secondary" onClick={() => signOut()}>
+                <Button
+                  className="!px-2 md:!px-4"
+                  hierarchy="secondary"
+                  onClick={() => signOut()}
+                >
                   <SignOut color="currentColor" size={16} />
-                  <div>Sign Out</div>
+                  <div className="hidden md:block">Sign Out</div>
                 </Button>
               </div>
             </div>
@@ -115,7 +126,11 @@ export default function SignInModal(props: AccountConfigProps) {
           <div className="space-y-6">
             <p>Sign in below to save your sessions</p>
             <div className="space-y-2">
-            <Button className="w-full" hierarchy="secondary" onClick={() => signIn("github")}>
+              <Button
+                className="w-full"
+                hierarchy="secondary"
+                onClick={() => signIn("github")}
+              >
                 <Image
                   alt="Sign in with Github"
                   width={20}
@@ -124,7 +139,11 @@ export default function SignInModal(props: AccountConfigProps) {
                 />
                 <div>Sign in with Github</div>
               </Button>
-              <Button className="w-full" hierarchy="secondary" onClick={() => signIn("google")}>
+              <Button
+                className="w-full"
+                hierarchy="secondary"
+                onClick={() => signIn("google")}
+              >
                 <Image
                   alt="Sign in with Google"
                   width={20}
