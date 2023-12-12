@@ -8,6 +8,7 @@ interface ChatInputButtonProps {
   sending: boolean;
   paused: boolean;
   stopped: boolean;
+  message: string;
   handlePause: () => void;
   handleContinue: () => void;
   handleSend: () => void;
@@ -17,6 +18,7 @@ const ChatInputButton = ({
   evoRunning,
   sending,
   paused,
+  message,
   handlePause,
   stopped,
   handleContinue,
@@ -31,10 +33,10 @@ const ChatInputButton = ({
               hierarchy="secondary"
               onClick={handlePause}
               disabled={!evoRunning || paused}
-              className="!px-2 !py-1"
+              className="!p-1 md:!px-2"
             >
               <Pause weight="fill" />
-              <div>Pause</div>
+              <div className="hidden md:block">Pause</div>
             </Button>
           )}
           {paused && (
@@ -43,10 +45,10 @@ const ChatInputButton = ({
                 <Button
                   hierarchy="secondary"
                   disabled={true}
-                  className="!px-2 !py-1"
+                  className="!p-1 md:!px-2"
                 >
                   <LoadingCircle />
-                  <div>Pausing</div>
+                  <div className="hidden md:block">Pausing</div>
                 </Button>
               )}
 
@@ -55,10 +57,10 @@ const ChatInputButton = ({
                   hierarchy="secondary"
                   onClick={handleContinue}
                   disabled={evoRunning && !paused}
-                  className="!px-2 !py-1"
+                  className="!p-1 md:!px-2"
                 >
                   <Stop weight="fill" />
-                  <div>Paused</div>
+                  <div className="hidden md:block">Paused</div>
                 </Button>
               )}
             </>
@@ -70,7 +72,7 @@ const ChatInputButton = ({
         <Button
           hierarchy="secondary"
           onClick={async () => await handleSend()}
-          disabled={evoRunning || sending}
+          disabled={message.length === 0 || sending}
           className="!p-2"
           type="submit"
         >

@@ -34,6 +34,7 @@ import Logo from "./Logo";
 import Button from "./Button";
 import LoadingCircle from "./LoadingCircle";
 import Disclaimer from "./Disclaimer";
+import useWindowSize from "@/lib/hooks/useWindowSize";
 
 export interface ChatMessage {
   title: string;
@@ -72,6 +73,7 @@ const Chat: React.FC<ChatProps> = ({
   const [welcomeModalSeen] = useAtom(welcomeModalAtom);
   const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom);
   const [, setUploadedFiles] = useAtom(uploadedFilesAtom);
+  const { isMobile } = useWindowSize();
 
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -142,7 +144,7 @@ const Chat: React.FC<ChatProps> = ({
 
   return (
     <main
-      className={clsx("flex h-full w-full flex-col px-5", {
+      className={clsx("flex h-full w-full flex-col", {
         "items-center justify-center": samplePrompts?.length,
       })}
     >
@@ -153,13 +155,13 @@ const Chat: React.FC<ChatProps> = ({
         </div>
       ) : (
         <>
-          <div className="flex h-12 items-center justify-center border-b-2 border-zinc-800">
+          <div className="flex h-20 items-center justify-center border-b-2 border-zinc-800 md:h-12">
             <div>{chat_name}</div>
           </div>
           <div
             ref={listContainerRef}
             onScroll={handleScroll}
-            className="w-full flex-1 items-center space-y-6 overflow-auto p-5 text-left"
+            className="w-full flex-1 items-center space-y-6 overflow-y-auto overflow-x-clip px-2 py-3 text-left"
           >
             {messages.map((msg, index) => {
               return (
@@ -167,9 +169,9 @@ const Chat: React.FC<ChatProps> = ({
                   key={index}
                   className={`${msg.user} m-auto w-full max-w-[56rem] self-center`}
                 >
-                  <div className="group relative flex w-full animate-slide-down items-start space-x-4 rounded-lg p-2 pb-10 text-white opacity-0 transition-colors duration-300 ">
+                  <div className="animate-slide-down group relative flex w-full items-start space-x-3 rounded-lg p-2 pb-10 text-white opacity-0 transition-colors duration-300 ">
                     {msg.user === "evo" ? (
-                      <Logo wordmark={false} className="!w-8" />
+                      <Logo wordmark={false} className="!w-8 !min-w-[2rem]" />
                     ) : (
                       <AvatarBlockie
                         address="0x7cB57B5A97eAbe94205C07890BE4c1aD31E486A8"
@@ -177,13 +179,13 @@ const Chat: React.FC<ChatProps> = ({
                         className="border-2 border-zinc-900"
                       />
                     )}
-                    <div className="space-y-2 pt-1">
+                    <div className="max-w-[calc(100vw-84px)] space-y-2 pt-1 md:max-w-[49rem]">
                       {index === 0 || messages[index - 1].user !== msg.user ? (
                         <div className="SenderName font-medium">
                           {msg.user.charAt(0).toUpperCase() + msg.user.slice(1)}
                         </div>
                       ) : null}
-                      <div className="prose prose-invert max-w-[49rem]">
+                      <div className="prose prose-invert w-full max-w-none">
                         <ReactMarkdown>{msg.title.toString()}</ReactMarkdown>
                         <ReactMarkdown>
                           {msg.content?.toString() ?? ""}
@@ -206,7 +208,7 @@ const Chat: React.FC<ChatProps> = ({
                         </div>
                       )}
                     </div>
-                    <div className="absolute bottom-1 left-9 hidden animate-fade-in space-x-0.5 group-hover:flex">
+                    <div className="animate-fade-in absolute bottom-1 left-9 hidden space-x-0.5 group-hover:flex">
                       {msg.user === "evo" ? (
                         <>
                           <Button variant="icon">
@@ -251,16 +253,20 @@ const Chat: React.FC<ChatProps> = ({
       )}
       <div
         className={clsx(
-          "flex w-full space-y-4",
+          "mt-4 flex w-full space-y-4",
           samplePrompts?.length
-            ? "flex-col-reverse"
-            : "mx-auto max-w-[56rem] flex-col"
+            ? "flex-col-reverse space-y-reverse px-4 md:px-8 lg:px-4"
+            : "mx-auto max-w-[56rem] flex-col px-4"
         )}
       >
         {samplePrompts?.length && (
           <div className="flex flex-col items-center space-y-3">
             <h2 className="w-full text-center font-normal">
-              Not sure where to start? Try asking one of these:
+              Not sure where to start?{` `}
+              {isMobile && <br />}
+              <span className="text-sm md:text-base">
+                Try asking one of these:
+              </span>
             </h2>
             <div className="flex w-full max-w-[56rem] flex-wrap items-center justify-center self-center">
               {examplePrompts.map((prompt, index) => (
@@ -282,8 +288,8 @@ const Chat: React.FC<ChatProps> = ({
         )}
         <div
           className={clsx(
-            "mb-4 flex w-full items-center justify-center gap-4 self-center p-4",
-            samplePrompts?.length ? "max-w-[42rem]" : "max-w-[56rem]"
+            "mb-4 flex w-full items-center justify-center gap-4 self-center",
+            samplePrompts?.length ? "max-w-[42rem] " : "max-w-[56rem]"
           )}
         >
           <TextField
@@ -304,6 +310,7 @@ const Chat: React.FC<ChatProps> = ({
                 paused={isPaused}
                 sending={isSending}
                 stopped={isStopped}
+                message={message}
                 handlePause={onPause}
                 handleContinue={onContinue}
                 handleSend={async () => await handleSend(message)}
@@ -319,7 +326,7 @@ const Chat: React.FC<ChatProps> = ({
         <Disclaimer handleDisclaimerSelect={handleDisclaimerSelect} />
       )}
       <a
-        className="fixed bottom-4 right-4 z-10 cursor-pointer rounded-full border-2 border-zinc-500 bg-zinc-700 p-1 shadow hover:bg-zinc-600 hover:shadow-lg"
+        className="fixed bottom-4 right-4 z-10 hidden cursor-pointer rounded-full border-2 border-zinc-500 bg-zinc-700 p-1 shadow hover:bg-zinc-600 hover:shadow-lg md:block"
         href="https://discord.gg/r3rwh69cCa"
         target="_blank"
         rel="noopener noreferrer"

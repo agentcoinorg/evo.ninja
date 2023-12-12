@@ -49,7 +49,6 @@ const Button = ({
     text: "border-none bg-none !p-1 text-cyan-500 hover:text-white",
   };
   const variantClass = variant ? variantClasses[variant] : null;
-
   return (
     <Popover className="relative">
       <Popover.Button
@@ -59,7 +58,7 @@ const Button = ({
           hierarchyClasses[hierarchy],
           sizeClasses[size],
           variantClass,
-          disabled ? "cursor-default opacity-60" : "cursor-pointer",
+          disabled ? "!cursor-default !opacity-60" : "cursor-pointer",
           className
         )}
         onMouseEnter={() => setShowTooltip(true)}
