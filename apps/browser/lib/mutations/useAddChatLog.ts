@@ -3,12 +3,12 @@ import { Row } from "../supabase/types";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { ChatMessage } from "@/components/Chat";
+import { ChatLog } from "@/components/Chat";
 
 const mapChatLogToLogDTO = (
   chatId: string,
-  chatLog: ChatMessage
-): Omit<Row<"logs">, "id" | "created_at"> => {
+  chatLog: ChatLog
+): Omit<Row<'logs'>, "id" | "created_at"> => {
   return {
     chat_id: chatId,
     title: chatLog.title,
@@ -22,7 +22,10 @@ export const useAddChatLog = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (args: { chatId: string; log: ChatMessage }) => {
+    mutationFn: async (args: {
+      chatId: string;
+      log: ChatLog;
+    }) => {
       const { error } = await supabase
         .from("logs")
         .insert(mapChatLogToLogDTO(args.chatId, args.log));

@@ -1,6 +1,6 @@
 "use client";
 
-import Chat, { ChatMessage } from "@/components/Chat";
+import Chat, { ChatLog } from "@/components/Chat";
 import { examplePrompts } from "@/lib/examplePrompts";
 import { useCheckForUserFiles } from "@/lib/hooks/useCheckForUserFiles";
 import { useEvo } from "@/lib/hooks/useEvo";
@@ -10,7 +10,7 @@ import { useAddMessages } from "@/lib/mutations/useAddMessages";
 import { useAddVariable } from "@/lib/mutations/useAddVariable";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";
 import { useChats } from "@/lib/queries/useChats";
-import { ChatLogType, ChatMessage as AgentMessage } from "@evo-ninja/agents";
+import { ChatLogType, ChatMessage } from "@evo-ninja/agents";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { useAtom } from "jotai";
@@ -38,9 +38,9 @@ function Dojo({ params }: { params: { id?: string } }) {
   const { data: chats } = useChats();
 
   const isAuthenticatedRef = useRef<boolean>(false);
-  const inMemoryLogsRef = useRef<ChatMessage[]>([]);
+  const inMemoryLogsRef = useRef<ChatLog[]>([])
 
-  const [inMemoryLogs, setInMemoryLogs] = useState<ChatMessage[]>([]);
+  const [inMemoryLogs, setInMemoryLogs] = useState<ChatLog[]>([])
 
   const currentChat = chats?.find((c) => c.id === chatIdRef.current);
   const logs = currentChat?.logs ?? [];
@@ -60,7 +60,7 @@ function Dojo({ params }: { params: { id?: string } }) {
 
   const onMessagesAdded = async (
     type: ChatLogType,
-    messages: AgentMessage[]
+    messages: ChatMessage[]
   ) => {
     if (!isAuthenticatedRef.current) {
       return;
@@ -93,7 +93,7 @@ function Dojo({ params }: { params: { id?: string } }) {
     });
   };
 
-  const onChatLog = async (log: ChatMessage) => {
+  const onChatLog = async (log: ChatLog) => {
     checkForUserFiles();
 
     if (!isAuthenticatedRef.current) {
@@ -111,16 +111,29 @@ function Dojo({ params }: { params: { id?: string } }) {
 
   const handleSend = async (newMessage: string) => {
     if (!newMessage) return;
-    const authorized = await handlePromptAuth(newMessage);
+
+    if (!currentChat?.messages.length && isAuthenticatedRef.current && !params.id) {
+      const chatId = uuid();
+      const createdChat = await createChat(chatId)
+
+      if (!createdChat) {
+        return;
+      }
+
+      chatIdRef.current = createdChat.id
+
+      window.history.pushState(null, "Chat", `/chat/${chatId}`);
+    if (!currentChat?.messages.length && isAuthenticatedRef.current) {
+      const { chatId } = await createChat();
+      chatIdRef.current = chatId;
+    }
+
+    const authorized = await handlePromptAuth(newMessage, chatIdRef.current);
 
     if (!authorized) {
       return;
     }
 
-    if (!currentChat?.messages.length && isAuthenticatedRef.current) {
-      const { chatId } = await createChat();
-      chatIdRef.current = chatId;
-    }
     await onChatLog({
       title: newMessage,
       user: "user",
@@ -171,7 +184,7 @@ function Dojo({ params }: { params: { id?: string } }) {
 
   return (
     <Chat
-      messages={logsToShow}
+      logs={logsToShow}
       samplePrompts={!logsToShow.length ? examplePrompts : undefined}
       isPaused={isPaused}
       isRunning={isRunning}

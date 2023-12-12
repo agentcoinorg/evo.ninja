@@ -11,6 +11,7 @@ export async function POST(request: Request) {
   const session = await getServerSession(getAuthOptions());
   const email = session?.user?.email;
   const body = await request.json();
+  const chatId = body.chatId || null;
 
   // If the user does not need this goal to be subsidizied
   if (!body.subsidize) {
@@ -21,6 +22,7 @@ export async function POST(request: Request) {
         user_email: email,
         prompt: body.message,
         submission_date: currentDate,
+        chat_id: chatId,
         subsidized: false
       })
       .select()
@@ -70,6 +72,7 @@ export async function POST(request: Request) {
       user_email: email,
       prompt: body.message,
       submission_date: new Date().toISOString(),
+      chat_id: chatId,
       subsidized: true
     })
     .select()

@@ -25,7 +25,7 @@ export function useHandleAuth() {
 
   const firstTimeUser = !localOpenAiApiKey && !session?.user;
 
-  const handlePromptAuth = async (message: string) => {
+  const handlePromptAuth = async (message: string, chatId: string | undefined) => {
     if (awaitingAuth) {
       return false;
     }
@@ -39,6 +39,7 @@ export function useHandleAuth() {
 
     setAwaitingAuth(true);
     const goalId = await AuthProxy.checkGoal(
+      chatId,
       allowTelemetry ? message : "<redacted>",
       subsidize,
       () => {

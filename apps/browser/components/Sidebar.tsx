@@ -7,13 +7,23 @@ import CloseIcon from "./CloseIcon";
 import SidebarIcon from "./SidebarIcon";
 import ChatList from "./ChatList";
 import Worspace from "./Worspace";
+import { useSession } from "next-auth/react";
 
 export interface SidebarProps {
   onSettingsClick: () => void;
   onSidebarToggleClick: () => void;
 }
 
-const Sidebar = ({ onSettingsClick, onSidebarToggleClick }: SidebarProps) => {
+const Sidebar = ({
+  onSettingsClick,
+  onSidebarToggleClick,
+}: SidebarProps) => {
+  const [userFiles] = useAtom(userFilesAtom)
+  const [, setUploadedFiles] = useAtom(uploadedFilesAtom)
+  const { data: session } = useSession()
+
+  const downloadUserFiles = useDownloadFilesAsZip()
+
   return (
     <div className="box-border flex h-full w-full flex-col items-center justify-between overflow-auto bg-opacity-black p-4">
       <div className="flex h-auto w-full flex-col items-center gap-4">
@@ -42,7 +52,7 @@ const Sidebar = ({ onSettingsClick, onSidebarToggleClick }: SidebarProps) => {
           </div>
         </div>
         <Worspace />
-        <ChatList />
+        { session?.user.email &&  <ChatList /> }
       </div>
       <div className="box-border flex w-10/12 flex-col justify-center gap-2">
         <div className="flex justify-center">
