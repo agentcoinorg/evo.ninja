@@ -29,12 +29,12 @@ import {
 } from "@phosphor-icons/react";
 import ChatInputButton from "./ChatInputButton";
 import Image from "next/image";
-import AvatarBlockie from "./AvatarBlockie";
 import Logo from "./Logo";
 import Button from "./Button";
 import LoadingCircle from "./LoadingCircle";
 import Disclaimer from "./Disclaimer";
 import useWindowSize from "@/lib/hooks/useWindowSize";
+import { useSession } from "next-auth/react";
 
 export interface ChatMessage {
   title: string;
@@ -74,6 +74,7 @@ const Chat: React.FC<ChatProps> = ({
   const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom);
   const [, setUploadedFiles] = useAtom(uploadedFilesAtom);
   const { isMobile } = useWindowSize();
+  const { data: session } = useSession();
 
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -173,16 +174,24 @@ const Chat: React.FC<ChatProps> = ({
                     {msg.user === "evo" ? (
                       <Logo wordmark={false} className="!w-8 !min-w-[2rem]" />
                     ) : (
-                      <AvatarBlockie
-                        address="0x7cB57B5A97eAbe94205C07890BE4c1aD31E486A8"
-                        size={32}
-                        className="border-2 border-zinc-900"
-                      />
+                      <>
+                        {session?.user.image && session?.user.email ? (
+                          <img
+                            src={session?.user.image}
+                            className="h-8 w-8 rounded-full bg-yellow-500"
+                          />
+                        ) : (
+                          <div className="h-8 w-8 rounded-full bg-yellow-500" />
+                        )}
+                      </>
                     )}
                     <div className="max-w-[calc(100vw-84px)] space-y-2 pt-1 md:max-w-[49rem]">
                       {index === 0 || messages[index - 1].user !== msg.user ? (
                         <div className="SenderName font-medium">
-                          {msg.user.charAt(0).toUpperCase() + msg.user.slice(1)}
+                          {session?.user.name && !msg.user.includes("evo")
+                            ? session?.user.name
+                            : msg.user.charAt(0).toUpperCase() +
+                              msg.user.slice(1)}
                         </div>
                       ) : null}
                       <div className="prose prose-invert w-full max-w-none">

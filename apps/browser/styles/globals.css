@@ -40,7 +40,7 @@ code {
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-zinc-500 rounded;
+  @apply bg-zinc-700 rounded;
 }
 
 ::-webkit-scrollbar-thumb:hover {

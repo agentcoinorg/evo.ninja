@@ -119,7 +119,7 @@ const Sidebar = ({
                         <div
                           key={chat.id}
                           data-id={chat.id}
-                          className="w-full cursor-pointer rounded p-1 text-sm text-zinc-100 transition-colors duration-300 hover:bg-zinc-800 hover:text-white md:text-base"
+                          className="w-full cursor-pointer overflow-x-hidden text-ellipsis whitespace-nowrap rounded p-1 text-sm text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white md:text-base"
                           onClick={() => handleChatClick(chat.id)}
                         >
                           {chat.name}
