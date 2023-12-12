@@ -15,6 +15,7 @@ import { useAtom } from "jotai";
 import { uploadedFilesAtom, userFilesAtom } from "@/lib/store";
 import { useDownloadFilesAsZip } from "@/lib/hooks/useDownloadFilesAsZip";
 import ChatList from "./ChatList";
+import { useSession } from "next-auth/react";
 
 export interface SidebarProps {
   onSettingsClick: () => void;
@@ -27,6 +28,7 @@ const Sidebar = ({
 }: SidebarProps) => {
   const [userFiles] = useAtom(userFilesAtom)
   const [, setUploadedFiles] = useAtom(uploadedFilesAtom)
+  const { data: session } = useSession()
 
   const downloadUserFiles = useDownloadFilesAsZip()
 
@@ -76,7 +78,7 @@ const Sidebar = ({
           )}
         </Upload>
 
-        <ChatList />
+      { session?.user.email &&  <ChatList /> }
       </div>
         <div className="box-border flex justify-center w-10/12 flex-col gap-2">
           <div className="flex justify-center">
