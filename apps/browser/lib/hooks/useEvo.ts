@@ -26,8 +26,6 @@ import { useAtom } from "jotai";
 import { ChatLog } from "@/components/Chat";
 import {
   capReachedAtom,
-  proxyEmbeddingAtom,
-  proxyLlmAtom,
   localOpenAiApiKeyAtom,
   userWorkspaceAtom,
 } from "@/lib/store";
