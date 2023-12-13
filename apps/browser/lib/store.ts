@@ -16,5 +16,5 @@ export const errorAtom = atom<string | undefined>(undefined)
 export const userFilesAtom = atom<InMemoryFile[]>([]);
 export const uploadedFilesAtom = atom<InMemoryFile[]>([]);
 export const userWorkspaceAtom = atom<Workspace | undefined>(undefined);
-export const sidebarAtom = atom<boolean>(true)
+export const sidebarAtom = atom<boolean | undefined>(undefined)
 export const chatIdAtom = atom<string>("")

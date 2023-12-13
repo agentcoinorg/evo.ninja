@@ -13,12 +13,10 @@ import Button from "./Button";
 import { List, X } from "@phosphor-icons/react";
 import WelcomeModal from "./modals/WelcomeModal";
 import { welcomeModalAtom } from "@/lib/store";
+import { useHydrateAtoms } from "jotai/utils";
 
-export default function SidebarLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function SidebarLayout(props: { children: React.ReactNode, isMobile: boolean }) {
+  useHydrateAtoms([[sidebarAtom, !props.isMobile]]);
   const [sidebarOpen, setSidebarOpen] = useAtom(sidebarAtom);
   const [userFiles] = useAtom(userFilesAtom);
   const [hoveringSidebarButton, setHovering] = useState<boolean>(false);
@@ -77,7 +75,7 @@ export default function SidebarLayout({
           >
             <Sidebar
               hoveringSidebarButton={hoveringSidebarButton}
-              sidebarOpen={sidebarOpen}
+              sidebarOpen={!!sidebarOpen}
               userFiles={userFiles}
             />
             {!isMobile && (
@@ -89,13 +87,13 @@ export default function SidebarLayout({
               >
                 <CloseSidebarIcon
                   hoveringSidebarButton={hoveringSidebarButton}
-                  sidebarOpen={sidebarOpen}
+                  sidebarOpen={!!sidebarOpen}
                 />
               </button>
             )}
           </aside>
         </>
-        {children}
+        {props.children}
       </div>
       <WelcomeModal
         isOpen={!welcomeModalSeen}
