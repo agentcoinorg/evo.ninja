@@ -79,7 +79,7 @@ const Sidebar = ({
         )}
       >
         <div
-          className="animate-fade-in flex h-full flex-col justify-between opacity-0"
+          className="flex h-full animate-fade-in flex-col justify-between opacity-0"
           style={{ animationDelay: sidebarOpen ? "150ms" : "0ms" }}
         >
           <div className="flex h-full flex-col justify-between">
@@ -89,42 +89,44 @@ const Sidebar = ({
                   <Logo className="w-[162px] cursor-pointer p-4 transition-opacity hover:opacity-50" />
                 </a>
               </header>
-              <div className="space-y-1 px-2">
-                <div className="flex w-full items-center justify-between space-x-1 px-3">
-                  <div className="text-xs uppercase tracking-widest text-zinc-500">
-                    Recent Chats
+              {session?.user.email && (
+                <div className="space-y-1 px-2">
+                  <div className="flex w-full items-center justify-between space-x-1 px-3">
+                    <div className="text-xs uppercase tracking-widest text-zinc-500">
+                      Recent Chats
+                    </div>
+                    <Button variant="icon" onClick={createNewChat}>
+                      <NotePencil size={18} weight="bold" />
+                    </Button>
                   </div>
-                  <Button variant="icon" onClick={createNewChat}>
-                    <NotePencil size={18} weight="bold" />
-                  </Button>
+                  <div className="h-full max-h-[30vh] space-y-0.5 overflow-y-auto">
+                    {chats && chats.length > 0 ? (
+                      <div className="px-2">
+                        {mappedChats?.map((chat, i) => (
+                          <div
+                            key={chat.id}
+                            data-id={chat.id}
+                            className="w-full cursor-pointer overflow-x-hidden text-ellipsis whitespace-nowrap rounded p-1 text-sm text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white"
+                            onClick={() => handleChatClick(chat.id)}
+                          >
+                            {chat.name}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div
+                        onClick={createNewChat}
+                        className=" mt-1 flex cursor-pointer flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed border-zinc-500 p-7 text-center transition-colors duration-300 hover:border-cyan-500 hover:bg-zinc-950 hover:text-cyan-500"
+                      >
+                        <NotePencil size={24} className="text-[currentColor]" />
+                        <p className="leading-regular text-xs text-zinc-500">
+                          You currently have no chats.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="h-full max-h-[30vh] space-y-0.5 overflow-y-auto">
-                  {chats && chats.length > 0 ? (
-                    <div className="px-2">
-                      {mappedChats?.map((chat, i) => (
-                        <div
-                          key={chat.id}
-                          data-id={chat.id}
-                          className="w-full cursor-pointer overflow-x-hidden text-ellipsis whitespace-nowrap rounded p-1 text-sm text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white"
-                          onClick={() => handleChatClick(chat.id)}
-                        >
-                          {chat.name}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div
-                      onClick={createNewChat}
-                      className=" mt-1 flex cursor-pointer flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed border-zinc-500 p-7 text-center transition-colors duration-300 hover:border-cyan-500 hover:bg-zinc-950 hover:text-cyan-500"
-                    >
-                      <NotePencil size={24} className="text-[currentColor]" />
-                      <p className="leading-regular text-xs text-zinc-500">
-                        You currently have no chats.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
+              )}
               <CurrentWorkspace userFiles={userFiles} />
             </div>
             <div className="relative flex w-full items-center justify-between p-4">

@@ -1,8 +1,11 @@
 import {theme} from 'tailwindcss/defaultConfig';
 import { useEffect, useState } from 'react';
+import { sidebarAtom } from '../store';
+import { useAtom } from 'jotai';
 
 const useWindowSize = () => {
-  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [sidebarOpen] = useAtom(sidebarAtom)
+  const [isMobile, setIsMobile] = useState<boolean>(!sidebarOpen);
   const [windowWidth, setWindowWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 0);
   const [currentBreakpoint, setCurrentBreakpoint] = useState<string | null>(null);
 

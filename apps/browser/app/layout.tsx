@@ -8,10 +8,11 @@ import "@fortawesome/fontawesome-svg-core/styles.css";
 import "react-toastify/dist/ReactToastify.css";
 import SidebarLayout from "@/components/SidebarLayout";
 import { Providers } from "@/components/providers/Providers";
-
+import { cookies } from "next/headers";
 config.autoAddCss = false;
 
 export default function EvoApp({ children }: { children: React.ReactNode }) {
+  const currentDevice = cookies().get("X-User-Device");
   return (
     <html>
       <body>
@@ -32,7 +33,9 @@ export default function EvoApp({ children }: { children: React.ReactNode }) {
             `}
           </Script>
           <Providers>
-            <SidebarLayout>{children}</SidebarLayout>
+            <SidebarLayout isMobile={!!(currentDevice?.value === "mobile")}>
+              {children}
+            </SidebarLayout>
           </Providers>
         </div>
       </body>

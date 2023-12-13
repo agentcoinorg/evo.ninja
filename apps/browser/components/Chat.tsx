@@ -18,14 +18,7 @@ import {
 } from "@/lib/store";
 import { ExamplePrompt } from "@/lib/examplePrompts";
 import TextField from "./TextField";
-import {
-  CaretCircleRight,
-  CopySimple,
-  PencilSimple,
-  ThumbsDown,
-  ThumbsUp,
-  UploadSimple,
-} from "@phosphor-icons/react";
+import { UploadSimple } from "@phosphor-icons/react";
 import ChatInputButton from "./ChatInputButton";
 import Image from "next/image";
 import Logo from "./Logo";
