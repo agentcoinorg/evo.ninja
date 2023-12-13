@@ -19,6 +19,9 @@ export interface SidebarProps {
   sidebarOpen: boolean;
 }
 
+const loadedAccount = true;
+const loadedChats = true;
+
 const Sidebar = ({
   userFiles,
   sidebarOpen,
@@ -79,11 +82,11 @@ const Sidebar = ({
         )}
       >
         <div
-          className="flex h-full animate-fade-in flex-col justify-between opacity-0"
+          className="animate-fade-in flex h-full flex-col justify-between opacity-0"
           style={{ animationDelay: sidebarOpen ? "150ms" : "0ms" }}
         >
           <div className="flex h-full flex-col justify-between">
-            <div className="space-y-6">
+            <div className={clsx({ "space-y-6": session?.user.email })}>
               <header>
                 <a href="/">
                   <Logo className="w-[162px] cursor-pointer p-4 transition-opacity hover:opacity-50" />
@@ -95,80 +98,98 @@ const Sidebar = ({
                     <div className="text-xs uppercase tracking-widest text-zinc-500">
                       Recent Chats
                     </div>
-                    <Button variant="icon" onClick={createNewChat}>
-                      <NotePencil size={18} weight="bold" />
-                    </Button>
-                  </div>
-                  <div className="h-full max-h-[30vh] space-y-0.5 overflow-y-auto">
-                    {chats && chats.length > 0 ? (
-                      <div className="px-2">
-                        {mappedChats?.map((chat, i) => (
-                          <div
-                            key={chat.id}
-                            data-id={chat.id}
-                            className="w-full cursor-pointer overflow-x-hidden text-ellipsis whitespace-nowrap rounded p-1 text-sm text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white"
-                            onClick={() => handleChatClick(chat.id)}
-                          >
-                            {chat.name}
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div
-                        onClick={createNewChat}
-                        className=" mt-1 flex cursor-pointer flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed border-zinc-500 p-7 text-center transition-colors duration-300 hover:border-cyan-500 hover:bg-zinc-950 hover:text-cyan-500"
-                      >
-                        <NotePencil size={24} className="text-[currentColor]" />
-                        <p className="leading-regular text-xs text-zinc-500">
-                          You currently have no chats.
-                        </p>
-                      </div>
+                    {loadedChats && (
+                      <Button variant="icon" onClick={createNewChat}>
+                        <NotePencil size={18} weight="bold" />
+                      </Button>
                     )}
                   </div>
+                  {loadedChats ? (
+                    <div className="h-full max-h-[30vh] space-y-0.5 overflow-y-auto">
+                      {chats && chats.length > 0 ? (
+                        <div className="px-2">
+                          {mappedChats?.map((chat, i) => (
+                            <div
+                              key={chat.id}
+                              data-id={chat.id}
+                              className="w-full cursor-pointer overflow-x-hidden text-ellipsis whitespace-nowrap rounded p-1 text-sm text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white"
+                              onClick={() => handleChatClick(chat.id)}
+                            >
+                              {chat.name}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div
+                          onClick={createNewChat}
+                          className=" mt-1 flex cursor-pointer flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed border-zinc-500 p-7 text-center transition-colors duration-300 hover:border-cyan-500 hover:bg-zinc-950 hover:text-cyan-500"
+                        >
+                          <NotePencil
+                            size={24}
+                            className="text-[currentColor]"
+                          />
+                          <p className="leading-regular text-xs text-zinc-500">
+                            You currently have no chats.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="mx-2 h-[20vh] w-[calc(100%-1rem)] animate-pulse rounded-lg bg-zinc-700" />
+                  )}
                 </div>
               )}
               <CurrentWorkspace userFiles={userFiles} />
             </div>
-            <div className="relative flex w-full items-center justify-between p-4">
-              <DropdownAccount ref={dropdownRef} dropdownOpen={dropdownOpen} />
-              <div
-                className={clsx(
-                  "inline-flex w-full -translate-x-2 transform cursor-pointer items-center space-x-2 rounded-lg p-2 transition-colors hover:bg-zinc-800",
-                  { "bg-zinc-800": dropdownOpen }
-                )}
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-              >
-                {session?.user.email ? (
-                  <>
-                    <div className="flex items-center space-x-2">
-                      {session.user.image ? (
-                        <img
-                          src={session.user.image}
-                          className="h-8 w-8 min-w-[2rem] rounded-full bg-cyan-600"
+            <div className="relative flex w-full items-center justify-between space-x-2 p-4">
+              {loadedAccount ? (
+                <>
+                  <DropdownAccount
+                    ref={dropdownRef}
+                    dropdownOpen={dropdownOpen}
+                  />
+                  <div
+                    className={clsx(
+                      "inline-flex w-full -translate-x-2 transform cursor-pointer items-center space-x-2 rounded-lg p-2 transition-colors hover:bg-zinc-800",
+                      { "bg-zinc-800": dropdownOpen }
+                    )}
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                  >
+                    {session?.user.email ? (
+                      <>
+                        <div className="flex items-center space-x-2">
+                          {session.user.image ? (
+                            <img
+                              src={session.user.image}
+                              className="h-8 w-8 min-w-[2rem] rounded-full bg-cyan-600"
+                            />
+                          ) : (
+                            <div className="h-8 w-8 min-w-[2rem] rounded-full bg-cyan-600" />
+                          )}
+                          <div className="w-full space-y-1 overflow-x-hidden">
+                            <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold leading-none">
+                              {session.user.name}
+                            </div>
+                            <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap text-[11px] leading-none text-gray-400">
+                              {session.user.email}
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <AvatarBlockie
+                          size={32}
+                          address={"0x7cB57B5A97eAbe94205C07890BE4c1aD31E486A8"}
                         />
-                      ) : (
-                        <div className="h-8 w-8 min-w-[2rem] rounded-full bg-cyan-600" />
-                      )}
-                      <div className="w-full space-y-1 overflow-x-hidden">
-                        <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold leading-none">
-                          {session.user.name}
-                        </div>
-                        <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap text-[11px] leading-none text-gray-400">
-                          {session.user.email}
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <AvatarBlockie
-                      size={32}
-                      address={"0x7cB57B5A97eAbe94205C07890BE4c1aD31E486A8"}
-                    />
-                    <div className="text-white">Guest</div>
-                  </>
-                )}
-              </div>
+                        <div className="text-white">Guest</div>
+                      </>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="h-12 w-full animate-pulse rounded-lg bg-zinc-700" />
+              )}
               <div className="flex items-center space-x-1 text-lg text-white">
                 <a
                   href="https://discord.gg/r3rwh69cCa"
