@@ -61,17 +61,20 @@ const DropdownAccount: React.ForwardRefRenderFunction<
       <div
         ref={ref}
         className={clsx(
-          "absolute bottom-full left-2 w-[272px] animate-fade-in space-y-1 rounded-lg border-2 border-zinc-700 bg-zinc-800 p-2 shadow-lg",
-          { hidden: !dropdownOpen }
+          "animate-fade-in absolute bottom-full left-2 w-[272px] rounded-lg border-2 border-zinc-700 bg-zinc-800 p-2 shadow-lg",
+          { hidden: !dropdownOpen },
+          { "md:space-y-1": session?.user.email }
         )}
       >
-        <div
-          className="flex w-full cursor-pointer items-center space-x-2 rounded-md p-2 text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white"
-          onClick={handleAccountSettingsClick}
-        >
-          <GearSix size={16} weight="bold" />
-          <div className="leading-none">Account Settings</div>
-        </div>
+        {session?.user.email && (
+          <div
+            className="flex w-full cursor-pointer items-center space-x-2 rounded-md p-2 text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white"
+            onClick={handleAccountSettingsClick}
+          >
+            <GearSix size={16} weight="bold" />
+            <div className="leading-none">Account Settings</div>
+          </div>
+        )}
         <a
           className="flex w-full cursor-pointer items-center space-x-2 rounded-md p-2 text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white md:hidden"
           href="https://discord.gg/r3rwh69cCa"
