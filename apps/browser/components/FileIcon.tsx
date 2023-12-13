@@ -1,4 +1,3 @@
-import { File, IconProps } from "@phosphor-icons/react";
 import clsx from "clsx";
 
 interface FileIconProps {
