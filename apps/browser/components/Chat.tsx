@@ -20,7 +20,7 @@ export interface ChatLog {
 
 export interface ChatProps {
   logs: ChatLog[];
-  samplePrompts?: ExamplePrompt[];
+  samplePrompts: ExamplePrompt[];
   isRunning: boolean;
   isStopped: boolean;
   isPaused: boolean;
@@ -138,7 +138,7 @@ const Chat: React.FC<ChatProps> = ({
           </div>
         ))}
       </div>
-      {samplePrompts?.length ? (
+      {!message.length && !logs.length ? (
         <div className="grid w-full grid-rows-2 p-2.5 py-16 self-center w-[100%] max-w-[56rem]">
           {samplePrompts.map((prompt, index) => (
             <div 

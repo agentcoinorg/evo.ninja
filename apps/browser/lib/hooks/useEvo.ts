@@ -53,7 +53,6 @@ export function useEvo({
   isSending: boolean;
   setIsSending: (sending: boolean) => void;
 } {
-  // const supabase = useSupabase();
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [isSending, setIsSending] = useState<boolean>(false);
@@ -71,104 +70,101 @@ export function useEvo({
   const [, setCapReached] = useAtom(capReachedAtom);
   const [userWorkspace, setUserWorkspace] = useAtom(userWorkspaceAtom);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const browserLogger = new BrowserLogger({
-          onLog: async (message: string) => {
-            await onChatLog({
-              user: "evo",
-              title: message,
-            });
-          },
-        });
-        const logger = new Logger([browserLogger, new ConsoleLogger()], {
-          promptUser: () => Promise.resolve("N/A"),
-        });
+  const createEvoInstance = () => {
+    try {
+      const browserLogger = new BrowserLogger({
+        onLog: async (message: string) => {
+          await onChatLog({
+            user: "evo",
+            title: message,
+          });
+        },
+      });
+      const logger = new Logger([browserLogger, new ConsoleLogger()], {
+        promptUser: () => Promise.resolve("N/A"),
+      });
 
-        const scriptsWorkspace = await createInBrowserScripts();
-        const scripts = new Scripts(scriptsWorkspace);
+      const scriptsWorkspace = createInBrowserScripts();
+      const scripts = new Scripts(scriptsWorkspace);
 
-        const env = new Env({
-          OPENAI_API_KEY: localOpenAiApiKey || " ",
-          GPT_MODEL: "gpt-4-1106-preview",
-          CONTEXT_WINDOW_TOKENS: "128000",
-          MAX_RESPONSE_TOKENS: "4096",
-        });
+      const env = new Env({
+        OPENAI_API_KEY: localOpenAiApiKey || " ",
+        GPT_MODEL: "gpt-4-1106-preview",
+        CONTEXT_WINDOW_TOKENS: "128000",
+        MAX_RESPONSE_TOKENS: "4096",
+      });
 
-        let llm: LlmApi;
-        let embedding: EmbeddingApi;
+      let llm: LlmApi;
+      let embedding: EmbeddingApi;
 
-        if (localOpenAiApiKey) {
-          llm = new OpenAILlmApi(
-            env.OPENAI_API_KEY,
-            env.GPT_MODEL as LlmModel,
-            env.CONTEXT_WINDOW_TOKENS,
-            env.MAX_RESPONSE_TOKENS,
-            logger,
-            env.OPENAI_API_BASE_URL,
-          );
-          embedding = new OpenAIEmbeddingAPI(
-            env.OPENAI_API_KEY,
-            logger,
-            cl100k_base,
-            env.OPENAI_API_BASE_URL,
-          );
-        } else {
-          llm = new ProxyLlmApi(
-            env.GPT_MODEL as LlmModel,
-            env.CONTEXT_WINDOW_TOKENS,
-            env.MAX_RESPONSE_TOKENS,
-            () => setCapReached(true)
-          );
-          setLlmProxyApi(llm as ProxyLlmApi);
-          embedding = new ProxyEmbeddingApi(cl100k_base, () =>
-            setCapReached(true)
-          );
-          setEmbeddingProxyApi(embedding as ProxyEmbeddingApi);
-        }
-
-        let workspace = userWorkspace;
-
-        if (!workspace) {
-          workspace = new InMemoryWorkspace();
-          setUserWorkspace(workspace);
-        }
-
-        const internals = new SubWorkspace(".evo", workspace);
-
-        const chat = new EvoChat(cl100k_base, {
-          onMessagesAdded,
-        });
-        const agentVariables = new AgentVariables({
-          onVariableSet
-        })
-
-        setEvo(
-          new Evo(
-            new AgentContext(
-              llm,
-              embedding,
-              chat,
-              logger,
-              workspace,
-              internals,
-              env,
-              scripts,
-              undefined,
-              agentVariables
-            )
-          )
+      if (localOpenAiApiKey) {
+        llm = new OpenAILlmApi(
+          env.OPENAI_API_KEY,
+          env.GPT_MODEL as LlmModel,
+          env.CONTEXT_WINDOW_TOKENS,
+          env.MAX_RESPONSE_TOKENS,
+          logger,
+          env.OPENAI_API_BASE_URL,
         );
-      } catch (e: any) {
-        setError(e.message);
+        embedding = new OpenAIEmbeddingAPI(
+          env.OPENAI_API_KEY,
+          logger,
+          cl100k_base,
+          env.OPENAI_API_BASE_URL,
+        );
+      } else {
+        llm = new ProxyLlmApi(
+          env.GPT_MODEL as LlmModel,
+          env.CONTEXT_WINDOW_TOKENS,
+          env.MAX_RESPONSE_TOKENS,
+          () => setCapReached(true)
+        );
+        setLlmProxyApi(llm as ProxyLlmApi);
+        embedding = new ProxyEmbeddingApi(cl100k_base, () =>
+          setCapReached(true)
+        );
+        setEmbeddingProxyApi(embedding as ProxyEmbeddingApi);
       }
-    })();
-  }, [
-    localOpenAiApiKey
-  ]);
+
+      let workspace = userWorkspace;
+
+      if (!workspace) {
+        workspace = new InMemoryWorkspace();
+        setUserWorkspace(workspace);
+      }
+
+      const internals = new SubWorkspace(".evo", workspace);
+
+      const chat = new EvoChat(cl100k_base, {
+        onMessagesAdded,
+      });
+      const agentVariables = new AgentVariables({
+        onVariableSet
+      })
+
+      const evo = new Evo(
+        new AgentContext(
+          llm,
+          embedding,
+          chat,
+          logger,
+          workspace,
+          internals,
+          env,
+          scripts,
+          undefined,
+          agentVariables
+        )
+      );
+      setEvo(evo);
+      return evo;
+    } catch (e: any) {
+      setError(e.message);
+    }
+  };
 
   const start = (goal: string) => {
+    const evo = createEvoInstance();
     if (!evo) return;
     setIterator(evo.run({ goal }));
     setIsRunning(true);
