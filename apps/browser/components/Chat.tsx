@@ -104,10 +104,10 @@ const Chat: React.FC<ChatProps> = ({
   };
 
   const handleSamplePromptClick = async (prompt: ExamplePrompt) => {
+    await handleSend(prompt.prompt);
     if (prompt.files) {
       setUploadedFiles(prompt.files);
     }
-    await handleSend(prompt.prompt);
   };
 
   const handleScroll = useCallback(() => {
