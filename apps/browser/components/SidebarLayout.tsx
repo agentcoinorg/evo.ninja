@@ -97,7 +97,7 @@ export default function SidebarLayout({
         </>
         {children}
       </div>
-      <WelcomeModal isOpen={true} onClose={() => setWelcomeModalSeen(true)} />
+      <WelcomeModal isOpen={!welcomeModalSeen} onClose={() => setWelcomeModalSeen(true)} />
     </>
   );
 }
