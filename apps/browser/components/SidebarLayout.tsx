@@ -38,7 +38,7 @@ export default function SidebarLayout(props: { children: React.ReactNode, isMobi
           {isMobile && (
             <>
               {sidebarOpen && (
-                <div className="fixed bottom-0 left-0 right-0 top-0 z-10 animate-fade-in bg-zinc-900/50 opacity-0 backdrop-blur" />
+                <div className="animate-fade-in fixed bottom-0 left-0 right-0 top-0 z-10 bg-zinc-900/50 opacity-0 backdrop-blur" />
               )}
               <header
                 className={clsx(
@@ -50,7 +50,7 @@ export default function SidebarLayout(props: { children: React.ReactNode, isMobi
                   <a href="/">
                     <Logo
                       wordmark={false}
-                      className="w-8 animate-fade-in cursor-pointer opacity-0 transition-opacity hover:opacity-50"
+                      className="animate-fade-in w-8 cursor-pointer opacity-0 transition-opacity hover:opacity-50"
                     />
                   </a>
                 )}
@@ -95,10 +95,7 @@ export default function SidebarLayout(props: { children: React.ReactNode, isMobi
         </>
         {props.children}
       </div>
-      <WelcomeModal
-        isOpen={!welcomeModalSeen}
-        onClose={() => setWelcomeModalSeen(true)}
-      />
+      <WelcomeModal isOpen={true} onClose={() => setWelcomeModalSeen(true)} />
     </>
   );
 }

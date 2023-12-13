@@ -14,10 +14,12 @@ interface WelcomeModalProps {
 }
 
 export default function WelcomeModal(props: WelcomeModalProps) {
-  const { data: session } = useSession()
+  const { data: session } = useSession();
   const { isOpen, onClose } = props;
-  const { onSave, AccountConfig, firstTimeUser } = useAccountConfig({ onClose })
-  
+  const { onSave, AccountConfig, firstTimeUser } = useAccountConfig({
+    onClose,
+  });
+
   return (
     <>
       <Modal isOpen={isOpen} title="Welcome to Evo Ninja" onClose={onClose}>
@@ -34,7 +36,14 @@ export default function WelcomeModal(props: WelcomeModalProps) {
             </div>
             <div className="flex items-center justify-between rounded-lg bg-zinc-800 p-4">
               <div className="flex items-center space-x-2">
-                <div className="h-8 w-8 rounded-full bg-yellow-500" />
+                {session.user.image ? (
+                  <img
+                    src={session?.user.image}
+                    className="h-8 w-8 min-w-[2rem] rounded-full bg-cyan-600"
+                  />
+                ) : (
+                  <div className="h-8 w-8 min-w-[2rem] rounded-full bg-cyan-600" />
+                )}
                 <div className="space-y-1">
                   <div className="text-sm font-semibold leading-none">
                     {session.user.name}
@@ -45,7 +54,11 @@ export default function WelcomeModal(props: WelcomeModalProps) {
                 </div>
               </div>
               <div className="space-x-2">
-                <Button className="!px-4" hierarchy="secondary" onClick={() => signOut()}>
+                <Button
+                  className="!px-4"
+                  hierarchy="secondary"
+                  onClick={() => signOut()}
+                >
                   <SignOut color="currentColor" size={16} />
                   <div>Sign Out</div>
                 </Button>
@@ -56,7 +69,11 @@ export default function WelcomeModal(props: WelcomeModalProps) {
           <div className="space-y-6 border-b-2 border-zinc-700 pb-8">
             <p>Sign in below to save your sessions</p>
             <div className="space-y-2">
-              <Button className="w-full" hierarchy="secondary" onClick={() => signIn("github")}>
+              <Button
+                className="w-full"
+                hierarchy="secondary"
+                onClick={() => signIn("github")}
+              >
                 <Image
                   alt="Sign in with Github"
                   width={20}
@@ -65,7 +82,11 @@ export default function WelcomeModal(props: WelcomeModalProps) {
                 />
                 <div>Sign in with Github</div>
               </Button>
-              <Button className="w-full" hierarchy="secondary" onClick={() => signIn("google")}>
+              <Button
+                className="w-full"
+                hierarchy="secondary"
+                onClick={() => signIn("google")}
+              >
                 <Image
                   alt="Sign in with Google"
                   width={20}

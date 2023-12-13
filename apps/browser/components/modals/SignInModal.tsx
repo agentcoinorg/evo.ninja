@@ -36,10 +36,10 @@ export default function SignInModal(props: AccountConfigProps) {
                 {session.user.image ? (
                   <img
                     src={session.user.image}
-                    className="h-8 w-8 rounded-full bg-yellow-500"
+                    className="h-8 w-8 rounded-full bg-cyan-600"
                   />
                 ) : (
-                  <div className="h-8 w-8 rounded-full bg-yellow-500" />
+                  <div className="h-8 w-8 rounded-full bg-cyan-600" />
                 )}
                 <div className="space-y-1">
                   <div className="text-sm font-semibold leading-none">

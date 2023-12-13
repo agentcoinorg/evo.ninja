@@ -33,17 +33,19 @@ function AccountConfig(props: AccountConfigProps) {
             error={error}
             type="text"
           />
-          <div className="text-xs text-zinc-400">
-            Don't have an OpenAI key?
-            <a
-              className="ml-1 text-cyan-500 underline transition-colors duration-300 hover:text-white"
-              href="https://platform.openai.com/account/api-keys"
-              target="_blank"
-              rel="noredirect"
-            >
-              Get one here.
-            </a>
-          </div>
+          {!apiKey && (
+            <div className="text-xs text-zinc-400">
+              Don't have an OpenAI key?
+              <a
+                className="ml-1 text-cyan-500 underline transition-colors duration-300 hover:text-white"
+                href="https://platform.openai.com/account/api-keys"
+                target="_blank"
+                rel="noredirect"
+              >
+                Get one here.
+              </a>
+            </div>
+          )}
         </div>
 
         <div className="w-full space-y-1">

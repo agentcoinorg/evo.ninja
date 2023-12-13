@@ -47,9 +47,14 @@ export default function Modal(props: PropsWithChildren<ModalProps>) {
                     <Button
                       variant="icon"
                       onClick={onClose}
-                      className="translate-x-2 transform"
+                      className="group translate-x-2 transform"
                     >
-                      <X size={20} color="white" weight="bold" />
+                      <X
+                        size={20}
+                        color="white"
+                        weight="bold"
+                        className="transition-opacity duration-300 ease-in-out group-hover:opacity-50"
+                      />
                     </Button>
                   </div>
                   <div className="max-h-[calc(100vh-96px)] space-y-8 overflow-y-auto bg-zinc-900 p-8 pb-12">
