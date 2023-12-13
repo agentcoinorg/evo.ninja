@@ -1,3 +1,5 @@
+# https://github.com/microsoft/autogen/blob/main/notebook/agentchat_hierarchy_flow_using_select_speaker.ipynb
+
 import json
 import logging
 import os
@@ -104,9 +106,76 @@ def main(goal: str):
 
     research_planner = GPTAssistantAgent(
         name="research_planner",
+        instructions='''
+        You will be presented a question about something that has not happened yet and does not have a definitive answer.
+        You will do your best to plan a research to gather useful information to predict its answer.
+
+        1. Research the web to gather information about the question
+
+        2. Break Down the Question: 
+          - Divide big questions into smaller, related parts.
+          - Example: Instead of "Votes of last US presidential winner?", ask:
+            a. "When was the last US presidential election?"
+            b. "Who won that election?"
+            c. "How many votes did the winner get?"
+          - If one search is enough, leave the question as is.
+            
+        3. Use Current Year:
+          - If you need the current year in a search, use 2023
+            
+        4. Explain Your Steps:
+          - Tell us how you came up with your plan.
+            
+        5. Be Clear and Brief:
+          - Aim for accuracy and keep it short.
+        ''',
         llm_config={
             "config_list": config_list,
-            "assistant_id": "asst_dG7xuXtd3j4O6WpdR7hkT8zK"
+            "tools": [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "web_search",
+                        "description": "Search the web for information",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "query": {
+                                    "type": "string",
+                                    "description": "The query to search the internet for"
+                                }
+                            },
+                            "required": [
+                                "query"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "web_scrape",
+                        "description": "Scrape a website and summarize the content",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "url": {
+                                    "type": "string",
+                                    "description": "The URL of the website to scrape"
+                                },
+                                "content_length_threshold": {
+                                    "type": "integer",
+                                    "description": "The minimum length of the content to scrape",
+                                    "default": 10000
+                                }
+                            },
+                            "required": [
+                                "url"
+                            ]
+                        }
+                    }
+                }
+            ]
         },
         verbose=True,
     )
@@ -120,18 +189,75 @@ def main(goal: str):
     
     research_evaluator = GPTAssistantAgent(
         name="research_evaluator",
+        instructions='''
+        You are a research results evaluator. Evaluate the results you're presented with in order to answer the user's question.
+        The user's question is a binary (yes or no) question that cannot be definitively answered.
+        The objective is to provide the user with a research report for him to make an informed prediction.
+
+        Assess the quality, accuracy, and depth of research conducted by other agents.
+        Before approving any findings, ensure that all claims are backed by solid evidence and robust methodologies.
+        Respond 'No, you have to keep searching for the information' and point out what's missing or flawed, if you feel the results do not meet the standard.
+        ''',
         llm_config={
             "config_list": config_list,
-            "assistant_id": "asst_USStI8GI6FFM0XYU2Eip8xKT"
         },
         verbose=True,
     )
     
     researcher = GPTAssistantAgent(
         name="researcher",
+        instructions='''
+        You will receive a specific step of a research plan and your task is to search the web to fulfill it.
+        After searching the web, scrape pages if you want more information from that source.
+        Include your sources in your assessment
+        ''',
         llm_config={
             "config_list": config_list,
-            "assistant_id": "asst_PTd9I7W6yoBMDWp9BhbMy33t"
+            "tools": [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "web_search",
+                        "description": "Search the web for information",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "query": {
+                                    "type": "string",
+                                    "description": "The query to search the internet for"
+                                }
+                            },
+                            "required": [
+                                "query"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "web_scrape",
+                        "description": "Scrape a website and summarize the content",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "url": {
+                                    "type": "string",
+                                    "description": "The URL of the website to scrape"
+                                },
+                                "content_length_threshold": {
+                                    "type": "integer",
+                                    "description": "The minimum length of the content to scrape",
+                                    "default": 10000
+                                }
+                            },
+                            "required": [
+                                "url"
+                            ]
+                        }
+                    }
+                }
+            ]
         },
         verbose=True,
     )
