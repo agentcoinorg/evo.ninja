@@ -35,6 +35,7 @@ import Disclaimer from "./Disclaimer";
 import useWindowSize from "@/lib/hooks/useWindowSize";
 import { useSession } from "next-auth/react";
 import { useUploadFiles } from "@/lib/hooks/useUploadFile";
+import AvatarBlockie from "./AvatarBlockie";
 
 export interface ChatLog {
   title: string;
@@ -146,6 +147,8 @@ const Chat: React.FC<ChatProps> = ({
     }
   }, [logs, isAtBottom]);
 
+  console.log(logs);
+
   return (
     <main
       className={clsx("flex h-full w-full flex-col", {
@@ -172,6 +175,7 @@ const Chat: React.FC<ChatProps> = ({
               if (isEvo) {
                 shownEvo++;
               }
+              console.log(index);
               return (
                 <div
                   key={index}
@@ -187,6 +191,13 @@ const Chat: React.FC<ChatProps> = ({
                             <img
                               src={session?.user.image}
                               className="w-full rounded-full bg-yellow-500"
+                            />
+                          ) : !session?.user.email ? (
+                            <AvatarBlockie
+                              address={
+                                "0x7cB57B5A97eAbe94205C07890BE4c1aD31E486A8"
+                              }
+                              size={32}
                             />
                           ) : (
                             <div className="w-full rounded-full bg-yellow-500" />
@@ -212,7 +223,7 @@ const Chat: React.FC<ChatProps> = ({
                       {isEvo &&
                         isRunning &&
                         isSending &&
-                        index === logs.length && (
+                        index === logs.length - 1 && (
                           <div className="flex items-center space-x-2 text-cyan-500">
                             <LoadingCircle />
                             <div className="group flex items-center space-x-2 text-cyan-500">
