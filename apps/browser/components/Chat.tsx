@@ -11,13 +11,12 @@ import clsx from "clsx";
 import { useAtom } from "jotai";
 import {
   allowTelemetryAtom,
-  showAccountModalAtom,
   showDisclaimerAtom,
   signInModalAtom,
   uploadedFilesAtom,
   welcomeModalAtom,
 } from "@/lib/store";
-import { ExamplePrompt, examplePrompts } from "@/lib/examplePrompts";
+import { ExamplePrompt } from "@/lib/examplePrompts";
 import TextField from "./TextField";
 import {
   CaretCircleRight,
@@ -46,7 +45,7 @@ export interface ChatLog {
 
 export interface ChatProps {
   logs: ChatLog[];
-  samplePrompts?: ExamplePrompt[];
+  samplePrompts: ExamplePrompt[];
   isRunning: boolean;
   isStopped: boolean;
   isPaused: boolean;
@@ -77,6 +76,7 @@ const Chat: React.FC<ChatProps> = ({
   const { isMobile } = useWindowSize();
   const { open, getInputProps } = useUploadFiles();
   const { data: session } = useSession();
+  const shouldShowExamplePromps = !message.length && !logs.length
 
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -148,10 +148,10 @@ const Chat: React.FC<ChatProps> = ({
   return (
     <main
       className={clsx("flex h-full w-full flex-col", {
-        "items-center justify-center": samplePrompts?.length,
+        "items-center justify-center": shouldShowExamplePromps,
       })}
     >
-      {samplePrompts?.length ? (
+      {shouldShowExamplePromps ? (
         <div className="flex flex-col items-center space-y-2">
           <Logo wordmark={false} className="w-16" />
           <h1 className="text-2xl font-bold">What's your goal today?</h1>
@@ -265,12 +265,12 @@ const Chat: React.FC<ChatProps> = ({
       <div
         className={clsx(
           "mt-4 flex w-full space-y-4",
-          samplePrompts?.length
+          shouldShowExamplePromps
             ? "flex-col-reverse space-y-reverse px-4 md:px-8 lg:px-4"
             : "mx-auto max-w-[56rem] flex-col px-4"
         )}
       >
-        {samplePrompts?.length && (
+        {!message.length && !logs.length && (
           <div className="flex flex-col items-center space-y-3">
             <h2 className="w-full text-center font-normal">
               Not sure where to start?{` `}
@@ -280,12 +280,12 @@ const Chat: React.FC<ChatProps> = ({
               </span>
             </h2>
             <div className="flex w-full max-w-[56rem] flex-wrap items-center justify-center self-center">
-              {examplePrompts.map((prompt, index) => (
+              {samplePrompts.map((prompt, index) => (
                 <div
                   key={index}
                   className={clsx(
                     "m-1 cursor-pointer rounded-lg  border-2 bg-zinc-900/50 p-2.5 text-xs text-zinc-400 transition-all duration-300 ease-in-out hover:bg-cyan-600 hover:text-white",
-                    samplePrompts?.length
+                    shouldShowExamplePromps
                       ? "border-zinc-700"
                       : "w-[calc(100%-1.5rem)] border-zinc-800"
                   )}
@@ -300,7 +300,7 @@ const Chat: React.FC<ChatProps> = ({
         <div
           className={clsx(
             "mb-4 flex w-full items-center justify-center gap-4 self-center",
-            samplePrompts?.length ? "max-w-[42rem] " : "max-w-[56rem]"
+            shouldShowExamplePromps ? "max-w-[42rem] " : "max-w-[56rem]"
           )}
         >
           <TextField
