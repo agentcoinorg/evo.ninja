@@ -77,6 +77,7 @@ const Chat: React.FC<ChatProps> = ({
   const { open, getInputProps } = useUploadFiles();
   const { data: session } = useSession();
   const shouldShowExamplePromps = !message.length && !logs.length;
+  let shownEvo = 0;
 
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -167,26 +168,32 @@ const Chat: React.FC<ChatProps> = ({
             className="w-full flex-1 items-center space-y-6 overflow-y-auto overflow-x-clip px-2 py-3 text-left"
           >
             {logs.map((msg, index) => {
+              const isEvo = msg.user === "evo";
+              if (isEvo) {
+                shownEvo++;
+              }
               return (
                 <div
                   key={index}
                   className={`${msg.user} m-auto w-full max-w-[56rem] self-center`}
                 >
                   <div className="animate-slide-down group relative flex w-full items-start space-x-3 rounded-lg p-2 text-white opacity-0 transition-colors duration-300 ">
-                    {msg.user === "evo" ? (
-                      <Logo wordmark={false} className="!w-8 !min-w-[2rem]" />
-                    ) : (
-                      <>
-                        {session?.user.image && session?.user.email ? (
-                          <img
-                            src={session?.user.image}
-                            className="h-8 w-8 rounded-full bg-yellow-500"
-                          />
-                        ) : (
-                          <div className="h-8 w-8 rounded-full bg-yellow-500" />
-                        )}
-                      </>
-                    )}
+                    <div className="!w-8 !min-w-[2rem]">
+                      {isEvo && shownEvo < 2 ? (
+                        <Logo wordmark={false} className="w-full" />
+                      ) : msg.user !== "evo" ? (
+                        <>
+                          {session?.user.image && session?.user.email ? (
+                            <img
+                              src={session?.user.image}
+                              className="w-full rounded-full bg-yellow-500"
+                            />
+                          ) : (
+                            <div className="w-full rounded-full bg-yellow-500" />
+                          )}
+                        </>
+                      ) : null}
+                    </div>
                     <div className="max-w-[calc(100vw-84px)] space-y-2 pt-1 md:max-w-[49rem]">
                       {index === 0 || logs[index - 1].user !== msg.user ? (
                         <div className="SenderName font-medium">
@@ -202,22 +209,23 @@ const Chat: React.FC<ChatProps> = ({
                           {msg.content?.toString() ?? ""}
                         </ReactMarkdown>
                       </div>
-                      {msg.user === "evo" && isRunning && isSending && (
-                        <div className="flex items-center space-x-2 text-cyan-500">
-                          <LoadingCircle />
-                          <div className="group flex cursor-pointer items-center space-x-2 text-cyan-500 transition-all duration-500 hover:text-cyan-700">
-                            <div className="group-hover:underline">
-                              Predicting best approach...
+                      {isEvo &&
+                        isRunning &&
+                        isSending &&
+                        index === logs.length && (
+                          <div className="flex items-center space-x-2 text-cyan-500">
+                            <LoadingCircle />
+                            <div className="group flex items-center space-x-2 text-cyan-500">
+                              <div>Predicting best approach...</div>
+                              <Button
+                                variant="icon"
+                                className="!text-current !transition-none"
+                              >
+                                {/* <CaretCircleRight size={20} /> */}
+                              </Button>
                             </div>
-                            <Button
-                              variant="icon"
-                              className="!text-current !transition-none"
-                            >
-                              <CaretCircleRight size={20} />
-                            </Button>
                           </div>
-                        </div>
-                      )}
+                        )}
                     </div>
                     {/* <div className="absolute bottom-1 left-9 hidden animate-fade-in space-x-0.5 group-hover:flex">
                       {msg.user === "evo" ? (
