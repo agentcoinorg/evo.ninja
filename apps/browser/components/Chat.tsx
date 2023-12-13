@@ -35,6 +35,7 @@ import LoadingCircle from "./LoadingCircle";
 import Disclaimer from "./Disclaimer";
 import useWindowSize from "@/lib/hooks/useWindowSize";
 import { useSession } from "next-auth/react";
+import { useUploadFiles } from "@/lib/hooks/useUploadFile";
 
 export interface ChatLog {
   title: string;
@@ -74,6 +75,7 @@ const Chat: React.FC<ChatProps> = ({
   const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom);
   const [, setUploadedFiles] = useAtom(uploadedFilesAtom);
   const { isMobile } = useWindowSize();
+  const { open, getInputProps } = useUploadFiles();
   const { data: session } = useSession();
 
   const listContainerRef = useRef<HTMLDivElement | null>(null);
@@ -170,7 +172,7 @@ const Chat: React.FC<ChatProps> = ({
                   key={index}
                   className={`${msg.user} m-auto w-full max-w-[56rem] self-center`}
                 >
-                  <div className="animate-slide-down group relative flex w-full items-start space-x-3 rounded-lg p-2 pb-10 text-white opacity-0 transition-colors duration-300 ">
+                  <div className="group relative flex w-full animate-slide-down items-start space-x-3 rounded-lg p-2 pb-10 text-white opacity-0 transition-colors duration-300 ">
                     {msg.user === "evo" ? (
                       <Logo wordmark={false} className="!w-8 !min-w-[2rem]" />
                     ) : (
@@ -217,7 +219,7 @@ const Chat: React.FC<ChatProps> = ({
                         </div>
                       )}
                     </div>
-                    <div className="animate-fade-in absolute bottom-1 left-9 hidden space-x-0.5 group-hover:flex">
+                    <div className="absolute bottom-1 left-9 hidden animate-fade-in space-x-0.5 group-hover:flex">
                       {msg.user === "evo" ? (
                         <>
                           <Button variant="icon">
@@ -309,9 +311,12 @@ const Chat: React.FC<ChatProps> = ({
             placeholder="Ask Evo anything..."
             className="!rounded-lg !p-4 !pl-12"
             leftAdornment={
-              <Button variant="icon" className="!text-white">
-                <UploadSimple size={20} />
-              </Button>
+              <>
+                <Button variant="icon" className="!text-white" onClick={open}>
+                  <UploadSimple size={20} />
+                </Button>
+                <input {...getInputProps()} />
+              </>
             }
             rightAdornment={
               <ChatInputButton

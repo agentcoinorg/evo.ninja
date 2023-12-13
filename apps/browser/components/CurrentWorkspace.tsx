@@ -1,60 +1,24 @@
-import React, {
-  useEffect,
-  useState,
-  PropsWithChildren,
-  MouseEvent,
-} from "react";
-import { useDropzone } from "react-dropzone";
-import { readFile } from "@/lib/sys/file";
+import React, { PropsWithChildren } from "react";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import { downloadFilesAsZip } from "@/lib/sys/file/downloadFilesAsZip";
 import clsx from "clsx";
 
 import FileIcon from "./FileIcon";
-import colors from "tailwindcss/colors";
 import { DownloadSimple, FilePlus } from "@phosphor-icons/react";
 import Button from "./Button";
+import { useUploadFiles } from "@/lib/hooks/useUploadFile";
 
 interface UploadProps {
-  className?: string;
   userFiles: InMemoryFile[];
-  onUploadFiles: (files: InMemoryFile[]) => void;
 }
 
-function CurrentWorkspace({
-  userFiles,
-  onUploadFiles,
-  ...props
-}: PropsWithChildren<UploadProps>) {
-  const { className } = props;
-  const [showUpload, setShowUpload] = useState(false);
-  const { acceptedFiles, getRootProps, getInputProps, isDragAccept, open } =
-    useDropzone({ noClick: true });
-
-  function downloadUserFiles() {
-    downloadFilesAsZip("workspace.zip", userFiles);
-  }
+function CurrentWorkspace({ userFiles }: PropsWithChildren<UploadProps>) {
+  const { getRootProps, getInputProps, isDragAccept, open } = useUploadFiles();
 
   function getFileType(path: InMemoryFile["path"]) {
     const index = path.lastIndexOf(".");
     return path.substring(index + 1);
   }
-
-  useEffect(() => {
-    (async () => {
-      if (acceptedFiles && acceptedFiles.length) {
-        const result = await Promise.all(
-          acceptedFiles.map(async (x) => {
-            return await readFile(x);
-          })
-        );
-
-        onUploadFiles(result);
-
-        setShowUpload(false);
-      }
-    })();
-  }, [acceptedFiles, onUploadFiles]);
 
   return (
     <div className="p-2">
@@ -71,7 +35,7 @@ function CurrentWorkspace({
             <Button
               variant="icon"
               className="text-zinc-500 hover:text-cyan-500"
-              onClick={downloadUserFiles}
+              onClick={() => downloadFilesAsZip("workspace.zip", userFiles)}
             >
               <DownloadSimple size={18} weight="bold" />
             </Button>
@@ -99,8 +63,7 @@ function CurrentWorkspace({
                   {
                     "cursor-pointer !border-dashed !border-cyan-500 !bg-zinc-950":
                       isDragAccept,
-                  },
-                  className
+                  }
                 ),
               })}
             >

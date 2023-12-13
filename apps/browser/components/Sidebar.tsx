@@ -16,7 +16,6 @@ import { useSession } from "next-auth/react";
 
 export interface SidebarProps {
   userFiles: InMemoryFile[];
-  onUploadFiles: (files: InMemoryFile[]) => void;
   hoveringSidebarButton: boolean;
   sidebarOpen: boolean;
   setSidebarOpen: (set: boolean) => void;
@@ -24,7 +23,6 @@ export interface SidebarProps {
 
 const Sidebar = ({
   userFiles,
-  onUploadFiles,
   sidebarOpen,
   hoveringSidebarButton,
   setSidebarOpen,
@@ -99,9 +97,9 @@ const Sidebar = ({
           <div className="flex h-full flex-col justify-between">
             <div className="space-y-6">
               <header>
-                <button onClick={createNewChat}>
+                <a href="/">
                   <Logo className="w-[162px] cursor-pointer p-4 transition-opacity hover:opacity-50" />
-                </button>
+                </a>
               </header>
               <div className="space-y-1 px-2">
                 <div className="flex w-full items-center justify-between space-x-1 px-3">
@@ -138,7 +136,6 @@ const Sidebar = ({
               </div>
               <CurrentWorkspace
                 userFiles={userFiles}
-                onUploadFiles={onUploadFiles}
               />
             </div>
             <div className="relative flex w-full items-center justify-between p-4">

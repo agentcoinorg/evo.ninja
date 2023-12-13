@@ -5,7 +5,7 @@ import { useAtom } from "jotai";
 
 import clsx from "clsx";
 import Sidebar from "@/components/Sidebar";
-import { sidebarAtom, uploadedFilesAtom, userFilesAtom } from "@/lib/store";
+import { sidebarAtom, userFilesAtom } from "@/lib/store";
 import CloseSidebarIcon from "./CloseSidebarIcon";
 import useWindowSize from "@/lib/hooks/useWindowSize";
 import Logo from "./Logo";
@@ -21,7 +21,6 @@ export default function SidebarLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useAtom(sidebarAtom);
   const [userFiles] = useAtom(userFilesAtom);
-  const [, setUploadedFiles] = useAtom(uploadedFilesAtom);
   const [hoveringSidebarButton, setHovering] = useState<boolean>(false);
   const { isMobile } = useWindowSize();
   const [welcomeModalSeen, setWelcomeModalSeen] = useAtom(welcomeModalAtom);
@@ -72,7 +71,6 @@ export default function SidebarLayout({
               hoveringSidebarButton={hoveringSidebarButton}
               sidebarOpen={sidebarOpen}
               userFiles={userFiles}
-              onUploadFiles={setUploadedFiles}
               setSidebarOpen={setSidebarOpen}
             />
             {!isMobile && (
