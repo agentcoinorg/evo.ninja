@@ -101,7 +101,7 @@ function Dojo({ params }: { params: { id?: string } }) {
 
     const authorized = await handlePromptAuth(newMessage, chatIdRef.current);
 
-    if (!authorized) {
+    if (!authorized.complete) {
       return;
     }
 
@@ -111,7 +111,7 @@ function Dojo({ params }: { params: { id?: string } }) {
     });
 
     setIsSending(true);
-    start(newMessage);
+    start(newMessage, authorized.goalId as string);
   };
 
   const {

@@ -45,7 +45,7 @@ export function useEvo({
 }: UseEvoArgs): {
   isRunning: boolean;
   error?: string;
-  start: (message: string) => void;
+  start: (message: string, goalId: string) => void;
   onContinue: () => void;
   onPause: () => void;
   isPaused: boolean;
@@ -63,14 +63,11 @@ export function useEvo({
 
   const [error, setError] = useState<string | undefined>();
   const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom);
-  const [evo, setEvo] = useState<Evo | undefined>();
-  const [, setLlmProxyApi] = useAtom(proxyLlmAtom);
-  const [, setEmbeddingProxyApi] = useAtom(proxyEmbeddingAtom);
 
   const [, setCapReached] = useAtom(capReachedAtom);
   const [userWorkspace, setUserWorkspace] = useAtom(userWorkspaceAtom);
 
-  const createEvoInstance = () => {
+  const createEvoInstance = (goalId: string) => {
     try {
       const browserLogger = new BrowserLogger({
         onLog: async (message: string) => {
@@ -113,17 +110,19 @@ export function useEvo({
           env.OPENAI_API_BASE_URL,
         );
       } else {
-        llm = new ProxyLlmApi(
+        const llmProxy = new ProxyLlmApi(
           env.GPT_MODEL as LlmModel,
           env.CONTEXT_WINDOW_TOKENS,
           env.MAX_RESPONSE_TOKENS,
-          () => setCapReached(true)
+          () => setCapReached(true),
         );
-        setLlmProxyApi(llm as ProxyLlmApi);
-        embedding = new ProxyEmbeddingApi(cl100k_base, () =>
+        llmProxy.setGoalId(goalId);
+        llm = llmProxy;
+        const embeddingProxy = new ProxyEmbeddingApi(cl100k_base, () =>
           setCapReached(true)
         );
-        setEmbeddingProxyApi(embedding as ProxyEmbeddingApi);
+        embeddingProxy.setGoalId(goalId);
+        embedding = embeddingProxy;
       }
 
       let workspace = userWorkspace;
@@ -156,15 +155,14 @@ export function useEvo({
           agentVariables
         )
       );
-      setEvo(evo);
       return evo;
     } catch (e: any) {
       setError(e.message);
     }
   };
 
-  const start = (goal: string) => {
-    const evo = createEvoInstance();
+  const start = (goal: string, goalId: string) => {
+    const evo = createEvoInstance(goalId);
     if (!evo) return;
     setIterator(evo.run({ goal }));
     setIsRunning(true);
@@ -205,7 +203,6 @@ export function useEvo({
           setIsRunning(false);
           setIterator(undefined);
           setIsSending(false);
-          evo?.reset();
           break;
         }
 

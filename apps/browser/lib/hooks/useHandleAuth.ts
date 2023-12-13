@@ -4,8 +4,6 @@ import {
   allowTelemetryAtom,
   capReachedAtom,
   localOpenAiApiKeyAtom,
-  proxyEmbeddingAtom,
-  proxyLlmAtom,
   showAccountModalAtom,
 } from "../store";
 import { useSession } from "next-auth/react";
@@ -18,21 +16,25 @@ export function useHandleAuth() {
   const [allowTelemetry] = useAtom(allowTelemetryAtom);
   const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom);
   const [, setCapReached] = useAtom(capReachedAtom);
-  const [proxyLlmApi] = useAtom(proxyLlmAtom);
-  const [proxyEmbeddingApi] = useAtom(proxyEmbeddingAtom);
 
   const { data: session } = useSession();
 
   const firstTimeUser = !localOpenAiApiKey && !session?.user;
 
-  const handlePromptAuth = async (message: string, chatId: string | undefined) => {
+  const handlePromptAuth = async (
+    message: string,
+    chatId: string | undefined
+  ): Promise<{
+    complete: boolean;
+    goalId?: string;
+  }> => {
     if (awaitingAuth) {
-      return false;
+      return { complete: false };
     }
 
     if (firstTimeUser) {
       setAccountModalOpen(true);
-      return false;
+      return { complete: false };
     }
 
     const subsidize = !localOpenAiApiKey;
@@ -50,12 +52,13 @@ export function useHandleAuth() {
     setAwaitingAuth(false);
 
     if (!goalId) {
-      return false;
+      return { complete: false };
     }
 
-    proxyLlmApi?.setGoalId(goalId);
-    proxyEmbeddingApi?.setGoalId(goalId);
-    return true;
+    return {
+      complete: true,
+      goalId: goalId
+    };
   };
   return {
     handlePromptAuth,
