@@ -7,31 +7,21 @@ interface AccountConfigProps {
   setTelemetry: (telemetry: boolean) => void;
   telemetry: boolean;
   isLoggedIn: boolean;
-  showText?: boolean;
   error: string | undefined;
 }
 
 function AccountConfig(props: AccountConfigProps) {
-  const {
-    isLoggedIn,
-    showText,
-    apiKey,
-    setApiKey,
-    setTelemetry,
-    telemetry,
-    error,
-  } = props;
+  const { isLoggedIn, apiKey, setApiKey, setTelemetry, telemetry, error } =
+    props;
 
   return (
     <>
       <div className="space-y-6">
-        {showText && (
-          <p>
-            {isLoggedIn
-              ? "Provide your own OpenAI key to get started with Evo."
-              : "Provide your own OpenAI key and use Evo as a guest. As a guest, your sessions will not be saved."}
-          </p>
-        )}
+        <p>
+          {isLoggedIn
+            ? "Provide your own OpenAI key to get started with Evo."
+            : "Provide your own OpenAI key and use Evo as a guest. As a guest, your sessions will not be saved."}
+        </p>
         <div className="space-y-3">
           <TextField
             value={apiKey ? apiKey : ""}
@@ -62,7 +52,11 @@ function AccountConfig(props: AccountConfigProps) {
             <label className="text-sm text-zinc-200">
               Share prompts with Evo
             </label>
-            <TextField checked={telemetry} onChange={(e) => setTelemetry(e.target.checked)} type="checkbox" />
+            <TextField
+              checked={telemetry}
+              onChange={(e) => setTelemetry(e.target.checked)}
+              type="checkbox"
+            />
           </fieldset>
         </div>
       </div>
