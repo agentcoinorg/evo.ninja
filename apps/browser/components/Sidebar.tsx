@@ -105,7 +105,7 @@ const Sidebar = ({
                         <div
                           key={chat.id}
                           data-id={chat.id}
-                          className="w-full cursor-pointer overflow-x-hidden text-ellipsis whitespace-nowrap rounded p-1 text-sm text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white md:text-base"
+                          className="w-full cursor-pointer overflow-x-hidden text-ellipsis whitespace-nowrap rounded p-1 text-sm text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white"
                           onClick={() => handleChatClick(chat.id)}
                         >
                           {chat.name}
@@ -116,15 +116,13 @@ const Sidebar = ({
                     <div className="mt-1 flex flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed border-zinc-500 p-7 text-center">
                       <NotePencil size={24} className="text-[currentColor]" />
                       <p className="leading-regular text-xs text-zinc-500">
-                        You currently have no chats in your workspace.
+                        You currently have no chats.
                       </p>
                     </div>
                   )}
                 </div>
               </div>
-              <CurrentWorkspace
-                userFiles={userFiles}
-              />
+              <CurrentWorkspace userFiles={userFiles} />
             </div>
             <div className="relative flex w-full items-center justify-between p-4">
               <DropdownAccount ref={dropdownRef} dropdownOpen={dropdownOpen} />
@@ -146,11 +144,11 @@ const Sidebar = ({
                       ) : (
                         <div className="h-8 w-8 rounded-full bg-yellow-500" />
                       )}
-                      <div className="space-y-1">
-                        <div className="text-sm font-semibold leading-none">
+                      <div className="w-full space-y-1 overflow-x-hidden">
+                        <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold leading-none">
                           {session.user.name}
                         </div>
-                        <div className="text-[12px] leading-none text-gray-400">
+                        <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap text-[11px] leading-none text-gray-400">
                           {session.user.email}
                         </div>
                       </div>

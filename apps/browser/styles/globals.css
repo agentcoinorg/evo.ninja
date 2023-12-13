@@ -28,7 +28,7 @@ code {
   @apply w-full h-full bg-no-repeat;
   background-image: url('../public/checkmark.svg');
   background-size: 70%;
-  background-position: center 56%;
+  background-position: 56% 58%;
 }
 
 ::-webkit-scrollbar {

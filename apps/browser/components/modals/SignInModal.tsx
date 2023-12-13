@@ -45,7 +45,7 @@ export default function SignInModal(props: AccountConfigProps) {
                   <div className="text-sm font-semibold leading-none">
                     {session.user.name}
                   </div>
-                  <div className="text-[12px] leading-none text-gray-400">
+                  <div className="text-[11px] leading-none text-gray-400">
                     {session.user.email}
                   </div>
                 </div>

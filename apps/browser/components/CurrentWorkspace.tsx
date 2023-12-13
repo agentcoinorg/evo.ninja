@@ -72,12 +72,14 @@ function CurrentWorkspace({ userFiles }: PropsWithChildren<UploadProps>) {
                   <div
                     key={i}
                     className={clsx(
-                      "flex w-full cursor-pointer items-center space-x-2 rounded p-1 text-sm text-cyan-500 transition-colors duration-300 md:text-base",
+                      "flex w-full cursor-pointer items-center space-x-2 rounded p-1 text-sm text-cyan-500 transition-colors duration-300",
                       { "hover:bg-zinc-800 hover:text-white": !isDragAccept }
                     )}
                   >
                     <FileIcon fileType={getFileType(file.path)} />
-                    <div>{file.path}</div>
+                    <div className="w-full overflow-x-hidden text-ellipsis whitespace-nowrap">
+                      {file.path}
+                    </div>
                   </div>
                 );
               })}

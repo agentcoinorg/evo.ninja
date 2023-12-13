@@ -11,7 +11,7 @@ const FileIcon = ({ fileType, ...props }: FileIconProps) => {
   }
 
   return (
-    <div className="relative h-5 w-5 md:h-5 md:w-5" {...props}>
+    <div className="relative h-5 w-5 max-w-[1.25rem]" {...props}>
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path
           d="M4.5 10.7671V4.01709C4.5 3.81818 4.57902 3.62741 4.71967 3.48676C4.86032 3.34611 5.05109 3.26709 5.25 3.26709H14.25M14.25 3.26709L19.5 8.51709M14.25 3.26709V8.51709H19.5M19.5 8.51709V10.7671"

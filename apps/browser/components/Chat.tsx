@@ -76,7 +76,7 @@ const Chat: React.FC<ChatProps> = ({
   const { isMobile } = useWindowSize();
   const { open, getInputProps } = useUploadFiles();
   const { data: session } = useSession();
-  const shouldShowExamplePromps = !message.length && !logs.length
+  const shouldShowExamplePromps = !message.length && !logs.length;
 
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -172,7 +172,7 @@ const Chat: React.FC<ChatProps> = ({
                   key={index}
                   className={`${msg.user} m-auto w-full max-w-[56rem] self-center`}
                 >
-                  <div className="group relative flex w-full animate-slide-down items-start space-x-3 rounded-lg p-2 pb-10 text-white opacity-0 transition-colors duration-300 ">
+                  <div className="animate-slide-down group relative flex w-full items-start space-x-3 rounded-lg p-2 text-white opacity-0 transition-colors duration-300 ">
                     {msg.user === "evo" ? (
                       <Logo wordmark={false} className="!w-8 !min-w-[2rem]" />
                     ) : (
@@ -219,7 +219,7 @@ const Chat: React.FC<ChatProps> = ({
                         </div>
                       )}
                     </div>
-                    <div className="absolute bottom-1 left-9 hidden animate-fade-in space-x-0.5 group-hover:flex">
+                    {/* <div className="absolute bottom-1 left-9 hidden animate-fade-in space-x-0.5 group-hover:flex">
                       {msg.user === "evo" ? (
                         <>
                           <Button variant="icon">
@@ -254,7 +254,7 @@ const Chat: React.FC<ChatProps> = ({
                           </Button>
                         </>
                       )}
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               );
