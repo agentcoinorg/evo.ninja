@@ -140,8 +140,6 @@ const Chat: React.FC<ChatProps> = ({
     }
   }, [logs, isAtBottom]);
 
-  console.log(logs);
-
   return (
     <main
       className={clsx("flex h-full w-full flex-col", {
@@ -168,7 +166,6 @@ const Chat: React.FC<ChatProps> = ({
               if (isEvo) {
                 shownEvo++;
               }
-              console.log(index);
               return (
                 <div
                   key={index}

@@ -66,8 +66,6 @@ const Sidebar = ({
     };
   }, [dropdownOpen]);
 
-  console.log(session);
-
   return (
     <>
       <div
