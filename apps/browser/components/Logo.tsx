@@ -1,13 +1,20 @@
 import { clsx } from "clsx";
 import { memo } from "react";
+import colors from "tailwindcss/colors";
 
 type LogoType = {
   wordmark?: boolean;
   className?: string;
   logoClassName?: string;
+  chatAvatar?: boolean;
 };
 
-const Logo = ({ wordmark = true, className, logoClassName }: LogoType) => {
+const Logo = ({
+  wordmark = true,
+  className,
+  logoClassName,
+  chatAvatar,
+}: LogoType) => {
   return (
     <>
       <div className={clsx("flex", className)}>
@@ -32,7 +39,7 @@ const Logo = ({ wordmark = true, className, logoClassName }: LogoType) => {
               width="580.592"
               height="580.592"
               rx="290.296"
-              stroke="#130F08"
+              stroke={chatAvatar ? colors.zinc[500] : "#130F08"}
               strokeWidth="31.2551"
             />
             <g filter="url(#filter0_d_145_4616)">
