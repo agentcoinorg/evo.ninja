@@ -190,7 +190,7 @@ const Chat: React.FC<ChatProps> = ({
                           {session?.user.image && session?.user.email ? (
                             <img
                               src={session?.user.image}
-                              className="w-full rounded-full bg-yellow-500"
+                              className="w-full rounded-full bg-cyan-600"
                             />
                           ) : !session?.user.email ? (
                             <AvatarBlockie
@@ -200,7 +200,7 @@ const Chat: React.FC<ChatProps> = ({
                               size={32}
                             />
                           ) : (
-                            <div className="w-full rounded-full bg-yellow-500" />
+                            <div className="w-full rounded-full bg-cyan-600" />
                           )}
                         </>
                       ) : null}

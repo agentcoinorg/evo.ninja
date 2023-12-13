@@ -66,6 +66,8 @@ const Sidebar = ({
     };
   }, [dropdownOpen]);
 
+  console.log(session);
+
   return (
     <>
       <div
@@ -142,10 +144,10 @@ const Sidebar = ({
                       {session.user.image ? (
                         <img
                           src={session.user.image}
-                          className="h-8 w-8 rounded-full bg-yellow-500"
+                          className="h-8 w-8 min-w-[2rem] rounded-full bg-cyan-600"
                         />
                       ) : (
-                        <div className="h-8 w-8 rounded-full bg-yellow-500" />
+                        <div className="h-8 w-8 min-w-[2rem] rounded-full bg-cyan-600" />
                       )}
                       <div className="w-full space-y-1 overflow-x-hidden">
                         <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold leading-none">

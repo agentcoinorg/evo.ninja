@@ -34,7 +34,7 @@ export default function SettingsModal(props: AccountConfigProps) {
       >
         <div className="space-y-6">
           {capReached && (
-            <div className="flex items-start justify-between space-x-2 rounded-lg border-2 border-yellow-500/50 bg-yellow-500/20 p-4">
+            <div className="flex items-start justify-between space-x-2 rounded-lg border-2 border-yellow-500/50 bg-cyan-600/20 p-4">
               <WarningCircle color={yellow[500]} size={32} />
               <p className="py-1.5 text-sm text-white">
                 You have used all of your free daily prompts. Please enter your
