@@ -28,7 +28,7 @@ const Sidebar = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { mutateAsync: createChat } = useCreateChat();
   const { data: chats } = useChats();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const mappedChats = chats?.map((chat) => ({
     id: chat.id,
     name: chat.logs[0]?.title ?? "New session",
@@ -138,7 +138,15 @@ const Sidebar = ({
                 )}
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
-                {session?.user.email ? (
+                {status === "loading" ? (
+                  <div className="flex items-center space-x-2">
+                      <div className="h-8 w-8 min-w-[2rem] rounded-full bg-cyan-600" />
+                      <div className="w-full space-y-1 overflow-x-hidden">
+                        <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48"/>
+                        <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 w-48"/>
+                      </div>
+                    </div>
+                ) : session?.user.email ? (
                   <>
                     <div className="flex items-center space-x-2">
                       {session.user.image ? (
