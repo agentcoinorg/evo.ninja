@@ -8,7 +8,12 @@ import clsx from "clsx";
 import React, { forwardRef, useEffect, useState } from "react";
 import SettingsModal from "./modals/SettingsModal";
 import { useAtom } from "jotai";
-import { allowTelemetryAtom, capReachedAtom, localOpenAiApiKeyAtom } from "@/lib/store";
+import {
+  allowTelemetryAtom,
+  capReachedAtom,
+  localOpenAiApiKeyAtom,
+  signInModalAtom,
+} from "@/lib/store";
 import { useSession, signOut } from "next-auth/react";
 import SignInModal from "./modals/SignInModal";
 
@@ -25,9 +30,9 @@ const DropdownAccount: React.ForwardRefRenderFunction<
   const { data: session } = useSession();
   const [isSettingsModalOpen, setIsSettingsModalOpen] =
     useState<boolean>(false);
-  const [isSignInModalOpen, setIsSignInModalOpen] = useState<boolean>(false);
+  const [isSignInModalOpen, setIsSignInModalOpen] = useAtom(signInModalAtom);
   const firstTimeUser = !localOpenAiApiKey && !session?.user;
-  const [ capReached ] = useAtom(capReachedAtom)
+  const [capReached] = useAtom(capReachedAtom);
 
   const handleAccountSettingsClick = () => {
     setIsSettingsModalOpen(true);
@@ -47,16 +52,16 @@ const DropdownAccount: React.ForwardRefRenderFunction<
 
   useEffect(() => {
     if (capReached) {
-      setIsSettingsModalOpen(true)
+      setIsSettingsModalOpen(true);
     }
-  }, [capReached])
+  }, [capReached]);
 
   return (
     <>
       <div
         ref={ref}
         className={clsx(
-          "animate-fade-in absolute bottom-full left-2 w-[272px] space-y-1 rounded-lg border-2 border-zinc-700 bg-zinc-800 p-2 shadow-lg",
+          "absolute bottom-full left-2 w-[272px] animate-fade-in space-y-1 rounded-lg border-2 border-zinc-700 bg-zinc-800 p-2 shadow-lg",
           { hidden: !dropdownOpen }
         )}
       >

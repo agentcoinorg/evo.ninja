@@ -5,6 +5,8 @@ import { SignOut } from "@phosphor-icons/react";
 import Image from "next/image";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useAccountConfig } from "@/lib/hooks/useAccountConfig";
+import { useAtom } from "jotai";
+import { localOpenAiApiKeyAtom } from "@/lib/store";
 
 interface AccountConfigProps {
   apiKey: string | null;
@@ -16,7 +18,8 @@ interface AccountConfigProps {
 export default function SignInModal(props: AccountConfigProps) {
   const { data: session } = useSession();
   const { isOpen, onClose } = props;
-  const { AccountConfig } = useAccountConfig({
+  const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom);
+  const { AccountConfig, onSave } = useAccountConfig({
     onClose,
   });
 
@@ -91,6 +94,14 @@ export default function SignInModal(props: AccountConfigProps) {
                 <div>Sign in with Google</div>
               </Button>
             </div>
+            {!localOpenAiApiKey && (
+              <>
+                {AccountConfig}
+                <div className="flex justify-end border-t-2 border-zinc-700 pt-6">
+                  <Button onClick={onSave}>Save</Button>
+                </div>
+              </>
+            )}
           </div>
         )}
       </Modal>

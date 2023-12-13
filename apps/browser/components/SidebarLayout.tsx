@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAtom } from "jotai";
 
 import clsx from "clsx";
@@ -24,6 +24,14 @@ export default function SidebarLayout({
   const [hoveringSidebarButton, setHovering] = useState<boolean>(false);
   const { isMobile } = useWindowSize();
   const [welcomeModalSeen, setWelcomeModalSeen] = useAtom(welcomeModalAtom);
+
+  useEffect(() => {
+    if (isMobile) {
+      setSidebarOpen(false);
+    } else {
+      setSidebarOpen(true);
+    }
+  }, [isMobile]);
 
   return (
     <>
@@ -71,7 +79,6 @@ export default function SidebarLayout({
               hoveringSidebarButton={hoveringSidebarButton}
               sidebarOpen={sidebarOpen}
               userFiles={userFiles}
-              setSidebarOpen={setSidebarOpen}
             />
             {!isMobile && (
               <button

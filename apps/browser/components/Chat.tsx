@@ -13,7 +13,7 @@ import {
   allowTelemetryAtom,
   showAccountModalAtom,
   showDisclaimerAtom,
-  sidebarAtom,
+  signInModalAtom,
   uploadedFilesAtom,
   welcomeModalAtom,
 } from "@/lib/store";
@@ -56,7 +56,7 @@ export interface ChatProps {
   onPromptSent: (prompt: string) => Promise<void>;
 }
 
-const chat_name = "New Chat";
+const chatName = "New Chat";
 
 const Chat: React.FC<ChatProps> = ({
   logs,
@@ -70,7 +70,7 @@ const Chat: React.FC<ChatProps> = ({
   isStopped,
 }: ChatProps) => {
   const [message, setMessage] = useState<string>("");
-  const [showAccountModal] = useAtom(showAccountModalAtom);
+  const [signInModal] = useAtom(signInModalAtom);
   const [welcomeModalSeen] = useAtom(welcomeModalAtom);
   const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom);
   const [, setUploadedFiles] = useAtom(uploadedFilesAtom);
@@ -159,7 +159,7 @@ const Chat: React.FC<ChatProps> = ({
       ) : (
         <>
           <div className="flex h-20 items-center justify-center border-b-2 border-zinc-800 md:h-12">
-            <div>{chat_name}</div>
+            <div>{chatName}</div>
           </div>
           <div
             ref={listContainerRef}
@@ -336,7 +336,7 @@ const Chat: React.FC<ChatProps> = ({
         </div>
       </div>
 
-      {showDisclaimer && !showAccountModal && welcomeModalSeen && (
+      {showDisclaimer && !signInModal && welcomeModalSeen && (
         <Disclaimer handleDisclaimerSelect={handleDisclaimerSelect} />
       )}
       <a

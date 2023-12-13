@@ -11,21 +11,18 @@ import { useCreateChat } from "@/lib/mutations/useCreateChat";
 import { useChats } from "@/lib/queries/useChats";
 import { useRouter } from "next/navigation";
 import { v4 as uuid } from "uuid";
-import useWindowSize from "@/lib/hooks/useWindowSize";
 import { useSession } from "next-auth/react";
 
 export interface SidebarProps {
   userFiles: InMemoryFile[];
   hoveringSidebarButton: boolean;
   sidebarOpen: boolean;
-  setSidebarOpen: (set: boolean) => void;
 }
 
 const Sidebar = ({
   userFiles,
   sidebarOpen,
   hoveringSidebarButton,
-  setSidebarOpen,
 }: SidebarProps) => {
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -36,7 +33,6 @@ const Sidebar = ({
     id: chat.id,
     name: chat.logs[0]?.title ?? "New session",
   }));
-  const { isMobile } = useWindowSize();
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
 
   const createNewChat = async () => {
@@ -48,14 +44,6 @@ const Sidebar = ({
   const handleChatClick = (id: string) => {
     router.push(`/chat/${id}`);
   };
-
-  useEffect(() => {
-    if (isMobile) {
-      setSidebarOpen(false);
-    } else {
-      setSidebarOpen(true);
-    }
-  }, [isMobile]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

@@ -6,14 +6,14 @@ import {
   localOpenAiApiKeyAtom,
   proxyEmbeddingAtom,
   proxyLlmAtom,
-  showAccountModalAtom,
+  signInModalAtom,
 } from "../store";
 import { useSession } from "next-auth/react";
 import { AuthProxy } from "../api/AuthProxy";
 
 export function useHandleAuth() {
   const [awaitingAuth, setAwaitingAuth] = useState<boolean>(false);
-  const [, setAccountModalOpen] = useAtom(showAccountModalAtom);
+  const [, setSignInModal] = useAtom(signInModalAtom);
 
   const [allowTelemetry] = useAtom(allowTelemetryAtom);
   const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom);
@@ -31,7 +31,7 @@ export function useHandleAuth() {
     }
 
     if (firstTimeUser) {
-      setAccountModalOpen(true);
+      setSignInModal(true);
       return false;
     }
 
@@ -44,7 +44,6 @@ export function useHandleAuth() {
       subsidize,
       () => {
         setCapReached(true);
-        setAccountModalOpen(true);
       }
     );
     setAwaitingAuth(false);
