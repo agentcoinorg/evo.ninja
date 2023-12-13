@@ -61,6 +61,7 @@ export function useEvo({
 
   const [error, setError] = useState<string | undefined>();
   const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom);
+  const [evo, setEvo] = useState<Evo | undefined>();
 
   const [, setCapReached] = useAtom(capReachedAtom);
   const [userWorkspace, setUserWorkspace] = useAtom(userWorkspaceAtom);
@@ -153,6 +154,7 @@ export function useEvo({
           agentVariables
         )
       );
+      setEvo(evo);
       return evo;
     } catch (e: any) {
       setError(e.message);
@@ -201,6 +203,7 @@ export function useEvo({
           setIsRunning(false);
           setIterator(undefined);
           setIsSending(false);
+          evo?.reset();
           break;
         }
 
