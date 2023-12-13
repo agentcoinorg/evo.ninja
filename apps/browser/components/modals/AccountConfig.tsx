@@ -17,11 +17,13 @@ function AccountConfig(props: AccountConfigProps) {
   return (
     <>
       <div className="space-y-6">
-        <p>
-          {isLoggedIn
-            ? "Provide your own OpenAI key to get started with Evo."
-            : "Provide your own OpenAI key and use Evo as a guest. As a guest, your sessions will not be saved."}
-        </p>
+        {!apiKey && (
+          <p>
+            {isLoggedIn
+              ? "Provide your own OpenAI key to get started with Evo."
+              : "Provide your own OpenAI key and use Evo as a guest. As a guest, your sessions will not be saved."}
+          </p>
+        )}
         <div className="space-y-3">
           <TextField
             value={apiKey ? apiKey : ""}

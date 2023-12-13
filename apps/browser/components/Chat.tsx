@@ -174,7 +174,7 @@ const Chat: React.FC<ChatProps> = ({
                   <div className="animate-slide-down group relative flex w-full items-start space-x-3 rounded-lg p-2 text-white opacity-0 transition-colors duration-300 ">
                     <div className="!w-8 !min-w-[2rem]">
                       {isEvo && shownEvo < 2 ? (
-                        <Logo wordmark={false} className="w-full" />
+                        <Logo wordmark={false} className="w-full" chatAvatar />
                       ) : msg.user !== "evo" ? (
                         <>
                           {session?.user.image && session?.user.email ? (
