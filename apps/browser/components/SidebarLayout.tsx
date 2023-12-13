@@ -95,7 +95,7 @@ export default function SidebarLayout(props: { children: React.ReactNode, isMobi
         </>
         {props.children}
       </div>
-      <WelcomeModal isOpen={true} onClose={() => setWelcomeModalSeen(true)} />
+      <WelcomeModal isOpen={!welcomeModalSeen} onClose={() => setWelcomeModalSeen(true)} />
     </>
   );
 }
