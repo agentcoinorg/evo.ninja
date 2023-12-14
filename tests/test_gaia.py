@@ -5,7 +5,7 @@ import pandas as pd
 import os
 import dotenv
 from openai import OpenAI
-from evopynja.main import research  # Import the function you're testing
+from evo_researcher.main import research  # Import the function you're testing
 
 dotenv.load_dotenv()
 

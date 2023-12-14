@@ -5,8 +5,8 @@ from autogen import config_list_from_json
 from autogen import UserProxyAgent
 import autogen
 
-from evopynja.agents.planner import create_planner
-from evopynja.agents.researcher import create_researcher
+from evo_researcher.agents.planner import create_planner
+from evo_researcher.agents.researcher import create_researcher
 
 load_dotenv()
 config_list = config_list_from_json("OAI_CONFIG_LIST")

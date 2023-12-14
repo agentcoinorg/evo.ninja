@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "evopynja"
+name = "evo_researcher"
 version = "0.1.0"
 description = ""
 authors = ["Nestor Amesty <nestor09amesty@gmail.com>"]

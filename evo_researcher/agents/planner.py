@@ -1,8 +1,8 @@
 from typing import Dict, List
 from autogen.agentchat.contrib.gpt_assistant_agent import GPTAssistantAgent
 
-from evopynja.functions import web_scrape
-from evopynja.functions.web_research import web_search
+from evo_researcher.functions import web_scrape
+from evo_researcher.functions.web_research import web_search
 
 def create_planner(config_list: List[Dict]) -> GPTAssistantAgent:
     planner = GPTAssistantAgent(
