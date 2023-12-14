@@ -56,6 +56,9 @@ const DropdownAccount: React.ForwardRefRenderFunction<
     }
   }, [capReached]);
 
+  const menuItemClasses =
+    "flex w-full cursor-pointer items-center space-x-2 rounded-md p-2 text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white active:bg-zinc-900 active:ring-2 active:ring-inset active:ring-cyan-500/20 active:text-cyan-500";
+
   return (
     <>
       <div
@@ -67,16 +70,13 @@ const DropdownAccount: React.ForwardRefRenderFunction<
         )}
       >
         {session?.user.email && (
-          <div
-            className="flex w-full cursor-pointer items-center space-x-2 rounded-md p-2 text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white"
-            onClick={handleAccountSettingsClick}
-          >
+          <div className={menuItemClasses} onClick={handleAccountSettingsClick}>
             <GearSix size={16} weight="bold" />
             <div className="leading-none">Account Settings</div>
           </div>
         )}
         <a
-          className="flex w-full cursor-pointer items-center space-x-2 rounded-md p-2 text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white md:hidden"
+          className={menuItemClasses}
           href="https://discord.gg/r3rwh69cCa"
           target="_blank"
           rel="noopener noreferrer"
@@ -84,19 +84,14 @@ const DropdownAccount: React.ForwardRefRenderFunction<
           <Question size={16} weight="bold" />
           <div className="leading-none">Support</div>
         </a>
+        <div className="relative w-full py-2 before:absolute before:h-[2px] before:w-full before:bg-zinc-700"></div>
         {session?.user.email ? (
-          <div
-            className="flex w-full cursor-pointer items-center space-x-2 rounded-md p-2 text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white"
-            onClick={() => signOut()}
-          >
+          <div className={menuItemClasses} onClick={() => signOut()}>
             <SignOut size={16} weight="bold" />
             <div className="leading-none">Sign Out</div>
           </div>
         ) : (
-          <div
-            className="flex w-full cursor-pointer items-center space-x-2 rounded-md p-2 text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white"
-            onClick={handleSignInClick}
-          >
+          <div className={menuItemClasses} onClick={handleSignInClick}>
             <UserCirclePlus size={16} weight="bold" />
             <div className="leading-none">Sign In</div>
           </div>

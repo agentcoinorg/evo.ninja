@@ -166,7 +166,7 @@ const Sidebar = ({
                           ) : (
                             <div className="h-8 w-8 min-w-[2rem] rounded-full bg-cyan-600" />
                           )}
-                          <div className="w-full space-y-1 overflow-x-hidden">
+                          <div className="w-full max-w-[124px] space-y-1 overflow-x-hidden">
                             <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold leading-none">
                               {session.user.name}
                             </div>

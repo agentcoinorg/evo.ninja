@@ -147,10 +147,7 @@ const Chat: React.FC<ChatProps> = ({
       })}
     >
       {shouldShowExamplePromps ? (
-        <div className="flex flex-col items-center space-y-2">
-          <Logo wordmark={false} className="w-16" />
-          <h1 className="text-2xl font-bold">What's your goal today?</h1>
-        </div>
+        <Logo wordmark={false} className="mb-24 w-16" />
       ) : (
         <>
           <div className="flex h-20 items-center justify-center border-b-2 border-zinc-800 md:h-12">
@@ -348,14 +345,6 @@ const Chat: React.FC<ChatProps> = ({
       {showDisclaimer && !signInModal && welcomeModalSeen && (
         <Disclaimer handleDisclaimerSelect={handleDisclaimerSelect} />
       )}
-      <a
-        className="fixed bottom-4 right-4 z-10 hidden cursor-pointer rounded-full border-2 border-zinc-500 bg-zinc-700 p-1 shadow hover:bg-zinc-600 hover:shadow-lg md:block"
-        href="https://discord.gg/r3rwh69cCa"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <Image alt="Support" src="/questionmark.svg" width={12} height={12} />
-      </a>
     </main>
   );
 };
