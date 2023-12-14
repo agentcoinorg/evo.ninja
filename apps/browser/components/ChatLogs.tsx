@@ -12,6 +12,13 @@ export default function ChatLogs(props: ChatLogsProps) {
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
 
+  const scrollToBottom = () => {
+    listContainerRef.current?.scrollTo({
+      top: listContainerRef.current.scrollHeight,
+      behavior: 'smooth',
+    });
+  }
+
   const handleScroll = useCallback(() => {
     // Detect if the user is at the bottom of the list
     const container = listContainerRef.current;
@@ -24,10 +31,7 @@ export default function ChatLogs(props: ChatLogsProps) {
   useEffect(() => {
     // If the user is at the bottom, scroll to the new item
     if (isAtBottom) {
-      listContainerRef.current?.scrollTo({
-        top: listContainerRef.current.scrollHeight,
-        behavior: 'smooth',
-      });
+      scrollToBottom();
     }
   }, [logs, isAtBottom]);
 
@@ -45,6 +49,10 @@ export default function ChatLogs(props: ChatLogsProps) {
       }
     };
   }, [handleScroll]);
+
+  if (isAtBottom) {
+    scrollToBottom();
+  }
 
   return (
     <div
