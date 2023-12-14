@@ -1,20 +1,8 @@
 TODO:
-x authenticated
-  x fix first login bug, can't create chat
-  x fix multiple goals => multiple chats
-x fix workspace not being updated
 - improve usage of "<anon>"
-
-Bugs:
-- send prompt -> meet quota -> add openai key -> stuck in loading
 
 NITs:
 - improve loading of chatid routes
 
 Test:
 - handle abort mid-goal execution
-x sending same goal twice (retyping)
-x chats updating on backend & in app synchronously
-  x start goal, switch, watch db, switch back, check app (may not be same)
-x 2 tabs, same chat open in both, send in one, watch other
-  x chatGPT loads only on reload of app

@@ -124,6 +124,7 @@ export class EvoThread {
 
     if (!goalId) {
       this._callbacks?.onError("Unable to acquire a goal ID.");
+      this.setIsRunning(false);
       return;
     }
 
@@ -144,6 +145,7 @@ export class EvoThread {
     );
 
     if (!evo) {
+      this.setIsRunning(false);
       return;
     }
 
