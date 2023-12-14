@@ -70,13 +70,13 @@ const Chat: React.FC<ChatProps> = ({
   const { isMobile } = useWindowSize();
   const { open, getInputProps } = useUploadFiles();
   const { data: session } = useSession();
-  const shouldShowExamplePromps = !message.length && !logs.length;
+  const shouldShowExamplePrompts = logs.length === 0;
   let shownEvo = 0;
 
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
 
-  const [, setAllowTelemetry] = useAtom(allowTelemetryAtom);
+  const [allowTelemetry, setAllowTelemetry] = useAtom(allowTelemetryAtom);
 
   const handleDisclaimerSelect = (select: boolean) => {
     setAllowTelemetry(select);
@@ -140,13 +140,19 @@ const Chat: React.FC<ChatProps> = ({
     }
   }, [logs, isAtBottom]);
 
+  useEffect(() => {
+    if (allowTelemetry && showDisclaimer) {
+      setShowDisclaimer(false);
+    }
+  }, [allowTelemetry, showDisclaimer]);
+
   return (
     <main
       className={clsx("flex h-full w-full flex-col", {
-        "items-center justify-center": shouldShowExamplePromps,
+        "items-center justify-center": shouldShowExamplePrompts,
       })}
     >
-      {shouldShowExamplePromps ? (
+      {shouldShowExamplePrompts ? (
         <Logo wordmark={false} className="mb-24 w-16" />
       ) : (
         <>
@@ -207,60 +213,7 @@ const Chat: React.FC<ChatProps> = ({
                           {msg.content?.toString() ?? ""}
                         </ReactMarkdown>
                       </div>
-                      {isEvo &&
-                        isRunning &&
-                        isSending &&
-                        index === logs.length - 1 && (
-                          <div className="flex items-center space-x-2 text-cyan-500">
-                            <LoadingCircle />
-                            <div className="group flex items-center space-x-2 text-cyan-500">
-                              <div>Predicting best approach...</div>
-                              <Button
-                                variant="icon"
-                                className="!text-current !transition-none"
-                              >
-                                {/* <CaretCircleRight size={20} /> */}
-                              </Button>
-                            </div>
-                          </div>
-                        )}
                     </div>
-                    {/* <div className="absolute bottom-1 left-9 hidden animate-fade-in space-x-0.5 group-hover:flex">
-                      {msg.user === "evo" ? (
-                        <>
-                          <Button variant="icon">
-                            <CopySimple
-                              size={16}
-                              className="fill-currentColor"
-                            />
-                          </Button>
-                          <Button variant="icon">
-                            <ThumbsUp size={16} className="fill-currentColor" />
-                          </Button>
-                          <Button variant="icon">
-                            <ThumbsDown
-                              size={16}
-                              className="fill-currentColor"
-                            />
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <Button variant="icon">
-                            <PencilSimple
-                              size={16}
-                              className="fill-currentColor"
-                            />
-                          </Button>
-                          <Button variant="icon">
-                            <CopySimple
-                              size={16}
-                              className="fill-currentColor"
-                            />
-                          </Button>
-                        </>
-                      )}
-                    </div> */}
                   </div>
                 </div>
               );
@@ -271,12 +224,12 @@ const Chat: React.FC<ChatProps> = ({
       <div
         className={clsx(
           "mt-4 flex w-full space-y-4",
-          shouldShowExamplePromps
+          shouldShowExamplePrompts
             ? "flex-col-reverse space-y-reverse px-4 md:px-8 lg:px-4"
             : "mx-auto max-w-[56rem] flex-col px-4"
         )}
       >
-        {!message.length && !logs.length && (
+        {shouldShowExamplePrompts && (
           <div className="flex flex-col items-center space-y-3">
             <h2 className="w-full text-center font-normal">
               Not sure where to start?{` `}
@@ -291,7 +244,7 @@ const Chat: React.FC<ChatProps> = ({
                   key={index}
                   className={clsx(
                     "m-1 cursor-pointer rounded-lg  border-2 bg-zinc-900/50 p-2.5 text-xs text-zinc-400 transition-all duration-300 ease-in-out hover:bg-cyan-600 hover:text-white",
-                    shouldShowExamplePromps
+                    shouldShowExamplePrompts
                       ? "border-zinc-700"
                       : "w-[calc(100%-1.5rem)] border-zinc-800"
                   )}
@@ -306,7 +259,7 @@ const Chat: React.FC<ChatProps> = ({
         <div
           className={clsx(
             "mb-4 flex w-full items-center justify-center gap-4 self-center",
-            shouldShowExamplePromps ? "max-w-[42rem] " : "max-w-[56rem]"
+            shouldShowExamplePrompts ? "max-w-[42rem] " : "max-w-[56rem]"
           )}
         >
           <TextField

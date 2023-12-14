@@ -7,13 +7,12 @@ import FileIcon from "./FileIcon";
 import { DownloadSimple, FilePlus } from "@phosphor-icons/react";
 import Button from "./Button";
 import { useUploadFiles } from "@/lib/hooks/useUploadFile";
-import { useAtom } from "jotai";
-import { uploadedFilesAtom } from "@/lib/store";
 
 interface UploadProps {
   userFiles: InMemoryFile[];
 }
 
+// TODO(cbrzn): Update when supabase bucket workspace is attached
 const loadedWorkspace = true;
 
 function CurrentWorkspace({ userFiles }: PropsWithChildren<UploadProps>) {
