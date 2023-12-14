@@ -1,7 +1,7 @@
+import { createSupabaseClient } from "@/lib/supabase/supabase"
+import { Chat } from "@/lib/queries/useChats"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
-import { createSupabaseClient } from "../supabase/supabase"
-import { Chat } from "../queries/useChats"
 
 export const useCreateChat = () => {
   const { data: session } = useSession()

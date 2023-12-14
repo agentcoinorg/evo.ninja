@@ -1,15 +1,15 @@
 import { useAtom } from "jotai";
+import { Workspace } from "@evo-ninja/agent-utils";
 import { userFilesAtom, userWorkspaceAtom } from "../store";
 import { updateWorkspaceFiles } from "../updateWorkspaceFiles";
 
-export const useCheckForUserFiles = () => {
+export const useCheckForUserFiles = (workspace: Workspace | undefined) => {
   const [userFiles, setUserFiles] = useAtom(userFilesAtom);
-  const [userWorkspace] = useAtom(userWorkspaceAtom);
-  
+
   return async () => {
-    if (!userWorkspace) {
+    if (!workspace) {
       return;
     }
-    await updateWorkspaceFiles(userWorkspace, userFiles, setUserFiles);
+    await updateWorkspaceFiles(workspace, userFiles, setUserFiles);
   }
 }

@@ -1,15 +1,20 @@
-import React, { useState, useEffect, useRef, useCallback, ChangeEvent } from "react";
-import ReactMarkdown from "react-markdown";
-
+import {
+  sidebarAtom,
+  showDisclaimerAtom,
+  errorAtom,
+  localOpenAiApiKeyAtom,
+  showAccountModalAtom
+} from "@/lib/store";
+import { useEvoService } from "@/lib/hooks/useEvoService";
+import { exportChatHistory } from "@/lib/exportChatHistory";
+import SidebarIcon from "@/components/SidebarIcon";
+import ExamplePrompts from "@/components/ExamplePrompts";
+import ChatLogs from "@/components/ChatLogs";
+import Disclaimer from "@/components/modals/Disclaimer";
+import React, { useState, ChangeEvent } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
-import clsx from "clsx";
-import SidebarIcon from "./SidebarIcon";
 import { useAtom } from "jotai";
-import { showDisclaimerAtom, sidebarAtom, uploadedFilesAtom } from "@/lib/store";
-import { ExamplePrompt } from "@/lib/examplePrompts";
-import Disclaimer from "./modals/Disclaimer";
-import { exportChatHistory } from "@/lib/exportChatHistory";
 
 export interface ChatLog {
   title: string;
@@ -19,92 +24,66 @@ export interface ChatLog {
 }
 
 export interface ChatProps {
-  logs: ChatLog[];
-  samplePrompts: ExamplePrompt[];
-  isRunning: boolean;
-  isStopped: boolean;
-  isPaused: boolean;
-  isSending: boolean;
-  onPause: () => void;
-  onContinue: () => void;
-  onPromptSent: (prompt: string) => Promise<void>;
+  chatId: string | "<anon>" | undefined;
+  isAuthenticated: boolean;
+  onCreateChat: (chatId: string) => void;
 }
 
-const Chat: React.FC<ChatProps> = ({
-  logs,
-  samplePrompts,
-  onPromptSent,
-  onContinue,
-  onPause,
-  isPaused,
-  isRunning,
-  isSending,
-  isStopped
+const Chat2: React.FC<ChatProps> =({
+  chatId,
+  isAuthenticated,
+  onCreateChat
 }: ChatProps) => {
-  const [message, setMessage] = useState<string>("");
   const [sidebarOpen, setSidebarOpen] = useAtom(sidebarAtom);
-
   const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom)
-  const [, setUploadedFiles] = useAtom(uploadedFilesAtom)
+  const [, setError] = useAtom(errorAtom);
+  const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom);
+  const [, setAccountModalOpen] = useAtom(showAccountModalAtom);
 
-  const listContainerRef = useRef<HTMLDivElement | null>(null);
-  const [isAtBottom, setIsAtBottom] = useState(true);
+  const [message, setMessage] = useState<string>("");
 
-  const handleSend = async (prompt: string) => {
-    await onPromptSent(prompt);
-    setMessage("")
+  const {
+    logs,
+    isStarting,
+    isRunning,
+    handleStart
+  } = useEvoService(
+    chatId,
+    isAuthenticated,
+    onCreateChat
+  );
+
+  const handleGoalSubmit = (goal: string) => {
+    if (!goal) {
+      setError("Please enter a goal.");
+      return;
+    }
+
+    if (isStarting || isRunning) {
+      setError("Goal is already in progress.");
+      return;
+    }
+
+    const firstTimeUser = !localOpenAiApiKey && !isAuthenticated;
+    if (firstTimeUser) {
+      setError("Please login or add an OpenAI API key.");
+      setAccountModalOpen(true);
+      return;
+    }
+
+    handleStart(goal);
+    setMessage("");
   }
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleMessageChange = (event: ChangeEvent<HTMLInputElement>) => {
     setMessage(event.target.value);
   };
 
   const handleKeyPress = async (event: React.KeyboardEvent) => {
-    if (event.key === "Enter" && !isSending) {
-      await handleSend(message)
+    if (event.key === "Enter" && !isStarting && !isRunning) {
+      await handleGoalSubmit(message)
     }
   };
-
-  const handleSamplePromptClick = async (prompt: ExamplePrompt) => {
-    if (prompt.files) {
-      setUploadedFiles(prompt.files);
-    }
-    await handleSend(prompt.prompt)
-  };
-
-  const handleScroll = useCallback(() => {
-    // Detect if the user is at the bottom of the list
-    const container = listContainerRef.current;
-    if (container) {
-      const isScrolledToBottom = container.scrollHeight - container.scrollTop <= container.clientHeight;
-      setIsAtBottom(isScrolledToBottom);
-    }
-  }, []);
-
-  useEffect(() => {
-    const container = listContainerRef.current;
-    if (container) {
-      // Add scroll event listener
-      container.addEventListener('scroll', handleScroll);
-    }
-
-    // Clean up listener
-    return () => {
-      if (container) {
-        container.removeEventListener('scroll', handleScroll);
-      }
-    };
-  }, [handleScroll]);
-
-  useEffect(() => {
-    // If the user is at the bottom, scroll to the new item
-    if (isAtBottom) {
-      listContainerRef.current?.scrollTo({
-        top: listContainerRef.current.scrollHeight,
-        behavior: 'smooth',
-      });
-    }
-  }, [logs, isAtBottom]);
 
   return (
     <div className="flex h-full flex-col bg-[#0A0A0A] text-white">
@@ -112,89 +91,34 @@ const Chat: React.FC<ChatProps> = ({
         <div className="h-14 p-4 text-lg text-white cursor-pointer hover:opacity-100 opacity-80 transition-all" onClick={() => setSidebarOpen(!sidebarOpen)}>
           { sidebarOpen ? <></>: <SidebarIcon /> }
         </div>
-        <FontAwesomeIcon className="cursor-pointer" icon={faDownload} onClick={() => exportChatHistory(logs)} />
+        {logs && <FontAwesomeIcon className="cursor-pointer" icon={faDownload} onClick={() => exportChatHistory(logs)} />}
       </div>
-      <div
-        ref={listContainerRef}
-        onScroll={handleScroll}
-        className="flex-1 overflow-auto p-5 text-left items-center"
-      >
-        {logs.map((msg, index) => (
-          <div key={index} className={`${msg.user} m-auto self-center w-[100%] max-w-[56rem]`}>
-            {index === 0 || logs[index - 1].user !== msg.user ? (
-              <div className="SenderName">{msg.user.toUpperCase()}</div>
-            ) : null}
-            <div 
-              className={clsx(
-                "my-1 rounded border border-transparent px-4 py-2.5 transition-all hover:border-orange-600",
-                msg.user === "user" ? "bg-blue-500": "bg-neutral-900")
-              }
-            >
-              <div className="prose prose-invert">
-                <ReactMarkdown>{msg.title.toString()}</ReactMarkdown>
-                <ReactMarkdown>{msg.content?.toString() ?? ""}</ReactMarkdown>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-      {!message.length && !logs.length ? (
-        <div className="grid w-full grid-rows-2 p-2.5 py-16 self-center w-[100%] max-w-[56rem]">
-          {samplePrompts.map((prompt, index) => (
-            <div 
-              key={index} 
-              className="m-1 cursor-pointer rounded-xl border border-neutral-500 bg-neutral-800 p-2.5 text-left text-xs text-neutral-50 transition-all hover:border-orange-500" 
-              onClick={() => handleSamplePromptClick(prompt)}
-            >
-              {prompt.prompt}
-            </div>
-          ))}
-        </div>
-      ) : null}
+
+      {logs &&
+        <ChatLogs logs={logs} />
+      }
+
+      {(!logs || logs.length === 0) &&
+        <ExamplePrompts onClick={async (prompt: string) => await handleGoalSubmit(prompt)} />
+      }
       <div className="flex items-center justify-center gap-4 p-4 mb-4 self-center w-[100%] max-w-[56rem]">
         <Disclaimer isOpen={showDisclaimer} onClose={() => setShowDisclaimer(false)} />
         <input
           type="text"
           value={message}
-          onChange={handleChange}
+          onChange={handleMessageChange}
           onKeyPress={handleKeyPress}
           placeholder="Enter your main goal here..."
           className="mr-2.5 flex-1 rounded border border-neutral-400 bg-neutral-900 p-2.5 text-neutral-50 outline-none transition-all"
-          disabled={isSending || showDisclaimer}
+          disabled={isStarting || isRunning || showDisclaimer}
         />
-        {isRunning && (
-          <>
-            {
-              !isPaused && (
-                <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" onClick={onPause} disabled={!isRunning || isPaused}>
-                Pause
-                </button>
-              )
-            }
-            {
-              isPaused && (
-                <>
-                  {!isStopped && (
-                     <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" disabled={true}>
-                     Pausing
-                     </button>
-                  )}
-
-                  {isStopped && (
-                     <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" onClick={onContinue} disabled={isRunning && !isPaused}>
-                     Paused
-                     </button>
-                  )}
-                </>
-              )
-            }
-          </>
-        )}
-
         {isRunning ? (
           <div className="h-9 w-9 animate-spin rounded-full border-4 border-black/10 border-l-orange-600" />
         ) : (
-          <button className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500" onClick={() => handleSend(message)} disabled={isRunning || isSending}>
+          <button
+            className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500"
+            onClick={() => handleGoalSubmit(message)}
+            disabled={isStarting || isRunning}>
             Start
           </button>
         )}
@@ -211,4 +135,4 @@ const Chat: React.FC<ChatProps> = ({
   );
 };
 
-export default Chat;
+export default Chat2;
