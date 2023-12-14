@@ -3,7 +3,8 @@ import {
   showDisclaimerAtom,
   errorAtom,
   localOpenAiApiKeyAtom,
-  showAccountModalAtom
+  showAccountModalAtom,
+  chatIdAtom
 } from "@/lib/store";
 import { useEvoService } from "@/lib/hooks/useEvoService";
 import { exportChatHistory } from "@/lib/exportChatHistory";
@@ -24,16 +25,15 @@ export interface ChatLog {
 }
 
 export interface ChatProps {
-  chatId: string | "<anon>" | undefined;
   isAuthenticated: boolean;
   onCreateChat: (chatId: string) => void;
 }
 
 const Chat: React.FC<ChatProps> =({
-  chatId,
   isAuthenticated,
   onCreateChat
 }: ChatProps) => {
+  const [chatId] = useAtom(chatIdAtom);
   const [sidebarOpen, setSidebarOpen] = useAtom(sidebarAtom);
   const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom)
   const [, setError] = useAtom(errorAtom);
@@ -44,6 +44,7 @@ const Chat: React.FC<ChatProps> =({
 
   const {
     logs,
+    isLoading,
     isStarting,
     isRunning,
     handleStart
@@ -98,7 +99,7 @@ const Chat: React.FC<ChatProps> =({
         <ChatLogs logs={logs} />
       }
 
-      {(!logs || logs.length === 0) &&
+      {(!logs || logs.length === 0) && !isLoading &&
         <ExamplePrompts onClick={async (prompt: string) => await handleGoalSubmit(prompt)} />
       }
       <div className="flex items-center justify-center gap-4 p-4 mb-4 self-center w-[100%] max-w-[56rem]">

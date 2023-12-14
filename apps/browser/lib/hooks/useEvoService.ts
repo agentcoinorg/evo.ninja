@@ -27,6 +27,7 @@ export const useEvoService = (
   onCreateChat: (chatId: string) => void
 ): {
   logs: ChatLog[] | undefined;
+  isLoading: boolean;
   isStarting: boolean;
   isRunning: boolean;
   handleStart: (goal: string) => void;
@@ -41,9 +42,9 @@ export const useEvoService = (
   const [, setError] = useAtom(errorAtom);
 
   // State
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isStarting, setIsStarting] = useState<boolean>(false);
   const [isRunning, setIsRunning] = useState<boolean>(false);
-  const chatLogRef = useRef<ChatLog[]>([]);
   const [chatLog, setChatLog] = useState<ChatLog[]>([]);
 
   // Mutations
@@ -53,7 +54,7 @@ export const useEvoService = (
   const { mutateAsync: addVariable } = useAddVariable();
 
   // Queries
-  const { data: chats } = useChats();
+  const { refetch: fetchChats } = useChats();
 
   // Helpers
   const updateUserFiles = useUpdateUserFiles();
@@ -65,6 +66,7 @@ export const useEvoService = (
       return;
     }
 
+    setIsLoading(true);
     evoService.disconnect();
 
     const config: EvoThreadConfig = {
@@ -88,7 +90,8 @@ export const useEvoService = (
         setError("Failed to start Evo.");
       },
     };
-    evoService.connect(config, callbacks); 
+    evoService.connect(config, callbacks)
+      .then(() => setIsLoading(false));
   }
 
   const loadChatLog = async (chatId: string) => {
@@ -96,11 +99,7 @@ export const useEvoService = (
       return [];
     }
 
-    // TODO: handle this properly
-    if (!chats) {
-      console.error("CHATS NOT LOADED YET")
-      return [];
-    }
+    const { data: chats } = await fetchChats();
 
     const currentChat = chats?.find(c => c.id === chatId);
 
@@ -121,19 +120,17 @@ export const useEvoService = (
     await updateUserFiles(workspace);
   }
 
-  const handleChatLogAdded = async (chatLog: ChatLog) => {
-    chatLogRef.current = [...chatLogRef.current, chatLog];
-    setChatLog(chatLogRef.current);
-    if (isAuthenticated && chatId) {
-      await addChatLog({ chatId, log: chatLog });
+  const handleChatLogAdded = async (log: ChatLog) => {
+    if (!isAuthenticated || !chatId) {
+      return;
     }
+    await addChatLog({ chatId, log });
   }
 
   const handleMessagesAdded = async (type: ChatLogType, messages: ChatMessage[]) => {
     if (!isAuthenticated || !chatId) {
       return;
     }
-
     await addMessages({
       chatId,
       messages,
@@ -145,7 +142,6 @@ export const useEvoService = (
     if (!isAuthenticated || !chatId) {
       return;
     }
-
     await addVariable({
       chatId,
       key,
@@ -185,6 +181,7 @@ export const useEvoService = (
 
   return {
     logs: chatLog,
+    isLoading,
     isStarting,
     isRunning,
     handleStart
