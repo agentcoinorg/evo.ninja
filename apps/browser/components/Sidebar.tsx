@@ -31,7 +31,7 @@ const Sidebar = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { mutateAsync: createChat } = useCreateChat();
   const { data: chats } = useChats();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const mappedChats = chats?.map((chat) => ({
     id: chat.id,
     name: chat.logs[0]?.title ?? "New session",
