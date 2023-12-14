@@ -27,7 +27,6 @@ export const useEvoService = (
   onCreateChat: (chatId: string) => void
 ): {
   logs: ChatLog[] | undefined;
-  isLoading: boolean;
   isStarting: boolean;
   isRunning: boolean;
   handleStart: (goal: string) => void;
@@ -42,7 +41,6 @@ export const useEvoService = (
   const [, setError] = useAtom(errorAtom);
 
   // State
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isStarting, setIsStarting] = useState<boolean>(false);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [chatLog, setChatLog] = useState<ChatLog[]>([]);
@@ -66,7 +64,6 @@ export const useEvoService = (
       return;
     }
 
-    setIsLoading(true);
     evoService.disconnect();
 
     const config: EvoThreadConfig = {
@@ -90,8 +87,7 @@ export const useEvoService = (
         setError("Failed to start Evo.");
       },
     };
-    evoService.connect(config, callbacks)
-      .then(() => setIsLoading(false));
+    evoService.connect(config, callbacks);
   }
 
   const loadChatLog = async (chatId: string) => {
@@ -181,7 +177,6 @@ export const useEvoService = (
 
   return {
     logs: chatLog,
-    isLoading,
     isStarting,
     isRunning,
     handleStart

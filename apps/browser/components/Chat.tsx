@@ -41,10 +41,10 @@ const Chat: React.FC<ChatProps> =({
   const [, setAccountModalOpen] = useAtom(showAccountModalAtom);
 
   const [message, setMessage] = useState<string>("");
+  const [goalSent, setGoalSent] = useState<boolean>(false);
 
   const {
     logs,
-    isLoading,
     isStarting,
     isRunning,
     handleStart
@@ -74,6 +74,7 @@ const Chat: React.FC<ChatProps> =({
 
     handleStart(goal);
     setMessage("");
+    setGoalSent(true);
   }
 
   const handleMessageChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -97,7 +98,7 @@ const Chat: React.FC<ChatProps> =({
 
       <ChatLogs logs={logs ?? []} />
 
-      {(!logs || logs.length === 0) && !isLoading &&
+      {(!logs || logs.length === 0) && !goalSent &&
         <ExamplePrompts onClick={async (prompt: string) => await handleGoalSubmit(prompt)} />
       }
       <div className="flex items-center justify-center gap-4 p-4 mb-4 self-center w-[100%] max-w-[56rem]">
