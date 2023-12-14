@@ -5,12 +5,14 @@ import {
   Evo,
   ChatLogType,
   ChatMessage,
-  Workspace
+  Workspace,
+  InMemoryWorkspace
 } from "@evo-ninja/agents";
 
 export interface EvoThreadConfig {
   chatId: string;
   loadChatLog: (chatId: string) => Promise<ChatLog[]>;
+  loadWorkspace: (chatId: string) => Promise<Workspace>;
   onChatLogAdded: (chatLog: ChatLog) => Promise<void>;
   onMessagesAdded: (type: ChatLogType, messages: ChatMessage[]) => Promise<void>;
   onVariableSet: (key: string, value: string) => Promise<void>;
@@ -20,18 +22,19 @@ export interface EvoThreadState {
   isRunning: boolean;
   isLoading: boolean;
   logs: ChatLog[];
+  workspace: Workspace;
 }
 
 export interface EvoThreadCallbacks {
   setIsRunning: (value: boolean) => void;
   setChatLog: (chatLog: ChatLog[]) => void;
+  setWorkspace: (workspace: Workspace) => void;
   onGoalCapReached: () => void;
   onError: (error: string) => void;
 }
 
 export interface EvoThreadStartOptions {
   goal: string;
-  workspace: Workspace;
   allowTelemetry: boolean;
   openAiApiKey?: string;
 }
@@ -40,6 +43,7 @@ const INIT_STATE: EvoThreadState = {
   isRunning: false,
   isLoading: false,
   logs: [],
+  workspace: new InMemoryWorkspace()
 };
 
 export class EvoThread {
@@ -68,7 +72,8 @@ export class EvoThread {
 
     // Dispatch init values
     this._callbacks.setIsRunning(INIT_STATE.isRunning);
-    this._callbacks.setChatLog([]);
+    this._callbacks.setChatLog(INIT_STATE.logs);
+    this._callbacks.setWorkspace(INIT_STATE.workspace);
 
     // Disconnect all callbacks
     this._callbacks = undefined;
@@ -92,10 +97,11 @@ export class EvoThread {
     // Send current state to newly connected callbacks
     this._callbacks.setIsRunning(this._state.isRunning);
     this._callbacks.setChatLog(this._state.logs);
+    this._callbacks.setWorkspace(this._state.workspace);
   }
 
   async start(options: EvoThreadStartOptions) {
-    const { isRunning } = this._state;
+    const { isRunning, workspace } = this._state;
     const {
       goal,
       allowTelemetry,
@@ -126,7 +132,7 @@ export class EvoThread {
     // Create an Evo instance
     const evo = createEvoInstance(
       goalId,
-      options.workspace,
+      workspace,
       options.openAiApiKey,
       this._config.onMessagesAdded,
       this._config.onVariableSet,
@@ -148,13 +154,25 @@ export class EvoThread {
   }
 
   private async load() {
+    const chatId = this._config.chatId;
     this._state.isLoading = true;
-    this._state.logs = await this._config.loadChatLog(
-      this._config.chatId
-    ).catch((reason) => {
-      this._callbacks?.onError(reason.toString());
-      return [];
-    });
+
+    const results = await Promise.all<[
+      Promise<ChatLog[]>,
+      Promise<Workspace>
+    ]>([
+      this._config.loadChatLog(chatId).catch((reason) => {
+        this._callbacks?.onError(reason.toString());
+        return [];
+      }),
+      this._config.loadWorkspace(chatId).catch((reason) => {
+        this._callbacks?.onError(reason.toString());
+        return new InMemoryWorkspace();
+      })
+    ]);
+
+    this._state.logs = results[0];
+    this._state.workspace = results[1];
     this._state.isLoading = false;
   }
 
@@ -181,6 +199,8 @@ export class EvoThread {
 
     while (this._state.isRunning) {
       const response = await iterator.next();
+
+      this._callbacks?.setWorkspace(this._state.workspace);
 
       if (response.done) {
         console.log(response.value);

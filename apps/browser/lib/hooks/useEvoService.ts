@@ -2,9 +2,9 @@ import {
   allowTelemetryAtom,
   capReachedAtom,
   evoServiceAtom,
-  userWorkspaceAtom,
   localOpenAiApiKeyAtom,
   showAccountModalAtom,
+  userWorkspaceAtom,
   errorAtom
 } from "@/lib/store";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";
@@ -12,14 +12,13 @@ import { useAddChatLog } from "@/lib/mutations/useAddChatLog";
 import { useAddMessages } from "@/lib/mutations/useAddMessages";
 import { useChats } from "@/lib/queries/useChats";
 import { useAddVariable } from "@/lib/mutations/useAddVariable";
-import { useCheckForUserFiles } from "@/lib/hooks/useCheckForUserFiles";
+import { useUpdateUserFiles } from "@/lib/hooks/useUpdateUserFiles";
 import { ChatLog } from "@/components/Chat";
 import { EvoThreadCallbacks, EvoThreadConfig } from "@/lib/services/evo/EvoThread";
 import { v4 as uuid } from "uuid";
 import { useAtom } from "jotai";
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { InMemoryWorkspace } from "@evo-ninja/agent-utils";
+import { Workspace, InMemoryWorkspace } from "@evo-ninja/agent-utils";
 import { ChatLogType, ChatMessage } from "@evo-ninja/agents";
 
 export const useEvoService = (
@@ -34,9 +33,9 @@ export const useEvoService = (
 } => {
   // Globals
   const [evoService] = useAtom(evoServiceAtom);
-  const [userWorkspace, setUserWorkspace] = useAtom(userWorkspaceAtom);
   const [allowTelemetry] = useAtom(allowTelemetryAtom);
   const [openAiApiKey] = useAtom(localOpenAiApiKeyAtom);
+  const [, setUserWorkspace] = useAtom(userWorkspaceAtom);
   const [, setCapReached] = useAtom(capReachedAtom);
   const [, setAccountModalOpen] = useAtom(showAccountModalAtom);
   const [, setError] = useAtom(errorAtom);
@@ -47,9 +46,6 @@ export const useEvoService = (
   const chatLogRef = useRef<ChatLog[]>([]);
   const [chatLog, setChatLog] = useState<ChatLog[]>([]);
 
-  const router = useRouter();
-  const checkForUserFiles = useCheckForUserFiles(userWorkspace);
-
   // Mutations
   const { mutateAsync: createChat } = useCreateChat();
   const { mutateAsync: addChatLog } = useAddChatLog();
@@ -58,6 +54,9 @@ export const useEvoService = (
 
   // Queries
   const { data: chats } = useChats();
+
+  // Helpers
+  const updateUserFiles = useUpdateUserFiles();
 
   const handleChatIdChange = (chatId: string | undefined) => {
     const currentThread = evoService.current;
@@ -71,6 +70,7 @@ export const useEvoService = (
     const config: EvoThreadConfig = {
       chatId: chatId || "<anon>",
       loadChatLog,
+      loadWorkspace,
       onChatLogAdded: handleChatLogAdded,
       onMessagesAdded: handleMessagesAdded,
       onVariableSet: handleVariableSet
@@ -78,6 +78,7 @@ export const useEvoService = (
     const callbacks: EvoThreadCallbacks = {
       setIsRunning,
       setChatLog,
+      setWorkspace,
       onGoalCapReached: () => {
         setCapReached(true);
         setAccountModalOpen(true);
@@ -110,8 +111,17 @@ export const useEvoService = (
     return currentChat.logs;
   }
 
+  const loadWorkspace = async (chatId: string) => {
+    // TODO: introduce workspace fetching from supabase storage buckets
+    return new InMemoryWorkspace()
+  }
+
+  const setWorkspace = async (workspace: Workspace) => {
+    setUserWorkspace(workspace);
+    await updateUserFiles(workspace);
+  }
+
   const handleChatLogAdded = async (chatLog: ChatLog) => {
-    checkForUserFiles();
     chatLogRef.current = [...chatLogRef.current, chatLog];
     setChatLog(chatLogRef.current);
     if (isAuthenticated && chatId) {
@@ -160,16 +170,9 @@ export const useEvoService = (
       }
     }
 
-    // If no workspace exists, create it
-    const workspace = userWorkspace || new InMemoryWorkspace();
-    if (!userWorkspace) {
-      setUserWorkspace(workspace);
-    }
-
     // Tell the EvoService to start the goal
     evoService.start({
       goal,
-      workspace,
       allowTelemetry,
       openAiApiKey
     });

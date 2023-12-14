@@ -1,29 +1,34 @@
-import { useCheckForUserFiles } from "@/lib/hooks/useCheckForUserFiles";
 import { uploadedFilesAtom, userWorkspaceAtom } from "@/lib/store";
+import { useUpdateUserFiles } from "@/lib/hooks/useUpdateUserFiles";
 import { useAtom } from "jotai";
 import { useEffect } from "react";
 
 export default function WorkspaceFilesProvider({ children }: { children: React.ReactNode }) {
-  const [uploadedFiles] = useAtom(uploadedFilesAtom);
+  const [uploadedFiles, setUploadedFiles] = useAtom(uploadedFilesAtom);
   const [userWorkspace] = useAtom(userWorkspaceAtom);
-  const checkForUserFiles = useCheckForUserFiles(userWorkspace)
+  const updateUserFiles = useUpdateUserFiles();
 
   useEffect(() => {
-    if (!userWorkspace) {
-      return;
-    }
-
     //eslint-disable-next-line @typescript-eslint/no-floating-promises
     (async () => {
+      if (uploadedFiles.length === 0) {
+        return;
+      }
+
+      const decoder = new TextDecoder();
+      const files = [...uploadedFiles];
+      setUploadedFiles([]);
+
+      // Write all uploaded files
       await Promise.all(
-        uploadedFiles.map((file) =>
+        files.map((file) =>
           userWorkspace.writeFile(
             file.path,
-            new TextDecoder().decode(file.content)
+            decoder.decode(file.content)
           )
         )
       );
-      await checkForUserFiles();
+      await updateUserFiles(userWorkspace);
     })();
   }, [uploadedFiles]);
 
