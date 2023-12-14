@@ -76,7 +76,7 @@ const Chat: React.FC<ChatProps> = ({
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
 
-  const [, setAllowTelemetry] = useAtom(allowTelemetryAtom);
+  const [allowTelemetry, setAllowTelemetry] = useAtom(allowTelemetryAtom);
 
   const handleDisclaimerSelect = (select: boolean) => {
     setAllowTelemetry(select);
@@ -139,6 +139,12 @@ const Chat: React.FC<ChatProps> = ({
       });
     }
   }, [logs, isAtBottom]);
+
+  useEffect(() => {
+    if (allowTelemetry && showDisclaimer) {
+      setShowDisclaimer(false)
+    }
+  }, [allowTelemetry, showDisclaimer])
 
   return (
     <main
@@ -210,14 +216,6 @@ const Chat: React.FC<ChatProps> = ({
                           {msg.content?.toString() ?? ""}
                         </ReactMarkdown>
                       </div>
-                      {isEvo &&
-                        isRunning &&
-                        isSending &&
-                        index === logs.length - 1 && (
-                          <div className="flex items-center space-x-2 text-cyan-500">
-                            <LoadingCircle />
-                          </div>
-                        )}
                     </div>
                   </div>
                 </div>

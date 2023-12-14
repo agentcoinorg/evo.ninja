@@ -26,49 +26,7 @@ const ChatInputButton = ({
 }: ChatInputButtonProps) => {
   return (
     <>
-      {evoRunning && (
-        <>
-          {!paused && (
-            <Button
-              hierarchy="secondary"
-              onClick={handlePause}
-              disabled={!evoRunning || paused}
-              className="!p-1 md:!px-2"
-            >
-              <Pause weight="fill" />
-              <div className="hidden md:block">Pause</div>
-            </Button>
-          )}
-          {paused && (
-            <>
-              {!stopped && (
-                <Button
-                  hierarchy="secondary"
-                  disabled={true}
-                  className="!p-1 md:!px-2"
-                >
-                  <LoadingCircle />
-                  <div className="hidden md:block">Pausing</div>
-                </Button>
-              )}
-
-              {stopped && (
-                <Button
-                  hierarchy="secondary"
-                  onClick={handleContinue}
-                  disabled={evoRunning && !paused}
-                  className="!p-1 md:!px-2"
-                >
-                  <Stop weight="fill" />
-                  <div className="hidden md:block">Paused</div>
-                </Button>
-              )}
-            </>
-          )}
-        </>
-      )}
-
-      {!evoRunning && (
+      {!evoRunning ? (
         <Button
           hierarchy="secondary"
           onClick={async () => await handleSend()}
@@ -78,6 +36,8 @@ const ChatInputButton = ({
         >
           <ArrowRight weight="bold" />
         </Button>
+      ) : (
+        <LoadingCircle />
       )}
     </>
   );

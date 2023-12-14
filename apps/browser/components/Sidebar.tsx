@@ -79,15 +79,13 @@ const Sidebar = ({
         )}
       >
         <div
-          className="animate-fade-in flex h-full flex-col justify-between opacity-0"
+          className="flex h-full animate-fade-in flex-col justify-between opacity-0"
           style={{ animationDelay: sidebarOpen ? "150ms" : "0ms" }}
         >
           <div className="flex h-full flex-col justify-between">
             <div className={clsx({ "space-y-6": session?.user.email })}>
-              <header>
-                <a href="/">
-                  <Logo className="w-[162px] cursor-pointer p-4 transition-opacity hover:opacity-50" />
-                </a>
+              <header onClick={() => router.replace("/")}>
+                <Logo className="w-[162px] cursor-pointer p-4 transition-opacity hover:opacity-50"/>
               </header>
               {session?.user.email && (
                 <div className="space-y-1 px-2">
