@@ -6,8 +6,7 @@ TODO:
 - improve usage of "<anon>"
 
 Bugs:
-- anonymous => send message => ChatLog doesn't update
-- scroll doesn't work (chat getting set breaks scrollview)
+- send prompt -> meet quota -> add openai key -> stuck in loading
 
 NITs:
 - improve loading of chatid routes

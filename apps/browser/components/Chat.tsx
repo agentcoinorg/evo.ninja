@@ -95,9 +95,7 @@ const Chat: React.FC<ChatProps> =({
         {logs && <FontAwesomeIcon className="cursor-pointer" icon={faDownload} onClick={() => exportChatHistory(logs)} />}
       </div>
 
-      {logs &&
-        <ChatLogs logs={logs} />
-      }
+      <ChatLogs logs={logs ?? []} />
 
       {(!logs || logs.length === 0) && !isLoading &&
         <ExamplePrompts onClick={async (prompt: string) => await handleGoalSubmit(prompt)} />

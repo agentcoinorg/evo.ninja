@@ -189,7 +189,7 @@ export class EvoThread {
   }
 
   private async onChatLog(chatLog: ChatLog): Promise<void> {
-    this._state.logs.push(chatLog);
+    this._state.logs = [...this._state.logs, chatLog];
     this._callbacks?.setChatLog(this._state.logs);
     await this._config.onChatLogAdded(chatLog);
   }
