@@ -84,11 +84,7 @@ export class EvoThread {
     this._callbacks = callbacks;
 
     // Wait until loading has finished
-    while (this._state.isLoading) {
-      await new Promise((resolve) =>
-        setTimeout(resolve, 200)
-      );
-    }
+    await this.waitForLoad();
 
     if (!this._callbacks) {
       return;
@@ -101,14 +97,16 @@ export class EvoThread {
   }
 
   async start(options: EvoThreadStartOptions) {
-    const { isRunning, workspace } = this._state;
     const {
       goal,
       allowTelemetry,
       openAiApiKey
     } = options;
 
-    if (isRunning) {
+    // Wait until loading has finished
+    await this.waitForLoad();
+
+    if (this._state.isRunning) {
       this._callbacks?.onError("A goal is already underway.");
       return;
     }
@@ -132,7 +130,7 @@ export class EvoThread {
     // Create an Evo instance
     const evo = createEvoInstance(
       goalId,
-      workspace,
+      this._state.workspace,
       options.openAiApiKey,
       this._config.onMessagesAdded,
       this._config.onVariableSet,
@@ -174,6 +172,15 @@ export class EvoThread {
     this._state.logs = results[0];
     this._state.workspace = results[1];
     this._state.isLoading = false;
+  }
+
+  private async waitForLoad() {
+    while (this._state.isLoading) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, 200)
+      );
+    }
+    return Promise.resolve();
   }
 
   private setIsRunning(value: boolean) {

@@ -11,7 +11,8 @@
     ]
   },
   "resolutions": {
-    "jest": "29.5.0"
+    "jest": "29.5.0",
+    "jest-cli": "29.5.0"
   },
   "scripts": {
     "reset": "yarn clean && yarn && yarn build",

@@ -11,7 +11,7 @@ import { useAtom } from "jotai";
 function Dojo({ params }: { params: { id?: string } }) {
 
   const router = useRouter()
-  const { status: sessionStatus, data } = useSession();
+  const { status: sessionStatus, data: sessionData } = useSession();
   const [evoService, setEvoService] = useAtom(evoServiceAtom);
   const [, setChatId] = useAtom(chatIdAtom);
 
@@ -29,10 +29,15 @@ function Dojo({ params }: { params: { id?: string } }) {
       return;
     }
 
+    const user = sessionData?.user.email || "<anon>";
+    if (evoService.user === user) {
+      return;
+    }
+
     evoService.disconnect();
     evoService.destroy();
-    setEvoService(new EvoService());
-  }, [sessionStatus])
+    setEvoService(new EvoService(user));
+  }, [sessionStatus, sessionData])
 
   useEffect(() => {
     if (sessionStatus === "unauthenticated" && params.id) {

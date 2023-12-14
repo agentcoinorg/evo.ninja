@@ -5,6 +5,13 @@ TODO:
 - fix workspace not being updated
 - improve usage of "<anon>"
 
+Bugs:
+- anonymous => send message => ChatLog doesn't update
+- scroll doesn't work (chat getting set breaks scrollview)
+
+NITs:
+- improve loading of chatid routes
+
 Test:
 - sending same goal twice (retyping)
 - handle abort mid-goal execution
