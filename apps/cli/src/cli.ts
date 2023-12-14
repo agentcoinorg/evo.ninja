@@ -33,7 +33,7 @@ export async function cli(): Promise<void> {
   async function handleGoal(goal: string): Promise<void> {
     await app.debugLog?.goalStart(goal);
 
-    let iterator = app.evo.run({ goal });
+    let iterator = app.evo.runWithExistingContext({ goal });
     let stepCounter = 1;
 
     while (true) {
@@ -74,6 +74,7 @@ export async function cli(): Promise<void> {
   let goal: string | undefined = program.args[0];
   let goalCounter = 0;
 
+  await app.evo.init();
   while (true) {
     if (!goal) {
       goal = await app.logger.prompt("Enter your goal");

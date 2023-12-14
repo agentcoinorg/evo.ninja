@@ -36,11 +36,21 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
     return this.context.workspace;
   }
 
-  public async *run(
-    args: TRunArgs
-  ): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
-    await this.initializeChat(args);
+  public async init() {
+    await this.context.chat.persistent([
+      { role: "system", content: `Variables are annotated using the \${variable-name} syntax. Variables can be used as function argument using the \${variable-name} syntax. Variables are created as needed, and do not exist unless otherwise stated.` },
+      ...this.config.prompts.initialMessages()
+    ]);
+  }
 
+  public async *run(args: TRunArgs): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
+    await this.init();
+    return yield* this.runWithExistingContext(args);
+  }
+
+  public async *runWithExistingContext(args: TRunArgs): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
+    await this.initRun(args);
+  
     const { chat } = this.context;
 
     if (this.config.timeout) {
@@ -82,6 +92,12 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
 
   public onFirstRun(_: TRunArgs, chat: Chat): Promise<void> {
     return Promise.resolve();
+  }
+
+  protected async initRun(args: TRunArgs): Promise<void> {
+    await this.context.chat.persistent(
+      this.config.prompts.runMessages(args)
+    );
   }
 
   protected async executeFunction(
@@ -136,13 +152,6 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
 
   protected async createEmbeddingVector(text: string): Promise<number[]> {
     return (await this.context.embedding.createEmbeddings(text))[0].embedding;
-  }
-
-  protected async initializeChat(args: TRunArgs) {
-    await this.context.chat.persistent([
-      { role: "system", content: `Variables are annotated using the \${variable-name} syntax. Variables can be used as function argument using the \${variable-name} syntax. Variables are created as needed, and do not exist unless otherwise stated.` },
-      ...this.config.prompts.initialMessages(args)
-    ]);
   }
 
   protected async beforeLlmResponse(): Promise<{

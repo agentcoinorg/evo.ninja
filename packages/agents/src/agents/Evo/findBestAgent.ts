@@ -3,7 +3,6 @@ import { AgentContext } from "@/agent-core";
 import { AgentFunctionBase } from "../../functions/utils";
 import { Agent, GoalRunArgs } from "../utils/Agent";
 import { CsvAnalystAgent } from "../CsvAnalyst";
-import { DeveloperAgent } from "../Developer";
 import { ResearcherAgent } from "../Researcher";
 import { SynthesizerAgent } from "../Synthesizer";
 import { InMemoryWorkspace } from "@evo-ninja/agent-utils";
@@ -36,7 +35,7 @@ export const findBestAgent = async (
   const agentsWithPrompts = allAgents.map(agent => {
     return {
       expertise: agent.config.prompts.expertise + "\n" + agent.config.functions.map(x => x.name).join("\n"),
-      persona: agent.config.prompts.initialMessages({ goal: "" })[0].content ?? "",
+      persona: agent.config.prompts.initialMessages()[0].content ?? "",
       agent,
     };
   });

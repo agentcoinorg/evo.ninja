@@ -9,7 +9,9 @@ export const prompts = (
 ): AgentPrompts<GoalVerifierRunArgs> => ({
   name: "GoalVerifier",
   expertise: `verifies if the users' goal has been achieved or not.`,
-  initialMessages: ({ messagesToVerify }: GoalVerifierRunArgs): ChatMessage[] => [
+  initialMessages: (): ChatMessage[] => [
+  ],
+  runMessages: ({ messagesToVerify }: GoalVerifierRunArgs): ChatMessage[] => [
     { role: "user", content: `\`\`\`
   ${(messagesToVerify ?? []).map(x => JSON.stringify(x, null, 2 )).join("\n")}
 Verify that the assistant has correctly achieved the users' goal by reading the files.
