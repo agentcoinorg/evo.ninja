@@ -38,7 +38,17 @@ const TextField = ({
     useState<TextFieldProps["checked"]>(checked);
 
   const handleCheck = () => {
-    setIsChecked(!isChecked);
+    const newValue = !isChecked;
+    setIsChecked(newValue);
+    if (props.onChange) {
+      const event = {
+        target: {
+          type: "checkbox",
+          checked: newValue,
+        },
+      } as ChangeEvent<HTMLInputElement>;
+      props.onChange(event);
+    }
   };
 
   return (
@@ -49,13 +59,6 @@ const TextField = ({
           className={clsx("checkbox", { checked: isChecked }, className)}
           onClick={handleCheck}
         >
-          <input
-            type="hidden"
-            className="hidden"
-            checked={isChecked}
-            onChange={props.onChange}
-            {...props}
-          />
           <div className={clsx("checkmark", { hidden: !isChecked })} />
         </div>
       ) : (
