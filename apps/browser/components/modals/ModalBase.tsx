@@ -57,7 +57,7 @@ export default function Modal(props: PropsWithChildren<ModalProps>) {
                       />
                     </Button>
                   </div>
-                  <div className="max-h-[calc(100vh-96px)] space-y-8 overflow-y-auto bg-zinc-900 p-8 pb-12">
+                  <div className="max-h-[calc(100vh-96px)] space-y-8 overflow-y-auto bg-zinc-900 p-8">
                     {children}
                   </div>
                 </Dialog.Panel>

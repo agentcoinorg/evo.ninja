@@ -1,5 +1,8 @@
 import React, { ChangeEvent } from "react";
 import TextField from "../TextField";
+import { useSession, signOut } from "next-auth/react";
+import Button from "../Button";
+import { SignOut } from "@phosphor-icons/react/dist/ssr";
 
 interface AccountConfigProps {
   setApiKey: (key: string) => void;
@@ -13,10 +16,43 @@ interface AccountConfigProps {
 function AccountConfig(props: AccountConfigProps) {
   const { isLoggedIn, apiKey, setApiKey, setTelemetry, telemetry, error } =
     props;
+  const { data: session } = useSession();
 
   return (
     <>
       <div className="space-y-6">
+        {session?.user.email && (
+          <div className="flex items-center justify-between rounded-lg bg-zinc-800 p-4">
+            <div className="flex items-center space-x-2">
+              {session?.user.image ? (
+                <img
+                  src={session?.user.image}
+                  className="h-8 w-8 rounded-full bg-cyan-600"
+                />
+              ) : (
+                <div className="h-8 w-8 rounded-full bg-cyan-600" />
+              )}
+              <div className="space-y-1">
+                <div className="text-sm font-semibold leading-none">
+                  {session?.user.name}
+                </div>
+                <div className="text-[11px] leading-none text-gray-400">
+                  {session?.user.email}
+                </div>
+              </div>
+            </div>
+            <div className="space-x-2">
+              <Button
+                className="!px-2 md:!px-4"
+                hierarchy="secondary"
+                onClick={() => signOut()}
+              >
+                <SignOut color="currentColor" size={16} />
+                <div className="hidden md:block">Sign Out</div>
+              </Button>
+            </div>
+          </div>
+        )}
         {!apiKey && (
           <p>
             {isLoggedIn
