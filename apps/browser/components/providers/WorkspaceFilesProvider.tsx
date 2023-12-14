@@ -6,7 +6,7 @@ import { useEffect } from "react";
 export default function WorkspaceFilesProvider({ children }: { children: React.ReactNode }) {
   const [uploadedFiles] = useAtom(uploadedFilesAtom);
   const [userWorkspace] = useAtom(userWorkspaceAtom);
-  const checkForUserFiles = useCheckForUserFiles()
+  const checkForUserFiles = useCheckForUserFiles(userWorkspace)
 
   useEffect(() => {
     if (!userWorkspace) {

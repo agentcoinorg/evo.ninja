@@ -29,7 +29,7 @@ export interface ChatProps {
   onCreateChat: (chatId: string) => void;
 }
 
-const Chat2: React.FC<ChatProps> =({
+const Chat: React.FC<ChatProps> =({
   chatId,
   isAuthenticated,
   onCreateChat
@@ -135,4 +135,4 @@ const Chat2: React.FC<ChatProps> =({
   );
 };
 
-export default Chat2;
+export default Chat;
