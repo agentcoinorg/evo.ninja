@@ -206,7 +206,6 @@ export class EvoThread {
       });
 
       if (!response.done) {
-        // TODO: Update this function to add information to the modal output (rather than adding it into the chat)
         const evoMessage = {
           title: `### Action executed:\n${response.value.title}`,
           content: response.value.content,
@@ -219,8 +218,3 @@ export class EvoThread {
     }
   }
 }
-
-/*
-NOTE: all supabase mutations for evo's persistence should be done within the thread
-NOTE: all evo state should come from evo's thread
-*/

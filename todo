@@ -1,0 +1,14 @@
+TODO:
+- authenticated
+  - fix first login bug, can't create chat
+  - fix multiple goals => multiple chats
+- fix workspace not being updated
+- improve usage of "<anon>"
+
+Test:
+- sending same goal twice (retyping)
+- handle abort mid-goal execution
+- chats updating on backend & in app synchronously
+  - start goal, switch, watch db, switch back, check app (may not be same)
+- 2 tabs, same chat open in both, send in one, watch other
+  - chatGPT loads only on reload of app
