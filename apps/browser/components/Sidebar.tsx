@@ -19,9 +19,6 @@ export interface SidebarProps {
   sidebarOpen: boolean;
 }
 
-const loadedAccount = true;
-const loadedChats = true;
-
 const Sidebar = ({
   userFiles,
   sidebarOpen,
@@ -30,7 +27,7 @@ const Sidebar = ({
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { mutateAsync: createChat } = useCreateChat();
-  const { data: chats } = useChats();
+  const { data: chats, isLoading: isLoadingChats } = useChats();
   const { data: session, status } = useSession();
   const mappedChats = chats?.map((chat) => ({
     id: chat.id,
@@ -98,13 +95,13 @@ const Sidebar = ({
                     <div className="text-xs uppercase tracking-widest text-zinc-500">
                       Recent Chats
                     </div>
-                    {loadedChats && (
+                    {!isLoadingChats && (
                       <Button variant="icon" onClick={createNewChat}>
                         <NotePencil size={18} weight="bold" />
                       </Button>
                     )}
                   </div>
-                  {loadedChats ? (
+                  {!isLoadingChats ? (
                     <div className="h-full max-h-[30vh] space-y-0.5 overflow-y-auto">
                       {chats && chats.length > 0 ? (
                         <div className="px-2">
@@ -142,7 +139,7 @@ const Sidebar = ({
               <CurrentWorkspace userFiles={userFiles} />
             </div>
             <div className="relative flex w-full items-center justify-between space-x-2 p-4">
-              {loadedAccount ? (
+              {status !== "loading" ? (
                 <>
                   <DropdownAccount
                     ref={dropdownRef}
