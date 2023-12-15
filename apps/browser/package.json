@@ -2,6 +2,18 @@
   "name": "@evo-ninja/ui",
   "version": "0.1.0",
   "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "prebuild": "yarn build:scripts && yarn build:env",
+    "build:scripts": "node scripts/build.scripts.js",
+    "build:env": "node scripts/build.env.js",
+    "db:start": "supabase start",
+    "db:reset": "supabase db reset",
+    "db:stop": "supabase stop",
+    "lint": "eslint --color -c ../../.eslintrc.js app/ lib/ components/",
+    "start": "next start"
+  },
   "dependencies": {
     "@auth/supabase-adapter": "0.1.9",
     "@evo-ninja/agent-utils": "0.1.0",
@@ -12,7 +24,8 @@
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@headlessui/react": "^1.7.17",
     "@nerfzael/memory-fs": "0.1.1",
-    "@supabase/supabase-js": "2.38.5",
+    "@supabase/supabase-js": "~2.38.5",
+    "@supabase/storage-js": "~2.5.5",
     "@tanstack/react-query": "^5.12.2",
     "buffer": "6.0.3",
     "clsx": "^2.0.0",
@@ -28,7 +41,8 @@
     "react-dropzone": "^14.2.3",
     "react-markdown": "^8.0.7",
     "react-modal": "3.16.1",
-    "react-toastify": "9.1.3"
+    "react-toastify": "9.1.3",
+    "uuid": "9.0.1"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "14.0.3",
@@ -45,17 +59,5 @@
     "supabase": "^1.115.5",
     "tailwindcss": "^3.3.3",
     "typescript": "4.9.5"
-  },
-  "scripts": {
-    "build": "next build",
-    "dev": "next dev",
-    "prebuild": "yarn build:scripts && yarn build:env",
-    "build:scripts": "node scripts/build.scripts.js",
-    "build:env": "node scripts/build.env.js",
-    "db:start": "supabase start",
-    "db:reset": "supabase db reset",
-    "db:stop": "supabase stop",
-    "lint": "eslint --color -c ../../.eslintrc.js app/ lib/ components/",
-    "start": "next start"
   }
 }
