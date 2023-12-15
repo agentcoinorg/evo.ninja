@@ -8,7 +8,8 @@ import { prompts as synthesizerPrompts } from "../Synthesizer/prompts";
 export const agentPrompts = (): AgentPrompts<GoalRunArgs> => ({
   name: "Evo",
   expertise: `an expert evolving assistant that achieves user goals`,
-  initialMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [],
+  initialMessages: (): ChatMessage[] => [],
+  runMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [],
   loopPreventionPrompt: `Assistant, you seem to be looping. Try delegating a task or calling agent_onGoalAchieved or agent_onGoalFailed`,
 });
 
