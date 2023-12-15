@@ -10,14 +10,45 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Exo", ...defaultTheme.fontFamily.sans],
-        mono: ["Source Code Pro", ...defaultTheme.fontFamily.mono]
+        sans: ["Ubuntu", ...defaultTheme.fontFamily.sans],
+        mono: ["Fira Mono", ...defaultTheme.fontFamily.mono]
       },
       backgroundSize: {
-        "landing-bg": `461px 250px`
+        "landing-bg": `461px 250px`,
+        button: '100% 200%'
       },
       colors: {
-        'opacity-black': 'hsla(0, 0%, 9%, 0.8)'
+        'opacity-black': 'hsla(0, 0%, 9%, 0.8)',
+        current: 'currentColor'
+      },
+      typography: (theme) => ({
+        DEFAULT: {
+          css: {
+            pre: {
+              "background-color": theme('colors.zinc.950')
+            }
+          }
+        }
+      }),
+      animation: {
+        'fade-in': 'fade 300ms ease-in-out forwards',
+        'fade-out': 'fade 300ms ease-in-out reverse forwards',
+        'slide-down': 'slide-down 500ms ease-in-out forwards',
+        'slide-up': 'slide-up 500ms ease-in-out forwards'
+      },
+      keyframes: {
+        'fade': {
+          "0%": { opacity: 0 },
+          "100%": {opacity: 1 }
+        },
+        'slide-up': {
+          "0%": { transform: 'translateY(10%)', opacity: 0 },
+          "100%": { transform: 'translateY(0%)', opacity: 1 }
+        },
+        'slide-down': {
+          "0%": { transform: 'translateY(-10%)', opacity: 0 },
+          "100%": { transform: 'translateY(0%)', opacity: 1 }
+        },
       }
     },
   },

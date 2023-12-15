@@ -11,6 +11,7 @@ export const localOpenAiApiKeyAtom = atomWithStorage<string | undefined>(
 export const allowTelemetryAtom = atomWithStorage("allow-telemetry", false);
 export const welcomeModalAtom = atomWithStorage("welcome-modal-seen", false);
 export const showDisclaimerAtom = atomWithStorage("show-disclaimer", true);
+export const signInModalAtom = atom<boolean>(false);
 export const capReachedAtom = atom<boolean>(false)
 export const errorAtom = atom<string | undefined>(undefined)
 export const showAccountModalAtom = atom<boolean>(false);
