@@ -1,4 +1,6 @@
 import React from "react";
+import { useAtom } from "jotai";
+import { useSession } from "next-auth/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faDiscord,
@@ -8,14 +10,11 @@ import { faUser, faDownload } from "@fortawesome/free-solid-svg-icons";
 import { faFolder } from "@fortawesome/free-solid-svg-icons";
 import Upload from "./Upload";
 import File from "./File";
-
 import CloseIcon from "./CloseIcon";
 import SidebarIcon from "./SidebarIcon";
-import { useAtom } from "jotai";
 import { uploadedFilesAtom, userFilesAtom } from "@/lib/store";
-import { useDownloadFilesAsZip } from "@/lib/hooks/useDownloadFilesAsZip";
+import { useDownloadWorkspaceAsZip } from "@/lib/hooks/useDownloadWorkspaceAsZip";
 import ChatList from "./ChatList";
-import { useSession } from "next-auth/react";
 
 export interface SidebarProps {
   onSettingsClick: () => void;
@@ -26,11 +25,10 @@ const Sidebar = ({
   onSettingsClick,
   onSidebarToggleClick,
 }: SidebarProps) => {
-  const [userFiles] = useAtom(userFilesAtom)
   const [, setUploadedFiles] = useAtom(uploadedFilesAtom)
+  const [userFiles] = useAtom(userFilesAtom)
   const { data: session } = useSession()
-
-  const downloadUserFiles = useDownloadFilesAsZip()
+  const downloadUserWorkspace = useDownloadWorkspaceAsZip()
 
   return (
     <div className="box-border flex h-full w-full flex-col items-center overflow-auto bg-opacity-black p-4 justify-between">
@@ -71,7 +69,7 @@ const Sidebar = ({
             <button
               className="my-4 inline-block h-9 cursor-pointer rounded-xl border-none bg-orange-600 px-6 py-2.5 text-center text-neutral-900 shadow-md outline-none transition-all hover:bg-orange-500"
               title="Download"
-              onClick={downloadUserFiles}
+              onClick={downloadUserWorkspace}
             >
               <FontAwesomeIcon icon={faDownload} /> Download
             </button>

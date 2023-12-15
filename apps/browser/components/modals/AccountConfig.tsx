@@ -77,7 +77,7 @@ function AccountConfig() {
         return;
       }
     } else {
-      setLocalApiKey(null);
+      setLocalApiKey(undefined);
     }
     setAllowTelemetry(telemetry);
     onClose();

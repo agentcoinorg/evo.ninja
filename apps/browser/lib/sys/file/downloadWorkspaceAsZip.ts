@@ -1,5 +1,7 @@
 import JSZip from "jszip";
 import FileSaver from "file-saver";
+import path from "path-browserify";
+import { Workspace } from "@evo-ninja/agent-utils";
 import { InMemoryFile, InMemoryPackageReader } from "@nerfzael/memory-fs";
 
 const zipPackage = async (
@@ -23,11 +25,37 @@ const zipPackage = async (
   return zip;
 };
 
-export const downloadFilesAsZip = async (
+const readWorkspaceFiles = async (
+  workspace: Workspace,
+  subpath: string
+): Promise<InMemoryFile[]> => {
+  const files: InMemoryFile[] = [];
+  const encoder = new TextEncoder();
+  const entries = await workspace.readdir(subpath);
+  for (const entry of entries) {
+    const newPath = path.join(subpath, entry.name);
+    if (entry.type === "directory") {
+      files.push(...await readWorkspaceFiles(
+        workspace,
+        newPath
+      ));
+    } else {
+      files.push(new InMemoryFile(
+        newPath,
+        encoder.encode(await workspace.readFile(newPath))
+      ));
+    }
+  }
+  return files;
+}
+
+export const downloadWorkspaceAsZip = async (
   zipName: string,
-  files: InMemoryFile[]
+  workspace: Workspace
 ): Promise<void> => {
-  const reader = new InMemoryPackageReader(files);
+  const reader = new InMemoryPackageReader(
+    await readWorkspaceFiles(workspace, "./")
+  );
   const zip = await zipPackage(".", new JSZip(), reader);
 
   await zip.generateAsync({ type: "blob" }).then((content: Blob) => {
