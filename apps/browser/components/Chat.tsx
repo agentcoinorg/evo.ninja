@@ -147,7 +147,7 @@ const Chat: React.FC<ChatProps> = ({
 
   return (
     <main
-      className={clsx("flex h-full w-full flex-col", {
+      className={clsx("flex h-full w-full flex-col relative", {
         "items-center justify-center": shouldShowExamplePrompts,
       })}
     >
