@@ -80,9 +80,7 @@ export function useAccountConfig({ onClose }: UseAccountArgs) {
   };
 
   useEffect(() => {
-    if (!apiKey && localApiKey) {
-      setApiKey(localApiKey)
-    }
+    setApiKey(localApiKey ?? "")
   }, [localApiKey])
 
   useEffect(() => {
