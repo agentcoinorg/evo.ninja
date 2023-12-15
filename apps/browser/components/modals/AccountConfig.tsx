@@ -1,4 +1,4 @@
-import React, { ChangeEvent } from "react";
+import React, { ChangeEvent, useEffect, useRef } from "react";
 import TextField from "../TextField";
 import { useSession, signOut } from "next-auth/react";
 import Button from "../Button";
@@ -16,7 +16,15 @@ interface AccountConfigProps {
 function AccountConfig(props: AccountConfigProps) {
   const { isLoggedIn, apiKey, setApiKey, setTelemetry, telemetry, error } =
     props;
+  const apiKeyRef = useRef<HTMLInputElement | null>(null);
   const { data: session } = useSession();
+
+  useEffect(() => {
+    // Focus on the TextField when the component mounts
+    if (apiKeyRef.current) {
+      apiKeyRef.current.focus();
+    }
+  }, []);
 
   return (
     <>
@@ -62,6 +70,7 @@ function AccountConfig(props: AccountConfigProps) {
         )}
         <div className="space-y-3">
           <TextField
+            ref={apiKeyRef}
             value={apiKey ? apiKey : ""}
             placeholder="Enter API Key"
             label="OpenAI Key"

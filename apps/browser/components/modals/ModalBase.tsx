@@ -24,7 +24,7 @@ export default function Modal(props: PropsWithChildren<ModalProps>) {
           onClose={onClose}
         >
           <div className="fixed inset-0 overflow-y-auto bg-zinc-400/50 backdrop-blur">
-            <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <div className="flex min-h-full items-center justify-center text-center md:p-4">
               <Transition.Child
                 as={Fragment}
                 enter="ease-out duration-300"
@@ -35,7 +35,7 @@ export default function Modal(props: PropsWithChildren<ModalProps>) {
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel
-                  className="w-full max-w-[540px] transform overflow-hidden rounded-2xl bg-zinc-800 text-left align-middle text-zinc-50 shadow-xl transition-all"
+                  className="w-full max-w-[540px] transform overflow-hidden rounded-none bg-zinc-800 text-left align-middle text-zinc-50 shadow-xl transition-all md:rounded-2xl"
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
@@ -57,7 +57,7 @@ export default function Modal(props: PropsWithChildren<ModalProps>) {
                       />
                     </Button>
                   </div>
-                  <div className="max-h-[calc(100vh-96px)] space-y-8 overflow-y-auto bg-zinc-900 p-8">
+                  <div className="max-h-[calc(100vh-64px)] space-y-8 overflow-y-auto bg-zinc-900 p-8 md:max-h-[calc(100vh-96px)]">
                     {children}
                   </div>
                 </Dialog.Panel>

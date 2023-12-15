@@ -153,7 +153,7 @@ const Chat: React.FC<ChatProps> = ({
       })}
     >
       {shouldShowExamplePrompts ? (
-        <Logo wordmark={false} className="mb-24 w-16" />
+        <Logo wordmark={false} className="mb-16 w-16" />
       ) : (
         <>
           <div className="flex h-20 items-center justify-center border-b-2 border-zinc-800 md:h-12">
