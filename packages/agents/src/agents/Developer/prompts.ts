@@ -4,7 +4,7 @@ import { AgentPrompts, GoalRunArgs } from "../utils";
 export const prompts = (): AgentPrompts<GoalRunArgs> => ({
   name: "Developer",
   expertise: `architect and build complex software. specialized in python`,
-  initialMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
+  initialMessages: (): ChatMessage[] => [
     {
       role: "user",
       content: `You are an expert developer assistant that excels at coding related tasks.
@@ -23,7 +23,12 @@ you still make unit tests without adding complex logic
 You will always make sure that the implementation and tests are created before running tests with function runPytest
 You must not interact with the user or ask question for clarification. Solve the task to the best of your abilities.`,
     },
-    { role: "user", content: goal },
+  ],
+  runMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
+    {
+      role: "user",
+      content: goal,
+    },
   ],
   loopPreventionPrompt: `Assistant, you appear to be in a loop, try executing a different function.`,
 });

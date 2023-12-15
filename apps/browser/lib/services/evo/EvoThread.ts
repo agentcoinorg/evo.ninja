@@ -149,6 +149,8 @@ export class EvoThread {
       return;
     }
 
+    await evo.init();
+
     // Run the evo instance against the goal
     await this.runEvo(evo, options.goal);
   }
