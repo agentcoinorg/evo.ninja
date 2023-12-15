@@ -9,8 +9,6 @@ import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { useAccountConfig } from "@/lib/hooks/useAccountConfig";
 
 interface AccountConfigProps {
-  apiKey: string | null;
-  allowTelemetry: boolean;
   isOpen: boolean;
   onClose: () => void;
   firstTimeUser: boolean;

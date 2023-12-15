@@ -100,13 +100,9 @@ const DropdownAccount: React.ForwardRefRenderFunction<
       <SettingsModal
         isOpen={isSettingsModalOpen}
         onClose={onSettingsClose}
-        apiKey={localOpenAiApiKey}
-        allowTelemetry={allowTelemetry}
         firstTimeUser={firstTimeUser}
       />
       <SignInModal
-        apiKey={localOpenAiApiKey}
-        allowTelemetry={allowTelemetry}
         isOpen={isSignInModalOpen}
         onClose={onSignInClose}
       />

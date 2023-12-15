@@ -1,16 +1,13 @@
 import React from "react";
 import Modal from "./ModalBase";
 import Button from "../Button";
-import { SignOut } from "@phosphor-icons/react";
 import Image from "next/image";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useAccountConfig } from "@/lib/hooks/useAccountConfig";
 import { useAtom } from "jotai";
 import { localOpenAiApiKeyAtom } from "@/lib/store";
 
 interface AccountConfigProps {
-  apiKey: string | null;
-  allowTelemetry: boolean;
   isOpen: boolean;
   onClose: () => void;
 }
