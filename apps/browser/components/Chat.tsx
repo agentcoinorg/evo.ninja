@@ -4,6 +4,7 @@ import {
   localOpenAiApiKeyAtom,
   chatIdAtom,
   showAccountModalAtom,
+  welcomeModalAtom,
 } from "@/lib/store";
 import { useEvoService } from "@/lib/hooks/useEvoService";
 import { UploadSimple } from "@phosphor-icons/react";
@@ -41,6 +42,7 @@ const Chat: React.FC<ChatProps> = ({
   const [, setError] = useAtom(errorAtom);
   const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom);
   const [, setAccountModalOpen] = useAtom(showAccountModalAtom);
+  const [welcomeModalSeen] = useAtom(welcomeModalAtom);
 
   const [message, setMessage] = useState<string>("");
   const [goalSent, setGoalSent] = useState<boolean>(false);
@@ -143,7 +145,7 @@ const Chat: React.FC<ChatProps> = ({
         </div>
       </div>
       <Disclaimer
-        isOpen={showDisclaimer}
+        isOpen={showDisclaimer && welcomeModalSeen}
         onClose={() => setShowDisclaimer(false)}
       />
     </main>
