@@ -91,8 +91,6 @@ export const useEvoService = (
         setError("Failed to start Evo.");
       },
     };
-    console.log("Connecting EvoService...");
-    console.log(config);
     evoService.connect(config, callbacks);
   }
 
