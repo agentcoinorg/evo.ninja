@@ -74,6 +74,7 @@ export async function cli(): Promise<void> {
   let goal: string | undefined = program.args[0];
   let goalCounter = 0;
 
+  await app.evo.init();
   while (true) {
     if (!goal) {
       goal = await app.logger.prompt("Enter your goal");

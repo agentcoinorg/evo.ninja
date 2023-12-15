@@ -7,7 +7,7 @@ export const prompts = (
 ): AgentPrompts<GoalRunArgs> => ({
   name: "Planner",
   expertise: `I provide a plan that tells you how to achieve any goal`,
-  initialMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
+  initialMessages: (): ChatMessage[] => [
     {
       role: "user",
       content: `You are an expert planner. 
@@ -26,7 +26,12 @@ export const prompts = (
   You use the ${onGoalAchievedFn.name} function to send plans. You ONLY send the STEP-BY-STEP PLAN text in the message arg of ${onGoalAchievedFn.name}.
   `,
     },
-    { role: "user", content: goal },
+  ],
+  runMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
+    {
+      role: "user",
+      content: goal,
+    },
   ],
   loopPreventionPrompt: `Assistant, you appear to be in a loop, try executing a different function.`,
 });

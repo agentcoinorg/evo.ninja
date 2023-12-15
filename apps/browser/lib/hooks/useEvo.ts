@@ -161,9 +161,10 @@ export function useEvo({
     }
   };
 
-  const start = (goal: string, goalId: string) => {
+  const start = async (goal: string, goalId: string) => {
     const evo = createEvoInstance(goalId);
     if (!evo) return;
+    await evo.init();
     setIterator(evo.run({ goal }));
     setIsRunning(true);
   };
