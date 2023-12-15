@@ -28,7 +28,7 @@ import Disclaimer from "./modals/Disclaimer";
 import useWindowSize from "@/lib/hooks/useWindowSize";
 import { useSession } from "next-auth/react";
 import { useUploadFiles } from "@/lib/hooks/useUploadFile";
-import AvatarBlockie from "./AvatarBlockie";
+import Avatar from "./Avatar";
 
 export interface ChatLog {
   title: string;
@@ -182,12 +182,7 @@ const Chat: React.FC<ChatProps> = ({
                               className="w-full rounded-full bg-cyan-600"
                             />
                           ) : !session?.user.email ? (
-                            <AvatarBlockie
-                              address={
-                                "0x7cB57B5A97eAbe94205C07890BE4c1aD31E486A8"
-                              }
-                              size={32}
-                            />
+                            <Avatar size={32} />
                           ) : (
                             <div className="w-full rounded-full bg-cyan-600" />
                           )}
