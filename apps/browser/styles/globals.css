@@ -16,6 +16,12 @@ code {
   @apply h-full;
 }
 
+@layer components {
+  .dropdown-menu-item {
+    @apply flex w-full cursor-pointer items-center space-x-2 rounded-md p-2 text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white active:bg-zinc-900 active:ring-2 active:ring-inset active:ring-cyan-500/20 active:text-cyan-500;
+  }
+}
+
 .checkbox {
   @apply rounded border-2 border-zinc-500 w-4 h-4 transition-colors duration-300 cursor-pointer hover:border-zinc-400;
 }
