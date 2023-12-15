@@ -4,13 +4,16 @@ import {
   SyncWorkspace,
 } from "@evo-ninja/agent-utils";
 import fs from "fs";
-import path from "path-browserify";
+import pathBrowserify from "path-browserify";
+import path from "path";
 import spawn from "spawn-command";
 
+// Path module will use node's path module on windows and browserify's path module on other platforms to ensure compatibility
+const pathModule = process.platform !== "win32" ? pathBrowserify : path;
 export class FileSystemWorkspace implements Workspace, SyncWorkspace {
   constructor(private _workspacePath: string) {
     // Fully resolve the workspace path
-    this._workspacePath = path.resolve(this._workspacePath);
+    this._workspacePath = pathModule.resolve(_workspacePath);
 
     // Initialize the directory
     if (!fs.existsSync(this._workspacePath)) {
@@ -19,9 +22,9 @@ export class FileSystemWorkspace implements Workspace, SyncWorkspace {
   }
 
   toWorkspacePath(subpath: string): string {
-    const absPath = path.resolve(
+    const absPath = pathModule.resolve(
       !subpath.startsWith(this._workspacePath)
-        ? path.join(this._workspacePath, subpath)
+        ? pathModule.join(this._workspacePath, subpath)
         : subpath
     );
 
