@@ -147,7 +147,7 @@ const Chat: React.FC<ChatProps> = ({
 
   return (
     <main
-      className={clsx("flex h-full w-full flex-col relative", {
+      className={clsx("relative flex h-full w-full flex-col", {
         "items-center justify-center": shouldShowExamplePrompts,
       })}
     >
@@ -171,7 +171,7 @@ const Chat: React.FC<ChatProps> = ({
                   className={`${msg.user} m-auto w-full max-w-[56rem] self-center`}
                 >
                   <div className="animate-slide-down group relative flex w-full items-start space-x-3 rounded-lg p-2 text-white opacity-0 transition-colors duration-300 ">
-                    <div className="!w-8 !min-w-[2rem]">
+                    <div className="!h-8 !w-8 !min-w-[2rem]">
                       {isEvo && logs[index - 1].user === "user" ? (
                         <Logo wordmark={false} className="w-full" chatAvatar />
                       ) : !isEvo ? (
@@ -179,7 +179,7 @@ const Chat: React.FC<ChatProps> = ({
                           {session?.user.image && session?.user.email ? (
                             <img
                               src={session?.user.image}
-                              className="w-full rounded-full bg-cyan-600"
+                              className="h-full w-full rounded-full bg-cyan-600"
                             />
                           ) : !session?.user.email ? (
                             <Avatar size={32} />
