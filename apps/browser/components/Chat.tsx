@@ -204,6 +204,14 @@ const Chat: React.FC<ChatProps> = ({
                           {msg.content?.toString() ?? ""}
                         </ReactMarkdown>
                       </div>
+                      {isEvo &&
+                        isRunning &&
+                        isSending &&
+                        index === logs.length - 1 && (
+                          <div className="flex items-center space-x-2 text-cyan-500">
+                            <LoadingCircle />
+                          </div>
+                        )}
                     </div>
                   </div>
                 </div>
