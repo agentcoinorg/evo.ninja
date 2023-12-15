@@ -91,8 +91,6 @@ export const useEvoService = (
         setError("Failed to start Evo.");
       },
     };
-    console.log("Connecting EvoService...");
-    console.log(config);
     evoService.connect(config, callbacks);
   }
 
@@ -119,7 +117,11 @@ export const useEvoService = (
   }
 
   const loadWorkspace = async (chatId: string) => {
-    return new SupabaseWorkspace(chatId, supabase.storage)
+    if (isAuthenticated) {
+      return new SupabaseWorkspace(chatId, supabase.storage)
+    } else {
+      return new InMemoryWorkspace()
+    }
   }
 
   const setWorkspace = async (workspace: Workspace) => {
