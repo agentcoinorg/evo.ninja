@@ -72,7 +72,7 @@ export function useAccountConfig({ onClose }: UseAccountArgs) {
         return;
       }
     } else {
-      setLocalApiKey(null);
+      setLocalApiKey(undefined);
     }
     setError(undefined)
     setAllowTelemetry(telemetry);

@@ -12,8 +12,6 @@ import { useChats } from "@/lib/queries/useChats";
 import { useRouter } from "next/navigation";
 import { v4 as uuid } from "uuid";
 import { useSession } from "next-auth/react";
-import UserWorkspace from "./UserWorkspace";
-import { useDownloadWorkspaceAsZip } from "@/lib/hooks/useDownloadWorkspaceAsZip";
 import { useAtom } from "jotai";
 import { userFilesAtom } from "@/lib/store";
 
