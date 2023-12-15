@@ -4,8 +4,8 @@ import React from "react";
 import { useAtom } from "jotai";
 
 import clsx from "clsx";
-import Sidebar from "@/components/Sidebar";
 import { showAccountModalAtom, sidebarAtom } from "@/lib/store";
+import Sidebar from "./Sidebar";
 
 export default function SidebarLayout({ children }: { children: React.ReactNode }) {
   const [, setAccountModalOpen] = useAtom(showAccountModalAtom);

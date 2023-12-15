@@ -1,4 +1,4 @@
-import { createSupabaseClient } from "@/lib/supabase/supabase"
+import { createSupabaseClient } from "../supabase/createSupabaseClient"
 import { Chat } from "@/lib/queries/useChats"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
