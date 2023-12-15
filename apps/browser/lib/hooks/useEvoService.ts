@@ -95,7 +95,13 @@ export const useEvoService = (
       return [];
     }
 
-    const { data: chats } = await fetchChats();
+    const { data: chats, error } = await fetchChats();
+
+    if (error) {
+      console.error(error);
+      setError("Failed to fetch user chats.");
+      return [];
+    }
 
     const currentChat = chats?.find(c => c.id === chatId);
 
