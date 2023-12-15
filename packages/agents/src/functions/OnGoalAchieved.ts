@@ -1,4 +1,4 @@
-import { AgentOutputType } from "@/agent-core"
+import { AgentOutputType, ChatMessageBuilder } from "@/agent-core"
 import { ScriptFunction } from "./utils";
 import { Agent } from "../agents/utils";
 
@@ -35,7 +35,10 @@ export class OnGoalAchievedFunction extends ScriptFunction<OnGoalAchievedFuncPar
           content: params.message,
         },
       ],
-      messages: [],
+      messages: [
+        ChatMessageBuilder.functionCall(this.name, rawParams),
+        ChatMessageBuilder.functionCallResult(this.name, result),
+      ],
     };
   }
 
@@ -53,7 +56,13 @@ export class OnGoalAchievedFunction extends ScriptFunction<OnGoalAchievedFuncPar
           content: params.message,
         },
       ],
-      messages: [],
+      messages: [
+        ChatMessageBuilder.functionCall(this.name, rawParams),
+        ChatMessageBuilder.functionCallResult(
+          this.name,
+          `Failed calling ${this.name}:\n${error}`
+        ),
+      ],
     };
   }
 }

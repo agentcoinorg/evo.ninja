@@ -1,5 +1,5 @@
-export class AuthProxy {
-  public static async checkGoal(
+export class GoalApi {
+  public static async create(
     chatId: string | undefined,
     message: string,
     subsidize: boolean,
@@ -8,7 +8,7 @@ export class AuthProxy {
     const getGoalRequest = await fetch(`/api/goal/create`, {
       method: "POST",
       body: JSON.stringify({
-        chatId,
+        chatId: chatId === "<anon>" ? undefined : chatId,
         message,
         subsidize
       }),

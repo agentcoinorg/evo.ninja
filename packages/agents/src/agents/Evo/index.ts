@@ -11,7 +11,8 @@ import {
   tokensToChars,
   AgentOutput,
   AgentContext,
-  Prompt
+  Prompt,
+  RunResult
 } from "@/agent-core";
 import { agentPrompts, prompts } from "./prompts";
 import { Agent, AgentConfig, GoalRunArgs } from "../../agents/utils";
@@ -27,7 +28,7 @@ export class Evo extends Agent<GoalRunArgs> {
   private initializedAgents: Set<string> = new Set();
   private goal: string = "";
 
-  constructor(context: AgentContext, timeout?: Timeout) {
+  constructor(context: AgentContext, timeout?: Timeout, private enableQuickTermination?: boolean) {
     super(new AgentConfig(agentPrompts, [], context.scripts, timeout), context);
     this._chunker = new MessageChunker({
       maxChunkSize: context.variables.saveThreshold,
@@ -46,16 +47,9 @@ export class Evo extends Agent<GoalRunArgs> {
     this.previousAgent = undefined;
     this.initializedAgents = new Set();
     this.goal = "";
-    this.context.chat = this.context.chat.cloneEmpty();
-    this._cChat = new ContextualizedChat(
-      this.context,
-      this.context.chat,
-      this._chunker,
-      this.context.variables
-    );
   }
 
-  protected async initializeChat(args: GoalRunArgs): Promise<void> {
+  public override async init(): Promise<void> {
     const { chat } = this.context;
 
     const initialMessages: ChatMessage[] = [
@@ -63,11 +57,14 @@ export class Evo extends Agent<GoalRunArgs> {
       { role: "user", content: prompts.exhaustAllApproaches },
       { role: "user", content: prompts.variablesExplainer },
       { role: "user", content: prompts.evoExplainer },
-      { role: "user", content: args.goal },
     ];
 
     await chat.persistent(initialMessages);
+  }
+
+  protected override async initRun(args: GoalRunArgs): Promise<void> {
     this.goal = args.goal;
+    await this.context.chat.persistent([{ role: "user", content: args.goal }]);
   }
 
   protected async beforeLlmResponse(): Promise<{
@@ -84,7 +81,11 @@ export class Evo extends Agent<GoalRunArgs> {
         ? await this.predictBestNextStep(
             messages,
             this.previousAgent,
-            this.previousPrediction ? "SUCCESS" : undefined
+            this.enableQuickTermination 
+              ? this.previousPrediction 
+                ? "SUCCESS" 
+                : undefined
+              : undefined
           )
         : this.previousPrediction;
 
@@ -160,7 +161,7 @@ export class Evo extends Agent<GoalRunArgs> {
   ): Promise<string> {
     const agentPersona = previousAgent
       ? // TODO: fix this when we refactor agent prompts
-        previousAgent.config.prompts.initialMessages({ goal: "" }).slice(0, -1)
+        previousAgent.config.prompts.initialMessages().slice(0, -1)
       : [{ role: "user", content: prompts.generalAgentPersona }];
 
     return await this.askLlm(

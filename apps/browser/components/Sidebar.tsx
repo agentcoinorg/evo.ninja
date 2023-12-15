@@ -12,6 +12,11 @@ import { useChats } from "@/lib/queries/useChats";
 import { useRouter } from "next/navigation";
 import { v4 as uuid } from "uuid";
 import { useSession } from "next-auth/react";
+import UserWorkspace from "./UserWorkspace";
+import { useDownloadWorkspaceAsZip } from "@/lib/hooks/useDownloadWorkspaceAsZip";
+import { useAtom } from "jotai";
+import { userFilesAtom } from "@/lib/store";
+
 
 export interface SidebarProps {
   userFiles: InMemoryFile[];
@@ -20,7 +25,6 @@ export interface SidebarProps {
 }
 
 const Sidebar = ({
-  userFiles,
   sidebarOpen,
   hoveringSidebarButton,
 }: SidebarProps) => {
@@ -29,6 +33,7 @@ const Sidebar = ({
   const { mutateAsync: createChat } = useCreateChat();
   const { data: chats, isLoading: isLoadingChats } = useChats();
   const { data: session, status } = useSession();
+  const [userFiles] = useAtom(userFilesAtom)
   const mappedChats = chats?.map((chat) => ({
     id: chat.id,
     name: chat.logs[0]?.title ?? "New session",
@@ -134,7 +139,7 @@ const Sidebar = ({
                   )}
                 </div>
               )}
-              <CurrentWorkspace userFiles={userFiles} />
+              <CurrentWorkspace />
             </div>
             <div className="relative flex w-full items-center justify-between space-x-2 p-4">
               {status !== "loading" ? (

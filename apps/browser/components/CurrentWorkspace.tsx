@@ -1,22 +1,22 @@
-import React, { PropsWithChildren } from "react";
+import React from "react";
 import { InMemoryFile } from "@nerfzael/memory-fs";
-import { downloadFilesAsZip } from "@/lib/sys/file/downloadFilesAsZip";
 import clsx from "clsx";
 
 import FileIcon from "./FileIcon";
 import { DownloadSimple, FilePlus } from "@phosphor-icons/react";
 import Button from "./Button";
 import { useUploadFiles } from "@/lib/hooks/useUploadFile";
-
-interface UploadProps {
-  userFiles: InMemoryFile[];
-}
+import { useAtom } from "jotai";
+import { userFilesAtom } from "@/lib/store";
+import { useDownloadWorkspaceAsZip } from "@/lib/hooks/useDownloadWorkspaceAsZip";
 
 // TODO(cbrzn): Update when supabase bucket workspace is attached
 const loadedWorkspace = true;
 
-function CurrentWorkspace({ userFiles }: PropsWithChildren<UploadProps>) {
+function CurrentWorkspace() {
   const { getRootProps, getInputProps, isDragAccept, open } = useUploadFiles();
+  const [userFiles] = useAtom(userFilesAtom);
+  const downloadFilesAsZip = useDownloadWorkspaceAsZip()
 
   function getFileType(path: InMemoryFile["path"]) {
     const index = path.lastIndexOf(".");
@@ -39,7 +39,7 @@ function CurrentWorkspace({ userFiles }: PropsWithChildren<UploadProps>) {
               <Button
                 variant="icon"
                 className="text-zinc-500 hover:text-cyan-500"
-                onClick={() => downloadFilesAsZip("workspace.zip", userFiles)}
+                onClick={downloadFilesAsZip}
               >
                 <DownloadSimple size={18} weight="bold" />
               </Button>

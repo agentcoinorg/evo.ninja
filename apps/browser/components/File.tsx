@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Modal from "react-modal";
 
-type FileType = {
+export type FileType = {
   path: string;
   content?: Uint8Array;
 };
