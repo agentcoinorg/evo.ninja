@@ -44,11 +44,6 @@ export class Agent<TRunArgs = GoalRunArgs> implements RunnableAgent<TRunArgs> {
   }
 
   public async *run(args: TRunArgs): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
-    await this.init();
-    return yield* this.runWithExistingContext(args);
-  }
-
-  public async *runWithExistingContext(args: TRunArgs): AsyncGenerator<AgentOutput, RunResult, string | undefined> {
     await this.initRun(args);
   
     const { chat } = this.context;
