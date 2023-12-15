@@ -1,16 +1,14 @@
-import { DirectoryEntry } from "@evo-ninja/agent-utils";
+import { DirectoryEntry, Workspace } from "@evo-ninja/agent-utils";
 import { StorageClient } from "@supabase/storage-js";
 import * as path from "path-browserify";
 
 const BUCKET_NAME = "workspaces";
 
-export class SupabaseWorkspace {
+export class SupabaseWorkspace implements Workspace {
   constructor(
     public readonly chatId: string,
     private readonly supabaseStorage: StorageClient
   ) {}
-
-  async init(): Promise<void> {}
 
   async writeFile(subpath: string, data: string): Promise<void> {
     const path = this.toWorkspacePath(subpath);
