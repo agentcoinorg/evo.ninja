@@ -7,6 +7,7 @@ import Modal from "./ModalBase";
 import Button from "../Button";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { useAccountConfig } from "@/lib/hooks/useAccountConfig";
+import AccountConfig from "./AccountConfig";
 
 interface AccountConfigProps {
   isOpen: boolean;
@@ -17,7 +18,8 @@ interface AccountConfigProps {
 export default function SettingsModal(props: AccountConfigProps) {
   const [capReached] = useAtom(capReachedAtom);
   const { isOpen, onClose } = props;
-  const { onSave, AccountConfig } = useAccountConfig({ onClose });
+  const { onSave, error, setApiKey, apiKey, setTelemetry, telemetry } =
+    useAccountConfig({ onClose });
 
   return (
     <>
@@ -40,7 +42,13 @@ export default function SettingsModal(props: AccountConfigProps) {
               </p>
             </div>
           )}
-          {AccountConfig}
+          <AccountConfig
+            apiKey={apiKey}
+            setApiKey={setApiKey}
+            setTelemetry={setTelemetry}
+            telemetry={telemetry}
+            error={error}
+          />
 
           <div className="flex justify-end border-t-2 border-zinc-700 pt-6">
             <Button onClick={onSave}>

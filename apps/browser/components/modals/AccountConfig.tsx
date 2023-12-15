@@ -9,13 +9,11 @@ interface AccountConfigProps {
   apiKey: string | null;
   setTelemetry: (telemetry: boolean) => void;
   telemetry: boolean;
-  isLoggedIn: boolean;
   error: string | undefined;
 }
 
 function AccountConfig(props: AccountConfigProps) {
-  const { isLoggedIn, apiKey, setApiKey, setTelemetry, telemetry, error } =
-    props;
+  const { apiKey, setApiKey, telemetry, setTelemetry } = props
   const apiKeyRef = useRef<HTMLInputElement | null>(null);
   const { data: session } = useSession();
 
@@ -63,7 +61,7 @@ function AccountConfig(props: AccountConfigProps) {
         )}
         {!apiKey && (
           <p>
-            {isLoggedIn
+            {!!session?.user.email
               ? "Provide your own OpenAI key to get started with Evo."
               : "Provide your own OpenAI key and use Evo as a guest. As a guest, your sessions will not be saved."}
           </p>
@@ -77,7 +75,7 @@ function AccountConfig(props: AccountConfigProps) {
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               setApiKey(e.target.value)
             }
-            error={error}
+            error={props.error}
             type="text"
           />
           {!apiKey && (

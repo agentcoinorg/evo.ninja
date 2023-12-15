@@ -8,8 +8,6 @@ import {
 
 import { LlmModel } from "@evo-ninja/agents";
 import OpenAi from "openai";
-import AccountConfig from "@/components/modals/AccountConfig";
-import { useSession } from "next-auth/react";
 
 const checkLlmModel = async (
   apiKey: string,
@@ -49,24 +47,17 @@ const validateOpenAiApiKey = async (
   }
 };
 
-export function useAccountConfig({ onClose }: { onClose: () => void }) {
+interface UseAccountArgs {
+  onClose: () => void;
+}
+
+export function useAccountConfig({ onClose }: UseAccountArgs) {
   const [localApiKey, setLocalApiKey] = useAtom(localOpenAiApiKeyAtom);
   const [allowTelemetry, setAllowTelemetry] = useAtom(allowTelemetryAtom);
   const [apiKey, setApiKey] = useState<string>(localApiKey || "");
   const [telemetry, setTelemetry] = useState(allowTelemetry);
-  const [error, setError] = useState<string | undefined>();
   const [capReached, setCapReached] = useAtom(capReachedAtom);
-  const { data: session } = useSession();
-
-  useEffect(() => {
-    if (!apiKey && localApiKey) {
-      setApiKey(localApiKey)
-    }
-  }, [localApiKey])
-
-  useEffect(() => {
-    setTelemetry(allowTelemetry)
-  }, [allowTelemetry])
+  const [error, setError] = useState<string>();
 
   const onSave = async () => {
     if (apiKey) {
@@ -83,20 +74,27 @@ export function useAccountConfig({ onClose }: { onClose: () => void }) {
     } else {
       setLocalApiKey(null);
     }
+    setError(undefined)
     setAllowTelemetry(telemetry);
     onClose();
   };
 
+  useEffect(() => {
+    if (!apiKey && localApiKey) {
+      setApiKey(localApiKey)
+    }
+  }, [localApiKey])
+
+  useEffect(() => {
+    setTelemetry(allowTelemetry)
+  }, [allowTelemetry])
+
   return {
     onSave,
-    AccountConfig: AccountConfig({
-      apiKey,
-      telemetry,
-      setTelemetry,
-      setApiKey,
-      error,
-      isLoggedIn: !!session?.user.email,
-    }),
-    firstTimeUser: !!session?.user.email && !localApiKey
+    error,
+    setApiKey,
+    apiKey,
+    setTelemetry,
+    telemetry,
   };
 }
