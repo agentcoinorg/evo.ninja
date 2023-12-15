@@ -1,16 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import Modal from "./ModalBase";
 import Button from "../Button";
-import { SignOut } from "@phosphor-icons/react";
 import Image from "next/image";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useAccountConfig } from "@/lib/hooks/useAccountConfig";
-import { useAtom } from "jotai";
-import { localOpenAiApiKeyAtom } from "@/lib/store";
+import AccountConfig from "./AccountConfig";
 
 interface AccountConfigProps {
-  apiKey: string | null;
-  allowTelemetry: boolean;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -18,16 +14,20 @@ interface AccountConfigProps {
 export default function SignInModal(props: AccountConfigProps) {
   const { data: session } = useSession();
   const { isOpen, onClose } = props;
-  const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom);
-  const { AccountConfig, onSave } = useAccountConfig({
-    onClose,
-  });
+  const { onSave, error, setApiKey, apiKey, setTelemetry, telemetry } =
+    useAccountConfig({ onClose });
 
   return (
     <>
       <Modal isOpen={isOpen} title="Sign In" onClose={onClose}>
         {session?.user?.email ? (
-          AccountConfig
+          <AccountConfig
+            setApiKey={setApiKey}
+            apiKey={apiKey}
+            telemetry={telemetry}
+            setTelemetry={setTelemetry}
+            error={error}
+          />
         ) : (
           <div className="space-y-6">
             <p>Sign in below to save your sessions</p>
@@ -59,14 +59,18 @@ export default function SignInModal(props: AccountConfigProps) {
                 <div>Sign in with Google</div>
               </Button>
             </div>
-            {!localOpenAiApiKey && (
-              <>
-                {AccountConfig}
-                <div className="flex justify-end border-t-2 border-zinc-700 pt-6">
-                  <Button onClick={onSave}>Save</Button>
-                </div>
-              </>
-            )}
+            <>
+              <AccountConfig
+                setApiKey={setApiKey}
+                apiKey={apiKey}
+                telemetry={telemetry}
+                setTelemetry={setTelemetry}
+                error={error}
+              />
+              <div className="flex justify-end border-t-2 border-zinc-700 pt-6">
+                <Button onClick={onSave}>Save</Button>
+              </div>
+            </>
           </div>
         )}
       </Modal>

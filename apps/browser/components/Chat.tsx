@@ -24,7 +24,7 @@ import Image from "next/image";
 import Logo from "./Logo";
 import Button from "./Button";
 import LoadingCircle from "./LoadingCircle";
-import Disclaimer from "./Disclaimer";
+import Disclaimer from "./modals/Disclaimer";
 import useWindowSize from "@/lib/hooks/useWindowSize";
 import { useSession } from "next-auth/react";
 import { useUploadFiles } from "@/lib/hooks/useUploadFile";
@@ -71,7 +71,6 @@ const Chat: React.FC<ChatProps> = ({
   const { open, getInputProps } = useUploadFiles();
   const { data: session } = useSession();
   const shouldShowExamplePrompts = logs.length === 0;
-  let shownEvo = 0;
 
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -166,9 +165,6 @@ const Chat: React.FC<ChatProps> = ({
           >
             {logs.map((msg, index) => {
               const isEvo = msg.user === "evo";
-              if (isEvo) {
-                shownEvo++;
-              }
               return (
                 <div
                   key={index}
@@ -176,9 +172,9 @@ const Chat: React.FC<ChatProps> = ({
                 >
                   <div className="animate-slide-down group relative flex w-full items-start space-x-3 rounded-lg p-2 text-white opacity-0 transition-colors duration-300 ">
                     <div className="!w-8 !min-w-[2rem]">
-                      {isEvo && shownEvo < 2 ? (
+                      {isEvo && logs[index - 1].user === "user" ? (
                         <Logo wordmark={false} className="w-full" chatAvatar />
-                      ) : msg.user !== "evo" ? (
+                      ) : !isEvo ? (
                         <>
                           {session?.user.image && session?.user.email ? (
                             <img
