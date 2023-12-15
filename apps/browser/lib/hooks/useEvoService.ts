@@ -20,6 +20,8 @@ import { useAtom } from "jotai";
 import { useState, useEffect, useRef } from "react";
 import { Workspace, InMemoryWorkspace } from "@evo-ninja/agent-utils";
 import { ChatLogType, ChatMessage } from "@evo-ninja/agents";
+import { SupabaseWorkspace } from "../supabase/SupabaseWorkspace";
+import { useSupabaseClient } from "../supabase/useSupabaseClient";
 
 export const useEvoService = (
   chatId: string | "<anon>" | undefined,
@@ -31,6 +33,8 @@ export const useEvoService = (
   isRunning: boolean;
   handleStart: (goal: string) => void;
 } => {
+  const supabase = useSupabaseClient();
+
   // Globals
   const [evoService] = useAtom(evoServiceAtom);
   const [allowTelemetry] = useAtom(allowTelemetryAtom);
@@ -113,8 +117,11 @@ export const useEvoService = (
   }
 
   const loadWorkspace = async (chatId: string) => {
-    // TODO: introduce workspace fetching from supabase storage buckets
-    return new InMemoryWorkspace()
+    if (isAuthenticated) {
+      return new SupabaseWorkspace(chatId, supabase.storage)
+    } else {
+      return new InMemoryWorkspace()
+    }
   }
 
   const setWorkspace = async (workspace: Workspace) => {

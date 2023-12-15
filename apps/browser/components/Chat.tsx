@@ -1,21 +1,24 @@
 import {
-  sidebarAtom,
   showDisclaimerAtom,
   errorAtom,
   localOpenAiApiKeyAtom,
+  chatIdAtom,
   showAccountModalAtom,
-  chatIdAtom
+  welcomeModalAtom,
 } from "@/lib/store";
 import { useEvoService } from "@/lib/hooks/useEvoService";
-import { exportChatHistory } from "@/lib/exportChatHistory";
-import SidebarIcon from "@/components/SidebarIcon";
+import { UploadSimple } from "@phosphor-icons/react";
 import ExamplePrompts from "@/components/ExamplePrompts";
 import ChatLogs from "@/components/ChatLogs";
 import Disclaimer from "@/components/modals/Disclaimer";
-import React, { useState, ChangeEvent } from "react";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload, faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
+import React, { useState, ChangeEvent, memo } from "react";
 import { useAtom } from "jotai";
+import clsx from "clsx";
+import Logo from "./Logo";
+import Button from "./Button";
+import ChatInputButton from "./ChatInputButton";
+import TextField from "./TextField";
+import { useUploadFiles } from "@/lib/hooks/useUploadFile";
 
 export interface ChatLog {
   title: string;
@@ -29,30 +32,26 @@ export interface ChatProps {
   onCreateChat: (chatId: string) => void;
 }
 
-const Chat: React.FC<ChatProps> =({
+const Chat: React.FC<ChatProps> = ({
   isAuthenticated,
-  onCreateChat
+  onCreateChat,
 }: ChatProps) => {
   const [chatId] = useAtom(chatIdAtom);
-  const [sidebarOpen, setSidebarOpen] = useAtom(sidebarAtom);
-  const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom)
+  const { getInputProps, open } = useUploadFiles();
+  const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom);
   const [, setError] = useAtom(errorAtom);
   const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom);
   const [, setAccountModalOpen] = useAtom(showAccountModalAtom);
+  const [welcomeModalSeen] = useAtom(welcomeModalAtom);
 
   const [message, setMessage] = useState<string>("");
   const [goalSent, setGoalSent] = useState<boolean>(false);
-
-  const {
-    logs,
-    isStarting,
-    isRunning,
-    handleStart
-  } = useEvoService(
+  const { logs, isStarting, isRunning, handleStart } = useEvoService(
     chatId,
     isAuthenticated,
     onCreateChat
   );
+  const shouldShowExamplePrompts = !logs || logs.length === 0;
 
   const handleGoalSubmit = (goal: string) => {
     if (!goal) {
@@ -75,7 +74,7 @@ const Chat: React.FC<ChatProps> =({
     handleStart(goal);
     setMessage("");
     setGoalSent(true);
-  }
+  };
 
   const handleMessageChange = (event: ChangeEvent<HTMLInputElement>) => {
     setMessage(event.target.value);
@@ -83,56 +82,74 @@ const Chat: React.FC<ChatProps> =({
 
   const handleKeyPress = async (event: React.KeyboardEvent) => {
     if (event.key === "Enter" && !isStarting && !isRunning) {
-      await handleGoalSubmit(message)
+      await handleGoalSubmit(message);
     }
   };
 
   return (
-    <div className="flex h-full flex-col bg-[#0A0A0A] text-white">
-      <div className="flex justify-between items-center p-4 border-b-2 border-neutral-700">
-        <div className="h-14 p-4 text-lg text-white cursor-pointer hover:opacity-100 opacity-80 transition-all" onClick={() => setSidebarOpen(!sidebarOpen)}>
-          { sidebarOpen ? <></>: <SidebarIcon /> }
-        </div>
-        {logs && <FontAwesomeIcon className="cursor-pointer" icon={faDownload} onClick={() => exportChatHistory(logs)} />}
-      </div>
+    <main
+      className={clsx("relative flex h-full w-full flex-col", {
+        "items-center justify-center": shouldShowExamplePrompts,
+      })}
+    >
+      {shouldShowExamplePrompts && !goalSent ? (
+        <Logo wordmark={false} className="mb-16 w-16" />
+      ) : (
+        <ChatLogs isRunning={isRunning} logs={logs ?? []} />
+      )}
 
-      <ChatLogs logs={logs ?? []} />
-
-      {(!logs || logs.length === 0) && !goalSent &&
-        <ExamplePrompts onClick={async (prompt: string) => await handleGoalSubmit(prompt)} />
-      }
-      <div className="flex items-center justify-center gap-4 p-4 mb-4 self-center w-[100%] max-w-[56rem]">
-        <Disclaimer isOpen={showDisclaimer} onClose={() => setShowDisclaimer(false)} />
-        <input
-          type="text"
-          value={message}
-          onChange={handleMessageChange}
-          onKeyPress={handleKeyPress}
-          placeholder="Enter your main goal here..."
-          className="mr-2.5 flex-1 rounded border border-neutral-400 bg-neutral-900 p-2.5 text-neutral-50 outline-none transition-all"
-          disabled={isStarting || isRunning || showDisclaimer}
-        />
-        {isRunning ? (
-          <div className="h-9 w-9 animate-spin rounded-full border-4 border-black/10 border-l-orange-600" />
-        ) : (
-          <button
-            className="inline-block h-12 cursor-pointer rounded-xl border-none bg-orange-600 px-5 py-2.5 text-center text-neutral-950 shadow-md outline-none transition-all hover:bg-orange-500"
-            onClick={() => handleGoalSubmit(message)}
-            disabled={isStarting || isRunning}>
-            Start
-          </button>
+      <div
+        className={clsx(
+          "mt-4 flex w-full space-y-4",
+          shouldShowExamplePrompts
+            ? "flex-col-reverse space-y-reverse px-4 md:px-8 lg:px-4"
+            : "mx-auto max-w-[56rem] flex-col px-4"
         )}
-      </div>
-      <a
-        className="cursor-pointer fixed bottom-0 right-0 mx-4 my-2"
-        href="https://discord.gg/r3rwh69cCa"
-        target="_blank"
-        rel="noopener noreferrer"
       >
-        <FontAwesomeIcon icon={faQuestionCircle} title="Questions?" />
-      </a>
-    </div>
+        {shouldShowExamplePrompts && !goalSent && (
+          <ExamplePrompts
+            onClick={async (prompt: string) => await handleGoalSubmit(prompt)}
+          />
+        )}
+        <div
+          className={clsx(
+            "mb-4 flex w-full items-center justify-center gap-4 self-center",
+            shouldShowExamplePrompts ? "max-w-[42rem] " : "max-w-[56rem]"
+          )}
+        >
+          <TextField
+            type="text"
+            value={message}
+            onChange={handleMessageChange}
+            onKeyDown={handleKeyPress}
+            placeholder="Ask Evo anything..."
+            className="!rounded-lg !p-4 !pl-12"
+            leftAdornment={
+              <>
+                <Button variant="icon" className="!text-white" onClick={open}>
+                  <UploadSimple size={20} />
+                </Button>
+                <input {...getInputProps()} />
+              </>
+            }
+            rightAdornment={
+              <ChatInputButton
+                running={isRunning}
+                message={message}
+                handleSend={async () => await handleGoalSubmit(message)}
+              />
+            }
+            rightAdornmentClassnames="!right-3"
+            disabled={isRunning || showDisclaimer} // Disable input while sending or if disclaimer is shown
+          />
+        </div>
+      </div>
+      <Disclaimer
+        isOpen={showDisclaimer && welcomeModalSeen}
+        onClose={() => setShowDisclaimer(false)}
+      />
+    </main>
   );
 };
 
-export default Chat;
+export default memo(Chat);

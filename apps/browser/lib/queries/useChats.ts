@@ -3,7 +3,7 @@ import { useSession } from "next-auth/react"
 import { ChatMessage } from "@evo-ninja/agents"
 import { ChatLog } from "@/components/Chat"
 import { Json } from "../supabase/dbTypes"
-import { createSupabaseClient } from "../supabase/supabase"
+import { createSupabaseClient } from "../supabase/createSupabaseClient"
 
 export interface Chat {
   id: string;

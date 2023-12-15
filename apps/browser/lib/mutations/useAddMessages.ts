@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { ChatLogType, ChatMessage } from "@evo-ninja/agents"
 import { Row } from "../supabase/types"
-import { createSupabaseClient } from "../supabase/supabase"
+import { createSupabaseClient } from "../supabase/createSupabaseClient"
 
 const mapChatMessageToMessageDTO = (
   chatId: string,

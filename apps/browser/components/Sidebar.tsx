@@ -1,109 +1,216 @@
-import React from "react";
-import { useAtom } from "jotai";
+import React, { memo, useEffect, useRef, useState } from "react";
+import Logo from "./Logo";
+import { InMemoryFile } from "@nerfzael/memory-fs";
+import clsx from "clsx";
+import DropdownAccount from "./DropdownAccount";
+import CurrentWorkspace from "./CurrentWorkspace";
+import { DiscordLogo, GithubLogo, NotePencil } from "@phosphor-icons/react";
+import Avatar from "./Avatar";
+import Button from "./Button";
+import { useCreateChat } from "@/lib/mutations/useCreateChat";
+import { useChats } from "@/lib/queries/useChats";
+import { useRouter } from "next/navigation";
+import { v4 as uuid } from "uuid";
 import { useSession } from "next-auth/react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faDiscord,
-  faGithub,
-} from "@fortawesome/free-brands-svg-icons";
-import { faUser, faDownload } from "@fortawesome/free-solid-svg-icons";
-import { faFolder } from "@fortawesome/free-solid-svg-icons";
-import Upload from "./Upload";
-import File from "./File";
-import CloseIcon from "./CloseIcon";
-import SidebarIcon from "./SidebarIcon";
-import { uploadedFilesAtom, userFilesAtom } from "@/lib/store";
-import { useDownloadWorkspaceAsZip } from "@/lib/hooks/useDownloadWorkspaceAsZip";
-import ChatList from "./ChatList";
+import { useAtom } from "jotai";
+import { userFilesAtom } from "@/lib/store";
+
 
 export interface SidebarProps {
-  onSettingsClick: () => void;
-  onSidebarToggleClick: () => void;
+  userFiles: InMemoryFile[];
+  hoveringSidebarButton: boolean;
+  sidebarOpen: boolean;
 }
 
 const Sidebar = ({
-  onSettingsClick,
-  onSidebarToggleClick,
+  sidebarOpen,
+  hoveringSidebarButton,
 }: SidebarProps) => {
-  const [, setUploadedFiles] = useAtom(uploadedFilesAtom)
+  const router = useRouter();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const { mutateAsync: createChat } = useCreateChat();
+  const { data: chats, isLoading: isLoadingChats } = useChats();
+  const { data: session, status } = useSession();
   const [userFiles] = useAtom(userFilesAtom)
-  const { data: session } = useSession()
-  const downloadUserWorkspace = useDownloadWorkspaceAsZip()
+  const mappedChats = chats?.map((chat) => ({
+    id: chat.id,
+    name: chat.logs[0]?.title ?? "New session",
+  }));
+  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+
+  const createNewChat = async () => {
+    const id = uuid();
+    const createdChat = await createChat(id);
+    router.push(`/chat/${createdChat.id}`);
+  };
+
+  const handleChatClick = (id: string) => {
+    router.push(`/chat/${id}`);
+  };
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    }
+
+    // Bind the event listener
+    if (dropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    // Unbind the event listener on clean up
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownOpen]);
 
   return (
-    <div className="box-border flex h-full w-full flex-col items-center overflow-auto bg-opacity-black p-4 justify-between">
-      <div className="flex h-auto w-full flex-col items-center gap-4">
-        <div className="flex w-full justify-end lg:hidden">
-          <div
-            className="flex cursor-pointer gap-2"
-            onClick={onSidebarToggleClick}
-          >
-            <span>Close menu</span>
-            <CloseIcon></CloseIcon>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 w-full">
-          <div className="flex flex-1 justify-center h-14 items-center rounded border border-neutral-500 p-3 text-lg text-white gap-4 cursor-pointer hover:opacity-100 opacity-80 transition-all" onClick={onSettingsClick}>
-            <FontAwesomeIcon icon={faUser} />
-            Account
-          </div>
-          <div className="rounded border border-neutral-500 h-14 p-4 text-lg text-white gap-4 cursor-pointer hover:opacity-100 opacity-80 transition-all" onClick={onSidebarToggleClick}>
-            <SidebarIcon />
-          </div>
-        </div>
-
-        <Upload
-          className="flex h-auto max-h-96 w-full flex-col justify-between overflow-y-auto rounded border border-neutral-500 bg-neutral-900 p-4 text-neutral-50"
-          onUploadFiles={setUploadedFiles}
+    <>
+      <div
+        className={clsx(
+          "flex h-full flex-col justify-between transition-opacity",
+          {
+            "opacity-50 delay-0 duration-300":
+              sidebarOpen && hoveringSidebarButton,
+            "pointer-events-none opacity-0 delay-0 duration-0": !sidebarOpen,
+          }
+        )}
+      >
+        <div
+          className="animate-fade-in flex h-full flex-col justify-between opacity-0"
+          style={{ animationDelay: sidebarOpen ? "150ms" : "0ms" }}
         >
-          <h3 className="text-lg font-semibold">
-            <FontAwesomeIcon icon={faFolder} style={{ marginRight: "10px" }} />{" "}
-            WORKSPACE
-          </h3>
-          <div>
-            {userFiles.map((file, i) => (
-              <File key={i} file={file}  />
-            ))}
-          </div>
-          {userFiles.length !== 0 && (
-            <button
-              className="my-4 inline-block h-9 cursor-pointer rounded-xl border-none bg-orange-600 px-6 py-2.5 text-center text-neutral-900 shadow-md outline-none transition-all hover:bg-orange-500"
-              title="Download"
-              onClick={downloadUserWorkspace}
-            >
-              <FontAwesomeIcon icon={faDownload} /> Download
-            </button>
-          )}
-        </Upload>
-
-      { session?.user.email &&  <ChatList /> }
-      </div>
-        <div className="box-border flex justify-center w-10/12 flex-col gap-2">
-          <div className="flex justify-center">
-            <img className="max-w-[16rem]" src="/avatar-name.png" alt="Main Logo" />
-          </div>
-          <div className="flex justify-center text-lg text-white gap-4">
-            <a
-              className="cursor-pointer opacity-80 transition-all hover:opacity-100"
-              href="https://discord.gg/r3rwh69cCa"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FontAwesomeIcon icon={faDiscord} title="Support & Feedback" />
-            </a>
-            <div className="pointer-events-none">|</div>
-            <a
-              className="cursor-pointer opacity-80 transition-all hover:opacity-100"
-              href="https://github.com/polywrap/evo.ninja"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FontAwesomeIcon icon={faGithub} title="Star us on GitHub" />
-            </a>
+          <div className="flex h-full flex-col justify-between">
+            <div className={clsx({ "space-y-6": session?.user.email })}>
+              <header onClick={() => router.replace("/")}>
+                <Logo className="w-[162px] cursor-pointer p-4 transition-opacity hover:opacity-50" />
+              </header>
+              {session?.user.email && (
+                <div className="space-y-1 px-2">
+                  <div className="flex w-full items-center justify-between space-x-1 px-3">
+                    <div className="text-xs uppercase tracking-widest text-zinc-500">
+                      Recent Chats
+                    </div>
+                    {!isLoadingChats && (
+                      <Button variant="icon" onClick={createNewChat}>
+                        <NotePencil size={18} weight="bold" />
+                      </Button>
+                    )}
+                  </div>
+                  {!isLoadingChats ? (
+                    <div className="h-full max-h-[30vh] space-y-0.5 overflow-y-auto">
+                      {chats && chats.length > 0 ? (
+                        <div className="px-2">
+                          {mappedChats?.map((chat, i) => (
+                            <div
+                              key={chat.id}
+                              data-id={chat.id}
+                              className="w-full cursor-pointer overflow-x-hidden text-ellipsis whitespace-nowrap rounded p-1 text-sm text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white"
+                              onClick={() => handleChatClick(chat.id)}
+                            >
+                              {chat.name}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div
+                          onClick={createNewChat}
+                          className=" mt-1 flex cursor-pointer flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed border-zinc-500 p-7 text-center transition-colors duration-300 hover:border-cyan-500 hover:bg-zinc-950 hover:text-cyan-500"
+                        >
+                          <NotePencil
+                            size={24}
+                            className="text-[currentColor]"
+                          />
+                          <p className="leading-regular text-xs text-zinc-500">
+                            You currently have no chats.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="mx-2 h-[20vh] w-[calc(100%-1rem)] animate-pulse rounded-lg bg-zinc-700" />
+                  )}
+                </div>
+              )}
+              <CurrentWorkspace />
+            </div>
+            <div className="relative flex w-full items-center justify-between space-x-2 p-4">
+              {status !== "loading" ? (
+                <>
+                  <DropdownAccount
+                    ref={dropdownRef}
+                    dropdownOpen={dropdownOpen}
+                  />
+                  <div
+                    className={clsx(
+                      "inline-flex w-full -translate-x-2 transform cursor-pointer items-center space-x-2 rounded-lg p-2 transition-colors hover:bg-zinc-800",
+                      { "bg-zinc-800": dropdownOpen }
+                    )}
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                  >
+                    {session?.user.email ? (
+                      <>
+                        <div className="flex items-center space-x-2">
+                          {session.user.image ? (
+                            <img
+                              src={session.user.image}
+                              className="h-8 w-8 min-w-[2rem] rounded-full bg-cyan-600"
+                            />
+                          ) : (
+                            <div className="h-8 w-8 min-w-[2rem] rounded-full bg-cyan-600" />
+                          )}
+                          <div className="w-full max-w-[124px] space-y-1 overflow-x-hidden">
+                            <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold leading-none">
+                              {session.user.name}
+                            </div>
+                            <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap text-[11px] leading-none text-gray-400">
+                              {session.user.email}
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <Avatar size={32} />
+                        <div className="text-white">Guest</div>
+                      </>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="h-12 w-full animate-pulse rounded-lg bg-zinc-700" />
+              )}
+              <div className="flex items-center space-x-1 text-lg text-white">
+                <a
+                  href="https://discord.gg/r3rwh69cCa"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button variant="icon">
+                    <DiscordLogo size={20} />
+                  </Button>
+                </a>
+                <a
+                  href="https://github.com/polywrap/evo.ninja"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button variant="icon">
+                    <GithubLogo size={20} />
+                  </Button>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
-    </div>
+      </div>
+    </>
   );
 };
 
-export default Sidebar;
+export default memo(Sidebar);

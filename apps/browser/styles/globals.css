@@ -5,7 +5,7 @@
 body,
 #__next,
 html {
-  @apply h-full font-sans;
+  @apply h-full font-sans font-light bg-zinc-900 text-white tracking-wide;
 }
 
 code {
@@ -16,18 +16,43 @@ code {
   @apply h-full;
 }
 
+@layer components {
+  .dropdown-menu-item {
+    @apply flex w-full cursor-pointer items-center space-x-2 rounded-md p-2 text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white active:bg-zinc-900 active:ring-2 active:ring-inset active:ring-cyan-500/20 active:text-cyan-500;
+  }
+}
+
+.checkbox {
+  @apply rounded border-2 border-zinc-500 w-4 h-4 transition-colors duration-300 cursor-pointer hover:border-zinc-400;
+}
+
+.checkbox.checked {
+  @apply border-cyan-500 bg-cyan-500/50 text-white hover:border-cyan-400;
+}
+
+.checkmark {
+  @apply w-full h-full bg-no-repeat;
+  background-image: url('../public/checkmark.svg');
+  background-size: 70%;
+  background-position: 56% 58%;
+}
+
 ::-webkit-scrollbar {
-  @apply h-2 w-2 rounded;
+  @apply w-1 h-1 rounded;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-neutral-600;
+  @apply bg-transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply rounded bg-orange-600;
+  @apply bg-zinc-700 rounded;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply rounded bg-orange-500;
+  @apply bg-zinc-400 rounded;
+}
+
+::-webkit-scrollbar-corner {
+  @apply bg-transparent;
 }
