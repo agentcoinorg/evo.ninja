@@ -19,4 +19,4 @@ export const uploadedFilesAtom = atom<InMemoryFile[]>([]);
 export const userWorkspaceAtom = atom<Workspace>(new InMemoryWorkspace());
 export const sidebarAtom = atom<boolean>(true)
 export const chatIdAtom = atom<string | "<anon>" | undefined>("<anon>")
-export const evoServiceAtom = atom<EvoService>(new EvoService());
+export const evoServiceAtom = atom<EvoService>(new EvoService("<anon>"));
