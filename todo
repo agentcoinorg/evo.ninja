@@ -1,8 +1,5 @@
 TODO:
 - improve usage of "<anon>"
 
-NITs:
-- improve loading of chatid routes
-
 Test:
 - handle abort mid-goal execution

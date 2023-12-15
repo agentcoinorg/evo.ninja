@@ -46,13 +46,20 @@ function Dojo({ params }: { params: { id?: string } }) {
   }, [sessionStatus, params.id])
 
   return (
-    <Chat
-      isAuthenticated={sessionStatus === "authenticated"}
-      onCreateChat={(chatId: string) => {
-        window.history.pushState(null, "Chat", `/chat/${chatId}`);
-        setChatId(chatId);
-      }}
-    />
+    <>
+      {sessionStatus !== "loading" ?
+        <Chat
+          isAuthenticated={sessionStatus === "authenticated"}
+          onCreateChat={(chatId: string) => {
+            window.history.pushState(null, "Chat", `/chat/${chatId}`);
+            setChatId(chatId);
+          }}
+        /> :
+        <div className="flex items-center justify-center h-full w-full">
+          <div className="h-9 w-9 animate-spin rounded-full border-4 border-black/10 border-l-orange-600" />
+        </div>
+      }
+    </>
   );
 }
 
