@@ -5,7 +5,7 @@ import clsx from "clsx";
 import DropdownAccount from "./DropdownAccount";
 import CurrentWorkspace from "./CurrentWorkspace";
 import { DiscordLogo, GithubLogo, NotePencil } from "@phosphor-icons/react";
-import AvatarBlockie from "./AvatarBlockie";
+import Avatar from "./Avatar";
 import Button from "./Button";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";
 import { useChats } from "@/lib/queries/useChats";
@@ -79,13 +79,13 @@ const Sidebar = ({
         )}
       >
         <div
-          className="flex h-full animate-fade-in flex-col justify-between opacity-0"
+          className="animate-fade-in flex h-full flex-col justify-between opacity-0"
           style={{ animationDelay: sidebarOpen ? "150ms" : "0ms" }}
         >
           <div className="flex h-full flex-col justify-between">
             <div className={clsx({ "space-y-6": session?.user.email })}>
               <header onClick={() => router.replace("/")}>
-                <Logo className="w-[162px] cursor-pointer p-4 transition-opacity hover:opacity-50"/>
+                <Logo className="w-[162px] cursor-pointer p-4 transition-opacity hover:opacity-50" />
               </header>
               {session?.user.email && (
                 <div className="space-y-1 px-2">
@@ -173,10 +173,7 @@ const Sidebar = ({
                       </>
                     ) : (
                       <>
-                        <AvatarBlockie
-                          size={32}
-                          address={"0x7cB57B5A97eAbe94205C07890BE4c1aD31E486A8"}
-                        />
+                        <Avatar size={32} />
                         <div className="text-white">Guest</div>
                       </>
                     )}

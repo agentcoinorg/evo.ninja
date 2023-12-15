@@ -1,21 +1,16 @@
 import clsx from "clsx";
-import makeBlockie from "ethereum-blockies-base64";
 import Image from "next/image";
 
-interface AvatarBlockieProps {
+interface AvatarProps {
   address: string;
   size?: number;
   className?: string;
 }
 
-const AvatarBlockie = ({
-  address,
-  size = 20,
-  className,
-}: AvatarBlockieProps) => {
+const Avatar = ({ size = 20, className }: AvatarProps) => {
   return (
     <Image
-      src={makeBlockie(address)}
+      src={"./guest.svg"}
       height={size}
       width={size}
       alt="User Avatar"
@@ -25,4 +20,4 @@ const AvatarBlockie = ({
   );
 };
 
-export default AvatarBlockie;
+export default Avatar;
