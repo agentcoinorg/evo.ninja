@@ -14,6 +14,9 @@ click = "^8.1.7"
 markdownify = "^0.11.6"
 pandas = "^2.1.4"
 pytest = "^7.4.3"
+openai = "^1.4.0"
+chromadb = "^0.4.20"
+scrapingbee = "^2.0.1"
 
 
 [build-system]

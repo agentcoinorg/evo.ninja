@@ -4,29 +4,29 @@ import os
 import requests
 from markdownify import markdownify
 from bs4 import BeautifulSoup
+from scrapingbee import ScrapingBeeClient
+from evo_researcher.functions.summarize import summarize
 
-def web_scrape(url: str, content_length_threshold: int = 10000):
-    headers = {'Cache-Control': 'no-cache', 'Content-Type': 'application/json'}
-    data_json = json.dumps({"url": url})
-    api_key = os.getenv("BROWSERLESS_API_KEY")
+def web_scrape(url: str, objective: str, content_length_threshold: int = 10000):
+    api_key = os.getenv("SCRAPINGBEE_API_KEY")
+    client = ScrapingBeeClient(api_key=api_key)
 
     try:
-        response = requests.post(f"https://chrome.browserless.io/content?token={api_key}", headers=headers,
-                                 data=data_json)
-        response.raise_for_status()
+        response = client.get(url=url)
 
         if 'text/html' in response.headers.get('Content-Type', ''):
             soup = BeautifulSoup(response.content, "html.parser")
             text = soup.get_text()
+            markdown_text = markdownify(text)
 
-            if len(text) > content_length_threshold:
-                return markdownify(text)  # Ensure summary function is defined/imported
+            if len(markdown_text) > content_length_threshold:
+                return summarize(objective=objective, content=markdown_text)
             else:
-                return text
+                return markdown_text
         else:
             logging.warning("Non-HTML content received")
             return ""
 
     except requests.RequestException as e:
         logging.error(f"HTTP request failed: {e}")
-        raise
+        return ""
