@@ -136,7 +136,7 @@ const Chat: React.FC<ChatProps> = ({
               <ChatInputButton
                 running={isRunning}
                 message={message}
-                handleSend={async () => await handleGoalSubmit(message)}
+                handleSend={() => handleGoalSubmit(message)}
               />
             }
             rightAdornmentClassnames="!right-3"

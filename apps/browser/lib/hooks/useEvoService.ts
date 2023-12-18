@@ -5,23 +5,24 @@ import {
   localOpenAiApiKeyAtom,
   showAccountModalAtom,
   userWorkspaceAtom,
-  errorAtom
+  errorAtom,
 } from "@/lib/store";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";
 import { useAddChatLog } from "@/lib/mutations/useAddChatLog";
 import { useAddMessages } from "@/lib/mutations/useAddMessages";
 import { useChats } from "@/lib/queries/useChats";
 import { useAddVariable } from "@/lib/mutations/useAddVariable";
-import { useUpdateUserFiles } from "@/lib/hooks/useUpdateUserFiles";
 import { ChatLog } from "@/components/Chat";
 import { EvoThreadCallbacks, EvoThreadConfig } from "@/lib/services/evo/EvoThread";
 import { v4 as uuid } from "uuid";
 import { useAtom } from "jotai";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Workspace, InMemoryWorkspace } from "@evo-ninja/agent-utils";
 import { ChatLogType, ChatMessage } from "@evo-ninja/agents";
 import { SupabaseWorkspace } from "../supabase/SupabaseWorkspace";
 import { useSupabaseClient } from "../supabase/useSupabaseClient";
+import { useWatchForFileUploads } from "./useWatchForFileUploads";
+import { useUpdateUserFiles } from "./useUpdateUserFiles";
 
 export const useEvoService = (
   chatId: string | "<anon>" | undefined,
@@ -60,6 +61,19 @@ export const useEvoService = (
 
   // Helpers
   const updateUserFiles = useUpdateUserFiles();
+  useWatchForFileUploads(chatId, createChatIdIfNeccessary, loadWorkspace);
+
+  async function createChatIdIfNeccessary(chatId: string | undefined): Promise<string | undefined> {
+    if (isAuthenticated) {
+      if (!chatId) {
+        chatId = uuid();
+        await createChat(chatId);
+        onCreateChat(chatId);
+        return chatId;
+      }
+    }
+    return chatId;
+  }
 
   const setChatLog = (chatLog: ChatLog[]) => {
     // If the first message is the user's goal, append
@@ -106,7 +120,7 @@ export const useEvoService = (
       },
     };
     await evoService.connect(config, callbacks);
-  }
+  };
 
   const loadChatLog = async (chatId: string) => {
     if (chatId === "<anon>") {
@@ -128,27 +142,27 @@ export const useEvoService = (
     }
 
     return currentChat.logs;
-  }
+  };
 
-  const loadWorkspace = async (chatId: string) => {
+  function loadWorkspace(chatId: string): Workspace {
     if (isAuthenticated) {
-      return new SupabaseWorkspace(chatId, supabase.storage)
+      return new SupabaseWorkspace(chatId, supabase.storage);
     } else {
-      return new InMemoryWorkspace()
+      return new InMemoryWorkspace();
     }
-  }
+  };
 
   const setWorkspace = async (workspace: Workspace) => {
     setUserWorkspace(workspace);
     await updateUserFiles(workspace);
-  }
+  };
 
   const handleChatLogAdded = async (log: ChatLog) => {
     if (!isAuthenticated || !chatId) {
       return;
     }
     await addChatLog({ chatId, log });
-  }
+  };
 
   const handleMessagesAdded = async (type: ChatLogType, messages: ChatMessage[]) => {
     if (!isAuthenticated || !chatId) {
@@ -158,7 +172,7 @@ export const useEvoService = (
       chatId,
       messages,
       type
-    })
+    });
   };
 
   const handleVariableSet = async (key: string, value: string) => {
@@ -170,7 +184,7 @@ export const useEvoService = (
       key,
       value
     });
-  }
+  };
 
   const handleStart = async (goal: string) => {
     if (isStarting) {
@@ -179,15 +193,7 @@ export const useEvoService = (
 
     setIsStarting(true);
 
-    if (isAuthenticated) {
-      // Create a ChatID
-      if (!chatId) {
-        chatId = uuid();
-        await createChat(chatId);
-        await handleChatIdChange(chatId);
-        onCreateChat(chatId);
-      }
-    }
+    await createChatIdIfNeccessary(chatId);
 
     setChatLog([{
       user: "user",
@@ -201,7 +207,7 @@ export const useEvoService = (
       openAiApiKey
     });
     setIsStarting(false);
-  }
+  };
 
   useEffect(() => {
     handleChatIdChange(chatId);
@@ -213,4 +219,4 @@ export const useEvoService = (
     isRunning,
     handleStart
   };
-}
+};

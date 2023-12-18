@@ -12,7 +12,7 @@ import {
 export interface EvoThreadConfig {
   chatId: string;
   loadChatLog: (chatId: string) => Promise<ChatLog[]>;
-  loadWorkspace: (chatId: string) => Promise<Workspace>;
+  loadWorkspace: (chatId: string) => Workspace;
   onChatLogAdded: (chatLog: ChatLog) => Promise<void>;
   onMessagesAdded: (type: ChatLogType, messages: ChatMessage[]) => Promise<void>;
   onVariableSet: (key: string, value: string) => Promise<void>;
@@ -159,22 +159,13 @@ export class EvoThread {
     const chatId = this._config.chatId;
     this._state.isLoading = true;
 
-    const results = await Promise.all<[
-      Promise<ChatLog[]>,
-      Promise<Workspace>
-    ]>([
-      this._config.loadChatLog(chatId).catch((reason) => {
-        this._callbacks?.onError(reason.toString());
-        return [];
-      }),
-      this._config.loadWorkspace(chatId).catch((reason) => {
-        this._callbacks?.onError(reason.toString());
-        return new InMemoryWorkspace();
-      })
-    ]);
+    const logs = await this._config.loadChatLog(chatId).catch((reason) => {
+      this._callbacks?.onError(reason.toString());
+      return [];
+    });
 
-    this._state.logs = results[0];
-    this._state.workspace = results[1];
+    this._state.logs = logs;
+    this._state.workspace = this._config.loadWorkspace(chatId);
     this._state.isLoading = false;
   }
 
