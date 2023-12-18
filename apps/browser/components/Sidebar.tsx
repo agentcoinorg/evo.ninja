@@ -31,11 +31,10 @@ const Sidebar = ({
   const { mutateAsync: createChat } = useCreateChat();
   const { data: chats, isLoading: isLoadingChats } = useChats();
   const { data: session, status } = useSession();
-  const [userFiles] = useAtom(userFilesAtom)
   const mappedChats = chats?.map((chat) => ({
     id: chat.id,
     name: chat.logs[0]?.title ?? "New session",
-  }));
+  })).reverse();
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
 
   const createNewChat = async () => {
