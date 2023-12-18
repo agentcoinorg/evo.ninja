@@ -4,7 +4,13 @@ import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import DropdownAccount from "./DropdownAccount";
 import CurrentWorkspace from "./CurrentWorkspace";
-import { DiscordLogo, GithubLogo, NotePencil } from "@phosphor-icons/react";
+import {
+  DiscordLogo,
+  GithubLogo,
+  NotePencil,
+  PencilSimple,
+  TrashSimple,
+} from "@phosphor-icons/react";
 import Avatar from "./Avatar";
 import Button from "./Button";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";
@@ -15,23 +21,19 @@ import { useSession } from "next-auth/react";
 import { useAtom } from "jotai";
 import { userFilesAtom } from "@/lib/store";
 
-
 export interface SidebarProps {
   userFiles: InMemoryFile[];
   hoveringSidebarButton: boolean;
   sidebarOpen: boolean;
 }
 
-const Sidebar = ({
-  sidebarOpen,
-  hoveringSidebarButton,
-}: SidebarProps) => {
+const Sidebar = ({ sidebarOpen, hoveringSidebarButton }: SidebarProps) => {
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { mutateAsync: createChat } = useCreateChat();
   const { data: chats, isLoading: isLoadingChats } = useChats();
   const { data: session, status } = useSession();
-  const [userFiles] = useAtom(userFilesAtom)
+  const [userFiles] = useAtom(userFilesAtom);
   const mappedChats = chats?.map((chat) => ({
     id: chat.id,
     name: chat.logs[0]?.title ?? "New session",
@@ -82,7 +84,7 @@ const Sidebar = ({
         )}
       >
         <div
-          className="animate-fade-in flex h-full flex-col justify-between opacity-0"
+          className="flex h-full animate-fade-in flex-col justify-between opacity-0"
           style={{ animationDelay: sidebarOpen ? "150ms" : "0ms" }}
         >
           <div className="flex h-full flex-col justify-between">
@@ -110,17 +112,25 @@ const Sidebar = ({
                             <div
                               key={chat.id}
                               data-id={chat.id}
-                              className="w-full cursor-pointer overflow-x-hidden text-ellipsis whitespace-nowrap rounded p-1 text-sm text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white"
+                              className="group relative w-full cursor-pointer overflow-x-hidden text-ellipsis whitespace-nowrap rounded p-1 text-sm text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:pr-14 hover:text-white"
                               onClick={() => handleChatClick(chat.id)}
                             >
                               {chat.name}
+                              <div className="absolute right-1 top-1/2 hidden -translate-y-1/2 transform animate-fade-in items-center opacity-0 group-hover:flex">
+                                <Button variant="icon" className="!text-white">
+                                  <PencilSimple weight="bold" size={16} />
+                                </Button>
+                                <Button variant="icon" className="!text-white">
+                                  <TrashSimple weight="bold" size={16} />
+                                </Button>
+                              </div>
                             </div>
                           ))}
                         </div>
                       ) : (
                         <div
                           onClick={createNewChat}
-                          className=" mt-1 flex cursor-pointer flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed border-zinc-500 p-7 text-center transition-colors duration-300 hover:border-cyan-500 hover:bg-zinc-950 hover:text-cyan-500"
+                          className="mt-1 flex cursor-pointer flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed border-zinc-500 p-7 text-center transition-colors duration-300 hover:border-cyan-500 hover:bg-zinc-950 hover:text-cyan-500"
                         >
                           <NotePencil
                             size={24}
