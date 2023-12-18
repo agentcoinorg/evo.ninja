@@ -5,20 +5,21 @@ import { useAtom } from "jotai";
 
 import clsx from "clsx";
 import Sidebar from "@/components/Sidebar";
-import { sidebarAtom, userFilesAtom } from "@/lib/store";
+import { sidebarAtom } from "@/lib/store";
 import CloseSidebarIcon from "./CloseSidebarIcon";
 import useWindowSize from "@/lib/hooks/useWindowSize";
-import Logo from "./Logo";
 import Button from "./Button";
 import { List, X } from "@phosphor-icons/react";
 import WelcomeModal from "./modals/WelcomeModal";
 import { welcomeModalAtom } from "@/lib/store";
 import { useHydrateAtoms } from "jotai/utils";
 
-export default function SidebarLayout(props: { children: React.ReactNode, isMobile: boolean }) {
+export default function SidebarLayout(props: {
+  children: React.ReactNode;
+  isMobile: boolean;
+}) {
   useHydrateAtoms([[sidebarAtom, !props.isMobile]]);
   const [sidebarOpen, setSidebarOpen] = useAtom(sidebarAtom);
-  const [userFiles] = useAtom(userFilesAtom);
   const [hoveringSidebarButton, setHovering] = useState<boolean>(false);
   const { isMobile } = useWindowSize();
   const [welcomeModalSeen, setWelcomeModalSeen] = useAtom(welcomeModalAtom);
@@ -38,7 +39,7 @@ export default function SidebarLayout(props: { children: React.ReactNode, isMobi
           {isMobile && (
             <>
               {sidebarOpen && (
-                <div className="animate-fade-in fixed bottom-0 left-0 right-0 top-0 z-10 bg-zinc-900/50 opacity-0 backdrop-blur" />
+                <div className="fixed bottom-0 left-0 right-0 top-0 z-10 animate-fade-in bg-zinc-900/50 opacity-0 backdrop-blur" />
               )}
               <header
                 className={clsx(
@@ -46,20 +47,12 @@ export default function SidebarLayout(props: { children: React.ReactNode, isMobi
                   sidebarOpen ? "justify-end" : "justify-between"
                 )}
               >
-                {!sidebarOpen && (
-                  <a href="/">
-                    <Logo
-                      wordmark={false}
-                      className="animate-fade-in w-8 cursor-pointer opacity-0 transition-opacity hover:opacity-50"
-                    />
-                  </a>
-                )}
                 <Button
                   variant="icon"
                   className="!text-white"
                   onClick={() => setSidebarOpen(!sidebarOpen)}
                 >
-                  {sidebarOpen ? <X size={32} /> : <List size={32} />}
+                  {!sidebarOpen ? <List size={32} /> : <X size={32} />}
                 </Button>
               </header>
             </>
@@ -76,7 +69,7 @@ export default function SidebarLayout(props: { children: React.ReactNode, isMobi
             <Sidebar
               hoveringSidebarButton={hoveringSidebarButton}
               sidebarOpen={!!sidebarOpen}
-              userFiles={userFiles}
+              closeSidebar={() => setSidebarOpen(false)}
             />
             {!isMobile && (
               <button
@@ -95,7 +88,10 @@ export default function SidebarLayout(props: { children: React.ReactNode, isMobi
         </>
         {props.children}
       </div>
-      <WelcomeModal isOpen={!welcomeModalSeen} onClose={() => setWelcomeModalSeen(true)} />
+      <WelcomeModal
+        isOpen={!welcomeModalSeen}
+        onClose={() => setWelcomeModalSeen(true)}
+      />
     </>
   );
 }

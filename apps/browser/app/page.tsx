@@ -3,7 +3,7 @@
 import Chat from "@/components/Chat";
 import { evoServiceAtom, chatIdAtom } from "@/lib/store";
 import { EvoService } from "@/lib/services/evo/EvoService";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useAtom } from "jotai";
@@ -13,9 +13,13 @@ function Dojo({ params }: { params: { id?: string } }) {
   const { status: sessionStatus, data: sessionData } = useSession();
   const [evoService, setEvoService] = useAtom(evoServiceAtom);
   const [, setChatId] = useAtom(chatIdAtom);
+  const [loading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (sessionStatus === "unauthenticated") {
+      if (params.id) {
+        router.push("/");
+      }
       setChatId("<anon>");
       return;
     }
@@ -27,6 +31,7 @@ function Dojo({ params }: { params: { id?: string } }) {
     if (sessionStatus === "loading") {
       return;
     }
+    setIsLoading(false);
 
     const user = sessionData?.user.email || "<anon>";
     if (evoService.user === user) {
@@ -38,15 +43,9 @@ function Dojo({ params }: { params: { id?: string } }) {
     setEvoService(new EvoService(user));
   }, [sessionStatus, sessionData]);
 
-  useEffect(() => {
-    if (sessionStatus === "unauthenticated" && params.id) {
-      router.push("/");
-    }
-  }, [sessionStatus, params.id]);
-
   return (
     <>
-      {sessionStatus !== "loading" ? (
+      {!loading ? (
         <Chat
           isAuthenticated={sessionStatus === "authenticated"}
           onCreateChat={(chatId: string) => {
