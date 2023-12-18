@@ -12,8 +12,6 @@ import { useChats } from "@/lib/queries/useChats";
 import { useRouter } from "next/navigation";
 import { v4 as uuid } from "uuid";
 import { useSession } from "next-auth/react";
-import { useAtom } from "jotai";
-import { userFilesAtom } from "@/lib/store";
 
 
 export interface SidebarProps {
@@ -31,7 +29,6 @@ const Sidebar = ({
   const { mutateAsync: createChat } = useCreateChat();
   const { data: chats, isLoading: isLoadingChats } = useChats();
   const { data: session, status } = useSession();
-  const [userFiles] = useAtom(userFilesAtom)
   const mappedChats = chats?.map((chat) => ({
     id: chat.id,
     name: chat.logs[0]?.title ?? "New session",
