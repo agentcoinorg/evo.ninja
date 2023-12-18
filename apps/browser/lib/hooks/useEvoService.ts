@@ -16,7 +16,7 @@ import { ChatLog } from "@/components/Chat";
 import { EvoThreadCallbacks, EvoThreadConfig } from "@/lib/services/evo/EvoThread";
 import { v4 as uuid } from "uuid";
 import { useAtom } from "jotai";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Workspace, InMemoryWorkspace } from "@evo-ninja/agent-utils";
 import { ChatLogType, ChatMessage } from "@evo-ninja/agents";
 import { SupabaseWorkspace } from "../supabase/SupabaseWorkspace";
@@ -164,7 +164,7 @@ export const useEvoService = (
     await addChatLog({ chatId, log });
   };
 
-  const handleMessagesAdded = async (type: ChatLogType, messages: ChatMessage[]) => {
+  const handleMessagesAdded = useCallback(async (type: ChatLogType, messages: ChatMessage[]) => {
     if (!isAuthenticated || !chatId) {
       return;
     }
@@ -173,7 +173,7 @@ export const useEvoService = (
       messages,
       type
     });
-  };
+  }, [isAuthenticated, chatId]);
 
   const handleVariableSet = async (key: string, value: string) => {
     if (!isAuthenticated || !chatId) {
