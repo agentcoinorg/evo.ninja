@@ -1,4 +1,3 @@
-import json
 import click
 
 from dotenv import load_dotenv
@@ -9,11 +8,9 @@ import autogen
 from langchain.chat_models import ChatOpenAI
 from langchain.output_parsers import CommaSeparatedListOutputParser
 from langchain.schema.output_parser import StrOutputParser
-from langchain_core.runnables import RunnableLambda
 from langchain.prompts import ChatPromptTemplate
 from evo_researcher.agents.planner import create_planner
 from evo_researcher.agents.researcher import create_researcher
-from evo_researcher.functions.summarize import summarize
 from evo_researcher.functions.web_scrape import web_scrape
 from evo_researcher.functions.web_research import web_search
 
