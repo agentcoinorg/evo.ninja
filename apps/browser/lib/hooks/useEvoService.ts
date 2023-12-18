@@ -61,7 +61,7 @@ export const useEvoService = (
   // Helpers
   const updateUserFiles = useUpdateUserFiles();
 
-  const handleChatIdChange = (chatId: string | undefined) => {
+  const handleChatIdChange = async (chatId: string | undefined) => {
     const currentThread = evoService.current;
 
     if (currentThread && currentThread.chatId === chatId) {
@@ -91,7 +91,7 @@ export const useEvoService = (
         setError("Failed to start Evo.");
       },
     };
-    evoService.connect(config, callbacks);
+    await evoService.connect(config, callbacks);
   }
 
   const loadChatLog = async (chatId: string) => {
@@ -170,7 +170,7 @@ export const useEvoService = (
       if (!chatId) {
         chatId = uuid();
         await createChat(chatId);
-        handleChatIdChange(chatId);
+        await handleChatIdChange(chatId);
         onCreateChat(chatId);
       }
     }
