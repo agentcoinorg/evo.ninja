@@ -13,6 +13,7 @@ from evo_researcher.agents.planner import create_planner
 from evo_researcher.agents.researcher import create_researcher
 from evo_researcher.functions.web_scrape import web_scrape
 from evo_researcher.functions.web_research import web_search
+from autonolas.research import research as autonolas_research
 
 load_dotenv()
 config_list = config_list_from_json("OAI_CONFIG_LIST")
@@ -106,13 +107,27 @@ def research_autogen(goal: str):
 
     user_proxy.initiate_chat(manager, message=f"Prepare and then execute a research plan for: {goal}")
 
+# @click.command()
+# @click.option('--goal',
+#               prompt='Research goal',
+#               required=True,
+#               help='Research goal')
+# def run(goal: str):
+#     research_langchain(goal)
+    
 @click.command()
-@click.option('--goal',
-              prompt='Research goal',
+@click.option('--prompt',
+              prompt='Prompt',
               required=True,
-              help='Research goal')
-def run(goal: str):
-    research_langchain(goal)
+              help='Prompt')
+def run(
+    prompt: str
+):
+    response = autonolas_research(
+                                  "prediction-sentence-embedding-conservative",
+                                  prompt)
+    
+    print(response)
     
 
 if __name__ == '__main__':

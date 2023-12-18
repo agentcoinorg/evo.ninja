@@ -12,7 +12,9 @@ import typing
 
 from bs4 import BeautifulSoup, NavigableString
 from googleapiclient.discovery import build
-import openai
+from openai import OpenAI
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 import requests
 from requests import Session
 import spacy
@@ -1014,7 +1016,7 @@ def fetch_additional_information(
     url_query_prompt = URL_QUERY_PROMPT.format(event_question=event_question)
 
     # Perform moderation check
-    moderation_result = openai.Moderation.create(url_query_prompt)
+    moderation_result = client.moderations.create(url_query_prompt)
     if moderation_result["results"][0]["flagged"]:
         # return empty additional information if the prompt is flagged
         return ""
@@ -1026,16 +1028,14 @@ def fetch_additional_information(
     ]
 
     # Fetch queries from the OpenAI engine
-    response = openai.ChatCompletion.create(
-        model=engine,
-        messages=messages,
-        temperature=temperature,  # Override the default temperature parameter set for the engine
-        max_tokens=max_compl_tokens,  # Override the default max_compl_tokens parameter set for the engine
-        n=1,
-        timeout=90,
-        request_timeout=90,
-        stop=None,
-    )
+    response = client.chat.completions.create(model=engine,
+    messages=messages,
+    temperature=temperature,  # Override the default temperature parameter set for the engine
+    max_tokens=max_compl_tokens,  # Override the default max_compl_tokens parameter set for the engine
+    n=1,
+    timeout=90,
+    request_timeout=90,
+    stop=None)
 
     # Parse the response content
     json_data = json.loads(response.choices[0].message.content)
@@ -1061,20 +1061,18 @@ def fetch_additional_information(
 
     return additional_informations
 
-
-def run(
+def research(
     tool: typing.Literal[
     "prediction-sentence-embedding-conservative",
     "prediction-sentence-embedding-bold",
     ],
     prompt: str,
-    max_tokens: int,
-    temperature: int
+    max_tokens: int = None,
+    temperature: int = None
 ) -> Tuple[str, Optional[str], Optional[Dict[str, Any]]]:
     max_compl_tokens =  max_tokens or DEFAULT_OPENAI_SETTINGS["max_compl_tokens"]
     temperature = temperature or DEFAULT_OPENAI_SETTINGS["temperature"]
 
-    openai.api_key = os.getenv("OPENAI_API_KEY")
     if tool not in ALLOWED_TOOLS:
         raise ValueError(f"TOOL {tool} is not supported.")
 
@@ -1133,7 +1131,7 @@ def run(
     )
 
     # Perform moderation
-    moderation_result = openai.Moderation.create(prediction_prompt)
+    moderation_result = client.moderations.create(prediction_prompt)
     if moderation_result["results"][0]["flagged"]:
         return "Moderation flagged the prompt as in violation of terms.", None, None
 
@@ -1144,15 +1142,13 @@ def run(
     ]
 
     # Generate the response
-    response = openai.ChatCompletion.create(
-        model=engine,
-        messages=messages,
-        temperature=temperature,
-        max_tokens=max_compl_tokens,
-        n=1,
-        timeout=150,
-        request_timeout=150,
-        stop=None,
-    )
+    response = client.chat.completions.create(model=engine,
+    messages=messages,
+    temperature=temperature,
+    max_tokens=max_compl_tokens,
+    n=1,
+    timeout=150,
+    request_timeout=150,
+    stop=None)
 
     return response.choices[0].message.content, prediction_prompt, None
