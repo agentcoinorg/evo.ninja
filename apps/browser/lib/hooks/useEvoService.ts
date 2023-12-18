@@ -47,7 +47,7 @@ export const useEvoService = (
   // State
   const [isStarting, setIsStarting] = useState<boolean>(false);
   const [isRunning, setIsRunning] = useState<boolean>(false);
-  const [chatLog, setChatLog] = useState<ChatLog[]>([]);
+  const [chatLog, setChatLogState] = useState<ChatLog[]>([]);
 
   // Mutations
   const { mutateAsync: createChat } = useCreateChat();
@@ -60,6 +60,20 @@ export const useEvoService = (
 
   // Helpers
   const updateUserFiles = useUpdateUserFiles();
+
+  const setChatLog = (chatLog: ChatLog[]) => {
+    // If the first message is the user's goal, append
+    // an informative message from Evo
+    if (chatLog.length === 1 && chatLog[0].user === "user") {
+      setChatLogState([
+        ...chatLog, {
+        user: "evo",
+        title: "Reviewing your prompt..."
+      }]);
+    } else {
+      setChatLogState(chatLog);
+    }
+  }
 
   const handleChatIdChange = async (chatId: string | undefined) => {
     const currentThread = evoService.current;
@@ -174,6 +188,11 @@ export const useEvoService = (
         onCreateChat(chatId);
       }
     }
+
+    setChatLog([{
+      user: "user",
+      title: goal
+    }]);
 
     // Tell the EvoService to start the goal
     evoService.start({
