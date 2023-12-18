@@ -1,6 +1,5 @@
 import React, { memo, useEffect, useRef, useState } from "react";
 import Logo from "./Logo";
-import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import DropdownAccount from "./DropdownAccount";
 import CurrentWorkspace from "./CurrentWorkspace";
@@ -12,40 +11,45 @@ import { useChats } from "@/lib/queries/useChats";
 import { useRouter } from "next/navigation";
 import { v4 as uuid } from "uuid";
 import { useSession } from "next-auth/react";
-import { useAtom } from "jotai";
-import { userFilesAtom } from "@/lib/store";
-
+import useWindowSize from "@/lib/hooks/useWindowSize";
 
 export interface SidebarProps {
-  userFiles: InMemoryFile[];
   hoveringSidebarButton: boolean;
   sidebarOpen: boolean;
+  closeSidebar: () => void
 }
 
 const Sidebar = ({
   sidebarOpen,
   hoveringSidebarButton,
+  closeSidebar
 }: SidebarProps) => {
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { mutateAsync: createChat } = useCreateChat();
   const { data: chats, isLoading: isLoadingChats } = useChats();
   const { data: session, status } = useSession();
-  const [userFiles] = useAtom(userFilesAtom)
   const mappedChats = chats?.map((chat) => ({
     id: chat.id,
     name: chat.logs[0]?.title ?? "New session",
   }));
+  const { isMobile } = useWindowSize()
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
 
   const createNewChat = async () => {
     const id = uuid();
     const createdChat = await createChat(id);
     router.push(`/chat/${createdChat.id}`);
+    if (isMobile) {
+      closeSidebar()
+    }
   };
 
   const handleChatClick = (id: string) => {
     router.push(`/chat/${id}`);
+    if (isMobile) {
+      closeSidebar()
+    }
   };
 
   useEffect(() => {
