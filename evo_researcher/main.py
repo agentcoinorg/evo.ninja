@@ -27,7 +27,7 @@ def research_langchain(goal: str):
     The plan will consist of multiple web searches separated by commas.
     Return ONLY the web searches, separated by commas.
     
-    Keep it to a max of 1 searches.
+    Keep it to a max of 3 searches.
     """
     planning_prompt = ChatPromptTemplate.from_template(template=planning_prompt_template)
     
@@ -41,10 +41,12 @@ def research_langchain(goal: str):
         "goal": goal
     })
     
+    print(web_searches)
+    
     scraped = []
     for search in web_searches:
         sanitized_search_query = search.strip('\"')
-        search_results = web_search(sanitized_search_query, max_results=1)
+        search_results = web_search(sanitized_search_query, max_results=3)
         
         for result in search_results:
             scraped_content = web_scrape(result["url"], sanitized_search_query, 5000)

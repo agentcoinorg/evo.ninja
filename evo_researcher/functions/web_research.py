@@ -2,6 +2,7 @@ import os
 import requests
 
 def web_search(query, max_results=10):
+    print(f"-- Searching the web for {query} --")
     # Base URL for the API
     base_url = "https://serpapi.com/search"
 

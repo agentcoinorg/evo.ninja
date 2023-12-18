@@ -8,6 +8,7 @@ from scrapingbee import ScrapingBeeClient
 from evo_researcher.functions.summarize import summarize
 
 def web_scrape(url: str, objective: str, content_length_threshold: int = 10000):
+    print(f"-- Scraping {url} --")
     api_key = os.getenv("SCRAPINGBEE_API_KEY")
     client = ScrapingBeeClient(api_key=api_key)
 

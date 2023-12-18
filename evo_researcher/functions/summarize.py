@@ -23,7 +23,7 @@ def summarize(objective: str, content: str) -> str:
     
     reduce_template = """The following is set of summaries:
     {docs}
-    Take these and distill it into a final comprehensive, summary relevant to: {objective}. 
+    Take these and distill it into a final full comprehensive, summary relevant to: {objective}. 
     Helpful Answer:"""
     reduce_prompt = PromptTemplate(template=reduce_template, input_variables=["docs", "objective"])
     
@@ -61,8 +61,6 @@ def summarize(objective: str, content: str) -> str:
     docs = text_splitter.create_documents([content])
     
     response = map_reduce_chain.run(docs=docs, objective=objective)
-    
-    print(response)
     
     return response
 
