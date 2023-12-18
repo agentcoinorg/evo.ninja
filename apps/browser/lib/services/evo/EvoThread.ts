@@ -214,7 +214,6 @@ export class EvoThread {
       this._callbacks?.setWorkspace(this._state.workspace);
 
       if (response.done) {
-        console.log(response.value);
         const actionTitle = response.value.value.title;
         if (
           actionTitle.includes("onGoalAchieved") ||
