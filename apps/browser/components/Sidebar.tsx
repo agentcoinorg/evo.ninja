@@ -1,6 +1,5 @@
 import React, { memo, useEffect, useRef, useState } from "react";
 import Logo from "./Logo";
-import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 import DropdownAccount from "./DropdownAccount";
 import CurrentWorkspace from "./CurrentWorkspace";
@@ -21,18 +20,24 @@ import { useSession } from "next-auth/react";
 import { useDeleteChat } from "@/lib/mutations/useDeleteChat";
 import { userWorkspaceAtom } from "@/lib/store";
 import { useAtom } from "jotai";
+import useWindowSize from "@/lib/hooks/useWindowSize";
 
 export interface SidebarProps {
-  userFiles: InMemoryFile[];
   hoveringSidebarButton: boolean;
   sidebarOpen: boolean;
+  closeSidebar: () => void
 }
 
-const Sidebar = ({ sidebarOpen, hoveringSidebarButton }: SidebarProps) => {
+const Sidebar = ({
+  sidebarOpen,
+  hoveringSidebarButton,
+  closeSidebar
+}: SidebarProps) => {
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { mutateAsync: createChat } = useCreateChat();
   const { mutateAsync: deleteChat } = useDeleteChat();
+
   const [userWorkspace] = useAtom(userWorkspaceAtom);
 
   const { data: chats, isLoading: isLoadingChats } = useChats();
@@ -41,16 +46,22 @@ const Sidebar = ({ sidebarOpen, hoveringSidebarButton }: SidebarProps) => {
     id: chat.id,
     name: chat.logs[0]?.title ?? "New session",
   }));
+  const { isMobile } = useWindowSize()
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
-
   const createNewChat = async () => {
     const id = uuid();
     const createdChat = await createChat({ chatId: id, title: "New session" });
     router.push(`/chat/${createdChat.id}`);
+    if (isMobile) {
+      closeSidebar()
+    }
   };
 
   const handleChatClick = (id: string) => {
     router.push(`/chat/${id}`);
+    if (isMobile) {
+      closeSidebar()
+    }
   };
 
   const handleEditClick = (id: string) => {
