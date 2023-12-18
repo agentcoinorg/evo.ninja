@@ -21,57 +21,66 @@ import { useDeleteChat } from "@/lib/mutations/useDeleteChat";
 import { userWorkspaceAtom } from "@/lib/store";
 import { useAtom } from "jotai";
 import useWindowSize from "@/lib/hooks/useWindowSize";
+import TextField from "./TextField";
+import { useUpdateChatTitle } from "@/lib/mutations/useUpdateChatTitle";
 
 export interface SidebarProps {
   hoveringSidebarButton: boolean;
   sidebarOpen: boolean;
-  closeSidebar: () => void
+  closeSidebar: () => void;
 }
 
 const Sidebar = ({
   sidebarOpen,
   hoveringSidebarButton,
-  closeSidebar
+  closeSidebar,
 }: SidebarProps) => {
   const router = useRouter();
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const { mutateAsync: createChat } = useCreateChat();
   const { mutateAsync: deleteChat } = useDeleteChat();
-
-  const [userWorkspace] = useAtom(userWorkspaceAtom);
-
+  const { mutateAsync: updateChat } = useUpdateChatTitle();
   const { data: chats, isLoading: isLoadingChats } = useChats();
   const { data: session, status } = useSession();
+  const { isMobile } = useWindowSize();
+
+  const [userWorkspace] = useAtom(userWorkspaceAtom);
+  const [editChat, setEditChat] = useState<{ id: string; title: string }>();
+  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const editTitleInputRef = useRef<HTMLInputElement>(null);
+
   const mappedChats = chats?.map((chat) => ({
     id: chat.id,
-    name: chat.logs[0]?.title ?? "New session",
+    name: chat.title,
   }));
-  const { isMobile } = useWindowSize()
-  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+
   const createNewChat = async () => {
     const id = uuid();
     const createdChat = await createChat({ chatId: id, title: "New session" });
     router.push(`/chat/${createdChat.id}`);
     if (isMobile) {
-      closeSidebar()
+      closeSidebar();
     }
   };
 
   const handleChatClick = (id: string) => {
-    router.push(`/chat/${id}`);
-    if (isMobile) {
-      closeSidebar()
+    if (!editChat) {
+      router.push(`/chat/${id}`);
+      if (isMobile) {
+        closeSidebar();
+      }
     }
   };
 
-  const handleEditClick = (id: string) => {
-    console.log("rename chat");
+  const handleEditClick = async (id: string, title: string) => {
+    await updateChat({ chatId: id, title });
+    setEditChat(undefined);
   };
 
   const handleDeleteClick = async (id: string) => {
-    // Remove files associated to chat
-    await userWorkspace.rmdir(id, { recursive: true })
-    await deleteChat(id)
+    // Remove files associated to chat before removing chat
+    await userWorkspace.rmdir(id, { recursive: true });
+    await deleteChat(id);
   };
 
   useEffect(() => {
@@ -94,6 +103,22 @@ const Sidebar = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [dropdownOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        editTitleInputRef.current &&
+        !editTitleInputRef.current.contains(event.target as Node)
+      ) {
+        setEditChat(undefined);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [editTitleInputRef]);
 
   return (
     <>
@@ -132,17 +157,37 @@ const Sidebar = ({
                     <div className="h-full max-h-[30vh] space-y-0.5 overflow-y-auto">
                       {chats && chats.length > 0 ? (
                         <div className="px-2">
-                          {mappedChats?.map((chat, i) => (
+                          {mappedChats?.map((chat) => (
                             <div
                               key={chat.id}
                               data-id={chat.id}
                               className="group relative w-full cursor-pointer overflow-x-hidden text-ellipsis whitespace-nowrap rounded p-1 text-sm text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:pr-14 hover:text-white"
                               onClick={() => handleChatClick(chat.id)}
                             >
-                              {chat.name}
+                              {chat.id === editChat?.id ? (
+                                <div ref={editTitleInputRef}>
+                                  <TextField
+                                    defaultValue={chat.name}
+                                    onKeyDown={(e) =>
+                                      e.key === "Enter" &&
+                                      handleEditClick(
+                                        chat.id,
+                                        e.currentTarget.value
+                                      )
+                                    }
+                                  />
+                                </div>
+                              ) : (
+                                chat.name
+                              )}
                               <div className="absolute right-1 top-1/2 hidden -translate-y-1/2 transform animate-fade-in items-center opacity-0 group-hover:flex">
                                 <Button
-                                  onClick={() => handleEditClick(chat.id)}
+                                  onClick={() =>
+                                    setEditChat({
+                                      id: chat.id,
+                                      title: chat.name,
+                                    })
+                                  }
                                   variant="icon"
                                   className="!text-white"
                                 >
