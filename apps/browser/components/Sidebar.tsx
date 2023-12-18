@@ -50,6 +50,14 @@ const Sidebar = ({ sidebarOpen, hoveringSidebarButton }: SidebarProps) => {
     router.push(`/chat/${id}`);
   };
 
+  const handleEditClick = (id: string) => {
+    console.log("rename chat");
+  };
+
+  const handleDeleteClick = (id: string) => {
+    console.log("delete chat");
+  };
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -117,10 +125,18 @@ const Sidebar = ({ sidebarOpen, hoveringSidebarButton }: SidebarProps) => {
                             >
                               {chat.name}
                               <div className="absolute right-1 top-1/2 hidden -translate-y-1/2 transform animate-fade-in items-center opacity-0 group-hover:flex">
-                                <Button variant="icon" className="!text-white">
+                                <Button
+                                  onClick={handleEditClick(chat.id)}
+                                  variant="icon"
+                                  className="!text-white"
+                                >
                                   <PencilSimple weight="bold" size={16} />
                                 </Button>
-                                <Button variant="icon" className="!text-white">
+                                <Button
+                                  onClick={handleDeleteClick(chat.id)}
+                                  variant="icon"
+                                  className="!text-white"
+                                >
                                   <TrashSimple weight="bold" size={16} />
                                 </Button>
                               </div>
