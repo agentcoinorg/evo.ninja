@@ -18,6 +18,9 @@ import { useChats } from "@/lib/queries/useChats";
 import { useRouter } from "next/navigation";
 import { v4 as uuid } from "uuid";
 import { useSession } from "next-auth/react";
+import { useDeleteChat } from "@/lib/mutations/useDeleteChat";
+import { userWorkspaceAtom } from "@/lib/store";
+import { useAtom } from "jotai";
 
 export interface SidebarProps {
   userFiles: InMemoryFile[];
@@ -29,6 +32,9 @@ const Sidebar = ({ sidebarOpen, hoveringSidebarButton }: SidebarProps) => {
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { mutateAsync: createChat } = useCreateChat();
+  const { mutateAsync: deleteChat } = useDeleteChat();
+  const [userWorkspace] = useAtom(userWorkspaceAtom);
+
   const { data: chats, isLoading: isLoadingChats } = useChats();
   const { data: session, status } = useSession();
   const mappedChats = chats?.map((chat) => ({
@@ -51,8 +57,10 @@ const Sidebar = ({ sidebarOpen, hoveringSidebarButton }: SidebarProps) => {
     console.log("rename chat");
   };
 
-  const handleDeleteClick = (id: string) => {
-    console.log("delete chat");
+  const handleDeleteClick = async (id: string) => {
+    // Remove files associated to chat
+    await userWorkspace.rmdir(id, { recursive: true })
+    await deleteChat(id)
   };
 
   useEffect(() => {

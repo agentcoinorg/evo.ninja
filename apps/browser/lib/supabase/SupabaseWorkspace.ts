@@ -76,16 +76,16 @@ export class SupabaseWorkspace implements Workspace {
       throw new Error("Non-recursive rmdir is not supported");
     }
 
-    const path = this.toWorkspacePath(subpath);
+    const folderPath = path.resolve("/", subpath).slice(1);
 
     const { data: list, error: listError } = await this.supabaseStorage
       .from(BUCKET_NAME)
-      .list(path);
+      .list(folderPath);
 
     if (listError) {
       throw listError;
     }
-    const filesToRemove = list.map((x) => `${path}/${x.name}`);
+    const filesToRemove = list.map((x) => `${folderPath}/${x.name}`);
 
     if (filesToRemove.length === 0) {
       return;
