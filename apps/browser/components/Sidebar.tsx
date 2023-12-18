@@ -161,12 +161,19 @@ const Sidebar = ({
                             <div
                               key={chat.id}
                               data-id={chat.id}
-                              className="group relative w-full cursor-pointer overflow-x-hidden text-ellipsis whitespace-nowrap rounded p-1 text-sm text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:pr-14 hover:text-white"
+                              className={clsx(
+                                "group relative w-full cursor-pointer overflow-x-hidden text-ellipsis whitespace-nowrap rounded text-sm text-zinc-100 transition-colors duration-300",
+                                {
+                                  "hover:bg-zinc-700 hover:pr-14 hover:text-white p-1":
+                                    chat.id !== editChat?.id,
+                                }
+                              )}
                               onClick={() => handleChatClick(chat.id)}
                             >
                               {chat.id === editChat?.id ? (
                                 <div ref={editTitleInputRef}>
                                   <TextField
+                                    className="!border-none !p-1 focus:!bg-zinc-950"
                                     defaultValue={chat.name}
                                     onKeyDown={(e) =>
                                       e.key === "Enter" &&
@@ -180,7 +187,15 @@ const Sidebar = ({
                               ) : (
                                 chat.name
                               )}
-                              <div className="absolute right-1 top-1/2 hidden -translate-y-1/2 transform animate-fade-in items-center opacity-0 group-hover:flex">
+                              <div
+                                className={clsx(
+                                  "absolute right-1 top-1/2 hidden -translate-y-1/2 transform animate-fade-in items-center opacity-0",
+                                  {
+                                    "group-hover:flex":
+                                      chat.id !== editChat?.id,
+                                  }
+                                )}
+                              >
                                 <Button
                                   onClick={() =>
                                     setEditChat({
