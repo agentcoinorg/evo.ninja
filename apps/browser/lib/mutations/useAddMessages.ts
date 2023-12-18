@@ -60,6 +60,9 @@ const mapChatMessageToMessageDTO = (
         temporary
       }
     }
+
+    default:
+      throw new Error(`Role ${message.role} not supported`)
   }
 }
 

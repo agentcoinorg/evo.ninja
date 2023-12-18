@@ -183,7 +183,7 @@ export const useEvoService = (
       // Create a ChatID
       if (!chatId) {
         chatId = uuid();
-        await createChat(chatId);
+        await createChat({ chatId, title: "New session" });
         await handleChatIdChange(chatId);
         onCreateChat(chatId);
       }

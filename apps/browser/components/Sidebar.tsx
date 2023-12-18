@@ -45,7 +45,7 @@ const Sidebar = ({ sidebarOpen, hoveringSidebarButton }: SidebarProps) => {
 
   const createNewChat = async () => {
     const id = uuid();
-    const createdChat = await createChat(id);
+    const createdChat = await createChat({ chatId: id, title: "New session" });
     router.push(`/chat/${createdChat.id}`);
   };
 

@@ -8,12 +8,13 @@ export const useCreateChat = () => {
   const queryClient = useQueryClient()
   
   return useMutation({
-    mutationFn: async (chatId: string) => {
+    mutationFn: async (args: { chatId: string, title: string }) => {
       const supabase = createSupabaseClient(session?.supabaseAccessToken as string)
       const { data, error } = await supabase
         .from("chats")
         .insert({
-          id: chatId
+          id: args.chatId,
+          title: args.title
         })
         .select("id")
 
@@ -23,12 +24,13 @@ export const useCreateChat = () => {
 
       return data[0]
     },
-    onMutate: async (chatId: string) => {
+    onMutate: async (args: { chatId: string, title: string }) => {
       await queryClient.cancelQueries({ queryKey: ['chats'] })
       queryClient.setQueryData<Chat[]>(['chats'], (old) => [...(old ?? []), {
-        id: chatId,
+        id: args.chatId,
         messages: [],
         logs: [],
+        title: args.title,
         variables: new Map(),
         created_at: new Date().toISOString()
       }])
