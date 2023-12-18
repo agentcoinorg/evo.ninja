@@ -14,7 +14,6 @@ from bs4 import BeautifulSoup, NavigableString
 from googleapiclient.discovery import build
 from openai import OpenAI
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 import requests
 from requests import Session
 import spacy
@@ -24,6 +23,8 @@ import tiktoken
 from dateutil import parser
 
 load_dotenv()
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 NUM_URLS_EXTRACT = 5
 MAX_TOTAL_TOKENS_CHAT_COMPLETION = 4000  # Set the limit for cost efficiency
@@ -1015,11 +1016,11 @@ def fetch_additional_information(
     # Create URL query prompt
     url_query_prompt = URL_QUERY_PROMPT.format(event_question=event_question)
 
-    # Perform moderation check
-    moderation_result = client.moderations.create(url_query_prompt)
-    if moderation_result["results"][0]["flagged"]:
-        # return empty additional information if the prompt is flagged
-        return ""
+    # # Perform moderation check
+    # moderation_result = client.moderations.create(url_query_prompt)
+    # if moderation_result["results"][0]["flagged"]:
+    #     # return empty additional information if the prompt is flagged
+    #     return ""
 
     # Create messages for the OpenAI engine
     messages = [
@@ -1034,7 +1035,6 @@ def fetch_additional_information(
     max_tokens=max_compl_tokens,  # Override the default max_compl_tokens parameter set for the engine
     n=1,
     timeout=90,
-    request_timeout=90,
     stop=None)
 
     # Parse the response content
@@ -1130,10 +1130,10 @@ def research(
         timestamp=formatted_time_utc,
     )
 
-    # Perform moderation
-    moderation_result = client.moderations.create(prediction_prompt)
-    if moderation_result["results"][0]["flagged"]:
-        return "Moderation flagged the prompt as in violation of terms.", None, None
+    # # Perform moderation
+    # moderation_result = client.moderations.create(prediction_prompt)
+    # if moderation_result["results"][0]["flagged"]:
+    #     return "Moderation flagged the prompt as in violation of terms.", None, None
 
     # Create messages for the OpenAI engine
     messages = [
@@ -1148,7 +1148,6 @@ def research(
     max_tokens=max_compl_tokens,
     n=1,
     timeout=150,
-    request_timeout=150,
     stop=None)
 
     return response.choices[0].message.content, prediction_prompt, None
