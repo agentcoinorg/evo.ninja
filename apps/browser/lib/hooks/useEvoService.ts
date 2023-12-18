@@ -22,6 +22,7 @@ import { Workspace, InMemoryWorkspace } from "@evo-ninja/agent-utils";
 import { ChatLogType, ChatMessage } from "@evo-ninja/agents";
 import { SupabaseWorkspace } from "../supabase/SupabaseWorkspace";
 import { useSupabaseClient } from "../supabase/useSupabaseClient";
+import { useUpdateChatTitle } from "../mutations/useUpdateChatTitle";
 
 export const useEvoService = (
   chatId: string | "<anon>" | undefined,
@@ -54,6 +55,7 @@ export const useEvoService = (
   const { mutateAsync: addChatLog } = useAddChatLog();
   const { mutateAsync: addMessages } = useAddMessages();
   const { mutateAsync: addVariable } = useAddVariable();
+  const { mutateAsync: updateChatTitle } = useUpdateChatTitle();
 
   // Queries
   const { refetch: fetchChats } = useChats();
@@ -183,9 +185,11 @@ export const useEvoService = (
       // Create a ChatID
       if (!chatId) {
         chatId = uuid();
-        await createChat({ chatId, title: "New session" });
+        await createChat({ chatId, title: goal });
         await handleChatIdChange(chatId);
         onCreateChat(chatId);
+      } else {
+        await updateChatTitle({ chatId, title: goal })
       }
     }
 
