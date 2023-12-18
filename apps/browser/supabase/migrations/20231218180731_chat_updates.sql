@@ -23,5 +23,9 @@ SET "title" = (
     LIMIT 1
 );
 
+UPDATE "public"."chats"
+SET "title" = 'New session'
+WHERE "title" IS NULL;
+
 ALTER TABLE "public"."chats"
 ALTER COLUMN "title" SET NOT NULL;
