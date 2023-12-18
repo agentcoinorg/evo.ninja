@@ -56,3 +56,12 @@ code {
 ::-webkit-scrollbar-corner {
   @apply bg-transparent;
 }
+
+/* In smaller screens, font-sizes smaller than 16px cause
+   disruptive zooming. Setting to 16px for input text fields
+   fixes this. Issue: https://github.com/polywrap/evo.ninja/issues/620 */
+@media screen and (max-width: 480px) {
+  input, textarea {
+      font-size: 16px !important;
+  }
+}
