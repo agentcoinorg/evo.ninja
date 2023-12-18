@@ -18,8 +18,6 @@ import { useChats } from "@/lib/queries/useChats";
 import { useRouter } from "next/navigation";
 import { v4 as uuid } from "uuid";
 import { useSession } from "next-auth/react";
-import { useAtom } from "jotai";
-import { userFilesAtom } from "@/lib/store";
 
 export interface SidebarProps {
   userFiles: InMemoryFile[];
@@ -33,7 +31,6 @@ const Sidebar = ({ sidebarOpen, hoveringSidebarButton }: SidebarProps) => {
   const { mutateAsync: createChat } = useCreateChat();
   const { data: chats, isLoading: isLoadingChats } = useChats();
   const { data: session, status } = useSession();
-  const [userFiles] = useAtom(userFilesAtom);
   const mappedChats = chats?.map((chat) => ({
     id: chat.id,
     name: chat.logs[0]?.title ?? "New session",
@@ -126,14 +123,14 @@ const Sidebar = ({ sidebarOpen, hoveringSidebarButton }: SidebarProps) => {
                               {chat.name}
                               <div className="absolute right-1 top-1/2 hidden -translate-y-1/2 transform animate-fade-in items-center opacity-0 group-hover:flex">
                                 <Button
-                                  onClick={handleEditClick(chat.id)}
+                                  onClick={() => handleEditClick(chat.id)}
                                   variant="icon"
                                   className="!text-white"
                                 >
                                   <PencilSimple weight="bold" size={16} />
                                 </Button>
                                 <Button
-                                  onClick={handleDeleteClick(chat.id)}
+                                  onClick={() => handleDeleteClick(chat.id)}
                                   variant="icon"
                                   className="!text-white"
                                 >

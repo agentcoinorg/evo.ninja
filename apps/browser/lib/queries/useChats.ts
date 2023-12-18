@@ -134,7 +134,10 @@ export const useChats = () => {
             role,
             tool_call_id
           )
-        `)
+        `).order(
+          'created_at',
+          { ascending: false }
+        )
 
       if (error) {
         console.error(error)
