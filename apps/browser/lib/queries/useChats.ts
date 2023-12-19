@@ -8,7 +8,7 @@ import { createSupabaseClient } from "../supabase/createSupabaseClient"
 export interface Chat {
   id: string;
   created_at: string;
-  title: string;
+  title: string | null;
   messages: ChatMessage[];
   logs: ChatLog[];
   variables: Map<string, string>
@@ -43,7 +43,7 @@ interface LogDTO {
 interface ChatDTO {
   id: string;
   created_at: string;
-  title: string;
+  title: string | null;
   logs: LogDTO[];
   variables: VariableDTO[];
   messages: MessageDTO[];
