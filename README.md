@@ -13,11 +13,15 @@ poetry run python ./evo_researcher/main.py --prompt="Is nayib bukele going to ru
 
 # Test
 
+## Run all questions
+
 ```bash
-pytest -k "my_test_string_matcher"
+pytest
 ```
 
-For example:
+## Run specific questions
+
+Use `pytest`'s `-k` flag and a string matcher. Example:
 
 ```bash
 pytest -k "Vladimir"
