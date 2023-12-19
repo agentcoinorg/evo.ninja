@@ -10,7 +10,7 @@ export class GoalApi {
       body: JSON.stringify({
         chatId: chatId === "<anon>" ? undefined : chatId,
         message,
-        subsidize
+        subsidize,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -23,6 +23,20 @@ export class GoalApi {
     if (getGoalRequest.status === 200) {
       const { goalAdded } = await getGoalRequest.json();
       return goalAdded.id;
+    }
+  }
+
+  public static async generateTitle(
+    chatId: string,
+    prompt: string
+  ): Promise<string | undefined> {
+    const generateTitle = await fetch(
+      `/api/goal/generate-title?chatId=${chatId}&prompt=${prompt}`
+    );
+
+    if (generateTitle.status === 200) {
+      const { message } = await generateTitle.json();
+      return message;
     }
   }
 }

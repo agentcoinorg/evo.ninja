@@ -23,6 +23,7 @@ import { ChatLogType, ChatMessage } from "@evo-ninja/agents";
 import { SupabaseWorkspace } from "../supabase/SupabaseWorkspace";
 import { useSupabaseClient } from "../supabase/useSupabaseClient";
 import { useUpdateChatTitle } from "../mutations/useUpdateChatTitle";
+import { GoalApi } from "../api";
 
 export const useEvoService = (
   chatId: string | "<anon>" | undefined,
@@ -188,9 +189,12 @@ export const useEvoService = (
         await createChat({ chatId, title: goal });
         await handleChatIdChange(chatId);
         onCreateChat(chatId);
-      } else {
-        await updateChatTitle({ chatId, title: goal })
       }
+      GoalApi.generateTitle(chatId, goal).then(async (title) => {
+        if (title && chatId) {
+          await updateChatTitle({ chatId, title });
+        }
+      });
     }
 
     setChatLog([{
