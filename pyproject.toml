@@ -17,6 +17,8 @@ pytest = "^7.4.3"
 openai = "^1.4.0"
 chromadb = "^0.4.20"
 scrapingbee = "^2.0.1"
+spacy = "^3.7.2"
+google-api-python-client = "^2.111.0"
 
 
 [build-system]
