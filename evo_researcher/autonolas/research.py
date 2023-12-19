@@ -1071,6 +1071,7 @@ def research(
     max_tokens: int = None,
     temperature: int = None
 ) -> Tuple[str, Optional[str], Optional[Dict[str, Any]]]:
+    prompt = f"\"{prompt}\""
     max_compl_tokens =  max_tokens or DEFAULT_OPENAI_SETTINGS["max_compl_tokens"]
     temperature = temperature or DEFAULT_OPENAI_SETTINGS["temperature"]
 
