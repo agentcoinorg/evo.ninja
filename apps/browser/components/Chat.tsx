@@ -95,7 +95,7 @@ const Chat: React.FC<ChatProps> = ({
       {shouldShowExamplePrompts && !goalSent ? (
         <Logo wordmark={false} className="mb-16 w-16" />
       ) : (
-        <ChatLogs chatName={chatName} isRunning={isStarting || isRunning} logs={logs ?? []} />
+        <ChatLogs chatName={chatName ?? "New Session"} isRunning={isStarting || isRunning} logs={logs ?? []} />
       )}
 
       <div

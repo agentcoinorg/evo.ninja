@@ -20,8 +20,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({}, { status: 401 });
   }
   const supabase = createSupabaseClient(session.supabaseAccessToken as string);
-  // Only can only fetch chats associated with its ID, so if it doesn't return
-  // anything it means it is querying a chat from other user
   const { data, error } = await supabase
     .from("chats")
     .select()

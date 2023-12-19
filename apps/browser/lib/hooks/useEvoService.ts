@@ -61,7 +61,7 @@ export const useEvoService = (
   const { mutateAsync: updateChatTitle } = useUpdateChatTitle();
 
   // Queries
-  const { refetch: fetchChats } = useChats();
+  const { data: chats, refetch: fetchChats } = useChats();
 
   // Helpers
   const updateUserFiles = useUpdateUserFiles();
@@ -132,10 +132,6 @@ export const useEvoService = (
       return [];
     }
 
-    if (currentChat.title) {
-      setCurrentChatInfo({ name: currentChat.title })
-    }
-
     return currentChat.logs;
   }
 
@@ -196,13 +192,18 @@ export const useEvoService = (
         await handleChatIdChange(chatId);
         onCreateChat(chatId);
       }
-      // Generate title for chat in the background
-      GoalApi.generateTitle(chatId, goal).then(async (title) => {
-        if (title && chatId) {
-          await updateChatTitle({ chatId, title });
-          setCurrentChatInfo({ name: title });
-        }
-      });
+
+      const currentChat = chats?.find((chat) => chat.id === chatId)
+      if (!currentChat || !currentChat?.title) {
+        // Generate title for chat in the background
+        GoalApi.generateTitle(chatId, goal).then(async (title) => {
+          if (title && chatId) {
+            await updateChatTitle({ chatId, title });
+            setCurrentChatInfo({ name: title });
+          }
+        });
+        await updateChatTitle({ chatId, title: goal })
+      }
     }
 
     setChatLog([

@@ -63,7 +63,7 @@ export default function ChatLogs(props: ChatLogsProps) {
   return (
     <>
       <div className="flex h-20 items-center justify-center border-b-2 border-zinc-800 md:h-12">
-        <div>{chatName && chatName}</div>
+        <div>{chatName}</div>
       </div>
       <div
         ref={listContainerRef}
