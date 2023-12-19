@@ -5,7 +5,8 @@ import {
   localOpenAiApiKeyAtom,
   showAccountModalAtom,
   userWorkspaceAtom,
-  errorAtom
+  errorAtom,
+  chatInfoAtom
 } from "@/lib/store";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";
 import { useAddChatLog } from "@/lib/mutations/useAddChatLog";
@@ -45,6 +46,7 @@ export const useEvoService = (
   const [, setCapReached] = useAtom(capReachedAtom);
   const [, setAccountModalOpen] = useAtom(showAccountModalAtom);
   const [, setError] = useAtom(errorAtom);
+  const [{ name: chatName }, setCurrentChatInfo] = useAtom(chatInfoAtom)
 
   // State
   const [isStarting, setIsStarting] = useState<boolean>(false);
@@ -129,6 +131,7 @@ export const useEvoService = (
     if (!currentChat) {
       return [];
     }
+    setCurrentChatInfo({ name: currentChat.title })
 
     return currentChat.logs;
   }
@@ -191,8 +194,9 @@ export const useEvoService = (
         onCreateChat(chatId);
       }
       GoalApi.generateTitle(chatId, goal).then(async (title) => {
-        if (title && chatId) {
+        if (title && chatId && chatName === "New Session") {
           await updateChatTitle({ chatId, title });
+          setCurrentChatInfo({ name: title });
         }
       });
     }

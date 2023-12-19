@@ -1,7 +1,7 @@
 "use client";
 
 import Chat from "@/components/Chat";
-import { evoServiceAtom, chatIdAtom } from "@/lib/store";
+import { evoServiceAtom, chatInfoAtom } from "@/lib/store";
 import { EvoService } from "@/lib/services/evo/EvoService";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
@@ -12,7 +12,7 @@ function Dojo({ params }: { params: { id?: string } }) {
   const router = useRouter();
   const { status: sessionStatus, data: sessionData } = useSession();
   const [evoService, setEvoService] = useAtom(evoServiceAtom);
-  const [, setChatId] = useAtom(chatIdAtom);
+  const [,setChatInfo] = useAtom(chatInfoAtom);
   const [loading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -20,11 +20,11 @@ function Dojo({ params }: { params: { id?: string } }) {
       if (params.id) {
         router.push("/");
       }
-      setChatId("<anon>");
+      setChatInfo({ id: "<anon>" });
       return;
     }
 
-    setChatId(params.id);
+    setChatInfo({ id: params.id });
   }, [sessionStatus, params.id]);
 
   useEffect(() => {
@@ -49,8 +49,8 @@ function Dojo({ params }: { params: { id?: string } }) {
         <Chat
           isAuthenticated={sessionStatus === "authenticated"}
           onCreateChat={(chatId: string) => {
-            window.history.pushState(null, "Chat", `/chat/${chatId}`);
-            setChatId(chatId);
+            router.replace(`/chat/${chatId}`);
+            setChatInfo({ id: chatId });
           }}
         />
       ) : (

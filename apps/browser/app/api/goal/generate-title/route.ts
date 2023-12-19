@@ -36,11 +36,15 @@ export async function GET(request: NextRequest) {
     const completion = await openAi.chat.completions.create({
       messages: [
         {
+          role: "system",
+          content:"Summarize the given prompt using a max 4 words"
+        },
+        {
           role: "user",
-          content: `Summarize this prompt "${prompt}" into 4 words with no more than 20 characters in total`,
+          content: `${prompt}`,
         },
       ],
-      model: "gpt-3.5-turbo-1106",
+      model: "gpt-3.5-turbo",
     });
 
     if (completion.choices.length < 1) {

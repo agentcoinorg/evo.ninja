@@ -2,7 +2,7 @@ import {
   showDisclaimerAtom,
   errorAtom,
   localOpenAiApiKeyAtom,
-  chatIdAtom,
+  chatInfoAtom,
   showAccountModalAtom,
   welcomeModalAtom,
 } from "@/lib/store";
@@ -36,7 +36,7 @@ const Chat: React.FC<ChatProps> = ({
   isAuthenticated,
   onCreateChat,
 }: ChatProps) => {
-  const [chatId] = useAtom(chatIdAtom);
+  const [{ id: chatId, name: chatName }] = useAtom(chatInfoAtom);
   const { getInputProps, open } = useUploadFiles();
   const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom);
   const [, setError] = useAtom(errorAtom);
@@ -95,7 +95,7 @@ const Chat: React.FC<ChatProps> = ({
       {shouldShowExamplePrompts && !goalSent ? (
         <Logo wordmark={false} className="mb-16 w-16" />
       ) : (
-        <ChatLogs isRunning={isStarting || isRunning} logs={logs ?? []} />
+        <ChatLogs chatName={chatName} isRunning={isStarting || isRunning} logs={logs ?? []} />
       )}
 
       <div

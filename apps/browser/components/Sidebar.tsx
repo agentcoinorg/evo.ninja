@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation";
 import { v4 as uuid } from "uuid";
 import { useSession } from "next-auth/react";
 import { useDeleteChat } from "@/lib/mutations/useDeleteChat";
-import { userWorkspaceAtom } from "@/lib/store";
+import { chatInfoAtom, userWorkspaceAtom } from "@/lib/store";
 import { useAtom } from "jotai";
 import useWindowSize from "@/lib/hooks/useWindowSize";
 import TextField from "./TextField";
@@ -44,6 +44,7 @@ const Sidebar = ({
   const { isMobile } = useWindowSize();
 
   const [userWorkspace] = useAtom(userWorkspaceAtom);
+  const [{ id: currentChatId }, setCurrentChatInfo] = useAtom(chatInfoAtom);
   const [editChat, setEditChat] = useState<{ id: string; title: string }>();
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -63,9 +64,10 @@ const Sidebar = ({
     }
   };
 
-  const handleChatClick = (id: string) => {
+  const handleChatClick = (id: string, name: string) => {
     if (!editChat) {
       router.push(`/chat/${id}`);
+      setCurrentChatInfo({ name });
       if (isMobile) {
         closeSidebar();
       }
@@ -73,6 +75,9 @@ const Sidebar = ({
   };
 
   const handleEditClick = async (id: string, title: string) => {
+    if (currentChatId === id) {
+      setCurrentChatInfo({ name: title });
+    }
     await updateChat({ chatId: id, title });
     setEditChat(undefined);
   };
@@ -164,11 +169,13 @@ const Sidebar = ({
                               className={clsx(
                                 "group relative w-full cursor-pointer overflow-x-hidden text-ellipsis whitespace-nowrap rounded text-sm text-zinc-100 transition-colors duration-300",
                                 {
-                                  "hover:bg-zinc-700 hover:pr-14 hover:text-white p-1":
+                                  "p-1 hover:bg-zinc-700 hover:pr-14 hover:text-white":
                                     chat.id !== editChat?.id,
                                 }
                               )}
-                              onClick={() => handleChatClick(chat.id)}
+                              onClick={() =>
+                                handleChatClick(chat.id, chat.name)
+                              }
                             >
                               {chat.id === editChat?.id ? (
                                 <div ref={editTitleInputRef}>
