@@ -35,7 +35,7 @@ module.exports = {
       width: {
         sidebar: SIDEBAR_WIDTH
       },
-      maxWidth: {
+      minWidth: {
         sidebar: SIDEBAR_WIDTH
       },
       animation: {

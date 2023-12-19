@@ -202,7 +202,6 @@ export const useEvoService = (
             setCurrentChatInfo({ name: title });
           }
         });
-        await updateChatTitle({ chatId, title: goal })
       }
     }
 
