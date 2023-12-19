@@ -1,6 +1,7 @@
 const defaultTheme = require('tailwindcss/defaultTheme')
 
 /** @type {import('tailwindcss').Config} */
+const SIDEBAR_WIDTH = 320
 module.exports = {
   content: [
     "./components/**/*.{js,jsx,ts,tsx}",
@@ -30,6 +31,12 @@ module.exports = {
           }
         }
       }),
+      width: {
+        sidebar: SIDEBAR_WIDTH
+      },
+      minWidth: {
+        sidebar: SIDEBAR_WIDTH
+      },
       animation: {
         'fade-in': 'fade 300ms ease-in-out forwards',
         'fade-out': 'fade 300ms ease-in-out reverse forwards',
