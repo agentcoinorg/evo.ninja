@@ -189,7 +189,8 @@ export const useEvoService = (
       }
     }
 
-    setChatLog([{
+    setChatLog([
+      ...chatLog, {
       user: "user",
       title: goal
     }]);
