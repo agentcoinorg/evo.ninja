@@ -81,10 +81,12 @@ const Sidebar = ({
 
   const handleEditClick = async (id: string, title: string) => {
     // If user is editing the name of the chat it curretly is, also modify it in the chat header
-    if (currentChatId === id) {
-      setCurrentChatInfo({ name: title });
+    if (title) {
+      if (currentChatId === id) {
+        setCurrentChatInfo({ name: title });
+      }
+      await updateChat({ chatId: id, title });
     }
-    await updateChat({ chatId: id, title });
     setEditChat(undefined);
   };
 
