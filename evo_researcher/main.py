@@ -116,8 +116,7 @@ def run(
     prompt: str
 ):
     research_response = autonolas_research(prompt)
-    prediction_with_autonolas_research = make_prediction(prompt, research_response)
-    print(prediction_with_autonolas_research)
+    print(research_response)
     
 
 if __name__ == '__main__':
