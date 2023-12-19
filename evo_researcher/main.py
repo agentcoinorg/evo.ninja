@@ -115,7 +115,7 @@ def research_autogen(goal: str):
 def run(
     prompt: str
 ):
-    research_response = autonolas_research(prompt)
+    research_response = research_langchain(prompt)
     print(research_response)
     
 
