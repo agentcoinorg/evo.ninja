@@ -3,7 +3,13 @@ import Logo from "./Logo";
 import clsx from "clsx";
 import DropdownAccount from "./DropdownAccount";
 import CurrentWorkspace from "./CurrentWorkspace";
-import { DiscordLogo, GithubLogo, NotePencil } from "@phosphor-icons/react";
+import {
+  DiscordLogo,
+  GithubLogo,
+  NotePencil,
+  PencilSimple,
+  TrashSimple,
+} from "@phosphor-icons/react";
 import Avatar from "./Avatar";
 import Button from "./Button";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";
@@ -11,44 +17,85 @@ import { useChats } from "@/lib/queries/useChats";
 import { useRouter } from "next/navigation";
 import { v4 as uuid } from "uuid";
 import { useSession } from "next-auth/react";
+import { useDeleteChat } from "@/lib/mutations/useDeleteChat";
+import { userWorkspaceAtom } from "@/lib/store";
+import { useAtom } from "jotai";
 import useWindowSize from "@/lib/hooks/useWindowSize";
+import TextField from "./TextField";
+import { useUpdateChatTitle } from "@/lib/mutations/useUpdateChatTitle";
+import { SupabaseWorkspace } from "@/lib/supabase/SupabaseWorkspace";
+import { useSupabaseClient } from "@/lib/supabase/useSupabaseClient";
 
 export interface SidebarProps {
   hoveringSidebarButton: boolean;
   sidebarOpen: boolean;
-  closeSidebar: () => void
+  closeSidebar: () => void;
 }
 
 const Sidebar = ({
   sidebarOpen,
   hoveringSidebarButton,
-  closeSidebar
+  closeSidebar,
 }: SidebarProps) => {
   const router = useRouter();
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const { mutateAsync: createChat } = useCreateChat();
+  const { mutateAsync: deleteChat } = useDeleteChat();
+  const { mutateAsync: updateChat } = useUpdateChatTitle();
   const { data: chats, isLoading: isLoadingChats } = useChats();
   const { data: session, status } = useSession();
+  const { isMobile } = useWindowSize();
+  const supabaseClient = useSupabaseClient();
+
+  const [userWorkspace] = useAtom(userWorkspaceAtom);
+  const [editChat, setEditChat] = useState<{ id: string; title: string }>();
+  const [activeChat, setActiveChat] = useState<{ id: string }>();
+  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const editTitleInputRef = useRef<HTMLInputElement>(null);
+
   const mappedChats = chats?.map((chat) => ({
     id: chat.id,
-    name: chat.logs[0]?.title ?? "New session",
+    name: chat.title
+      ? chat.title
+      : chat.logs[0]
+        ? chat.logs[0].title
+        : "New session",
   }));
-  const { isMobile } = useWindowSize()
-  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
 
   const createNewChat = async () => {
     const id = uuid();
     const createdChat = await createChat(id);
     router.push(`/chat/${createdChat.id}`);
     if (isMobile) {
-      closeSidebar()
+      closeSidebar();
     }
   };
 
   const handleChatClick = (id: string) => {
-    router.push(`/chat/${id}`);
+    if (activeChat?.id !== id) {
+      setActiveChat({ id: id });
+    }
+    if (!editChat) {
+      router.push(`/chat/${id}`);
+      if (isMobile) {
+        closeSidebar();
+      }
+    }
+  };
+
+  const handleEditClick = async (id: string, title: string) => {
+    await updateChat({ chatId: id, title });
+    setEditChat(undefined);
+  };
+
+  const handleDeleteClick = async (id: string) => {
+    // Remove files associated to chat before removing chat
+    const workspace = new SupabaseWorkspace(id, supabaseClient.storage);
+    await workspace.rmdir("", { recursive: true });
+    await deleteChat(id);
+    await router.push(`/`);
     if (isMobile) {
-      closeSidebar()
+      await closeSidebar();
     }
   };
 
@@ -73,6 +120,22 @@ const Sidebar = ({
     };
   }, [dropdownOpen]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        editTitleInputRef.current &&
+        !editTitleInputRef.current.contains(event.target as Node)
+      ) {
+        setEditChat(undefined);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [editTitleInputRef]);
+
   return (
     <>
       <div
@@ -86,7 +149,7 @@ const Sidebar = ({
         )}
       >
         <div
-          className="animate-fade-in flex h-full flex-col justify-between opacity-0"
+          className="flex h-full animate-fade-in flex-col justify-between opacity-0"
           style={{ animationDelay: sidebarOpen ? "150ms" : "0ms" }}
         >
           <div className="flex h-full flex-col justify-between">
@@ -110,21 +173,77 @@ const Sidebar = ({
                     <div className="h-full max-h-[30vh] space-y-0.5 overflow-y-auto">
                       {chats && chats.length > 0 ? (
                         <div className="px-2">
-                          {mappedChats?.map((chat, i) => (
+                          {mappedChats?.map((chat) => (
                             <div
                               key={chat.id}
                               data-id={chat.id}
-                              className="w-full cursor-pointer overflow-x-hidden text-ellipsis whitespace-nowrap rounded p-1 text-sm text-zinc-100 transition-colors duration-300 hover:bg-zinc-700 hover:text-white"
+                              className={clsx(
+                                "relative w-full cursor-pointer overflow-x-hidden text-ellipsis whitespace-nowrap rounded p-1 text-sm text-zinc-100 transition-colors duration-300",
+                                {
+                                  "bg-zinc-700 pr-14":
+                                    chat.id === activeChat?.id &&
+                                    chat.id !== editChat?.id,
+                                },
+                                {
+                                  "hover:bg-zinc-700 hover:text-white":
+                                    chat.id !== editChat?.id,
+                                }
+                              )}
                               onClick={() => handleChatClick(chat.id)}
                             >
-                              {chat.name}
+                              {chat.id === editChat?.id ? (
+                                <div ref={editTitleInputRef}>
+                                  <TextField
+                                    className="!border-none !p-1 focus:!bg-zinc-950"
+                                    defaultValue={chat.name}
+                                    onKeyDown={(e) =>
+                                      e.key === "Enter" &&
+                                      handleEditClick(
+                                        chat.id,
+                                        e.currentTarget.value
+                                      )
+                                    }
+                                  />
+                                </div>
+                              ) : (
+                                chat.name
+                              )}
+                              <div
+                                className={clsx(
+                                  "absolute right-1 top-1/2 -translate-y-1/2 transform animate-fade-in items-center",
+                                  chat.id === activeChat?.id &&
+                                    chat.id !== editChat?.id
+                                    ? "flex"
+                                    : "hidden opacity-0"
+                                )}
+                              >
+                                <Button
+                                  onClick={() =>
+                                    setEditChat({
+                                      id: chat.id,
+                                      title: chat.name,
+                                    })
+                                  }
+                                  variant="icon"
+                                  className="!text-white"
+                                >
+                                  <PencilSimple weight="bold" size={16} />
+                                </Button>
+                                <Button
+                                  onClick={() => handleDeleteClick(chat.id)}
+                                  variant="icon"
+                                  className="!text-white"
+                                >
+                                  <TrashSimple weight="bold" size={16} />
+                                </Button>
+                              </div>
                             </div>
                           ))}
                         </div>
                       ) : (
                         <div
                           onClick={createNewChat}
-                          className=" mt-1 flex cursor-pointer flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed border-zinc-500 p-7 text-center transition-colors duration-300 hover:border-cyan-500 hover:bg-zinc-950 hover:text-cyan-500"
+                          className="mt-1 flex cursor-pointer flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed border-zinc-500 p-7 text-center transition-colors duration-300 hover:border-cyan-500 hover:bg-zinc-950 hover:text-cyan-500"
                         >
                           <NotePencil
                             size={24}
