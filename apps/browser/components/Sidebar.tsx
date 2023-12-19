@@ -51,7 +51,11 @@ const Sidebar = ({
 
   const mappedChats = chats?.map((chat) => ({
     id: chat.id,
-    name: chat.title ?? chat.logs[0].title,
+    name: chat.title
+      ? chat.title
+      : chat.logs[0]
+        ? chat.logs[0].title
+        : "New session",
   }));
 
   const createNewChat = async () => {
