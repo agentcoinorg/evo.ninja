@@ -1,8 +1,9 @@
-import { uploadedFilesAtom } from "@/lib/store";
+import { localOpenAiApiKeyAtom, uploadedFilesAtom, welcomeModalAtom } from "@/lib/store";
 import { examplePrompts, ExamplePrompt } from "@/lib/examplePrompts";
 import { useAtom } from "jotai";
 import clsx from "clsx";
 import useWindowSize from "@/lib/hooks/useWindowSize";
+import { useSession } from "next-auth/react";
 
 export interface ExamplePromptsProps {
   onClick: (prompt: string) => Promise<void>;
@@ -10,9 +11,17 @@ export interface ExamplePromptsProps {
 
 export default function ExamplePrompts(props: ExamplePromptsProps) {
   const [, setUploadedFiles] = useAtom(uploadedFilesAtom);
+  const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom)
+  const [,setWelcomeModalOpen] = useAtom(welcomeModalAtom)
   const { isMobile } = useWindowSize();
+  const { status } = useSession()
+  const firstTimeUser = !localOpenAiApiKey && status !== "authenticated"
 
   const handleClick = (prompt: ExamplePrompt) => {
+    if (firstTimeUser) {
+      setWelcomeModalOpen(true)
+      return
+    }
     if (prompt.files) {
       setUploadedFiles(prompt.files);
     }

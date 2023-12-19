@@ -22,7 +22,7 @@ export default function SidebarLayout(props: {
   const [sidebarOpen, setSidebarOpen] = useAtom(sidebarAtom);
   const [hoveringSidebarButton, setHovering] = useState<boolean>(false);
   const { isMobile } = useWindowSize();
-  const [welcomeModalSeen, setWelcomeModalSeen] = useAtom(welcomeModalAtom);
+  const [welcomeModalOpen, setWelcomeModalOpen] = useAtom(welcomeModalAtom);
 
   useEffect(() => {
     if (isMobile) {
@@ -89,8 +89,8 @@ export default function SidebarLayout(props: {
         {props.children}
       </div>
       <WelcomeModal
-        isOpen={!welcomeModalSeen}
-        onClose={() => setWelcomeModalSeen(true)}
+        isOpen={welcomeModalOpen}
+        onClose={() => setWelcomeModalOpen(false)}
       />
     </>
   );

@@ -3,7 +3,6 @@ import {
   errorAtom,
   localOpenAiApiKeyAtom,
   chatIdAtom,
-  showAccountModalAtom,
   welcomeModalAtom,
 } from "@/lib/store";
 import { useEvoService } from "@/lib/hooks/useEvoService";
@@ -41,8 +40,7 @@ const Chat: React.FC<ChatProps> = ({
   const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom);
   const [, setError] = useAtom(errorAtom);
   const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom);
-  const [, setAccountModalOpen] = useAtom(showAccountModalAtom);
-  const [welcomeModalSeen] = useAtom(welcomeModalAtom);
+  const [welcomeModalOpen, setWelcomeModalOpen] = useAtom(welcomeModalAtom);
 
   const [message, setMessage] = useState<string>("");
   const [goalSent, setGoalSent] = useState<boolean>(false);
@@ -66,8 +64,7 @@ const Chat: React.FC<ChatProps> = ({
 
     const firstTimeUser = !localOpenAiApiKey && !isAuthenticated;
     if (firstTimeUser) {
-      setError("Please login or add an OpenAI API key.");
-      setAccountModalOpen(true);
+      setWelcomeModalOpen(true);
       return;
     }
 
@@ -145,7 +142,7 @@ const Chat: React.FC<ChatProps> = ({
         </div>
       </div>
       <Disclaimer
-        isOpen={showDisclaimer && welcomeModalSeen}
+        isOpen={showDisclaimer && !welcomeModalOpen}
         onClose={() => setShowDisclaimer(false)}
       />
     </main>
