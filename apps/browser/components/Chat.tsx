@@ -53,7 +53,7 @@ const Chat: React.FC<ChatProps> = ({
   );
   const shouldShowExamplePrompts = !logs || logs.length === 0;
 
-  const handleGoalSubmit = (goal: string) => {
+  const handleGoalSubmit = async (goal: string): Promise<void> => {
     if (!goal) {
       setError("Please enter a goal.");
       return;
@@ -71,7 +71,7 @@ const Chat: React.FC<ChatProps> = ({
       return;
     }
 
-    handleStart(goal);
+    await handleStart(goal);
     setMessage("");
     setGoalSent(true);
   };

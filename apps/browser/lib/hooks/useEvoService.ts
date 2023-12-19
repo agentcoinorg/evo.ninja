@@ -32,7 +32,7 @@ export const useEvoService = (
   logs: ChatLog[] | undefined;
   isStarting: boolean;
   isRunning: boolean;
-  handleStart: (goal: string) => void;
+  handleStart: (goal: string) => Promise<void>;
 } => {
   const supabase = useSupabaseClient();
 
@@ -186,7 +186,7 @@ export const useEvoService = (
     });
   };
 
-  const handleStart = async (goal: string) => {
+  const handleStart = async (goal: string): Promise<void> => {
     if (isStarting) {
       return;
     }

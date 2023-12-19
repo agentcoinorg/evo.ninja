@@ -96,7 +96,7 @@ export class EvoThread {
     this._callbacks.setWorkspace(this._state.workspace);
   }
 
-  async start(options: EvoThreadStartOptions) {
+  async start(options: EvoThreadStartOptions): Promise<void> {
     const {
       goal,
       allowTelemetry,
