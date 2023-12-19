@@ -16,7 +16,7 @@ import { ChatLog } from "@/components/Chat";
 import { EvoThreadCallbacks, EvoThreadConfig } from "@/lib/services/evo/EvoThread";
 import { v4 as uuid } from "uuid";
 import { useAtom } from "jotai";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Workspace, InMemoryWorkspace } from "@evo-ninja/agent-utils";
 import { ChatLogType, ChatMessage } from "@evo-ninja/agents";
 import { SupabaseWorkspace } from "../supabase/SupabaseWorkspace";
@@ -46,9 +46,10 @@ export const useEvoService = (
   const [, setError] = useAtom(errorAtom);
 
   // State
-  const [isStarting, setIsStarting] = useState<boolean>(false);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [chatLog, setChatLogState] = useState<ChatLog[]>([]);
+  const [isStarting, setIsStarting] = useState<boolean>(false);
+  const [goalToStart, setGoalToStart] = useState<string | undefined>(undefined);
 
   // Mutations
   const { mutateAsync: createChat } = useCreateChat();
@@ -164,7 +165,7 @@ export const useEvoService = (
     await addChatLog({ chatId, log });
   };
 
-  const handleMessagesAdded = useCallback(async (type: ChatLogType, messages: ChatMessage[]) => {
+  const handleMessagesAdded = async (type: ChatLogType, messages: ChatMessage[]) => {
     if (!isAuthenticated || !chatId) {
       return;
     }
@@ -173,7 +174,7 @@ export const useEvoService = (
       messages,
       type
     });
-  }, [isAuthenticated, chatId]);
+  };
 
   const handleVariableSet = async (key: string, value: string) => {
     if (!isAuthenticated || !chatId) {
@@ -192,26 +193,38 @@ export const useEvoService = (
     }
 
     setIsStarting(true);
-
+    
     await createChatIdIfNeccessary(chatId);
-
+    
     setChatLog([{
       user: "user",
       title: goal
     }]);
 
-    // Tell the EvoService to start the goal
-    evoService.start({
-      goal,
-      allowTelemetry,
-      openAiApiKey
-    });
-    setIsStarting(false);
+    // We don't start the evoService here because we need to wait for the
+    // chatId to be hooked up to all the callbacks
+    setGoalToStart(goal);
   };
 
   useEffect(() => {
-    handleChatIdChange(chatId);
-  }, [chatId]);
+    (async () => {
+      await handleChatIdChange(chatId);
+
+      if (!isStarting || !goalToStart) {
+        return;
+      }
+
+      // Tell the EvoService to start the goal
+      // We don't await this because it should run in the background
+      evoService.start({
+        goal: goalToStart,
+        allowTelemetry,
+        openAiApiKey
+      });
+      setGoalToStart(undefined);
+    })();
+
+  }, [chatId, isStarting, goalToStart]);
 
   return {
     logs: chatLog,
