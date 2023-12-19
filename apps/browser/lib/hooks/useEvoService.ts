@@ -25,6 +25,7 @@ import { SupabaseWorkspace } from "../supabase/SupabaseWorkspace";
 import { useSupabaseClient } from "../supabase/useSupabaseClient";
 import { useUpdateChatTitle } from "../mutations/useUpdateChatTitle";
 import { GoalApi } from "../api";
+import { ChatApi } from "../api/ChatApi";
 
 export const useEvoService = (
   chatId: string | "<anon>" | undefined,
@@ -195,7 +196,7 @@ export const useEvoService = (
 
       const currentChat = chats?.find((chat) => chat.id === chatId)
       if (!currentChat || !currentChat?.title) {
-        GoalApi.generateTitle(chatId, goal).then(async (title) => {
+        ChatApi.generateTitle(chatId, goal).then(async (title) => {
           if (title && chatId) {
             await updateChatTitle({ chatId, title });
             setCurrentChatInfo({ name: title });

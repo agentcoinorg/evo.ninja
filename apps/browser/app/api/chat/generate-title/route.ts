@@ -4,12 +4,9 @@ import { createSupabaseClient } from "@/lib/supabase/createSupabaseClient";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-  const chatId = searchParams.get("chatId");
-  const prompt = searchParams.get("prompt");
-
-  if (!chatId || !prompt) {
+export async function POST(request: NextRequest) {
+  const body = await request.json();
+  if (!body.id || !body.prompt) {
     return NextResponse.json({}, { status: 400 });
   }
 
@@ -23,7 +20,7 @@ export async function GET(request: NextRequest) {
   const { data, error } = await supabase
     .from("chats")
     .select()
-    .eq("id", chatId)
+    .eq("id", body.id)
     .single();
   if (error) {
     return NextResponse.json({}, { status: 403 });
@@ -40,11 +37,11 @@ export async function GET(request: NextRequest) {
       messages: [
         {
           role: "system",
-          content:"Summarize the given prompt using a max 4 words"
+          content:"Summarize the given prompt using max 4 words"
         },
         {
           role: "user",
-          content: `${prompt}`,
+          content: `${body.prompt}`,
         },
       ],
       model: "gpt-3.5-turbo",

@@ -25,20 +25,4 @@ export class GoalApi {
       return goalAdded.id;
     }
   }
-
-  public static async generateTitle(
-    chatId: string,
-    prompt: string
-  ): Promise<string | undefined> {
-    const generateTitle = await fetch(
-      `/api/goal/generate-title?chatId=${chatId}&prompt=${prompt}`
-    );
-
-    if (generateTitle.status === 200) {
-      const response = await generateTitle.json();
-      if (response.message) {
-        return response.message;
-      }
-    }
-  }
 }
