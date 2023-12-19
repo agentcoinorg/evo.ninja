@@ -72,7 +72,7 @@ const Sidebar = ({
   };
 
   const handleChatClick = (id: string) => {
-    if (activeChat !== id) {
+    if (activeChat?.id !== id) {
       setActiveChat({ id: id });
     }
     if (!editChat) {
