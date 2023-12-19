@@ -1,8 +1,7 @@
 from langchain.prompts import PromptTemplate
 from langchain.chat_models import ChatOpenAI
 
-from langchain.text_splitter import RecursiveCharacterTextSplitter, CharacterTextSplitter
-from langchain.chains.summarize import load_summarize_chain
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains.llm import LLMChain
 from langchain.chains.summarize import ReduceDocumentsChain, StuffDocumentsChain, MapReduceDocumentsChain
 from langchain.text_splitter import RecursiveCharacterTextSplitter
