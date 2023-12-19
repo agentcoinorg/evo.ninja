@@ -1,6 +1,6 @@
 
 import os
-from typing import Any, Dict, Generator, List, Optional, Tuple
+from typing import Any, Dict, Generator, List, Optional, Tuple, TypedDict
 from datetime import datetime, timezone
 import json
 from dotenv import load_dotenv
@@ -8,7 +8,6 @@ import re
 from concurrent.futures import Future, ThreadPoolExecutor
 from itertools import groupby
 from operator import itemgetter
-import typing
 
 from bs4 import BeautifulSoup, NavigableString
 from googleapiclient.discovery import build
@@ -292,6 +291,12 @@ HTML_TAGS_TO_REMOVE = [
     "embed",
     "link",
 ]
+
+class Prediction(TypedDict):
+    p_yes: float
+    p_yes: float
+    confidence: float
+    info_utility: float
 
 
 def search_google(query: str, api_key: str, engine: str, num: int = 3) -> List[str]:
@@ -1062,10 +1067,6 @@ def fetch_additional_information(
     return additional_informations
 
 def research(
-    tool: typing.Literal[
-    "prediction-sentence-embedding-conservative",
-    "prediction-sentence-embedding-bold",
-    ],
     prompt: str,
     max_tokens: int = None,
     temperature: int = None
@@ -1073,15 +1074,12 @@ def research(
     max_compl_tokens =  max_tokens or DEFAULT_OPENAI_SETTINGS["max_compl_tokens"]
     temperature = temperature or DEFAULT_OPENAI_SETTINGS["temperature"]
 
-    if tool not in ALLOWED_TOOLS:
-        raise ValueError(f"TOOL {tool} is not supported.")
-
     # Load the spacy model
     download_spacy_model("en_core_web_md")
     nlp = spacy.load("en_core_web_md")
 
     # Get the LLM engine to be used
-    engine = TOOL_TO_ENGINE[tool]
+    engine = "gpt-4-1106-preview"
 
     # Extract the event question from the prompt
     event_question = re.search(r"\"(.+?)\"", prompt).group(1)
@@ -1102,7 +1100,7 @@ def research(
     # Fetch additional information
     additional_information = fetch_additional_information(
         event_question=event_question,
-        engine="gpt-3.5-turbo",
+        # engine=engine,
         temperature=0.5,
         max_compl_tokens=max_compl_tokens,
         nlp=nlp,
@@ -1117,37 +1115,37 @@ def research(
         max_add_tokens,
         enc=enc,
     )
+    
+    return additional_information
 
-    # Get the current utc timestamp
+    
+
+def make_prediction(prompt: str, additional_information: str, max_compl_tokens: int = None, temperature: float = None) -> Prediction:
+    max_compl_tokens =  max_compl_tokens or DEFAULT_OPENAI_SETTINGS["max_compl_tokens"]
+    temperature = temperature or DEFAULT_OPENAI_SETTINGS["temperature"]
+    
     current_time_utc = datetime.now(timezone.utc)
     formatted_time_utc = current_time_utc.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-6] + "Z"
 
-    # Generate the prediction prompt
     prediction_prompt = PREDICTION_PROMPT.format(
-        event_question=event_question,
         user_prompt=prompt,
         additional_information=additional_information,
         timestamp=formatted_time_utc,
     )
 
-    # # Perform moderation
-    # moderation_result = client.moderations.create(prediction_prompt)
-    # if moderation_result["results"][0]["flagged"]:
-    #     return "Moderation flagged the prompt as in violation of terms.", None, None
-
-    # Create messages for the OpenAI engine
     messages = [
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": prediction_prompt},
     ]
 
-    # Generate the response
-    response = client.chat.completions.create(model=engine,
-    messages=messages,
-    temperature=temperature,
-    max_tokens=max_compl_tokens,
-    n=1,
-    timeout=150,
-    stop=None)
+    response = client.chat.completions.create(
+        model="gpt-4-1106-preview",
+        messages=messages,
+        temperature=temperature,
+        max_tokens=max_compl_tokens,
+        n=1,
+        timeout=150,
+        stop=None
+    )
 
-    return response.choices[0].message.content, prediction_prompt, None
+    return response.choices[0].message.content

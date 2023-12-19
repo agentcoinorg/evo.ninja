@@ -13,7 +13,7 @@ from evo_researcher.agents.planner import create_planner
 from evo_researcher.agents.researcher import create_researcher
 from evo_researcher.functions.web_scrape import web_scrape
 from evo_researcher.functions.web_research import web_search
-from autonolas.research import research as autonolas_research
+from autonolas.research import make_prediction, research as autonolas_research
 
 load_dotenv()
 config_list = config_list_from_json("OAI_CONFIG_LIST")
@@ -115,11 +115,9 @@ def research_autogen(goal: str):
 def run(
     prompt: str
 ):
-    response = autonolas_research(
-                                  "prediction-sentence-embedding-bold",
-                                  prompt)
-    
-    print(response)
+    research_response = autonolas_research(prompt)
+    prediction_with_autonolas_research = make_prediction(prompt, research_response)
+    print(prediction_with_autonolas_research)
     
 
 if __name__ == '__main__':
