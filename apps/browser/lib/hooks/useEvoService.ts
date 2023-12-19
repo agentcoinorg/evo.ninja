@@ -58,7 +58,7 @@ export const useEvoService = (
   const { mutateAsync: updateChatTitle } = useUpdateChatTitle();
 
   // Queries
-  const { refetch: fetchChats } = useChats();
+  const { data: chats, refetch: fetchChats } = useChats();
 
   // Helpers
   const updateUserFiles = useUpdateUserFiles();
@@ -188,7 +188,10 @@ export const useEvoService = (
         await createChat(chatId);
         await handleChatIdChange(chatId);
         onCreateChat(chatId);
-      } else {
+      }
+
+      const currentChat = chats?.find((chat) => chat.id === chatId)
+      if (!currentChat || !currentChat?.title) {
         await updateChatTitle({ chatId, title: goal })
       }
     }
