@@ -23,6 +23,8 @@ import { useAtom } from "jotai";
 import useWindowSize from "@/lib/hooks/useWindowSize";
 import TextField from "./TextField";
 import { useUpdateChatTitle } from "@/lib/mutations/useUpdateChatTitle";
+import { SupabaseWorkspace } from "@/lib/supabase/SupabaseWorkspace";
+import { useSupabaseClient } from "@/lib/supabase/useSupabaseClient";
 
 export interface SidebarProps {
   hoveringSidebarButton: boolean;
@@ -42,6 +44,7 @@ const Sidebar = ({
   const { data: chats, isLoading: isLoadingChats } = useChats();
   const { data: session, status } = useSession();
   const { isMobile } = useWindowSize();
+  const supabaseClient = useSupabaseClient()
 
   const [userWorkspace] = useAtom(userWorkspaceAtom);
   const [{ id: currentChatId }, setCurrentChatInfo] = useAtom(chatInfoAtom);
@@ -92,7 +95,8 @@ const Sidebar = ({
 
   const handleDeleteClick = async (id: string) => {
     // Remove files associated to chat before removing chat
-    await userWorkspace.rmdir(id, { recursive: true });
+    const workspace = new SupabaseWorkspace(id, supabaseClient.storage)
+    await workspace.rmdir("", { recursive: true });
     await deleteChat(id);
     // If user deletes the chat where it currently is, redirect to main page
     if (currentChatId === id) {
