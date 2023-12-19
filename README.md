@@ -8,5 +8,5 @@ poetry shell
 # Run
 
 ```
-poetry run python ./evo_researcher/main.py --goal="Is nayib bukele going to run for president again?"
+poetry run python ./evo_researcher/main.py --prompt="Is nayib bukele going to run for president again?"
 ```
