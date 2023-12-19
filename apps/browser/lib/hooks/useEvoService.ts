@@ -196,10 +196,13 @@ export const useEvoService = (
     
     await createChatIdIfNeccessary(chatId);
     
-    setChatLog([{
-      user: "user",
-      title: goal
-    }]);
+    setChatLog([
+      ...chatLog,
+      {
+        user: "user",
+        title: goal
+      }
+    ]);
 
     // We don't start the evoService here because we need to wait for the
     // chatId to be hooked up to all the callbacks
