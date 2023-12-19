@@ -10,6 +10,7 @@ import SettingsModal from "./modals/SettingsModal";
 import { useAtom } from "jotai";
 import {
   capReachedAtom,
+  settingsModalAtom,
   signInModalAtom,
 } from "@/lib/store";
 import { useSession, signOut } from "next-auth/react";
@@ -25,7 +26,7 @@ const DropdownAccount: React.ForwardRefRenderFunction<
 > = ({ dropdownOpen }, ref) => {
   const { data: session } = useSession();
   const [isSettingsModalOpen, setIsSettingsModalOpen] =
-    useState<boolean>(false);
+    useAtom(settingsModalAtom);
   const [isSignInModalOpen, setIsSignInModalOpen] = useAtom(signInModalAtom);
   const [capReached] = useAtom(capReachedAtom);
 
