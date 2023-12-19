@@ -67,9 +67,9 @@ export const useEvoService = (
   const updateUserFiles = useUpdateUserFiles();
 
   const setChatLog = (chatLog: ChatLog[]) => {
-    // If the first message is the user's goal, append
-    // an informative message from Evo
-    if (chatLog.length === 1 && chatLog[0].user === "user") {
+    // If the most recent message is the user's goal,
+    // append an informative message from Evo
+    if (chatLog.length !== 0 && chatLog[chatLog.length - 1].user === "user") {
       setChatLogState([
         ...chatLog, {
         user: "evo",
@@ -205,7 +205,8 @@ export const useEvoService = (
       });
     }
 
-    setChatLog([{
+    setChatLog([
+      ...chatLog, {
       user: "user",
       title: goal
     }]);
