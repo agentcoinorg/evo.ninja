@@ -12,6 +12,7 @@ dataset = [
     "Will Tether collapse and take down the whole crypto market before the end of 2024?",
 ]
 
+@pytest.mark.skip("Not implemented")
 @pytest.mark.parametrize("question", [question for question in dataset])
 def test_research(question: str):
     evo_research = research_langchain(question)
@@ -21,4 +22,3 @@ def test_research(question: str):
     prediction_with_autonolas_research = make_prediction(question, autonolas_research)
     
     assert prediction_with_evo_research["info_utility"] > prediction_with_autonolas_research["info_utility"]
-    

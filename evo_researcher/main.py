@@ -13,7 +13,6 @@ from evo_researcher.agents.planner import create_planner
 from evo_researcher.agents.researcher import create_researcher
 from evo_researcher.functions.web_scrape import web_scrape
 from evo_researcher.functions.web_research import web_search
-from autonolas.research import make_prediction, research as autonolas_research
 
 load_dotenv()
 config_list = config_list_from_json("OAI_CONFIG_LIST")
