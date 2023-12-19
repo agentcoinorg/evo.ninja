@@ -23,8 +23,6 @@ import { useAtom } from "jotai";
 import useWindowSize from "@/lib/hooks/useWindowSize";
 import TextField from "./TextField";
 import { useUpdateChatTitle } from "@/lib/mutations/useUpdateChatTitle";
-import { SupabaseWorkspace } from "@/lib/supabase/SupabaseWorkspace";
-import { useSupabaseClient } from "@/lib/supabase/useSupabaseClient";
 
 export interface SidebarProps {
   hoveringSidebarButton: boolean;
@@ -44,29 +42,22 @@ const Sidebar = ({
   const { data: chats, isLoading: isLoadingChats } = useChats();
   const { data: session, status } = useSession();
   const { isMobile } = useWindowSize();
-  const supabaseClient = useSupabaseClient();
 
   const [userWorkspace] = useAtom(userWorkspaceAtom);
   const [{ id: currentChatId }, setCurrentChatInfo] = useAtom(chatInfoAtom);
   const [editChat, setEditChat] = useState<{ id: string; title: string }>();
-  const [activeChat, setActiveChat] = useState<{ id: string }>();
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const editTitleInputRef = useRef<HTMLInputElement>(null);
 
   const mappedChats = chats?.map((chat) => ({
     id: chat.id,
-    name: chat.title
-      ? chat.title
-      : chat.logs[0]
-        ? chat.logs[0].title
-        : "New session",
+    name: chat.title ?? "New session",
   }));
 
   const createNewChat = async () => {
     const id = uuid();
     const createdChat = await createChat(id);
-    setCurrentChatInfo({ name: "New session" });
     router.push(`/chat/${createdChat.id}`);
     if (isMobile) {
       closeSidebar();
@@ -74,37 +65,31 @@ const Sidebar = ({
   };
 
   const handleChatClick = (id: string, name: string) => {
-    if (activeChat?.id !== id) {
-      setActiveChat({ id: id });
-    }
     if (!editChat) {
-      router.push(`/chat/${id}`);
       setCurrentChatInfo({ name });
+      router.push(`/chat/${id}`);
       if (isMobile) {
         closeSidebar();
       }
     }
   };
 
-  const handleEditClick = async (id: string, title: string) => {
+  const handleChatNameEdit = async (id: string, title: string) => {
     // If user is editing the name of the chat it curretly is, also modify it in the chat header
     if (title) {
-      if (currentChatId === id) {
-        setCurrentChatInfo({ name: title });
-      }
       await updateChat({ chatId: id, title });
+      setCurrentChatInfo({ name: title });
     }
     setEditChat(undefined);
   };
 
-  const handleDeleteClick = async (id: string) => {
+  const handleChatDelete = async (id: string) => {
     // Remove files associated to chat before removing chat
     await userWorkspace.rmdir("", { recursive: true });
     await deleteChat(id);
-    // If user deletes the chat where it currently is, redirect to main page
     router.replace("/");
     if (isMobile) {
-      await closeSidebar();
+      closeSidebar();
     }
   };
 
@@ -190,7 +175,7 @@ const Sidebar = ({
                                 "relative w-full cursor-pointer overflow-x-hidden text-ellipsis whitespace-nowrap rounded p-1 text-sm text-zinc-100 transition-colors duration-300",
                                 {
                                   "bg-zinc-700 pr-14":
-                                    chat.id === activeChat?.id &&
+                                    chat.id === currentChatId &&
                                     chat.id !== editChat?.id,
                                 },
                                 {
@@ -209,7 +194,7 @@ const Sidebar = ({
                                     defaultValue={chat.name}
                                     onKeyDown={(e) =>
                                       e.key === "Enter" &&
-                                      handleEditClick(
+                                      handleChatNameEdit(
                                         chat.id,
                                         e.currentTarget.value
                                       )
@@ -222,7 +207,7 @@ const Sidebar = ({
                               <div
                                 className={clsx(
                                   "absolute right-1 top-1/2 -translate-y-1/2 transform animate-fade-in items-center",
-                                  chat.id === activeChat?.id &&
+                                  chat.id === currentChatId &&
                                     chat.id !== editChat?.id
                                     ? "flex"
                                     : "hidden opacity-0"
@@ -241,7 +226,7 @@ const Sidebar = ({
                                   <PencilSimple weight="bold" size={16} />
                                 </Button>
                                 <Button
-                                  onClick={() => handleDeleteClick(chat.id)}
+                                  onClick={() => handleChatDelete(chat.id)}
                                   variant="icon"
                                   className="!text-white"
                                 >

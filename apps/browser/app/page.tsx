@@ -49,8 +49,8 @@ function Dojo({ params }: { params: { id?: string } }) {
         <Chat
           isAuthenticated={sessionStatus === "authenticated"}
           onCreateChat={(chatId: string) => {
-            router.push(`/chat/${chatId}`);
-            // setChatInfo({ id: chatId });
+            window.history.pushState(null, "Chat", `/chat/${chatId}`);
+            setChatInfo({ id: chatId });
           }}
         />
       ) : (

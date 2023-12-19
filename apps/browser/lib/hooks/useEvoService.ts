@@ -18,7 +18,7 @@ import { ChatLog } from "@/components/Chat";
 import { EvoThreadCallbacks, EvoThreadConfig } from "@/lib/services/evo/EvoThread";
 import { v4 as uuid } from "uuid";
 import { useAtom } from "jotai";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Workspace, InMemoryWorkspace } from "@evo-ninja/agent-utils";
 import { ChatLogType, ChatMessage } from "@evo-ninja/agents";
 import { SupabaseWorkspace } from "../supabase/SupabaseWorkspace";
@@ -46,7 +46,7 @@ export const useEvoService = (
   const [, setCapReached] = useAtom(capReachedAtom);
   const [, setAccountModalOpen] = useAtom(showAccountModalAtom);
   const [, setError] = useAtom(errorAtom);
-  const [{ name: chatName }, setCurrentChatInfo] = useAtom(chatInfoAtom)
+  const [, setCurrentChatInfo] = useAtom(chatInfoAtom)
 
   // State
   const [isStarting, setIsStarting] = useState<boolean>(false);
@@ -195,7 +195,6 @@ export const useEvoService = (
 
       const currentChat = chats?.find((chat) => chat.id === chatId)
       if (!currentChat || !currentChat?.title) {
-        // Generate title for chat in the background
         GoalApi.generateTitle(chatId, goal).then(async (title) => {
           if (title && chatId) {
             await updateChatTitle({ chatId, title });
