@@ -22,13 +22,18 @@ export async function GET(request: NextRequest) {
   const supabase = createSupabaseClient(session.supabaseAccessToken as string);
   // Only can only fetch chats associated with its ID, so if it doesn't return
   // anything it means it is querying a chat from other user
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("chats")
     .select()
     .eq("id", chatId)
     .single();
   if (error) {
     return NextResponse.json({}, { status: 403 });
+  }
+
+  // If the chat has title, there's no need to ask the LLM; return an empty object
+  if (data.title) {
+    return NextResponse.json({}, { status: 200 });
   }
 
   try {

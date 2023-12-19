@@ -131,7 +131,10 @@ export const useEvoService = (
     if (!currentChat) {
       return [];
     }
-    setCurrentChatInfo({ name: currentChat.title })
+
+    if (currentChat.title) {
+      setCurrentChatInfo({ name: currentChat.title })
+    }
 
     return currentChat.logs;
   }
@@ -193,8 +196,9 @@ export const useEvoService = (
         await handleChatIdChange(chatId);
         onCreateChat(chatId);
       }
+      // Generate title for chat in the background
       GoalApi.generateTitle(chatId, goal).then(async (title) => {
-        if (title && chatId && chatName === "New Session") {
+        if (title && chatId) {
           await updateChatTitle({ chatId, title });
           setCurrentChatInfo({ name: title });
         }

@@ -35,8 +35,10 @@ export class GoalApi {
     );
 
     if (generateTitle.status === 200) {
-      const { message } = await generateTitle.json();
-      return message;
+      const response = await generateTitle.json();
+      if (response.message) {
+        return response.message;
+      }
     }
   }
 }

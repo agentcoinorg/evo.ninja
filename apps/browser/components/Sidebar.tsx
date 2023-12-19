@@ -52,12 +52,17 @@ const Sidebar = ({
 
   const mappedChats = chats?.map((chat) => ({
     id: chat.id,
-    name: chat.title ?? chat.logs[0].title,
+    name: chat.title
+      ? chat.title
+      : chat.logs[0]
+        ? chat.logs[0].title
+        : "New session",
   }));
 
   const createNewChat = async () => {
     const id = uuid();
     const createdChat = await createChat(id);
+    setCurrentChatInfo({ name: "New session" });
     router.push(`/chat/${createdChat.id}`);
     if (isMobile) {
       closeSidebar();
@@ -75,6 +80,7 @@ const Sidebar = ({
   };
 
   const handleEditClick = async (id: string, title: string) => {
+    // If user is editing the name of the chat it curretly is, also modify it in the chat header
     if (currentChatId === id) {
       setCurrentChatInfo({ name: title });
     }
@@ -86,6 +92,10 @@ const Sidebar = ({
     // Remove files associated to chat before removing chat
     await userWorkspace.rmdir(id, { recursive: true });
     await deleteChat(id);
+    // If user deletes the chat where it currently is, redirect to main page
+    if (currentChatId === id) {
+      router.replace("/");
+    }
   };
 
   useEffect(() => {
