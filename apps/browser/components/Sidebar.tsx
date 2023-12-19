@@ -52,12 +52,12 @@ const Sidebar = ({
 
   const mappedChats = chats?.map((chat) => ({
     id: chat.id,
-    name: chat.title,
+    name: chat.title ?? chat.logs[0].title,
   }));
 
   const createNewChat = async () => {
     const id = uuid();
-    const createdChat = await createChat({ chatId: id, title: "New session" });
+    const createdChat = await createChat(id);
     router.push(`/chat/${createdChat.id}`);
     if (isMobile) {
       closeSidebar();

@@ -189,7 +189,7 @@ export const useEvoService = (
       // Create a ChatID
       if (!chatId) {
         chatId = uuid();
-        await createChat({ chatId, title: goal });
+        await createChat(chatId);
         await handleChatIdChange(chatId);
         onCreateChat(chatId);
       }
