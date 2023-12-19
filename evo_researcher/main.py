@@ -106,14 +106,6 @@ def research_autogen(goal: str):
     )
 
     user_proxy.initiate_chat(manager, message=f"Prepare and then execute a research plan for: {goal}")
-
-# @click.command()
-# @click.option('--goal',
-#               prompt='Research goal',
-#               required=True,
-#               help='Research goal')
-# def run(goal: str):
-#     research_langchain(goal)
     
 @click.command()
 @click.option('--prompt',
@@ -124,7 +116,7 @@ def run(
     prompt: str
 ):
     response = autonolas_research(
-                                  "prediction-sentence-embedding-conservative",
+                                  "prediction-sentence-embedding-bold",
                                   prompt)
     
     print(response)
