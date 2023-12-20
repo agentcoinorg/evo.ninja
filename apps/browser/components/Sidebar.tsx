@@ -46,7 +46,7 @@ const Sidebar = ({
   const supabaseClient = useSupabaseClient();
 
   const [editChat, setEditChat] = useState<{ id: string; title: string }>();
-  const [activeChat, setActiveChat] = useState<{ id: string }>();
+  const [activeChat, setActiveChat] = useState<string | undefined>(undefined);
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const editTitleInputRef = useRef<HTMLInputElement>(null);
@@ -80,9 +80,6 @@ const Sidebar = ({
   };
 
   const handleChatClick = (id: string) => {
-    if (activeChat?.id !== id) {
-      setActiveChat({ id: id });
-    }
     if (!editChat) {
       router.push(`/chat/${id}`);
       if (isMobile) {
@@ -106,6 +103,12 @@ const Sidebar = ({
       await closeSidebar();
     }
   };
+
+  useEffect(() => {
+    if (activeChat !== chatId) {
+      setActiveChat(chatId);
+    }
+  }, [chatId, activeChat])
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -189,7 +192,7 @@ const Sidebar = ({
                                 "relative w-full cursor-pointer overflow-x-hidden text-ellipsis whitespace-nowrap rounded p-1 text-sm text-zinc-100 transition-colors duration-300",
                                 {
                                   "bg-zinc-700 pr-14":
-                                    chat.id === activeChat?.id &&
+                                    chat.id === activeChat &&
                                     chat.id !== editChat?.id,
                                 },
                                 {
@@ -220,7 +223,7 @@ const Sidebar = ({
                               <div
                                 className={clsx(
                                   "absolute right-1 top-1/2 -translate-y-1/2 transform animate-fade-in items-center",
-                                  chat.id === activeChat?.id &&
+                                  chat.id === activeChat &&
                                     chat.id !== editChat?.id
                                     ? "flex"
                                     : "hidden opacity-0"
