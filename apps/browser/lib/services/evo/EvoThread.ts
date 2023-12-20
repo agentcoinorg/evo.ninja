@@ -20,6 +20,7 @@ export interface EvoThreadConfig {
 }
 
 export interface EvoThreadState {
+  goal?: string;
   isRunning: boolean;
   isLoading: boolean;
   logs: ChatLog[];
@@ -97,22 +98,25 @@ export class EvoThread {
     this._callbacks.setWorkspace(this._state.workspace);
   }
 
-  async start(options: EvoThreadStartOptions) {
+  async start(options: EvoThreadStartOptions): Promise<void> {
     const {
       goal,
       allowTelemetry,
       openAiApiKey
     } = options;
 
-    // Wait until loading has finished
-    await this.waitForLoad();
-
     if (this._state.isRunning) {
-      this._callbacks?.onError("A goal is already underway.");
+      if (this._state.goal !== options.goal) {
+        this._callbacks?.onError("A goal is already underway.");
+      }
       return;
     }
 
+    this._state.goal = options.goal;
     this.setIsRunning(true);
+
+    // Wait until loading has finished
+    await this.waitForLoad();
 
     // Acquire a GoalID
     const subsidize = !openAiApiKey;
@@ -152,6 +156,7 @@ export class EvoThread {
 
     // Run the evo instance against the goal
     await this.runEvo(evo, options.goal);
+    this._state.goal = undefined;
   }
 
   private async load() {
