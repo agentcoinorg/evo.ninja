@@ -1,6 +1,7 @@
-import pytest 
+import pytest
+from evo_researcher.functions.grade_info import grade_info 
 from evo_researcher.main import research_langchain
-from evo_researcher.autonolas.research import make_prediction, research as research_autonolas
+from evo_researcher.autonolas.research import research as research_autonolas
 
 dataset = [
     "Will Vladimir Putin run for the president of Russia in 2024?",
@@ -12,13 +13,12 @@ dataset = [
     "Will Tether collapse and take down the whole crypto market before the end of 2024?",
 ]
 
-@pytest.mark.skip("Not implemented")
-@pytest.mark.parametrize("question", [question for question in dataset])
+@pytest.mark.parametrize("question", [pytest.param(question, id=question) for question in dataset])
 def test_research(question: str):
     evo_research = research_langchain(question)
     autonolas_research = research_autonolas(question)
     
-    prediction_with_evo_research = make_prediction(question, evo_research)
-    prediction_with_autonolas_research = make_prediction(question, autonolas_research)
+    evo_research_score = grade_info(evo_research, question)
+    autonolas_research_score = grade_info(autonolas_research, question)
     
-    assert prediction_with_evo_research["info_utility"] > prediction_with_autonolas_research["info_utility"]
+    assert evo_research_score.final_grade.grade > autonolas_research_score.final_grade.grade
