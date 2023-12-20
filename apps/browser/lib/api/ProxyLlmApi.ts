@@ -1,4 +1,4 @@
-import { ChatLogs, LlmApi, LlmOptions } from "@evo-ninja/agents";
+import { ChatLogs, LlmApi, LlmModel, LlmOptions } from "@evo-ninja/agents";
 import { ChatCompletionMessage, ChatCompletionTool } from "openai/resources";
 import { ERROR_SUBSIDY_MAX } from "./errors";
 
@@ -9,7 +9,7 @@ export class ProxyLlmApi implements LlmApi {
   private _goalId: string | undefined = undefined;
 
   constructor(
-    private _defaultModel: string,
+    private _defaultModel: LlmModel,
     private _defaultMaxTokens: number,
     private _defaultMaxResponseTokens: number,
     private _setCapReached: () => void
