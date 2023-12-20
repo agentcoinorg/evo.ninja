@@ -9,7 +9,7 @@ import { useSession } from "next-auth/react";
 export interface ChatLogsProps {
   logs: ChatLog[];
   isRunning: boolean;
-  chatName: string | undefined
+  chatName: string
 }
 
 export default function ChatLogs(props: ChatLogsProps) {
