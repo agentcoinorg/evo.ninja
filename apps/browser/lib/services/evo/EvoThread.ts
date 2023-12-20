@@ -140,7 +140,7 @@ export class EvoThread {
       options.openAiApiKey,
       this._config.onMessagesAdded,
       this._config.onVariableSet,
-      (chatLog) => this.onChatLog(chatLog) || Promise.resolve(),
+      (chatLog) => this.onChatLog(chatLog),
       (status) => this._config.onStatusUpdate(status),
       () => this._callbacks?.onGoalCapReached(),
       // onError

@@ -44,10 +44,11 @@ function Dojo({ params }: { params: { id?: string } }) {
 
   const { mutateAsync: createChat } = useCreateChat();
   const { mutateAsync: updateChatTitle } = useUpdateChatTitle();
-  const { logs, isConnected, isStarting, isRunning, handleStart } =
-    useEvoService(chatId, isAuthenticated, (status: string) =>
-      setCurrentStatus(status)
-    );
+  const { logs, isConnected, isStarting, isRunning, handleStart } = useEvoService(
+    chatId,
+    isAuthenticated,
+    setCurrentStatus
+  );
 
   const workspaceUploadUpdate = useWorkspaceUploadUpdate();
 

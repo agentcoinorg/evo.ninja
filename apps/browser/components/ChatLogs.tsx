@@ -32,11 +32,13 @@ export function sanitizeLogs(messages: ChatLog[]): MessageSet[] {
   let currentStepTitle = "";
   let evoMessageFlag = false;
 
-  console.log(messages)
-
   messages.forEach((message, index) => {
     if (!message.title.startsWith("#")) {
-      if (currentMessageSet.userMessage && !evoMessageFlag && message.user === "evo") {
+      if (
+        currentMessageSet.userMessage &&
+        !evoMessageFlag &&
+        message.user === "evo"
+      ) {
         // This is the evoMessage after details
         currentMessageSet.evoMessage = message.title;
         evoMessageFlag = true;
@@ -90,7 +92,10 @@ export default function ChatLogs({
     return sanitizeLogs(logs);
   }, [logs]);
 
-  const [logsDetails, setLogsDetails] = useState({ open: false, index: 0 });
+  const [logsDetails, setLogsDetails] = useState<{
+    open: boolean;
+    index: number;
+  }>({ open: false, index: 0 });
 
   const handleScroll = useCallback(() => {
     // Detect if the user is at the bottom of the list
@@ -164,16 +169,6 @@ export default function ChatLogs({
                     {msg.userMessage}
                   </div>
                 </div>
-                {/* <div className="absolute bottom-1 left-9 hidden animate-fade-in space-x-0.5 group-hover:flex">
-                  <>
-                    <Button variant="icon">
-                      <PencilSimple size={16} className="fill-currentColor" />
-                    </Button>
-                    <Button variant="icon">
-                      <CopySimple size={16} className="fill-currentColor" />
-                    </Button>
-                  </>
-                </div> */}
               </div>
               <div
                 key={index}
@@ -185,55 +180,46 @@ export default function ChatLogs({
                     <>
                       <div className="flex items-center justify-between">
                         <span className="SenderName font-medium">Evo</span>
-                        <span
-                          onClick={() =>
-                            setLogsDetails({
-                              open: true,
-                              index,
-                            })
-                          }
-                        >
-                          Details
-                        </span>
+                        {msg.evoMessage && (
+                          <span
+                            onClick={() =>
+                              setLogsDetails({
+                                open: true,
+                                index,
+                              })
+                            }
+                          >
+                            Details
+                          </span>
+                        )}
                       </div>
                     </>
                     {msg.evoMessage && (
-                      <div className="prose prose-invert w-full max-w-none">
+                      <ReactMarkdown className="prose prose-invert w-full max-w-none">
                         {msg.evoMessage}
-                      </div>
+                      </ReactMarkdown>
                     )}
-                    {!msg.evoMessage && isRunning && (
+                    {!msg.evoMessage && isRunning && sanitizedLogs.length - 1 === index && (
                       <>
                         <div className="flex items-center space-x-2 text-cyan-500">
                           <LoadingCircle />
                           <div className="group flex cursor-pointer items-center space-x-2 text-cyan-500 transition-all duration-500 hover:text-cyan-700">
-                            <div className="group-hover:underline">
+                            <div
+                              className="group-hover:underline"
+                              onClick={() =>
+                                setLogsDetails({
+                                  open: true,
+                                  index,
+                                })
+                              }
+                            >
                               {currentStatus}
                             </div>
-                            {/*  <Button
-                              variant="icon"
-                              className="!text-current !transition-none"
-                            >
-                              <CaretCircleRight size={20} />
-                            </Button>*/}
                           </div>
                         </div>
                       </>
                     )}
                   </div>
-                  {/* <div className="absolute bottom-1 left-9 hidden animate-fade-in space-x-0.5 group-hover:flex">
-                    <>
-                      <Button variant="icon">
-                        <CopySimple size={16} className="fill-currentColor" />
-                      </Button>
-                      <Button variant="icon">
-                        <ThumbsUp size={16} className="fill-currentColor" />
-                      </Button>
-                      <Button variant="icon">
-                        <ThumbsDown size={16} className="fill-currentColor" />
-                      </Button>
-                    </>
-                  </div> */}
                 </div>
               </div>
             </div>
@@ -242,7 +228,7 @@ export default function ChatLogs({
       </div>
       <ChatDetails
         isOpen={logsDetails.open}
-        onClose={() => setLogsDetails({ open: false, index: 0 })}
+        onClose={() => setLogsDetails({ ...logsDetails, open: false })}
         logs={sanitizedLogs[logsDetails.index]}
       />
     </>
