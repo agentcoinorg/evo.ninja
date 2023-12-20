@@ -57,6 +57,12 @@ code {
   @apply bg-transparent;
 }
 
+@supports (-webkit-touch-callout: none) {
+  .h-screen {
+      height: 100dvh; /* Override height for Safari */
+  }
+}
+
 /* In smaller screens, font-sizes smaller than 16px cause
    disruptive zooming. Setting to 16px for input text fields
    fixes this. Issue: https://github.com/polywrap/evo.ninja/issues/620 */
