@@ -41,7 +41,6 @@ const Sidebar = ({
   const { data: chats, isLoading: isLoadingChats } = useChats();
   const { data: session, status } = useSession();
   const { isMobile } = useWindowSize();
-  const [{ id: chatId }, setCurrentChatInfo] = useAtom(chatInfoAtom);
 
   const [editChat, setEditChat] = useState<{ id: string; title: string }>();
   const [activeChat, setActiveChat] = useState<string | undefined>(undefined);
@@ -57,6 +56,7 @@ const Sidebar = ({
   const { mutateAsync: createChat } = useCreateChat();
   const { mutateAsync: deleteChat } = useDeleteChat();
   const { mutateAsync: updateChat } = useUpdateChatTitle();
+  const [{ id: chatId }, setCurrentChatInfo] = useAtom(chatInfoAtom);
   const [isChatLoading, setIsChatLoading] = useAtom(isChatLoadingAtom);
   const [workspace] = useAtom(workspaceAtom);
 
