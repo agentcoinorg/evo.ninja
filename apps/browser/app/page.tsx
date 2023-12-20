@@ -11,8 +11,10 @@ import {
   newGoalSubmittedAtom,
   isChatLoadingAtom,
 } from "@/lib/store";
+import { useChats } from "@/lib/queries/useChats";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";
 import { useUpdateChatTitle } from "@/lib/mutations/useUpdateChatTitle";
+import { ChatApi } from "@/lib/api/ChatApi";
 import { EvoService } from "@/lib/services/evo/EvoService";
 import { useEvoService } from "@/lib/hooks/useEvoService";
 import { useWorkspaceUploadUpdate } from "@/lib/hooks/useWorkspaceUploadUpdate";
@@ -23,8 +25,6 @@ import { useRouter } from "next/navigation";
 import { useAtom } from "jotai";
 import { v4 as uuid } from "uuid";
 import { InMemoryFile } from "@nerfzael/memory-fs";
-import { useChats } from "@/lib/queries/useChats";
-import { ChatApi } from "@/lib/api/ChatApi";
 
 function Dojo({ params }: { params: { id?: string } }) {
   const [evoService, setEvoService] = useAtom(evoServiceAtom);
