@@ -15,7 +15,7 @@ import { useCreateChat } from "@/lib/mutations/useCreateChat";
 import { useUpdateChatTitle } from "@/lib/mutations/useUpdateChatTitle";
 import { EvoService } from "@/lib/services/evo/EvoService";
 import { useEvoService } from "@/lib/hooks/useEvoService";
-import { useWorkspaceUploadSync } from "@/lib/hooks/useWorkspaceUploadSync";
+import { useWorkspaceUploadUpdate } from "@/lib/hooks/useWorkspaceUploadUpdate";
 import Chat from "@/components/Chat";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
@@ -48,7 +48,7 @@ function Dojo({ params }: { params: { id?: string } }) {
     isAuthenticated
   );
 
-  const workspaceUploadSync = useWorkspaceUploadSync();
+  const workspaceUploadUpdate = useWorkspaceUploadUpdate();
 
   const handleChatIdChange = (newChatId?: string) => {
     if (chatId === newChatId) {
@@ -151,7 +151,7 @@ function Dojo({ params }: { params: { id?: string } }) {
             if (!chatId && !isChatLoading) {
               handleCreateNewChat();
             } else if (workspace) {
-              workspaceUploadSync(workspace, uploads);
+              workspaceUploadUpdate(workspace, uploads);
             }
           }}
         />

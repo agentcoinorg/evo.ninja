@@ -6,7 +6,7 @@ import { useDeleteChat } from "@/lib/mutations/useDeleteChat";
 import { useUpdateChatTitle } from "@/lib/mutations/useUpdateChatTitle";
 import { useChats } from "@/lib/queries/useChats";
 import useWindowSize from "@/lib/hooks/useWindowSize";
-import { useWorkspaceUploadSync } from "@/lib/hooks/useWorkspaceUploadSync";
+import { useWorkspaceUploadUpdate } from "@/lib/hooks/useWorkspaceUploadUpdate";
 import Logo from "@/components/Logo";
 import Avatar from "@/components/Avatar";
 import Button from "@/components/Button";
@@ -67,7 +67,7 @@ const Sidebar = ({
   const [isChatLoading, setIsChatLoading] = useAtom(isChatLoadingAtom);
   const [workspace] = useAtom(workspaceAtom);
 
-  const workspaceUploadSync = useWorkspaceUploadSync();
+  const workspaceUploadUpdate = useWorkspaceUploadUpdate();
 
   const handleCreateNewChat = async () => {
     const id = uuid();
@@ -277,7 +277,7 @@ const Sidebar = ({
                   if (!chatId && !isChatLoading) {
                     handleCreateNewChat();
                   } else if (workspace) {
-                    workspaceUploadSync(workspace, uploads);
+                    workspaceUploadUpdate(workspace, uploads);
                   }
                 }}
               />

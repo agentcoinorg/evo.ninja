@@ -1,12 +1,12 @@
 import { workspaceUploadsAtom } from "@/lib/store";
-import { useWorkspaceFilesSync } from "@/lib/hooks/useWorkspaceFilesSync";
+import { useWorkspaceFilesUpdate } from "@/lib/hooks/useWorkspaceFilesUpdate";
 import { useAtom } from "jotai";
 import { Workspace } from "@evo-ninja/agent-utils";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 
-export const useWorkspaceUploadSync = () => {
+export const useWorkspaceUploadUpdate = () => {
   const [workspaceUploads, setWorkspaceUploads] = useAtom(workspaceUploadsAtom);
-  const workspaceFilesSync = useWorkspaceFilesSync();
+  const workspaceFilesUpdate = useWorkspaceFilesUpdate();
 
   return async (workspace: Workspace, uploads?: InMemoryFile[]) => {
     uploads = uploads || workspaceUploads;
@@ -25,6 +25,6 @@ export const useWorkspaceUploadSync = () => {
         decoder.decode(file.content)
       ))
     );
-    await workspaceFilesSync(workspace);
+    await workspaceFilesUpdate(workspace);
   }
 }

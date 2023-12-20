@@ -14,8 +14,8 @@ import { useAddVariable } from "@/lib/mutations/useAddVariable";
 import { useChats } from "@/lib/queries/useChats";
 import { SupabaseWorkspace } from "@/lib/supabase/SupabaseWorkspace";
 import { useSupabaseClient } from "@/lib/supabase/useSupabaseClient";
-import { useWorkspaceFilesSync } from "@/lib/hooks/useWorkspaceFilesSync";
-import { useWorkspaceUploadSync } from "@/lib/hooks/useWorkspaceUploadSync";
+import { useWorkspaceFilesUpdate } from "@/lib/hooks/useWorkspaceFilesUpdate";
+import { useWorkspaceUploadUpdate } from "@/lib/hooks/useWorkspaceUploadUpdate";
 import { ChatLog } from "@/components/Chat";
 import { Workspace, InMemoryWorkspace } from "@evo-ninja/agent-utils";
 import { ChatLogType, ChatMessage } from "@evo-ninja/agents";
@@ -58,8 +58,8 @@ export const useEvoService = (
   const { data: chats, refetch: fetchChats } = useChats();
 
   // Helpers
-  const workspaceFilesSync = useWorkspaceFilesSync();
-  const workspaceUploadSync = useWorkspaceUploadSync();
+  const workspaceFilesUpdate = useWorkspaceFilesUpdate();
+  const workspaceUploadUpdate = useWorkspaceUploadUpdate();
 
   const setChatLog = (chatLog: ChatLog[]) => {
     // If the most recent message is the user's goal,
@@ -141,14 +141,14 @@ export const useEvoService = (
       new SupabaseWorkspace(chatId, supabase.storage) :
       new InMemoryWorkspace();
 
-    await workspaceUploadSync(workspace);
+    await workspaceUploadUpdate(workspace);
 
     return workspace;
   };
 
   const setWorkspace = async (workspace: Workspace) => {
     setWorkspaceAtom(workspace);
-    await workspaceFilesSync(workspace);
+    await workspaceFilesUpdate(workspace);
   };
 
   const handleChatLogAdded = async (log: ChatLog) => {

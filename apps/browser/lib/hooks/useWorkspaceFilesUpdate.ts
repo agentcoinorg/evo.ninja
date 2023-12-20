@@ -3,7 +3,7 @@ import { Workspace } from "@evo-ninja/agent-utils";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import { workspaceFilesAtom } from "@/lib/store";
 
-export const useWorkspaceFilesSync = () => {
+export const useWorkspaceFilesUpdate = () => {
   const [, setWorkspaceFiles] = useAtom(workspaceFilesAtom);
 
   return async (workspace: Workspace) => {
