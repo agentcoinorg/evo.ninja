@@ -1,25 +1,24 @@
 import {
   showDisclaimerAtom,
   errorAtom,
-  localOpenAiApiKeyAtom,
   chatIdAtom,
   welcomeModalAtom,
   signInModalAtom,
   settingsModalAtom,
 } from "@/lib/store";
-import { useEvoService } from "@/lib/hooks/useEvoService";
-import { UploadSimple } from "@phosphor-icons/react";
+import { useWorkspaceUploadDrop } from "@/lib/hooks/useWorkspaceUploadDrop";
 import ExamplePrompts from "@/components/ExamplePrompts";
 import ChatLogs from "@/components/ChatLogs";
 import Disclaimer from "@/components/modals/Disclaimer";
-import React, { useState, ChangeEvent, memo } from "react";
+import Logo from "@/components/Logo";
+import Button from "@/components/Button";
+import ChatInputButton from "@/components/ChatInputButton";
+import TextField from "@/components/TextField";
+import React, { useState, ChangeEvent } from "react";
+import { UploadSimple } from "@phosphor-icons/react";
 import { useAtom } from "jotai";
 import clsx from "clsx";
-import Logo from "./Logo";
-import Button from "./Button";
-import ChatInputButton from "./ChatInputButton";
-import TextField from "./TextField";
-import { useUploadFiles } from "@/lib/hooks/useUploadFile";
+import { InMemoryFile } from "@nerfzael/memory-fs";
 
 export interface ChatLog {
   title: string;
@@ -29,62 +28,40 @@ export interface ChatLog {
 }
 
 export interface ChatProps {
-  isAuthenticated: boolean;
-  onCreateChat: (chatId: string) => void;
+  logs: ChatLog[];
+  isStarting: boolean;
+  isRunning: boolean;
+  onGoalSubmit: (goal: string) => Promise<void>;
+  onUpload: (upload: InMemoryFile[]) => void;
 }
 
 const Chat: React.FC<ChatProps> = ({
-  isAuthenticated,
-  onCreateChat,
+  logs,
+  isStarting,
+  isRunning,
+  onGoalSubmit,
+  onUpload,
 }: ChatProps) => {
-  const [chatId] = useAtom(chatIdAtom);
-  const { getInputProps, open } = useUploadFiles();
+  const [chatId, ] = useAtom(chatIdAtom);
   const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom);
   const [, setError] = useAtom(errorAtom);
-  const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom);
-  const [welcomeModalOpen, setWelcomeModalOpen] = useAtom(welcomeModalAtom);
+  const [welcomeModalOpen] = useAtom(welcomeModalAtom);
   const [signInModalOpen] = useAtom(signInModalAtom);
   const [settingsModalOpen] = useAtom(settingsModalAtom)
 
   const [message, setMessage] = useState<string>("");
-  const [goalSent, setGoalSent] = useState<boolean>(false);
-  const { logs, isStarting, isRunning, handleStart } = useEvoService(
-    chatId,
-    isAuthenticated,
-    onCreateChat
-  );
-  const shouldShowExamplePrompts = !logs || logs.length === 0;
 
-  const handleGoalSubmit = (goal: string) => {
+  const { getInputProps, open } = useWorkspaceUploadDrop(onUpload);
+
+  const shouldShowExamplePrompts = !chatId || (!logs.length && !isStarting && !isRunning);
+
+  const handleGoalSubmit = async (goal: string): Promise<void> => {
     if (!goal) {
       setError("Please enter a goal.");
       return;
     }
-
-    if (isStarting || isRunning) {
-      setError("Goal is already in progress.");
-      return;
-    }
-
-    const firstTimeUser = !localOpenAiApiKey && !isAuthenticated;
-    if (firstTimeUser) {
-      setWelcomeModalOpen(true);
-      return;
-    }
-
-    handleStart(goal);
     setMessage("");
-    setGoalSent(true);
-  };
-
-  const handleMessageChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setMessage(event.target.value);
-  };
-
-  const handleKeyPress = async (event: React.KeyboardEvent) => {
-    if (event.key === "Enter" && !isStarting && !isRunning) {
-      await handleGoalSubmit(message);
-    }
+    return onGoalSubmit(goal);
   };
 
   return (
@@ -93,10 +70,10 @@ const Chat: React.FC<ChatProps> = ({
         "items-center justify-center": shouldShowExamplePrompts,
       })}
     >
-      {shouldShowExamplePrompts && !goalSent ? (
+      {shouldShowExamplePrompts ? (
         <Logo wordmark={false} className="mb-16 w-16" />
       ) : (
-        <ChatLogs isRunning={isStarting || isRunning} logs={logs ?? []} />
+        <ChatLogs isRunning={isStarting || isRunning} logs={logs} />
       )}
 
       <div
@@ -107,9 +84,9 @@ const Chat: React.FC<ChatProps> = ({
             : "mx-auto max-w-[56rem] flex-col px-4"
         )}
       >
-        {shouldShowExamplePrompts && !goalSent && (
+        {shouldShowExamplePrompts && (
           <ExamplePrompts
-            onClick={async (prompt: string) => await handleGoalSubmit(prompt)}
+            onClick={handleGoalSubmit}
           />
         )}
         <div
@@ -121,8 +98,14 @@ const Chat: React.FC<ChatProps> = ({
           <TextField
             type="text"
             value={message}
-            onChange={handleMessageChange}
-            onKeyDown={handleKeyPress}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => {
+              setMessage(event.target.value)
+            }}
+            onKeyDown={(event: React.KeyboardEvent) => {
+              if (event.key === "Enter" && !isStarting && !isRunning) {
+                return handleGoalSubmit(message);
+              }
+            }}
             placeholder="Ask Evo anything..."
             className="!rounded-lg !p-4 !pl-12"
             leftAdornment={
@@ -137,7 +120,7 @@ const Chat: React.FC<ChatProps> = ({
               <ChatInputButton
                 running={isRunning}
                 message={message}
-                handleSend={async () => await handleGoalSubmit(message)}
+                handleSend={() => handleGoalSubmit(message)}
               />
             }
             rightAdornmentClassnames="!right-3"
@@ -153,4 +136,4 @@ const Chat: React.FC<ChatProps> = ({
   );
 };
 
-export default memo(Chat);
+export default Chat;

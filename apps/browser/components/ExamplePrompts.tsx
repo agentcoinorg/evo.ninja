@@ -1,4 +1,5 @@
-import { localOpenAiApiKeyAtom, uploadedFilesAtom, welcomeModalAtom } from "@/lib/store";
+import { workspaceAtom, workspaceUploadsAtom, localOpenAiApiKeyAtom, welcomeModalAtom } from "@/lib/store";
+import { useWorkspaceUploadUpdate } from "@/lib/hooks/useWorkspaceUploadUpdate";
 import { examplePrompts, ExamplePrompt } from "@/lib/examplePrompts";
 import { useAtom } from "jotai";
 import clsx from "clsx";
@@ -10,9 +11,11 @@ export interface ExamplePromptsProps {
 }
 
 export default function ExamplePrompts(props: ExamplePromptsProps) {
-  const [, setUploadedFiles] = useAtom(uploadedFilesAtom);
+  const [workspace] = useAtom(workspaceAtom);
+  const [, setWorkspaceUploads] = useAtom(workspaceUploadsAtom);
   const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom)
   const [,setWelcomeModalOpen] = useAtom(welcomeModalAtom)
+  const workspaceUploadUpdate = useWorkspaceUploadUpdate();
   const { isMobile } = useWindowSize();
   const { status } = useSession()
   const firstTimeUser = !localOpenAiApiKey && status !== "authenticated"
@@ -23,7 +26,10 @@ export default function ExamplePrompts(props: ExamplePromptsProps) {
       return
     }
     if (prompt.files) {
-      setUploadedFiles(prompt.files);
+      setWorkspaceUploads(prompt.files);
+      if (workspace) {
+        workspaceUploadUpdate(workspace, prompt.files)
+      }
     }
     return props.onClick(prompt.prompt);
   };
