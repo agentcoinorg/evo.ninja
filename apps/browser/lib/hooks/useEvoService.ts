@@ -6,7 +6,6 @@ import {
   showAccountModalAtom,
   workspaceAtom,
   errorAtom,
-  chatInfoAtom,
 } from "@/lib/store";
 import { EvoThreadCallbacks, EvoThreadConfig } from "@/lib/services/evo/EvoThread";
 import { useAddChatLog } from "@/lib/mutations/useAddChatLog";
@@ -43,7 +42,6 @@ export const useEvoService = (
   const [, setCapReached] = useAtom(capReachedAtom);
   const [, setAccountModalOpen] = useAtom(showAccountModalAtom);
   const [, setError] = useAtom(errorAtom);
-  const [, setCurrentChatInfo] = useAtom(chatInfoAtom)
 
   // State
   const [isConnected, setIsConnected] = useState<boolean>(false);
