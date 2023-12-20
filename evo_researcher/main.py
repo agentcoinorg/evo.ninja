@@ -9,6 +9,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.output_parsers import CommaSeparatedListOutputParser
 from langchain.schema.output_parser import StrOutputParser
 from langchain.prompts import ChatPromptTemplate
+from evo_researcher.autonolas.research import research as research_autonolas
 from evo_researcher.agents.planner import create_planner
 from evo_researcher.agents.researcher import create_researcher
 from evo_researcher.functions.web_scrape import web_scrape
@@ -16,6 +17,8 @@ from evo_researcher.functions.web_research import web_search
 
 load_dotenv()
 config_list = config_list_from_json("OAI_CONFIG_LIST")
+
+AVAILABLE_AGENTS = ["autonolas", "evo"]
 
 def research_langchain(goal: str):
     planning_prompt_template = """
@@ -111,10 +114,21 @@ def research_autogen(goal: str):
               prompt='Prompt',
               required=True,
               help='Prompt')
+@click.option('--agent',
+              prompt=f"Agent to use ({AVAILABLE_AGENTS})",
+              required=True,
+              help='Agent')
 def run(
-    prompt: str
+    prompt: str,
+    agent: str
 ):
-    research_response = research_langchain(prompt)
+    if agent == "autonolas":
+        research_response = research_autonolas(prompt)
+    elif agent == "evo":
+        research_response = research_langchain(prompt)
+    else:
+        raise Exception(f"Invalid agent. Available agents: {AVAILABLE_AGENTS}")
+    
     print(research_response)
     
 
