@@ -9,7 +9,7 @@ interface ChatInfo {
   name: string | undefined;
 }
 export const chatInfoAtom = atom<ChatInfo, Partial<ChatInfo>[], ChatInfo>(
-  { id: "<anon>", name: undefined },
+  { id: undefined, name: undefined },
   (get, set, args) => {
     const currentState: ChatInfo = get(chatInfoAtom);
     const newState: ChatInfo = set(chatInfoAtom, { ...currentState, ...args });
