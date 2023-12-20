@@ -7,8 +7,16 @@ poetry shell
 
 # Run
 
+With Evo:
+
 ```bash
-poetry run python ./evo_researcher/main.py --prompt="Is nayib bukele going to run for president again?"
+poetry run python ./evo_researcher/main.py --prompt="Is nayib bukele going to run for president again?" --agent="evo"
+```
+
+With Autonolas:
+
+```bash
+poetry run python ./evo_researcher/main.py --prompt="Is nayib bukele going to run for president again?" --agent="autonolas"
 ```
 
 # Test
