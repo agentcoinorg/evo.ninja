@@ -5,17 +5,19 @@ import clsx from "clsx";
 import FileIcon from "./FileIcon";
 import { DownloadSimple, FilePlus } from "@phosphor-icons/react";
 import Button from "./Button";
-import { useUploadFiles } from "@/lib/hooks/useUploadFile";
+import { useWorkspaceUploadDrop } from "@/lib/hooks/useWorkspaceUploadDrop";
 import { useAtom } from "jotai";
-import { userFilesAtom } from "@/lib/store";
+import { workspaceFilesAtom, workspaceUploadsAtom } from "@/lib/store";
 import { useDownloadWorkspaceAsZip } from "@/lib/hooks/useDownloadWorkspaceAsZip";
 
-// TODO(cbrzn): Update when supabase bucket workspace is attached
-const loadedWorkspace = true;
+export interface WorkspaceProps {
+  onUpload: (uploads: InMemoryFile[]) => void;
+}
 
-function CurrentWorkspace() {
-  const { getRootProps, getInputProps, isDragAccept, open } = useUploadFiles();
-  const [userFiles] = useAtom(userFilesAtom);
+function Workspace({ onUpload }: WorkspaceProps) {
+  const { getRootProps, getInputProps, isDragAccept, open } = useWorkspaceUploadDrop(onUpload);
+  const [workspaceFiles] = useAtom(workspaceFilesAtom);
+  const [workspaceUploads] = useAtom(workspaceUploadsAtom);
   const downloadFilesAsZip = useDownloadWorkspaceAsZip()
 
   function getFileType(path: InMemoryFile["path"]) {
@@ -23,34 +25,38 @@ function CurrentWorkspace() {
     return path.substring(index + 1);
   }
 
+  const workspaceLoading = workspaceUploads.length > 0;
+
   return (
     <div className="p-2">
       <div className="flex w-full items-center justify-between space-x-1 px-2">
         <div className="text-xs uppercase tracking-widest text-zinc-500">
           Current Workspace
         </div>
-        {loadedWorkspace && (
-          <div className="flex items-center space-x-1">
-            <Button variant="icon" onClick={open}>
-              <FilePlus size={18} weight="bold" />
+        <div className="flex items-center space-x-1">
+          <Button variant="icon" onClick={open}>
+            <FilePlus size={18} weight="bold" />
+          </Button>
+          <input {...getInputProps()} />
+          {workspaceFiles.length !== 0 && (
+            <Button
+              variant="icon"
+              className="text-zinc-500 hover:text-cyan-500"
+              onClick={downloadFilesAsZip}
+            >
+              <DownloadSimple size={18} weight="bold" />
             </Button>
-            <input {...getInputProps()} />
-            {userFiles.length !== 0 && (
-              <Button
-                variant="icon"
-                className="text-zinc-500 hover:text-cyan-500"
-                onClick={downloadFilesAsZip}
-              >
-                <DownloadSimple size={18} weight="bold" />
-              </Button>
-            )}
-          </div>
-        )}
+          )}
+        </div>
       </div>
-      {loadedWorkspace ? (
-        <>
-          <div className="relative h-full max-h-[24vh] overflow-y-auto">
-            {userFiles.length === 0 ? (
+      <div className="relative h-full max-h-[24vh] overflow-y-auto">
+        {workspaceLoading ? (
+          <div className="flex h-full w-full items-center justify-center">
+            <div className="h-9 w-9 animate-spin rounded-full border-4 border-black/10 border-l-cyan-600" />
+          </div>
+        ) : (
+          <>
+            {workspaceFiles.length === 0 ? (
               <div
                 className="mt-1 flex cursor-pointer flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed border-zinc-500 p-7 text-center transition-colors duration-300 hover:border-cyan-500 hover:bg-zinc-950 hover:text-cyan-500"
                 onClick={open}
@@ -74,7 +80,7 @@ function CurrentWorkspace() {
                     ),
                   })}
                 >
-                  {userFiles.map((file, i) => {
+                  {workspaceFiles.map((file, i) => {
                     return (
                       <div
                         key={i}
@@ -95,13 +101,11 @@ function CurrentWorkspace() {
                 </div>
               </>
             )}
-          </div>
-        </>
-      ) : (
-        <div className="m-2 mt-1 h-[20vh] w-[calc(100%-1rem)] animate-pulse rounded-lg bg-zinc-700" />
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
 
-export default CurrentWorkspace;
+export default Workspace;

@@ -1,8 +1,17 @@
+import { isChatLoadingAtom, workspaceAtom, chatInfoAtom } from "@/lib/store";
+import { useCreateChat } from "@/lib/mutations/useCreateChat";
+import { useDeleteChat } from "@/lib/mutations/useDeleteChat";
+import { useUpdateChatTitle } from "@/lib/mutations/useUpdateChatTitle";
+import { useChats } from "@/lib/queries/useChats";
+import useWindowSize from "@/lib/hooks/useWindowSize";
+import { useWorkspaceUploadUpdate } from "@/lib/hooks/useWorkspaceUploadUpdate";
+import Logo from "@/components/Logo";
+import Avatar from "@/components/Avatar";
+import Button from "@/components/Button";
+import TextField from "@/components/TextField";
+import DropdownAccount from "@/components/DropdownAccount";
+import Workspace from "@/components/Workspace";
 import React, { memo, useEffect, useRef, useState } from "react";
-import Logo from "./Logo";
-import clsx from "clsx";
-import DropdownAccount from "./DropdownAccount";
-import CurrentWorkspace from "./CurrentWorkspace";
 import {
   DiscordLogo,
   GithubLogo,
@@ -10,19 +19,12 @@ import {
   PencilSimple,
   TrashSimple,
 } from "@phosphor-icons/react";
-import Avatar from "./Avatar";
-import Button from "./Button";
-import { useCreateChat } from "@/lib/mutations/useCreateChat";
-import { useChats } from "@/lib/queries/useChats";
 import { useRouter } from "next/navigation";
-import { v4 as uuid } from "uuid";
 import { useSession } from "next-auth/react";
-import { useDeleteChat } from "@/lib/mutations/useDeleteChat";
-import { chatInfoAtom, userWorkspaceAtom } from "@/lib/store";
+import { v4 as uuid } from "uuid";
 import { useAtom } from "jotai";
-import useWindowSize from "@/lib/hooks/useWindowSize";
-import TextField from "./TextField";
-import { useUpdateChatTitle } from "@/lib/mutations/useUpdateChatTitle";
+import clsx from "clsx";
+import { InMemoryFile } from "@nerfzael/memory-fs";
 
 export interface SidebarProps {
   hoveringSidebarButton: boolean;
@@ -36,16 +38,13 @@ const Sidebar = ({
   closeSidebar,
 }: SidebarProps) => {
   const router = useRouter();
-  const { mutateAsync: createChat } = useCreateChat();
-  const { mutateAsync: deleteChat } = useDeleteChat();
-  const { mutateAsync: updateChat } = useUpdateChatTitle();
   const { data: chats, isLoading: isLoadingChats } = useChats();
   const { data: session, status } = useSession();
   const { isMobile } = useWindowSize();
+  const [{ id: chatId }, setCurrentChatInfo] = useAtom(chatInfoAtom);
 
-  const [userWorkspace] = useAtom(userWorkspaceAtom);
-  const [{ id: currentChatId }, setCurrentChatInfo] = useAtom(chatInfoAtom);
   const [editChat, setEditChat] = useState<{ id: string; title: string }>();
+  const [activeChat, setActiveChat] = useState<string | undefined>(undefined);
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const editTitleInputRef = useRef<HTMLInputElement>(null);
@@ -55,10 +54,20 @@ const Sidebar = ({
     name: chat.title ?? "New session",
   }));
 
-  const createNewChat = async () => {
+  const { mutateAsync: createChat } = useCreateChat();
+  const { mutateAsync: deleteChat } = useDeleteChat();
+  const { mutateAsync: updateChat } = useUpdateChatTitle();
+  const [isChatLoading, setIsChatLoading] = useAtom(isChatLoadingAtom);
+  const [workspace] = useAtom(workspaceAtom);
+
+  const workspaceUploadUpdate = useWorkspaceUploadUpdate();
+
+  const handleCreateNewChat = async () => {
     const id = uuid();
-    const createdChat = await createChat(id);
-    router.push(`/chat/${createdChat.id}`);
+    await createChat(id);
+    router.push(`/chat/${id}`);
+    setCurrentChatInfo({ name: undefined });
+    setIsChatLoading(true);
     if (isMobile) {
       closeSidebar();
     }
@@ -66,8 +75,8 @@ const Sidebar = ({
 
   const handleChatClick = (id: string, name: string) => {
     if (!editChat) {
-      setCurrentChatInfo({ name });
       router.push(`/chat/${id}`);
+      setCurrentChatInfo({ name });
       if (isMobile) {
         closeSidebar();
       }
@@ -85,13 +94,20 @@ const Sidebar = ({
 
   const handleChatDelete = async (id: string) => {
     // Remove files associated to chat before removing chat
-    await userWorkspace.rmdir("", { recursive: true });
+    await workspace?.rmdir("", { recursive: true });
     await deleteChat(id);
+    setCurrentChatInfo({ name: undefined });
     router.replace("/");
     if (isMobile) {
       closeSidebar();
     }
   };
+
+  useEffect(() => {
+    if (activeChat !== chatId) {
+      setActiveChat(chatId);
+    }
+  }, [chatId, activeChat])
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -158,7 +174,7 @@ const Sidebar = ({
                       Recent Chats
                     </div>
                     {!isLoadingChats && (
-                      <Button variant="icon" onClick={createNewChat}>
+                      <Button variant="icon" onClick={handleCreateNewChat}>
                         <NotePencil size={18} weight="bold" />
                       </Button>
                     )}
@@ -175,7 +191,7 @@ const Sidebar = ({
                                 "relative w-full cursor-pointer overflow-x-hidden text-ellipsis whitespace-nowrap rounded p-1 text-sm text-zinc-100 transition-colors duration-300",
                                 {
                                   "bg-zinc-700 pr-14":
-                                    chat.id === currentChatId &&
+                                    chat.id === activeChat &&
                                     chat.id !== editChat?.id,
                                 },
                                 {
@@ -192,13 +208,14 @@ const Sidebar = ({
                                   <TextField
                                     className="!border-none !p-1 focus:!bg-zinc-950"
                                     defaultValue={chat.name}
-                                    onKeyDown={(e) =>
-                                      e.key === "Enter" &&
-                                      handleChatNameEdit(
-                                        chat.id,
-                                        e.currentTarget.value
-                                      )
-                                    }
+                                    onKeyDown={async (e) => {
+                                      if (e.key === "Enter") {
+                                        await handleChatNameEdit(
+                                          chat.id,
+                                          e.currentTarget.value
+                                        )
+                                      }
+                                    }}
                                   />
                                 </div>
                               ) : (
@@ -207,7 +224,7 @@ const Sidebar = ({
                               <div
                                 className={clsx(
                                   "absolute right-1 top-1/2 -translate-y-1/2 transform animate-fade-in items-center",
-                                  chat.id === currentChatId &&
+                                  chat.id === activeChat &&
                                     chat.id !== editChat?.id
                                     ? "flex"
                                     : "hidden opacity-0"
@@ -238,7 +255,7 @@ const Sidebar = ({
                         </div>
                       ) : (
                         <div
-                          onClick={createNewChat}
+                          onClick={handleCreateNewChat}
                           className="mt-1 flex cursor-pointer flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed border-zinc-500 p-7 text-center transition-colors duration-300 hover:border-cyan-500 hover:bg-zinc-950 hover:text-cyan-500"
                         >
                           <NotePencil
@@ -256,7 +273,15 @@ const Sidebar = ({
                   )}
                 </div>
               )}
-              <CurrentWorkspace />
+              <Workspace
+                onUpload={(uploads: InMemoryFile[]) => {
+                  if (!chatId && !isChatLoading) {
+                    handleCreateNewChat();
+                  } else if (workspace) {
+                    workspaceUploadUpdate(workspace, uploads);
+                  }
+                }}
+              />
             </div>
             <div className="relative flex w-full items-center justify-between space-x-2 p-4">
               {status !== "loading" ? (
