@@ -12,6 +12,7 @@ import {
   isChatLoadingAtom,
 } from "@/lib/store";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";
+import { useUpdateChatTitle } from "@/lib/mutations/useUpdateChatTitle";
 import { EvoService } from "@/lib/services/evo/EvoService";
 import { useEvoService } from "@/lib/hooks/useEvoService";
 import { useWorkspaceUploadSync } from "@/lib/hooks/useWorkspaceUploadSync";
@@ -41,6 +42,7 @@ function Dojo({ params }: { params: { id?: string } }) {
   const isAuthenticated = sessionStatus === "authenticated";
 
   const { mutateAsync: createChat } = useCreateChat();
+  const { mutateAsync: updateChatTitle } = useUpdateChatTitle();
   const { logs, isConnected, isStarting, isRunning, handleStart } = useEvoService(
     chatId,
     isAuthenticated
@@ -68,6 +70,7 @@ function Dojo({ params }: { params: { id?: string } }) {
     await createChat(id);
     router.push(`/chat/${id}`);
     setIsChatLoading(true);
+    return id;
   };
 
   const handleGoalSubmit = async (goal: string): Promise<void> => {
@@ -86,10 +89,8 @@ function Dojo({ params }: { params: { id?: string } }) {
     let goalChatId = chatId;
 
     if (!goalChatId) {
-      goalChatId = uuid();
-      await createChat(goalChatId);
-      router.push(`/chat/${goalChatId}`);
-      setIsChatLoading(true);
+      goalChatId = await handleCreateNewChat();
+      await updateChatTitle({ chatId: goalChatId, title: goal })
     }
 
     setNewGoalSubmitted({
