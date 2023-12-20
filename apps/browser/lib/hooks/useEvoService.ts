@@ -27,7 +27,8 @@ import { useUpdateChatTitle } from "../mutations/useUpdateChatTitle";
 export const useEvoService = (
   chatId: string | "<anon>" | undefined,
   isAuthenticated: boolean,
-  onCreateChat: (chatId: string) => void
+  onCreateChat: (chatId: string) => void,
+  handleStatusUpdate: (status: string) => void
 ): {
   logs: ChatLog[] | undefined;
   isStarting: boolean;
@@ -91,6 +92,7 @@ export const useEvoService = (
       loadChatLog,
       loadWorkspace,
       onChatLogAdded: handleChatLogAdded,
+      onStatusUpdate: handleStatusUpdate,
       onMessagesAdded: handleMessagesAdded,
       onVariableSet: handleVariableSet
     };

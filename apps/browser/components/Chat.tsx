@@ -43,13 +43,15 @@ const Chat: React.FC<ChatProps> = ({
   const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom);
   const [, setAccountModalOpen] = useAtom(showAccountModalAtom);
   const [welcomeModalSeen] = useAtom(welcomeModalAtom);
+  const [currentStatus, setCurrentStatus] = useState<string>();
 
   const [message, setMessage] = useState<string>("");
   const [goalSent, setGoalSent] = useState<boolean>(false);
   const { logs, isStarting, isRunning, handleStart } = useEvoService(
     chatId,
     isAuthenticated,
-    onCreateChat
+    onCreateChat,
+    (status: string) => setCurrentStatus(status)
   );
   const shouldShowExamplePrompts = !logs || logs.length === 0;
 
@@ -95,7 +97,7 @@ const Chat: React.FC<ChatProps> = ({
       {shouldShowExamplePrompts && !goalSent ? (
         <Logo wordmark={false} className="mb-16 w-16" />
       ) : (
-        <ChatLogs isRunning={isStarting || isRunning} logs={logs ?? []} />
+        <ChatLogs currentStatus={currentStatus} isRunning={isStarting || isRunning} logs={logs ?? []} />
       )}
 
       <div

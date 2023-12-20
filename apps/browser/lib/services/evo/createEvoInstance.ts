@@ -30,6 +30,7 @@ export function createEvoInstance(
   onMessagesAdded: (type: ChatLogType, messages: ChatMessage[]) => Promise<void>,
   onVariableSet: (key: string, value: string) => Promise<void>,
   onChatLog: (chatLog: ChatLog) => Promise<void>,
+  onStatusUpdate: (status: string) => void,
   onGoalCapReached: () => void,
   onError: (error: string) => void
 ): Evo | undefined {
@@ -41,6 +42,7 @@ export function createEvoInstance(
           title: message,
         });
       },
+      onStatusUpdate
     });
     const logger = new Logger([browserLogger, new ConsoleLogger()], {
       promptUser: () => Promise.resolve("N/A"),

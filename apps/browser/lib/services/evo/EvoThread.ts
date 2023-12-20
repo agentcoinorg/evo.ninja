@@ -14,6 +14,7 @@ export interface EvoThreadConfig {
   loadChatLog: (chatId: string) => Promise<ChatLog[]>;
   loadWorkspace: (chatId: string) => Promise<Workspace>;
   onChatLogAdded: (chatLog: ChatLog) => Promise<void>;
+  onStatusUpdate: (status: string) => void;
   onMessagesAdded: (type: ChatLogType, messages: ChatMessage[]) => Promise<void>;
   onVariableSet: (key: string, value: string) => Promise<void>;
 }
@@ -135,13 +136,11 @@ export class EvoThread {
       options.openAiApiKey,
       this._config.onMessagesAdded,
       this._config.onVariableSet,
-      (chatLog) =>
-        this.onChatLog(chatLog) || Promise.resolve(),
-      () =>
-        this._callbacks?.onGoalCapReached(),
+      (chatLog) => this.onChatLog(chatLog) || Promise.resolve(),
+      (status) => this._config.onStatusUpdate(status),
+      () => this._callbacks?.onGoalCapReached(),
       // onError
-      (error) =>
-        this._callbacks?.onError(error)
+      (error) => this._callbacks?.onError(error)
     );
 
     if (!evo) {
@@ -209,31 +208,19 @@ export class EvoThread {
     let stepCounter = 1;
 
     while (this._state.isRunning) {
+      await this.onChatLog({
+        title: `## Step ${stepCounter}`,
+        user: "evo",
+      });
       const response = await iterator.next();
 
       this._callbacks?.setWorkspace(this._state.workspace);
 
       if (response.done) {
-        const actionTitle = response.value.value.title;
-        if (
-          actionTitle.includes("onGoalAchieved") ||
-          actionTitle === "SUCCESS"
-        ) {
-          await this.onChatLog({
-            title: "## Goal Achieved",
-            user: "evo",
-          });
-        }
-
         this.setIsRunning(false);
         evo?.reset();
         break;
       }
-
-      await this.onChatLog({
-        title: `## Step ${stepCounter}`,
-        user: "evo",
-      });
 
       if (!response.done) {
         const evoMessage = {

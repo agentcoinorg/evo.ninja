@@ -1,18 +1,81 @@
 import { ChatLog } from "@/components/Chat";
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import ReactMarkdown from "react-markdown";
 import LoadingCircle from "./LoadingCircle";
 import Avatar from "./Avatar";
 import Logo from "./Logo";
 import { useSession } from "next-auth/react";
+import ChatDetails from "./modals/ChatDetails";
 
 export interface ChatLogsProps {
   logs: ChatLog[];
   isRunning: boolean;
+  currentStatus: string | undefined;
 }
 
-export default function ChatLogs(props: ChatLogsProps) {
-  const { logs, isRunning } = props;
+export type MessageSet = {
+  userMessage: string;
+  evoMessage?: string;
+  details: Record<string, string[]>;
+};
+
+export function sanitizeLogs(messages: ChatLog[]): MessageSet[] {
+  if (!messages || !messages.length) return [];
+  const dividedMessages: MessageSet[] = [];
+  let currentMessageSet: MessageSet = { userMessage: "", details: {} };
+  let currentStepTitle = "";
+  let evoMessageFlag = false;
+
+  console.log(messages)
+
+  messages.forEach((message, index) => {
+    if (!message.title.startsWith("#")) {
+      if (currentMessageSet.userMessage && !evoMessageFlag && message.user === "evo") {
+        // This is the evoMessage after details
+        currentMessageSet.evoMessage = message.title;
+        evoMessageFlag = true;
+      } else if (!currentMessageSet.userMessage && message.user === "user") {
+        // This is the initial userMessage
+        currentMessageSet.userMessage = message.title;
+        evoMessageFlag = false;
+      } else {
+        // New set starts here
+        dividedMessages.push(currentMessageSet);
+        currentMessageSet = { userMessage: message.title, details: {} };
+        currentStepTitle = "";
+        evoMessageFlag = false;
+      }
+    } else {
+      if (message.title.startsWith("## ")) {
+        // New step title
+        currentStepTitle = message.title;
+        currentMessageSet.details[currentStepTitle] = [];
+      } else if (currentStepTitle) {
+        // Add detail to the current step
+        currentMessageSet.details[currentStepTitle].push(message.title);
+      }
+    }
+
+    // Handle the last element
+    if (index === messages.length - 1) {
+      dividedMessages.push(currentMessageSet);
+    }
+  });
+
+  return dividedMessages;
+}
+
+export default function ChatLogs({
+  logs,
+  isRunning,
+  currentStatus,
+}: ChatLogsProps) {
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const { data: session } = useSession();
@@ -22,6 +85,12 @@ export default function ChatLogs(props: ChatLogsProps) {
       behavior: "smooth",
     });
   };
+
+  const sanitizedLogs = useMemo(() => {
+    return sanitizeLogs(logs);
+  }, [logs]);
+
+  const [logsDetails, setLogsDetails] = useState({ open: false, index: 0 });
 
   const handleScroll = useCallback(() => {
     // Detect if the user is at the bottom of the list
@@ -55,10 +124,7 @@ export default function ChatLogs(props: ChatLogsProps) {
     };
   }, [handleScroll]);
 
-  if (isAtBottom) {
-    scrollToBottom();
-  }
-
+  console.log(sanitizedLogs)
   return (
     <>
       <div className="flex h-20 items-center justify-center border-b-2 border-zinc-800 md:h-12">
@@ -69,58 +135,116 @@ export default function ChatLogs(props: ChatLogsProps) {
         onScroll={handleScroll}
         className="w-full flex-1 items-center space-y-6 overflow-y-auto overflow-x-clip px-2 py-3 text-left"
       >
-        {logs.map((msg, index, logs) => {
-          const isEvo = msg.user === "evo";
-          const previousMessage = logs[index - 1];
+        {sanitizedLogs.map((msg, index) => {
           return (
             <div
               key={index}
-              className="m-auto w-full max-w-[56rem] self-center"
+              className={"m-auto w-full max-w-[56rem] self-center"}
             >
-              <div className="group relative flex w-full animate-slide-down items-start space-x-3 rounded-lg p-2 text-white opacity-0 transition-colors duration-300 ">
-                <div className="!h-8 !w-8 !min-w-[2rem]">
-                  {isEvo && previousMessage?.user === "user" ? (
-                    <Logo wordmark={false} className="w-full" chatAvatar />
-                  ) : !isEvo ? (
-                    <>
-                      {session?.user.image && session?.user.email ? (
-                        <img
-                          src={session?.user.image}
-                          className="h-full w-full rounded-full bg-cyan-600"
-                        />
-                      ) : !session?.user.email ? (
-                        <Avatar size={32} />
-                      ) : (
-                        <div className="w-full rounded-full bg-cyan-600" />
-                      )}
-                    </>
-                  ) : null}
-                </div>
-                <div className="max-w-[calc(100vw-84px)] space-y-2 pt-1 md:max-w-[49rem]">
-                  {index === 0 || previousMessage?.user !== msg.user ? (
-                    <div className="SenderName font-medium">
-                      {session?.user.name && !msg.user.includes("evo")
-                        ? session?.user.name
-                        : msg.user.charAt(0).toUpperCase() + msg.user.slice(1)}
-                    </div>
-                  ) : null}
-                  <div className="prose prose-invert w-full max-w-none">
-                    <ReactMarkdown>{msg.title.toString()}</ReactMarkdown>
-                    <ReactMarkdown>
-                      {msg.content?.toString() ?? ""}
-                    </ReactMarkdown>
-                  </div>
-                  {isEvo && isRunning && index === logs.length - 1 && (
-                    <div className="flex items-center space-x-2 text-cyan-500">
-                      <LoadingCircle />
-                    </div>
+              <div className="group relative flex w-full animate-slide-down items-start space-x-3 rounded-lg p-2 pb-10 text-white opacity-0 transition-colors duration-300 ">
+                <>
+                  {session?.user.image && session?.user.email ? (
+                    <img
+                      src={session?.user.image}
+                      className="h-8 w-8 rounded-full bg-yellow-500"
+                    />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-yellow-500" />
                   )}
+                </>
+                <div className="w-full max-w-[calc(100vw-84px)] space-y-2 pt-1 md:max-w-[49rem]">
+                  <>
+                    <div className="flex items-center justify-between">
+                      <span className="SenderName font-medium">
+                        {session?.user.name ? session?.user.name : "User"}
+                      </span>
+                    </div>
+                  </>
+                  <div className="prose prose-invert w-full max-w-none">
+                    {msg.userMessage}
+                  </div>
+                </div>
+                {/* <div className="absolute bottom-1 left-9 hidden animate-fade-in space-x-0.5 group-hover:flex">
+                  <>
+                    <Button variant="icon">
+                      <PencilSimple size={16} className="fill-currentColor" />
+                    </Button>
+                    <Button variant="icon">
+                      <CopySimple size={16} className="fill-currentColor" />
+                    </Button>
+                  </>
+                </div> */}
+              </div>
+              <div
+                key={index}
+                className={"m-auto w-full max-w-[56rem] self-center"}
+              >
+                <div className="group relative flex w-full animate-slide-down items-start space-x-3 rounded-lg p-2 pb-10 text-white opacity-0 transition-colors duration-300 ">
+                  <Logo wordmark={false} className="!w-8 !min-w-[2rem]" />
+                  <div className="w-full max-w-[calc(100vw-84px)] space-y-2 pt-1 md:max-w-[49rem]">
+                    <>
+                      <div className="flex items-center justify-between">
+                        <span className="SenderName font-medium">Evo</span>
+                        <span
+                          onClick={() =>
+                            setLogsDetails({
+                              open: true,
+                              index,
+                            })
+                          }
+                        >
+                          Details
+                        </span>
+                      </div>
+                    </>
+                    {msg.evoMessage && (
+                      <div className="prose prose-invert w-full max-w-none">
+                        {msg.evoMessage}
+                      </div>
+                    )}
+                    {!msg.evoMessage && isRunning && (
+                      <>
+                        <div className="flex items-center space-x-2 text-cyan-500">
+                          <LoadingCircle />
+                          <div className="group flex cursor-pointer items-center space-x-2 text-cyan-500 transition-all duration-500 hover:text-cyan-700">
+                            <div className="group-hover:underline">
+                              {currentStatus}
+                            </div>
+                            {/*  <Button
+                              variant="icon"
+                              className="!text-current !transition-none"
+                            >
+                              <CaretCircleRight size={20} />
+                            </Button>*/}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  {/* <div className="absolute bottom-1 left-9 hidden animate-fade-in space-x-0.5 group-hover:flex">
+                    <>
+                      <Button variant="icon">
+                        <CopySimple size={16} className="fill-currentColor" />
+                      </Button>
+                      <Button variant="icon">
+                        <ThumbsUp size={16} className="fill-currentColor" />
+                      </Button>
+                      <Button variant="icon">
+                        <ThumbsDown size={16} className="fill-currentColor" />
+                      </Button>
+                    </>
+                  </div> */}
                 </div>
               </div>
             </div>
           );
         })}
       </div>
+      <ChatDetails
+        isOpen={logsDetails.open}
+        onClose={() => setLogsDetails({ open: false, index: 0 })}
+        logs={sanitizedLogs[logsDetails.index]}
+      />
     </>
   );
 }
