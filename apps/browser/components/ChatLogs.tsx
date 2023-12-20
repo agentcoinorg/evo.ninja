@@ -180,7 +180,7 @@ export default function ChatLogs({
                     <>
                       <div className="flex items-center justify-between">
                         <span className="SenderName font-medium">Evo</span>
-                        {msg.evoMessage && (
+                        {msg.evoMessage && !isRunning && (
                           <span
                             onClick={() =>
                               setLogsDetails({
