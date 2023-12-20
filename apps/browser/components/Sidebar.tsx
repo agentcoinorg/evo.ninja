@@ -1,17 +1,21 @@
-import React, { memo, useEffect, useRef, useState } from "react";
-import Logo from "./Logo";
-import clsx from "clsx";
-import DropdownAccount from "./DropdownAccount";
-import CurrentWorkspace from "./CurrentWorkspace";
-import { DiscordLogo, GithubLogo, NotePencil } from "@phosphor-icons/react";
-import Avatar from "./Avatar";
-import Button from "./Button";
+import { isChatLoadingAtom, chatIdAtom, workspaceAtom } from "@/lib/store";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";
 import { useChats } from "@/lib/queries/useChats";
-import { useRouter } from "next/navigation";
-import { v4 as uuid } from "uuid";
-import { useSession } from "next-auth/react";
 import useWindowSize from "@/lib/hooks/useWindowSize";
+import { useWorkspaceUploadSync } from "@/lib/hooks/useWorkspaceUploadSync";
+import Logo from "@/components/Logo";
+import Avatar from "@/components/Avatar";
+import Button from "@/components/Button";
+import DropdownAccount from "@/components/DropdownAccount";
+import Workspace from "@/components/Workspace";
+import React, { memo, useEffect, useRef, useState } from "react";
+import { DiscordLogo, GithubLogo, NotePencil } from "@phosphor-icons/react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { v4 as uuid } from "uuid";
+import { useAtom } from "jotai";
+import clsx from "clsx";
+import { InMemoryFile } from "@nerfzael/memory-fs";
 
 export interface SidebarProps {
   hoveringSidebarButton: boolean;
@@ -26,7 +30,6 @@ const Sidebar = ({
 }: SidebarProps) => {
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { mutateAsync: createChat } = useCreateChat();
   const { data: chats, isLoading: isLoadingChats } = useChats();
   const { data: session, status } = useSession();
   const mappedChats = chats?.map((chat) => ({
@@ -36,10 +39,18 @@ const Sidebar = ({
   const { isMobile } = useWindowSize()
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
 
-  const createNewChat = async () => {
+  const { mutateAsync: createChat } = useCreateChat();
+  const [chatId] = useAtom(chatIdAtom);
+  const [isChatLoading, setIsChatLoading] = useAtom(isChatLoadingAtom);
+  const [workspace] = useAtom(workspaceAtom);
+
+  const workspaceUploadSync = useWorkspaceUploadSync();
+
+  const handleCreateNewChat = async () => {
     const id = uuid();
-    const createdChat = await createChat(id);
-    router.push(`/chat/${createdChat.id}`);
+    await createChat(id);
+    router.push(`/chat/${id}`);
+    setIsChatLoading(true);
     if (isMobile) {
       closeSidebar()
     }
@@ -101,7 +112,7 @@ const Sidebar = ({
                       Recent Chats
                     </div>
                     {!isLoadingChats && (
-                      <Button variant="icon" onClick={createNewChat}>
+                      <Button variant="icon" onClick={handleCreateNewChat}>
                         <NotePencil size={18} weight="bold" />
                       </Button>
                     )}
@@ -123,7 +134,7 @@ const Sidebar = ({
                         </div>
                       ) : (
                         <div
-                          onClick={createNewChat}
+                          onClick={handleCreateNewChat}
                           className=" mt-1 flex cursor-pointer flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed border-zinc-500 p-7 text-center transition-colors duration-300 hover:border-cyan-500 hover:bg-zinc-950 hover:text-cyan-500"
                         >
                           <NotePencil
@@ -141,7 +152,15 @@ const Sidebar = ({
                   )}
                 </div>
               )}
-              <CurrentWorkspace />
+              <Workspace
+                onUpload={(uploads: InMemoryFile[]) => {
+                  if (!chatId && !isChatLoading) {
+                    handleCreateNewChat();
+                  } else if (workspace) {
+                    workspaceUploadSync(workspace, uploads);
+                  }
+                }}
+              />
             </div>
             <div className="relative flex w-full items-center justify-between space-x-2 p-4">
               {status !== "loading" ? (

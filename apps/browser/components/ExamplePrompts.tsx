@@ -1,4 +1,5 @@
-import { uploadedFilesAtom } from "@/lib/store";
+import { workspaceAtom, workspaceUploadsAtom } from "@/lib/store";
+import { useWorkspaceUploadSync } from "@/lib/hooks/useWorkspaceUploadSync";
 import { examplePrompts, ExamplePrompt } from "@/lib/examplePrompts";
 import { useAtom } from "jotai";
 import clsx from "clsx";
@@ -9,12 +10,17 @@ export interface ExamplePromptsProps {
 }
 
 export default function ExamplePrompts(props: ExamplePromptsProps) {
-  const [, setUploadedFiles] = useAtom(uploadedFilesAtom);
+  const [workspace] = useAtom(workspaceAtom);
+  const [, setWorkspaceUploads] = useAtom(workspaceUploadsAtom);
+  const workspaceUploadSync = useWorkspaceUploadSync();
   const { isMobile } = useWindowSize();
 
   const handleClick = (prompt: ExamplePrompt) => {
     if (prompt.files) {
-      setUploadedFiles(prompt.files);
+      setWorkspaceUploads(prompt.files);
+      if (workspace) {
+        workspaceUploadSync(workspace, prompt.files)
+      }
     }
     return props.onClick(prompt.prompt);
   };

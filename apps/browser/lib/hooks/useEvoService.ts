@@ -4,32 +4,30 @@ import {
   evoServiceAtom,
   localOpenAiApiKeyAtom,
   showAccountModalAtom,
-  userWorkspaceAtom,
+  workspaceAtom,
   errorAtom,
 } from "@/lib/store";
-import { useCreateChat } from "@/lib/mutations/useCreateChat";
+import { EvoThreadCallbacks, EvoThreadConfig } from "@/lib/services/evo/EvoThread";
 import { useAddChatLog } from "@/lib/mutations/useAddChatLog";
 import { useAddMessages } from "@/lib/mutations/useAddMessages";
-import { useChats } from "@/lib/queries/useChats";
 import { useAddVariable } from "@/lib/mutations/useAddVariable";
+import { useChats } from "@/lib/queries/useChats";
+import { SupabaseWorkspace } from "@/lib/supabase/SupabaseWorkspace";
+import { useSupabaseClient } from "@/lib/supabase/useSupabaseClient";
+import { useWorkspaceFilesSync } from "@/lib/hooks/useWorkspaceFilesSync";
+import { useWorkspaceUploadSync } from "@/lib/hooks/useWorkspaceUploadSync";
 import { ChatLog } from "@/components/Chat";
-import { EvoThreadCallbacks, EvoThreadConfig } from "@/lib/services/evo/EvoThread";
-import { v4 as uuid } from "uuid";
-import { useAtom } from "jotai";
-import { useState, useEffect } from "react";
 import { Workspace, InMemoryWorkspace } from "@evo-ninja/agent-utils";
 import { ChatLogType, ChatMessage } from "@evo-ninja/agents";
-import { SupabaseWorkspace } from "../supabase/SupabaseWorkspace";
-import { useSupabaseClient } from "../supabase/useSupabaseClient";
-import { useWatchForFileUploads } from "./useWatchForFileUploads";
-import { useUpdateUserFiles } from "./useUpdateUserFiles";
+import { useState, useEffect } from "react";
+import { useAtom } from "jotai";
 
 export const useEvoService = (
   chatId: string | "<anon>" | undefined,
   isAuthenticated: boolean,
-  onCreateChat: (chatId: string) => void
 ): {
-  logs: ChatLog[] | undefined;
+  logs: ChatLog[];
+  isConnected: boolean;
   isStarting: boolean;
   isRunning: boolean;
   handleStart: (goal: string) => Promise<void>;
@@ -40,19 +38,18 @@ export const useEvoService = (
   const [evoService] = useAtom(evoServiceAtom);
   const [allowTelemetry] = useAtom(allowTelemetryAtom);
   const [openAiApiKey] = useAtom(localOpenAiApiKeyAtom);
-  const [, setUserWorkspace] = useAtom(userWorkspaceAtom);
+  const [, setWorkspaceAtom] = useAtom(workspaceAtom);
   const [, setCapReached] = useAtom(capReachedAtom);
   const [, setAccountModalOpen] = useAtom(showAccountModalAtom);
   const [, setError] = useAtom(errorAtom);
 
   // State
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [isStarting, setIsStarting] = useState<boolean>(false);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [chatLog, setChatLogState] = useState<ChatLog[]>([]);
-  const [isStarting, setIsStarting] = useState<boolean>(false);
-  const [goalToStart, setGoalToStart] = useState<string | undefined>(undefined);
 
   // Mutations
-  const { mutateAsync: createChat } = useCreateChat();
   const { mutateAsync: addChatLog } = useAddChatLog();
   const { mutateAsync: addMessages } = useAddMessages();
   const { mutateAsync: addVariable } = useAddVariable();
@@ -61,20 +58,8 @@ export const useEvoService = (
   const { refetch: fetchChats } = useChats();
 
   // Helpers
-  const updateUserFiles = useUpdateUserFiles();
-  useWatchForFileUploads(chatId, createChatIdIfNeccessary, loadWorkspace);
-
-  async function createChatIdIfNeccessary(chatId: string | undefined): Promise<string | undefined> {
-    if (isAuthenticated) {
-      if (!chatId) {
-        chatId = uuid();
-        await createChat(chatId);
-        onCreateChat(chatId);
-        return chatId;
-      }
-    }
-    return chatId;
-  }
+  const workspaceFilesSync = useWorkspaceFilesSync();
+  const workspaceUploadSync = useWorkspaceUploadSync();
 
   const setChatLog = (chatLog: ChatLog[]) => {
     // If the most recent message is the user's goal,
@@ -86,21 +71,26 @@ export const useEvoService = (
         title: "Reviewing your prompt..."
       }]);
     } else {
-      setChatLogState(chatLog);
+      setChatLogState([...chatLog]);
     }
+  };
+
+  const disconnectEvoService = () => {
+    setIsConnected(false);
+    evoService.disconnect();
   }
 
-  const handleChatIdChange = async (chatId: string | undefined) => {
+  const connectEvoService = async (chatId: string) => {
     const currentThread = evoService.current;
 
     if (currentThread && currentThread.chatId === chatId) {
       return;
     }
 
-    evoService.disconnect();
+    disconnectEvoService();
 
     const config: EvoThreadConfig = {
-      chatId: chatId || "<anon>",
+      chatId,
       loadChatLog,
       loadWorkspace,
       onChatLogAdded: handleChatLogAdded,
@@ -121,6 +111,7 @@ export const useEvoService = (
       },
     };
     await evoService.connect(config, callbacks);
+    setIsConnected(true);
   };
 
   const loadChatLog = async (chatId: string) => {
@@ -145,17 +136,19 @@ export const useEvoService = (
     return currentChat.logs;
   };
 
-  function loadWorkspace(chatId: string): Workspace {
-    if (isAuthenticated) {
-      return new SupabaseWorkspace(chatId, supabase.storage);
-    } else {
-      return new InMemoryWorkspace();
-    }
+  async function loadWorkspace(chatId: string): Promise<Workspace> {
+    const workspace = isAuthenticated ?
+      new SupabaseWorkspace(chatId, supabase.storage) :
+      new InMemoryWorkspace();
+
+    await workspaceUploadSync(workspace);
+
+    return workspace;
   };
 
   const setWorkspace = async (workspace: Workspace) => {
-    setUserWorkspace(workspace);
-    await updateUserFiles(workspace);
+    setWorkspaceAtom(workspace);
+    await workspaceFilesSync(workspace);
   };
 
   const handleChatLogAdded = async (log: ChatLog) => {
@@ -192,10 +185,15 @@ export const useEvoService = (
       return;
     }
 
+    if (!chatId) {
+      setError("Trying to start a goal without a chatId.");
+      return;
+    }
+
     setIsStarting(true);
-    
-    await createChatIdIfNeccessary(chatId);
-    
+
+    await connectEvoService(chatId);
+
     setChatLog([
       ...chatLog,
       {
@@ -204,33 +202,28 @@ export const useEvoService = (
       }
     ]);
 
-    // We don't start the evoService here because we need to wait for the
-    // chatId to be hooked up to all the callbacks
-    setGoalToStart(goal);
+    evoService.start({
+      goal,
+      allowTelemetry,
+      openAiApiKey
+    });
+
+    setIsStarting(false);
   };
 
   useEffect(() => {
-    (async () => {
-      await handleChatIdChange(chatId);
-
-      if (!isStarting || !goalToStart) {
-        return;
+    if (chatId) {
+      connectEvoService(chatId);
+    } else {
+      if (evoService.current) {
+        disconnectEvoService();
       }
-
-      // Tell the EvoService to start the goal
-      // We don't await this because it should run in the background
-      evoService.start({
-        goal: goalToStart,
-        allowTelemetry,
-        openAiApiKey
-      });
-      setGoalToStart(undefined);
-    })();
-
-  }, [chatId, isStarting, goalToStart]);
+    }
+  }, [chatId]);
 
   return {
     logs: chatLog,
+    isConnected,
     isStarting,
     isRunning,
     handleStart

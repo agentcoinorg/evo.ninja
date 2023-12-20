@@ -1,10 +1,10 @@
 import { useAtom } from "jotai";
 import { Workspace } from "@evo-ninja/agent-utils";
 import { InMemoryFile } from "@nerfzael/memory-fs";
-import { userFilesAtom } from "@/lib/store";
+import { workspaceFilesAtom } from "@/lib/store";
 
-export const useUpdateUserFiles = () => {
-  const [, setUserFiles] = useAtom(userFilesAtom);
+export const useWorkspaceFilesSync = () => {
+  const [, setWorkspaceFiles] = useAtom(workspaceFilesAtom);
 
   return async (workspace: Workspace) => {
     const files: InMemoryFile[] = [];
@@ -24,6 +24,6 @@ export const useUpdateUserFiles = () => {
         });
       }
     }
-    setUserFiles(files);
+    setWorkspaceFiles(files);
   }
 }

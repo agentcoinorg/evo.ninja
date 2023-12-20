@@ -12,13 +12,14 @@ import {
 export interface EvoThreadConfig {
   chatId: string;
   loadChatLog: (chatId: string) => Promise<ChatLog[]>;
-  loadWorkspace: (chatId: string) => Workspace;
+  loadWorkspace: (chatId: string) => Promise<Workspace>;
   onChatLogAdded: (chatLog: ChatLog) => Promise<void>;
   onMessagesAdded: (type: ChatLogType, messages: ChatMessage[]) => Promise<void>;
   onVariableSet: (key: string, value: string) => Promise<void>;
 }
 
 export interface EvoThreadState {
+  goal?: string;
   isRunning: boolean;
   isLoading: boolean;
   logs: ChatLog[];
@@ -103,15 +104,18 @@ export class EvoThread {
       openAiApiKey
     } = options;
 
-    // Wait until loading has finished
-    await this.waitForLoad();
-
     if (this._state.isRunning) {
-      this._callbacks?.onError("A goal is already underway.");
+      if (this._state.goal !== options.goal) {
+        this._callbacks?.onError("A goal is already underway.");
+      }
       return;
     }
 
+    this._state.goal = options.goal;
     this.setIsRunning(true);
+
+    // Wait until loading has finished
+    await this.waitForLoad();
 
     // Acquire a GoalID
     const subsidize = !openAiApiKey;
@@ -136,10 +140,9 @@ export class EvoThread {
       this._config.onMessagesAdded,
       this._config.onVariableSet,
       (chatLog) =>
-        this.onChatLog(chatLog) || Promise.resolve(),
+        this.onChatLog(chatLog),
       () =>
         this._callbacks?.onGoalCapReached(),
-      // onError
       (error) =>
         this._callbacks?.onError(error)
     );
@@ -153,19 +156,29 @@ export class EvoThread {
 
     // Run the evo instance against the goal
     await this.runEvo(evo, options.goal);
+    this._state.goal = undefined;
   }
 
   private async load() {
     const chatId = this._config.chatId;
     this._state.isLoading = true;
 
-    const logs = await this._config.loadChatLog(chatId).catch((reason) => {
-      this._callbacks?.onError(reason.toString());
-      return [];
-    });
+    const results = await Promise.all<[
+      Promise<ChatLog[]>,
+      Promise<Workspace>
+    ]>([
+      this._config.loadChatLog(chatId).catch((reason) => {
+        this._callbacks?.onError(reason.toString());
+        return [];
+      }),
+      this._config.loadWorkspace(chatId).catch((reason) => {
+        this._callbacks?.onError(reason.toString());
+        return new InMemoryWorkspace();
+      })
+    ]);
 
-    this._state.logs = logs;
-    this._state.workspace = this._config.loadWorkspace(chatId);
+    this._state.logs = results[0];
+    this._state.workspace = results[1];
     this._state.isLoading = false;
   }
 

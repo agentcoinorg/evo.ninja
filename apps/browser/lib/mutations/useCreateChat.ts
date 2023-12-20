@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react"
 export const useCreateChat = () => {
   const { data: session } = useSession()
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: async (chatId: string) => {
       const supabase = createSupabaseClient(session?.supabaseAccessToken as string)
