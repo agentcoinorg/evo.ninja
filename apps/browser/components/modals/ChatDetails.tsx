@@ -1,16 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Modal from "./ModalBase";
 import ReactMarkdown from "react-markdown";
 import { MessageSet } from "../ChatLogs";
 import { CaretUp } from "@phosphor-icons/react";
 import clsx from "clsx";
-import { Transition } from "@headlessui/react";
-
-interface ChatDetailsProps {
-  isOpen: boolean;
-  onClose: () => void;
-  logs: MessageSet;
-}
 
 export default function ChatDetails({
   isOpen,
@@ -18,29 +11,24 @@ export default function ChatDetails({
   logs,
 }: ChatDetailsProps) {
   const [expandedStep, setExpandedStep] = useState<string | null>(null);
-  const [heights, setHeights] = useState<{ [index: number]: number }>({});
   const contentRefs = useRef<{ [index: number]: HTMLDivElement | null }>({});
 
-  useEffect(() => {
-    const newHeights = [];
-    Object.keys(contentRefs.current).forEach((key) => {
-      const index = parseInt(key);
-      const el = contentRefs.current[index];
-      if (el) {
-        newHeights[index] = el.scrollHeight;
-      }
-    });
-    setHeights(newHeights);
-  }, [logs]);
-
   const toggleStep = (step: string, index: number) => {
+    const currentEl = contentRefs.current[index];
+    if (!currentEl) return;
+
+    if (expandedStep !== null && expandedStep !== step) {
+      const currentIndex = Object.keys(logs.details).indexOf(expandedStep);
+      const currentExpandedEl = contentRefs.current[currentIndex];
+      if (currentExpandedEl) currentExpandedEl.style.height = 0;
+    }
+
     if (expandedStep === step) {
+      currentEl.style.height = 0;
       setExpandedStep(null);
     } else {
+      currentEl.style.height = `${currentEl.scrollHeight}px`;
       setExpandedStep(step);
-      if (contentRefs.current[index]) {
-        contentRefs.current[index].style.height = `${heights[index]}px`;
-      }
     }
   };
 
@@ -67,21 +55,22 @@ export default function ChatDetails({
                 weight="bold"
                 size={14}
                 className={clsx(
-                  "transform text-white transition-transform duration-150 ease-in-out group-hover:text-cyan-400",
+                  "transform text-white transition-transform duration-500 ease-in-out group-hover:text-cyan-500",
                   expandedStep !== stepTitle && "rotate-180"
                 )}
               />
             </button>
             <div
-              ref={(el) => (contentRefs.current[index] = el)}
+              ref={(el) => {
+                contentRefs.current[index] = el;
+              }}
               className={clsx(
-                "overflow-hidden transition-[height] duration-500 ease-in-out",
-                expandedStep === stepTitle ? "h-auto" : "h-0"
+                "step h-0 overflow-hidden transition-[height] duration-500 ease-in-out"
               )}
             >
               {stepDetails.map((detail, detailIndex) => (
-                <div className="p-4 pt-0">
-                  <ReactMarkdown key={detailIndex}>{detail}</ReactMarkdown>
+                <div className="p-4 pt-0" key={detailIndex}>
+                  <ReactMarkdown>{detail}</ReactMarkdown>
                 </div>
               ))}
             </div>
