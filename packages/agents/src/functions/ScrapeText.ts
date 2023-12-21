@@ -4,6 +4,7 @@ import { Agent } from "../agents/utils";
 import { AgentFunctionBase } from "./utils";
 import { FUNCTION_CALL_FAILED, FUNCTION_CALL_SUCCESS_CONTENT } from "../agents/Scripter/utils";
 import { fetchHTML } from "./utils";
+import axios from "axios"
 
 interface ScrapeTextFuncParameters {
   url: string;
@@ -32,7 +33,21 @@ export class ScrapeTextFunction extends AgentFunctionBase<{ url: string }> {
       rawParams?: string
     ): Promise<AgentFunctionResult> => {
       try {
-        const response = await this.processWebpage(params.url);
+        if (params.url.endsWith(".pdf")) {
+          return this.onError(
+            params,
+            "Scrape text function can not scrape pdf files",
+            rawParams
+          )
+        }
+
+        let response;
+        if (typeof window === "object") {
+          const result = await axios.get<{ text: string }>(`/api/process-web-page?url=${params.url}`)
+          response = result.data.text
+        } else {
+          response = await this.processWebpage(params.url);
+        }
 
         return this.onSuccess(
           params,

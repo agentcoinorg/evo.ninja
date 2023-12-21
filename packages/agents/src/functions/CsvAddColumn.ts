@@ -1,28 +1,33 @@
 import { ScriptFunction } from "./utils";
 
-export class CsvAddColumnFunction extends ScriptFunction<{ csv: string, column: string, values: string[] }> {
+export class CsvAddColumnFunction extends ScriptFunction<{
+  csv: string;
+  column: string;
+  values: string[];
+}> {
   name: string = "csv_addColumn";
+  description: string = "Adds a new column to a CSV";
   parameters: any = {
     type: "object",
-    properties: { 
+    properties: {
       csv: {
-          type: "string"
+        type: "string",
       },
       column: {
-          type: "string"
+        type: "string",
       },
       values: {
-          type: "array",
-          items: {
-              type: "string"
-          }
+        type: "array",
+        items: {
+          type: "string",
+        },
       },
       outputFile: {
-          type: "string",
-          description: "Write the result to a file"
-      }
+        type: "string",
+        description: "Write the result to a file",
+      },
     },
     required: ["csv", "column", "values"],
-    additionalProperties: false
+    additionalProperties: false,
   };
 }

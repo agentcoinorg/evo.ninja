@@ -4,13 +4,13 @@ import { GoalRunArgs } from "../utils";
 export const prompts = {
   name: "Researcher",
   expertise: `Searching the internet, comprehending details, and finding information.`,
-  initialMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
+  initialMessages: (): ChatMessage[] => [
     {
       role: "user",
       content: `You are an advanced web information retriever. You will receive a goal and need to perform research to answer it.
       1. You **MUST** first plan your research.
 
-      2. For each step, you will web search for results. You can perform queries in parllel.
+      2. For each step, you will web search for results. You can perform queries in parallel.
 
         Do NOT perform yearly individual searches unless absolutely required. This wastes resources and time. Always aim for consolidated data over a range of years.
 
@@ -25,7 +25,12 @@ export const prompts = {
       
       6. RESPECT USER'S DESIRED FORMAT`,
     },
-    { role: "user", content: goal },
+  ],
+  runMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
+    {
+      role: "user",
+      content: goal,
+    },
   ],
   loopPreventionPrompt: `Assistant, you appear to be in a loop, try executing a different function.`,
 };

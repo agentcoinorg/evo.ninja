@@ -6,7 +6,8 @@ import {
   DebugLog,
   LlmApi,
   LlmModel,
-  OpenAIChatCompletion
+  OpenAILlmApi,
+  OpenAIEmbeddingAPI
 } from "@evo-ninja/agents";
 import {
   Env,
@@ -35,10 +36,10 @@ const rl = readline.createInterface({
 
 const prompt = (fileLogger: FileLogger) => (query: string) =>
   new Promise<string>((resolve) => {
-    const callback = (answer: string) => {
-      fileLogger.info(`# User\n**${query}:** ${answer}`);
+    const callback = async (answer: string) => {
+      await fileLogger.info(`# User\n**${query}:** ${answer}`);
       resolve(answer);
-    }
+    };
     rl.question(`${query}: `, callback)
   });
 
@@ -59,7 +60,7 @@ export interface AppConfig {
   customWorkspace?: Workspace;
 }
 
-export function createApp(config?: AppConfig): App {
+export async function createApp(config?: AppConfig): Promise<App> {
   const rootDir = config?.rootDir
     ? path.resolve(config?.rootDir)
     : path.join(__dirname, "../../../");
@@ -73,13 +74,14 @@ export function createApp(config?: AppConfig): App {
   const sessionPath = path.join(rootDir, "sessions", sessionName);
 
   // User Workspace
-  const userWorkspace = config?.customWorkspace ?? new FileSystemWorkspace(sessionPath);
+  const userWorkspace =
+    config?.customWorkspace ?? new FileSystemWorkspace(sessionPath);
 
   // Internals Workspace (.evo directory)
   const internals = new SubWorkspace(".evo", userWorkspace);
 
   // Chat Log File
-  const fileLogger = new FileLogger("chat.md", internals);
+  const fileLogger = await FileLogger.create("chat.md", internals);
 
   // Logger
   const consoleLogger = new ConsoleLogger();
@@ -94,12 +96,13 @@ export function createApp(config?: AppConfig): App {
   const scripts = new Scripts(scriptsWorkspace, "./");
 
   // LLM
-  let llm: LlmApi = new OpenAIChatCompletion(
+  let llm: LlmApi = new OpenAILlmApi(
     env.OPENAI_API_KEY,
     env.GPT_MODEL as LlmModel,
     env.CONTEXT_WINDOW_TOKENS,
     env.MAX_RESPONSE_TOKENS,
-    logger
+    logger,
+    env.OPENAI_API_BASE_URL
   );
 
   // Chat
@@ -115,10 +118,18 @@ export function createApp(config?: AppConfig): App {
     llm = new DebugLlmApi(debugLog, llm);
   }
 
+  const embedding = new OpenAIEmbeddingAPI(
+    env.OPENAI_API_KEY,
+    logger,
+    cl100k_base,
+    env.OPENAI_API_BASE_URL
+  );
+
   // Evo
   const evo = new Evo(
     new AgentContext(
       llm,
+      embedding,
       chat,
       logger,
       userWorkspace,
@@ -135,6 +146,6 @@ export function createApp(config?: AppConfig): App {
     fileLogger,
     consoleLogger,
     debugLog,
-    chat
+    chat,
   };
 }

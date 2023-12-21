@@ -76,26 +76,29 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         googleResults = await searchOnGoogle(query, context.env.SERP_API_KEY);
       }
 
+      // Remove all PDFs
+      const urls = googleResults.map(x => x.url).filter(u => !u.endsWith(".pdf")) 
+
       const searchMatches = await this.searchInPages({
-        urls: googleResults.map(x => x.url),
+        urls,
         query,
         context
       })
 
       const analyzeChunkMatchesPrompt = new Prompt()
-      .text(`
-        I will give you chunks of text from different webpages.
+        .text(`
+          I will give you chunks of text from different webpages.
 
-        I want to extract ${query}. Keep in mind some information may not be properly formatted.
-        Do your best to extract as much information as you can.
+          I want to extract ${query}. Keep in mind some information may not be properly formatted.
+          Do your best to extract as much information as you can.
 
-        Prioritize decimal precision. Aim for answers with 3 decimal places, if possible; if not settle for 2 decimal places.
-        Only take 1 decimal or rounded numbers when absolutely necessary.
+          Prioritize decimal precision. Aim for answers with 3 decimal places, if possible; if not settle for 2 decimal places.
+          Only take 1 decimal or rounded numbers when absolutely necessary.
 
-        Chunks: ${searchMatches.join("\n------------\n")}
-      `)
-      .line(`Specify if the information is incomplete but still return it`)
-      .toString()
+          Chunks: ${searchMatches.join("\n------------\n")}
+        `)
+        .line(`Specify if the information is incomplete but still return it`)
+        .toString()
 
       const analysisFromChunks = await this.askLlm(analyzeChunkMatchesPrompt, {
         maxResponseTokens: 200
@@ -206,7 +209,10 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
 
     const webpagesChunks = urlsContents.map(webpageContent => ({
       url: webpageContent.url,
-      chunks: TextChunker.fixedCharacterLength(webpageContent.response, { chunkLength: 550, overlap: 110 })
+      chunks: TextChunker.fixedCharacterLength(
+        webpageContent.response,
+        { chunkLength: 550, overlap: 110 }
+      )
     }))
 
     const results = await Promise.all(webpagesChunks.map(async (webpageChunks) => {
@@ -215,27 +221,35 @@ export class WebSearchFunction extends LlmAgentFunctionBase<WebSearchFuncParamet
         url: webpageChunks.url,
       }))
 
-      const matches = await Rag.standard<{ chunk: string; url: string }>(params.context)
-      .addItems(items)
-      .selector(x => x.chunk)
-      .query(params.query)
-      .recombine(ArrayRecombiner.standard({
-        limit: 4,
-        unique: true,
-      }));
+      const matches = await(
+        await Rag.standard<{ chunk: string; url: string }>(params.context)
+      )
+        .addItems(items)
+        .selector((x) => x.chunk)
+        .query(params.query)
+        .recombine(
+          ArrayRecombiner.standard({
+            limit: 4,
+            unique: true,
+          })
+        );
 
       return matches
     }))
 
-    const otherResults = await Rag.standard<{ chunk: string; url: string }>(params.context)
+    const otherResults = await(
+      await Rag.standard<{ chunk: string; url: string }>(params.context)
+    )
       .addItems(results.flat())
-      .selector(x => x.chunk)
+      .selector((x) => x.chunk)
       .query(params.query)
-      .recombine(ArrayRecombiner.standard({
-        limit: 10,
-        unique: true,
-        sort: "index"
-      }));
+      .recombine(
+        ArrayRecombiner.standard({
+          limit: 10,
+          unique: true,
+          sort: "index",
+        })
+      );
 
     return otherResults.map(x => x.chunk)
   }

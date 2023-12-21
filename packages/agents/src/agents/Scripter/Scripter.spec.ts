@@ -1,7 +1,8 @@
 import {
   Chat,
   LlmApi,
-  OpenAIChatCompletion,
+  OpenAILlmApi,
+  OpenAIEmbeddingAPI,
 } from "@/agent-core";
 import { FileSystemWorkspace } from "@evo-ninja/agent-utils-fs";
 import * as rimraf from "rimraf";
@@ -40,7 +41,7 @@ describe('Dev Agent Test Suite', () => {
       },
     });
 
-    const llm: LlmApi = new OpenAIChatCompletion(
+    const llm: LlmApi = new OpenAILlmApi(
       env.OPENAI_API_KEY,
       env.GPT_MODEL as LlmModel,
       env.CONTEXT_WINDOW_TOKENS,
@@ -63,11 +64,13 @@ describe('Dev Agent Test Suite', () => {
 
     const workspace = new FileSystemWorkspace(testCaseDir);
     const internals = new SubWorkspace(".evo", workspace);
+    const embedding = new OpenAIEmbeddingAPI(env.OPENAI_API_KEY, logger, cl100k_base);
 
     return {
       agent: new ScripterAgent(
         new AgentContext(
           debugLlm,
+          embedding,
           chat,
           logger,
           workspace,
@@ -81,19 +84,19 @@ describe('Dev Agent Test Suite', () => {
   }
 
   async function runAgent(agent: ScripterAgent, goal: string, debugLog: DebugLog) {
-    debugLog.goalStart(goal);
+    await debugLog.goalStart(goal);
     const iterator = agent.run({ goal });
 
     while (true) {
-      debugLog.stepStart();
+      await debugLog.stepStart();
       const response = await iterator.next();
-      debugLog.stepEnd();
+      await debugLog.stepEnd();
 
       if (response.done) {
         if (!response.value.ok) {
-          debugLog.stepError(response.value.error ?? "Unknown error");
+          await debugLog.stepError(response.value.error ?? "Unknown error");
         } else {
-          debugLog.stepLog(JSON.stringify(response.value.value));
+          await debugLog.stepLog(JSON.stringify(response.value.value));
         }
         return response;
       }
@@ -109,7 +112,7 @@ describe('Dev Agent Test Suite', () => {
     );
 
     expect(response.value.ok).toBe(true);
-    const sourceCode = agent.workspace.readFileSync("output.csv");
+    const sourceCode = await agent.workspace.readFile("output.csv");
     expect(sourceCode).toBeTruthy();
   });
 });

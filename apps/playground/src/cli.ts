@@ -6,9 +6,10 @@ import {
   LlmModel,
   Chat,
   AgentContext,
-  OpenAIChatCompletion,
+  OpenAILlmApi,
+  OpenAIEmbeddingAPI
 } from "@evo-ninja/agents";
-import { run } from "./demos/basic";
+import { run } from "./demos/revenue-retrieval";
 import { LlmAdapter } from "./utils";
 
 dotenv.config({
@@ -22,16 +23,24 @@ export async function cli(): Promise<void> {
   });
   const env = new Env(process.env as Record<string, string>);
 
-  const llm = new OpenAIChatCompletion(
+  const llm = new OpenAILlmApi(
     env.OPENAI_API_KEY,
     env.GPT_MODEL as LlmModel,
     env.CONTEXT_WINDOW_TOKENS,
     env.MAX_RESPONSE_TOKENS,
-    logger
+    logger,
+    env.OPENAI_API_BASE_URL
   );
   const chat = new Chat(cl100k_base);
+  const embedding = new OpenAIEmbeddingAPI(
+    env.OPENAI_API_KEY,
+    logger,
+    cl100k_base,
+    env.OPENAI_API_BASE_URL
+  );
   const context = new AgentContext(
     llm,
+    embedding,
     chat,
     logger,
     new InMemoryWorkspace(),

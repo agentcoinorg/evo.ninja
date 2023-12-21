@@ -2,7 +2,7 @@ import { ChatCompletionMessage } from "openai/resources";
 import { DebugLog } from "./DebugLog";
 import { Timer } from "./Timer";
 
-import { LlmApi, LlmOptions, ChatLogs, ChatMessage } from "@/agent-core";
+import { LlmApi, LlmOptions, ChatLogs, LlmModel } from "@/agent-core";
 
 export class DebugLlmApi implements LlmApi {
   constructor(
@@ -18,7 +18,7 @@ export class DebugLlmApi implements LlmApi {
     return this.llm.getMaxResponseTokens();
   }
 
-  getModel(): string {
+  getModel(): LlmModel {
     return this.llm.getModel();
   }
 
@@ -37,11 +37,7 @@ export class DebugLlmApi implements LlmApi {
     );
 
     time.end();
-    this.debugLog.stepLlmReq(
-      time,
-      chatLogs.clone(),
-      resp
-    );
+    await this.debugLog.stepLlmReq(time, chatLogs.clone(), resp);
 
     return resp;
   }

@@ -4,11 +4,13 @@ import { GoalRunArgs } from "../utils";
 export const prompts = {
   name: "Synthesizer",
   expertise: `Reads text files, analyzing and gathering data and information from text files, generating summaries and reports, and analyzing text.`,
-  initialMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
+  initialMessages: (): ChatMessage[] => [
     {
       role: "user",
       content: `You are a reader and synthesizer agent. Your job is to read text files, analyze text file contents`,
     },
+  ],
+  runMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
     {
       role: "user",
       content: goal,

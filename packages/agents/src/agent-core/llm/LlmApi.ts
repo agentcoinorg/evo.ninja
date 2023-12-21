@@ -1,5 +1,5 @@
 import { ChatCompletionMessage } from "openai/resources";
-import { ChatLogs, ChatMessage, FunctionDefinition } from ".";
+import { ChatLogs, FunctionDefinition } from ".";
 
 export declare const LlmRoles: {
   readonly System: "system";
@@ -27,7 +27,7 @@ export interface LlmOptions {
 export interface LlmApi {
   getMaxContextTokens(): number;
   getMaxResponseTokens(): number;
-  getModel(): string;
+  getModel(): LlmModel;
   getResponse(
     chatLog: ChatLogs,
     functionDefinitions?: FunctionDefinition[],

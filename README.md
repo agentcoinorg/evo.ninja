@@ -1,4 +1,4 @@
-# evo.ninja
+# evo.ninja  
 
 ![](https://hackmd.io/_uploads/ByWjLKAhn.png)
 
@@ -81,5 +81,12 @@ Once the evo.ninja CLI is run, there will be a `./sessions` directory created, w
 
 ## UI
 
-Just run:
-> `yarn start:browser`
+The UI depends on [Supabase Database](https://supabase.com/). In order to run it locally you must have [Docker Desktop](https://docs.docker.com/get-docker/) installed and running.
+
+0. Make sure you've followed installation steps above
+1. Go to `cd apps/browser`
+2. Run `yarn db:start` - This can take up to ~3 minutes, since it will download all the images needed by supabase
+3. Update `.env.local` with:
+    - `NEXT_PUBLIC_SUPABASE_URL` will have the value of `API URL`
+    - `SUPABASE_SERVICE_ROLE_KEY` will have the value of `service_role key`
+4. Run the UI with `yarn dev`
