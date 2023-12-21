@@ -55,7 +55,7 @@ export const useEvoService = (
   const { mutateAsync: addVariable } = useAddVariable();
 
   // Queries
-  const { data: chats, refetch: fetchChats } = useChats();
+  const { refetch: fetchChats } = useChats();
 
   // Helpers
   const workspaceFilesUpdate = useWorkspaceFilesUpdate();

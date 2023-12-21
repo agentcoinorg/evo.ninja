@@ -9,10 +9,11 @@ import { useSession } from "next-auth/react";
 export interface ChatLogsProps {
   logs: ChatLog[];
   isRunning: boolean;
+  chatName: string
 }
 
 export default function ChatLogs(props: ChatLogsProps) {
-  const { logs, isRunning } = props;
+  const { logs, isRunning, chatName } = props;
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const { data: session } = useSession();
@@ -62,7 +63,7 @@ export default function ChatLogs(props: ChatLogsProps) {
   return (
     <>
       <div className="flex h-20 items-center justify-center border-b-2 border-zinc-800 md:h-12">
-        {/* <div>{chatName}</div> */}
+        <div>{chatName}</div>
       </div>
       <div
         ref={listContainerRef}

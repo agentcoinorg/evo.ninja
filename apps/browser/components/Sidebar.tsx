@@ -1,6 +1,4 @@
-import { isChatLoadingAtom, chatIdAtom, workspaceAtom } from "@/lib/store";
-import { SupabaseWorkspace } from "@/lib/supabase/SupabaseWorkspace";
-import { useSupabaseClient } from "@/lib/supabase/useSupabaseClient";
+import { isChatLoadingAtom, workspaceAtom, chatInfoAtom } from "@/lib/store";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";
 import { useDeleteChat } from "@/lib/mutations/useDeleteChat";
 import { useUpdateChatTitle } from "@/lib/mutations/useUpdateChatTitle";
@@ -43,7 +41,6 @@ const Sidebar = ({
   const { data: chats, isLoading: isLoadingChats } = useChats();
   const { data: session, status } = useSession();
   const { isMobile } = useWindowSize();
-  const supabaseClient = useSupabaseClient();
 
   const [editChat, setEditChat] = useState<{ id: string; title: string }>();
   const [activeChat, setActiveChat] = useState<string | undefined>(undefined);
@@ -53,17 +50,13 @@ const Sidebar = ({
 
   const mappedChats = chats?.map((chat) => ({
     id: chat.id,
-    name: chat.title
-      ? chat.title
-      : chat.logs[0]
-        ? chat.logs[0].title
-        : "New session",
+    name: chat.title ?? "New session",
   }));
 
   const { mutateAsync: createChat } = useCreateChat();
   const { mutateAsync: deleteChat } = useDeleteChat();
   const { mutateAsync: updateChat } = useUpdateChatTitle();
-  const [chatId] = useAtom(chatIdAtom);
+  const [{ id: chatId }] = useAtom(chatInfoAtom);
   const [isChatLoading, setIsChatLoading] = useAtom(isChatLoadingAtom);
   const [workspace] = useAtom(workspaceAtom);
 
@@ -79,7 +72,7 @@ const Sidebar = ({
     }
   };
 
-  const handleChatClick = (id: string) => {
+  const handleChatClick = (id: string, name: string) => {
     if (!editChat) {
       router.push(`/chat/${id}`);
       if (isMobile) {
@@ -88,19 +81,21 @@ const Sidebar = ({
     }
   };
 
-  const handleEditClick = async (id: string, title: string) => {
-    await updateChat({ chatId: id, title });
+  const handleChatNameEdit = async (id: string, title: string) => {
+    // If user is editing the name of the chat it curretly is, also modify it in the chat header
+    if (title) {
+      await updateChat({ chatId: id, title });
+    }
     setEditChat(undefined);
   };
 
-  const handleDeleteClick = async (id: string) => {
+  const handleChatDelete = async (id: string) => {
     // Remove files associated to chat before removing chat
-    const workspace = new SupabaseWorkspace(id, supabaseClient.storage);
-    await workspace.rmdir("", { recursive: true });
+    await workspace?.rmdir("", { recursive: true });
     await deleteChat(id);
-    await router.push(`/`);
+    router.replace("/");
     if (isMobile) {
-      await closeSidebar();
+      closeSidebar();
     }
   };
 
@@ -200,7 +195,9 @@ const Sidebar = ({
                                     chat.id !== editChat?.id,
                                 }
                               )}
-                              onClick={() => handleChatClick(chat.id)}
+                              onClick={() =>
+                                handleChatClick(chat.id, chat.name)
+                              }
                             >
                               {chat.id === editChat?.id ? (
                                 <div ref={editTitleInputRef}>
@@ -209,7 +206,7 @@ const Sidebar = ({
                                     defaultValue={chat.name}
                                     onKeyDown={async (e) => {
                                       if (e.key === "Enter") {
-                                        await handleEditClick(
+                                        await handleChatNameEdit(
                                           chat.id,
                                           e.currentTarget.value
                                         );
@@ -242,7 +239,7 @@ const Sidebar = ({
                                   <PencilSimple weight="bold" size={16} />
                                 </Button>
                                 <Button
-                                  onClick={() => handleDeleteClick(chat.id)}
+                                  onClick={() => handleChatDelete(chat.id)}
                                   variant="icon"
                                   className="!text-white"
                                 >

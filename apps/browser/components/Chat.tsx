@@ -1,7 +1,7 @@
 import {
   showDisclaimerAtom,
   errorAtom,
-  chatIdAtom,
+  chatInfoAtom,
   welcomeModalAtom,
   signInModalAtom,
   settingsModalAtom,
@@ -43,7 +43,7 @@ const Chat: React.FC<ChatProps> = ({
   onGoalSubmit,
   onUpload,
 }: ChatProps) => {
-  const [chatId, ] = useAtom(chatIdAtom);
+  const [{ id: chatId, name: chatName }] = useAtom(chatInfoAtom);
   const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom);
   const [, setError] = useAtom(errorAtom);
   const [welcomeModalOpen, setWelcomeModalOpen] = useAtom(welcomeModalAtom);
@@ -87,7 +87,7 @@ const Chat: React.FC<ChatProps> = ({
       {shouldShowExamplePrompts ? (
         <Logo wordmark={false} className="mb-16 w-16" />
       ) : (
-        <ChatLogs isRunning={isStarting || isRunning} logs={logs} />
+        <ChatLogs chatName={chatName ?? "New Session"} isRunning={isStarting || isRunning} logs={logs} />
       )}
 
       <div
