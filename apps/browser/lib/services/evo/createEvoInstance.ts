@@ -42,7 +42,12 @@ export function createEvoInstance(
           title: message,
         });
       },
-      onStatusUpdate
+      onLogLevel: {
+        "notice": (msg: string) => {
+          onStatusUpdate(msg);
+          return Promise.resolve();
+        }
+      }
     });
     const logger = new Logger([browserLogger, new ConsoleLogger()], {
       promptUser: () => Promise.resolve("N/A"),
