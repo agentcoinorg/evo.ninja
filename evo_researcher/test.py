@@ -172,6 +172,4 @@ def research(goal: str):
     
     report = prepare_report(goal, scraped) 
 
-    print(report)
-
-research("Will Twitter implement a new misinformation policy before the 2024 elections?")
+    return report
