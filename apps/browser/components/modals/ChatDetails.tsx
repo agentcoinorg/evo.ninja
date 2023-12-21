@@ -5,6 +5,12 @@ import { MessageSet } from "../ChatLogs";
 import { CaretUp } from "@phosphor-icons/react";
 import clsx from "clsx";
 
+interface ChatDetailsProps {
+  isOpen: boolean
+  onClose: () => void
+  logs: MessageSet
+}
+
 export default function ChatDetails({
   isOpen,
   onClose,
@@ -20,11 +26,11 @@ export default function ChatDetails({
     if (expandedStep !== null && expandedStep !== step) {
       const currentIndex = Object.keys(logs.details).indexOf(expandedStep);
       const currentExpandedEl = contentRefs.current[currentIndex];
-      if (currentExpandedEl) currentExpandedEl.style.height = 0;
+      if (currentExpandedEl) currentExpandedEl.style.height = "0px";
     }
 
     if (expandedStep === step) {
-      currentEl.style.height = 0;
+      currentEl.style.height = "0px";
       setExpandedStep(null);
     } else {
       currentEl.style.height = `${currentEl.scrollHeight}px`;
@@ -35,7 +41,7 @@ export default function ChatDetails({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Details">
       <div className="space-y-4">
-        {Object.entries(logs.details).map(([stepTitle, stepDetails], index) => (
+        {logs.details && Object.entries(logs.details).map(([stepTitle, stepDetails], index) => (
           <div
             key={stepTitle}
             className={clsx(

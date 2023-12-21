@@ -130,7 +130,6 @@ export default function ChatLogs({
     };
   }, [handleScroll]);
 
-  console.log(sanitizedLogs)
   return (
     <>
       <div className="flex h-20 items-center justify-center border-b-2 border-zinc-800 md:h-12">
