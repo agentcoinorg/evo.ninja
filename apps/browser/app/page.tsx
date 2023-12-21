@@ -36,7 +36,6 @@ function Dojo({ params }: { params: { id?: string } }) {
   const [, setAccountModalOpen] = useAtom(showAccountModalAtom);
 
   const [isAuthLoading, setIsAuthLoading] = useState(true);
-  const [currentStatus, setCurrentStatus] = useState<string>();
 
   const router = useRouter();
   const { status: sessionStatus, data: sessionData } = useSession();
@@ -44,10 +43,9 @@ function Dojo({ params }: { params: { id?: string } }) {
 
   const { mutateAsync: createChat } = useCreateChat();
   const { mutateAsync: updateChatTitle } = useUpdateChatTitle();
-  const { logs, isConnected, isStarting, isRunning, handleStart } = useEvoService(
+  const { logs, isConnected, isStarting, isRunning, handleStart, currentStatus } = useEvoService(
     chatId,
     isAuthenticated,
-    setCurrentStatus
   );
 
   const workspaceUploadUpdate = useWorkspaceUploadUpdate();

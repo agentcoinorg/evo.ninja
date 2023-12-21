@@ -23,6 +23,7 @@ export interface ChatLog {
   content?: string;
   user: string;
   color?: string;
+  created_at?: string
 }
 
 export interface ChatProps {

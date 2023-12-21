@@ -8,13 +8,13 @@ interface OnGoalAchievedFuncParameters {
 
 export class OnGoalAchievedFunction extends ScriptFunction<OnGoalAchievedFuncParameters> {
   name: string = "agent_onGoalAchieved";
-  description: string = "Informs the user that the goal has been achieved. Return a complete answer for user's question";
+  description: string = "Informs the user that the goal has been achieved. Returns as message a complete and explicit answer for user's question";
   parameters: any = {
     type: "object",
     properties: {
       message: {
         type: "string",
-        description: "Complete answer for user's question",
+        description: "Complete and explicit answer for user's question",
       },
     },
     required: ["message"],

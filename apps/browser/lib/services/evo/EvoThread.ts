@@ -6,7 +6,7 @@ import {
   ChatLogType,
   ChatMessage,
   Workspace,
-  InMemoryWorkspace
+  InMemoryWorkspace,
 } from "@evo-ninja/agents";
 
 export interface EvoThreadConfig {
@@ -15,7 +15,10 @@ export interface EvoThreadConfig {
   loadWorkspace: (chatId: string) => Promise<Workspace>;
   onChatLogAdded: (chatLog: ChatLog) => Promise<void>;
   onStatusUpdate: (status: string) => void;
-  onMessagesAdded: (type: ChatLogType, messages: ChatMessage[]) => Promise<void>;
+  onMessagesAdded: (
+    type: ChatLogType,
+    messages: ChatMessage[]
+  ) => Promise<void>;
   onVariableSet: (key: string, value: string) => Promise<void>;
 }
 
@@ -25,11 +28,13 @@ export interface EvoThreadState {
   isLoading: boolean;
   logs: ChatLog[];
   workspace: Workspace;
+  status?: string
 }
 
 export interface EvoThreadCallbacks {
   setIsRunning: (value: boolean) => void;
   setChatLog: (chatLog: ChatLog[]) => void;
+  setStatus: (status?: string) => void;
   setWorkspace: (workspace: Workspace) => void;
   onGoalCapReached: () => void;
   onError: (error: string) => void;
@@ -96,6 +101,7 @@ export class EvoThread {
     this._callbacks.setIsRunning(this._state.isRunning);
     this._callbacks.setChatLog(this._state.logs);
     this._callbacks.setWorkspace(this._state.workspace);
+    this._callbacks.setStatus(this._state.status)
   }
 
   async start(options: EvoThreadStartOptions): Promise<void> {
@@ -141,7 +147,7 @@ export class EvoThread {
       this._config.onMessagesAdded,
       this._config.onVariableSet,
       (chatLog) => this.onChatLog(chatLog),
-      (status) => this._config.onStatusUpdate(status),
+      (status) => this.onStatusUpdate(status),
       () => this._callbacks?.onGoalCapReached(),
       // onError
       (error) => this._callbacks?.onError(error)
@@ -202,6 +208,11 @@ export class EvoThread {
     await this._config.onChatLogAdded(chatLog);
   }
 
+  private onStatusUpdate(status: string): void {
+    this._callbacks?.setStatus(status)
+    this._state.status = status
+  }
+
   private async runEvo(evo: Evo, goal: string): Promise<void> {
     const iterator = evo.run({ goal });
 
@@ -222,6 +233,17 @@ export class EvoThread {
       this._callbacks?.setWorkspace(this._state.workspace);
 
       if (response.done) {
+        // If value is not present is because an unhandled error has happened in Evo
+        if ("value" in response.value) {
+          const isSuccess = response.value.value.type === "success";
+          const message = {
+            title: `#### Information ${
+              isSuccess ? "has been" : "could not be"
+            } retrieved`,
+            user: "evo",
+          };
+          await this.onChatLog(message);
+        }
         this.setIsRunning(false);
         evo?.reset();
         break;

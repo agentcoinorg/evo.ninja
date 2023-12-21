@@ -25,12 +25,12 @@ import { useAtom } from "jotai";
 export const useEvoService = (
   chatId: string | "<anon>" | undefined,
   isAuthenticated: boolean,
-  handleStatusUpdate: (status: string) => void
 ): {
   logs: ChatLog[];
   isConnected: boolean;
   isStarting: boolean;
   isRunning: boolean;
+  currentStatus: string | undefined;
   handleStart: (goal: string) => Promise<void>;
 } => {
   const supabase = useSupabaseClient();
@@ -49,6 +49,7 @@ export const useEvoService = (
   const [isStarting, setIsStarting] = useState<boolean>(false);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [chatLog, setChatLogState] = useState<ChatLog[]>([]);
+  const [currentStatus, setCurrentStatus] = useState<string>();
 
   // Mutations
   const { mutateAsync: addChatLog } = useAddChatLog();
@@ -76,6 +77,12 @@ export const useEvoService = (
     }
   };
 
+  const setStatus = (status?: string) => {
+    if (status) {
+      setCurrentStatus(status)
+    }
+  }
+
   const disconnectEvoService = () => {
     setIsConnected(false);
     evoService.disconnect();
@@ -95,7 +102,7 @@ export const useEvoService = (
       loadChatLog,
       loadWorkspace,
       onChatLogAdded: handleChatLogAdded,
-      onStatusUpdate: handleStatusUpdate,
+      onStatusUpdate: setCurrentStatus,
       onMessagesAdded: handleMessagesAdded,
       onVariableSet: handleVariableSet
     };
@@ -103,6 +110,7 @@ export const useEvoService = (
       setIsRunning,
       setChatLog,
       setWorkspace,
+      setStatus,
       onGoalCapReached: () => {
         setCapReached(true);
         setAccountModalOpen(true);
@@ -228,6 +236,7 @@ export const useEvoService = (
     isConnected,
     isStarting,
     isRunning,
-    handleStart
+    handleStart,
+    currentStatus
   };
 };

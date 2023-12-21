@@ -9,7 +9,6 @@ import React, {
 import ReactMarkdown from "react-markdown";
 import LoadingCircle from "./LoadingCircle";
 import { ArrowSquareRight } from "@phosphor-icons/react";
-import Avatar from "./Avatar";
 import Logo from "./Logo";
 import { useSession } from "next-auth/react";
 import ChatDetails from "./modals/ChatDetails";
@@ -27,11 +26,19 @@ export type MessageSet = {
 };
 
 export function sanitizeLogs(messages: ChatLog[]): MessageSet[] {
+  console.log(messages)
   if (!messages || !messages.length) return [];
   const dividedMessages: MessageSet[] = [];
   let currentMessageSet: MessageSet = { userMessage: "", details: {} };
   let currentStepTitle = "";
   let evoMessageFlag = false;
+
+  messages.sort((a, b) => {
+    return new Date(a.created_at as string).getTime() - new Date(b.created_at as string).getTime()
+  })
+  // const s = [...messages].reduce((sanitizedLogs, currentMessage, index) => {
+  //   return [];
+  // }, []);
 
   messages.forEach((message, index) => {
     if (!message.title.startsWith("#")) {
@@ -61,7 +68,8 @@ export function sanitizeLogs(messages: ChatLog[]): MessageSet[] {
         currentMessageSet.details[currentStepTitle] = [];
       } else if (currentStepTitle) {
         // Add detail to the current step
-        currentMessageSet.details[currentStepTitle].push(message.title);
+        const detailContent = message.content ? message.title.concat(`\n${message.content}`) : message.title
+        currentMessageSet.details[currentStepTitle].push(detailContent);
       }
     }
 
