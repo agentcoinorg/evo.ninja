@@ -6,7 +6,12 @@ import { workspaceFilesAtom } from "@/lib/store";
 export const useWorkspaceFilesUpdate = () => {
   const [, setWorkspaceFiles] = useAtom(workspaceFilesAtom);
 
-  return async (workspace: Workspace) => {
+  return async (workspace: Workspace | undefined) => {
+    if (!workspace) {
+      setWorkspaceFiles([]);
+      return;
+    }
+
     const files: InMemoryFile[] = [];
     const encoder = new TextEncoder();
     const entries = await workspace.readdir("./");

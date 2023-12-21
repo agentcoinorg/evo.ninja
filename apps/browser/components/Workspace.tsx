@@ -8,7 +8,7 @@ import { DownloadSimple, FilePlus } from "@phosphor-icons/react";
 import Button from "./Button";
 import { useWorkspaceUploadDrop } from "@/lib/hooks/useWorkspaceUploadDrop";
 import { useAtom } from "jotai";
-import { workspaceFilesAtom, workspaceUploadsAtom, welcomeModalAtom } from "@/lib/store";
+import { workspaceFilesAtom, isChatLoadingAtom, welcomeModalAtom } from "@/lib/store";
 import { useDownloadWorkspaceAsZip } from "@/lib/hooks/useDownloadWorkspaceAsZip";
 import { useFirstTimeUser } from "@/lib/hooks/useFirstTimeUser";
 
@@ -20,7 +20,7 @@ function Workspace({ onUpload }: WorkspaceProps) {
   const { getRootProps, getInputProps, isDragAccept, open } =
     useWorkspaceUploadDrop(onUpload);
   const [workspaceFiles] = useAtom(workspaceFilesAtom);
-  const [workspaceUploads] = useAtom(workspaceUploadsAtom);
+  const [isChatLoading] = useAtom(isChatLoadingAtom);
   const downloadFilesAsZip = useDownloadWorkspaceAsZip();
   const [showFile, setShowFile] = useState<InMemoryFile | null>(null);
   const [showFileModal, setShowFileModal] = useState<boolean>(false);
@@ -39,8 +39,6 @@ function Workspace({ onUpload }: WorkspaceProps) {
     }
     open();
   }
-
-  const workspaceLoading = workspaceUploads.length > 0;
 
   const handleFileClick = (file: InMemoryFile | null) => {
     setShowFile(file);
@@ -70,10 +68,8 @@ function Workspace({ onUpload }: WorkspaceProps) {
         </div>
       </div>
       <div className="relative h-full max-h-[24vh] overflow-y-auto [scrollbar-gutter:stable]">
-        {workspaceLoading ? (
-          <div className="flex h-full w-full items-center justify-center">
-            <div className="h-9 w-9 animate-spin rounded-full border-4 border-black/10 border-l-cyan-600" />
-          </div>
+        {isChatLoading ? (
+          <div className="mt-1 h-24 w-full animate-pulse rounded-lg bg-zinc-700" />
         ) : (
           <>
             {workspaceFiles.length === 0 ? (
