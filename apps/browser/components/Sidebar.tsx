@@ -20,6 +20,8 @@ import {
   NotePencil,
   PencilSimple,
   TrashSimple,
+  CheckCircle,
+  XCircle,
 } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -108,7 +110,7 @@ const Sidebar = ({
     if (activeChat !== chatId) {
       setActiveChat(chatId);
     }
-  }, [chatId, activeChat])
+  }, [chatId, activeChat]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -183,74 +185,86 @@ const Sidebar = ({
                   {!isLoadingChats ? (
                     <div className="h-full max-h-[30vh] space-y-0.5 overflow-y-auto">
                       {chats && chats.length > 0 ? (
-                        <div className="px-2">
-                          {mappedChats?.map((chat) => (
-                            <div
-                              key={chat.id}
-                              data-id={chat.id}
-                              className={clsx(
-                                "relative w-full cursor-pointer overflow-x-hidden text-ellipsis whitespace-nowrap rounded p-1 text-sm text-zinc-100 transition-colors duration-300",
-                                {
-                                  "bg-zinc-700 pr-14":
-                                    chat.id === activeChat &&
-                                    chat.id !== editChat?.id,
-                                },
-                                {
-                                  "hover:bg-zinc-700 hover:text-white":
-                                    chat.id !== editChat?.id,
-                                }
-                              )}
-                              onClick={() => handleChatClick(chat.id)}
-                            >
-                              {chat.id === editChat?.id ? (
-                                <div ref={editTitleInputRef}>
-                                  <TextField
-                                    className="!border-none !p-1 focus:!bg-zinc-950"
-                                    defaultValue={chat.name}
-                                    onKeyDown={async (e) => {
-                                      if (e.key === "Enter") {
-                                        await handleEditClick(
-                                          chat.id,
-                                          e.currentTarget.value
-                                        )
-                                      }
-                                    }}
-                                  />
-                                </div>
-                              ) : (
-                                chat.name
-                              )}
+                        <div className="space-y-0.5 px-2">
+                          {mappedChats?.map((chat) => {
+                            chat.goalAchieved = Math.random() > 0.5;
+                            return (
                               <div
+                                key={chat.id}
+                                data-id={chat.id}
                                 className={clsx(
-                                  "absolute right-1 top-1/2 -translate-y-1/2 transform animate-fade-in items-center",
-                                  chat.id === activeChat &&
-                                    chat.id !== editChat?.id
-                                    ? "flex"
-                                    : "hidden opacity-0"
-                                )}
-                              >
-                                <Button
-                                  onClick={() =>
-                                    setEditChat({
-                                      id: chat.id,
-                                      title: chat.name,
-                                    })
+                                  "relative w-full cursor-pointer rounded p-1 text-sm text-zinc-100 transition-colors duration-300",
+                                  {
+                                    "bg-zinc-700 pr-16":
+                                      chat.id === activeChat &&
+                                      chat.id !== editChat?.id,
+                                  },
+                                  {
+                                    "hover:bg-zinc-700 hover:text-white":
+                                      chat.id !== editChat?.id,
                                   }
-                                  variant="icon"
-                                  className="!text-white"
+                                )}
+                                onClick={() => handleChatClick(chat.id)}
+                              >
+                                {chat.id === editChat?.id ? (
+                                  <div ref={editTitleInputRef}>
+                                    <TextField
+                                      className="!border-none !p-1 focus:!bg-zinc-950"
+                                      defaultValue={chat.name}
+                                      onKeyDown={async (e) => {
+                                        if (e.key === "Enter") {
+                                          await handleEditClick(
+                                            chat.id,
+                                            e.currentTarget.value
+                                          );
+                                        }
+                                      }}
+                                    />
+                                  </div>
+                                ) : (
+                                  <div className="flex w-full items-center space-x-1">
+                                    {chat.goalAchieved ? (
+                                      <CheckCircle className="min-w-[14px] text-green-500" />
+                                    ) : (
+                                      <XCircle className="min-w-[14px] text-red-500" />
+                                    )}
+                                    <div className="w-full overflow-x-hidden text-ellipsis whitespace-nowrap">
+                                      {chat.name}
+                                    </div>
+                                  </div>
+                                )}
+                                <div
+                                  className={clsx(
+                                    "absolute right-1 top-1/2 -translate-y-1/2 transform animate-fade-in items-center",
+                                    chat.id === activeChat &&
+                                      chat.id !== editChat?.id
+                                      ? "flex"
+                                      : "hidden opacity-0"
+                                  )}
                                 >
-                                  <PencilSimple weight="bold" size={16} />
-                                </Button>
-                                <Button
-                                  onClick={() => handleDeleteClick(chat.id)}
-                                  variant="icon"
-                                  className="!text-white"
-                                >
-                                  <TrashSimple weight="bold" size={16} />
-                                </Button>
+                                  <Button
+                                    onClick={() =>
+                                      setEditChat({
+                                        id: chat.id,
+                                        title: chat.name,
+                                      })
+                                    }
+                                    variant="icon"
+                                    className="!text-white"
+                                  >
+                                    <PencilSimple weight="bold" size={16} />
+                                  </Button>
+                                  <Button
+                                    onClick={() => handleDeleteClick(chat.id)}
+                                    variant="icon"
+                                    className="!text-white"
+                                  >
+                                    <TrashSimple weight="bold" size={16} />
+                                  </Button>
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       ) : (
                         <div
