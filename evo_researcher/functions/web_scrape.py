@@ -6,14 +6,7 @@ from pydantic import BaseModel
 from bs4 import BeautifulSoup
 from scrapingbee import ScrapingBeeClient
 
-class WebScrapeResult(BaseModel):
-    url: str
-    text: str
-    
-    def __getitem__(self, item):
-        return getattr(self, item)
-
-def web_scrape(url: str) -> WebScrapeResult:
+def web_scrape(url: str) -> tuple[str, str]:
     print(f"-- Scraping {url} --")
     api_key = os.getenv("SCRAPINGBEE_API_KEY")
     client = ScrapingBeeClient(api_key=api_key)
@@ -31,12 +24,7 @@ def web_scrape(url: str) -> WebScrapeResult:
             text = soup.get_text()
             text = re.sub('(\n\n)\n*|\n', r'\1', text)
             
-            result = WebScrapeResult(
-                url=url,
-                text=text
-            )
-            
-            return result
+            return (url, text)
         else:
             logging.warning("Non-HTML content received")
             return ""
