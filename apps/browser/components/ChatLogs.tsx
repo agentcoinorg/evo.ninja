@@ -128,7 +128,7 @@ export default function ChatLogs({
                     <>
                       <div className="flex items-center justify-between">
                         <span className="SenderName font-medium">Evo</span>
-                        {msg.evoMessage && !isRunning && (
+                        {!isRunning && (
                           <button
                             className="group/button flex items-center space-x-2 text-cyan-500 hover:text-cyan-400"
                             onClick={() =>
@@ -175,7 +175,7 @@ export default function ChatLogs({
                       )}
                     {!msg.evoMessage && !isRunning && (
                       <ReactMarkdown className="prose prose-invert w-full max-w-none">
-                        There was an issue with your request, please try again
+                        It seems I have been interrupted, please try again.
                       </ReactMarkdown>
                     )}
                   </div>
