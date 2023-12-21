@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import ReactMarkdown from "react-markdown";
 import LoadingCircle from "./LoadingCircle";
+import { ArrowSquareRight } from "@phosphor-icons/react";
 import Avatar from "./Avatar";
 import Logo from "./Logo";
 import { useSession } from "next-auth/react";
@@ -181,7 +182,8 @@ export default function ChatLogs({
                       <div className="flex items-center justify-between">
                         <span className="SenderName font-medium">Evo</span>
                         {msg.evoMessage && !isRunning && (
-                          <span
+                          <button
+                            className="group/button flex items-center space-x-2 text-cyan-500 hover:text-cyan-400"
                             onClick={() =>
                               setLogsDetails({
                                 open: true,
@@ -189,8 +191,11 @@ export default function ChatLogs({
                               })
                             }
                           >
-                            Details
-                          </span>
+                            <div className="font-regular text-xs group-hover/button:underline">
+                              View Details
+                            </div>
+                            <ArrowSquareRight size={24} />
+                          </button>
                         )}
                       </div>
                     </>
@@ -199,26 +204,28 @@ export default function ChatLogs({
                         {msg.evoMessage}
                       </ReactMarkdown>
                     )}
-                    {!msg.evoMessage && isRunning && sanitizedLogs.length - 1 === index && (
-                      <>
-                        <div className="flex items-center space-x-2 text-cyan-500">
-                          <LoadingCircle />
-                          <div className="group flex cursor-pointer items-center space-x-2 text-cyan-500 transition-all duration-500 hover:text-cyan-700">
-                            <div
-                              className="group-hover:underline"
-                              onClick={() =>
-                                setLogsDetails({
-                                  open: true,
-                                  index,
-                                })
-                              }
-                            >
-                              {currentStatus}
+                    {!msg.evoMessage &&
+                      isRunning &&
+                      sanitizedLogs.length - 1 === index && (
+                        <>
+                          <div className="flex items-center space-x-2 text-cyan-500">
+                            <LoadingCircle />
+                            <div className="group/loading flex cursor-pointer items-center space-x-2 text-cyan-500 transition-all duration-500 hover:text-cyan-700">
+                              <div
+                                className="group-hover/loading:underline"
+                                onClick={() =>
+                                  setLogsDetails({
+                                    open: true,
+                                    index,
+                                  })
+                                }
+                              >
+                                {currentStatus}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </>
-                    )}
+                        </>
+                      )}
                   </div>
                 </div>
               </div>
