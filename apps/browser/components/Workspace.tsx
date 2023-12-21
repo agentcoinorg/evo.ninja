@@ -22,6 +22,7 @@ function Workspace({ onUpload }: WorkspaceProps) {
   const [workspaceUploads] = useAtom(workspaceUploadsAtom);
   const downloadFilesAsZip = useDownloadWorkspaceAsZip();
   const [showFile, setShowFile] = useState<InMemoryFile | null>(null);
+  const [showFileModal, setShowFileModal] = useState<boolean>(false);
 
   function getFileType(path: InMemoryFile["path"]) {
     const index = path.lastIndexOf(".");
@@ -30,7 +31,10 @@ function Workspace({ onUpload }: WorkspaceProps) {
 
   const workspaceLoading = workspaceUploads.length > 0;
 
-  const showFileModal = !!showFile;
+  const handleFileClick = (file: InMemoryFile | null) => {
+    setShowFile(file);
+    setShowFileModal(true);
+  };
 
   return (
     <div className="p-2">
@@ -89,7 +93,7 @@ function Workspace({ onUpload }: WorkspaceProps) {
                     return (
                       <div
                         key={i}
-                        onClick={() => setShowFile(file)}
+                        onClick={() => handleFileClick(file)}
                         className={clsx(
                           "flex w-full cursor-pointer items-center space-x-2 rounded p-1 text-sm text-cyan-500 transition-colors duration-300",
                           {
@@ -112,7 +116,7 @@ function Workspace({ onUpload }: WorkspaceProps) {
       </div>
       <FileModal
         isOpen={showFileModal}
-        onClose={() => setShowFile(null)}
+        onClose={() => setShowFileModal(false)}
         file={showFile}
       />
     </div>
