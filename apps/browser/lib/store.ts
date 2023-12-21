@@ -28,7 +28,6 @@ export const signInModalAtom = atom<boolean>(false);
 export const settingsModalAtom = atom<boolean>(false);
 export const capReachedAtom = atom<boolean>(false);
 export const errorAtom = atom<string | undefined>(undefined);
-export const showAccountModalAtom = atom<boolean>(false);
 export const workspaceFilesAtom = atom<InMemoryFile[]>([]);
 export const workspaceUploadsAtom = atom<InMemoryFile[]>([]);
 export const workspaceAtom = atom<Workspace | undefined>(undefined);

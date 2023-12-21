@@ -3,7 +3,7 @@ import {
   capReachedAtom,
   evoServiceAtom,
   localOpenAiApiKeyAtom,
-  showAccountModalAtom,
+  settingsModalAtom,
   workspaceAtom,
   errorAtom,
 } from "@/lib/store";
@@ -40,7 +40,7 @@ export const useEvoService = (
   const [openAiApiKey] = useAtom(localOpenAiApiKeyAtom);
   const [, setWorkspaceAtom] = useAtom(workspaceAtom);
   const [, setCapReached] = useAtom(capReachedAtom);
-  const [, setAccountModalOpen] = useAtom(showAccountModalAtom);
+  const [, setSettingsModalOpen] = useAtom(settingsModalAtom);
   const [, setError] = useAtom(errorAtom);
 
   // State
@@ -103,7 +103,7 @@ export const useEvoService = (
       setWorkspace,
       onGoalCapReached: () => {
         setCapReached(true);
-        setAccountModalOpen(true);
+        setSettingsModalOpen(true);
       },
       onError: (error: string) => {
         console.error(error);
