@@ -47,7 +47,7 @@ function Dojo({ params }: { params: { id?: string } }) {
 
   const { mutateAsync: createChat } = useCreateChat();
   const { mutateAsync: updateChatTitle } = useUpdateChatTitle();
-  const { logs, isConnected, isStarting, isRunning, handleStart, currentStatus } = useEvoService(
+  const { logs, isConnected, isStarting, isRunning, handleStart, status } = useEvoService(
     chatId,
     isAuthenticated,
   );
@@ -187,7 +187,7 @@ function Dojo({ params }: { params: { id?: string } }) {
               workspaceUploadUpdate(workspace, uploads);
             }
           }}
-          currentStatus={currentStatus}
+          status={status}
         />
       ) : (
         <div className="flex h-full w-full items-center justify-center">

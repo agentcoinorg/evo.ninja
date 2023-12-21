@@ -14,7 +14,6 @@ export interface EvoThreadConfig {
   loadChatLog: (chatId: string) => Promise<ChatLog[]>;
   loadWorkspace: (chatId: string) => Promise<Workspace>;
   onChatLogAdded: (chatLog: ChatLog) => Promise<void>;
-  onStatusUpdate: (status: string) => void;
   onMessagesAdded: (
     type: ChatLogType,
     messages: ChatMessage[]
@@ -23,18 +22,18 @@ export interface EvoThreadConfig {
 }
 
 export interface EvoThreadState {
-  goal?: string;
+  goal: string | undefined;
+  status: string | undefined;
   isRunning: boolean;
   isLoading: boolean;
   logs: ChatLog[];
   workspace: Workspace;
-  status?: string
 }
 
 export interface EvoThreadCallbacks {
+  setStatus: (status?: string) => void;
   setIsRunning: (value: boolean) => void;
   setChatLog: (chatLog: ChatLog[]) => void;
-  setStatus: (status?: string) => void;
   setWorkspace: (workspace: Workspace) => void;
   onGoalCapReached: () => void;
   onError: (error: string) => void;
@@ -47,6 +46,8 @@ export interface EvoThreadStartOptions {
 }
 
 const INIT_STATE: EvoThreadState = {
+  goal: undefined,
+  status: undefined,
   isRunning: false,
   isLoading: false,
   logs: [],
@@ -78,6 +79,7 @@ export class EvoThread {
     }
 
     // Dispatch init values
+    this._callbacks.setStatus(INIT_STATE.status);
     this._callbacks.setIsRunning(INIT_STATE.isRunning);
     this._callbacks.setChatLog(INIT_STATE.logs);
     this._callbacks.setWorkspace(INIT_STATE.workspace);
@@ -98,10 +100,10 @@ export class EvoThread {
     }
 
     // Send current state to newly connected callbacks
+    this._callbacks.setStatus(this._state.status);
     this._callbacks.setIsRunning(this._state.isRunning);
     this._callbacks.setChatLog(this._state.logs);
     this._callbacks.setWorkspace(this._state.workspace);
-    this._callbacks.setStatus(this._state.status)
   }
 
   async start(options: EvoThreadStartOptions): Promise<void> {
@@ -209,8 +211,8 @@ export class EvoThread {
   }
 
   private onStatusUpdate(status: string): void {
-    this._callbacks?.setStatus(status)
-    this._state.status = status
+    this._state.status = status;
+    this._callbacks?.setStatus(status);
   }
 
   private async runEvo(evo: Evo, goal: string): Promise<void> {

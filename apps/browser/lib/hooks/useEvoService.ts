@@ -30,7 +30,7 @@ export const useEvoService = (
   isConnected: boolean;
   isStarting: boolean;
   isRunning: boolean;
-  currentStatus: string | undefined;
+  status: string | undefined;
   handleStart: (goal: string) => Promise<void>;
 } => {
   const supabase = useSupabaseClient();
@@ -49,7 +49,7 @@ export const useEvoService = (
   const [isStarting, setIsStarting] = useState<boolean>(false);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [chatLog, setChatLogState] = useState<ChatLog[]>([]);
-  const [currentStatus, setCurrentStatus] = useState<string>();
+  const [status, setStatus] = useState<string | undefined>(undefined);
 
   // Mutations
   const { mutateAsync: addChatLog } = useAddChatLog();
@@ -77,12 +77,6 @@ export const useEvoService = (
     }
   };
 
-  const setStatus = (status?: string) => {
-    if (status) {
-      setCurrentStatus(status)
-    }
-  }
-
   const disconnectEvoService = () => {
     setIsConnected(false);
     evoService.disconnect();
@@ -102,7 +96,6 @@ export const useEvoService = (
       loadChatLog,
       loadWorkspace,
       onChatLogAdded: handleChatLogAdded,
-      onStatusUpdate: setCurrentStatus,
       onMessagesAdded: handleMessagesAdded,
       onVariableSet: handleVariableSet
     };
@@ -237,6 +230,6 @@ export const useEvoService = (
     isStarting,
     isRunning,
     handleStart,
-    currentStatus
+    status
   };
 };

@@ -16,7 +16,7 @@ import ChatDetails from "./modals/ChatDetails";
 export interface ChatLogsProps {
   logs: ChatLog[];
   isRunning: boolean;
-  currentStatus: string | undefined;
+  status: string | undefined;
   chatName: string
 }
 
@@ -86,7 +86,7 @@ export function sanitizeLogs(messages: ChatLog[]): MessageSet[] {
 export default function ChatLogs({
   logs,
   isRunning,
-  currentStatus,
+  status,
   chatName
 }: ChatLogsProps) {
   const listContainerRef = useRef<HTMLDivElement | null>(null);
@@ -229,7 +229,7 @@ export default function ChatLogs({
                                   })
                                 }
                               >
-                                {currentStatus}
+                                {status}
                               </div>
                             </div>
                           </div>
