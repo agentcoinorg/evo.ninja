@@ -47,9 +47,9 @@ function Dojo({ params }: { params: { id?: string } }) {
 
   const { mutateAsync: createChat } = useCreateChat();
   const { mutateAsync: updateChatTitle } = useUpdateChatTitle();
-  const { logs, isConnected, isStarting, isRunning, handleStart } = useEvoService(
+  const { logs, isConnected, isStarting, isRunning, handleStart, status } = useEvoService(
     chatId,
-    isAuthenticated
+    isAuthenticated,
   );
 
   const workspaceUploadUpdate = useWorkspaceUploadUpdate();
@@ -67,7 +67,7 @@ function Dojo({ params }: { params: { id?: string } }) {
     // reset workspace and user files on chatId change
     setWorkspace(undefined);
     setWorkspaceFiles([]);
-  }
+  };
 
   const handleCreateNewChat = async () => {
     const id = uuid();
@@ -110,7 +110,7 @@ function Dojo({ params }: { params: { id?: string } }) {
 
     setNewGoalSubmitted({
       goal,
-      chatId: goalChatId
+      chatId: goalChatId,
     });
   };
 
@@ -139,7 +139,8 @@ function Dojo({ params }: { params: { id?: string } }) {
   // Set isChatLoading to true when evoService is connected
   // and the current chatId matches the current goal (if present)
   useEffect(() => {
-    const chatIdMatches = !newGoalSubmitted || chatId === newGoalSubmitted.chatId;
+    const chatIdMatches =
+      !newGoalSubmitted || chatId === newGoalSubmitted.chatId;
     if (isChatLoading && isConnected && chatIdMatches) {
       setIsChatLoading(false);
     }
@@ -186,6 +187,7 @@ function Dojo({ params }: { params: { id?: string } }) {
               workspaceUploadUpdate(workspace, uploads);
             }
           }}
+          status={status}
         />
       ) : (
         <div className="flex h-full w-full items-center justify-center">

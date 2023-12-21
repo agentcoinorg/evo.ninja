@@ -26,6 +26,7 @@ export interface ChatLog {
   content?: string;
   user: string;
   color?: string;
+  created_at?: string
 }
 
 export interface ChatProps {
@@ -34,6 +35,7 @@ export interface ChatProps {
   isRunning: boolean;
   onGoalSubmit: (goal: string) => Promise<void>;
   onUpload: (upload: InMemoryFile[]) => void;
+  status: string | undefined;
 }
 
 const Chat: React.FC<ChatProps> = ({
@@ -42,6 +44,7 @@ const Chat: React.FC<ChatProps> = ({
   isRunning,
   onGoalSubmit,
   onUpload,
+  status
 }: ChatProps) => {
   const [{ id: chatId, name: chatName }] = useAtom(chatInfoAtom);
   const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom);
@@ -87,7 +90,7 @@ const Chat: React.FC<ChatProps> = ({
       {shouldShowExamplePrompts ? (
         <Logo wordmark={false} className="mb-16 w-16" />
       ) : (
-        <ChatLogs chatName={chatName ?? "New Session"} isRunning={isStarting || isRunning} logs={logs} />
+        <ChatLogs status={status}  chatName={chatName ?? "New Session"} isRunning={isStarting || isRunning} logs={logs} />
       )}
 
       <div

@@ -37,6 +37,10 @@ code {
   background-position: 56% 58%;
 }
 
+.prose-condensed blockquote, dl, dd, h1, h2, h3, h4, h5, h6, hr, figure, p, pre {
+  @apply !m-0;
+}
+
 .prose-file * {
   @apply my-0;
 }
