@@ -23,7 +23,7 @@ export default function Modal(props: PropsWithChildren<ModalProps>) {
           className={clsx(Ubuntu_FONT.className, "relative z-30")}
           onClose={onClose}
         >
-          <div className="fixed inset-0 overflow-y-auto bg-zinc-400/50 backdrop-blur">
+          <div className="fixed inset-0 overflow-y-auto bg-zinc-400/50 backdrop-blur [scrollbar-gutter:stable] ">
             <div className="flex min-h-full items-center justify-center text-center md:p-4">
               <Transition.Child
                 as={Fragment}
@@ -57,7 +57,7 @@ export default function Modal(props: PropsWithChildren<ModalProps>) {
                       />
                     </Button>
                   </div>
-                  <div className="max-h-[calc(100vh-64px)] space-y-8 overflow-y-auto bg-zinc-900 p-8 md:max-h-[calc(100vh-96px)]">
+                  <div className="max-h-[calc(100vh-64px)] space-y-8 overflow-y-auto bg-zinc-900 p-8 [scrollbar-gutter:stable] md:max-h-[calc(100vh-96px)]">
                     {children}
                   </div>
                 </Dialog.Panel>

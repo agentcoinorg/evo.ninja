@@ -67,7 +67,7 @@ export default function ChatLogs(props: ChatLogsProps) {
       <div
         ref={listContainerRef}
         onScroll={handleScroll}
-        className="w-full flex-1 items-center space-y-6 overflow-y-auto overflow-x-clip px-2 py-3 text-left"
+        className="w-full flex-1 items-center space-y-6 overflow-y-auto overflow-x-clip px-2 py-3 text-left [scrollbar-gutter:stable]"
       >
         {logs.map((msg, index, logs) => {
           const isEvo = msg.user === "evo";

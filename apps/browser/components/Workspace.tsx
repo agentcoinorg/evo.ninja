@@ -49,7 +49,7 @@ function Workspace({ onUpload }: WorkspaceProps) {
           )}
         </div>
       </div>
-      <div className="relative h-full max-h-[24vh] overflow-y-auto">
+      <div className="relative h-full max-h-[24vh] overflow-y-auto [scrollbar-gutter:stable]">
         {workspaceLoading ? (
           <div className="flex h-full w-full items-center justify-center">
             <div className="h-9 w-9 animate-spin rounded-full border-4 border-black/10 border-l-cyan-600" />
@@ -72,7 +72,7 @@ function Workspace({ onUpload }: WorkspaceProps) {
                 <div
                   {...getRootProps({
                     className: clsx(
-                      "dropzone group h-full space-y-1 overflow-y-auto rounded-lg border-2 border-solid border-zinc-900 p-[6px] transition-all duration-100 ease-in-out",
+                      "dropzone group h-full space-y-1 rounded-lg border-2 border-solid border-zinc-900 p-[6px] transition-all duration-100 ease-in-out",
                       {
                         "cursor-pointer !border-dashed !border-cyan-500 !bg-zinc-950":
                           isDragAccept,

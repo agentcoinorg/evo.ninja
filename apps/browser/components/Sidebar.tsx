@@ -108,7 +108,7 @@ const Sidebar = ({
     if (activeChat !== chatId) {
       setActiveChat(chatId);
     }
-  }, [chatId, activeChat])
+  }, [chatId, activeChat]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -181,7 +181,7 @@ const Sidebar = ({
                     )}
                   </div>
                   {!isLoadingChats ? (
-                    <div className="h-full max-h-[30vh] space-y-0.5 overflow-y-auto">
+                    <div className="h-full max-h-[30vh] space-y-0.5 overflow-y-auto [scrollbar-gutter:stable]">
                       {chats && chats.length > 0 ? (
                         <div className="px-2">
                           {mappedChats?.map((chat) => (
@@ -212,7 +212,7 @@ const Sidebar = ({
                                         await handleEditClick(
                                           chat.id,
                                           e.currentTarget.value
-                                        )
+                                        );
                                       }
                                     }}
                                   />
