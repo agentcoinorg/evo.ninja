@@ -149,7 +149,7 @@ export const useEvoService = (
     return workspace;
   };
 
-  const setWorkspace = async (workspace: Workspace) => {
+  const setWorkspace = async (workspace: Workspace | undefined) => {
     setWorkspaceAtom(workspace);
     await workspaceFilesUpdate(workspace);
   };

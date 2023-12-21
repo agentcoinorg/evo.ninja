@@ -34,7 +34,7 @@ export interface EvoThreadCallbacks {
   setStatus: (status?: string) => void;
   setIsRunning: (value: boolean) => void;
   setChatLog: (chatLog: ChatLog[]) => void;
-  setWorkspace: (workspace: Workspace) => void;
+  setWorkspace: (workspace: Workspace | undefined) => Promise<void>;
   onGoalCapReached: () => void;
   onError: (error: string) => void;
 }
@@ -78,11 +78,11 @@ export class EvoThread {
       return;
     }
 
-    // Dispatch init values
+    // Dispatch reset values
     this._callbacks.setStatus(INIT_STATE.status);
     this._callbacks.setIsRunning(INIT_STATE.isRunning);
     this._callbacks.setChatLog(INIT_STATE.logs);
-    this._callbacks.setWorkspace(INIT_STATE.workspace);
+    this._callbacks.setWorkspace(undefined);
 
     // Disconnect all callbacks
     this._callbacks = undefined;
@@ -103,7 +103,7 @@ export class EvoThread {
     this._callbacks.setStatus(this._state.status);
     this._callbacks.setIsRunning(this._state.isRunning);
     this._callbacks.setChatLog(this._state.logs);
-    this._callbacks.setWorkspace(this._state.workspace);
+    await this._callbacks.setWorkspace(this._state.workspace);
   }
 
   async start(options: EvoThreadStartOptions): Promise<void> {
