@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import clsx from "clsx";
 
 import FileIcon from "./FileIcon";
+import FileModal from "./modals/FileModal";
 import { DownloadSimple, FilePlus } from "@phosphor-icons/react";
 import Button from "./Button";
 import { useWorkspaceUploadDrop } from "@/lib/hooks/useWorkspaceUploadDrop";
@@ -16,11 +17,14 @@ export interface WorkspaceProps {
 }
 
 function Workspace({ onUpload }: WorkspaceProps) {
-  const { getRootProps, getInputProps, isDragAccept, open } = useWorkspaceUploadDrop(onUpload);
+  const { getRootProps, getInputProps, isDragAccept, open } =
+    useWorkspaceUploadDrop(onUpload);
   const [workspaceFiles] = useAtom(workspaceFilesAtom);
   const [workspaceUploads] = useAtom(workspaceUploadsAtom);
+  const downloadFilesAsZip = useDownloadWorkspaceAsZip();
+  const [showFile, setShowFile] = useState<InMemoryFile | null>(null);
+  const [showFileModal, setShowFileModal] = useState<boolean>(false);
   const [,setWelcomeModalOpen] = useAtom(welcomeModalAtom)
-  const downloadFilesAsZip = useDownloadWorkspaceAsZip()
   const firstTimeUser = useFirstTimeUser();
 
   function getFileType(path: InMemoryFile["path"]) {
@@ -37,6 +41,11 @@ function Workspace({ onUpload }: WorkspaceProps) {
   }
 
   const workspaceLoading = workspaceUploads.length > 0;
+
+  const handleFileClick = (file: InMemoryFile | null) => {
+    setShowFile(file);
+    setShowFileModal(true);
+  };
 
   return (
     <div className="p-2">
@@ -95,6 +104,7 @@ function Workspace({ onUpload }: WorkspaceProps) {
                     return (
                       <div
                         key={i}
+                        onClick={() => handleFileClick(file)}
                         className={clsx(
                           "flex w-full cursor-pointer items-center space-x-2 rounded p-1 text-sm text-cyan-500 transition-colors duration-300",
                           {
@@ -115,6 +125,11 @@ function Workspace({ onUpload }: WorkspaceProps) {
           </>
         )}
       </div>
+      <FileModal
+        isOpen={showFileModal}
+        onClose={() => setShowFileModal(false)}
+        file={showFile}
+      />
     </div>
   );
 }

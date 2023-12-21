@@ -37,6 +37,10 @@ code {
   background-position: 56% 58%;
 }
 
+.prose-file * {
+  @apply my-0;
+}
+
 ::-webkit-scrollbar {
   @apply w-1 h-1 rounded;
 }
