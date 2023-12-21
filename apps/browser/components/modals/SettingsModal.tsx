@@ -12,7 +12,6 @@ import AccountConfig from "./AccountConfig";
 interface AccountConfigProps {
   isOpen: boolean;
   onClose: () => void;
-  firstTimeUser: boolean;
 }
 
 export default function SettingsModal(props: AccountConfigProps) {

@@ -10,7 +10,7 @@ import SettingsModal from "./modals/SettingsModal";
 import { useAtom } from "jotai";
 import {
   capReachedAtom,
-  localOpenAiApiKeyAtom,
+  settingsModalAtom,
   signInModalAtom,
 } from "@/lib/store";
 import { useSession, signOut } from "next-auth/react";
@@ -24,12 +24,10 @@ const DropdownAccount: React.ForwardRefRenderFunction<
   HTMLDivElement,
   DropdownAccountProps
 > = ({ dropdownOpen }, ref) => {
-  const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom);
   const { data: session } = useSession();
   const [isSettingsModalOpen, setIsSettingsModalOpen] =
-    useState<boolean>(false);
+    useAtom(settingsModalAtom);
   const [isSignInModalOpen, setIsSignInModalOpen] = useAtom(signInModalAtom);
-  const firstTimeUser = !localOpenAiApiKey && !session?.user;
   const [capReached] = useAtom(capReachedAtom);
 
   const handleAccountSettingsClick = () => {
@@ -95,7 +93,6 @@ const DropdownAccount: React.ForwardRefRenderFunction<
       <SettingsModal
         isOpen={isSettingsModalOpen}
         onClose={onSettingsClose}
-        firstTimeUser={firstTimeUser}
       />
       <SignInModal
         isOpen={isSignInModalOpen}
