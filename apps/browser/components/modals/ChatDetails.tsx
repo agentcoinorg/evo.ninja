@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
 import Modal from "./ModalBase";
 import ReactMarkdown from "react-markdown";
-import { MessageSet } from "../ChatLogs";
 import { CaretUp } from "@phosphor-icons/react";
+import { MessageSet } from "@/lib/utils/sanitizeLogsDetails";
 import clsx from "clsx";
 
 interface ChatDetailsProps {
@@ -66,14 +66,16 @@ export default function ChatDetails({
                   className="group flex w-full items-center justify-between p-4"
                 >
                   <ReactMarkdown>{stepTitle}</ReactMarkdown>
-                  <CaretUp
-                    weight="bold"
-                    size={14}
-                    className={clsx(
-                      "transform text-white transition-transform duration-500 ease-in-out group-hover:text-cyan-500",
-                      expandedStep !== stepTitle && "rotate-180"
-                    )}
-                  />
+                  {stepDetails.length > 0 && (
+                    <CaretUp
+                      weight="bold"
+                      size={14}
+                      className={clsx(
+                        "transform text-white transition-transform duration-500 ease-in-out group-hover:text-cyan-500",
+                        expandedStep !== stepTitle && "rotate-180"
+                      )}
+                    />
+                  )}
                 </button>
                 <div
                   ref={(el) => {

@@ -237,9 +237,7 @@ export class EvoThread {
         if ("value" in response.value) {
           const isSuccess = response.value.value.type === "success";
           const message = {
-            title: `#### Information ${
-              isSuccess ? "has been" : "could not be"
-            } retrieved`,
+            title: `## Goal has ${isSuccess ? "" : "not"} been achieved`,
             user: "evo",
           };
           await this.onChatLog(message);

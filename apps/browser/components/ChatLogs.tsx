@@ -12,82 +12,20 @@ import { ArrowSquareRight } from "@phosphor-icons/react";
 import Logo from "./Logo";
 import { useSession } from "next-auth/react";
 import ChatDetails from "./modals/ChatDetails";
+import { sanitizeLogs } from "@/lib/utils/sanitizeLogsDetails";
 
 export interface ChatLogsProps {
   logs: ChatLog[];
   isRunning: boolean;
   currentStatus: string | undefined;
-  chatName: string
-}
-
-export type MessageSet = {
-  userMessage: string;
-  evoMessage?: string;
-  details: Record<string, string[]>;
-};
-
-export function sanitizeLogs(messages: ChatLog[]): MessageSet[] {
-  console.log(messages)
-  if (!messages || !messages.length) return [];
-  const dividedMessages: MessageSet[] = [];
-  let currentMessageSet: MessageSet = { userMessage: "", details: {} };
-  let currentStepTitle = "";
-  let evoMessageFlag = false;
-
-  messages.sort((a, b) => {
-    return new Date(a.created_at as string).getTime() - new Date(b.created_at as string).getTime()
-  })
-  // const s = [...messages].reduce((sanitizedLogs, currentMessage, index) => {
-  //   return [];
-  // }, []);
-
-  messages.forEach((message, index) => {
-    if (!message.title.startsWith("#")) {
-      if (
-        currentMessageSet.userMessage &&
-        !evoMessageFlag &&
-        message.user === "evo"
-      ) {
-        // This is the evoMessage after details
-        currentMessageSet.evoMessage = message.title;
-        evoMessageFlag = true;
-      } else if (!currentMessageSet.userMessage && message.user === "user") {
-        // This is the initial userMessage
-        currentMessageSet.userMessage = message.title;
-        evoMessageFlag = false;
-      } else {
-        // New set starts here
-        dividedMessages.push(currentMessageSet);
-        currentMessageSet = { userMessage: message.title, details: {} };
-        currentStepTitle = "";
-        evoMessageFlag = false;
-      }
-    } else {
-      if (message.title.startsWith("## ")) {
-        // New step title
-        currentStepTitle = message.title;
-        currentMessageSet.details[currentStepTitle] = [];
-      } else if (currentStepTitle) {
-        // Add detail to the current step
-        const detailContent = message.content ? message.title.concat(`\n${message.content}`) : message.title
-        currentMessageSet.details[currentStepTitle].push(detailContent);
-      }
-    }
-
-    // Handle the last element
-    if (index === messages.length - 1) {
-      dividedMessages.push(currentMessageSet);
-    }
-  });
-
-  return dividedMessages;
+  chatName: string;
 }
 
 export default function ChatLogs({
   logs,
   isRunning,
   currentStatus,
-  chatName
+  chatName,
 }: ChatLogsProps) {
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -235,11 +173,11 @@ export default function ChatLogs({
                           </div>
                         </>
                       )}
-                      {!msg.evoMessage && !isRunning && (
-                        <ReactMarkdown className="prose prose-invert w-full max-w-none">
-                          There was an issue with your request, please try again
-                        </ReactMarkdown>
-                      )}
+                    {!msg.evoMessage && !isRunning && (
+                      <ReactMarkdown className="prose prose-invert w-full max-w-none">
+                        There was an issue with your request, please try again
+                      </ReactMarkdown>
+                    )}
                   </div>
                 </div>
               </div>
