@@ -49,6 +49,32 @@ def generate_subqueries(query: str, limit: int) -> list[str]:
     
     return [query] + [subquery.strip('\"') for subquery in subqueries]
 
+
+rerank_queries_template = """
+I will present you with a list of queries to search the web for, for answers to the question: {goal}.
+
+Evaluate the queries in order that will provide the best data to answer the question. Do not modify the queries.
+Return them, in order of relevance, as a comma separated list of queries.
+
+Queries: {queries}
+"""
+
+def rerank_subqueries(queries: list[str], goal: str) -> list[str]:
+    rerank_results_prompt = ChatPromptTemplate.from_template(template=rerank_queries_template)
+    
+    rerank_results_chain = (
+        rerank_results_prompt |
+        ChatOpenAI(model="gpt-4-1106-preview") |
+        CommaSeparatedListOutputParser()
+    )
+    
+    responses = rerank_results_chain.invoke({
+        "goal": goal,
+        "queries": json.dumps(queries)
+    })
+    
+    return [response.strip('\"') for response in responses]
+
 rerank_results_template = """
 I will present you with a list of text snippets gathered from web searches
 to answer the question: {goal}.
@@ -93,7 +119,7 @@ def scrape_results(results: list[WebSearchResult]) -> list[WebScrapeResult]:
 
     return scraped
 
-def prepare_report(goal: str, scraped: list[WebScrapeResult]):
+def prepare_report(goal: str, scraped: list[str]):
     evaluation_prompt_template = """
     You are a professional researcher. Your goal is to answer: '{goal}'.
     
@@ -153,12 +179,14 @@ def create_embeddings_from_results(results: list[WebScrapeResult], text_splitter
     return collection
 
 def research(goal: str):
+    initial_subqueries_limit = 20
     subqueries_limit = 3
     scrape_content_split_chunk_size = 4000
     scrape_content_split_chunk_overlap = 500
     top_k = 8
     
-    queries = generate_subqueries(query=goal, limit=subqueries_limit)
+    queries = generate_subqueries(query=goal, limit=initial_subqueries_limit)
+    queries = rerank_subqueries(queries=queries, goal=goal)[:subqueries_limit]
 
     search_results_with_queries = search(queries, lambda result: not result["url"].startswith("https://www.youtube"))
 
