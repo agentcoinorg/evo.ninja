@@ -18,6 +18,7 @@ chromadb = "^0.4.20"
 scrapingbee = "^2.0.1"
 spacy = "^3.7.2"
 google-api-python-client = "^2.111.0"
+tiktoken = "^0.5.2"
 
 
 [build-system]

@@ -75,12 +75,12 @@ def rerank_results(results: list[str], goal: str) -> list[str]:
     
     return response
 
-def scrape_results(results: list[tuple[str, WebSearchResult]]) -> list[WebScrapeResult]:
+def scrape_results(results: list[WebSearchResult]) -> list[WebScrapeResult]:
     scraped: list[WebScrapeResult] = []
-    results_by_url = {result.url: result for (_, result) in results}
+    results_by_url = {result.url: result for result in results}
     
     with ThreadPoolExecutor(max_workers=5) as executor:
-        futures = {executor.submit(web_scrape, result.url, query, 5000) for (query, result) in results}
+        futures = {executor.submit(web_scrape, result.url) for result in results}
         for future in as_completed(futures):
             (scraped_content, url) = future.result()
             result = results_by_url[url]
@@ -149,27 +149,38 @@ def create_embeddings_from_results(results: list[WebScrapeResult], text_splitter
             texts=texts,
             metadatas=metadatas
         )
+        
+    return collection
 
 def research(goal: str):
-    queries = generate_subqueries(query=goal, limit=3)
+    subqueries_limit = 3
+    scrape_content_split_chunk_size = 4000
+    scrape_content_split_chunk_overlap = 500
+    top_k = 8
+    
+    queries = generate_subqueries(query=goal, limit=subqueries_limit)
 
-    results = search(queries, lambda result: not result["url"].startswith("https://www.youtube"))
+    search_results_with_queries = search(queries, lambda result: not result["url"].startswith("https://www.youtube"))
 
-    scrape_args = [(query, result.url) for (query, result) in results]
+    scrape_args = [result for (_, result) in search_results_with_queries]
     scraped = scrape_results(scrape_args)
     
-    text_splitter = RecursiveCharacterTextSplitter(separators=["\n\n", "\n"], chunk_size = 4000, chunk_overlap=500)
+    text_splitter = RecursiveCharacterTextSplitter(
+        separators=["\n\n", "\n"],
+        chunk_size=scrape_content_split_chunk_size,
+        chunk_overlap=scrape_content_split_chunk_overlap
+    )
     collection = create_embeddings_from_results(scraped, text_splitter)
     
     vector_result_texts: list[str] = []
     
     for query in queries:
-        top_k_results = collection.similarity_search(query, k=8)
+        top_k_results = collection.similarity_search(query, k=top_k)
         vector_result_texts += [result.page_content for result in top_k_results]
         
-    reranked_results = rerank_results(vector_result_texts, goal)[:10]
-    print(reranked_results)
+    # TODO: Fix this. Returns strings not corresponding to the vector_result_texts
+    # reranked_results = rerank_results(vector_result_texts, goal)[:10]
     
-    report = prepare_report(goal, scraped) 
+    report = prepare_report(goal, vector_result_texts) 
 
     return report

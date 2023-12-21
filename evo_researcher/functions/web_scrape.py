@@ -24,7 +24,7 @@ def web_scrape(url: str) -> tuple[str, str]:
             text = soup.get_text()
             text = re.sub('(\n\n)\n*|\n', r'\1', text)
             
-            return (url, text)
+            return (text, url)
         else:
             logging.warning("Non-HTML content received")
             return ""
