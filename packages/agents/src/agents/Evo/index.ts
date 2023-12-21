@@ -76,6 +76,7 @@ export class Evo extends Agent<GoalRunArgs> {
     const { chat } = this.context;
     const { messages } = chat.chatLogs;
 
+    await this.context.logger.notice("Predicting best next step...")
     const prediction =
       !this.previousPrediction || this.loopCounter % 2 === 0
         ? await this.predictBestNextStep(
@@ -110,7 +111,7 @@ export class Evo extends Agent<GoalRunArgs> {
     const predictionVector = await this.createEmbeddingVector(prediction);
 
     await this.context.logger.info("### Prediction:\n-> " + prediction);
-
+    await this.context.logger.notice("Finding best agent to execute step...")
     const [agent, agentFunctions, persona, allFunctions] = await findBestAgent(
       predictionVector,
       this.context

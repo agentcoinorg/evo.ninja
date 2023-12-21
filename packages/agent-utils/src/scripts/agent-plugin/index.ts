@@ -33,12 +33,12 @@ export class AgentPlugin extends Module<AgentPluginConfig> {
   }
 
   public async onGoalAchieved(args: Args_onGoalAchieved): Promise<boolean> {
-    await this._logger.success(`Goal has been achieved: ${args.message}`);
+    await this._logger.success(args.message);
     return true;
   }
 
   public async onGoalFailed(args: Args_onGoalFailed): Promise<boolean> {
-    await this._logger.error(`Goal could not be achieved: ${args.message}`);
+    await this._logger.error(args.message);
     return true;
   }
 }

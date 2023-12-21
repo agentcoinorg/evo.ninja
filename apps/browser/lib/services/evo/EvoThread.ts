@@ -6,7 +6,7 @@ import {
   ChatLogType,
   ChatMessage,
   Workspace,
-  InMemoryWorkspace
+  InMemoryWorkspace,
 } from "@evo-ninja/agents";
 
 export interface EvoThreadConfig {
@@ -14,12 +14,16 @@ export interface EvoThreadConfig {
   loadChatLog: (chatId: string) => Promise<ChatLog[]>;
   loadWorkspace: (chatId: string) => Promise<Workspace>;
   onChatLogAdded: (chatLog: ChatLog) => Promise<void>;
-  onMessagesAdded: (type: ChatLogType, messages: ChatMessage[]) => Promise<void>;
+  onMessagesAdded: (
+    type: ChatLogType,
+    messages: ChatMessage[]
+  ) => Promise<void>;
   onVariableSet: (key: string, value: string) => Promise<void>;
 }
 
 export interface EvoThreadState {
-  goal?: string;
+  goal: string | undefined;
+  status: string | undefined;
   isRunning: boolean;
   isLoading: boolean;
   logs: ChatLog[];
@@ -27,6 +31,7 @@ export interface EvoThreadState {
 }
 
 export interface EvoThreadCallbacks {
+  setStatus: (status?: string) => void;
   setIsRunning: (value: boolean) => void;
   setChatLog: (chatLog: ChatLog[]) => void;
   setWorkspace: (workspace: Workspace) => void;
@@ -41,6 +46,8 @@ export interface EvoThreadStartOptions {
 }
 
 const INIT_STATE: EvoThreadState = {
+  goal: undefined,
+  status: undefined,
   isRunning: false,
   isLoading: false,
   logs: [],
@@ -72,6 +79,7 @@ export class EvoThread {
     }
 
     // Dispatch init values
+    this._callbacks.setStatus(INIT_STATE.status);
     this._callbacks.setIsRunning(INIT_STATE.isRunning);
     this._callbacks.setChatLog(INIT_STATE.logs);
     this._callbacks.setWorkspace(INIT_STATE.workspace);
@@ -92,6 +100,7 @@ export class EvoThread {
     }
 
     // Send current state to newly connected callbacks
+    this._callbacks.setStatus(this._state.status);
     this._callbacks.setIsRunning(this._state.isRunning);
     this._callbacks.setChatLog(this._state.logs);
     this._callbacks.setWorkspace(this._state.workspace);
@@ -139,12 +148,11 @@ export class EvoThread {
       options.openAiApiKey,
       this._config.onMessagesAdded,
       this._config.onVariableSet,
-      (chatLog) =>
-        this.onChatLog(chatLog),
-      () =>
-        this._callbacks?.onGoalCapReached(),
-      (error) =>
-        this._callbacks?.onError(error)
+      (chatLog) => this.onChatLog(chatLog),
+      (status) => this.onStatusUpdate(status),
+      () => this._callbacks?.onGoalCapReached(),
+      // onError
+      (error) => this._callbacks?.onError(error)
     );
 
     if (!evo) {
@@ -202,6 +210,11 @@ export class EvoThread {
     await this._config.onChatLogAdded(chatLog);
   }
 
+  private onStatusUpdate(status: string): void {
+    this._state.status = status;
+    this._callbacks?.setStatus(status);
+  }
+
   private async runEvo(evo: Evo, goal: string): Promise<void> {
     const iterator = evo.run({ goal });
 
@@ -213,31 +226,28 @@ export class EvoThread {
     let stepCounter = 1;
 
     while (this._state.isRunning) {
+      await this.onChatLog({
+        title: `## Step ${stepCounter}`,
+        user: "evo",
+      });
       const response = await iterator.next();
 
       this._callbacks?.setWorkspace(this._state.workspace);
 
       if (response.done) {
-        const actionTitle = response.value.value.title;
-        if (
-          actionTitle.includes("onGoalAchieved") ||
-          actionTitle === "SUCCESS"
-        ) {
-          await this.onChatLog({
-            title: "## Goal Achieved",
+        // If value is not present is because an unhandled error has happened in Evo
+        if ("value" in response.value) {
+          const isSuccess = response.value.value.type === "success";
+          const message = {
+            title: `## Goal has ${isSuccess ? "" : "not"} been achieved`,
             user: "evo",
-          });
+          };
+          await this.onChatLog(message);
         }
-
         this.setIsRunning(false);
         evo?.reset();
         break;
       }
-
-      await this.onChatLog({
-        title: `## Step ${stepCounter}`,
-        user: "evo",
-      });
 
       if (!response.done) {
         const evoMessage = {

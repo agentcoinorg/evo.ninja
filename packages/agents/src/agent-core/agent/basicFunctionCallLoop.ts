@@ -27,6 +27,7 @@ export async function* basicFunctionCallLoop(
       return ResultOk(finalOutput);
     }
 
+    await context.logger.notice("Analyzing which function should be called...")
     const response = await llm.getResponse(logs, agentFunctions);
 
     if (!response) {
@@ -45,6 +46,7 @@ export async function* basicFunctionCallLoop(
         continue;
       }
 
+      await context.logger.notice("Executing function: " + sanitizedFunctionAndArgs.value[1].definition.name)
       const { result, functionCalled } = await executeAgentFunction(sanitizedFunctionAndArgs.value, fnArgs, context)
 
       // Save large results as variables

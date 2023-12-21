@@ -10,10 +10,34 @@ interface ModalProps {
   title: string;
   isOpen: boolean;
   onClose: () => void;
+  panelStyles?: {
+    maxWidth?: string;
+    other?: string;
+  };
+  contentStyles?: {
+    padding?: string;
+    "max-h"?: string;
+    spacing?: string;
+    overflow?: string;
+    other?: string;
+  };
 }
 
 export default function Modal(props: PropsWithChildren<ModalProps>) {
-  const { title, isOpen, onClose, children } = props;
+  const { title, isOpen, onClose, panelStyles, contentStyles, children } =
+    props;
+  const maxWidth = panelStyles?.maxWidth ?? "max-w-[540px]";
+
+  const defaultContentStyles = clsx(
+    "bg-zinc-900 [scrollbar-gutter:stable]",
+    contentStyles?.padding ? contentStyles?.padding : "p-8 pr-[1.5rem]",
+    contentStyles?.["max-h"]
+      ? contentStyles?.["max-h"]
+      : "max-h-[calc(100vh-72px)] md:max-h-[calc(100vh-96px)]",
+    contentStyles?.spacing ? contentStyles?.spacing : "space-y-8",
+    contentStyles?.overflow ? contentStyles?.overflow : "overflow-y-auto",
+    contentStyles?.other
+  );
 
   return (
     <>
@@ -24,7 +48,7 @@ export default function Modal(props: PropsWithChildren<ModalProps>) {
           onClose={onClose}
         >
           <div className="fixed inset-0 overflow-y-auto bg-zinc-400/50 backdrop-blur [scrollbar-gutter:stable] ">
-            <div className="flex min-h-full items-center justify-center text-center md:p-4">
+            <div className="flex min-h-full items-center justify-center p-1 text-center md:p-4">
               <Transition.Child
                 as={Fragment}
                 enter="ease-out duration-300"
@@ -35,7 +59,10 @@ export default function Modal(props: PropsWithChildren<ModalProps>) {
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel
-                  className="w-full max-w-[540px] transform overflow-hidden rounded-none bg-zinc-800 text-left align-middle text-zinc-50 shadow-xl transition-all md:rounded-2xl"
+                  className={clsx(
+                    "w-full transform overflow-hidden rounded-2xl rounded-none bg-zinc-800 text-left align-middle text-zinc-50 shadow-xl transition-all",
+                    maxWidth
+                  )}
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
@@ -57,9 +84,7 @@ export default function Modal(props: PropsWithChildren<ModalProps>) {
                       />
                     </Button>
                   </div>
-                  <div className="max-h-[calc(100vh-64px)] space-y-8 overflow-y-auto bg-zinc-900 p-8 [scrollbar-gutter:stable] md:max-h-[calc(100vh-96px)]">
-                    {children}
-                  </div>
+                  <div className={defaultContentStyles}>{children}</div>
                 </Dialog.Panel>
               </Transition.Child>
             </div>
