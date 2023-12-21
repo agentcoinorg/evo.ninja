@@ -1,7 +1,17 @@
 import os
+from pydantic import BaseModel
 import requests
 
-def web_search(query, max_results=10):
+class WebSearchResult(BaseModel):
+    title: str
+    url: str
+    description: str
+    query: str
+    
+    def __getitem__(self, item):
+        return getattr(self, item)
+
+def web_search(query: str, max_results=1) -> list[WebSearchResult]:
     print(f"-- Searching the web for {query} --")
     # Base URL for the API
     base_url = "https://serpapi.com/search"
@@ -30,11 +40,12 @@ def web_search(query, max_results=10):
 
     # Transform the results
     transformed_results = [
-        {
-            "title": result.get("title", ""),
-            "url": result.get("link", ""),
-            "description": result.get("snippet", "")
-        }
+        WebSearchResult(
+            title=result.get("title", ""),
+            url=result.get("link", ""),
+            description=result.get("snippet", ""),
+            query=query
+        )
         for result in organic_results
     ]
 
