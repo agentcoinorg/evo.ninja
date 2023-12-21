@@ -1,13 +1,19 @@
-import json
 import logging
 import os
+import re
 import requests
-from markdownify import markdownify
+from pydantic import BaseModel
 from bs4 import BeautifulSoup
 from scrapingbee import ScrapingBeeClient
-from evo_researcher.functions.summarize import summarize
 
-def web_scrape(url: str, objective: str, content_length_threshold: int = 10000):
+class WebScrapeResult(BaseModel):
+    url: str
+    text: str
+    
+    def __getitem__(self, item):
+        return getattr(self, item)
+
+def web_scrape(url: str) -> WebScrapeResult:
     print(f"-- Scraping {url} --")
     api_key = os.getenv("SCRAPINGBEE_API_KEY")
     client = ScrapingBeeClient(api_key=api_key)
@@ -17,13 +23,20 @@ def web_scrape(url: str, objective: str, content_length_threshold: int = 10000):
 
         if 'text/html' in response.headers.get('Content-Type', ''):
             soup = BeautifulSoup(response.content, "html.parser")
+            
+            [x.extract() for x in soup.findAll('script')]
+            [x.extract() for x in soup.findAll('style')]
+            [x.extract() for x in soup.findAll('head')]
+            
             text = soup.get_text()
-            markdown_text = markdownify(text)
-
-            if len(markdown_text) > content_length_threshold:
-                return summarize(objective=objective, content=markdown_text)
-            else:
-                return markdown_text
+            text = re.sub('(\n\n)\n*|\n', r'\1', text)
+            
+            result = WebScrapeResult(
+                url=url,
+                text=text
+            )
+            
+            return result
         else:
             logging.warning("Non-HTML content received")
             return ""
