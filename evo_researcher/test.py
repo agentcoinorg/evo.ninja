@@ -53,8 +53,8 @@ rerank_results_template = """
 I will present you with a list of text snippets gathered from web searches
 to answer the question: {goal}.
 
-Rank the snippets in order of relevance to the question.
-Return them as a comma separated list of snippets, without quotes.
+Rank the snippets in order of relevance to the question. Do not modify the snippets.
+Return them, in order of relevance, as a comma separated list of snippet.
 
 Snippets: {results}
 """
@@ -180,6 +180,7 @@ def research(goal: str):
         
     # TODO: Fix this. Returns strings not corresponding to the vector_result_texts
     # reranked_results = rerank_results(vector_result_texts, goal)[:10]
+    # print(reranked_results)
     
     report = prepare_report(goal, vector_result_texts) 
 
