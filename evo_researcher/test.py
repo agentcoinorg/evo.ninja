@@ -78,7 +78,7 @@ rerank_results_template = """
 I will present you with a list of text snippets gathered from web searches
 to answer the question: {goal}.
 
-The snippets are divided by '-------DIVISOR-------'.
+The snippets are divided by '---snippet---'
 
 Rank the snippets in order of relevance to the question.
 
@@ -98,7 +98,7 @@ def rerank_results(results: list[str], goal: str) -> list[str]:
     
     reordered_results: list[str] = rerank_results_chain.invoke({
         "goal": goal,
-        "results": "-------DIVISOR-------".join(results)
+        "results": "---snippet---".join(results)
     })
     
     return reordered_results
