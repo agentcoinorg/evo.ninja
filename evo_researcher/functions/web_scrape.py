@@ -2,7 +2,6 @@ import logging
 import os
 import re
 import requests
-from pydantic import BaseModel
 from bs4 import BeautifulSoup
 from scrapingbee import ScrapingBeeClient
 
