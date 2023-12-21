@@ -31,9 +31,9 @@ export class ReadAndAnalyzeCSVDataFunction extends AgentFunctionBase<ReadAndAnal
     return async (params: ReadAndAnalyzeCSVDataParameters, rawParams?: string): Promise<AgentFunctionResult> => {
       const analyzeData = new AnalyzeDataFunction(agent.context.llm, agent.context.chat.tokenizer);
 
-      const data = agent.context.workspace.readFileSync(params.path);
+      const data = await agent.context.workspace.readFile(params.path);
       const summary = await analyzeData.analyze({ data, question: params.question }, agent.context);
-      const variable = agent.context.variables.save("dataFile", data);
+      const variable = await agent.context.variables.save("dataFile", data);
 
       return {
         outputs: [

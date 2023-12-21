@@ -5,7 +5,7 @@ import { AgentPrompts } from "../../agents/utils";
 export const prompts: AgentPrompts<GoalRunArgs> = {
   name: "Scripter",
   expertise: `executing and creating scripts to solve basic tasks`,
-  initialMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
+  initialMessages: (): ChatMessage[] => [
     {
       role: "user",
       content: `Purpose:
@@ -24,6 +24,8 @@ When suitable scripts are found, you run them to solve the problem.
 If no scripts have been found, you cautiously consider createScript. You ensure any new script you create is specific, actionable, and not general.
 If a goal has been achieved or failed, you will call the agent_onGoalAchieved or agent_onGoalFailed function.`,
     },
+  ],
+  runMessages: ({ goal }: GoalRunArgs): ChatMessage[] => [
     {
       role: "user",
       content: goal,

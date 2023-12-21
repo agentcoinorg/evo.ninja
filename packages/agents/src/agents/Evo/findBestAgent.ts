@@ -3,7 +3,6 @@ import { AgentContext } from "@/agent-core";
 import { AgentFunctionBase } from "../../functions/utils";
 import { Agent, GoalRunArgs } from "../utils/Agent";
 import { CsvAnalystAgent } from "../CsvAnalyst";
-import { DeveloperAgent } from "../Developer";
 import { ResearcherAgent } from "../Researcher";
 import { SynthesizerAgent } from "../Synthesizer";
 import { InMemoryWorkspace } from "@evo-ninja/agent-utils";
@@ -28,16 +27,15 @@ export const findBestAgent = async (
   AgentFunctionBase<unknown>[]
 ]> => {
   const allAgents: Agent[] = [
-    DeveloperAgent,
     CsvAnalystAgent,
     ResearcherAgent,
     SynthesizerAgent,
-  ].map(agentClass => new agentClass(context.cloneEmpty()));
+  ].map((agentClass) => new agentClass(context.cloneEmpty()));
 
   const agentsWithPrompts = allAgents.map(agent => {
     return {
       expertise: agent.config.prompts.expertise + "\n" + agent.config.functions.map(x => x.name).join("\n"),
-      persona: agent.config.prompts.initialMessages({ goal: "" })[0].content ?? "",
+      persona: agent.config.prompts.initialMessages()[0].content ?? "",
       agent,
     };
   });
@@ -62,7 +60,10 @@ export const findBestAgent = async (
       limit: 1,
     }));
 
-  context.logger.info("### Selected agent:\n-> " + agents.map(x => x.agent.config.prompts.name)[0]);
+    await context.logger.info(
+      "### Selected agent:\n-> " +
+        agents.map((x) => x.agent.config.prompts.name)[0]
+    );
 
   const agentWithPrompt = agents[0];
 

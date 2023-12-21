@@ -13,29 +13,30 @@ export class AgentProtocolWorkspace implements Workspace {
   }
 
   get artifacts(): Artifact[] {
-    return Array.from(this._artifactLog.values())
-      .filter((x) => !x.relative_path?.startsWith("."));
+    return Array.from(this._artifactLog.values()).filter(
+      (x) => !x.relative_path?.startsWith(".")
+    );
   }
 
   cleanArtifacts(): void {
     this._artifactLog = new Map();
   }
 
-  writeFileSync(subpath: string, data: string): void {
+  async writeFile(subpath: string, data: string): Promise<void> {
     const artifact = createArtifact(subpath);
     this._artifactLog.set(subpath, artifact);
-    this._fsWorkspace.writeFileSync(subpath, data);
+    await this._fsWorkspace.writeFile(subpath, data);
   }
 
-  readFileSync(subpath: string): string {
-    return this._fsWorkspace.readFileSync(subpath);
+  readFile(subpath: string): Promise<string> {
+    return this._fsWorkspace.readFile(subpath);
   }
 
-  existsSync(subpath: string): boolean {
-    return this._fsWorkspace.existsSync(subpath);
+  exists(subpath: string): Promise<boolean> {
+    return this._fsWorkspace.exists(subpath);
   }
 
-  renameSync(oldPath: string, newPath: string): void {
+  async rename(oldPath: string, newPath: string): Promise<void> {
     let artifact = this._artifactLog.get(oldPath);
     if (artifact) {
       this._artifactLog.delete(oldPath);
@@ -45,23 +46,23 @@ export class AgentProtocolWorkspace implements Workspace {
       artifact = createArtifact(newPath);
       this._artifactLog.set(newPath, artifact);
     }
-    this._fsWorkspace.renameSync(oldPath, newPath);
+    await this._fsWorkspace.rename(oldPath, newPath);
   }
 
-  mkdirSync(subpath: string): void {
-    this._fsWorkspace.mkdirSync(subpath);
+  async mkdir(subpath: string): Promise<void> {
+    await this._fsWorkspace.mkdir(subpath);
   }
 
-  rmdirSync(subpath: string): void {
-    this._fsWorkspace.rmdirSync(subpath);
+  async rmdir(subpath: string): Promise<void> {
+    await this._fsWorkspace.rmdir(subpath);
   }
 
-  readdirSync(subpath: string): DirectoryEntry[] {
-    return this._fsWorkspace.readdirSync(subpath);
+  readdir(subpath: string): Promise<DirectoryEntry[]> {
+    return this._fsWorkspace.readdir(subpath);
   }
 
-  appendFileSync(subpath: string, data: string): void {
-    this._fsWorkspace.appendFileSync(subpath, data);
+  async appendFile(subpath: string, data: string): Promise<void> {
+    await this._fsWorkspace.appendFile(subpath, data);
     let artifact = this._artifactLog.get(subpath);
     if (!artifact) {
       artifact = createArtifact(subpath);
@@ -69,15 +70,18 @@ export class AgentProtocolWorkspace implements Workspace {
     }
   }
 
-  rmSync(subpath: string): void {
+  async rm(subpath: string): Promise<void> {
     const artifact = this._artifactLog.get(subpath);
     if (artifact) {
       this._artifactLog.delete(subpath);
     }
-    this._fsWorkspace.rmSync(subpath);
+    await this._fsWorkspace.rm(subpath);
   }
 
-  async exec(command: string, args?: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
+  async exec(
+    command: string,
+    args?: string[]
+  ): Promise<{ exitCode: number; stdout: string; stderr: string }> {
     return await this._fsWorkspace.exec(command, args);
   }
 }

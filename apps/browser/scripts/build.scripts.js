@@ -32,7 +32,7 @@ const scripts = uniqueFilesWithoutExtension.map((name) => {
   };
 });
 
-const templateFile = `import { InMemoryWorkspace, Workspace } from "@evo-ninja/agent-utils";
+const templateFile = `import { InMemoryWorkspace } from "@evo-ninja/agent-utils";
 
 export function createInBrowserScripts(): InMemoryWorkspace {
   const workspace = new InMemoryWorkspace();
@@ -41,17 +41,17 @@ export function createInBrowserScripts(): InMemoryWorkspace {
     {{#each scripts}}
     {{variableName}},
     {{/each}}
-  ]
+  ];
+
   availableScripts.forEach((script) => addScript(script, workspace));
 
   return workspace;
 }
 
-
 function addScript(
   script: { name: string; definition: string; code: string },
-  scriptsWorkspace: Workspace
-) {
+  scriptsWorkspace: InMemoryWorkspace
+): void {
   scriptsWorkspace.writeFileSync(script.name.concat(".json"), script.definition);
   scriptsWorkspace.writeFileSync(script.name.concat(".js"), script.code);
 }
@@ -69,4 +69,4 @@ const {{variableName}} = {
 const template = Handlebars.compile(templateFile);
 
 const scriptsFile = template({ scripts });
-fs.writeFileSync("./src/scripts.ts", scriptsFile);
+fs.writeFileSync("./lib/scripts.ts", scriptsFile);

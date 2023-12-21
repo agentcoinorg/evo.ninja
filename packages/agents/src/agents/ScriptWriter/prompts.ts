@@ -6,7 +6,7 @@ import { AgentPrompts } from "../../agents/utils";
 export const prompts: AgentPrompts<ScriptWriterRunArgs> = {
   name: "ScriptWriter",
   expertise: `writing single-purpose scripts`,
-  initialMessages: ({ namespace, description, args }: ScriptWriterRunArgs): ChatMessage[] => [
+  initialMessages: (): ChatMessage[] => [
     {
       role: "user",
       content: `You are an agent designed to write JavaScript functions. 
@@ -15,6 +15,8 @@ export const prompts: AgentPrompts<ScriptWriterRunArgs> = {
 3. Don't get disheartened by initial failures. Retry until success.
 4. Ensure authenticity; avoid creating mock functionality.`,
   },
+  ],
+  runMessages: ({ namespace, description, args }: ScriptWriterRunArgs): ChatMessage[] => [
   {
     role: "user",
     content: `Your goal is to compose the body of an async JavaScript function.

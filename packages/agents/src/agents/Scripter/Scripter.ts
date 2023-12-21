@@ -20,8 +20,8 @@ export class ScripterAgent extends Agent {
           new ReadFileFunction(context.scripts),
           new WriteFileFunction(context.scripts),
           new ReadDirectoryFunction(context.scripts),
-        ], 
-        context.scripts,
+        ],
+        context.scripts
       ),
       context
     );

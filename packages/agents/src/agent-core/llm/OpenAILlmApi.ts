@@ -22,11 +22,13 @@ export class OpenAILlmApi implements LlmApi {
     private _defaultMaxTokens: number,
     private _defaultMaxResponseTokens: number,
     private _logger: Logger,
-    private _maxRateLimitRetries: number = 5
+    baseURL?: string,
+    private _maxRateLimitRetries: number = 5,
   ) {
     this._api = new OpenAIApi({
       apiKey: this._apiKey,
-      dangerouslyAllowBrowser: true
+      dangerouslyAllowBrowser: true,
+      baseURL: baseURL
     });
   }
 
@@ -79,7 +81,9 @@ export class OpenAILlmApi implements LlmApi {
 
         // If a rate limit error is thrown
         if (maybeOpenAiError.status === 429) {
-          this._logger.warning("Warning: OpenAI rate limit exceeded, sleeping for 15 seconds.");
+          await this._logger.warning(
+            "Warning: OpenAI rate limit exceeded, sleeping for 15 seconds."
+          );
 
           // Try again after a short sleep
           await new Promise((resolve) => setTimeout(resolve, 15000));

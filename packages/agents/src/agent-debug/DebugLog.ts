@@ -23,14 +23,12 @@ export class DebugLog {
     prompt: "",
     time: new Timer(),
     tokens: 0,
-    llmReqs: 0
+    llmReqs: 0,
   };
   private steps: DebugStep[] = [];
   private longestLlmReqs: PriorityContainer<DebugLlmReq>;
 
-  constructor(
-    public workspace: Workspace
-  ) {
+  constructor(public workspace: Workspace) {
     this.longestLlmReqs = new PriorityContainer<DebugLlmReq>(
       5,
       (a, b) => b.time.duration() - a.time.duration()
@@ -41,62 +39,63 @@ export class DebugLog {
     return this.steps[this.steps.length - 1];
   }
 
-  save(): void {
-    this.workspace.writeFileSync(
-      "debug.json",
-      this.toString()
-    );
-    this.workspace.writeFileSync(
+  async save(): Promise<void> {
+    await this.workspace.writeFile("debug.json", this.toString());
+    await this.workspace.writeFile(
       "perf.json",
       JSON.stringify(this.longestLlmReqs.getItems(), null, 2)
     );
   }
 
-  goalStart(prompt: string): void {
+  async goalStart(prompt: string): Promise<void> {
     this.goal.prompt = prompt;
     this.goal.time.start();
-    this.save();
+    await this.save();
   }
 
-  goalEnd(): void {
+  async goalEnd(): Promise<void> {
     this.goal.time.end();
-    this.save();
+    await this.save();
   }
 
-  stepStart(): void {
+  async stepStart(): Promise<void> {
     const step: DebugStep = {
       time: new Timer(),
       llmTime: new Timer(),
-      llmReqs: []
+      llmReqs: [],
     };
     step.time.start();
     this.steps.push(step);
-    this.save();
+    await this.save();
   }
 
-  stepEnd(): void {
+  async stepEnd(): Promise<void> {
     this.latestStep.time.end();
-    this.save();
+    await this.save();
   }
 
-  stepLog(message: string): void {
+  async stepLog(message: string): Promise<void> {
     this.latestStep.message = message;
-    this.save();
+    await this.save();
   }
 
-  stepError(error: string): void {
+  async stepError(error: string): Promise<void> {
     this.latestStep.error = error;
-    this.save();
+    await this.save();
   }
 
-  stepLlmReq(time: Timer, chatLogs: ChatLogs, response?: ChatMessage): void {
+  async stepLlmReq(
+    time: Timer,
+    chatLogs: ChatLogs,
+    response?: ChatMessage
+  ): Promise<void> {
     const req = new DebugLlmReq(time, chatLogs, response);
     this.goal.llmReqs += 1;
     this.goal.tokens += req.tokens;
     this.latestStep.llmReqs.push(req);
     this.latestStep.llmTime.add(req.time.duration());
     this.longestLlmReqs.addItem(req);
-    this.save();
+    await this.save();
   }
 
   toString(): string {
