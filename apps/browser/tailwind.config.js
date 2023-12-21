@@ -27,7 +27,8 @@ module.exports = {
         DEFAULT: {
           css: {
             pre: {
-              "background-color": theme('colors.zinc.950')
+              "background-color": theme('colors.zinc.950'),
+              textWrap: "pretty",
             }
           }
         }

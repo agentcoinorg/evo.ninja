@@ -4,15 +4,18 @@ import {
   evoServiceAtom,
   workspaceAtom,
   workspaceFilesAtom,
-  chatIdAtom,
+  chatInfoAtom,
   localOpenAiApiKeyAtom,
-  showAccountModalAtom,
   errorAtom,
   newGoalSubmittedAtom,
   isChatLoadingAtom,
+  ChatInfo,
+  welcomeModalAtom,
 } from "@/lib/store";
+import { useChats } from "@/lib/queries/useChats";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";
 import { useUpdateChatTitle } from "@/lib/mutations/useUpdateChatTitle";
+import { ChatApi } from "@/lib/api/ChatApi";
 import { EvoService } from "@/lib/services/evo/EvoService";
 import { useEvoService } from "@/lib/hooks/useEvoService";
 import { useWorkspaceUploadUpdate } from "@/lib/hooks/useWorkspaceUploadUpdate";
@@ -26,17 +29,18 @@ import { InMemoryFile } from "@nerfzael/memory-fs";
 
 function Dojo({ params }: { params: { id?: string } }) {
   const [evoService, setEvoService] = useAtom(evoServiceAtom);
-  const [chatId, setChatId] = useAtom(chatIdAtom);
   const [newGoalSubmitted, setNewGoalSubmitted] = useAtom(newGoalSubmittedAtom);
   const [isChatLoading, setIsChatLoading] = useAtom(isChatLoadingAtom);
   const [, setError] = useAtom(errorAtom);
   const [workspace, setWorkspace] = useAtom(workspaceAtom);
   const [, setWorkspaceFiles] = useAtom(workspaceFilesAtom);
   const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom);
-  const [, setAccountModalOpen] = useAtom(showAccountModalAtom);
+  const [{ id: chatId, name: chatName }, setChatInfo] = useAtom(chatInfoAtom);
+  const [, setWelcomeModalOpen] = useAtom(welcomeModalAtom);
 
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
+  const { data: chats, isLoading: isChatsLoading } = useChats();
   const router = useRouter();
   const { status: sessionStatus, data: sessionData } = useSession();
   const isAuthenticated = sessionStatus === "authenticated";
@@ -54,7 +58,7 @@ function Dojo({ params }: { params: { id?: string } }) {
     if (chatId === newChatId) {
       return;
     }
-    setChatId(newChatId);
+    setChatInfo({ id: newChatId, name: undefined });
 
     if (newChatId) {
       setIsChatLoading(true);
@@ -81,8 +85,7 @@ function Dojo({ params }: { params: { id?: string } }) {
 
     const firstTimeUser = !localOpenAiApiKey && !isAuthenticated;
     if (firstTimeUser) {
-      setError("Please login or add an OpenAI API key.");
-      setAccountModalOpen(true);
+      setWelcomeModalOpen(true);
       return;
     }
 
@@ -90,7 +93,19 @@ function Dojo({ params }: { params: { id?: string } }) {
 
     if (!goalChatId) {
       goalChatId = await handleCreateNewChat();
-      await updateChatTitle({ chatId: goalChatId, title: goal });
+    }
+
+    // We guarentee chats is defined here through the use of isChatsLoaded
+    const currentChat = chats?.find((c) => c.id === goalChatId);
+
+    // If this is a new chat, or one without a name defined
+    if (!currentChat || !currentChat.title) {
+      // Generate a name
+      const title = await ChatApi.generateTitle(goalChatId, goal);
+      if (title) {
+        await updateChatTitle({ chatId: goalChatId, title });
+        setChatInfo({ name: title });
+      }
     }
 
     setNewGoalSubmitted({
@@ -140,9 +155,26 @@ function Dojo({ params }: { params: { id?: string } }) {
     }
   }, [newGoalSubmitted, chatId]);
 
+  // Apply the chat's title to chatInfo.name
+  // when a mismatch exists
+  useEffect(() => {
+    if (!params.id && chatName !== undefined) {
+      setChatInfo({ name: undefined });
+      return;
+    }
+    if (!chats) {
+      return;
+    }
+    const chat = chats.find(c => c.id === params.id);
+    const chatTitle = chat?.title || undefined;
+    if (!chat || chatTitle !== chatName) {
+      setChatInfo({ name: chatTitle });
+    }
+  }, [chats, isChatsLoading, params.id]);
+
   return (
     <>
-      {!isAuthLoading && !isChatLoading ? (
+      {!isAuthLoading && !isChatLoading && !isChatsLoading ? (
         <Chat
           logs={logs}
           isStarting={isStarting}

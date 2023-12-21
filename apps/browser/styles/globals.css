@@ -41,6 +41,10 @@ code {
   @apply !m-0;
 }
 
+.prose-file * {
+  @apply my-0;
+}
+
 ::-webkit-scrollbar {
   @apply w-1 h-1 rounded;
 }
@@ -59,6 +63,12 @@ code {
 
 ::-webkit-scrollbar-corner {
   @apply bg-transparent;
+}
+
+@supports (-webkit-touch-callout: none) {
+  .h-screen {
+      height: 100dvh; /* Override height for Safari */
+  }
 }
 
 /* In smaller screens, font-sizes smaller than 16px cause

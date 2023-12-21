@@ -35,7 +35,7 @@ const Disclaimer = ({ onClose, isOpen }: DisclaimerProps) => {
         <div className="flex w-full items-center space-x-1.5 md:space-x-2">
           <Logo
             wordmark={false}
-            className="h-8 min-w-[2rem] md:h-10 md:min-w-[2.5rem]"
+            className="h-8 w-8 min-w-[2rem] md:h-10 md:w-10 md:min-w-[2.5rem]"
           />
           <div className="w-full">
             Mind sharing your prompts to help make Evo even better?

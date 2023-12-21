@@ -17,6 +17,7 @@ export interface ChatLogsProps {
   logs: ChatLog[];
   isRunning: boolean;
   currentStatus: string | undefined;
+  chatName: string
 }
 
 export type MessageSet = {
@@ -86,6 +87,7 @@ export default function ChatLogs({
   logs,
   isRunning,
   currentStatus,
+  chatName
 }: ChatLogsProps) {
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -141,12 +143,12 @@ export default function ChatLogs({
   return (
     <>
       <div className="flex h-20 items-center justify-center border-b-2 border-zinc-800 md:h-12">
-        {/* <div>{chatName}</div> */}
+        <div>{chatName}</div>
       </div>
       <div
         ref={listContainerRef}
         onScroll={handleScroll}
-        className="w-full flex-1 items-center space-y-6 overflow-y-auto overflow-x-clip px-2 py-3 text-left"
+        className="w-full flex-1 items-center space-y-6 overflow-y-auto overflow-x-clip px-2 py-3 text-left [scrollbar-gutter:stable]"
       >
         {sanitizedLogs.map((msg, index) => {
           return (
@@ -232,6 +234,11 @@ export default function ChatLogs({
                             </div>
                           </div>
                         </>
+                      )}
+                      {!msg.evoMessage && !isRunning && (
+                        <ReactMarkdown className="prose prose-invert w-full max-w-none">
+                          There was an issue with your request, please try again
+                        </ReactMarkdown>
                       )}
                   </div>
                 </div>

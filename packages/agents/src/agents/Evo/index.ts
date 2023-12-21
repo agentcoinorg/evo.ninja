@@ -176,7 +176,7 @@ export class Evo extends Agent<GoalRunArgs> {
               : ""
           }`),
       {
-        model: "gpt-3.5-turbo-16k",
+        model: this.context.llm.getModel(),
       }
     );
   }

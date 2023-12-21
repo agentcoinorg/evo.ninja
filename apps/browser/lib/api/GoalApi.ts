@@ -10,7 +10,7 @@ export class GoalApi {
       body: JSON.stringify({
         chatId: chatId === "<anon>" ? undefined : chatId,
         message,
-        subsidize
+        subsidize,
       }),
       headers: {
         "Content-Type": "application/json",
