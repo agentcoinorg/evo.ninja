@@ -1,4 +1,4 @@
-import { isChatLoadingAtom, chatIdAtom, workspaceAtom, localOpenAiApiKeyAtom, welcomeModalAtom } from "@/lib/store";
+import { isChatLoadingAtom, chatIdAtom, workspaceAtom } from "@/lib/store";
 import { SupabaseWorkspace } from "@/lib/supabase/SupabaseWorkspace";
 import { useSupabaseClient } from "@/lib/supabase/useSupabaseClient";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";

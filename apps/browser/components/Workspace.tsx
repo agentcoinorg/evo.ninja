@@ -7,8 +7,9 @@ import { DownloadSimple, FilePlus } from "@phosphor-icons/react";
 import Button from "./Button";
 import { useWorkspaceUploadDrop } from "@/lib/hooks/useWorkspaceUploadDrop";
 import { useAtom } from "jotai";
-import { workspaceFilesAtom, workspaceUploadsAtom } from "@/lib/store";
+import { workspaceFilesAtom, workspaceUploadsAtom, welcomeModalAtom } from "@/lib/store";
 import { useDownloadWorkspaceAsZip } from "@/lib/hooks/useDownloadWorkspaceAsZip";
+import { useFirstTimeUser } from "@/lib/hooks/useFirstTimeUser";
 
 export interface WorkspaceProps {
   onUpload: (uploads: InMemoryFile[]) => void;
@@ -18,11 +19,21 @@ function Workspace({ onUpload }: WorkspaceProps) {
   const { getRootProps, getInputProps, isDragAccept, open } = useWorkspaceUploadDrop(onUpload);
   const [workspaceFiles] = useAtom(workspaceFilesAtom);
   const [workspaceUploads] = useAtom(workspaceUploadsAtom);
+  const [,setWelcomeModalOpen] = useAtom(welcomeModalAtom)
   const downloadFilesAsZip = useDownloadWorkspaceAsZip()
+  const firstTimeUser = useFirstTimeUser();
 
   function getFileType(path: InMemoryFile["path"]) {
     const index = path.lastIndexOf(".");
     return path.substring(index + 1);
+  }
+
+  function onOpen() {
+    if (firstTimeUser) {
+      setWelcomeModalOpen(true);
+      return;
+    }
+    open();
   }
 
   const workspaceLoading = workspaceUploads.length > 0;
@@ -34,7 +45,7 @@ function Workspace({ onUpload }: WorkspaceProps) {
           Current Workspace
         </div>
         <div className="flex items-center space-x-1">
-          <Button variant="icon" onClick={open}>
+          <Button variant="icon" onClick={onOpen}>
             <FilePlus size={18} weight="bold" />
           </Button>
           <input {...getInputProps()} />
@@ -59,7 +70,7 @@ function Workspace({ onUpload }: WorkspaceProps) {
             {workspaceFiles.length === 0 ? (
               <div
                 className="mt-1 flex cursor-pointer flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed border-zinc-500 p-7 text-center transition-colors duration-300 hover:border-cyan-500 hover:bg-zinc-950 hover:text-cyan-500"
-                onClick={open}
+                onClick={onOpen}
               >
                 <FilePlus size={24} className="text-[currentColor]" />
                 <p className="leading-regular text-xs text-zinc-500">

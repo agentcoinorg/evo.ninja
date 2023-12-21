@@ -1,10 +1,10 @@
-import { workspaceAtom, workspaceUploadsAtom, localOpenAiApiKeyAtom, welcomeModalAtom } from "@/lib/store";
+import { workspaceAtom, workspaceUploadsAtom, welcomeModalAtom } from "@/lib/store";
+import { useFirstTimeUser } from "@/lib/hooks/useFirstTimeUser";
 import { useWorkspaceUploadUpdate } from "@/lib/hooks/useWorkspaceUploadUpdate";
 import { examplePrompts, ExamplePrompt } from "@/lib/examplePrompts";
 import { useAtom } from "jotai";
 import clsx from "clsx";
 import useWindowSize from "@/lib/hooks/useWindowSize";
-import { useSession } from "next-auth/react";
 
 export interface ExamplePromptsProps {
   onClick: (prompt: string) => Promise<void>;
@@ -13,12 +13,10 @@ export interface ExamplePromptsProps {
 export default function ExamplePrompts(props: ExamplePromptsProps) {
   const [workspace] = useAtom(workspaceAtom);
   const [, setWorkspaceUploads] = useAtom(workspaceUploadsAtom);
-  const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom)
-  const [,setWelcomeModalOpen] = useAtom(welcomeModalAtom)
+  const [,setWelcomeModalOpen] = useAtom(welcomeModalAtom);
   const workspaceUploadUpdate = useWorkspaceUploadUpdate();
   const { isMobile } = useWindowSize();
-  const { status } = useSession()
-  const firstTimeUser = !localOpenAiApiKey && status !== "authenticated"
+  const firstTimeUser = useFirstTimeUser();
 
   const handleClick = (prompt: ExamplePrompt) => {
     if (firstTimeUser) {
