@@ -42,7 +42,15 @@ export function createEvoInstance(
           title: message,
         });
       },
-      onStatusUpdate
+      onNotice: (msg: string) => {
+        onStatusUpdate(msg);
+        return Promise.resolve();
+      },
+      onSuccess: (msg: string) =>
+        onChatLog({
+          user: "evo",
+          title: msg,
+        })
     });
     const logger = new Logger([browserLogger, new ConsoleLogger()], {
       promptUser: () => Promise.resolve("N/A"),

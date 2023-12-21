@@ -17,15 +17,15 @@ import { sanitizeLogs } from "@/lib/utils/sanitizeLogsDetails";
 export interface ChatLogsProps {
   logs: ChatLog[];
   isRunning: boolean;
-  currentStatus: string | undefined;
+  status: string | undefined;
   chatName: string;
 }
 
 export default function ChatLogs({
   logs,
   isRunning,
-  currentStatus,
-  chatName,
+  status,
+  chatName
 }: ChatLogsProps) {
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -167,7 +167,7 @@ export default function ChatLogs({
                                   })
                                 }
                               >
-                                {currentStatus}
+                                {status}
                               </div>
                             </div>
                           </div>
