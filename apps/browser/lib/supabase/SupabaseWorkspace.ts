@@ -15,7 +15,7 @@ export class SupabaseWorkspace implements Workspace {
 
     const { error } = await this.supabaseStorage
       .from(BUCKET_NAME)
-      .upload(path, data);
+      .upload(path, data, { upsert: true });
 
     if (error) {
       throw error;
@@ -138,7 +138,7 @@ export class SupabaseWorkspace implements Workspace {
 
     const { error: writeError } = await this.supabaseStorage
       .from(BUCKET_NAME)
-      .upload(path, newData);
+      .upload(path, newData, { upsert: true });
 
     if (writeError) {
       throw writeError;

@@ -1,4 +1,6 @@
-import { uploadedFilesAtom } from "@/lib/store";
+import { workspaceAtom, workspaceUploadsAtom, welcomeModalAtom } from "@/lib/store";
+import { useFirstTimeUser } from "@/lib/hooks/useFirstTimeUser";
+import { useWorkspaceUploadUpdate } from "@/lib/hooks/useWorkspaceUploadUpdate";
 import { examplePrompts, ExamplePrompt } from "@/lib/examplePrompts";
 import { useAtom } from "jotai";
 import clsx from "clsx";
@@ -9,12 +11,23 @@ export interface ExamplePromptsProps {
 }
 
 export default function ExamplePrompts(props: ExamplePromptsProps) {
-  const [, setUploadedFiles] = useAtom(uploadedFilesAtom);
+  const [workspace] = useAtom(workspaceAtom);
+  const [, setWorkspaceUploads] = useAtom(workspaceUploadsAtom);
+  const [,setWelcomeModalOpen] = useAtom(welcomeModalAtom);
+  const workspaceUploadUpdate = useWorkspaceUploadUpdate();
   const { isMobile } = useWindowSize();
+  const firstTimeUser = useFirstTimeUser();
 
   const handleClick = (prompt: ExamplePrompt) => {
+    if (firstTimeUser) {
+      setWelcomeModalOpen(true)
+      return
+    }
     if (prompt.files) {
-      setUploadedFiles(prompt.files);
+      setWorkspaceUploads(prompt.files);
+      if (workspace) {
+        workspaceUploadUpdate(workspace, prompt.files)
+      }
     }
     return props.onClick(prompt.prompt);
   };

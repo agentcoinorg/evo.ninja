@@ -22,7 +22,7 @@ export default function SidebarLayout(props: {
   const [sidebarOpen, setSidebarOpen] = useAtom(sidebarAtom);
   const [hoveringSidebarButton, setHovering] = useState<boolean>(false);
   const { isMobile } = useWindowSize();
-  const [welcomeModalSeen, setWelcomeModalSeen] = useAtom(welcomeModalAtom);
+  const [welcomeModalOpen, setWelcomeModalOpen] = useAtom(welcomeModalAtom);
 
   useEffect(() => {
     if (isMobile) {
@@ -61,7 +61,7 @@ export default function SidebarLayout(props: {
             className={clsx(
               "fixed bottom-0 left-0 top-0 z-10 h-full border-r-2 bg-zinc-900 transition-all duration-300 ease-in-out md:relative",
               sidebarOpen
-                ? "w-[calc(100%-72px)] md:w-[290px] md:min-w-[290px]"
+                ? "w-[calc(100%-72px)] md:w-sidebar md:min-w-sidebar"
                 : "w-0 min-w-0 border-none",
               hoveringSidebarButton ? "border-zinc-500" : "border-zinc-800"
             )}
@@ -89,8 +89,8 @@ export default function SidebarLayout(props: {
         {props.children}
       </div>
       <WelcomeModal
-        isOpen={!welcomeModalSeen}
-        onClose={() => setWelcomeModalSeen(true)}
+        isOpen={welcomeModalOpen}
+        onClose={() => setWelcomeModalOpen(false)}
       />
     </>
   );

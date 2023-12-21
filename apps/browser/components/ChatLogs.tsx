@@ -9,10 +9,11 @@ import { useSession } from "next-auth/react";
 export interface ChatLogsProps {
   logs: ChatLog[];
   isRunning: boolean;
+  chatName: string
 }
 
 export default function ChatLogs(props: ChatLogsProps) {
-  const { logs, isRunning } = props;
+  const { logs, isRunning, chatName } = props;
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const { data: session } = useSession();
@@ -62,12 +63,12 @@ export default function ChatLogs(props: ChatLogsProps) {
   return (
     <>
       <div className="flex h-20 items-center justify-center border-b-2 border-zinc-800 md:h-12">
-        {/* <div>{chatName}</div> */}
+        <div>{chatName}</div>
       </div>
       <div
         ref={listContainerRef}
         onScroll={handleScroll}
-        className="w-full flex-1 items-center space-y-6 overflow-y-auto overflow-x-clip px-2 py-3 text-left"
+        className="w-full flex-1 items-center space-y-6 overflow-y-auto overflow-x-clip px-2 py-3 text-left [scrollbar-gutter:stable]"
       >
         {logs.map((msg, index, logs) => {
           const isEvo = msg.user === "evo";

@@ -8,6 +8,7 @@
     "prebuild": "yarn build:scripts && yarn build:env",
     "build:scripts": "node scripts/build.scripts.js",
     "build:env": "node scripts/build.env.js",
+    "db:generate-types": "supabase gen types typescript --local --schema public > lib/supabase/dbTypes.ts",
     "db:start": "supabase start",
     "db:reset": "supabase db reset",
     "db:stop": "supabase stop",

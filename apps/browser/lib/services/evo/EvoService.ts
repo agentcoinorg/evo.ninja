@@ -35,7 +35,7 @@ export class EvoService {
     await this._current.connect(callbacks);
   }
 
-  async start(options: EvoThreadStartOptions) {
+  async start(options: EvoThreadStartOptions): Promise<void> {
     if (!this._current) {
       throw Error("EvoService must be connected before starting a goal.");
     }

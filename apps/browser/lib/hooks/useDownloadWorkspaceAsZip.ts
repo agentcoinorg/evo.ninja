@@ -1,11 +1,14 @@
 import { useAtom } from "jotai";
-import { userWorkspaceAtom } from "../store";
+import { workspaceAtom } from "../store";
 import { downloadWorkspaceAsZip } from "../sys/file/downloadWorkspaceAsZip";
 
 export const useDownloadWorkspaceAsZip = () => {
-  const [userWorkspace] = useAtom(userWorkspaceAtom);
+  const [workspace] = useAtom(workspaceAtom);
 
   return async () => {
-    await downloadWorkspaceAsZip("workspace.zip", userWorkspace);
+    if (!workspace) {
+      return;
+    }
+    await downloadWorkspaceAsZip("workspace.zip", workspace);
   }
 }
