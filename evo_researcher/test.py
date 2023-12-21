@@ -1,4 +1,3 @@
-import json
 import os
 from dotenv import load_dotenv
 from langchain.vectorstores.chroma import Chroma
@@ -53,8 +52,11 @@ rerank_results_template = """
 I will present you with a list of text snippets gathered from web searches
 to answer the question: {goal}.
 
-Rank the snippets in order of relevance to the question. Do not modify the snippets.
-Return them, in order of relevance, as a comma separated list of snippet.
+The snippets are divided by '-------DIVISOR-------'.
+
+Rank the snippets in order of relevance to the question.
+
+Return the snippets ordered by relevance, separated by commas and no quotes.
 
 Snippets: {results}
 """
@@ -68,12 +70,12 @@ def rerank_results(results: list[str], goal: str) -> list[str]:
         CommaSeparatedListOutputParser()
     )
     
-    response = rerank_results_chain.invoke({
+    reordered_results: list[str] = rerank_results_chain.invoke({
         "goal": goal,
-        "results": json.dumps(results)
+        "results": "-------DIVISOR-------".join(results)
     })
     
-    return response
+    return reordered_results
 
 def scrape_results(results: list[WebSearchResult]) -> list[WebScrapeResult]:
     scraped: list[WebScrapeResult] = []
@@ -93,7 +95,7 @@ def scrape_results(results: list[WebSearchResult]) -> list[WebScrapeResult]:
 
     return scraped
 
-def prepare_report(goal: str, scraped: list[WebScrapeResult]):
+def prepare_report(goal: str, scraped: list[str]):
     evaluation_prompt_template = """
     You are a professional researcher. Your goal is to answer: '{goal}'.
     
@@ -140,20 +142,22 @@ def search(queries: list[str], filter = lambda x: True) -> list[tuple[str, WebSe
 
 def create_embeddings_from_results(results: list[WebScrapeResult], text_splitter) -> Chroma:
     collection = Chroma(embedding_function=OpenAIEmbeddings(api_key=os.getenv("OPENAI_API_KEY")))
+    texts = []
+    # metadatas = []
             
     for scrape_result in results:
-        texts = text_splitter.split_text(scrape_result.content)
-        metadatas = [scrape_result.model_dump() for _ in texts]
-        
-        collection.add_texts(
-            texts=texts,
-            metadatas=metadatas
-        )
-        
+        texts += text_splitter.split_text(scrape_result.content)
+        # metadatas += [scrape_result.model_dump() for _ in texts]
+
+    print(texts)
+    collection.add_texts(
+        texts=texts,
+        # metadatas=metadatas
+    )
     return collection
 
 def research(goal: str):
-    subqueries_limit = 3
+    subqueries_limit = 2
     scrape_content_split_chunk_size = 4000
     scrape_content_split_chunk_overlap = 500
     top_k = 8
@@ -177,11 +181,10 @@ def research(goal: str):
     for query in queries:
         top_k_results = collection.similarity_search(query, k=top_k)
         vector_result_texts += [result.page_content for result in top_k_results]
-        
-    # TODO: Fix this. Returns strings not corresponding to the vector_result_texts
-    # reranked_results = rerank_results(vector_result_texts, goal)[:10]
-    # print(reranked_results)
     
-    report = prepare_report(goal, vector_result_texts) 
+    reranked_results = rerank_results(vector_result_texts, goal)
+    print(reranked_results)
+    
+    report = prepare_report(goal, reranked_results) 
 
     return report

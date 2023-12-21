@@ -2,7 +2,6 @@ import logging
 import os
 import re
 import requests
-from pydantic import BaseModel
 from bs4 import BeautifulSoup
 from scrapingbee import ScrapingBeeClient
 
@@ -27,8 +26,8 @@ def web_scrape(url: str) -> tuple[str, str]:
             return (text, url)
         else:
             logging.warning("Non-HTML content received")
-            return ""
+            return ("", url)
 
     except requests.RequestException as e:
         logging.error(f"HTTP request failed: {e}")
-        return ""
+        return ("", url)
