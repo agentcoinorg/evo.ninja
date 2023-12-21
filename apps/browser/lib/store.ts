@@ -4,7 +4,7 @@ import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { EvoService } from "@/lib/services/evo/EvoService";
 
-interface ChatInfo {
+export interface ChatInfo {
   id: string | "<anon>" | undefined;
   name: string | undefined;
 }

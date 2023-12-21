@@ -56,7 +56,7 @@ const Sidebar = ({
   const { mutateAsync: createChat } = useCreateChat();
   const { mutateAsync: deleteChat } = useDeleteChat();
   const { mutateAsync: updateChat } = useUpdateChatTitle();
-  const [{ id: chatId }, setCurrentChatInfo] = useAtom(chatInfoAtom);
+  const [{ id: chatId }] = useAtom(chatInfoAtom);
   const [isChatLoading, setIsChatLoading] = useAtom(isChatLoadingAtom);
   const [workspace] = useAtom(workspaceAtom);
 
@@ -66,7 +66,6 @@ const Sidebar = ({
     const id = uuid();
     await createChat(id);
     router.push(`/chat/${id}`);
-    setCurrentChatInfo({ name: undefined });
     setIsChatLoading(true);
     if (isMobile) {
       closeSidebar();
@@ -76,7 +75,6 @@ const Sidebar = ({
   const handleChatClick = (id: string, name: string) => {
     if (!editChat) {
       router.push(`/chat/${id}`);
-      setCurrentChatInfo({ name });
       if (isMobile) {
         closeSidebar();
       }
@@ -87,7 +85,6 @@ const Sidebar = ({
     // If user is editing the name of the chat it curretly is, also modify it in the chat header
     if (title) {
       await updateChat({ chatId: id, title });
-      setCurrentChatInfo({ name: title });
     }
     setEditChat(undefined);
   };
@@ -96,7 +93,6 @@ const Sidebar = ({
     // Remove files associated to chat before removing chat
     await workspace?.rmdir("", { recursive: true });
     await deleteChat(id);
-    setCurrentChatInfo({ name: undefined });
     router.replace("/");
     if (isMobile) {
       closeSidebar();

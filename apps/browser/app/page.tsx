@@ -10,6 +10,7 @@ import {
   errorAtom,
   newGoalSubmittedAtom,
   isChatLoadingAtom,
+  ChatInfo
 } from "@/lib/store";
 import { useChats } from "@/lib/queries/useChats";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";
@@ -35,11 +36,11 @@ function Dojo({ params }: { params: { id?: string } }) {
   const [, setWorkspaceFiles] = useAtom(workspaceFilesAtom);
   const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom);
   const [, setAccountModalOpen] = useAtom(showAccountModalAtom);
-  const [{ id: chatId }, setChatInfo] = useAtom(chatInfoAtom);
+  const [{ id: chatId, name: chatName }, setChatInfo] = useAtom(chatInfoAtom);
 
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
-  const { data: chats } = useChats();
+  const { data: chats, isLoading: isChatsLoading } = useChats();
   const router = useRouter();
   const { status: sessionStatus, data: sessionData } = useSession();
   const isAuthenticated = sessionStatus === "authenticated";
@@ -57,7 +58,7 @@ function Dojo({ params }: { params: { id?: string } }) {
     if (chatId === newChatId) {
       return;
     }
-    setChatInfo({ id: newChatId });
+    setChatInfo({ id: newChatId, name: undefined });
 
     if (newChatId) {
       setIsChatLoading(true);
@@ -95,14 +96,17 @@ function Dojo({ params }: { params: { id?: string } }) {
       goalChatId = await handleCreateNewChat();
     }
 
+    // We guarentee chats is defined here through the use of isChatsLoaded
     const currentChat = chats?.find((c) => c.id === goalChatId);
+
+    // If this is a new chat, or one without a name defined
     if (!currentChat || !currentChat.title) {
-      ChatApi.generateTitle(goalChatId, goal).then(async (title) => {
-        if (title && goalChatId) {
-          await updateChatTitle({ chatId: goalChatId, title });
-          setChatInfo({ name: title });
-        }
-      });
+      // Generate a name
+      const title = await ChatApi.generateTitle(goalChatId, goal);
+      if (title) {
+        await updateChatTitle({ chatId: goalChatId, title });
+        setChatInfo({ name: title });
+      }
     }
 
     setNewGoalSubmitted({
@@ -151,9 +155,26 @@ function Dojo({ params }: { params: { id?: string } }) {
     }
   }, [newGoalSubmitted, chatId]);
 
+  // Apply the chat's title to chatInfo.name
+  // when a mismatch exists
+  useEffect(() => {
+    if (!params.id && chatName !== undefined) {
+      setChatInfo({ name: undefined });
+      return;
+    }
+    if (!chats) {
+      return;
+    }
+    const chat = chats.find(c => c.id === params.id);
+    const chatTitle = chat?.title || undefined;
+    if (!chat || chatTitle !== chatName) {
+      setChatInfo({ name: chatTitle });
+    }
+  }, [chats, isChatsLoading, params.id]);
+
   return (
     <>
-      {!isAuthLoading && !isChatLoading ? (
+      {!isAuthLoading && !isChatLoading && !isChatsLoading ? (
         <Chat
           logs={logs}
           isStarting={isStarting}
