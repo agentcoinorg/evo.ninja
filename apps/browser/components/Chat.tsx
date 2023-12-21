@@ -1,10 +1,13 @@
 import {
   showDisclaimerAtom,
   errorAtom,
-  chatIdAtom,
+  chatInfoAtom,
   welcomeModalAtom,
+  signInModalAtom,
+  settingsModalAtom,
 } from "@/lib/store";
 import { useWorkspaceUploadDrop } from "@/lib/hooks/useWorkspaceUploadDrop";
+import { useFirstTimeUser } from "@/lib/hooks/useFirstTimeUser";
 import ExamplePrompts from "@/components/ExamplePrompts";
 import ChatLogs from "@/components/ChatLogs";
 import Disclaimer from "@/components/modals/Disclaimer";
@@ -40,18 +43,25 @@ const Chat: React.FC<ChatProps> = ({
   onGoalSubmit,
   onUpload,
 }: ChatProps) => {
-  const [chatId, ] = useAtom(chatIdAtom);
+  const [{ id: chatId, name: chatName }] = useAtom(chatInfoAtom);
   const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom);
   const [, setError] = useAtom(errorAtom);
-  const [welcomeModalSeen] = useAtom(welcomeModalAtom);
+  const [welcomeModalOpen, setWelcomeModalOpen] = useAtom(welcomeModalAtom);
+  const [signInModalOpen] = useAtom(signInModalAtom);
+  const [settingsModalOpen] = useAtom(settingsModalAtom)
 
   const [message, setMessage] = useState<string>("");
 
   const { getInputProps, open } = useWorkspaceUploadDrop(onUpload);
+  const firstTimeUser = useFirstTimeUser();
 
   const shouldShowExamplePrompts = !chatId || (!logs.length && !isStarting && !isRunning);
 
   const handleGoalSubmit = async (goal: string): Promise<void> => {
+    if (firstTimeUser) {
+      setWelcomeModalOpen(true);
+      return;
+    }
     if (!goal) {
       setError("Please enter a goal.");
       return;
@@ -59,6 +69,14 @@ const Chat: React.FC<ChatProps> = ({
     setMessage("");
     return onGoalSubmit(goal);
   };
+
+  const onUploadOpen = () => {
+    if (firstTimeUser) {
+      setWelcomeModalOpen(true);
+      return;
+    }
+    open();
+  }
 
   return (
     <main
@@ -69,7 +87,7 @@ const Chat: React.FC<ChatProps> = ({
       {shouldShowExamplePrompts ? (
         <Logo wordmark={false} className="mb-16 w-16" />
       ) : (
-        <ChatLogs isRunning={isStarting || isRunning} logs={logs} />
+        <ChatLogs chatName={chatName ?? "New Session"} isRunning={isStarting || isRunning} logs={logs} />
       )}
 
       <div
@@ -106,7 +124,7 @@ const Chat: React.FC<ChatProps> = ({
             className="!rounded-lg !p-4 !pl-12"
             leftAdornment={
               <>
-                <Button variant="icon" className="!text-white" onClick={open}>
+                <Button variant="icon" className="!text-white" onClick={onUploadOpen}>
                   <UploadSimple size={20} />
                 </Button>
                 <input {...getInputProps()} />
@@ -125,7 +143,7 @@ const Chat: React.FC<ChatProps> = ({
         </div>
       </div>
       <Disclaimer
-        isOpen={showDisclaimer && welcomeModalSeen}
+        isOpen={showDisclaimer && !welcomeModalOpen && !signInModalOpen && !settingsModalOpen}
         onClose={() => setShowDisclaimer(false)}
       />
     </main>
