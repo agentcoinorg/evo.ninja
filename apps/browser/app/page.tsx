@@ -6,10 +6,10 @@ import {
   workspaceFilesAtom,
   chatIdAtom,
   localOpenAiApiKeyAtom,
-  showAccountModalAtom,
   errorAtom,
   newGoalSubmittedAtom,
   isChatLoadingAtom,
+  welcomeModalAtom,
 } from "@/lib/store";
 import { useCreateChat } from "@/lib/mutations/useCreateChat";
 import { useUpdateChatTitle } from "@/lib/mutations/useUpdateChatTitle";
@@ -33,7 +33,7 @@ function Dojo({ params }: { params: { id?: string } }) {
   const [workspace, setWorkspace] = useAtom(workspaceAtom);
   const [, setWorkspaceFiles] = useAtom(workspaceFilesAtom);
   const [localOpenAiApiKey] = useAtom(localOpenAiApiKeyAtom);
-  const [, setAccountModalOpen] = useAtom(showAccountModalAtom);
+  const [, setWelcomeModalOpen] = useAtom(welcomeModalAtom);
 
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
@@ -81,8 +81,7 @@ function Dojo({ params }: { params: { id?: string } }) {
 
     const firstTimeUser = !localOpenAiApiKey && !isAuthenticated;
     if (firstTimeUser) {
-      setError("Please login or add an OpenAI API key.");
-      setAccountModalOpen(true);
+      setWelcomeModalOpen(true);
       return;
     }
 
