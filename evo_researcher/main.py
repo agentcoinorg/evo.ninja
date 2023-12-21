@@ -1,4 +1,8 @@
+import os
+from langchain.vectorstores.chroma import Chroma
+from langchain.embeddings.openai import OpenAIEmbeddings
 import click
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from dotenv import load_dotenv
 from autogen import config_list_from_json
@@ -6,14 +10,16 @@ from autogen import UserProxyAgent
 import autogen
 
 from langchain.chat_models import ChatOpenAI
-from langchain.output_parsers import CommaSeparatedListOutputParser
 from langchain.schema.output_parser import StrOutputParser
+from langchain.output_parsers import CommaSeparatedListOutputParser
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.prompts import ChatPromptTemplate
 from evo_researcher.autonolas.research import research as research_autonolas
 from evo_researcher.agents.planner import create_planner
 from evo_researcher.agents.researcher import create_researcher
-from evo_researcher.functions.web_scrape import web_scrape
-from evo_researcher.functions.web_research import web_search
+from evo_researcher.functions.rerank import rerank_results
+from evo_researcher.functions.web_scrape import web_scrape, WebScrapeResult
+from evo_researcher.functions.web_research import web_search, WebSearchResult
 
 load_dotenv()
 config_list = config_list_from_json("OAI_CONFIG_LIST")
@@ -25,9 +31,9 @@ def research_langchain(goal: str):
     You are a professional researcher. Your goal is to prepare a research plan for {goal}.
     
     The plan will consist of multiple web searches separated by commas.
-    Return ONLY the web searches, separated by commas.
+    Return ONLY the web searches, separated by commas and without quotes.
     
-    Keep it to a max of 3 searches.
+    Limit your searches to {search_limit}.
     """
     planning_prompt = ChatPromptTemplate.from_template(template=planning_prompt_template)
     
@@ -37,32 +43,57 @@ def research_langchain(goal: str):
         CommaSeparatedListOutputParser()
     )
     
-    web_searches = plan_searches_chain.invoke({
-        "goal": goal
+    queries = plan_searches_chain.invoke({
+        "goal": goal,
+        "search_limit": 2
     })
+    queries = [goal] + [query.strip('\"') for query in queries]
     
-    print(web_searches)
+    search_results_by_url: dict[str, WebSearchResult] = {}
     
-    scraped = []
-    for search in web_searches:
-        sanitized_search_query = search.strip('\"')
-        search_results = web_search(sanitized_search_query, max_results=3)
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        futures = {executor.submit(web_search, query) for query in queries}
+        for future in as_completed(futures):
+            results = future.result()
+            for result in results:
+                search_results_by_url[result.url] = result
+                
+    scrape_results_by_url: dict[str, WebScrapeResult] = {}
+    
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        futures = {executor.submit(web_scrape, search_result.url) for search_result in list(search_results_by_url.values())}
+        for future in as_completed(futures):
+            result = future.result()
+            scrape_results_by_url[result.url] = result
+            
+    text_splitter = RecursiveCharacterTextSplitter(separators=["\n\n", "\n"], chunk_size = 4000, chunk_overlap=500)
+    collection = Chroma(embedding_function=OpenAIEmbeddings(api_key=os.getenv("OPENAI_API_KEY")))
+            
+    for scrape_result in list(scrape_results_by_url.values()):
+        texts = text_splitter.split_text(scrape_result.text)
+        metadatas = [search_results_by_url[scrape_result.url].model_dump() for _ in texts]
         
-        for result in search_results:
-            scraped_content = web_scrape(result["url"], sanitized_search_query, 5000)
-            scraped.append({
-                "query": sanitized_search_query,
-                "url": result["url"],
-                "title": result["title"],
-                "content": scraped_content
-            })
+        collection.add_texts(
+            texts=texts,
+            metadatas=metadatas
+        )
+    
+    vector_results = []
+    
+    for query in queries:
+        top_k_results = collection.similarity_search(query, k=8)
+        vector_results += top_k_results
+    
+    vector_result_texts: list[str] = [result.page_content for result in vector_results]
+    
+    # reranked_texts = rerank_results(vector_result_texts, goal)[:10]
             
     evaluation_prompt_template = """
     You are a professional researcher. Your goal is to answer: '{goal}'.
-    
+        
     Here are the results of relevant web searches:
     
-    {search_results}
+    {reranked_texts}
     
     Prepare a comprehensive report that answers the question. If that is not possible,
     state why
@@ -76,11 +107,11 @@ def research_langchain(goal: str):
     )
     
     response = research_evaluation_chain.invoke({
-        "search_results": scraped,
+        "reranked_texts": vector_result_texts,
         "goal": goal
     })
     
-    print(response)
+    return response
 
 def research_autogen(goal: str):
     user_proxy = UserProxyAgent(
