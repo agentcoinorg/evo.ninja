@@ -149,7 +149,6 @@ def create_embeddings_from_results(results: list[WebScrapeResult], text_splitter
         texts += text_splitter.split_text(scrape_result.content)
         # metadatas += [scrape_result.model_dump() for _ in texts]
 
-    print(texts)
     collection.add_texts(
         texts=texts,
         # metadatas=metadatas
@@ -183,7 +182,6 @@ def research(goal: str):
         vector_result_texts += [result.page_content for result in top_k_results]
     
     reranked_results = rerank_results(vector_result_texts, goal)
-    print(reranked_results)
     
     report = prepare_report(goal, reranked_results) 
 
