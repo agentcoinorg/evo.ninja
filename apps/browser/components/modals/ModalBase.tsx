@@ -26,11 +26,12 @@ interface ModalProps {
 export default function Modal(props: PropsWithChildren<ModalProps>) {
   const { title, isOpen, onClose, panelStyles, contentStyles, children } =
     props;
+  console.log(panelStyles?.maxWidth);
   const maxWidth = panelStyles?.maxWidth ?? "max-w-[540px]";
 
   const defaultContentStyles = clsx(
     "bg-zinc-900 [scrollbar-gutter:stable]",
-    contentStyles?.padding ? contentStyles?.padding : "p-8 pr-[1.5rem]",
+    contentStyles?.padding ? contentStyles?.padding : "p-4 pr-3 md:p-8 md:pr-6",
     contentStyles?.["max-h"]
       ? contentStyles?.["max-h"]
       : "max-h-[calc(100dvh-78px)] md:max-h-[calc(100dvh-96px)]",
@@ -60,7 +61,7 @@ export default function Modal(props: PropsWithChildren<ModalProps>) {
               >
                 <Dialog.Panel
                   className={clsx(
-                    "w-full transform overflow-hidden rounded-2xl bg-zinc-800 text-left align-middle text-zinc-50 shadow-xl transition-all",
+                    "w-full transform overflow-hidden rounded-xl bg-zinc-800 text-left align-middle text-zinc-50 shadow-xl transition-all",
                     maxWidth
                   )}
                   onClick={(e) => {

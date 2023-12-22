@@ -46,15 +46,16 @@ export default function ChatDetails({
         onClose();
       }}
       title="Details"
+      panelStyles={{ maxWidth: "max-w-screen-md" }}
     >
-      <div className="space-y-4">
+      <div className="space-y-2">
         {logs &&
           Object.entries(logs.details).map(
             ([stepTitle, stepDetails], index) => (
               <div
                 key={stepTitle}
                 className={clsx(
-                  "prose-condensed prose prose-zinc prose-invert rounded-md bg-zinc-800 shadow-md transition-colors duration-0 ease-in-out hover:shadow-lg",
+                  "prose-condensed prose prose-zinc prose-invert relative max-w-none rounded-md bg-zinc-800 shadow-md transition-colors duration-0 ease-in-out hover:shadow-lg",
                   {
                     "cursor-pointer duration-150 hover:bg-zinc-700":
                       expandedStep !== stepTitle && stepDetails.length > 0,
@@ -76,7 +77,7 @@ export default function ChatDetails({
                     {stepTitle.includes("## Goal") && (
                       <CheckCircle size={24} weight="bold" />
                     )}
-                    <ReactMarkdown className="prose-headings:mt-0 prose-headings:text-inherit">
+                    <ReactMarkdown className="prose-headings:mt-0 prose-headings:text-lg prose-headings:text-inherit">
                       {stepTitle}
                     </ReactMarkdown>
                   </div>

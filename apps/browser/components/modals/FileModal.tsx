@@ -33,7 +33,7 @@ export default function FileModal(props: FileModalProps) {
         title={file?.path ?? "View File"}
         onClose={onClose}
         contentStyles={{ padding: "p-0" }}
-        panelStyles={{ maxWidth: "max-w-[700px]" }}
+        panelStyles={{ maxWidth: "max-w-screen-md" }}
       >
         {file?.content && (
           <div className="prose prose-invert w-full max-w-none overflow-auto p-8 pr-[1.5rem] font-mono text-xs [scrollbar-gutter:stable]">
