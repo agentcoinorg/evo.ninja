@@ -1,5 +1,6 @@
 import logging
 import os
+from markdownify import markdownify
 import re
 import requests
 from bs4 import BeautifulSoup
@@ -21,7 +22,8 @@ def web_scrape(url: str) -> tuple[str, str]:
             [x.extract() for x in soup.findAll('head')]
             
             text = soup.get_text()
-            text = re.sub('(\n\n)\n*|\n', r'\1', text)
+            text = markdownify(text)
+            text = "  ".join([x.strip() for x in text.split("\n")])
             
             return (text, url)
         else:

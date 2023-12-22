@@ -1,6 +1,6 @@
 import pytest
 from evo_researcher.functions.grade_info import grade_info 
-from evo_researcher.main import research_langchain
+from evo_researcher.test import research
 from evo_researcher.autonolas.research import research as research_autonolas
 
 dataset = [
@@ -15,7 +15,7 @@ dataset = [
 
 @pytest.mark.parametrize("question", [pytest.param(question, id=question) for question in dataset])
 def test_research(question: str):
-    evo_research = research_langchain(question)
+    evo_research = research(question)
     autonolas_research = research_autonolas(question)
     
     evo_research_score = grade_info(evo_research, question)
