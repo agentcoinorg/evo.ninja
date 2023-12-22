@@ -11,7 +11,7 @@ class WebSearchResult(BaseModel):
     def __getitem__(self, item):
         return getattr(self, item)
 
-def web_search(query: str, max_results=1) -> list[WebSearchResult]:
+def web_search(query: str, max_results=5) -> list[WebSearchResult]:
     print(f"-- Searching the web for {query} --")
     # Base URL for the API
     base_url = "https://serpapi.com/search"
