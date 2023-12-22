@@ -26,7 +26,6 @@ interface ModalProps {
 export default function Modal(props: PropsWithChildren<ModalProps>) {
   const { title, isOpen, onClose, panelStyles, contentStyles, children } =
     props;
-  console.log(panelStyles?.maxWidth);
   const maxWidth = panelStyles?.maxWidth ?? "max-w-[540px]";
 
   const defaultContentStyles = clsx(
