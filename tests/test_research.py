@@ -1,6 +1,6 @@
 import pytest
 from evo_researcher.functions.grade_info import grade_info 
-from evo_researcher.test import research
+from evo_researcher.research import research
 from evo_researcher.autonolas.research import research as research_autonolas
 
 dataset = [

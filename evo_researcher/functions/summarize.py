@@ -6,7 +6,6 @@ from langchain.chains.llm import LLMChain
 from langchain.chains.summarize import ReduceDocumentsChain, StuffDocumentsChain, MapReduceDocumentsChain
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-
 def summarize(objective: str, content: str) -> str:
     llm = ChatOpenAI(temperature = 0, model = "gpt-3.5-turbo-16k-0613")
     

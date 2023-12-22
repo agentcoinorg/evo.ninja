@@ -1,7 +1,6 @@
 import logging
 import os
 from markdownify import markdownify
-import re
 import requests
 from bs4 import BeautifulSoup
 from scrapingbee import ScrapingBeeClient
