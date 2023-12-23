@@ -65,8 +65,9 @@ export default function ChatDetails({
       }}
       autoScroll
       title="Details"
+      panelStyles={{ maxWidth: "max-w-screen-md" }}
     >
-      <div className="space-y-2 md:space-y-4">
+      <div className="space-y-2 md:space-y-2">
         {logs &&
           Object.entries(logs.details).map(
             ([stepTitle, stepDetails], index) => {
