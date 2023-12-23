@@ -25,7 +25,7 @@ export default function ChatLogs({
   logs,
   isRunning,
   status,
-  chatName
+  chatName,
 }: ChatLogsProps) {
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -189,6 +189,7 @@ export default function ChatLogs({
         isOpen={logsDetails.open}
         onClose={() => setLogsDetails({ ...logsDetails, open: false })}
         logs={sanitizedLogs[logsDetails.index]}
+        status={status}
       />
     </>
   );
