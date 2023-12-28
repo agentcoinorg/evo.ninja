@@ -31,7 +31,7 @@ export class EvoService {
   }
 
   async connect(config: EvoThreadConfig, callbacks: EvoThreadCallbacks): Promise<void> {
-    this._current = this.acquireThread(config);
+    this._current = await this.acquireThread(config);
     await this._current.connect(callbacks);
   }
 
@@ -42,9 +42,9 @@ export class EvoService {
     return this._current.start(options);
   }
 
-  private acquireThread(config: EvoThreadConfig): EvoThread {
+  private async acquireThread(config: EvoThreadConfig): Promise<EvoThread> {
     if (!this._threads[config.chatId]) {
-      this._threads[config.chatId] = new EvoThread(config);
+      this._threads[config.chatId] = await EvoThread.load(config);
     }
     return this._threads[config.chatId];
   }
