@@ -3,7 +3,7 @@ import { useSession } from "next-auth/react"
 import { ChatMessage } from "@evo-ninja/agents"
 import { ChatLog } from "@/components/Chat"
 import { Json } from "../supabase/dbTypes"
-import { createSupabaseClient } from "../supabase/createSupabaseClient"
+import { useSupabaseClient } from "../supabase/useSupabaseClient"
 
 export interface Chat {
   id: string;
@@ -110,45 +110,68 @@ const mapChatDTOtoChat = (dto: ChatDTO): Chat => {
   }
 }
 
+export const fetchChats = async (supabase: any): Promise<{
+  data: Chat[] | undefined,
+  error: Error | undefined
+}> => {
+  const { data, error } = await supabase
+    .from('chats')
+    .select(`
+      id,
+      created_at,
+      logs(id, created_at, title, content, user),
+      variables(id, key, value),
+      title,
+      messages(
+        id,
+        created_at,
+        content,
+        name,
+        function_call,
+        tool_calls,
+        temporary,
+        role,
+        tool_call_id
+      )
+    `).order(
+      'created_at',
+      { ascending: false }
+    )
+
+  if (error) {
+    return {
+      data: undefined,
+      error: error
+    }
+  }
+
+  return {
+    data: data.map(mapChatDTOtoChat),
+    error: undefined
+  };
+}
+
 export const useChats = () => {
-  const { data: session } = useSession()
+  const { data: session } = useSession();
+  const supabase = useSupabaseClient();
 
   return useQuery({
-    queryKey: ['chats'],
-    enabled: !!session?.user?.email,
+    queryKey: ['chats', session?.user?.email, supabase],
+    enabled: !!session?.user?.email && !!supabase,
     refetchOnMount: false,
     queryFn: async () => {
-      const supabase = createSupabaseClient(session?.supabaseAccessToken as string)
-      const { data, error } = await supabase
-        .from('chats')
-        .select(`
-          id,
-          created_at,
-          logs(id, created_at, title, content, user),
-          variables(id, key, value),
-          title,
-          messages(
-            id,
-            created_at,
-            content,
-            name,
-            function_call,
-            tool_calls,
-            temporary,
-            role,
-            tool_call_id
-          )
-        `).order(
-          'created_at',
-          { ascending: false }
-        )
+      if (!session?.user?.email || !supabase) {
+        throw new Error("Not authenticated")
+      }
+
+      const { data, error } = await fetchChats(supabase);
 
       if (error) {
         console.error(error)
-        throw new Error(error.message)
+        throw new Error(error.message);
       }
 
-      return data.map(mapChatDTOtoChat)
+      return data;
     }
   })
 }

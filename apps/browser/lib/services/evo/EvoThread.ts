@@ -66,15 +66,43 @@ export class EvoThread {
   private _state: EvoThreadState;
   private _callbacks?: EvoThreadCallbacks;
 
-  constructor(
+  protected constructor(
     private _config: EvoThreadConfig
   ) {
     this._state = Object.assign({}, INIT_STATE);
-    this.load();
   }
 
   get chatId(): string {
     return this._config.chatId;
+  }
+
+  public static async load(
+    config: EvoThreadConfig
+  ): Promise<EvoThread> {
+    const thread = new EvoThread(config);
+
+    const chatId = thread._config.chatId;
+    thread._state.isLoading = true;
+
+    const results = await Promise.all<[
+      Promise<ChatLog[]>,
+      Promise<Workspace>
+    ]>([
+      thread._config.loadChatLog(chatId).catch((reason) => {
+        thread._callbacks?.onError(reason.toString());
+        return [];
+      }),
+      thread._config.loadWorkspace(chatId).catch((reason) => {
+        thread._callbacks?.onError(reason.toString());
+        return new InMemoryWorkspace();
+      })
+    ]);
+
+    thread._state.logs = results[0];
+    thread._state.workspace = results[1];
+    thread._state.isLoading = false;
+
+    return thread;
   }
 
   destroy() {
@@ -190,29 +218,6 @@ export class EvoThread {
     // Run the evo instance against the goal
     await this.runEvo(this._state.evo, options.goal);
     this._state.goal = undefined;
-  }
-
-  private async load() {
-    const chatId = this._config.chatId;
-    this._state.isLoading = true;
-
-    const results = await Promise.all<[
-      Promise<ChatLog[]>,
-      Promise<Workspace>
-    ]>([
-      this._config.loadChatLog(chatId).catch((reason) => {
-        this._callbacks?.onError(reason.toString());
-        return [];
-      }),
-      this._config.loadWorkspace(chatId).catch((reason) => {
-        this._callbacks?.onError(reason.toString());
-        return new InMemoryWorkspace();
-      })
-    ]);
-
-    this._state.logs = results[0];
-    this._state.workspace = results[1];
-    this._state.isLoading = false;
   }
 
   private async waitForLoad() {
