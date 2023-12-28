@@ -1,5 +1,5 @@
 import { createEvoInstance } from "@/lib/services/evo/createEvoInstance";
-import { GoalApi } from "@/lib/api";
+import { GoalApi, ProxyEmbeddingApi, ProxyLlmApi } from "@/lib/api";
 import { ChatLog } from "@/components/Chat";
 import {
   Evo,
@@ -7,6 +7,8 @@ import {
   ChatMessage,
   Workspace,
   InMemoryWorkspace,
+  EmbeddingApi,
+  LlmApi,
 } from "@evo-ninja/agents";
 
 export interface EvoThreadConfig {
@@ -23,6 +25,9 @@ export interface EvoThreadConfig {
 
 export interface EvoThreadState {
   goal: string | undefined;
+  evo: Evo | undefined;
+  llm: LlmApi | undefined;
+  embedding: EmbeddingApi | undefined;
   status: string | undefined;
   isRunning: boolean;
   isLoading: boolean;
@@ -47,6 +52,9 @@ export interface EvoThreadStartOptions {
 
 const INIT_STATE: EvoThreadState = {
   goal: undefined,
+  evo: undefined,
+  llm: undefined,
+  embedding: undefined,
   status: undefined,
   isRunning: false,
   isLoading: false,
@@ -141,29 +149,46 @@ export class EvoThread {
       return;
     }
 
-    // Create an Evo instance
-    const evo = createEvoInstance(
-      goalId,
-      this._state.workspace,
-      options.openAiApiKey,
-      this._config.onMessagesAdded,
-      this._config.onVariableSet,
-      (chatLog) => this.onChatLog(chatLog),
-      (status) => this.onStatusUpdate(status),
-      () => this._callbacks?.onGoalCapReached(),
-      // onError
-      (error) => this._callbacks?.onError(error)
-    );
+    if (this._state.evo && this._state.llm && this._state.embedding) {
+      console.log("Reusing existing Evo instance");
+    } else {
+      console.log("Creating new Evo instance");
+      // Create an Evo instance
+      const result = createEvoInstance(
+        this._state.workspace,
+        options.openAiApiKey,
+        this._config.onMessagesAdded,
+        this._config.onVariableSet,
+        (chatLog) => this.onChatLog(chatLog),
+        (status) => this.onStatusUpdate(status),
+        () => this._callbacks?.onGoalCapReached(),
+        // onError
+        (error) => this._callbacks?.onError(error)
+      );
 
-    if (!evo) {
-      this.setIsRunning(false);
-      return;
+      if (!result) {
+        this.setIsRunning(false);
+        return;
+      }
+
+      console.log("Evo instance created", result);
+
+      this._state.evo = result.evo;
+      this._state.llm = result.llm;
+      this._state.embedding = result.embedding;
     }
 
-    await evo.init();
+    if (this._state.llm instanceof ProxyLlmApi) {
+      console.log("Setting goal ID1", goalId);
+      this._state.llm.setGoalId(goalId);
+    } 
+    if (this._state.embedding instanceof ProxyEmbeddingApi) {
+      console.log("Setting goal ID2", goalId);
+      this._state.embedding.setGoalId(goalId);
+    }
 
     // Run the evo instance against the goal
-    await this.runEvo(evo, options.goal);
+    await this.runEvo(this._state.evo, options.goal);
     this._state.goal = undefined;
   }
 

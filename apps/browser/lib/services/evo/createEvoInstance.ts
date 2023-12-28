@@ -24,7 +24,6 @@ import {
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 
 export function createEvoInstance(
-  goalId: string,
   workspace: Workspace,
   openAiApiKey: string | undefined,
   onMessagesAdded: (type: ChatLogType, messages: ChatMessage[]) => Promise<void>,
@@ -33,7 +32,14 @@ export function createEvoInstance(
   onStatusUpdate: (status: string) => void,
   onGoalCapReached: () => void,
   onError: (error: string) => void
-): Evo | undefined {
+): {
+  evo: Evo,
+  llm: LlmApi,
+  embedding: EmbeddingApi
+} | undefined {
+  let llm: LlmApi;
+  let embedding: EmbeddingApi;
+
   try {
     const browserLogger = new BrowserLogger({
       onLog: async (message: string) => {
@@ -66,10 +72,8 @@ export function createEvoInstance(
       MAX_RESPONSE_TOKENS: "4096",
     });
 
-    let llm: LlmApi;
-    let embedding: EmbeddingApi;
-
     if (openAiApiKey) {
+      console.log("Using OpenAI API");
       llm = new OpenAILlmApi(
         env.OPENAI_API_KEY,
         env.GPT_MODEL as LlmModel,
@@ -85,19 +89,18 @@ export function createEvoInstance(
         env.OPENAI_API_BASE_URL,
       );
     } else {
+      console.log("Using Evo API");
       const llmProxy = new ProxyLlmApi(
         env.GPT_MODEL as LlmModel,
         env.CONTEXT_WINDOW_TOKENS,
         env.MAX_RESPONSE_TOKENS,
         onGoalCapReached,
       );
-      llmProxy.setGoalId(goalId);
       llm = llmProxy;
       const embeddingProxy = new ProxyEmbeddingApi(
         cl100k_base,
         onGoalCapReached
       );
-      embeddingProxy.setGoalId(goalId);
       embedding = embeddingProxy;
     }
 
@@ -124,7 +127,11 @@ export function createEvoInstance(
         agentVariables
       )
     );
-    return evo;
+    return {
+      evo,
+      llm,
+      embedding
+    };
   } catch (e: any) {
     onError(e.message);
     return undefined;
