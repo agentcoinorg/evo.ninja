@@ -9,7 +9,12 @@ import "react-toastify/dist/ReactToastify.css";
 import SidebarLayout from "@/components/SidebarLayout";
 import { Providers } from "@/components/providers/Providers";
 import { cookies } from "next/headers";
+import { Metadata } from "next";
 config.autoAddCss = false;
+
+export const metadata: Metadata = {
+  title: "evo.ninja"
+}
 
 export default function EvoApp({ children }: { children: React.ReactNode }) {
   const currentDevice = cookies().get("X-User-Device");
