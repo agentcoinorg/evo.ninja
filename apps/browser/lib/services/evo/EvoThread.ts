@@ -27,8 +27,6 @@ export interface EvoThreadConfig {
 export interface EvoThreadState {
   goal: string | undefined;
   evo: Evo | undefined;
-  llm: LlmApi | undefined;
-  embedding: EmbeddingApi | undefined;
   status: string | undefined;
   isRunning: boolean;
   isLoading: boolean;
@@ -55,8 +53,6 @@ export interface EvoThreadStartOptions {
 const INIT_STATE: EvoThreadState = {
   goal: undefined,
   evo: undefined,
-  llm: undefined,
-  embedding: undefined,
   status: undefined,
   isRunning: false,
   isLoading: false,
@@ -181,8 +177,8 @@ export class EvoThread {
       return;
     }
 
-    if (!this._state.evo || !this._state.llm || !this._state.embedding) {
-      const result = createEvoInstance(
+    if (!this._state.evo) {
+      const evo = createEvoInstance(
         this._state.workspace,
         options.openAiApiKey,
         this._config.onMessagesAdded,
@@ -193,14 +189,12 @@ export class EvoThread {
         (error) => this._callbacks?.onError(error)
       );
 
-      if (!result) {
+      if (!evo) {
         this.setIsRunning(false);
         return;
       }
 
-      this._state.evo = result.evo;
-      this._state.llm = result.llm;
-      this._state.embedding = result.embedding;
+      this._state.evo = evo;
 
       if (this._state.chat?.messages.length) {
         await this._state.evo.context.chat.addWithoutEvents(
@@ -220,11 +214,13 @@ export class EvoThread {
       }
     }
 
-    if (this._state.llm instanceof ProxyLlmApi) {
-      this._state.llm.setGoalId(goalId);
+    const { llm, embedding } = this._state.evo.context;
+
+    if (llm instanceof ProxyLlmApi) {
+      llm.setGoalId(goalId);
     } 
-    if (this._state.embedding instanceof ProxyEmbeddingApi) {
-      this._state.embedding.setGoalId(goalId);
+    if (embedding instanceof ProxyEmbeddingApi) {
+      embedding.setGoalId(goalId);
     }
 
     // Run the evo instance against the goal

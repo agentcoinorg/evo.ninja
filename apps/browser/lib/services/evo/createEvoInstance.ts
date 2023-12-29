@@ -32,11 +32,7 @@ export function createEvoInstance(
   onStatusUpdate: (status: string) => void,
   onGoalCapReached: () => void,
   onError: (error: string) => void
-): {
-  evo: Evo,
-  llm: LlmApi,
-  embedding: EmbeddingApi
-} | undefined {
+): Evo | undefined {
   let llm: LlmApi;
   let embedding: EmbeddingApi;
 
@@ -125,11 +121,7 @@ export function createEvoInstance(
         agentVariables
       )
     );
-    return {
-      evo,
-      llm,
-      embedding
-    };
+    return evo;
   } catch (e: any) {
     onError(e.message);
     return undefined;
