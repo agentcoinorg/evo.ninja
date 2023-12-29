@@ -10,10 +10,11 @@ import {
   EmbeddingApi,
   LlmApi,
 } from "@evo-ninja/agents";
+import { Chat } from "@/lib/queries/useChats";
 
 export interface EvoThreadConfig {
   chatId: string;
-  loadChatLog: (chatId: string) => Promise<ChatLog[]>;
+  loadChat: (chatId: string) => Promise<Chat>;
   loadWorkspace: (chatId: string) => Promise<Workspace>;
   onChatLogAdded: (chatLog: ChatLog) => Promise<void>;
   onMessagesAdded: (
@@ -32,6 +33,7 @@ export interface EvoThreadState {
   isRunning: boolean;
   isLoading: boolean;
   logs: ChatLog[];
+  chat: Chat | undefined;
   workspace: Workspace;
 }
 
@@ -59,6 +61,7 @@ const INIT_STATE: EvoThreadState = {
   isRunning: false,
   isLoading: false,
   logs: [],
+  chat: undefined,
   workspace: new InMemoryWorkspace()
 };
 
@@ -85,12 +88,12 @@ export class EvoThread {
     thread._state.isLoading = true;
 
     const results = await Promise.all<[
-      Promise<ChatLog[]>,
+      Promise<Chat>,
       Promise<Workspace>
     ]>([
-      thread._config.loadChatLog(chatId).catch((reason) => {
+      thread._config.loadChat(chatId).catch((reason) => {
         thread._callbacks?.onError(reason.toString());
-        return [];
+        throw reason;
       }),
       thread._config.loadWorkspace(chatId).catch((reason) => {
         thread._callbacks?.onError(reason.toString());
@@ -98,7 +101,8 @@ export class EvoThread {
       })
     ]);
 
-    thread._state.logs = results[0];
+    thread._state.chat = results[0];
+    thread._state.logs = results[0].logs;
     thread._state.workspace = results[1];
     thread._state.isLoading = false;
 
@@ -177,11 +181,7 @@ export class EvoThread {
       return;
     }
 
-    if (this._state.evo && this._state.llm && this._state.embedding) {
-      console.log("Reusing existing Evo instance");
-    } else {
-      console.log("Creating new Evo instance");
-      // Create an Evo instance
+    if (!this._state.evo || !this._state.llm || !this._state.embedding) {
       const result = createEvoInstance(
         this._state.workspace,
         options.openAiApiKey,
@@ -190,7 +190,6 @@ export class EvoThread {
         (chatLog) => this.onChatLog(chatLog),
         (status) => this.onStatusUpdate(status),
         () => this._callbacks?.onGoalCapReached(),
-        // onError
         (error) => this._callbacks?.onError(error)
       );
 
@@ -199,19 +198,32 @@ export class EvoThread {
         return;
       }
 
-      console.log("Evo instance created", result);
-
       this._state.evo = result.evo;
       this._state.llm = result.llm;
       this._state.embedding = result.embedding;
+
+      if (this._state.chat?.messages.length) {
+        await this._state.evo.context.chat.addWithoutEvents(
+          "persistent",
+          this._state.chat.messages
+            .filter(x => !x.temporary)
+            .map(x => x.msg)
+        );
+        await this._state.evo.context.chat.addWithoutEvents(
+          "temporary",
+          this._state.chat.messages
+            .filter(x => x.temporary)
+            .map(x => x.msg)
+        );
+      } else {
+        await this._state.evo.init();
+      }
     }
 
     if (this._state.llm instanceof ProxyLlmApi) {
-      console.log("Setting goal ID1", goalId);
       this._state.llm.setGoalId(goalId);
     } 
     if (this._state.embedding instanceof ProxyEmbeddingApi) {
-      console.log("Setting goal ID2", goalId);
       this._state.embedding.setGoalId(goalId);
     }
 

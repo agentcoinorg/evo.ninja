@@ -73,7 +73,6 @@ export function createEvoInstance(
     });
 
     if (openAiApiKey) {
-      console.log("Using OpenAI API");
       llm = new OpenAILlmApi(
         env.OPENAI_API_KEY,
         env.GPT_MODEL as LlmModel,
@@ -89,7 +88,6 @@ export function createEvoInstance(
         env.OPENAI_API_BASE_URL,
       );
     } else {
-      console.log("Using Evo API");
       const llmProxy = new ProxyLlmApi(
         env.GPT_MODEL as LlmModel,
         env.CONTEXT_WINDOW_TOKENS,

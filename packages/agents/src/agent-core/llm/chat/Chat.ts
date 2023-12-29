@@ -34,6 +34,16 @@ export class Chat {
 
   public async add(type: ChatLogType, msg: ChatMessage | ChatMessage[]): Promise<void> {
     const msgs = Array.isArray(msg) ? msg : [msg];
+    
+    this.addWithoutEvents(type, msgs);
+
+    if (this.options?.onMessagesAdded) {
+      await this.options.onMessagesAdded(type, msgs);
+    }
+  }
+
+  public addWithoutEvents(type: ChatLogType, msg: ChatMessage | ChatMessage[]) {
+    const msgs = Array.isArray(msg) ? msg : [msg];
 
     const msgsWithTokens = msgs.map((msg) => {
       const tokens = this._tokenizer.encode(JSON.stringify(msg)).length;
@@ -42,10 +52,6 @@ export class Chat {
     const tokens = msgsWithTokens.map(({ tokens }) => tokens);
 
     this._chatLogs.add(type, msgs, tokens)
-
-    if (this.options?.onMessagesAdded) {
-      await this.options.onMessagesAdded(type, msgs);
-    }
   }
 
   public async persistent(role: ChatRole, content: string): Promise<void>;
