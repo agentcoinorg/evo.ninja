@@ -11,7 +11,7 @@ import { EvoThreadCallbacks, EvoThreadConfig } from "@/lib/services/evo/EvoThrea
 import { useAddChatLog } from "@/lib/mutations/useAddChatLog";
 import { useAddMessages } from "@/lib/mutations/useAddMessages";
 import { useAddVariable } from "@/lib/mutations/useAddVariable";
-import { fetchChats, useChats } from "@/lib/queries/useChats";
+import { Chat, fetchChats, useChats } from "@/lib/queries/useChats";
 import { SupabaseWorkspace } from "@/lib/supabase/SupabaseWorkspace";
 import { useWorkspaceFilesUpdate } from "@/lib/hooks/useWorkspaceFilesUpdate";
 import { useWorkspaceUploadUpdate } from "@/lib/hooks/useWorkspaceUploadUpdate";
@@ -89,7 +89,7 @@ export const useEvoService = (
 
     const config: EvoThreadConfig = {
       chatId,
-      loadChatLog,
+      loadChat,
       loadWorkspace,
       onChatLogAdded: handleChatLogAdded,
       onMessagesAdded: handleMessagesAdded,
@@ -113,9 +113,9 @@ export const useEvoService = (
     setIsConnected(true);
   };
 
-  const loadChatLog = async (chatId: string) => {
+  const loadChat = async (chatId: string): Promise<Chat> => {
     if (chatId === "<anon>") {
-      return [];
+      throw new Error("Cannot load chat for anonymous user.");
     }
 
     const { data: chats, error } = await fetchChats(supabase!);
@@ -123,16 +123,15 @@ export const useEvoService = (
     if (error) {
       console.error(error);
       setError("Failed to fetch user chats.");
-      return [];
+      throw error;
     }
 
     const currentChat = chats?.find(c => c.id === chatId);
 
     if (!currentChat) {
-      return [];
+      throw new Error(`Chat with id ${chatId} not found.`);
     }
-
-    return currentChat.logs;
+    return currentChat;
   };
 
   async function loadWorkspace(chatId: string): Promise<Workspace> {

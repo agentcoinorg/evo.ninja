@@ -9,9 +9,14 @@ export interface Chat {
   id: string;
   created_at: string;
   title: string | null;
-  messages: ChatMessage[];
+  messages: SavedMessage[];
   logs: ChatLog[];
   variables: Map<string, string>
+}
+
+export interface SavedMessage {
+  msg: ChatMessage, 
+  temporary: boolean
 }
 
 interface MessageDTO {
@@ -49,42 +54,52 @@ interface ChatDTO {
   messages: MessageDTO[];
 }
 
-const mapMessageDTOtoMessage = (dto: MessageDTO): ChatMessage & { temporary: boolean } => {
+const mapMessageDTOtoMessage = (dto: MessageDTO): SavedMessage => {
   const messageRole = dto.role as "function" | "user" | "tool" | "system" | "assistant"
   
   switch (messageRole) {
     case "user":
     case "system": {
       return {
-        role: messageRole,
-        content: dto.content,
-        temporary: dto.temporary
+        msg: {
+          role: messageRole,
+          content: dto.content,
+        },
+        temporary: dto.temporary,
       }
     }
     case "function": {
       return {
-        role: messageRole,
-        content: dto.content,
+        msg: {
+          role: messageRole,
+          content: dto.content,
+          name: dto.name as string
+        },
         temporary: dto.temporary,
-        name: dto.name as string
       }
     }
     case "assistant": {
       return {
-        role: messageRole,
-        content: dto.content,
+        msg: {
+          role: messageRole,
+          content: dto.content,
+          // TODO: Json casting
+          function_call: dto.function_call as any ?? undefined,
+          tool_calls: dto.tool_calls as any
+            ? dto.tool_calls as any
+            : undefined,
+        },
         temporary: dto.temporary,
-        // TODO: Json casting
-        function_call: dto.function_call as any,
-        tool_calls: dto.tool_calls as any,
       }
     }
     case "tool": {
       return {
-        role: messageRole,
-        content: dto.content,
+        msg: {
+          role: messageRole,
+          content: dto.content,
+          tool_call_id: dto.tool_call_id as string,
+        },
         temporary: dto.temporary,
-        tool_call_id: dto.tool_call_id as string,
       }
     }
   }
@@ -104,7 +119,7 @@ const mapChatDTOtoChat = (dto: ChatDTO): Chat => {
     id: dto.id,
     created_at: dto.created_at,
     title: dto.title,
-    messages,
+    messages: messages,
     variables,
     logs
   }
