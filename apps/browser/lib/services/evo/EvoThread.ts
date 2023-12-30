@@ -7,8 +7,6 @@ import {
   ChatMessage,
   Workspace,
   InMemoryWorkspace,
-  EmbeddingApi,
-  LlmApi,
 } from "@evo-ninja/agents";
 import { Chat } from "@/lib/queries/useChats";
 
@@ -30,7 +28,6 @@ export interface EvoThreadState {
   status: string | undefined;
   isRunning: boolean;
   isLoading: boolean;
-  logs: ChatLog[];
   chat: Chat | undefined;
   workspace: Workspace;
 }
@@ -56,7 +53,6 @@ const INIT_STATE: EvoThreadState = {
   status: undefined,
   isRunning: false,
   isLoading: false,
-  logs: [],
   chat: undefined,
   workspace: new InMemoryWorkspace()
 };
@@ -98,7 +94,6 @@ export class EvoThread {
     ]);
 
     thread._state.chat = results[0];
-    thread._state.logs = results[0].logs;
     thread._state.workspace = results[1];
     thread._state.isLoading = false;
 
@@ -117,7 +112,7 @@ export class EvoThread {
     // Dispatch reset values
     this._callbacks.setStatus(INIT_STATE.status);
     this._callbacks.setIsRunning(INIT_STATE.isRunning);
-    this._callbacks.setChatLog(INIT_STATE.logs);
+    this._callbacks.setChatLog([]);
     this._callbacks.setWorkspace(undefined);
 
     // Disconnect all callbacks
@@ -138,7 +133,7 @@ export class EvoThread {
     // Send current state to newly connected callbacks
     this._callbacks.setStatus(this._state.status);
     this._callbacks.setIsRunning(this._state.isRunning);
-    this._callbacks.setChatLog(this._state.logs);
+    this._callbacks.setChatLog(this._state.chat!.logs);
     await this._callbacks.setWorkspace(this._state.workspace);
   }
 
@@ -243,8 +238,8 @@ export class EvoThread {
   }
 
   private async onChatLog(chatLog: ChatLog): Promise<void> {
-    this._state.logs = [...this._state.logs, chatLog];
-    this._callbacks?.setChatLog(this._state.logs);
+    this._state.chat!.logs = [...this._state.chat!.logs, chatLog];
+    this._callbacks?.setChatLog(this._state.chat!.logs);
     await this._config.onChatLogAdded(chatLog);
   }
 
