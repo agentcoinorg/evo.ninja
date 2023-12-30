@@ -13,15 +13,21 @@ const SupabaseClientProvider = ({ children }: { children: React.ReactNode}) => {
   const [lastAccessToken, setLastAccessToken] = useState<string | undefined>(undefined);
 
   useEffect(() => {
+    console.log("useEffect")
     if (!session?.supabaseAccessToken) {
+      console.log("useEffect reset")
       setSupabaseClient(undefined);
       setLastAccessToken(undefined)
       return;
     }
 
     if (lastAccessToken === session.supabaseAccessToken) {
+      console.log("useEffect early out")
       return;
     }
+    console.log("useEffect SETTTING")
+    console.log("last", lastAccessToken)
+    console.log("new", session.supabaseAccessToken)
     setSupabaseClient(createSupabaseClient(session.supabaseAccessToken));
     setLastAccessToken(session.supabaseAccessToken);
   }, [session?.supabaseAccessToken]);

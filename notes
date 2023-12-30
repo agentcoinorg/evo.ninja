@@ -1,0 +1,7 @@
+Possible paths:
+1. configure next auth client-side to limit session invalidation (ex: on tab refocus)
+  - I feel this masks the issue, as the session is not being persisted for a fixed amount of time (ex: 4 hours)
+2. store session id in localstorage of the client-side app and have custom get/invalidate/re-auth logic
+  - requires custom logic which I feel shouldn't be needed.
+3. persist session id server-side and have the app fetch it using `getServerSideProps`
+  - does not seem to be compatable with our usage of the next.js `app/` directory.

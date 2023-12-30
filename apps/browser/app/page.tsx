@@ -9,7 +9,6 @@ import {
   errorAtom,
   newGoalSubmittedAtom,
   isChatLoadingAtom,
-  ChatInfo,
   welcomeModalAtom,
 } from "@/lib/store";
 import { useChats } from "@/lib/queries/useChats";
@@ -21,14 +20,15 @@ import { useEvoService } from "@/lib/hooks/useEvoService";
 import { useWorkspaceUploadUpdate } from "@/lib/hooks/useWorkspaceUploadUpdate";
 import Chat from "@/components/Chat";
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { GetServerSidePropsContext } from "next";
+import { useSession, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useAtom } from "jotai";
 import { v4 as uuid } from "uuid";
 import { InMemoryFile } from "@nerfzael/memory-fs";
 import { useSupabaseClient } from "@/lib/supabase/useSupabaseClient";
 
-function Dojo({ params }: { params: { id?: string } }) {
+export default function Dojo({ params }: { params: { id?: string } }) {
   const supabase = useSupabaseClient();
   const [evoService, setEvoService] = useAtom(evoServiceAtom);
   const [newGoalSubmitted, setNewGoalSubmitted] = useAtom(newGoalSubmittedAtom);
@@ -201,4 +201,9 @@ function Dojo({ params }: { params: { id?: string } }) {
   );
 }
 
-export default Dojo;
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const session = await getSession(context);
+  return {
+    props: { session }
+  };
+}
