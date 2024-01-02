@@ -24,7 +24,6 @@ import {
 import cl100k_base from "gpt-tokenizer/esm/encoding/cl100k_base";
 
 export function createEvoInstance(
-  goalId: string,
   workspace: Workspace,
   openAiApiKey: string | undefined,
   onMessagesAdded: (type: ChatLogType, messages: ChatMessage[]) => Promise<void>,
@@ -34,6 +33,9 @@ export function createEvoInstance(
   onGoalCapReached: () => void,
   onError: (error: string) => void
 ): Evo | undefined {
+  let llm: LlmApi;
+  let embedding: EmbeddingApi;
+
   try {
     const browserLogger = new BrowserLogger({
       onLog: async (message: string) => {
@@ -66,9 +68,6 @@ export function createEvoInstance(
       MAX_RESPONSE_TOKENS: "4096",
     });
 
-    let llm: LlmApi;
-    let embedding: EmbeddingApi;
-
     if (openAiApiKey) {
       llm = new OpenAILlmApi(
         env.OPENAI_API_KEY,
@@ -91,13 +90,11 @@ export function createEvoInstance(
         env.MAX_RESPONSE_TOKENS,
         onGoalCapReached,
       );
-      llmProxy.setGoalId(goalId);
       llm = llmProxy;
       const embeddingProxy = new ProxyEmbeddingApi(
         cl100k_base,
         onGoalCapReached
       );
-      embeddingProxy.setGoalId(goalId);
       embedding = embeddingProxy;
     }
 

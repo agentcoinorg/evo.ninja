@@ -11,9 +11,8 @@ import { EvoThreadCallbacks, EvoThreadConfig } from "@/lib/services/evo/EvoThrea
 import { useAddChatLog } from "@/lib/mutations/useAddChatLog";
 import { useAddMessages } from "@/lib/mutations/useAddMessages";
 import { useAddVariable } from "@/lib/mutations/useAddVariable";
-import { useChats } from "@/lib/queries/useChats";
+import { Chat, fetchChats, useChats } from "@/lib/queries/useChats";
 import { SupabaseWorkspace } from "@/lib/supabase/SupabaseWorkspace";
-import { useSupabaseClient } from "@/lib/supabase/useSupabaseClient";
 import { useWorkspaceFilesUpdate } from "@/lib/hooks/useWorkspaceFilesUpdate";
 import { useWorkspaceUploadUpdate } from "@/lib/hooks/useWorkspaceUploadUpdate";
 import { ChatLog } from "@/components/Chat";
@@ -21,10 +20,12 @@ import { Workspace, InMemoryWorkspace } from "@evo-ninja/agent-utils";
 import { ChatLogType, ChatMessage } from "@evo-ninja/agents";
 import { useState, useEffect } from "react";
 import { useAtom } from "jotai";
+import { EvoSupabaseClient } from "../supabase/EvoSupabaseClient";
 
 export const useEvoService = (
   chatId: string | "<anon>" | undefined,
   isAuthenticated: boolean,
+  supabase: EvoSupabaseClient | undefined
 ): {
   logs: ChatLog[];
   isConnected: boolean;
@@ -33,8 +34,6 @@ export const useEvoService = (
   status: string | undefined;
   handleStart: (goal: string) => Promise<void>;
 } => {
-  const supabase = useSupabaseClient();
-
   // Globals
   const [evoService] = useAtom(evoServiceAtom);
   const [allowTelemetry] = useAtom(allowTelemetryAtom);
@@ -55,9 +54,6 @@ export const useEvoService = (
   const { mutateAsync: addChatLog } = useAddChatLog();
   const { mutateAsync: addMessages } = useAddMessages();
   const { mutateAsync: addVariable } = useAddVariable();
-
-  // Queries
-  const { refetch: fetchChats } = useChats();
 
   // Helpers
   const workspaceFilesUpdate = useWorkspaceFilesUpdate();
@@ -93,7 +89,7 @@ export const useEvoService = (
 
     const config: EvoThreadConfig = {
       chatId,
-      loadChatLog,
+      loadChat,
       loadWorkspace,
       onChatLogAdded: handleChatLogAdded,
       onMessagesAdded: handleMessagesAdded,
@@ -117,31 +113,32 @@ export const useEvoService = (
     setIsConnected(true);
   };
 
-  const loadChatLog = async (chatId: string) => {
+  const loadChat = async (chatId: string): Promise<Chat> => {
     if (chatId === "<anon>") {
-      return [];
+      throw new Error("Cannot load chat for anonymous user.");
     }
 
-    const { data: chats, error } = await fetchChats();
+    const { data: chats, error } = await fetchChats(supabase!);
 
     if (error) {
       console.error(error);
       setError("Failed to fetch user chats.");
-      return [];
+      throw error;
     }
 
     const currentChat = chats?.find(c => c.id === chatId);
 
     if (!currentChat) {
-      return [];
+      throw new Error(`Chat with id ${chatId} not found.`);
     }
-
-    return currentChat.logs;
+    return currentChat;
   };
 
   async function loadWorkspace(chatId: string): Promise<Workspace> {
+    // isAuthenticated is only true if there's a supabase instance 
+    // so we can safely assume that it's not undefined
     const workspace = isAuthenticated ?
-      new SupabaseWorkspace(chatId, supabase.storage) :
+      new SupabaseWorkspace(chatId, supabase!.storage) :
       new InMemoryWorkspace();
 
     await workspaceUploadUpdate(workspace);
