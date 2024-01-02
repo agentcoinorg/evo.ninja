@@ -1,8 +1,9 @@
 import React, { ChangeEvent, useEffect, useRef } from "react";
-import TextField from "../TextField";
+import TextField from "../inputs/TextField";
 import { useSession, signOut } from "next-auth/react";
 import Button from "../Button";
 import { SignOut } from "@phosphor-icons/react/dist/ssr";
+import Checkbox from "../inputs/Checkbox";
 
 interface AccountConfigProps {
   setApiKey: (key: string) => void;
@@ -13,7 +14,7 @@ interface AccountConfigProps {
 }
 
 function AccountConfig(props: AccountConfigProps) {
-  const { apiKey, setApiKey, telemetry, setTelemetry } = props
+  const { apiKey, setApiKey, telemetry, setTelemetry } = props;
   const apiKeyRef = useRef<HTMLInputElement | null>(null);
   const { data: session } = useSession();
 
@@ -99,10 +100,9 @@ function AccountConfig(props: AccountConfigProps) {
             <label className="text-sm text-zinc-200">
               Share prompts with Evo
             </label>
-            <TextField
+            <Checkbox
               checked={telemetry}
               onChange={(e) => setTelemetry(e.target.checked)}
-              type="checkbox"
             />
           </fieldset>
         </div>

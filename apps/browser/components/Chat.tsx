@@ -14,13 +14,12 @@ import Disclaimer from "@/components/modals/Disclaimer";
 import Logo from "@/components/Logo";
 import Button from "@/components/Button";
 import ChatInputButton from "@/components/ChatInputButton";
-import TextField from "@/components/TextField";
 import React, { useState, ChangeEvent } from "react";
 import { UploadSimple } from "@phosphor-icons/react";
 import { useAtom } from "jotai";
 import clsx from "clsx";
 import { InMemoryFile } from "@nerfzael/memory-fs";
-import TextAreaField from "./TextAreaField";
+import TextAreaField from "./inputs/TextAreaField";
 
 export interface ChatLog {
   title: string;
@@ -124,13 +123,11 @@ const Chat: React.FC<ChatProps> = ({
               setMessage(event.target.value);
             }}
             onKeyDown={(event: React.KeyboardEvent) => {
-              if (
-                event.key === "Enter" &&
-                !event.shiftKey &&
-                !isStarting &&
-                !isRunning
-              ) {
-                return handleGoalSubmit(message);
+              if (!event.shiftKey && event.key === "Enter") {
+                event.preventDefault();
+                if (!isStarting && !isRunning) {
+                  return handleGoalSubmit(message);
+                }
               }
             }}
             placeholder="Ask Evo anything..."
