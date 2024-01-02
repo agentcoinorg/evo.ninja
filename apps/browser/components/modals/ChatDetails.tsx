@@ -47,7 +47,6 @@ export default function ChatDetails({
       const logs_index = Object.keys(logs.details).length - 1;
       const stepTitle = Object.keys(logs.details)[logs_index];
       const stepDetails = Object.values(logs.details)[logs_index];
-      console.log("layouteffect", contentRefs.current[logs_index]);
       if (contentRefs.current[logs_index] && stepDetails.length > 0) {
         toggleStep(stepTitle, logs_index);
         setInitialToggle(true);
