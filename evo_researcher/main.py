@@ -1,7 +1,7 @@
 import click
 from dotenv import load_dotenv
 from evo_researcher.autonolas.research import research as research_autonolas
-from evo_researcher.test import research
+from evo_researcher.functions.research import research
 
 load_dotenv()
 AVAILABLE_AGENTS = ["autonolas", "evo"]
@@ -27,7 +27,6 @@ def run(
         raise Exception(f"Invalid agent. Available agents: {AVAILABLE_AGENTS}")
     
     print(research_response)
-    
 
 if __name__ == '__main__':
     run()
