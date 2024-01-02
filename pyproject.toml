@@ -15,12 +15,12 @@ pandas = "^2.1.4"
 pytest = "^7.4.3"
 openai = "^1.4.0"
 chromadb = "^0.4.20"
-scrapingbee = "^2.0.1"
 spacy = "^3.7.2"
 google-api-python-client = "^2.111.0"
-tiktoken = "^0.5.2"
+tiktoken = "0.5.1"
 types-requests = "^2.31.0.10"
 types-beautifulsoup4 = "^4.12.0.7"
+tavily-python = "^0.3.0"
 
 
 [tool.poetry.group.dev.dependencies]
