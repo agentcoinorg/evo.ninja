@@ -26,8 +26,10 @@ import { useRouter } from "next/navigation";
 import { useAtom } from "jotai";
 import { v4 as uuid } from "uuid";
 import { InMemoryFile } from "@nerfzael/memory-fs";
+import { useSupabaseClient } from "@/lib/supabase/useSupabaseClient";
 
 function Dojo({ params }: { params: { id?: string } }) {
+  const supabase = useSupabaseClient();
   const [evoService, setEvoService] = useAtom(evoServiceAtom);
   const [newGoalSubmitted, setNewGoalSubmitted] = useAtom(newGoalSubmittedAtom);
   const [isChatLoading, setIsChatLoading] = useAtom(isChatLoadingAtom);
@@ -43,13 +45,14 @@ function Dojo({ params }: { params: { id?: string } }) {
   const { data: chats, isLoading: isChatsLoading } = useChats();
   const router = useRouter();
   const { status: sessionStatus, data: sessionData } = useSession();
-  const isAuthenticated = sessionStatus === "authenticated";
+  const isAuthenticated = sessionStatus === "authenticated" && !!supabase;
 
   const { mutateAsync: createChat } = useCreateChat();
   const { mutateAsync: updateChatTitle } = useUpdateChatTitle();
   const { logs, isConnected, isStarting, isRunning, handleStart, status } = useEvoService(
     chatId,
     isAuthenticated,
+    supabase
   );
 
   const workspaceUploadUpdate = useWorkspaceUploadUpdate();

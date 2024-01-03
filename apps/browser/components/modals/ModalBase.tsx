@@ -1,4 +1,10 @@
-import { PropsWithChildren } from "react";
+import {
+  PropsWithChildren,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { Ubuntu_FONT } from "@/lib/fonts";
@@ -10,6 +16,7 @@ interface ModalProps {
   title: string;
   isOpen: boolean;
   onClose: () => void;
+  autoScroll?: boolean;
   panelStyles?: {
     maxWidth?: string;
     other?: string;
@@ -24,20 +31,62 @@ interface ModalProps {
 }
 
 export default function Modal(props: PropsWithChildren<ModalProps>) {
-  const { title, isOpen, onClose, panelStyles, contentStyles, children } =
-    props;
+  const {
+    title,
+    isOpen,
+    onClose,
+    autoScroll = false,
+    panelStyles,
+    contentStyles,
+    children,
+  } = props;
+  const modalContainerRef = useRef<HTMLDivElement | null>(null);
+  const [isAtBottom, setIsAtBottom] = useState(true);
+
   const maxWidth = panelStyles?.maxWidth ?? "max-w-[540px]";
 
   const defaultContentStyles = clsx(
     "bg-zinc-900 [scrollbar-gutter:stable]",
-    contentStyles?.padding ? contentStyles?.padding : "p-8 pr-[1.5rem]",
+    contentStyles?.padding ? contentStyles?.padding : "p-4 pr-3 md:p-8 md:pr-6",
     contentStyles?.["max-h"]
       ? contentStyles?.["max-h"]
-      : "max-h-[calc(100vh-72px)] md:max-h-[calc(100vh-96px)]",
+      : "max-h-[calc(100dvh-78px)] md:max-h-[calc(100dvh-96px)]",
     contentStyles?.spacing ? contentStyles?.spacing : "space-y-8",
     contentStyles?.overflow ? contentStyles?.overflow : "overflow-y-auto",
     contentStyles?.other
   );
+
+  const scrollToBottom = () => {
+    modalContainerRef.current?.scrollTo({
+      top: modalContainerRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  };
+
+  const handleScroll = useCallback(() => {
+    // Detect if the user is at the bottom of the modal
+    const container = modalContainerRef.current;
+    if (container) {
+      const isScrolledToBottom =
+        container.scrollHeight - container.scrollTop <= container.clientHeight;
+      setIsAtBottom(isScrolledToBottom);
+    }
+  }, []);
+
+  useEffect(() => {
+    // If the user is at the bottom, scroll to the bottom
+    if (isAtBottom && autoScroll) {
+      scrollToBottom();
+    }
+  }, [children, isAtBottom, autoScroll]);
+
+  useEffect(() => {
+    const container = modalContainerRef.current;
+    if (container) {
+      // Add scroll event listener
+      container.addEventListener("scroll", handleScroll);
+    }
+  });
 
   return (
     <>
@@ -48,7 +97,7 @@ export default function Modal(props: PropsWithChildren<ModalProps>) {
           onClose={onClose}
         >
           <div className="fixed inset-0 overflow-y-auto bg-zinc-400/50 backdrop-blur [scrollbar-gutter:stable] ">
-            <div className="flex min-h-full items-center justify-center p-1 text-center md:p-4">
+            <div className="flex min-h-screen -translate-y-0.5 transform items-center justify-center p-1 text-center md:p-4">
               <Transition.Child
                 as={Fragment}
                 enter="ease-out duration-300"
@@ -60,7 +109,7 @@ export default function Modal(props: PropsWithChildren<ModalProps>) {
               >
                 <Dialog.Panel
                   className={clsx(
-                    "w-full transform overflow-hidden rounded-2xl rounded-none bg-zinc-800 text-left align-middle text-zinc-50 shadow-xl transition-all",
+                    "w-full transform overflow-hidden rounded-xl bg-zinc-800 text-left align-middle text-zinc-50 shadow-xl transition-all",
                     maxWidth
                   )}
                   onClick={(e) => {
@@ -84,7 +133,13 @@ export default function Modal(props: PropsWithChildren<ModalProps>) {
                       />
                     </Button>
                   </div>
-                  <div className={defaultContentStyles}>{children}</div>
+                  <div
+                    className={defaultContentStyles}
+                    onScroll={() => autoScroll && handleScroll()}
+                    ref={modalContainerRef}
+                  >
+                    {children}
+                  </div>
                 </Dialog.Panel>
               </Transition.Child>
             </div>
