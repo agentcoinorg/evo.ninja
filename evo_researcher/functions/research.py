@@ -10,10 +10,10 @@ from evo_researcher.functions.search import search
 
 def research(goal: str):
     initial_subqueries_limit = 20
-    subqueries_limit = 3
-    scrape_content_split_chunk_size = 500
+    subqueries_limit = 5
+    scrape_content_split_chunk_size = 650
     scrape_content_split_chunk_overlap = 150
-    top_k = 4
+    top_k = 10
 
     queries = generate_subqueries(query=goal, limit=initial_subqueries_limit)
     queries = rerank_subqueries(queries=queries, goal=goal)[:subqueries_limit]
@@ -27,17 +27,18 @@ def research(goal: str):
     scraped = [result for result in scraped if result.content != ""]
 
     text_splitter = RecursiveCharacterTextSplitter(
-        separators=["\n\n", "\n"],
+        separators=["\n\n", "\n", " ", "  "],
         chunk_size=scrape_content_split_chunk_size,
         chunk_overlap=scrape_content_split_chunk_overlap
     )
+    print (f"Scraped {len(scraped)} results")
     collection = create_embeddings_from_results(scraped, text_splitter)
 
     vector_result_texts: list[str] = []
 
     for query in queries:
         top_k_results = collection.similarity_search(query, k=top_k)
-        vector_result_texts += [result.page_content for result in top_k_results]
+        vector_result_texts += [f"Source: {result.metadata['url']}. Content: {result.page_content}" for result in top_k_results]
 
     reranked_results = rerank_results(vector_result_texts, goal)
 

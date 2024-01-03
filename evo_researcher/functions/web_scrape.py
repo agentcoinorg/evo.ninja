@@ -13,7 +13,7 @@ def fetch_html(url: str, timeout: int) -> Response:
     response = requests.get(url, headers=headers, timeout=timeout)
     return response
 
-def web_scrape(url: str, timeout: int = 5000) -> tuple[str, str]:
+def web_scrape(url: str, timeout: int = 10000) -> tuple[str, str]:
     cached = read_from_cache(url)
     if cached is not None:
         print(f"-- Using cached {url} --")
@@ -41,10 +41,12 @@ def web_scrape(url: str, timeout: int = 5000) -> tuple[str, str]:
             write_to_cache(url, text)
             return (text, url)
         else:
+            print("Non-HTML content received")
             logging.warning("Non-HTML content received")
             return ("", url)
 
     except requests.RequestException as e:
+        print(f"HTTP request failed: {e}")
         logging.error(f"HTTP request failed: {e}")
         return ("", url)
     
