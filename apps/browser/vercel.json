@@ -3,5 +3,25 @@
     "app/api/proxy/completions/route.ts": {
       "maxDuration": 45
     }
-  }
+  },
+  "builds": [
+    {
+      "src": "/agents-api/siu.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "/agents-api/yo.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/agents-api/siu",
+      "dest": "/app/agents-api/siu.py"
+    },
+    {
+      "src": "/agents-api/yo",
+      "dest": "/app/agents-api/yo.py"
+    }
+  ]
 }

@@ -24,3 +24,5 @@ yarn-error.log
 # Supabase
 .branches
 .temp
+
+__pycache__

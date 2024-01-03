@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev",
+    "dev": "concurrently \"yarn next dev\" \"yarn agents-dev\"",    
     "prebuild": "yarn build:scripts && yarn build:env",
     "build:scripts": "node scripts/build.scripts.js",
     "build:env": "node scripts/build.env.js",
@@ -13,7 +13,8 @@
     "db:reset": "supabase db reset",
     "db:stop": "supabase stop",
     "lint": "eslint --color -c ../../.eslintrc.js app/ lib/ components/",
-    "start": "next start"
+    "start": "next start",
+    "agents-dev": "python3 -m uvicorn app.agents-api.index:app --reload"
   },
   "dependencies": {
     "@auth/supabase-adapter": "0.1.9",
@@ -56,6 +57,7 @@
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
     "@types/react-modal": "3.16.0",
+    "concurrently": "^8.0.1",
     "autoprefixer": "10.4.16",
     "handlebars": "4.7.8",
     "postcss": "8.4.31",
