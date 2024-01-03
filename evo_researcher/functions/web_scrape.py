@@ -3,28 +3,36 @@ import os
 from markdownify import markdownify
 import requests
 from bs4 import BeautifulSoup
-from scrapingbee import ScrapingBeeClient
+from requests import Response
 import base64 
 
-def web_scrape(url: str) -> tuple[str, str]:
+def fetch_html(url: str, timeout: int) -> Response:
+    headers = {
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:107.0) Gecko/20100101 Firefox/107.0"
+    }
+    response = requests.get(url, headers=headers, timeout=timeout)
+    return response
+
+def web_scrape(url: str, timeout: int = 5000) -> tuple[str, str]:
     cached = read_from_cache(url)
     if cached is not None:
         print(f"-- Using cached {url} --")
         return (cached, url)
  
     print(f"-- Scraping {url} --")
-    api_key = os.getenv("SCRAPINGBEE_API_KEY")
-    client = ScrapingBeeClient(api_key=api_key)
-
     try:
-        response = client.get(url=url)
+        response = fetch_html(url=url, timeout=timeout)
 
         if 'text/html' in response.headers.get('Content-Type', ''):
             soup = BeautifulSoup(response.content, "html.parser")
             
             [x.extract() for x in soup.findAll('script')]
             [x.extract() for x in soup.findAll('style')]
+            [x.extract() for x in soup.findAll('noscript')]
+            [x.extract() for x in soup.findAll('link')]
             [x.extract() for x in soup.findAll('head')]
+            [x.extract() for x in soup.findAll('image')]
+            [x.extract() for x in soup.findAll('img')]
             
             text = soup.get_text()
             text = markdownify(text)

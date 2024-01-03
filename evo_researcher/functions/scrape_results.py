@@ -1,5 +1,5 @@
-from evo_researcher.WebScrapeResult import WebScrapeResult
-from evo_researcher.functions.web_research import WebSearchResult
+from evo_researcher.models.WebScrapeResult import WebScrapeResult
+from evo_researcher.functions.web_search import WebSearchResult
 from evo_researcher.functions.web_scrape import web_scrape
 
 from concurrent.futures import ThreadPoolExecutor, as_completed

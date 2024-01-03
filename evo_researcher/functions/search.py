@@ -1,4 +1,4 @@
-from evo_researcher.functions.web_research import WebSearchResult, web_search
+from evo_researcher.functions.web_search import WebSearchResult, web_search
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def search(queries: list[str], filter = lambda x: True) -> list[tuple[str, WebSearchResult]]:
