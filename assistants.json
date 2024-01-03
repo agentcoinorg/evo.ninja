@@ -1,0 +1,34 @@
+{
+  "research_planner": {
+    "name": "Research Planner",
+    "id": "asst_dG7xuXtd3j4O6WpdR7hkT8zK"
+  },
+  "researcher": {
+    "name": "Researcher",
+    "id": "asst_USStI8GI6FFM0XYU2Eip8xKT"
+  },
+  "global_conflicts_analyst": {
+    "name": "Global Conflicts Analyst",
+    "id": "asst_AUHkbN3KlTrKrCru2ivCIBCt"
+  },
+  "legal_and_regulatory_expert": {
+    "name": "Legal and Regulatory Expert",
+    "id": "asst_5tNnCn9KycvjtmGrAWWOXIF9"
+  },
+  "technology_and_innovation_expert": {
+    "name": "Technology and Innovation Expert",
+    "id": "asst_dFAlb63sfXWGqMTADd6ccEux"
+  },
+  "economic_theorist": {
+    "name": "Economic Theorist",
+    "id": "asst_LX9C3PQVPBIEG262XF0LU7PB"
+  },
+  "data_analyst": {
+    "name": "Data Analyst",
+    "id": "asst_SLqASyuY9S1dSQ1gKxRaN5eb"
+  },
+  "historical_analyst": {
+    "name": "Historical Analyst",
+    "id": "asst_B2zz2WIE5EwLeTg8lHn67PHt"
+  }
+}
