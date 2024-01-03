@@ -1,6 +1,6 @@
 import pytest
 from evo_researcher.functions.grade_info import grade_info 
-from evo_researcher.research import research
+from evo_researcher.functions.research import research
 from evo_researcher.autonolas.research import research as research_autonolas
 
 dataset = [
@@ -18,7 +18,14 @@ def test_research(question: str):
     evo_research = research(question)
     autonolas_research = research_autonolas(question)
     
-    evo_research_score = grade_info(evo_research, question)
-    autonolas_research_score = grade_info(autonolas_research, question)
+    evo_research_score = grade_info(information=evo_research, question=question)
+    autonolas_research_score = grade_info(information=autonolas_research, question=question)
     
-    assert evo_research_score.final_grade.grade > autonolas_research_score.final_grade.grade
+    print(f"question: {question}")
+    print(f"evo_research: {evo_research}")
+    print(f"autonolas_research: {autonolas_research}")
+    
+    print(f"evo_research_score: {evo_research_score}")
+    print(f"autonolas_research_score: {autonolas_research_score}")
+    
+    assert False

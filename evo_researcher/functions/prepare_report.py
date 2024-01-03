@@ -23,7 +23,7 @@ def prepare_report(goal: str, scraped: list[str]):
     - Links to sources
     - Caveats
     
-    Use markdown syntax.
+    Use markdown syntax. Include as much relevant information as possible and try not to summarize.
     """
     evaluation_prompt = ChatPromptTemplate.from_template(template=evaluation_prompt_template)
 

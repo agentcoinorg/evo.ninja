@@ -90,20 +90,14 @@ def grade_info(question: str, information: str) -> InfoScores:
         "question": question
     })
     
-    print(plan)
-    
     report = grading_chain.invoke({
         "question": question,
         "plan": plan,
         "information": information
     })
     
-    print(report)
-    
     grades = formatting_chain.invoke({
         "report": report
     })
-    
-    print(grades)
     
     return grades
