@@ -115,7 +115,14 @@ export const useEvoService = (
 
   const loadChat = async (chatId: string): Promise<Chat> => {
     if (chatId === "<anon>") {
-      throw new Error("Cannot load chat for anonymous user.");
+      return {
+        id: chatId,
+        created_at: new Date().toISOString(),
+        title: null,
+        messages: [],
+        logs: [],
+        variables: new Map<string, string>()
+      };
     }
 
     const { data: chats, error } = await fetchChats(supabase!);
