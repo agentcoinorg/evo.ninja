@@ -1,10 +1,10 @@
 import { ReadFileFunction } from "../../functions/ReadFile";
 import { AgentContext } from "@/agent-core";
 import { InitPoetryFunction } from "../../functions/InitPoetry";
-import { prompts } from "./prompts";
 import { RunPytest } from "../../functions/RunPytest";
 import { WriteFileFunction } from "../../functions/WriteFile";
 import { ReadDirectoryFunction } from "../../functions";
+import { prompts } from "./prompts";
 import { Agent, AgentConfig } from "../utils";
 
 export class DeveloperAgent extends Agent {
@@ -16,8 +16,8 @@ export class DeveloperAgent extends Agent {
           new WriteFileFunction(context.scripts),
           new ReadFileFunction(context.scripts),
           new ReadDirectoryFunction(context.scripts),
-          new RunPytest(),
-          new InitPoetryFunction(),
+          /*new RunPytest(),
+          new InitPoetryFunction(),*/
         ],
         context.scripts
       ),
@@ -25,11 +25,3 @@ export class DeveloperAgent extends Agent {
     );
   }
 }
-
-/* public override async onFirstRun(args: GoalRunArgs, chat: Chat): Promise<void> {
-  await Promise.all([
-    this.executeFunction(new InitPoetryFunction(), {}, chat),
-    this.executeFunction(new PlanDevelopmentFunction(), args, chat)
-  ]);
-  return Promise.resolve();
-}*/
