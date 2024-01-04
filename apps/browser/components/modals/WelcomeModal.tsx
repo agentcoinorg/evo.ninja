@@ -23,11 +23,10 @@ export default function WelcomeModal(props: WelcomeModalProps) {
   const IntroFlow = (
     <>
       <div className="relative flex h-full w-full flex-col items-center justify-center w-full">
-        <Logo wordmark={false} className="w-16 pb-6" />
         <div className="text-center">
           evo.ninja is a generalist AI agent with a unique<br/>chameleon architecture:
         </div>
-        <img src="/arch-diagram.png" alt="Architecture" className="w-64 h-auto pb-6" />
+        <img src="/arch-diagram-w-logo.png" alt="Architecture" className="w-64 h-auto pb-6" />
         <div className="text-center">
         Created by the <a href="https://polywrap.io" target="_blank" className="text-cyan-500">Polywrap</a> team, evo.ninja won<br/>"Best Generalist
         Agent" from AutoGPT.
@@ -35,7 +34,7 @@ export default function WelcomeModal(props: WelcomeModalProps) {
         <img src="/polywrap-award.png" alt="Award" className="w-32 h-auto pb-6 pt-6" />
         <div className="text-center">
           Join our <a href="https://discord.gg/r3rwh69cCa" target="_blank" className="text-cyan-500">discord</a> and <a href="https://blog.polywrap.io" target="_blank" className="text-cyan-500">substack</a> to learn and
-          stay informed with our latest creations!
+          stay<br/>informed with our latest creations!
         </div>
       </div>
       <div className="flex justify-end pt-8">
