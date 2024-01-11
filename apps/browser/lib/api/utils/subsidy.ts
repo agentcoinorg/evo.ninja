@@ -3,7 +3,7 @@ import { SupabaseClient } from "./supabase";
 type Subsidy = "completions" | "embedding";
 
 const SUBSIDY_CAP: Record<Subsidy, number> = {
-  "completions": 50,
+  "completions": 30,
   "embedding": 1000
 };
 
