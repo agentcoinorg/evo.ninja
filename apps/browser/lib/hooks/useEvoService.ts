@@ -11,7 +11,7 @@ import { EvoThreadCallbacks, EvoThreadConfig } from "@/lib/services/evo/EvoThrea
 import { useAddChatLog } from "@/lib/mutations/useAddChatLog";
 import { useAddMessages } from "@/lib/mutations/useAddMessages";
 import { useAddVariable } from "@/lib/mutations/useAddVariable";
-import { Chat, fetchChats, useChats } from "@/lib/queries/useChats";
+import { Chat, fetchChats } from "@/lib/queries/useChats";
 import { SupabaseWorkspace } from "@/lib/supabase/SupabaseWorkspace";
 import { useWorkspaceFilesUpdate } from "@/lib/hooks/useWorkspaceFilesUpdate";
 import { useWorkspaceUploadUpdate } from "@/lib/hooks/useWorkspaceUploadUpdate";
@@ -20,12 +20,12 @@ import { Workspace, InMemoryWorkspace } from "@evo-ninja/agent-utils";
 import { ChatLogType, ChatMessage } from "@evo-ninja/agents";
 import { useState, useEffect } from "react";
 import { useAtom } from "jotai";
-import { EvoSupabaseClient } from "../supabase/EvoSupabaseClient";
+import { useSession } from "next-auth/react";
+import { createSupabaseBrowserClient } from "../supabase/createBrowserClient";
 
 export const useEvoService = (
   chatId: string | "<anon>" | undefined,
-  isAuthenticated: boolean,
-  supabase: EvoSupabaseClient | undefined
+  isAuthenticated: boolean
 ): {
   logs: ChatLog[];
   isConnected: boolean;
@@ -42,6 +42,7 @@ export const useEvoService = (
   const [, setCapReached] = useAtom(capReachedAtom);
   const [, setSettingsModalOpen] = useAtom(settingsModalAtom);
   const [, setError] = useAtom(errorAtom);
+  const { data: session } = useSession()
 
   // State
   const [isConnected, setIsConnected] = useState<boolean>(false);
@@ -125,7 +126,7 @@ export const useEvoService = (
       };
     }
 
-    const { data: chats, error } = await fetchChats(supabase!);
+    const { data: chats, error } = await fetchChats(session?.supabaseAccessToken as string);
 
     if (error) {
       console.error(error);
@@ -142,11 +143,15 @@ export const useEvoService = (
   };
 
   async function loadWorkspace(chatId: string): Promise<Workspace> {
-    // isAuthenticated is only true if there's a supabase instance 
-    // so we can safely assume that it's not undefined
-    const workspace = isAuthenticated ?
-      new SupabaseWorkspace(chatId, supabase!.storage) :
-      new InMemoryWorkspace();
+    const workspace = (() => {
+      if (session?.supabaseAccessToken) {
+        const supabase = createSupabaseBrowserClient(session.supabaseAccessToken)
+        return new SupabaseWorkspace(chatId, supabase.storage)
+      } else {
+        return new InMemoryWorkspace()
+      }
+    })()
+
 
     await workspaceUploadUpdate(workspace);
 

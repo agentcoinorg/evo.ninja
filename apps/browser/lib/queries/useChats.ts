@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { ChatMessage } from "@evo-ninja/agents"
+import { PostgrestError } from "@supabase/supabase-js"
 import { ChatLog } from "@/components/Chat"
 import { Json } from "../supabase/dbTypes"
-import { useSupabaseClient } from "../supabase/useSupabaseClient"
+import { createSupabaseBrowserClient } from "../supabase/createBrowserClient"
 
 export interface Chat {
   id: string;
@@ -125,10 +126,11 @@ const mapChatDTOtoChat = (dto: ChatDTO): Chat => {
   }
 }
 
-export const fetchChats = async (supabase: any): Promise<{
+export const fetchChats = async (supabaseToken: string): Promise<{
   data: Chat[] | undefined,
-  error: Error | undefined
+  error: PostgrestError | undefined
 }> => {
+  const supabase = createSupabaseBrowserClient(supabaseToken);
   const { data, error } = await supabase
     .from('chats')
     .select(`
@@ -168,18 +170,17 @@ export const fetchChats = async (supabase: any): Promise<{
 
 export const useChats = () => {
   const { data: session } = useSession();
-  const supabase = useSupabaseClient();
 
   return useQuery({
-    queryKey: ['chats', session?.user?.email, supabase],
-    enabled: !!session?.user?.email && !!supabase,
+    queryKey: ['chats', session?.user?.email],
+    enabled: !!session?.user?.email,
     refetchOnMount: false,
     queryFn: async () => {
-      if (!session?.user?.email || !supabase) {
+      if (!session?.user?.email || !session?.supabaseAccessToken) {
         throw new Error("Not authenticated")
       }
 
-      const { data, error } = await fetchChats(supabase);
+      const { data, error } = await fetchChats(session.supabaseAccessToken);
 
       if (error) {
         console.error(error)
