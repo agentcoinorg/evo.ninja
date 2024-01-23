@@ -1,7 +1,8 @@
 import { getAuthOptions } from "@/lib/api/authOptions";
 import { createOpenAIApiClient } from "@/lib/api/utils/openai";
-import { createSupabaseClient } from "@/lib/supabase/createSupabaseClient";
+import { createClient } from "@/lib/supabase/createServerClient";
 import { getServerSession } from "next-auth";
+import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -11,12 +12,13 @@ export async function POST(request: NextRequest) {
   }
 
   // Make sure user is authenticated
+  const cookieStore = cookies()
   const session = await getServerSession(getAuthOptions());
   const email = session?.user?.email;
   if (!session || !email) {
     return NextResponse.json({}, { status: 401 });
   }
-  const supabase = createSupabaseClient(session.supabaseAccessToken as string);
+  const supabase = createClient(cookieStore, session.supabaseAccessToken as string);
   const { data, error } = await supabase
     .from("chats")
     .select()

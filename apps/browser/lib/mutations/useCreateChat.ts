@@ -1,17 +1,18 @@
 import { Chat } from "@/lib/queries/useChats"
+import { createSupabaseBrowserClient } from "@/lib/supabase/createBrowserClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useSupabaseClient } from "../supabase/useSupabaseClient";
+import { useSession } from "next-auth/react";
 
 export const useCreateChat = () => {
   const queryClient = useQueryClient();
-  const supabase = useSupabaseClient();
+  const { data : session } = useSession()
 
   return useMutation({
     mutationFn: async (chatId: string) => {
-      if (!supabase) {
+      if (!session?.supabaseAccessToken ) {
         throw new Error("Not authenticated");
       }
-
+      const supabase = createSupabaseBrowserClient(session.supabaseAccessToken);
       const { data, error } = await supabase
         .from("chats")
         .insert({
