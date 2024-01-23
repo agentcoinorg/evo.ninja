@@ -1,6 +1,6 @@
 import { getAuthOptions } from "@/lib/api/authOptions";
 import { createOpenAIApiClient } from "@/lib/api/utils/openai";
-import { createSupabaseClient } from "@/lib/supabase/createSupabaseClient";
+import { createSupabaseServerClient } from "@/lib/supabase/createServerClient";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   if (!session || !email) {
     return NextResponse.json({}, { status: 401 });
   }
-  const supabase = createSupabaseClient(session.supabaseAccessToken as string);
+  const supabase = createSupabaseServerClient();
   const { data, error } = await supabase
     .from("chats")
     .select()

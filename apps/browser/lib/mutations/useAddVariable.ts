@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Row } from "../supabase/types"
-import { useSupabaseClient } from "../supabase/useSupabaseClient"
+import { createSupabaseBrowserClient } from "../supabase/createBrowserClient"
 
 const mapVariableToVariableDTO = (
   chatId: string,
@@ -16,7 +16,6 @@ const mapVariableToVariableDTO = (
 
 export const useAddVariable = () => {
   const queryClient = useQueryClient();
-  const supabase = useSupabaseClient();
   
   return useMutation({
     mutationFn: async (args: {
@@ -24,10 +23,7 @@ export const useAddVariable = () => {
       key: string;
       value: string;
     }) => {
-      if (!supabase) {
-        throw new Error("Not authenticated");
-      }
-
+      const supabase = createSupabaseBrowserClient();
       const { error } = await supabase
         .from("variables")
         .insert(

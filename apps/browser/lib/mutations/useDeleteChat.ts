@@ -1,16 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useSupabaseClient } from "../supabase/useSupabaseClient";
+import { createSupabaseBrowserClient } from "@/lib/supabase/createBrowserClient";
 
 export const useDeleteChat = () => {
   const queryClient = useQueryClient();
-  const supabase = useSupabaseClient();
-  
+
   return useMutation({
     mutationFn: async (chatId: string) => {
-      if (!supabase) {
-        throw new Error("Not authenticated");
-      }
-
+      const supabase = createSupabaseBrowserClient();
       const { error } = await supabase
         .from("chats")
         .delete()
