@@ -7,7 +7,7 @@ const BUCKET_NAME = "workspaces";
 export class SupabaseWorkspace implements Workspace {
   constructor(
     public readonly chatId: string,
-    private readonly supabaseStorage: StorageClient
+    public readonly supabaseStorage: StorageClient
   ) {}
 
   async writeFile(subpath: string, data: string): Promise<void> {

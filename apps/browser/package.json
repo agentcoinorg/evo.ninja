@@ -29,6 +29,7 @@
     "@react-spring/web": "^9.7.3",
     "@supabase/supabase-js": "2.38.5",
     "@supabase/storage-js": "~2.5.5",
+    "@supabase/ssr": "0.0.10",
     "@tanstack/react-query": "^5.12.2",
     "buffer": "6.0.3",
     "clsx": "^2.0.0",

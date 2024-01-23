@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { ChatLogType, ChatMessage } from "@evo-ninja/agents"
 import { Row } from "../supabase/types"
-import { useSupabaseClient } from "../supabase/useSupabaseClient"
+import { createSupabaseBrowserClient } from "../supabase/createBrowserClient"
+import { useSession } from "next-auth/react"
 
 const mapChatMessageToMessageDTO = (
   chatId: string,
@@ -64,7 +65,7 @@ const mapChatMessageToMessageDTO = (
 
 export const useAddMessages = () => {
   const queryClient = useQueryClient();
-  const supabase = useSupabaseClient();
+  const { data: session } = useSession();
   
   return useMutation({
     mutationFn: async (args: {
@@ -72,10 +73,10 @@ export const useAddMessages = () => {
       messages: ChatMessage[];
       type: ChatLogType;
     }) => {
-      if (!supabase) {
+      if (!session?.supabaseAccessToken) {
         throw new Error("Not authenticated");
       }
-
+      const supabase = createSupabaseBrowserClient(session.supabaseAccessToken);
       const { error } = await supabase
         .from("messages")
         .insert(
