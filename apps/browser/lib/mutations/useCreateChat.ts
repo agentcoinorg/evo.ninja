@@ -9,7 +9,10 @@ export const useCreateChat = () => {
 
   return useMutation({
     mutationFn: async (chatId: string) => {
-      const supabase = createSupabaseBrowserClient(session?.supabaseAccessToken as string);
+      if (!session?.supabaseAccessToken ) {
+        throw new Error("Not authenticated");
+      }
+      const supabase = createSupabaseBrowserClient(session.supabaseAccessToken);
       const { data, error } = await supabase
         .from("chats")
         .insert({

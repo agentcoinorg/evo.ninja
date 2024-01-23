@@ -8,7 +8,11 @@ export const useUpdateChatTitle = () => {
 
   return useMutation({
     mutationFn: async (args: { chatId: string; title: string }) => {
-      const supabase = createSupabaseBrowserClient(session?.supabaseAccessToken as string);
+      if (!session?.supabaseAccessToken) {
+        throw new Error("Not authenticated");
+      }
+
+      const supabase = createSupabaseBrowserClient(session.supabaseAccessToken);
       const { error } = await supabase
         .from("chats")
         .update({ title: args.title })

@@ -73,9 +73,10 @@ export const useAddMessages = () => {
       messages: ChatMessage[];
       type: ChatLogType;
     }) => {
-      const supabase = createSupabaseBrowserClient(
-        session?.supabaseAccessToken as string
-      );
+      if (!session?.supabaseAccessToken) {
+        throw new Error("Not authenticated");
+      }
+      const supabase = createSupabaseBrowserClient(session.supabaseAccessToken);
       const { error } = await supabase
         .from("messages")
         .insert(

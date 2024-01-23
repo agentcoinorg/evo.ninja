@@ -24,9 +24,10 @@ export const useAddVariable = () => {
       key: string;
       value: string;
     }) => {
-      const supabase = createSupabaseBrowserClient(
-        session?.supabaseAccessToken as string
-      );
+      if (!session?.supabaseAccessToken) {
+        throw new Error("Not authenticated");
+      }
+      const supabase = createSupabaseBrowserClient(session.supabaseAccessToken);
       const { error } = await supabase
         .from("variables")
         .insert(

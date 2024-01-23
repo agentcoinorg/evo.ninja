@@ -176,11 +176,11 @@ export const useChats = () => {
     enabled: !!session?.user?.email,
     refetchOnMount: false,
     queryFn: async () => {
-      if (!session?.user?.email) {
+      if (!session?.user?.email || !session?.supabaseAccessToken) {
         throw new Error("Not authenticated")
       }
 
-      const { data, error } = await fetchChats(session.supabaseAccessToken as string);
+      const { data, error } = await fetchChats(session.supabaseAccessToken);
 
       if (error) {
         console.error(error)

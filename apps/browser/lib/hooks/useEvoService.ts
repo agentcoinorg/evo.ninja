@@ -144,7 +144,7 @@ export const useEvoService = (
 
   async function loadWorkspace(chatId: string): Promise<Workspace> {
     const workspace = (() => {
-        if (session?.supabaseAccessToken) {
+      if (session?.supabaseAccessToken) {
         const supabase = createSupabaseBrowserClient(session.supabaseAccessToken)
         return new SupabaseWorkspace(chatId, supabase)
       } else {
