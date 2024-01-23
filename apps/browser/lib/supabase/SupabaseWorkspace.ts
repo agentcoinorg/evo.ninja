@@ -1,5 +1,5 @@
 import { DirectoryEntry, Workspace } from "@evo-ninja/agent-utils";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { StorageClient } from "@supabase/storage-js";
 import * as path from "path-browserify";
 
 const BUCKET_NAME = "workspaces";
@@ -7,13 +7,13 @@ const BUCKET_NAME = "workspaces";
 export class SupabaseWorkspace implements Workspace {
   constructor(
     public readonly chatId: string,
-    public readonly supabase: SupabaseClient
+    public readonly supabaseStorage: StorageClient
   ) {}
 
   async writeFile(subpath: string, data: string): Promise<void> {
     const path = this.toWorkspacePath(subpath);
 
-    const { error } = await this.supabase.storage
+    const { error } = await this.supabaseStorage
       .from(BUCKET_NAME)
       .upload(path, data, { upsert: true });
 
@@ -27,7 +27,7 @@ export class SupabaseWorkspace implements Workspace {
   async readFile(subpath: string): Promise<string> {
     const path = this.toWorkspacePath(subpath);
 
-    const { data, error } = await this.supabase.storage
+    const { data, error } = await this.supabaseStorage
       .from(BUCKET_NAME)
       .download(path);
 
@@ -45,7 +45,7 @@ export class SupabaseWorkspace implements Workspace {
   async exists(subpath: string): Promise<boolean> {
     const path = this.toWorkspacePath(subpath);
 
-    const { data, error } = await this.supabase.storage
+    const { data, error } = await this.supabaseStorage
       .from(BUCKET_NAME)
       .download(path);
 
@@ -60,7 +60,7 @@ export class SupabaseWorkspace implements Workspace {
     const absOldPath = this.toWorkspacePath(oldPath);
     const absNewPath = this.toWorkspacePath(newPath);
 
-    const { error } = await this.supabase.storage
+    const { error } = await this.supabaseStorage
       .from(BUCKET_NAME)
       .move(absOldPath, absNewPath);
 
@@ -78,7 +78,7 @@ export class SupabaseWorkspace implements Workspace {
 
     const path = this.toWorkspacePath(subpath);
 
-    const { data: list, error: listError } = await this.supabase.storage
+    const { data: list, error: listError } = await this.supabaseStorage
       .from(BUCKET_NAME)
       .list(path);
 
@@ -91,7 +91,7 @@ export class SupabaseWorkspace implements Workspace {
       return;
     }
 
-    const { error: removeError } = await this.supabase.storage
+    const { error: removeError } = await this.supabaseStorage
       .from(BUCKET_NAME)
       .remove(filesToRemove);
 
@@ -103,7 +103,7 @@ export class SupabaseWorkspace implements Workspace {
   async readdir(subpath: string): Promise<DirectoryEntry[]> {
     const path = this.toWorkspacePath(subpath);
 
-    const { data, error } = await this.supabase.storage
+    const { data, error } = await this.supabaseStorage
       .from(BUCKET_NAME)
       .list(path);
 
@@ -126,7 +126,7 @@ export class SupabaseWorkspace implements Workspace {
   async appendFile(subpath: string, data: string): Promise<void> {
     const path = this.toWorkspacePath(subpath);
 
-    const { data: existingData, error: readError } = await this.supabase.storage
+    const { data: existingData, error: readError } = await this.supabaseStorage
       .from(BUCKET_NAME)
       .download(path);
 
@@ -136,7 +136,7 @@ export class SupabaseWorkspace implements Workspace {
 
     const newData = existingData ? existingData.text() + data : data;
 
-    const { error: writeError } = await this.supabase.storage
+    const { error: writeError } = await this.supabaseStorage
       .from(BUCKET_NAME)
       .upload(path, newData, { upsert: true });
 
@@ -148,7 +148,7 @@ export class SupabaseWorkspace implements Workspace {
   async rm(subpath: string): Promise<void> {
     const path = this.toWorkspacePath(subpath);
 
-    const { error } = await this.supabase.storage
+    const { error } = await this.supabaseStorage
       .from(BUCKET_NAME)
       .remove([path]);
 
