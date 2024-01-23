@@ -1,17 +1,14 @@
-import { createSupabaseBrowserClient } from "./createBrowserClient";
 import { DirectoryEntry, Workspace } from "@evo-ninja/agent-utils";
+import { SupabaseClient } from "@supabase/supabase-js";
 import * as path from "path-browserify";
 
 const BUCKET_NAME = "workspaces";
 
 export class SupabaseWorkspace implements Workspace {
   constructor(
-    public readonly chatId: string
+    public readonly chatId: string,
+    public readonly supabase: SupabaseClient
   ) {}
-
-  private get supabase() {
-    return createSupabaseBrowserClient();
-  }
 
   async writeFile(subpath: string, data: string): Promise<void> {
     const path = this.toWorkspacePath(subpath);

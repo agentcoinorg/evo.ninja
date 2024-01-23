@@ -126,11 +126,11 @@ const mapChatDTOtoChat = (dto: ChatDTO): Chat => {
   }
 }
 
-export const fetchChats = async (): Promise<{
+export const fetchChats = async (supabaseToken: string): Promise<{
   data: Chat[] | undefined,
   error: PostgrestError | undefined
 }> => {
-  const supabase = createSupabaseBrowserClient();
+  const supabase = createSupabaseBrowserClient(supabaseToken);
   const { data, error } = await supabase
     .from('chats')
     .select(`
@@ -180,7 +180,7 @@ export const useChats = () => {
         throw new Error("Not authenticated")
       }
 
-      const { data, error } = await fetchChats();
+      const { data, error } = await fetchChats(session.supabaseAccessToken as string);
 
       if (error) {
         console.error(error)

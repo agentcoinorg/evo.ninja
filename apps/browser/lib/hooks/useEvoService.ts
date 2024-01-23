@@ -20,6 +20,8 @@ import { Workspace, InMemoryWorkspace } from "@evo-ninja/agent-utils";
 import { ChatLogType, ChatMessage } from "@evo-ninja/agents";
 import { useState, useEffect } from "react";
 import { useAtom } from "jotai";
+import { useSession } from "next-auth/react";
+import { createSupabaseBrowserClient } from "../supabase/createBrowserClient";
 
 export const useEvoService = (
   chatId: string | "<anon>" | undefined,
@@ -40,6 +42,7 @@ export const useEvoService = (
   const [, setCapReached] = useAtom(capReachedAtom);
   const [, setSettingsModalOpen] = useAtom(settingsModalAtom);
   const [, setError] = useAtom(errorAtom);
+  const { data: session } = useSession()
 
   // State
   const [isConnected, setIsConnected] = useState<boolean>(false);
@@ -123,7 +126,7 @@ export const useEvoService = (
       };
     }
 
-    const { data: chats, error } = await fetchChats();
+    const { data: chats, error } = await fetchChats(session?.supabaseAccessToken as string);
 
     if (error) {
       console.error(error);
@@ -140,9 +143,15 @@ export const useEvoService = (
   };
 
   async function loadWorkspace(chatId: string): Promise<Workspace> {
-    const workspace = isAuthenticated ?
-      new SupabaseWorkspace(chatId) :
-      new InMemoryWorkspace();
+    const workspace = (() => {
+        if (session?.supabaseAccessToken) {
+        const supabase = createSupabaseBrowserClient(session.supabaseAccessToken)
+        return new SupabaseWorkspace(chatId, supabase)
+      } else {
+        return new InMemoryWorkspace()
+      }
+    })()
+
 
     await workspaceUploadUpdate(workspace);
 

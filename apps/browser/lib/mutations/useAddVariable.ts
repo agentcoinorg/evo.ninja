@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Row } from "../supabase/types"
 import { createSupabaseBrowserClient } from "../supabase/createBrowserClient"
+import { useSession } from "next-auth/react"
 
 const mapVariableToVariableDTO = (
   chatId: string,
@@ -16,14 +17,16 @@ const mapVariableToVariableDTO = (
 
 export const useAddVariable = () => {
   const queryClient = useQueryClient();
-  
+  const { data: session } = useSession();
   return useMutation({
     mutationFn: async (args: {
       chatId: string;
       key: string;
       value: string;
     }) => {
-      const supabase = createSupabaseBrowserClient();
+      const supabase = createSupabaseBrowserClient(
+        session?.supabaseAccessToken as string
+      );
       const { error } = await supabase
         .from("variables")
         .insert(
