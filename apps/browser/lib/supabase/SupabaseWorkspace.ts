@@ -1,5 +1,6 @@
 import { DirectoryEntry, Workspace } from "@evo-ninja/agent-utils";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { Database } from "./dbTypes";
 import * as path from "path-browserify";
 
 const BUCKET_NAME = "workspaces";
@@ -7,21 +8,12 @@ const BUCKET_NAME = "workspaces";
 export class SupabaseWorkspace implements Workspace {
   constructor(
     public readonly chatId: string,
-    public readonly supabase: SupabaseClient
+    public readonly supabase: SupabaseClient<Database>
   ) {}
 
   async writeFile(subpath: string, data: string): Promise<void> {
     const path = this.toWorkspacePath(subpath);
-
-    const { error } = await this.supabase.storage
-      .from(BUCKET_NAME)
-      .upload(path, data, { upsert: true });
-
-    if (error) {
-      throw error;
-    }
-
-    return;
+    await this.uploadWorkspaceFile(path, data);
   }
 
   async readFile(subpath: string): Promise<string> {
@@ -60,13 +52,10 @@ export class SupabaseWorkspace implements Workspace {
     const absOldPath = this.toWorkspacePath(oldPath);
     const absNewPath = this.toWorkspacePath(newPath);
 
-    const { error } = await this.supabase.storage
-      .from(BUCKET_NAME)
-      .move(absOldPath, absNewPath);
-
-    if (error) {
-      throw error;
-    }
+    await this.renameWorkspaceFile(
+      absOldPath,
+      absNewPath
+    );
   }
 
   async mkdir(_subpath: string): Promise<void> {}
@@ -77,48 +66,24 @@ export class SupabaseWorkspace implements Workspace {
     }
 
     const path = this.toWorkspacePath(subpath);
-
-    const { data: list, error: listError } = await this.supabase.storage
-      .from(BUCKET_NAME)
-      .list(path);
-
-    if (listError) {
-      throw listError;
-    }
-    const filesToRemove = list.map((x) => `${path}/${x.name}`);
+    const filesToRemove = await this.listWorkspaceFiles(path);
 
     if (filesToRemove.length === 0) {
       return;
     }
 
-    const { error: removeError } = await this.supabase.storage
-      .from(BUCKET_NAME)
-      .remove(filesToRemove);
-
-    if (removeError) {
-      throw removeError;
-    }
+    await this.removeWorkspaceFiles(filesToRemove);
   }
 
   async readdir(subpath: string): Promise<DirectoryEntry[]> {
     const path = this.toWorkspacePath(subpath);
+    const fileNames = (await this.listWorkspaceFiles(path))
+      .map((file) => file.replace(`${path}/`, ""));
 
-    const { data, error } = await this.supabase.storage
-      .from(BUCKET_NAME)
-      .list(path);
-
-    if (error) {
-      throw error;
-    }
-
-    if (!data) {
-      throw new Error("Directory not found");
-    }
-
-    return data
-      .filter((x) => !x.name.startsWith("."))
+    return fileNames
+      .filter((x) => !x.startsWith("."))
       .map((x) => ({
-        name: x.name,
+        name: x,
         type: "file",
       }));
   }
@@ -136,25 +101,12 @@ export class SupabaseWorkspace implements Workspace {
 
     const newData = existingData ? existingData.text() + data : data;
 
-    const { error: writeError } = await this.supabase.storage
-      .from(BUCKET_NAME)
-      .upload(path, newData, { upsert: true });
-
-    if (writeError) {
-      throw writeError;
-    }
+    await this.uploadWorkspaceFile(path, newData);
   }
 
   async rm(subpath: string): Promise<void> {
     const path = this.toWorkspacePath(subpath);
-
-    const { error } = await this.supabase.storage
-      .from(BUCKET_NAME)
-      .remove([path]);
-
-    if (error) {
-      throw error;
-    }
+    await this.removeWorkspaceFiles([path]);
   }
 
   async exec(
@@ -168,6 +120,85 @@ export class SupabaseWorkspace implements Workspace {
   }
 
   private toWorkspacePath(subpath: string): string {
-    return path.resolve("/", this.chatId, subpath).slice(1);
+    return path.resolve(path.join(this.chatId, subpath));
+  }
+
+  private async listWorkspaceFiles(path: string): Promise<string[]> {
+    const { data: list, error: listError } = await this.supabase
+      .from("workspace_files")
+      .select("path, chat_id")
+      .eq("chat_id", this.chatId);
+
+    if (listError) {
+      throw listError;
+    }
+
+    return list
+      .filter((x) => x)
+      .filter((x) => x.path.includes(path))
+      .map((x) => x.path) as string[];
+  }
+
+  private async uploadWorkspaceFile(path: string, data: string): Promise<void> {
+    const { error: storageError } = await this.supabase.storage
+      .from(BUCKET_NAME)
+      .upload(path, data, { upsert: true });
+
+    if (storageError) {
+      throw storageError;
+    }
+
+    const { error: indexError } = await this.supabase
+      .from("workspace_files")
+      .upsert({
+        chat_id: this.chatId,
+        path: path
+      }, {
+        onConflict: "chat_id, path"
+      });
+
+    if (indexError) {
+      throw indexError;
+    }
+  }
+
+  private async removeWorkspaceFiles(paths: string[]): Promise<void> {
+    const { error: storageError } = await this.supabase.storage
+      .from(BUCKET_NAME)
+      .remove(paths);
+
+    if (storageError) {
+      throw storageError;
+    }
+
+    const { error: indexError } = await this.supabase
+      .from("workspace_files")
+      .delete()
+      .eq("chat_id", this.chatId)
+      .in("path", paths);
+
+    if (indexError) {
+      throw indexError;
+    }
+  }
+
+  private async renameWorkspaceFile(oldPath: string, newPath: string): Promise<void> {
+    const { error: storageError } = await this.supabase.storage
+      .from(BUCKET_NAME)
+      .move(oldPath, newPath);
+
+    if (storageError) {
+      throw storageError;
+    }
+
+    const { error: indexError } = await this.supabase
+      .from("workspace_files")
+      .update({ path: newPath })
+      .eq("chat_id", this.chatId)
+      .eq("path", oldPath)
+
+    if (indexError) {
+      throw indexError;
+    }
   }
 }
