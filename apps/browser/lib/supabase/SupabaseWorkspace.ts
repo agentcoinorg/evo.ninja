@@ -73,6 +73,10 @@ export class SupabaseWorkspace implements Workspace {
     }
 
     await this.removeWorkspaceFiles(filesToRemove);
+
+    if (path === this.toWorkspacePath("")) {
+      await this.supabase.storage.deleteBucket(this.chatId);
+    }
   }
 
   async readdir(subpath: string): Promise<DirectoryEntry[]> {
@@ -120,7 +124,8 @@ export class SupabaseWorkspace implements Workspace {
   }
 
   private toWorkspacePath(subpath: string): string {
-    return path.resolve(path.join(this.chatId, subpath));
+    const result = path.resolve(path.join(this.chatId, subpath));
+    return result.replace(/^\/+/, "");
   }
 
   private async listWorkspaceFiles(path: string): Promise<string[]> {
