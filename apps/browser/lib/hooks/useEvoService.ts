@@ -146,7 +146,7 @@ export const useEvoService = (
     const workspace = (() => {
       if (session?.supabaseAccessToken) {
         const supabase = createSupabaseBrowserClient(session.supabaseAccessToken)
-        return new SupabaseWorkspace(chatId, supabase.storage)
+        return new SupabaseWorkspace(chatId, supabase)
       } else {
         return new InMemoryWorkspace()
       }
