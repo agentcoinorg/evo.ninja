@@ -18,8 +18,9 @@ INSERT INTO "public"."workspace_files" ("chat_id", "path")
 SELECT
   "path_tokens"[1]::uuid as "chat_id",
   "name" as "path"
-from
+FROM
   storage.objects
+JOIN chats ON chats.id = "path_tokens"[1]::uuid
 where
   bucket_id = 'workspaces';
 
