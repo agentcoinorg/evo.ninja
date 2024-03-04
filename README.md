@@ -88,7 +88,7 @@ The UI depends on [Supabase Database](https://supabase.com/). In order to run it
 0. Make sure you've followed installation steps above
 1. Go to `cd apps/browser`
 2. Run `yarn db:start` - This can take up to ~3 minutes, since it will download all the images needed by supabase
-3. Update `.env.local` with:
+3. Update `.env.local` with the values shown in the output of step 2:
     - `NEXT_PUBLIC_SUPABASE_URL` will have the value of `API URL`
     - `SUPABASE_SERVICE_ROLE_KEY` will have the value of `service_role key`
 4. Run the UI with `yarn dev`
