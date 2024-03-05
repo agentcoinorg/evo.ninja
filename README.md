@@ -10,9 +10,9 @@ To get started using evo.ninja simply head to our [website](https://evo.ninja), 
 
 ## Need Help?
 
-Join our [Discord community](https://discord.com/invite/Z5m88a5qWu) for support and discussions.
+Join our [Discord community](https://discord.gg/k7UCsH3ps9) for support and discussions.
 
-[![Join us on Discord](https://invidget.switchblade.xyz/r3rwh69cCa)](https://discord.com/invite/Z5m88a5qWu)
+[![Join us on Discord](https://invidget.switchblade.xyz/k7UCsH3ps9)](https://discord.com/invite/k7UCsH3ps9)
 
 If you have questions or encounter issues, please don't hesitate to [create a new issue](https://github.com/polywrap/evo.ninja/issues/new/choose) to get support.
 
