@@ -60,6 +60,8 @@ Please install the following:
 `SERP_API_KEY=b071...` (see https://serpapi.com)
 5. Use the correct version of Node.JS
     > `nvm install && nvm use`
+   Install Yarn if the node environment is new
+    > `npm install -g yarn`
 6. Install all dependencies & build project
     > `yarn && yarn build`
 
