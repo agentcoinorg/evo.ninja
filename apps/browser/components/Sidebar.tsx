@@ -330,7 +330,7 @@ const Sidebar = ({
                   variant="icon"
                   onClick={() => {
                     window.open(
-                      "https://discord.com/invite/Z5m88a5qWu",
+                      "https://discord.gg/k7UCsH3ps9",
                       "_blank",
                       "noopener noreferrer"
                     );

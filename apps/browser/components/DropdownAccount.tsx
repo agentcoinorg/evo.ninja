@@ -70,7 +70,7 @@ const DropdownAccount: React.ForwardRefRenderFunction<
         )}
         <a
           className="dropdown-menu-item"
-          href="https://discord.com/invite/Z5m88a5qWu"
+          href="https://discord.gg/k7UCsH3ps9"
           target="_blank"
           rel="noopener noreferrer"
         >
