@@ -2,7 +2,7 @@
 
 ![](https://hackmd.io/_uploads/ByWjLKAhn.png)
 
-[Discord](https://discord.com/invite/Z5m88a5qWu) | [Website](https://evo.ninja) | Give the repo a :star: !  
+[Discord](https://discord.gg/k7UCsH3ps9) | [Website](https://evo.ninja) | Give the repo a :star: !  
 
 ## Welcome!
 

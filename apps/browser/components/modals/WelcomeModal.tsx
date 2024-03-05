@@ -33,7 +33,7 @@ export default function WelcomeModal(props: WelcomeModalProps) {
         </div>
         <img src="/polywrap-award.png" alt="Award" className="w-32 h-auto pb-6 pt-6" />
         <div className="text-center">
-          Join our <a href="https://discord.com/invite/Z5m88a5qWu" target="_blank" className="text-cyan-500">discord</a> and <a href="https://blog.polywrap.io" target="_blank" className="text-cyan-500">substack</a> to learn and
+          Join our <a href="https://discord.gg/k7UCsH3ps9" target="_blank" className="text-cyan-500">discord</a> and <a href="https://blog.polywrap.io" target="_blank" className="text-cyan-500">substack</a> to learn and
           stay<br/>informed with our latest creations!
         </div>
       </div>
