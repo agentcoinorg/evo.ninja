@@ -81,7 +81,7 @@ export class Logger implements ILogger {
             return;
           }
           await logger.info("```\n" + data + "\n```\n");
-          await logger.info("Support: https://discord.gg/r3rwh69cCa");
+          await logger.info("Support: https://discord.gg/k7UCsH3ps9");
           resolve();
         }
       );
