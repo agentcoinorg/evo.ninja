@@ -36,6 +36,13 @@ export function sanitizeLogs(messages: ChatLog[]): MessageSet[] {
       return sanitizedLogs;
     }
 
+    // Sometimes the LLM request errors and returns "{}"
+    // This handles the error and explicitly returns an error message to the UI
+    if (!("title" in currentMessage) || currentMessage.title === "{}") {
+      currentSet.evoMessage = "An error has happened, please contact support if this continue happening";
+      return sanitizedLogs;
+    }
+
     // Only user message (goal) and evo's answer does not start with #
     // Since user message is handled above, we now for sure that its evo's answer
     if (!currentMessage.title.startsWith("#")) {

@@ -7,7 +7,12 @@ import ToastProvider from "./ToastProvider";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider>
+    <SessionProvider
+      // Re-fetch session every 15 minutes
+      refetchInterval={15 * 60}
+      // Don't re-fetch session when window is focused
+      refetchOnWindowFocus={false}
+    >
       <JotaiProvider>
         <ToastProvider>
           <ReactQueryProvider>

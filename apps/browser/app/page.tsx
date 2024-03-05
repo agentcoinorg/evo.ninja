@@ -9,7 +9,6 @@ import {
   errorAtom,
   newGoalSubmittedAtom,
   isChatLoadingAtom,
-  ChatInfo,
   welcomeModalAtom,
 } from "@/lib/store";
 import { useChats } from "@/lib/queries/useChats";
@@ -49,7 +48,7 @@ function Dojo({ params }: { params: { id?: string } }) {
   const { mutateAsync: updateChatTitle } = useUpdateChatTitle();
   const { logs, isConnected, isStarting, isRunning, handleStart, status } = useEvoService(
     chatId,
-    isAuthenticated,
+    isAuthenticated
   );
 
   const workspaceUploadUpdate = useWorkspaceUploadUpdate();

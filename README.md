@@ -2,7 +2,7 @@
 
 ![](https://hackmd.io/_uploads/ByWjLKAhn.png)
 
-[Discord](https://discord.gg/r3rwh69cCa) | [Website](https://evo.ninja) | Give the repo a :star: !  
+[Discord](https://discord.gg/k7UCsH3ps9) | [Website](https://evo.ninja) | Give the repo a :star: !  
 
 ## Welcome!
 
@@ -10,9 +10,9 @@ To get started using evo.ninja simply head to our [website](https://evo.ninja), 
 
 ## Need Help?
 
-Join our [Discord community](https://discord.gg/r3rwh69cCa) for support and discussions.
+Join our [Discord community](https://discord.gg/k7UCsH3ps9) for support and discussions.
 
-[![Join us on Discord](https://invidget.switchblade.xyz/r3rwh69cCa)](https://discord.gg/r3rwh69cCa)
+[![Join us on Discord](https://invidget.switchblade.xyz/k7UCsH3ps9)](https://discord.com/invite/k7UCsH3ps9)
 
 If you have questions or encounter issues, please don't hesitate to [create a new issue](https://github.com/polywrap/evo.ninja/issues/new/choose) to get support.
 
@@ -30,6 +30,8 @@ What makes evo.ninja special is that it adapts itself in real-time, based on the
 | 💻 [Developer](./packages/agents/src/agents/Developer/index.ts) | "Architect and build complex software. specialized in python." |
 
 ### Execution Loop
+
+![](apps/browser/public/arch-diagram-w-logo.png)
 
 1. **Predict Next Step:** For each iteration of the execution loop, Evo starts by making an informed prediction about what the best-next-step should be.
 2. **Select Best Agent:** Based on this prediction, Evo selects a best-fit agent persona.
@@ -58,6 +60,8 @@ Please install the following:
 `SERP_API_KEY=b071...` (see https://serpapi.com)
 5. Use the correct version of Node.JS
     > `nvm install && nvm use`
+   Install Yarn if the node environment is new
+    > `npm install -g yarn`
 6. Install all dependencies & build project
     > `yarn && yarn build`
 
@@ -86,7 +90,7 @@ The UI depends on [Supabase Database](https://supabase.com/). In order to run it
 0. Make sure you've followed installation steps above
 1. Go to `cd apps/browser`
 2. Run `yarn db:start` - This can take up to ~3 minutes, since it will download all the images needed by supabase
-3. Update `.env.local` with:
+3. Update `.env.local` with the values shown in the output of step 2:
     - `NEXT_PUBLIC_SUPABASE_URL` will have the value of `API URL`
     - `SUPABASE_SERVICE_ROLE_KEY` will have the value of `service_role key`
 4. Run the UI with `yarn dev`

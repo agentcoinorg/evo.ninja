@@ -1,17 +1,23 @@
 import { useQuery } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { ChatMessage } from "@evo-ninja/agents"
+import { PostgrestError } from "@supabase/supabase-js"
 import { ChatLog } from "@/components/Chat"
 import { Json } from "../supabase/dbTypes"
-import { createSupabaseClient } from "../supabase/createSupabaseClient"
+import { createSupabaseBrowserClient } from "../supabase/createBrowserClient"
 
 export interface Chat {
   id: string;
   created_at: string;
   title: string | null;
-  messages: ChatMessage[];
+  messages: SavedMessage[];
   logs: ChatLog[];
   variables: Map<string, string>
+}
+
+export interface SavedMessage {
+  msg: ChatMessage, 
+  temporary: boolean
 }
 
 interface MessageDTO {
@@ -49,42 +55,52 @@ interface ChatDTO {
   messages: MessageDTO[];
 }
 
-const mapMessageDTOtoMessage = (dto: MessageDTO): ChatMessage & { temporary: boolean } => {
+const mapMessageDTOtoMessage = (dto: MessageDTO): SavedMessage => {
   const messageRole = dto.role as "function" | "user" | "tool" | "system" | "assistant"
   
   switch (messageRole) {
     case "user":
     case "system": {
       return {
-        role: messageRole,
-        content: dto.content,
-        temporary: dto.temporary
+        msg: {
+          role: messageRole,
+          content: dto.content,
+        },
+        temporary: dto.temporary,
       }
     }
     case "function": {
       return {
-        role: messageRole,
-        content: dto.content,
+        msg: {
+          role: messageRole,
+          content: dto.content,
+          name: dto.name as string
+        },
         temporary: dto.temporary,
-        name: dto.name as string
       }
     }
     case "assistant": {
       return {
-        role: messageRole,
-        content: dto.content,
+        msg: {
+          role: messageRole,
+          content: dto.content,
+          // TODO: Json casting
+          function_call: dto.function_call as any ?? undefined,
+          tool_calls: dto.tool_calls as any
+            ? dto.tool_calls as any
+            : undefined,
+        },
         temporary: dto.temporary,
-        // TODO: Json casting
-        function_call: dto.function_call as any,
-        tool_calls: dto.tool_calls as any,
       }
     }
     case "tool": {
       return {
-        role: messageRole,
-        content: dto.content,
+        msg: {
+          role: messageRole,
+          content: dto.content,
+          tool_call_id: dto.tool_call_id as string,
+        },
         temporary: dto.temporary,
-        tool_call_id: dto.tool_call_id as string,
       }
     }
   }
@@ -104,51 +120,74 @@ const mapChatDTOtoChat = (dto: ChatDTO): Chat => {
     id: dto.id,
     created_at: dto.created_at,
     title: dto.title,
-    messages,
+    messages: messages,
     variables,
     logs
   }
 }
 
+export const fetchChats = async (supabaseToken: string): Promise<{
+  data: Chat[] | undefined,
+  error: PostgrestError | undefined
+}> => {
+  const supabase = createSupabaseBrowserClient(supabaseToken);
+  const { data, error } = await supabase
+    .from('chats')
+    .select(`
+      id,
+      created_at,
+      logs(id, created_at, title, content, user),
+      variables(id, key, value),
+      title,
+      messages(
+        id,
+        created_at,
+        content,
+        name,
+        function_call,
+        tool_calls,
+        temporary,
+        role,
+        tool_call_id
+      )
+    `).order(
+      'created_at',
+      { ascending: false }
+    )
+
+  if (error) {
+    return {
+      data: undefined,
+      error: error
+    }
+  }
+
+  return {
+    data: data.map(mapChatDTOtoChat),
+    error: undefined
+  };
+}
+
 export const useChats = () => {
-  const { data: session } = useSession()
+  const { data: session } = useSession();
 
   return useQuery({
-    queryKey: ['chats'],
+    queryKey: ['chats', session?.user?.email],
     enabled: !!session?.user?.email,
     refetchOnMount: false,
     queryFn: async () => {
-      const supabase = createSupabaseClient(session?.supabaseAccessToken as string)
-      const { data, error } = await supabase
-        .from('chats')
-        .select(`
-          id,
-          created_at,
-          logs(id, created_at, title, content, user),
-          variables(id, key, value),
-          title,
-          messages(
-            id,
-            created_at,
-            content,
-            name,
-            function_call,
-            tool_calls,
-            temporary,
-            role,
-            tool_call_id
-          )
-        `).order(
-          'created_at',
-          { ascending: false }
-        )
+      if (!session?.user?.email || !session?.supabaseAccessToken) {
+        throw new Error("Not authenticated")
+      }
+
+      const { data, error } = await fetchChats(session.supabaseAccessToken);
 
       if (error) {
         console.error(error)
-        throw new Error(error.message)
+        throw new Error(error.message);
       }
 
-      return data.map(mapChatDTOtoChat)
+      return data;
     }
   })
 }
