@@ -1,8 +1,10 @@
-# evo.ninja  
+![](./apps/browser/public/evo-ninja-logo.png)
 
-![](https://hackmd.io/_uploads/ByWjLKAhn.png)
+---
 
-[Discord](https://discord.gg/k7UCsH3ps9) | [Website](https://evo.ninja) | Give the repo a :star: !  
+[Discord](https://discord.gg/k7UCsH3ps9) | [Website](https://evo.ninja) | :star: the repo !  
+
+---
 
 ## Welcome!
 
