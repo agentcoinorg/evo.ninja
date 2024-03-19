@@ -1,4 +1,4 @@
-![](./apps/browser/public/evo-ninja-logo.png)
+![](./docs/imgs/evo-ninja-logo.png)
 
 ---
 
@@ -9,6 +9,8 @@
 ## Welcome!
 
 To get started using evo.ninja simply head to our [website](https://evo.ninja), or to build and run from source follow these [setup instructions](#setup).
+
+![](./docs/imgs/evo-ninja-app.png)
 
 ## Need Help?
 
