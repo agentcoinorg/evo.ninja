@@ -1,12 +1,16 @@
-# evo.ninja  
+![](./docs/imgs/evo-ninja-logo.png)
 
-![](https://hackmd.io/_uploads/ByWjLKAhn.png)
+---
 
-[Discord](https://discord.gg/k7UCsH3ps9) | [Website](https://evo.ninja) | Give the repo a :star: !  
+[Discord](https://discord.gg/k7UCsH3ps9) | [Website](https://evo.ninja) | :star: the repo !  
+
+---
 
 ## Welcome!
 
 To get started using evo.ninja simply head to our [website](https://evo.ninja), or to build and run from source follow these [setup instructions](#setup).
+
+![](./docs/imgs/evo-ninja-app.png)
 
 ## Need Help?
 
