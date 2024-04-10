@@ -14,7 +14,7 @@ export declare const LlmModels: {
   readonly GPT3_16k: "gpt-3.5-turbo-16k";
   readonly GPT4: "gpt-4";
   readonly GPT4_32k: "gpt-4-32k";
-  readonly GPT4_TURBO: "gpt-4-1106-preview"
+  readonly GPT4_TURBO: "gpt-4-turbo"
 };
 export declare type LlmModel = typeof LlmModels[keyof typeof LlmModels];
 
