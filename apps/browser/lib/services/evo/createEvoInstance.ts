@@ -63,7 +63,7 @@ export function createEvoInstance(
 
     const env = new Env({
       OPENAI_API_KEY: openAiApiKey || " ",
-      GPT_MODEL: "gpt-4-1106-preview",
+      GPT_MODEL: "gpt-4-turbo",
       CONTEXT_WINDOW_TOKENS: "128000",
       MAX_RESPONSE_TOKENS: "4096",
     });
