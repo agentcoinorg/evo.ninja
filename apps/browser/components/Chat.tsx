@@ -14,19 +14,19 @@ import Disclaimer from "@/components/modals/Disclaimer";
 import Logo from "@/components/Logo";
 import Button from "@/components/Button";
 import ChatInputButton from "@/components/ChatInputButton";
-import TextField from "@/components/TextField";
 import React, { useState, ChangeEvent } from "react";
 import { UploadSimple } from "@phosphor-icons/react";
 import { useAtom } from "jotai";
 import clsx from "clsx";
 import { InMemoryFile } from "@nerfzael/memory-fs";
+import TextAreaField from "./inputs/TextAreaField";
 
 export interface ChatLog {
   title: string;
   content?: string;
   user: string;
   color?: string;
-  created_at?: string
+  created_at?: string;
 }
 
 export interface ChatProps {
@@ -44,21 +44,22 @@ const Chat: React.FC<ChatProps> = ({
   isRunning,
   onGoalSubmit,
   onUpload,
-  status
+  status,
 }: ChatProps) => {
   const [{ id: chatId, name: chatName }] = useAtom(chatInfoAtom);
   const [showDisclaimer, setShowDisclaimer] = useAtom(showDisclaimerAtom);
   const [, setError] = useAtom(errorAtom);
   const [welcomeModalOpen, setWelcomeModalOpen] = useAtom(welcomeModalAtom);
   const [signInModalOpen] = useAtom(signInModalAtom);
-  const [settingsModalOpen] = useAtom(settingsModalAtom)
+  const [settingsModalOpen] = useAtom(settingsModalAtom);
 
   const [message, setMessage] = useState<string>("");
 
   const { getInputProps, open } = useWorkspaceUploadDrop(onUpload);
   const firstTimeUser = useFirstTimeUser();
 
-  const shouldShowExamplePrompts = !chatId || (!logs.length && !isStarting && !isRunning);
+  const shouldShowExamplePrompts =
+    !chatId || (!logs.length && !isStarting && !isRunning);
 
   const handleGoalSubmit = async (goal: string): Promise<void> => {
     if (firstTimeUser) {
@@ -79,7 +80,7 @@ const Chat: React.FC<ChatProps> = ({
       return;
     }
     open();
-  }
+  };
 
   return (
     <main
@@ -90,7 +91,12 @@ const Chat: React.FC<ChatProps> = ({
       {shouldShowExamplePrompts ? (
         <Logo wordmark={false} className="mb-16 w-16" />
       ) : (
-        <ChatLogs status={status}  chatName={chatName ?? "New Session"} isRunning={isStarting || isRunning} logs={logs} />
+        <ChatLogs
+          status={status}
+          chatName={chatName ?? "New Session"}
+          isRunning={isStarting || isRunning}
+          logs={logs}
+        />
       )}
 
       <div
@@ -102,9 +108,7 @@ const Chat: React.FC<ChatProps> = ({
         )}
       >
         {shouldShowExamplePrompts && (
-          <ExamplePrompts
-            onClick={handleGoalSubmit}
-          />
+          <ExamplePrompts onClick={handleGoalSubmit} />
         )}
         <div
           className={clsx(
@@ -112,22 +116,29 @@ const Chat: React.FC<ChatProps> = ({
             shouldShowExamplePrompts ? "max-w-[42rem] " : "max-w-[56rem]"
           )}
         >
-          <TextField
-            type="text"
+          <TextAreaField
+            rows={1}
             value={message}
-            onChange={(event: ChangeEvent<HTMLInputElement>) => {
-              setMessage(event.target.value)
+            onChange={(event: ChangeEvent<HTMLTextAreaElement>) => {
+              setMessage(event.target.value);
             }}
             onKeyDown={(event: React.KeyboardEvent) => {
-              if (event.key === "Enter" && !isStarting && !isRunning) {
-                return handleGoalSubmit(message);
+              if (!event.shiftKey && event.key === "Enter") {
+                event.preventDefault();
+                if (!isStarting && !isRunning) {
+                  return handleGoalSubmit(message);
+                }
               }
             }}
             placeholder="Ask Evo anything..."
-            className="!rounded-lg !p-4 !pl-12"
+            className="max-h-[200px] resize-none !rounded-lg !p-4 !pl-12"
             leftAdornment={
               <>
-                <Button variant="icon" className="!text-white" onClick={onUploadOpen}>
+                <Button
+                  variant="icon"
+                  className="!text-white"
+                  onClick={onUploadOpen}
+                >
                   <UploadSimple size={20} />
                 </Button>
                 <input {...getInputProps()} />
@@ -146,7 +157,12 @@ const Chat: React.FC<ChatProps> = ({
         </div>
       </div>
       <Disclaimer
-        isOpen={showDisclaimer && !welcomeModalOpen && !signInModalOpen && !settingsModalOpen}
+        isOpen={
+          showDisclaimer &&
+          !welcomeModalOpen &&
+          !signInModalOpen &&
+          !settingsModalOpen
+        }
         onClose={() => setShowDisclaimer(false)}
       />
     </main>

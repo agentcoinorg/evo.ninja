@@ -8,7 +8,7 @@ import { useWorkspaceUploadUpdate } from "@/lib/hooks/useWorkspaceUploadUpdate";
 import Logo from "@/components/Logo";
 import Avatar from "@/components/Avatar";
 import Button from "@/components/Button";
-import TextField from "@/components/TextField";
+import TextField from "@/components/inputs/TextField";
 import DropdownAccount from "@/components/DropdownAccount";
 import Workspace from "@/components/Workspace";
 import React, { memo, useEffect, useRef, useState } from "react";
