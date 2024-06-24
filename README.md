@@ -2,7 +2,7 @@
 
 ---
 
-[Discord](https://agentcoin.org/discord) | [Website](https://evo.ninja) | :star: the repo !  
+[Discord](https://agentcoin.org/discord) | :star: the repo !  
 
 ---
 
