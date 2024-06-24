@@ -2,7 +2,7 @@
 
 ---
 
-[Discord](https://discord.gg/k7UCsH3ps9) | [Website](https://evo.ninja) | :star: the repo !  
+[Discord](https://agentcoin.org/discord) | [Website](https://evo.ninja) | :star: the repo !  
 
 ---
 
@@ -14,11 +14,11 @@ To get started using evo.ninja simply head to our [website](https://evo.ninja), 
 
 ## Need Help?
 
-Join our [Discord community](https://discord.gg/k7UCsH3ps9) for support and discussions.
+Join our [Discord community](https://agentcoin.org/discord) for support and discussions.
 
-[![Join us on Discord](https://invidget.switchblade.xyz/k7UCsH3ps9)](https://discord.com/invite/k7UCsH3ps9)
+[![Join us on Discord](https://invidget.switchblade.xyz/6gk85fetcT)](https://discord.com/invite/6gk85fetcT)
 
-If you have questions or encounter issues, please don't hesitate to [create a new issue](https://github.com/polywrap/evo.ninja/issues/new/choose) to get support.
+If you have questions or encounter issues, please don't hesitate to [create a new issue](https://github.com/agentcoinorg/evo.ninja/issues/new/choose) to get support.
 
 ## How it works
 
