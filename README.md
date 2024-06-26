@@ -55,7 +55,7 @@ Please install the following:
 
 ### Installation
 1. Clone the repository 
-    > `git clone https://github.com/polywrap/evo.ninja`
+    > `git clone https://github.com/agentcoinorg/evo.ninja`
 2. Copy the `.env.template` file and rename it to `.env`.  
     > `cp .env.template .env`
 3. Find the line that says OPENAI_API_KEY=, and add your unique OpenAI API Key
