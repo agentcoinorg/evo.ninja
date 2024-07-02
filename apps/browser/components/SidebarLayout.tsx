@@ -10,8 +10,6 @@ import CloseSidebarIcon from "./CloseSidebarIcon";
 import useWindowSize from "@/lib/hooks/useWindowSize";
 import Button from "./Button";
 import { List, X } from "@phosphor-icons/react";
-import WelcomeModal from "./modals/WelcomeModal";
-import { welcomeModalAtom } from "@/lib/store";
 import { useHydrateAtoms } from "jotai/utils";
 
 export default function SidebarLayout(props: {
@@ -22,7 +20,6 @@ export default function SidebarLayout(props: {
   const [sidebarOpen, setSidebarOpen] = useAtom(sidebarAtom);
   const [hoveringSidebarButton, setHovering] = useState<boolean>(false);
   const { isMobile } = useWindowSize();
-  const [welcomeModalOpen, setWelcomeModalOpen] = useAtom(welcomeModalAtom);
 
   useEffect(() => {
     if (isMobile) {
@@ -88,10 +85,6 @@ export default function SidebarLayout(props: {
         </>
         {props.children}
       </div>
-      <WelcomeModal
-        isOpen={welcomeModalOpen}
-        onClose={() => setWelcomeModalOpen(false)}
-      />
     </>
   );
 }
