@@ -15,6 +15,8 @@ import Logo from "@/components/Logo";
 import Button from "@/components/Button";
 import ChatInputButton from "@/components/ChatInputButton";
 import TextField from "@/components/TextField";
+import DeprecateModal from "@/components/modals/DeprecateModal";
+import { deprecateModalAtom } from "@/lib/store";
 import React, { useState, ChangeEvent } from "react";
 import { UploadSimple } from "@phosphor-icons/react";
 import { useAtom } from "jotai";
@@ -52,6 +54,7 @@ const Chat: React.FC<ChatProps> = ({
   const [welcomeModalOpen, setWelcomeModalOpen] = useAtom(welcomeModalAtom);
   const [signInModalOpen] = useAtom(signInModalAtom);
   const [settingsModalOpen] = useAtom(settingsModalAtom)
+  const [deprecateModalOpen, setDeprecateModalOpen] = useAtom(deprecateModalAtom);
 
   const [message, setMessage] = useState<string>("");
 
@@ -148,6 +151,10 @@ const Chat: React.FC<ChatProps> = ({
       <Disclaimer
         isOpen={showDisclaimer && !welcomeModalOpen && !signInModalOpen && !settingsModalOpen}
         onClose={() => setShowDisclaimer(false)}
+      />
+      <DeprecateModal
+        isOpen={deprecateModalOpen}
+        onClose={() => setDeprecateModalOpen(false)}
       />
     </main>
   );
