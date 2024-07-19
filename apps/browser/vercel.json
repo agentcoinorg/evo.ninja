@@ -1,4 +1,11 @@
 {
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "destination": "https://agentcoin.org",
+      "permanent": true
+    }
+  ],
   "functions": {
     "app/api/proxy/completions/route.ts": {
       "maxDuration": 45
