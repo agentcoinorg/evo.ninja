@@ -7,6 +7,7 @@ import { CsvAnalystAgent } from "../CsvAnalyst";
 import { ResearcherAgent } from "../Researcher";
 import { SynthesizerAgent } from "../Synthesizer";
 import { InMemoryWorkspace } from "@evo-ninja/agent-utils";
+import DalleAgent from "agents/Dalle3";
 
 type AgentWithPrompts = {
   expertise: string;
@@ -28,8 +29,9 @@ export const findBestAgent = async (
   AgentFunctionBase<unknown>[]
 ]> => {
   const allAgents: Agent[] = [
-    DeveloperAgent,
+    DalleAgent,
     CsvAnalystAgent,
+    DeveloperAgent,
     ResearcherAgent,
     SynthesizerAgent,
   ].map((agentClass) => new agentClass(context.cloneEmpty()));
