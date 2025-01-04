@@ -97,4 +97,4 @@ The UI depends on [Supabase Database](https://supabase.com/). In order to run it
 3. Update `.env.local` with the values shown in the output of step 2:
     - `NEXT_PUBLIC_SUPABASE_URL` will have the value of `API URL`
     - `SUPABASE_SERVICE_ROLE_KEY` will have the value of `service_role key`
-4. Run the UI with `yarn dev`
+4. Run the UI with `yarn dev`.
